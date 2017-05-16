@@ -29,8 +29,8 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         # test create storage account with default set
         result = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'.
-                          format(resource_group, storage_account_name, location)) \
-                          .assert_with_checks(
+                          format(resource_group, storage_account_name, location)). \
+                          assert_with_checks(
                               [JMESPathCheck('name', storage_account_name),
                                JMESPathCheck('location', location),
                                JMESPathCheck('resourceGroup', resource_group)])
@@ -51,10 +51,10 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         # test create account with default set
         self.cmd('batch account create -g {} -n {} -l {}'
-            .format(resource_group, account_name, location)) \
-            .assert_with_checks([JMESPathCheck('name', account_name),
-                                 JMESPathCheck('location', location),
-                                 JMESPathCheck('resourceGroup', resource_group)])
+                 .format(resource_group, account_name, location)) \
+                    .assert_with_checks([JMESPathCheck('name', account_name),
+                                         JMESPathCheck('location', location),
+                                         JMESPathCheck('resourceGroup', resource_group)])
 
         # test create account with BYOS
         self.cmd('batch account create -g {} -n {} -l {} --keyvault {}'.
@@ -76,7 +76,7 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
                                       JMESPathCheck('autoStorage.storageAccountId', storage_id)])
 
         self.cmd('batch account autostorage-keys sync -g {} -n {}'.format(
-                 resource_group, account_name))
+            resource_group, account_name))
 
         keys = self.cmd('batch account keys list -g {} -n {}'
                         .format(resource_group, account_name)) \
@@ -85,8 +85,8 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         keys2 = self.cmd('batch account keys renew -g {} -n {} --key-name primary'.
                          format(resource_group, account_name)).assert_with_checks([
-                            JMESPathCheck('primary != null', True),
-                            JMESPathCheck('secondary', keys.get_output_in_json()['secondary'])])
+                             JMESPathCheck('primary != null', True),
+                             JMESPathCheck('secondary', keys.get_output_in_json()['secondary'])])
 
         self.assertTrue(keys.get_output_in_json()['primary'] != \
             keys2.get_output_in_json()['primary'])
@@ -136,9 +136,9 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         self.cmd('batch account create -g {} -n {} -l {} --storage-account {}'.format(
             resource_group, account_name, location, result.get_output_in_json()['id'])) \
                 .assert_with_checks([
-                     JMESPathCheck('name', account_name),
-                     JMESPathCheck('location', location),
-                     JMESPathCheck('resourceGroup', resource_group)])
+                    JMESPathCheck('name', account_name),
+                    JMESPathCheck('location', location),
+                    JMESPathCheck('resourceGroup', resource_group)])
 
         with open(package_file_name, 'w') as f:
             f.write('storage blob test sample file')
@@ -157,10 +157,10 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
                  ' --version {} --package-file "{}"'.
                  format(resource_group, account_name, application_name, application_package_name,
                         package_file_name)).assert_with_checks([
-                     JMESPathCheck('id', application_name),
-                     JMESPathCheck('storageUrl != null', True),
-                     JMESPathCheck('version', application_package_name),
-                     JMESPathCheck('state', 'active')])
+                            JMESPathCheck('id', application_name),
+                            JMESPathCheck('storageUrl != null', True),
+                            JMESPathCheck('version', application_package_name),
+                            JMESPathCheck('state', 'active')])
 
         self.cmd('batch application package activate -g {} -n {} --application-id {}'
                  ' --version {} --format zip'.format(resource_group, account_name,
@@ -169,10 +169,10 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         self.cmd('batch application package show -g {} -n {} --application-id {} --version {}'.
                  format(resource_group, account_name, application_name,
                         application_package_name)).assert_with_checks([
-                     JMESPathCheck('id', application_name),
-                     JMESPathCheck('format', 'zip'),
-                     JMESPathCheck('version', application_package_name),
-                     JMESPathCheck('state', 'active')])
+                            JMESPathCheck('id', application_name),
+                            JMESPathCheck('format', 'zip'),
+                            JMESPathCheck('version', application_package_name),
+                            JMESPathCheck('state', 'active')])
 
         self.cmd('batch application set -g {} -n {} --application-id {} --default-version {}'
                  .format(resource_group, account_name, application_name,

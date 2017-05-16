@@ -460,7 +460,7 @@ class TestBatchLoader(unittest.TestCase):
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             get_client, None, 3,
-            ['job.job_manager_task', 'job.job_preparation_task', \
+            ['job.job_manager_task', 'job.job_preparation_task',
              'job.job_release_task'], None, None)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
@@ -619,14 +619,14 @@ class TestBatchLoader(unittest.TestCase):
         handler = operations.job_schedule_operations.JobScheduleOperations.add
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
         self.assertEqual(len(args), 47)
-        self.assertTrue('id' in  args)
-        self.assertTrue('job_manager_task_id' in  args)
-        self.assertTrue('job_manager_task_max_wall_clock_time' in  args)
-        self.assertTrue('job_max_wall_clock_time' in  args)
-        self.assertTrue('allow_low_priority_node' in  args)
-        self.assertFalse('yes' in  args)
-        self.assertTrue('json_file' in  args)
-        self.assertFalse('destination' in  args)
+        self.assertTrue('id' in args)
+        self.assertTrue('job_manager_task_id' in args)
+        self.assertTrue('job_manager_task_max_wall_clock_time' in args)
+        self.assertTrue('job_max_wall_clock_time' in args)
+        self.assertTrue('allow_low_priority_node' in args)
+        self.assertFalse('yes' in args)
+        self.assertTrue('json_file' in args)
+        self.assertFalse('destination' in args)
 
     def test_batch_execute_command(self):
         def function_result(client, **kwargs):

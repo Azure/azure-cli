@@ -63,7 +63,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                  JMESPathCheck('startTask.userIdentity.autoUser.elevationLevel',
                                                "admin")])
         target = result.get_output_in_json()['currentDedicatedNodes']
-        self.batch_cmd('batch pool resize --pool-id {} --target-dedicated-nodes 5 --target-low-priority-nodes 3', account_info, create_pool_id)
+        self.batch_cmd('batch pool resize --pool-id {} --target-dedicated-nodes 5 '
+                       '--target-low-priority-nodes 3', account_info, create_pool_id)
         self.batch_cmd('batch pool show --pool-id {}', account_info, create_pool_id) \
             .assert_with_checks([JMESPathCheck('allocationState', 'resizing'),
                                  JMESPathCheck('targetDedicatedNodes', 5),
@@ -160,7 +161,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch task create --job-id {} --task-id aaa --command-line "echo hello"',
                        account_info, job_id) \
             .assert_with_checks(
-            [JMESPathCheck('id', 'aaa'), JMESPathCheck('commandLine', 'echo hello')])
+                [JMESPathCheck('id', 'aaa'), JMESPathCheck('commandLine', 'echo hello')])
 
         self.batch_cmd('batch task delete --job-id {} --task-id aaa --yes', account_info, job_id)
 
@@ -176,7 +177,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         job_id = "cli-test-job-1"
         account_info = self.get_account_info(batch_account_name, resource_group)
 
-         # test create paas pool using parameters
+        # test create paas pool using parameters
         self.batch_cmd('batch pool create --id {} --vm-size small --os-family 4', account_info,
                        pool_paas)
 
@@ -189,7 +190,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create job
         self.batch_cmd('batch job create --id {} --metadata test=value '
-                       '--job-max-task-retry-count 5 '                       
+                       '--job-max-task-retry-count 5 '
                        '--job-manager-task-id JobManager '
                        '--job-manager-task-command-line "cmd /c set AZ_BATCH_TASK_ID" '
                        '--job-manager-task-environment-settings '
@@ -243,7 +244,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer(location='westeurope')
-    def test_batch_pools_and_nodes(self, resource_group, batch_account_name):
+    def test_batch_pools_and_nodes(self, resource_group, batch_account_name): # pylint:disable=too-many-statements
         pool_paas = "azure-cli-test-paas"
         pool_iaas = "azure-cli-test-iaas"
         pool_json = "azure-cli-test-json"
@@ -308,7 +309,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.batch_cmd('batch pool create --json-file {} --vm-size small', account_info, input_json)
 
         # test list pools
-        pool_list =  self.batch_cmd('batch pool list', account_info)
+        pool_list = self.batch_cmd('batch pool list', account_info)
         pool_list = pool_list.get_output_in_json()
         self.assertEqual(len(pool_list), 3)
         pool_ids = sorted([p['id'] for p in pool_list])
@@ -338,7 +339,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test evaluate autoscale
         self.batch_cmd('batch pool autoscale evaluate --pool-id {} --auto-scale-formula '
-                 '"$TargetDedicatedNodes=3"', account_info, pool_iaas)
+                       '"$TargetDedicatedNodes=3"', account_info, pool_iaas)
 
         # test disable autoscale
         self.batch_cmd('batch pool autoscale disable --pool-id {}', account_info, pool_iaas)
@@ -377,6 +378,5 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         with self.assertRaises(CLIError):
             self.batch_cmd('batch pool set --pool-id {} --application-package-references '
                            'does-not-exist', account_info, pool_paas)
-
 
         # TODO: Test node commands
