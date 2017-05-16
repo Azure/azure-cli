@@ -571,7 +571,7 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 
 
 def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 firewall_mode=None,
                                  no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -585,7 +585,7 @@ def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 firewall_mode=None,
                                  rule_set_type='OWASP', rule_set_version=None,
                                  disabled_rule_groups=None,
                                  disabled_rules=None, no_wait=False):
@@ -928,7 +928,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                load_balancer_backend_address_pool_ids=None,
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
-               private_ip_address=None, private_ip_address_version=IPVersion.ipv4.value,
+               private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
@@ -985,7 +985,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
                          private_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                         private_ip_address_version=IPVersion.ipv4.value,
+                         private_ip_address_version=None,
                          make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
@@ -1173,7 +1173,7 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=IPVersion.ipv4.value):
+                     idle_timeout=4, reverse_fqdn=None, version=None):
     client = _network_client_factory().public_ip_addresses
 
     public_ip_args = {

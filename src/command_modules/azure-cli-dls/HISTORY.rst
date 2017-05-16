@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
+++++++++++++++++++
+
+* Update underlying Data Lake Store filesystem SDK version, addressing a performance issue.
 
 0.0.6 (2017-05-09)
 ++++++++++++++++++

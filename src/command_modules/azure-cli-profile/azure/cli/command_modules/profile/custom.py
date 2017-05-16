@@ -37,6 +37,8 @@ def show_subscription(subscription=None, expanded_view=None):
     if not expanded_view:
         return profile.get_subscription(subscription)
     else:
+        logger.warning("'--expanded-view' is deprecating and will be removed in a future release. "
+                       "You can get the same information using 'az cloud show'")
         return profile.get_expanded_subscription_info(subscription)
 
 

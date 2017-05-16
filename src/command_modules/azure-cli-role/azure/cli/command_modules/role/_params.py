@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+import argparse
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import enum_choice_list
@@ -16,8 +17,8 @@ register_cli_argument('ad app', 'homepage', help='the url where users can sign i
 register_cli_argument('ad app', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id')
 register_cli_argument('ad app', 'identifier_uris', nargs='+', help='space separated unique URIs that Azure AD can use for this app.')
 register_cli_argument('ad app', 'reply_urls', nargs='+', help='space separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
-register_cli_argument('ad app', 'start_date', help='the start date after which password or key would be valid. Default value is current time')
-register_cli_argument('ad app', 'end_date', help='the end date till which password or key is valid. Default value is one year after current time')
+register_cli_argument('ad app', 'start_date', help="Date or datetime at which credentials become valid(e.g. '2017-01-01T01:00:00+00:00' or '2017-01-01'). Default value is current time")
+register_cli_argument('ad app', 'end_date', help="Date or datetime after which credentials expire(e.g. '2017-12-31T11:59:59+00:00' or '2017-12-31'). Default value is one year after current time")
 register_cli_argument('ad app', 'available_to_other_tenants', action='store_true', help='the application can be used from any Azure AD tenants')
 register_cli_argument('ad app', 'key_value', help='the value for the key credentials associated with the application')
 # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
@@ -31,7 +32,7 @@ register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help
 register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
-register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
+register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help=argparse.SUPPRESS)
 
 for item in ['create-for-rbac', 'reset-credentials']:
     register_cli_argument('ad sp {}'.format(item), 'name', name_arg_type)
