@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 ALLOWED_ERRORS = [
-    "has requirement azure-common[autorest]==1.1.4, but you have azure-common 1.1.5.",
+    "has requirement azure-common[autorest]==1.1.4, but you have azure-common 1.1.6.",
     "has requirement azure-common~=1.1.5, but you have azure-common 1.1.4."
 ]
 
