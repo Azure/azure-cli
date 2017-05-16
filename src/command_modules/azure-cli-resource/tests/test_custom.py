@@ -45,7 +45,6 @@ class TestCustom(unittest.TestCase):
 
         self.assertDictEqual(out_params, expected)
 
-
     def test_resource_merge_parameters(self):
         tests = [
             {
@@ -69,6 +68,7 @@ class TestCustom(unittest.TestCase):
         for test in tests:
             output = _merge_parameters(test['parameter_list'])
             self.assertEqual(output, test['expected'])
+
 
 if __name__ == '__main__':
     unittest.main()
