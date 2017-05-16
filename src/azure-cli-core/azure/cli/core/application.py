@@ -36,7 +36,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
-        result = commands.get_command_table(argv[0] if argv else None)
+        result = commands.get_command_table(argv[0].lower() if argv else None)
 
         if argv is None:
             return result
@@ -74,7 +74,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         command_so_far = ""
         try:
             for part in parts:
-                best_match = best_match[part]
+                best_match = best_match[part.lower()]
                 command_so_far = ' '.join((command_so_far, part))
                 if isinstance(best_match, CliCommand):
                     break
@@ -160,13 +160,14 @@ class Application(object):
 
         # Rudimentary parsing to get the command
         nouns = []
-        for noun in argv:
+        for i in range(len(argv)):  # pylint: disable=consider-using-enumerate
             try:
-                if noun[0] == '-':
+                if argv[i][0] == '-':
                     break
             except IndexError:
                 pass
-            nouns.append(noun)
+            argv[i] = argv[i].lower()
+            nouns.append(argv[i])
         command = ' '.join(nouns)
 
         if argv[-1] in ('--help', '-h') or command in command_table:
