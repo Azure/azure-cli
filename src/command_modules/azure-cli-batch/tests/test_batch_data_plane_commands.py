@@ -46,7 +46,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                  JMESPathCheck('state', 'deleting')])
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='westcentralus')
+    @BatchAccountPreparer(location='japanwest')
     def test_batch_pool_cmd(self, resource_group, batch_account_name):
         account_info = self.get_account_info(batch_account_name, resource_group)
         create_pool_file_path = self._get_test_data_file('batchCreatePool.json')
@@ -62,11 +62,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                  JMESPathCheck('startTask.commandLine', "cmd /c echo test"),
                                  JMESPathCheck('startTask.userIdentity.autoUser.elevationLevel',
                                                "admin")])
-        target = result.get_output_in_json()['currentDedicated']
-        self.batch_cmd('batch pool resize --pool-id {} --target-dedicated 5', account_info, create_pool_id)
+        target = result.get_output_in_json()['currentDedicatedNodes']
+        self.batch_cmd('batch pool resize --pool-id {} --target-dedicated-nodes 5 --target-low-priority-nodes 3', account_info, create_pool_id)
         self.batch_cmd('batch pool show --pool-id {}', account_info, create_pool_id) \
             .assert_with_checks([JMESPathCheck('allocationState', 'resizing'),
-                                 JMESPathCheck('targetDedicated', 5),
+                                 JMESPathCheck('targetDedicatedNodes', 5),
+                                 JMESPathCheck('targetLowPriorityNodes', 3),
                                  JMESPathCheck('id', create_pool_id)])
 
         self.batch_cmd('batch pool resize --pool-id {} --abort', account_info, create_pool_id)
@@ -77,8 +78,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool show --pool-id {}', account_info, create_pool_id) \
             .assert_with_checks([JMESPathCheck('allocationState', 'steady'),
                                  JMESPathCheck('id', create_pool_id),
-                                 JMESPathCheck('currentDedicated', target),
-                                 JMESPathCheck('targetDedicated', 5)])
+                                 JMESPathCheck('currentDedicatedNodes', target),
+                                 JMESPathCheck('targetDedicatedNodes', 5),
+                                 JMESPathCheck('targetLowPriorityNodes', 3)])
 
         self.batch_cmd('batch pool reset --pool-id {} --json-file "{}"', account_info,
                        create_pool_id, update_pool_file_path) \
@@ -318,25 +320,25 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertEqual(len(pool_list), 1)
 
         # test resize pool
-        self.batch_cmd('batch pool resize --pool-id {} --target-dedicated 5', account_info, pool_paas)
-        self.batch_cmd('batch pool show --pool-id {} --select "allocationState, targetDedicated"',
+        self.batch_cmd('batch pool resize --pool-id {} --target-dedicated-nodes 5', account_info, pool_paas)
+        self.batch_cmd('batch pool show --pool-id {} --select "allocationState, targetDedicatedNodes"',
                        account_info, pool_paas).assert_with_checks([
                            JMESPathCheck('allocationState', 'resizing'),
-                           JMESPathCheck('targetDedicated', 5)])
+                           JMESPathCheck('targetDedicatedNodes', 5)])
 
         # test cancel pool resize
         self.batch_cmd('batch pool resize --pool-id {} --abort', account_info, pool_paas)
 
         # test enable autoscale
         self.batch_cmd('batch pool autoscale enable --pool-id {} --auto-scale-formula '
-                       '"$TargetDedicated=3"', account_info, pool_iaas)
+                       '"$TargetDedicatedNodes=3"', account_info, pool_iaas)
         self.batch_cmd('batch pool show --pool-id {} --select "enableAutoScale"',
                        account_info, pool_iaas).assert_with_checks([
                            JMESPathCheck('enableAutoScale', True)])
 
         # test evaluate autoscale
         self.batch_cmd('batch pool autoscale evaluate --pool-id {} --auto-scale-formula '
-                 '"$TargetDedicated=3"', account_info, pool_iaas)
+                 '"$TargetDedicatedNodes=3"', account_info, pool_iaas)
 
         # test disable autoscale
         self.batch_cmd('batch pool autoscale disable --pool-id {}', account_info, pool_iaas)
