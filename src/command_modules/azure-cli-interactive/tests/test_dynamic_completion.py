@@ -10,11 +10,6 @@ import six
 from prompt_toolkit.document import Document
 
 from azclishell.__main__ import AZCOMPLETER
-from azclishell.configuration import CONFIGURATION
-
-
-def none():
-    pass
 
 
 class DynamicShellCompletionsTest(unittest.TestCase):
@@ -22,7 +17,6 @@ class DynamicShellCompletionsTest(unittest.TestCase):
     def test_mute_parse(self):
         """ tests dynamic completions """
         completer = AZCOMPLETER
-        CONFIGURATION.firsttime = none
         stream = six.StringIO()
 
         stderr = sys.stderr
