@@ -9,9 +9,7 @@ from azure.cli.core.util import CLIError
 
 def get_target_resource_validator(dest, required):
     def _validator(namespace):
-        from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
-
-        id = getattr(namespace, dest)
+        name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
         parent = namespace.parent
@@ -20,21 +18,23 @@ def get_target_resource_validator(dest, required):
         usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
                                '--{0}-namespace NAMESPACE [--{0}-parent PARENT] '
                                '[--{0}-type TYPE]'.format(dest))
-        if not id and required:
+        if not name_or_id and required:
             raise usage_error
-        elif id:
-            if is_valid_resource_id(id) and any((res_ns, parent, res_type)):
+        elif name_or_id:
+            if is_valid_resource_id(name_or_id) and any((res_ns, parent, res_type)):
                 raise usage_error
-            elif not is_valid_resource_id(id):
+            elif not is_valid_resource_id(name_or_id):
                 from azure.cli.core.commands.client_factory import get_subscription_id
-                if '/' in res_type:
+                if res_type and '/' in res_type:
                     res_ns = res_ns or res_type.rsplit('/', 1)[0]
                     res_type = res_type.rsplit('/', 1)[1]
-                if not all((rg, res_ns, res_type, id)):
+                if not all((rg, res_ns, res_type, name_or_id)):
                     raise usage_error
 
-                setattr(namespace, dest, '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
-                    get_subscription_id(), rg, res_ns, parent + '/' if parent else '', res_type, id))
+                setattr(namespace, dest,
+                        '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
+                            get_subscription_id(), rg, res_ns, parent + '/' if parent else '',
+                            res_type, name_or_id))
 
         del namespace.namespace
         del namespace.parent

@@ -41,10 +41,8 @@ cli_command(__name__, 'monitor alert list-incidents', ari_path + 'list_by_alert_
 
 # region Metrics
 
-metrics_path = 'azure.monitor.operations.metrics_operations#MetricsOperations.'
-metric_def_path = 'azure.monitor.operations.metric_definitions_operations#MetricDefinitionsOperations.'
-cli_command(__name__, 'monitor metrics list', metrics_path + 'list', cf_metrics)
-cli_command(__name__, 'monitor metrics list-definitions', metric_def_path + 'list', cf_metric_def)
+cli_command(__name__, 'monitor metrics list', custom_path + 'list_metrics', cf_metrics)
+cli_command(__name__, 'monitor metrics list-definitions', custom_path + 'list_metric_definitions', cf_metric_def)
 
 # endregion
 

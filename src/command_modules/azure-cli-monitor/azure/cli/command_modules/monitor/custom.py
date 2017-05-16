@@ -32,12 +32,14 @@ aggregation_map = {
     'last': TimeAggregationOperator.last.value
 }
 
+
 def _parse_actions(actions):
     """ Actions come in as a combined list. This method separates the webhook actions into a
         separate collection and combines any number of email actions into a single email collection
         and a single value for `email_service_owners`. If any email action contains a True value
         for `send_to_service_owners` then it is assumed the entire value should be True. """
     from azure.mgmt.monitor.models import RuleEmailAction, RuleWebhookAction
+    actions = actions or []
     email_service_owners = None
     webhooks = [x for x in actions if isinstance(x, RuleWebhookAction)]
     custom_emails = set()
@@ -47,6 +49,7 @@ def _parse_actions(actions):
                 email_service_owners = True
             custom_emails = custom_emails | set(action.custom_emails)
     return list(custom_emails), webhooks, email_service_owners
+
 
 def _parse_action_removals(actions):
     """ Separates the combined list of keys to remove into webhooks and emails. """
@@ -62,15 +65,16 @@ def _parse_action_removals(actions):
 
 
 def create_metric_rule(client, resource_group_name, rule_name, target, condition,
-                       description=None, enabled=True, location=None, tags=None,
+                       description=None, disabled=False, location=None, tags=None,
                        email_service_owners=False, actions=None):
     from azure.mgmt.monitor.models import AlertRuleResource, RuleEmailAction, RuleWebhookAction
     condition.data_source.resource_uri = target
-    custom_emails, webhooks = _add_actions(actions)
+    custom_emails, webhooks, _ = _parse_actions(actions)
     actions = [RuleEmailAction(email_service_owners, custom_emails)] + (webhooks or [])
-    rule = AlertRuleResource(location, rule_name, enabled,
+    rule = AlertRuleResource(location, rule_name, not disabled,
                              condition, tags, description, actions)
     return client.create_or_update(resource_group_name, rule_name, rule)
+
 
 def update_metric_rule(instance, target=None, condition=None, description=None, enabled=None,
                        metric=None, operator=None, threshold=None, aggregation=None, period=None,
@@ -131,13 +135,14 @@ def update_metric_rule(instance, target=None, condition=None, description=None, 
 # endregion
 
 
-def list_metric_definitions(client, resource_id, metric_names=None):
+# pylint: disable=unused-argument
+def list_metric_definitions(client, resource, resource_group_name=None, metric_names=None):
     '''Commands to manage metric definitions.
     :param str resource_id: The identifier of the resource
     :param str metric_names: The list of metric names
     '''
     odata_filter = _metric_names_filter_builder(metric_names)
-    metric_definitions = client.list(resource_id, filter=odata_filter)
+    metric_definitions = client.list(resource, filter=odata_filter)
     return list(metric_definitions)
 
 
@@ -151,7 +156,8 @@ def _metric_names_filter_builder(metric_names=None):
     return ' or '.join(filters)
 
 
-def list_metrics(client, resource_id, time_grain,
+# pylint: disable=unused-argument
+def list_metrics(client, resource, time_grain, resource_group_name=None,
                  start_time=None, end_time=None, metric_names=None):
     '''Lists the metric values for a resource.
     :param str resource_id: The identifier of the resource
@@ -166,7 +172,7 @@ def list_metrics(client, resource_id, time_grain,
     :param str metric_names: The space separated list of metric names
     '''
     odata_filter = _metrics_odata_filter_builder(time_grain, start_time, end_time, metric_names)
-    metrics = client.list(resource_id, filter=odata_filter)
+    metrics = client.list(resource, filter=odata_filter)
     return list(metrics)
 
 

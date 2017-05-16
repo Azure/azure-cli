@@ -9,15 +9,16 @@ import re
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.monitor.custom import operator_map, aggregation_map
 
+
 def period_type(value):
 
-    def _get_substring(range):
-        if range == tuple([-1, -1]):
+    def _get_substring(indices):
+        if indices == tuple([-1, -1]):
             return ''
         else:
-            return value[range[0]: range[1]]
+            return value[indices[0]: indices[1]]
 
-    regex = '(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
+    regex = r'(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
     match = re.match(regex, value.lower())
     match_len = match.regs[0]
     if match_len != tuple([0, len(value)]):
@@ -34,6 +35,8 @@ def period_type(value):
         seconds = _get_substring(match.regs[8])
         return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
 
+
+# pylint: disable=too-few-public-methods
 class ConditionAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         from azure.mgmt.monitor.models import ThresholdRuleCondition, RuleMetricDataSource
@@ -52,17 +55,19 @@ class ConditionAction(argparse.Action):
         aggregation = aggregation_map[values[-2].lower()]
         window = period_type(values[-1])
         metric = RuleMetricDataSource(None, metric_name)  # target URI will be filled in later
-        condition = ThresholdRuleCondition(operator, threshold, metric, window, aggregation)            
+        condition = ThresholdRuleCondition(operator, threshold, metric, window, aggregation)
         namespace.condition = condition
 
 
+# pylint: disable=protected-access
 class AlertAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
         super(AlertAddAction, self).__call__(parser, namespace, action, option_string)
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
+        action = None
         if _type == 'email':
             from azure.mgmt.monitor.models import RuleEmailAction
             action = RuleEmailAction(custom_emails=values[1:])
@@ -73,7 +78,7 @@ class AlertAddAction(argparse._AppendAction):
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
                 raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
-            action = RuleWebhookAction(uri, properties)
+            action = RuleWebhookAction(uri, properties)  # pylint: disable=redefined-variable-type
         else:
             raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
@@ -85,7 +90,7 @@ class AlertRemoveAction(argparse._AppendAction):
         action = self.get_action(values, option_string)
         super(AlertRemoveAction, self).__call__(parser, namespace, action, option_string)
 
-    def get_action(self, values, option_string):
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
         # TYPE is artificially enforced to create consistency with the --add-action argument
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()

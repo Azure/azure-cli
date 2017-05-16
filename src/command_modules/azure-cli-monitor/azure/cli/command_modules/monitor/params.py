@@ -7,13 +7,10 @@ from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
 
 from azure.cli.core.commands import \
-    (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
-from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
-                                                enum_choice_list, tags_type, ignore_type,
-                                                file_type, get_resource_group_completion_list,
-                                                three_state_flag, model_choice_list)
+    (CliArgumentType, register_cli_argument, register_extra_cli_argument)
+from azure.cli.core.commands.parameters import \
+    (location_type, enum_choice_list, tags_type, three_state_flag)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.monitor.actions import \
     (AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
@@ -21,7 +18,10 @@ from azure.cli.command_modules.monitor.custom import operator_map, aggregation_m
 from azure.cli.command_modules.monitor.validators import \
     (validate_diagnostic_settings, get_target_resource_validator)
 from azure.mgmt.monitor.models.monitor_management_client_enums import \
-    (MetricStatisticType, TimeAggregationType, ConditionOperator, TimeAggregationOperator) 
+    (ConditionOperator, TimeAggregationOperator)
+from azure.mgmt.monitor.models import (LogProfileResource, RetentionPolicy)
+
+# pylint: disable=line-too-long
 
 
 def register_resource_parameter(command, dest, arg_group=None, required=True):
@@ -45,6 +45,7 @@ register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name
 register_cli_argument('monitor alert create', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
 register_cli_argument('monitor alert create', 'custom_emails', nargs='+', arg_group='Action')
+register_cli_argument('monitor alert create', 'disabled', help='Create the rule in a disabled state.', **three_state_flag())
 register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', **three_state_flag())
 register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+', arg_group='Action')
 register_cli_argument('monitor alert create', 'condition', action=ConditionAction, nargs='+')
@@ -75,6 +76,13 @@ register_cli_argument('monitor alert list-incidents', 'rule_name', options_list=
 
 # endregion
 
+# region Metrics
+
+for item in ['list', 'list-definitions']:
+    register_resource_parameter('monitor metrics {}'.format(item), 'resource', 'Target Resource')
+    register_cli_argument('monitor metrics {}'.format(item), 'resource_group_name', arg_group='Target Resource')
+
+# endregion
 with ParametersContext(command='monitor autoscale-settings') as c:
     c.register_alias('name', ('--azure-resource-name',))
     c.register_alias('autoscale_setting_name', ('--name', '-n'))
@@ -115,9 +123,6 @@ with ParametersContext(command='monitor log-profiles') as c:
     c.register_alias('log_profile_name', ('--name', '-n'))
 
 with ParametersContext(command='monitor log-profiles create') as c:
-    from azure.mgmt.monitor.models.log_profile_resource import LogProfileResource
-    from azure.mgmt.monitor.models.retention_policy import RetentionPolicy
-
     c.register_alias('name', ('--log-profile-name',))
     c.expand('retention_policy', RetentionPolicy)
     c.expand('parameters', LogProfileResource)

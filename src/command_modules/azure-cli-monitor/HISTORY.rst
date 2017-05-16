@@ -17,6 +17,7 @@ unreleased
 	  `--alert-rule-resource-name` removed. `is-enabled` renamed `enabled` and no longer required.
 	  `description` defaults based on the supplied condition. Added examples to help clarifiy the
 	  new format.
+* BC: Support names or IDs for `monitor metric` commands.
 * `monitor alert rule update` - Added numerous convenience arguments to improve usability. Added
   examples to explain usage of the new arguments.
 
