@@ -26,28 +26,31 @@ helps['monitor alert create'] = """
         - name: --action -a
           short-summary: Add an action to fire when the alert is triggered.
           long-summary: |
-            To specify multiple actions, add multiple --action ARGS entries.
-            Usage:   --action TYPE KEY [ARG ...]
-            Example: --action email bob@contoso.com
-            Example: --action webhook https://www.contoso.com/alert apiKey=value
-            Example: --action webhook https://www.contoso.com/alert?apiKey=value
+            Usage:   --add-action TYPE KEY [ARG ...]
+            Email:   --add-action email bob@contoso.com ann@contoso.com
+            Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
+            Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+            To specify multiple actions, add multiple --add-action ARGS entries.
         - name: --description
-          short-summary: Free-text description of the rule.
+          short-summary: Free-text description of the rule. Defaults to the condition expression.
         - name: --condition
           short-summary: The condition expression upon which to trigger the rule.
-          long-summary: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD
-        - name: --custom-emails
-          short-summary: Space-separated list of addresses to email when the alert is triggered.
+          long-summary: |
+            Usage:   --condition "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD"
+            Example: --condition "Percentage CPU > 60 avg 1h30m"
         - name: --email-service-owners
           short-summary: Email the service owners if an alert is triggered.
-        - name: --webhook
-          short-summary: >
-            Send a POST request to a web service when the alert is triggered. Usage: --webhook URI [KEY=VALUE ...]
-          long-summary: To add multiple webhook actions, use multiple --webhook entries.
     examples:
-        - name: Create a High CPU-based alert on a VM.
+        - name: Create a High CPU-based alert on a VM with no actions.
           text: >
             az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition "Percentage CPU > 90 avg 5m"
+        - name: Create a High CPU-based alert on a VM with email and webhook actions.
+          text: |
+            az vm alert rule create -n rule1 -g <RG> --target <VM ID> \\
+                --condition "Percentage CPU > 90 avg 5m" \\
+                --action email bob@contoso.com ann@contoso.com --email-service-owners \\
+                --action webhook https://www.contoso.com/alerts?type=HighCPU \\
+                --action webhook https://alerts.contoso.com apiKey=<KEY> type=HighCPU
 """
 
 helps['monitor alert update'] = """
@@ -62,18 +65,24 @@ helps['monitor alert update'] = """
         - name: --description
           short-summary: Free-text description of the rule.
         - name: --condition
-          short-summary: The condition expression upon which to trigger the rule. If used, do not specify
-            other 'Condition Arguments'.
+          short-summary: The condition expression upon which to trigger the rule.
+          long-summary: |
+            Usage:   --condition "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD"
+            Example: --condition "Percentage CPU > 60 avg 1h30m"
         - name: --add-action -a
           short-summary: Add an action to fire when the alert is triggered.
           long-summary: |
-            To specify multiple actions, add multiple --add-action ARGS entries.
             Usage:   --add-action TYPE KEY [ARG ...]
-            Example: --add-action email bob@contoso.com
-            Example: --add-action webhook https://www.contoso.com/alert apiKey=value
-            Example: --add-action webhook https://www.contoso.com/alert?apiKey=value
+            Email:   --add-action email bob@contoso.com ann@contoso.com
+            Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
+            Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+            To specify multiple actions, add multiple --add-action ARGS entries.
         - name: --remove-action -r
-          short-summary: Remove one or more actions by key (address for emails or URI for webhooks).
+          short-summary: Remove one or more actions.
+          long-summary: |
+            Usage:   --remove-action TYPE KEY [KEY ...]
+            Email:   --remove-action email bob@contoso.com ann@contoso.com
+            Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com
         - name: --email-service-owners
           short-summary: Email the service owners if an alert is triggered.
         - name: --metric
@@ -88,7 +97,7 @@ helps['monitor alert update'] = """
           short-summary: Type of aggregation to apply based on --period.
         - name: --period
           short-summary: >
-            Time span over which to apply --aggregation, in nDnHnMnS format or ISO8601 format.
+            Time span over which to apply --aggregation, in nDnHnMnS shorthand or full ISO8601 format.
 """
 
 helps['monitor alert delete'] = """

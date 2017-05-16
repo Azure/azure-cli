@@ -15,7 +15,8 @@ from azure.cli.core.commands.parameters import (location_type, get_resource_name
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import CLIError
 
-from azure.cli.command_modules.monitor.actions import AlertAction, ConditionAction, period_type
+from azure.cli.command_modules.monitor.actions import \
+    (AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
 from azure.cli.command_modules.monitor.custom import operator_map, aggregation_map
 from azure.cli.command_modules.monitor.validators import \
     (validate_diagnostic_settings, get_target_resource_validator)
@@ -23,10 +24,10 @@ from azure.mgmt.monitor.models.monitor_management_client_enums import \
     (MetricStatisticType, TimeAggregationType, ConditionOperator, TimeAggregationOperator) 
 
 
-def register_resource_parameter(command, dest, arg_group=None):
+def register_resource_parameter(command, dest, arg_group=None, required=True):
     """ Helper method to add the extra parameters needed to support specifying name or ID
         for target resources. """
-    register_cli_argument(command, dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=False, validator=get_target_resource_validator(dest), help="Name or ID of the target resource.")
+    register_cli_argument(command, dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=required, validator=get_target_resource_validator(dest, required), help="Name or ID of the target resource.")
     register_extra_cli_argument(command, 'namespace', options_list=['--{}-namespace'.format(dest)], arg_group=arg_group, help="Target resource provider namespace.")
     register_extra_cli_argument(command, 'parent', options_list=['--{}-parent'.format(dest)], arg_group=arg_group, help="Target resource parent path, if applicable.")
     register_extra_cli_argument(command, 'resource_type', options_list=['--{}-type'.format(dest)], arg_group=arg_group, help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
@@ -45,7 +46,7 @@ register_cli_argument('monitor alert create', 'rule_name', name_arg_type, id_par
 
 register_cli_argument('monitor alert create', 'custom_emails', nargs='+', arg_group='Action')
 register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', **three_state_flag())
-register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAction, nargs='+', arg_group='Action')
+register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+', arg_group='Action')
 register_cli_argument('monitor alert create', 'condition', action=ConditionAction, nargs='+')
 register_cli_argument('monitor alert create', 'metric_name', arg_group='Condition')
 register_cli_argument('monitor alert create', 'operator', arg_group='Condition', **enum_choice_list(ConditionOperator))
@@ -56,24 +57,21 @@ register_resource_parameter('monitor alert create', 'target', 'Target Resource')
 
 register_cli_argument('monitor alert update', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 register_cli_argument('monitor alert update', 'email_service_owners', arg_group='Action', **three_state_flag())
-register_cli_argument('monitor alert update', 'add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAction, arg_group='Action')
-register_cli_argument('monitor alert update', 'remove_actions', options_list=['--remove-action', '-r'], nargs='+', arg_group='Action')
+register_cli_argument('monitor alert update', 'add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction, arg_group='Action')
+register_cli_argument('monitor alert update', 'remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction, arg_group='Action')
 register_cli_argument('monitor alert update', 'condition', action=ConditionAction, nargs='+', arg_group='Condition')
 register_cli_argument('monitor alert update', 'metric', arg_group='Condition')
 register_cli_argument('monitor alert update', 'operator', arg_group='Condition', **enum_choice_list(operator_map.keys()))
 register_cli_argument('monitor alert update', 'threshold', arg_group='Condition')
 register_cli_argument('monitor alert update', 'aggregation', arg_group='Condition', **enum_choice_list(aggregation_map.keys()))
 register_cli_argument('monitor alert update', 'period', type=period_type, arg_group='Condition')
-register_resource_parameter('monitor alert update', 'target', 'Target Resource')
+register_resource_parameter('monitor alert update', 'target', 'Target Resource', required=False)
 
 for item in ['show-incident', 'list-incidents']:
     register_cli_argument('monitor alert {}'.format(item), 'rule_name', options_list=['--rule-name'], id_part='name')
     register_cli_argument('monitor alert {}'.format(item), 'incident_name', name_arg_type, id_part='child_name')
 
 register_cli_argument('monitor alert list-incidents', 'rule_name', options_list=['--rule-name'], id_part=None)
-
-#  https://github.com/Azure/azure-rest-api-specs/issues/1017
-register_cli_argument('monitor alert rule list', 'filter', ignore_type)
 
 # endregion
 

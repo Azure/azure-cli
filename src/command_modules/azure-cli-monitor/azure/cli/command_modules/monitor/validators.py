@@ -7,7 +7,7 @@ from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse
 from azure.cli.core.util import CLIError
 
 
-def get_target_resource_validator(dest):
+def get_target_resource_validator(dest, required):
     def _validator(namespace):
         from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
 
@@ -20,9 +20,9 @@ def get_target_resource_validator(dest):
         usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
                                '--{0}-namespace NAMESPACE [--{0}-parent PARENT] '
                                '[--{0}-type TYPE]'.format(dest))
-        if not id:
+        if not id and required:
             raise usage_error
-        else:
+        elif id:
             if is_valid_resource_id(id) and any((res_ns, parent, res_type)):
                 raise usage_error
             elif not is_valid_resource_id(id):

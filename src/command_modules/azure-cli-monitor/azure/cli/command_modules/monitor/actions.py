@@ -27,8 +27,9 @@ def period_type(value):
         return value
     else:
         # if shorthand is used, only support days, minutes, hours, seconds
+        # ensure M is interpretted as minutes
         days = _get_substring(match.regs[4])
-        minutes = _get_substring(match.regs[6])
+        minutes = _get_substring(match.regs[6]) or _get_substring(match.regs[3])
         hours = _get_substring(match.regs[7])
         seconds = _get_substring(match.regs[8])
         return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
@@ -55,17 +56,39 @@ class ConditionAction(argparse.Action):
         namespace.condition = condition
 
 
-class AlertAction(argparse._AppendAction):
+class AlertAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
-        webhook_action = self.get_webhook(values, option_string)
-        super(AlertAction, self).__call__(parser, namespace, webhook_action, option_string)
+        action = self.get_action(values, option_string)
+        super(AlertAddAction, self).__call__(parser, namespace, action, option_string)
 
-    def get_webhook(self, values, option_string):
-        from azure.mgmt.monitor.models import RuleWebhookAction
-        uri = values[0]
-        try:
-            properties = dict(x.split('=', 1) for x in values[1:])
-        except ValueError:
-            raise CLIError('usage error: --webhook URI [KEY=VALUE ...]')
-        webhook_action = RuleWebhookAction(uri, properties)
-        return webhook_action
+    def get_action(self, values, option_string):
+        _type = values[0].lower()
+        if _type == 'email':
+            from azure.mgmt.monitor.models import RuleEmailAction
+            action = RuleEmailAction(custom_emails=values[1:])
+        elif _type == 'webhook':
+            from azure.mgmt.monitor.models import RuleWebhookAction
+            uri = values[1]
+            try:
+                properties = dict(x.split('=', 1) for x in values[2:])
+            except ValueError:
+                raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+            action = RuleWebhookAction(uri, properties)
+        else:
+            raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+
+        return action
+
+
+class AlertRemoveAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AlertRemoveAction, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):
+        # TYPE is artificially enforced to create consistency with the --add-action argument
+        # but it could be enhanced to do additional validation in the future.
+        _type = values[0].lower()
+        if _type not in ['email', 'webhook']:
+            raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+        return values[1:]
