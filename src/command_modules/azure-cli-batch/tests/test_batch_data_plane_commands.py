@@ -244,7 +244,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer(location='westeurope')
-    def test_batch_pools_and_nodes(self, resource_group, batch_account_name): # pylint:disable=too-many-statements
+    def test_batch_pools_and_nodes(self, resource_group, batch_account_name):  # pylint:disable=too-many-statements
         pool_paas = "azure-cli-test-paas"
         pool_iaas = "azure-cli-test-iaas"
         pool_json = "azure-cli-test-json"
