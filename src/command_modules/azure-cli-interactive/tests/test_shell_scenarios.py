@@ -5,8 +5,8 @@
 
 import unittest
 
-from azclishell.__main__ import AZCOMPLETER, AzLexer, APPLICATION
-from azclishell.app import Shell
+# from azclishell.__main__ import AZCOMPLETER, AzLexer, APPLICATION
+# from azclishell.app import Shell
 
 
 class ShellRun(unittest.TestCase):
