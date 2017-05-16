@@ -1,5 +1,5 @@
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch --help 
 
 Group
     az batch: Manage Azure Batch.
@@ -7,16 +7,16 @@ Group
 Subgroups:
     account     : Manage your Batch accounts.
     application : Manage your Batch applications.
-    certificate : Commands to manage your Batch certificates.
-    job         : Commands to manage your Batch jobs.
-    job-schedule: Commands to manage your Batch job schedules.
+    certificate : Manage your Batch certificates.
+    job         : Manage your Batch jobs.
+    job-schedule: Manage your Batch job schedules.
     location    : Manage Batch service options for a subscription at the region level.
-    node        : Commands to manage your Batch compute nodes.
-    pool        : Commands to manage your Batch pools.
-    task        : Commands to manage your Batch tasks.
+    node        : Manage your Batch compute nodes.
+    pool        : Manage your Batch pools.
+    task        : Manage your Batch tasks.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account --help 
 
 Group
     az batch account: Manage your Batch accounts.
@@ -32,12 +32,12 @@ Commands:
     list            : List the Batch accounts associated with a subscription or resource group.
     login           : Log in with specified Batch account through Azure Active Directory or Shared
                       Key authentication.
-    set             : Updates the properties of the specified Batch account. Properties that are not
+    set             : Update the properties of the specified Batch account. Properties that are not
                       specified remain unchanged.
     show            : Gets information about the specified Batch account.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account list --help 
 
 Command
     az batch account list: List the Batch accounts associated with a subscription or resource group.
@@ -53,7 +53,7 @@ Global Arguments
                          examples.
     --verbose          : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account show --help 
 
 Command
     az batch account show: Gets information about the specified Batch account.
@@ -71,7 +71,7 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account create --help 
 
 Command
     az batch account create: Create a Batch account with the specified parameters.
@@ -80,6 +80,8 @@ Arguments
     --location -l       [Required]: The region in which to create the account.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
+    --keyvault                    : The KeyVault name or resource ID to be used for an account with
+                                    a pool allocation mode of 'User Subscription'.
     --storage-account             : The storage account name or resource ID to be used for auto
                                     storage.
     --tags                        : Space separated tags in 'key[=value]' format.
@@ -93,10 +95,10 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account set --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account set --help 
 
 Command
-    az batch account set: Updates the properties of the specified Batch account. Properties that are
+    az batch account set: Update the properties of the specified Batch account. Properties that are
     not specified remain unchanged.
 
 Arguments
@@ -116,7 +118,7 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account delete --help 
 
 Command
     az batch account delete: Deletes the specified Batch account.
@@ -135,21 +137,21 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account autostorage-keys --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account autostorage-keys --help 
 
 Group
     az batch account autostorage-keys: Manage the access keys for the auto storage account
     configured for your Batch account.
 
 Commands:
-    sync: Synchronizes access keys for the auto storage account configured for the specified Batch
+    sync: Synchronizes access keys for the auto-storage account configured for the specified Batch
           account.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account autostorage-keys sync --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account autostorage-keys sync --help 
 
 Command
-    az batch account autostorage-keys sync: Synchronizes access keys for the auto storage account
+    az batch account autostorage-keys sync: Synchronizes access keys for the auto-storage account
     configured for the specified Batch account.
 
 Arguments
@@ -165,20 +167,24 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account keys --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account keys --help 
 
 Group
     az batch account keys: Manage your Batch account keys.
 
 Commands:
     list : Gets the account keys for the specified Batch account.
-    renew: Regenerates the specified account key for the specified Batch account.
+    renew: Regenerates the specified account key for the Batch account.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account keys list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account keys list --help 
 
 Command
     az batch account keys list: Gets the account keys for the specified Batch account.
+        This operation applies only to Batch accounts created with a poolAllocationMode of
+        'BatchService'. If the Batch account was created with a poolAllocationMode of
+        'UserSubscription', clients cannot use access to keys to authenticate, and must use Azure
+        Active Directory instead. In this case, getting the keys will fail.
 
 Arguments
     --name -n           [Required]: Name of the Batch account.
@@ -193,11 +199,10 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch account keys renew --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch account keys renew --help 
 
 Command
-    az batch account keys renew: Regenerates the specified account key for the specified Batch
-    account.
+    az batch account keys renew: Regenerates the specified account key for the Batch account.
 
 Arguments
     --key-name          [Required]: The type of account key to regenerate.  Allowed values: Primary,
@@ -214,25 +219,25 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application --help 
 
 Group
     az batch application: Manage your Batch applications.
 
 Subgroups:
     package: Manage your Batch application packages.
-    summary: Commands to view a summary of your Batch application packages.
+    summary: View a summary of your Batch application packages.
 
 Commands:
     create : Adds an application to the specified Batch account.
     delete : Deletes an application.
     list   : Lists all of the applications in the specified account.
-    set    : Updates the properties of the specified application. Properties that are not specified
+    set    : Update the properties of the specified application. Properties that are not specified
              remain unchanged.
     show   : Gets information about the specified application.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application list --help 
 
 Command
     az batch application list: Lists all of the applications in the specified account.
@@ -251,13 +256,13 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application show --help 
 
 Command
     az batch application show: Gets information about the specified application.
 
 Arguments
-    --application-id    [Required]: The id of the application.
+    --application-id    [Required]: The ID of the application.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
 
@@ -270,13 +275,13 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application create --help 
 
 Command
     az batch application create: Adds an application to the specified Batch account.
 
 Arguments
-    --application-id    [Required]: The id of the application.
+    --application-id    [Required]: The ID of the application.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
     --allow-updates               : Specify to indicate whether packages within the application may
@@ -293,10 +298,10 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application set --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application set --help 
 
 Command
-    az batch application set: Updates the properties of the specified application. Properties that
+    az batch application set: Update the properties of the specified application. Properties that
     are not specified remain unchanged.
 
 Arguments
@@ -319,13 +324,13 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application delete --help 
 
 Command
     az batch application delete: Deletes an application.
 
 Arguments
-    --application-id    [Required]: The id of the application.
+    --application-id    [Required]: The ID of the application.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
     --yes -y                      : Do not prompt for confirmation.
@@ -339,7 +344,7 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application package --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application package --help 
 
 Group
     az batch application package: Manage your Batch application packages.
@@ -347,16 +352,15 @@ Group
 Commands:
     activate: Activates the specified application package. This step is unnecessary if the package
               has already been successfully activated by the 'create' command.
-    create  : Creates an application package record and attempts to activate it.
+    create  : Create an application package record and activate it.
     delete  : Deletes an application package record and its associated binary file.
     show    : Gets information about the specified application package.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application package create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application package create --help 
 
 Command
-    az batch application package create: Creates an application package record and attempts to
-    activate it.
+    az batch application package create: Create an application package record and activate it.
 
 Arguments
     --application-id    [Required]: The ID of the application.
@@ -374,14 +378,14 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application package delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application package delete --help 
 
 Command
     az batch application package delete: Deletes an application package record and its associated
     binary file.
 
 Arguments
-    --application-id    [Required]: The id of the application.
+    --application-id    [Required]: The ID of the application.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
     --version           [Required]: The version of the application to delete.
@@ -396,13 +400,13 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application package show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application package show --help 
 
 Command
     az batch application package show: Gets information about the specified application package.
 
 Arguments
-    --application-id    [Required]: The id of the application.
+    --application-id    [Required]: The ID of the application.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
     --version           [Required]: The version of the application.
@@ -416,14 +420,14 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application package activate --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application package activate --help 
 
 Command
     az batch application package activate: Activates the specified application package. This step is
     unnecessary if the package has already been successfully activated by the 'create' command.
 
 Arguments
-    --application-id    [Required]: The id of the application.
+    --application-id    [Required]: The ID of the application.
     --format            [Required]: The format of the application package binary file.
     --name -n           [Required]: Name of the Batch account.
     --resource-group -g [Required]: Name of the resource group.
@@ -438,17 +442,17 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application summary --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application summary --help 
 
 Group
-    az batch application summary: Commands to view a summary of your Batch application packages.
+    az batch application summary: View a summary of your Batch application packages.
 
 Commands:
     list: Lists all of the applications available in the specified account.
     show: Gets information about the specified application.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application summary list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application summary list --help 
 
 Command
     az batch application summary list: Lists all of the applications available in the specified
@@ -476,7 +480,7 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch application summary show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch application summary show --help 
 
 Command
     az batch application summary show: Gets information about the specified application.
@@ -501,7 +505,7 @@ Global Arguments
                                  information and examples.
     --verbose                  : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch location --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch location --help 
 
 Group
     az batch location: Manage Batch service options for a subscription at the region level.
@@ -510,7 +514,7 @@ Subgroups:
     quotas: Manage Batch service quotas at the region level.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch location quotas --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch location quotas --help 
 
 Group
     az batch location quotas: Manage Batch service quotas at the region level.
@@ -519,7 +523,7 @@ Commands:
     show: Gets the Batch service quotas for the specified subscription at the given location.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch location quotas show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch location quotas show --help 
 
 Command
     az batch location quotas show: Gets the Batch service quotas for the specified subscription at
@@ -537,22 +541,22 @@ Global Arguments
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch certificate --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch certificate --help 
 
 Group
-    az batch certificate: Commands to manage your Batch certificates.
+    az batch certificate: Manage your Batch certificates.
 
 Commands:
-    create: Adds a certificate.
-    delete: Deletes the specified Batch certificate.
+    create: Add a certificate.
+    delete: Delete the specified Batch certificate.
     list  : Lists all of the certificates that have been added to the specified account.
     show  : Gets information about the specified certificate.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch certificate create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch certificate create --help 
 
 Command
-    az batch certificate create: Adds a certificate.
+    az batch certificate create: Add a certificate.
 
 Arguments
     --certificate-file [Required]: The certificate file: cer file or pfx file.
@@ -576,10 +580,10 @@ Global Arguments
                                    information and examples.
     --verbose                    : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch certificate delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch certificate delete --help 
 
 Command
-    az batch certificate delete: Deletes the specified Batch certificate.
+    az batch certificate delete: Delete the specified Batch certificate.
 
 Arguments
     --thumbprint [Required]: The certificate thumbprint.
@@ -603,7 +607,7 @@ Global Arguments
                              and examples.
     --verbose              : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch certificate show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch certificate show --help 
 
 Command
     az batch certificate show: Gets information about the specified certificate.
@@ -631,7 +635,7 @@ Global Arguments
                              and examples.
     --verbose              : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch certificate list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch certificate list --help 
 
 Command
     az batch certificate list: Lists all of the certificates that have been added to the specified
@@ -659,39 +663,37 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool --help 
 
 Group
-    az batch pool: Commands to manage your Batch pools.
+    az batch pool: Manage your Batch pools.
 
 Subgroups:
-    all-statistics : Commands to view statistics of all pools under your Batch account.
-    autoscale      : Commands to manage automatic scaling of your Batch pools.
-    node-agent-skus: Commands to retrieve node agent SKUs of pools using a Virtual Machine
-                     Configuration.
-    os             : Commands to manage the operating system of your Batch pools.
-    usage-metrics  : Commands to view usage metrics of your Batch pools.
+    all-statistics : View statistics of all pools under your Batch account.
+    autoscale      : Manage automatic scaling of your Batch pools.
+    node-agent-skus: Retrieve node agent SKUs of pools using a Virtual Machine Configuration.
+    os             : Manage the operating system of your Batch pools.
+    usage-metrics  : View usage metrics of your Batch pools.
 
 Commands:
-    create         : Creates a pool in the specified account. When creating a pool, please chose
-                     arguments from either Cloud Services Configuration or Virtual Machine
-                     Configuration.
+    create         : Create a pool in the specified account. When creating a pool, choose arguments
+                     from either Cloud Services Configuration or Virtual Machine Configuration.
     delete         : Deletes a pool from the specified account.
     list           : Lists all of the pools in the specified account.
-    reset          : Updates the properties of the specified pool. All updatable properties are
-                     replaced with the values specified or cleared/defaulted if unspecified.
-    resize         : Resizes (or stops resizing) the Batch pool.
-    set            : Updates the properties of the specified pool. Properties can be updated
-                     independently, but please note that an updated property in a sub-group (i.e.
-                     'start task') will result in all properties of that group being reset.
+    reset          : Update the properties of the specified pool. All updatable properties are
+                     replaced with the values specified or reset to default values if unspecified.
+    resize         : Resize (or stop resizing) the Batch pool.
+    set            : Update the properties of the specified pool. Properties can be updated
+                     independently, but when a property is updated in a sub-group, for example
+                     'start task', all properties of that group are reset.
     show           : Gets information about the specified pool.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool create --help 
 
 Command
-    az batch pool create: Creates a pool in the specified account. When creating a pool, please
-    chose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+    az batch pool create: Create a pool in the specified account. When creating a pool, choose
+    arguments from either Cloud Services Configuration or Virtual Machine Configuration.
 
 Arguments
     --json-file                      : A file containing the pool specification in JSON format. If
@@ -707,6 +709,12 @@ Batch Account Arguments
                                        variable: AZURE_BATCH_ACCOUNT.
 
 Pool Arguments
+    --application-licenses           : The list of application licenses the Batch service will make
+                                       available on each compute node in the pool. The list of
+                                       application licenses must be a subset of available Batch
+                                       service application licenses. If a license is requested which
+                                       is not supported, pool creation will fail. Space separated
+                                       values.
     --application-package-references : The list of application packages to be installed on each
                                        compute node in the pool. This property is currently not
                                        supported on pools created using the
@@ -754,9 +762,16 @@ Pool Arguments
                                        error; if you are calling the REST API directly, the HTTP
                                        status code is 400 (Bad Request). Expected format is an
                                        ISO-8601 duration.
-    --target-dedicated               : The desired number of compute nodes in the pool. This
-                                       property must have the default value if enableAutoScale is
-                                       true. It is required if enableAutoScale is false.
+    --target-dedicated-nodes         : The desired number of dedicated compute nodes in the pool.
+                                       This property must not be specified if enableAutoScale is set
+                                       to true. If enableAutoScale is set to false, then you must
+                                       set either targetDedicatedNodes, targetLowPriorityNodes, or
+                                       both.
+    --target-low-priority-nodes      : The desired number of low-priority compute nodes in the pool.
+                                       This property must not be specified if enableAutoScale is set
+                                       to true. If enableAutoScale is set to false, then you must
+                                       set either targetDedicatedNodes, targetLowPriorityNodes, or
+                                       both.
     --vm-size                        : The size of virtual machines in the pool. All virtual
                                        machines in a pool are the same size. For information about
                                        available sizes of virtual machines for Cloud Services pools
@@ -764,10 +779,11 @@ Pool Arguments
                                        Cloud Services
                                        (http://azure.microsoft.com/documentation/articles/cloud-
                                        services-sizes-specs/). Batch supports all Cloud Services VM
-                                       sizes except ExtraSmall. For information about available VM
-                                       sizes for pools using images from the Virtual Machines
-                                       Marketplace (pools created with virtualMachineConfiguration)
-                                       see Sizes for Virtual Machines (Linux)
+                                       sizes except ExtraSmall, A1V2 and A2V2. For information about
+                                       available VM sizes for pools using images from the Virtual
+                                       Machines Marketplace (pools created with
+                                       virtualMachineConfiguration) see Sizes for Virtual Machines
+                                       (Linux)
                                        (https://azure.microsoft.com/documentation/articles/virtual-
                                        machines-linux-sizes/) or Sizes for Virtual Machines
                                        (Windows)
@@ -839,7 +855,7 @@ Global Arguments
                                        information and examples.
     --verbose                        : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool list --help 
 
 Command
     az batch pool list: Lists all of the pools in the specified account.
@@ -867,7 +883,7 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool delete --help 
 
 Command
     az batch pool delete: Deletes a pool from the specified account.
@@ -916,7 +932,7 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool show --help 
 
 Command
     az batch pool show: Gets information about the specified pool.
@@ -956,12 +972,12 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool set --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool set --help 
 
 Command
-    az batch pool set: Updates the properties of the specified pool. Properties can be updated
-    independently, but please note that an updated property in a sub-group (i.e. 'start task') will
-    result in all properties of that group being reset.
+    az batch pool set: Update the properties of the specified pool. Properties can be updated
+    independently, but when a property is updated in a sub-group, for example 'start task', all
+    properties of that group are reset.
 
 Arguments
     --pool-id              [Required]: The ID of the pool to update.
@@ -1075,11 +1091,11 @@ Global Arguments
                                        information and examples.
     --verbose                        : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool reset --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool reset --help 
 
 Command
-    az batch pool reset: Updates the properties of the specified pool. All updatable properties are
-    replaced with the values specified or cleared/defaulted if unspecified.
+    az batch pool reset: Update the properties of the specified pool. All updatable properties are
+    replaced with the values specified or reset to default values if unspecified.
 
 Arguments
     --pool-id              [Required]: The ID of the pool to update.
@@ -1145,62 +1161,63 @@ Global Arguments
                                        information and examples.
     --verbose                        : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool resize --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool resize --help 
 
 Command
-    az batch pool resize: Resizes (or stops resizing) the Batch pool.
+    az batch pool resize: Resize (or stop resizing) the Batch pool.
 
 Arguments
-    --pool-id       [Required]: The ID of the pool.
-    --abort                   : Stop the pool resize operation.
-    --node-deallocation-option: When nodes may be removed from the pool, if the pool size is
-                                decreasing.  Allowed values: requeue, retainedData, taskCompletion,
-                                terminate.
-    --resize-timeout          : The timeout for allocation of compute nodes to the pool or removal
-                                of compute nodes from the pool. The default value is 15 minutes. The
-                                minimum value is 5 minutes. If you specify a value less than 5
-                                minutes, the Batch service returns an error; if you are calling the
-                                REST API directly, the HTTP status code is 400 (Bad Request).
-    --target-dedicated        : The desired number of compute nodes in the pool.
+    --pool-id        [Required]: The ID of the pool.
+    --abort                    : Stop the pool resize operation.
+    --node-deallocation-option : When nodes may be removed from the pool, if the pool size is
+                                 decreasing.  Allowed values: requeue, retainedData, taskCompletion,
+                                 terminate.
+    --resize-timeout           : The timeout for allocation of compute nodes to the pool or removal
+                                 of compute nodes from the pool. The default value is 15 minutes.
+                                 The minimum value is 5 minutes. If you specify a value less than 5
+                                 minutes, the Batch service returns an error; if you are calling the
+                                 REST API directly, the HTTP status code is 400 (Bad Request).
+    --target-dedicated-nodes   : The desired number of dedicated compute nodes in the pool.
+    --target-low-priority-nodes: The desired number of low-priority compute nodes in the pool.
 
 Batch Account Arguments
-    --account-endpoint        : Batch service endpoint. Alternatively, set by environment variable:
-                                AZURE_BATCH_ENDPOINT.
-    --account-key             : The Batch account key. Alternatively, set by environment variable:
-                                AZURE_BATCH_ACCESS_KEY.
-    --account-name            : The Batch account name. Alternatively, set by environment variable:
-                                AZURE_BATCH_ACCOUNT.
+    --account-endpoint         : Batch service endpoint. Alternatively, set by environment variable:
+                                 AZURE_BATCH_ENDPOINT.
+    --account-key              : The Batch account key. Alternatively, set by environment variable:
+                                 AZURE_BATCH_ACCESS_KEY.
+    --account-name             : The Batch account name. Alternatively, set by environment variable:
+                                 AZURE_BATCH_ACCOUNT.
 
 Pre-condition and Query Arguments
-    --if-match                : The operation will be performed only if the resource's current ETag
-                                exactly matches the specified value.
-    --if-modified-since       : The operation will be performed only if the resource has been
-                                modified since the specified timestamp.
-    --if-none-match           : The operation will not be performed only if the resource's current
-                                ETag exactly matches the specified value.
-    --if-unmodified-since     : The operation will not be performed only if the resource has been
-                                modified since the specified timestamp.
+    --if-match                 : The operation will be performed only if the resource's current ETag
+                                 exactly matches the specified value.
+    --if-modified-since        : The operation will be performed only if the resource has been
+                                 modified since the specified timestamp.
+    --if-none-match            : The operation will not be performed only if the resource's current
+                                 ETag exactly matches the specified value.
+    --if-unmodified-since      : The operation will not be performed only if the resource has been
+                                 modified since the specified timestamp.
 
 Global Arguments
-    --debug                   : Increase logging verbosity to show all debug logs.
-    --help -h                 : Show this help message and exit.
-    --output -o               : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
-                                json.
-    --query                   : JMESPath query string. See http://jmespath.org/ for more information
-                                and examples.
-    --verbose                 : Increase logging verbosity. Use --debug for full debug logs.
+    --debug                    : Increase logging verbosity to show all debug logs.
+    --help -h                  : Show this help message and exit.
+    --output -o                : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                                 json.
+    --query                    : JMESPath query string. See http://jmespath.org/ for more
+                                 information and examples.
+    --verbose                  : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool node-agent-skus --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool node-agent-skus --help 
 
 Group
-    az batch pool node-agent-skus: Commands to retrieve node agent SKUs of pools using a Virtual
-    Machine Configuration.
+    az batch pool node-agent-skus: Retrieve node agent SKUs of pools using a Virtual Machine
+    Configuration.
 
 Commands:
     list: Lists all node agent SKUs supported by the Azure Batch service.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool node-agent-skus list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool node-agent-skus list --help 
 
 Command
     az batch pool node-agent-skus list: Lists all node agent SKUs supported by the Azure Batch
@@ -1227,16 +1244,16 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool os --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool os --help 
 
 Group
-    az batch pool os: Commands to manage the operating system of your Batch pools.
+    az batch pool os: Manage the operating system of your Batch pools.
 
 Commands:
     upgrade: Upgrades the operating system of the specified pool.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool os upgrade --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool os upgrade --help 
 
 Command
     az batch pool os upgrade: Upgrades the operating system of the specified pool.
@@ -1290,17 +1307,17 @@ Global Arguments
                                     information and examples.
     --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool usage-metrics --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool usage-metrics --help 
 
 Group
-    az batch pool usage-metrics: Commands to view usage metrics of your Batch pools.
+    az batch pool usage-metrics: View usage metrics of your Batch pools.
 
 Commands:
     list: Lists the usage metrics, aggregated by pool across individual time intervals, for the
           specified account.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool usage-metrics list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool usage-metrics list --help 
 
 Command
     az batch pool usage-metrics list: Lists the usage metrics, aggregated by pool across individual
@@ -1337,21 +1354,21 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool all-statistics --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool all-statistics --help 
 
 Group
-    az batch pool all-statistics: Commands to view statistics of all pools under your Batch account.
+    az batch pool all-statistics: View statistics of all pools under your Batch account.
 
 Commands:
-    show: Gets lifetime summary statistics for all of the pools in the specified account. Statistics
+    show: Get lifetime summary statistics for all of the pools in the specified account. Statistics
           are aggregated across all pools that have ever existed in the account, from account
           creation to the last update time of the statistics.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool all-statistics show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool all-statistics show --help 
 
 Command
-    az batch pool all-statistics show: Gets lifetime summary statistics for all of the pools in the
+    az batch pool all-statistics show: Get lifetime summary statistics for all of the pools in the
     specified account. Statistics are aggregated across all pools that have ever existed in the
     account, from account creation to the last update time of the statistics.
 
@@ -1373,10 +1390,10 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool autoscale --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool autoscale --help 
 
 Group
-    az batch pool autoscale: Commands to manage automatic scaling of your Batch pools.
+    az batch pool autoscale: Manage automatic scaling of your Batch pools.
 
 Commands:
     disable : Disables automatic scaling for a pool.
@@ -1384,7 +1401,7 @@ Commands:
     evaluate: Gets the result of evaluating an automatic scaling formula on the pool.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool autoscale enable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool autoscale enable --help 
 
 Command
     az batch pool autoscale enable: Enables automatic scaling for a pool.
@@ -1451,7 +1468,7 @@ Global Arguments
                                       information and examples.
     --verbose                       : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool autoscale disable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool autoscale disable --help 
 
 Command
     az batch pool autoscale disable: Disables automatic scaling for a pool.
@@ -1475,7 +1492,7 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch pool autoscale evaluate --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch pool autoscale evaluate --help 
 
 Command
     az batch pool autoscale evaluate: Gets the result of evaluating an automatic scaling formula on
@@ -1512,18 +1529,17 @@ Global Arguments
                                      information and examples.
     --verbose                      : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node --help 
 
 Group
-    az batch node: Commands to manage your Batch compute nodes.
+    az batch node: Manage your Batch compute nodes.
 
 Subgroups:
-    file                 : Commands to manage your Batch compute node files.
-    remote-desktop       : Commands to retrieve the remote desktop protocol for a Batch compute
-                           node.
-    remote-login-settings: Commands to retrieve the remote login settings for a Batch compute node.
-    scheduling           : Commands to manage task scheduling for a Batch compute node.
-    user                 : Commands to manage your Batch compute node users.
+    file                 : Manage your Batch compute node files.
+    remote-desktop       : Retrieve the remote desktop protocol for a Batch compute node.
+    remote-login-settings: Retrieve the remote login settings for a Batch compute node.
+    scheduling           : Manage task scheduling for a Batch compute node.
+    user                 : Manage the user accounts of your Batch compute node.
 
 Commands:
     delete               : Removes compute nodes from the specified pool.
@@ -1533,7 +1549,7 @@ Commands:
     show                 : Gets information about the specified compute node.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node delete --help 
 
 Command
     az batch node delete: Removes compute nodes from the specified pool.
@@ -1591,7 +1607,7 @@ Global Arguments
                                 and examples.
     --verbose                 : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node show --help 
 
 Command
     az batch node show: Gets information about the specified compute node.
@@ -1619,7 +1635,7 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node list --help 
 
 Command
     az batch node list: Lists the compute nodes in the specified pool.
@@ -1647,7 +1663,7 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node reboot --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node reboot --help 
 
 Command
     az batch node reboot: Restarts the specified compute node.
@@ -1676,7 +1692,7 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node reimage --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node reimage --help 
 
 Command
     az batch node reimage: Reinstalls the operating system on the specified compute node.
@@ -1706,22 +1722,22 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node user --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node user --help 
 
 Group
-    az batch node user: Commands to manage your Batch compute node users.
+    az batch node user: Manage the user accounts of your Batch compute node.
 
 Commands:
-    create: Adds a user account to the specified compute node.
+    create: Add a user account to the specified compute node.
     delete: Deletes a user account from the specified compute node.
-    reset : Updates the properties of a user account on the specified compute node. All updatable
+    reset : Update the properties of a user account on the specified compute node. All updatable
             properties are replaced with the values specified or reset if unspecified.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node user create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node user create --help 
 
 Command
-    az batch node user create: Adds a user account to the specified compute node.
+    az batch node user create: Add a user account to the specified compute node.
 
 Arguments
     --node-id [Required]: The ID of the machine on which you want to create a user account.
@@ -1764,7 +1780,7 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node user delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node user delete --help 
 
 Command
     az batch node user delete: Deletes a user account from the specified compute node.
@@ -1792,11 +1808,11 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node user reset --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node user reset --help 
 
 Command
-    az batch node user reset: Updates the properties of a user account on the specified compute
-    node. All updatable properties are replaced with the values specified or reset if unspecified.
+    az batch node user reset: Update the properties of a user account on the specified compute node.
+    All updatable properties are replaced with the values specified or reset if unspecified.
 
 Arguments
     --node-id   [Required]: The ID of the machine on which you want to update a user account.
@@ -1839,17 +1855,17 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node scheduling --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node scheduling --help 
 
 Group
-    az batch node scheduling: Commands to manage task scheduling for a Batch compute node.
+    az batch node scheduling: Manage task scheduling for a Batch compute node.
 
 Commands:
     disable: Disables task scheduling on the specified compute node.
     enable : Enables task scheduling on the specified compute node.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node scheduling disable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node scheduling disable --help 
 
 Command
     az batch node scheduling disable: Disables task scheduling on the specified compute node.
@@ -1879,7 +1895,7 @@ Global Arguments
                                       information and examples.
     --verbose                       : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node scheduling enable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node scheduling enable --help 
 
 Command
     az batch node scheduling enable: Enables task scheduling on the specified compute node.
@@ -1904,17 +1920,17 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node remote-login-settings --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node remote-login-settings --help 
 
 Group
-    az batch node remote-login-settings: Commands to retrieve the remote login settings for a Batch
-    compute node.
+    az batch node remote-login-settings: Retrieve the remote login settings for a Batch compute
+    node.
 
 Commands:
     show: Gets the settings required for remote login to a compute node.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node remote-login-settings show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node remote-login-settings show --help 
 
 Command
     az batch node remote-login-settings show: Gets the settings required for remote login to a
@@ -1943,17 +1959,16 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node remote-desktop --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node remote-desktop --help 
 
 Group
-    az batch node remote-desktop: Commands to retrieve the remote desktop protocol for a Batch
-    compute node.
+    az batch node remote-desktop: Retrieve the remote desktop protocol for a Batch compute node.
 
 Commands:
     download: Gets the Remote Desktop Protocol file for the specified compute node.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node remote-desktop download --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node remote-desktop download --help 
 
 Command
     az batch node remote-desktop download: Gets the Remote Desktop Protocol file for the specified
@@ -1985,22 +2000,22 @@ Global Arguments
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node file --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node file --help 
 
 Group
-    az batch node file: Commands to manage your Batch compute node files.
+    az batch node file: Manage your Batch compute node files.
 
 Commands:
-    delete  : Deletes the specified task file from the compute node.
-    download: Downloads the content of the specified node file.
+    delete  : Deletes the specified file from the compute node.
+    download: Download the content of the specified node file.
     list    : Lists all of the files in task directories on the specified compute node.
     show    : Gets the properties of the specified compute node file.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node file delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node file delete --help 
 
 Command
-    az batch node file delete: Deletes the specified task file from the compute node.
+    az batch node file delete: Deletes the specified file from the compute node.
 
 Arguments
     --file-path [Required]: The path to the file that you want to delete.
@@ -2029,14 +2044,14 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node file download --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node file download --help 
 
 Command
-    az batch node file download: Downloads the content of the specified node file.
+    az batch node file download: Download the content of the specified node file.
 
 Arguments
     --destination [Required]: The path to the destination file or directory.
-    --file-path   [Required]: The path to the task file that you want to get the content of.
+    --file-path   [Required]: The path to the compute node file that you want to get the content of.
     --node-id     [Required]: The ID of the compute node that contains the file.
     --pool-id     [Required]: The ID of the pool that contains the compute node.
 
@@ -2069,7 +2084,7 @@ Global Arguments
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node file show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node file show --help 
 
 Command
     az batch node file show: Gets the properties of the specified compute node file.
@@ -2104,7 +2119,7 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch node file list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch node file list --help 
 
 Command
     az batch node file list: Lists all of the files in task directories on the specified compute
@@ -2134,35 +2149,35 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job --help 
 
 Group
-    az batch job: Commands to manage your Batch jobs.
+    az batch job: Manage your Batch jobs.
 
 Subgroups:
-    all-statistics     : Commands to view statistics of all the jobs under your Batch account.
-    prep-release-status: Commands to view the status of your job preparation and release tasks.
+    all-statistics     : View statistics of all the jobs under your Batch account.
+    prep-release-status: View the status of your job preparation and release tasks.
 
 Commands:
-    create             : Adds a job to the specified account.
+    create             : Add a job to the specified account.
     delete             : Deletes a job.
     disable            : Disables the specified job, preventing new tasks from running.
     enable             : Enables the specified job, allowing new tasks to run.
-    list               : Lists all of the jobs in the specified account or the specified job
+    list               : List all of the jobs in the specified account or the specified job
                          schedule.
-    reset              : Updates the properties of a job. All updatable properties are replaced with
-                         the values specified or cleared/defaulted if unspecified.
-    set                : Updates the properties of a job. Properties can be updated independently,
-                         but please note that an updated property in a sub-group (i.e. 'constraints'
-                         and 'pool info') will result in all properties of that group being reset.
+    reset              : Update the properties of a job. All updatable properties are replaced with
+                         the values specified or reset to default vaules if unspecified.
+    set                : Update the properties of a job. Properties can be updated independently,
+                         but when a property is updated in a sub-group, for example 'constraints' or
+                         'pool info', all properties of that group are reset.
     show               : Gets information about the specified job.
     stop               : Terminates the specified job, marking it as completed.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job create --help 
 
 Command
-    az batch job create: Adds a job to the specified account.
+    az batch job create: Add a job to the specified account.
 
 Arguments
     --json-file                            : A file containing the job specification in JSON format.
@@ -2250,7 +2265,7 @@ Global Arguments
     --verbose                              : Increase logging verbosity. Use --debug for full debug
                                              logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job delete --help 
 
 Command
     az batch job delete: Deletes a job.
@@ -2293,7 +2308,7 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job show --help 
 
 Command
     az batch job show: Gets information about the specified job.
@@ -2333,12 +2348,12 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job set --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job set --help 
 
 Command
-    az batch job set: Updates the properties of a job. Properties can be updated independently, but
-    please note that an updated property in a sub-group (i.e. 'constraints' and 'pool info') will
-    result in all properties of that group being reset.
+    az batch job set: Update the properties of a job. Properties can be updated independently, but
+    when a property is updated in a sub-group, for example 'constraints' or 'pool info', all
+    properties of that group are reset.
 
 Arguments
     --job-id        [Required]: The ID of the job whose properties you want to update.
@@ -2418,11 +2433,11 @@ Global Arguments
                                 and examples.
     --verbose                 : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job reset --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job reset --help 
 
 Command
-    az batch job reset: Updates the properties of a job. All updatable properties are replaced with
-    the values specified or cleared/defaulted if unspecified.
+    az batch job reset: Update the properties of a job. All updatable properties are replaced with
+    the values specified or reset to default vaules if unspecified.
 
 Arguments
     --job-id        [Required]: The ID of the job whose properties you want to update.
@@ -2499,10 +2514,10 @@ Global Arguments
                                 and examples.
     --verbose                 : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job list --help 
 
 Command
-    az batch job list: Lists all of the jobs in the specified account or the specified job schedule.
+    az batch job list: List all of the jobs in the specified account or the specified job schedule.
 
 Arguments
     --job-schedule-id : The ID of the job schedule from which you want to get a list of jobs. If
@@ -2529,7 +2544,7 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job disable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job disable --help 
 
 Command
     az batch job disable: Disables the specified job, preventing new tasks from running.
@@ -2579,7 +2594,7 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job enable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job enable --help 
 
 Command
     az batch job enable: Enables the specified job, allowing new tasks to run.
@@ -2622,7 +2637,7 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job stop --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job stop --help 
 
 Command
     az batch job stop: Terminates the specified job, marking it as completed.
@@ -2665,22 +2680,21 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job all-statistics --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job all-statistics --help 
 
 Group
-    az batch job all-statistics: Commands to view statistics of all the jobs under your Batch
-    account.
+    az batch job all-statistics: View statistics of all the jobs under your Batch account.
 
 Commands:
-    show: Gets lifetime summary statistics for all of the jobs in the specified account. Statistics
+    show: Get lifetime summary statistics for all of the jobs in the specified account. Statistics
           are aggregated across all jobs that have ever existed in the account, from account
           creation to the last update time of the statistics.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job all-statistics show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job all-statistics show --help 
 
 Command
-    az batch job all-statistics show: Gets lifetime summary statistics for all of the jobs in the
+    az batch job all-statistics show: Get lifetime summary statistics for all of the jobs in the
     specified account. Statistics are aggregated across all jobs that have ever existed in the
     account, from account creation to the last update time of the statistics.
 
@@ -2702,18 +2716,17 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job prep-release-status --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job prep-release-status --help 
 
 Group
-    az batch job prep-release-status: Commands to view the status of your job preparation and
-    release tasks.
+    az batch job prep-release-status: View the status of your job preparation and release tasks.
 
 Commands:
     list: Lists the execution status of the Job Preparation and Job Release task for the specified
           job across the compute nodes where the job has run.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job prep-release-status list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job prep-release-status list --help 
 
 Command
     az batch job prep-release-status list: Lists the execution status of the Job Preparation and Job
@@ -2745,31 +2758,31 @@ Global Arguments
                          examples.
     --verbose          : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule --help 
 
 Group
-    az batch job-schedule: Commands to manage your Batch job schedules.
+    az batch job-schedule: Manage your Batch job schedules.
 
 Commands:
-    create : Adds a job schedule to the specified account.
+    create : Add a job schedule to the specified account.
     delete : Deletes a job schedule from the specified account.
     disable: Disables a job schedule.
     enable : Enables a job schedule.
     list   : Lists all of the job schedules in the specified account.
-    reset  : Updates the properties of the specified job schedule. All updatable properties are
-             replaced with the values specified or cleared if unspecified. An updated job-
-             specification will only apply to new jobs.
-    set    : Updates the properties of the specified job schedule. You can independently update the
-             'schedule' and/or the 'job specification', but note that any change to either of these
-             entities will reset all properties in that entity.
+    reset  : Update the properties of the specified job schedule. All updatable properties are
+             replaced with the values specified or reset to default values if unspecified. An
+             updated job specification only applies to new jobs.
+    set    : Update the properties of the specified job schedule. You can independently update the
+             'schedule' and the 'job specification', but any change to either of these entities will
+             reset all properties in that entity.
     show   : Gets information about the specified job schedule.
     stop   : Terminates a job schedule.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule create --help 
 
 Command
-    az batch job-schedule create: Adds a job schedule to the specified account.
+    az batch job-schedule create: Add a job schedule to the specified account.
 
 Arguments
     --json-file                      : A file containing the cloud job schedule specification in
@@ -2917,7 +2930,7 @@ Global Arguments
                                        information and examples.
     --verbose                        : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule delete --help 
 
 Command
     az batch job-schedule delete: Deletes a job schedule from the specified account.
@@ -2966,7 +2979,7 @@ Global Arguments
                                   information and examples.
     --verbose                   : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule show --help 
 
 Command
     az batch job-schedule show: Gets information about the specified job schedule.
@@ -3011,12 +3024,12 @@ Global Arguments
                                   information and examples.
     --verbose                   : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule set --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule set --help 
 
 Command
-    az batch job-schedule set: Updates the properties of the specified job schedule. You can
-    independently update the 'schedule' and/or the 'job specification', but note that any change to
-    either of these entities will reset all properties in that entity.
+    az batch job-schedule set: Update the properties of the specified job schedule. You can
+    independently update the 'schedule' and the 'job specification', but any change to either of
+    these entities will reset all properties in that entity.
 
 Arguments
     --job-schedule-id                      [Required]: The ID of the job schedule to update.
@@ -3227,12 +3240,12 @@ Global Arguments
     --verbose                                        : Increase logging verbosity. Use --debug for
                                                        full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule reset --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule reset --help 
 
 Command
-    az batch job-schedule reset: Updates the properties of the specified job schedule. All updatable
-    properties are replaced with the values specified or cleared if unspecified. An updated job-
-    specification will only apply to new jobs.
+    az batch job-schedule reset: Update the properties of the specified job schedule. All updatable
+    properties are replaced with the values specified or reset to default values if unspecified. An
+    updated job specification only applies to new jobs.
 
 Arguments
     --job-schedule-id                      [Required]: The ID of the job schedule to update.
@@ -3444,7 +3457,7 @@ Global Arguments
     --verbose                                        : Increase logging verbosity. Use --debug for
                                                        full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule disable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule disable --help 
 
 Command
     az batch job-schedule disable: Disables a job schedule.
@@ -3488,7 +3501,7 @@ Global Arguments
                                   information and examples.
     --verbose                   : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule enable --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule enable --help 
 
 Command
     az batch job-schedule enable: Enables a job schedule.
@@ -3531,7 +3544,7 @@ Global Arguments
                                   information and examples.
     --verbose                   : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule stop --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule stop --help 
 
 Command
     az batch job-schedule stop: Terminates a job schedule.
@@ -3574,7 +3587,7 @@ Global Arguments
                                   information and examples.
     --verbose                   : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch job-schedule list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch job-schedule list --help 
 
 Command
     az batch job-schedule list: Lists all of the job schedules in the specified account.
@@ -3602,30 +3615,30 @@ Global Arguments
                         examples.
     --verbose         : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task --help 
 
 Group
-    az batch task: Commands to manage your Batch tasks.
+    az batch task: Manage your Batch tasks.
 
 Subgroups:
-    file      : Commands to manage your Batch task files.
-    subtask   : Commands to manage subtask information of your Batch task.
+    file      : Manage your Batch task files.
+    subtask   : Manage subtask information of your Batch task.
 
 Commands:
-    create    : Creates a single Batch task or multiple Batch tasks.
+    create    : Create a single Batch task or multiple Batch tasks.
     delete    : Deletes a task from the specified job.
     list      : Lists all of the tasks that are associated with the specified job.
     reactivate: Reactivates the specified task.
-    reset     : Updates the properties of the specified task. All updatable properties are replaced
+    reset     : Update the properties of the specified task. All updatable properties are replaced
                 with the values specified or reset if unspecified.
     show      : Gets information about the specified task.
     stop      : Terminates the specified task.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task create --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task create --help 
 
 Command
-    az batch task create: Creates a single Batch task or multiple Batch tasks.
+    az batch task create: Create a single Batch task or multiple Batch tasks.
 
 Arguments
     --job-id              [Required]: The ID of the job containing the task.
@@ -3686,7 +3699,7 @@ Global Arguments
                                       information and examples.
     --verbose                       : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task list --help 
 
 Command
     az batch task list: Lists all of the tasks that are associated with the specified job.
@@ -3717,7 +3730,7 @@ Global Arguments
                          examples.
     --verbose          : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task delete --help 
 
 Command
     az batch task delete: Deletes a task from the specified job.
@@ -3761,7 +3774,7 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task show --help 
 
 Command
     az batch task show: Gets information about the specified task.
@@ -3804,10 +3817,10 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task reset --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task reset --help 
 
 Command
-    az batch task reset: Updates the properties of the specified task. All updatable properties are
+    az batch task reset: Update the properties of the specified task. All updatable properties are
     replaced with the values specified or reset if unspecified.
 
 Arguments
@@ -3866,7 +3879,7 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task reactivate --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task reactivate --help 
 
 Command
     az batch task reactivate: Reactivates the specified task.
@@ -3911,7 +3924,7 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task stop --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task stop --help 
 
 Command
     az batch task stop: Terminates the specified task.
@@ -3953,16 +3966,16 @@ Global Arguments
                            examples.
     --verbose            : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task subtask --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task subtask --help 
 
 Group
-    az batch task subtask: Commands to manage subtask information of your Batch task.
+    az batch task subtask: Manage subtask information of your Batch task.
 
 Commands:
     list: Lists all of the subtasks that are associated with the specified multi-instance task.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task subtask list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task subtask list --help 
 
 Command
     az batch task subtask list: Lists all of the subtasks that are associated with the specified
@@ -3992,19 +4005,19 @@ Global Arguments
                           examples.
     --verbose           : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task file --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task file --help 
 
 Group
-    az batch task file: Commands to manage your Batch task files.
+    az batch task file: Manage your Batch task files.
 
 Commands:
     delete  : Deletes the specified task file from the compute node where the task ran.
-    download: Downloads the content of the specified task file.
+    download: Download the content of the specified task file.
     list    : Lists the files in a task's directory on its compute node.
     show    : Gets the properties of the specified task file.
 
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task file delete --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task file delete --help 
 
 Command
     az batch task file delete: Deletes the specified task file from the compute node where the task
@@ -4037,10 +4050,10 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task file download --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task file download --help 
 
 Command
-    az batch task file download: Downloads the content of the specified task file.
+    az batch task file download: Download the content of the specified task file.
 
 Arguments
     --destination [Required]: The path to the destination file or directory.
@@ -4077,7 +4090,7 @@ Global Arguments
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task file show --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task file show --help 
 
 Command
     az batch task file show: Gets the properties of the specified task file.
@@ -4111,7 +4124,7 @@ Global Arguments
                             examples.
     --verbose             : Increase logging verbosity. Use --debug for full debug logs.
 
-(cli-test) C:\Code\Patch\azure-cli>cmd /c az batch task file list --help 
+(env) C:\Code\Forks\azure-cli>cmd /c az batch task file list --help 
 
 Command
     az batch task file list: Lists the files in a task's directory on its compute node.
