@@ -46,7 +46,9 @@ VIRTUALENV_ARCHIVE_SHA256 = '70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba
 
 PLATFORM_SPECIFIC_DEPENDENCIES = [
     ('cryptography', '1.8.1'),
-    ('cffi', '1.10.0')
+    ('cffi', '1.10.0'),
+    ('SecretStorage', '2.3.1'),
+    ('pywin32-ctypes', '0.0.1'),
 ]
 
 def _error_exit(msg):
@@ -122,6 +124,7 @@ def _add_platform_dep_packages(packages_dest):
             dest = os.path.join(packages_dest, h['filename'])
             if not os.path.isfile(dest):
                 urlretrieve(h['url'], dest)
+                _print_status('Downloaded {}'.format(h['filename']))
 
 def _get_pip_args(python, cli_packages, cli_dist_dir, packages_dest):
     args = [python, '-m', 'pip', 'download']
@@ -136,6 +139,10 @@ def add_packages_to_bundle(bundle_working_dir, cli_dist_dir):
     _exec_command(_get_pip_args('python', cli_packages, cli_dist_dir, packages_dest))
     _exec_command(_get_pip_args('python3', cli_packages, cli_dist_dir, packages_dest))
     # 'pip download' only downloads packages for current platform. But we need all..
+    # There isn't a way to get pip to download the union of all dependencies required for all platforms.
+    # So we do this instead.
+    # see https://github.com/pypa/pip/pull/4423, https://github.com/pypa/pip/issues/4304
+    # https://github.com/pypa/pip/issues/4289
     _add_platform_dep_packages(packages_dest)
 
 def add_completion_to_bundle(bundle_working_dir, cli_source_dir):
@@ -180,8 +187,6 @@ def build_bundle():
     _print_status('Added virtualenv to working dir {}'.format(bundle))
     archived_bundle = archive_bundle(bundle)
     return archived_bundle
-
-# TODO Do the bundles work with both Python 2 and 3? - Test this.
 
 if __name__ == '__main__':
     archive = build_bundle()
