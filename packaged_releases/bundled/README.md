@@ -30,8 +30,8 @@ Verification
 
 ```
 $ tmp_dir=$(mktemp -d)
-$ tar -xvzf azure-cli_bundle.tar.gz -C $tmp_dir
-$ $tmp_dir/*/installer
+$ tar -xvzf azure-cli_bundle.tar.gz
+$ azure-cli_bundle_*/installer
 $ az --version
 ```
 

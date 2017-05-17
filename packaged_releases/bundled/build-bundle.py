@@ -34,6 +34,11 @@ COMPLETION_FILE_NAME = 'az.completion'
 ARCHIVE_FILE_TMPL = 'azure-cli_bundle_{}'
 INSTALLER_FILE_NAME = 'installer'
 
+VIRTUALENV_VERSION = '15.0.0'
+VIRTUALENV_ARCHIVE = 'virtualenv-'+VIRTUALENV_VERSION+'.tar.gz'
+VIRTUALENV_DOWNLOAD_URL = 'https://pypi.python.org/packages/source/v/virtualenv/'+VIRTUALENV_ARCHIVE
+VIRTUALENV_ARCHIVE_SHA256 = '70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19'
+
 def _error_exit(msg):
     print('ERROR: '+msg, file=sys.stderr)
     sys.exit(1)
@@ -118,6 +123,12 @@ def add_install_script_to_bundle(bundle_working_dir):
     shutil.copy(src, dest)
     os.chmod(dest, 0o777)
 
+def add_virtualenv_to_bundle(bundle_working_dir):
+    dest = os.path.join(bundle_working_dir, 'virtualenv.tar.gz')
+    downloaded_file, _ = urlretrieve(VIRTUALENV_DOWNLOAD_URL, dest)
+    if not _is_valid_sha256sum(downloaded_file, VIRTUALENV_ARCHIVE_SHA256):
+        _error_exit("The checksum of {} does not match the expected {}.".format(VIRTUALENV_DOWNLOAD_URL, VIRTUALENV_ARCHIVE_SHA256))
+
 def archive_bundle(bundle_working_dir):
     archive_filename = ARCHIVE_FILE_TMPL.format(CLI_VERSION)
     archive_dest = _get_tmp_dir()
@@ -134,11 +145,13 @@ def build_bundle():
     cli_dist_dir = build_packages(cli_source_dir)
     _print_status('Built CLI packages to {}'.format(cli_dist_dir))
     add_packages_to_bundle(bundle, cli_dist_dir)
-    _print_status('Added CLI packages to working dir {}'.format(bundle))
+    _print_status('Added CLI packages and dependencies to working dir {}'.format(bundle))
     add_completion_to_bundle(bundle, cli_source_dir)
     _print_status('Added completion file to working dir {}'.format(bundle))
     add_install_script_to_bundle(bundle)
     _print_status('Added install script file to working dir {}'.format(bundle))
+    add_virtualenv_to_bundle(bundle)
+    _print_status('Added virtualenv to working dir {}'.format(bundle))
     archived_bundle = archive_bundle(bundle)
     return archived_bundle
 
