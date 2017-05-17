@@ -3,6 +3,14 @@
 Release History
 ===============
 
+unreleased
+^^^^^^^^^^^^^^^^^^
+* Command paths are no longer case sensitive.
+
+2.0.6 (2017-05-09)
+^^^^^^^^^^^^^^^^^^
+* RP Auto-Reg: capture missing subscription registration error on LRO (#3268)
+
 2.0.5 (2017-05-05)
 ^^^^^^^^^^^^^^^^^^
 * core: capture exceptions caused by unregistered provider and auto-register it   

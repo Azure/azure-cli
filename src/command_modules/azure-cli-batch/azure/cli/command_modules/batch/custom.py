@@ -46,7 +46,7 @@ def list_accounts(client, resource_group_name=None):
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def create_account(client,  # pylint:disable=too-many-arguments
+def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
@@ -64,7 +64,7 @@ def create_account(client,  # pylint:disable=too-many-arguments
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
+def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -99,7 +99,7 @@ def login_account(client, resource_group_name, account_name, shared_key_auth=Fal
 
 
 @transfer_doc(UpdateApplicationParameters)
-def update_application(client,  # pylint:disable=too-many-arguments
+def update_application(client,
                        resource_group_name, account_name, application_id, allow_updates=None,
                        display_name=None, default_version=None):
     parameters = UpdateApplicationParameters(allow_updates=allow_updates,
@@ -137,7 +137,7 @@ def _upload_package_blob(package_file, url):
 
 
 @transfer_doc(ApplicationPackageOperations.create)
-def create_application_package(client,  # pylint:disable=too-many-arguments
+def create_application_package(client,
                                resource_group_name, account_name, application_id, version,
                                package_file):
     # create application if not exist
@@ -207,7 +207,7 @@ def delete_certificate(client, thumbprint, abort=False):
 
 
 @transfer_doc(PoolResizeParameter)
-def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-many-arguments
+def resize_pool(client, pool_id, target_dedicated=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
@@ -232,7 +232,7 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client,  # pylint:disable=too-many-arguments
+def update_pool(client,
                 pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
                 application_package_references=None, metadata=None,
                 start_task_environment_settings=None, start_task_wait_for_success=None,
@@ -297,7 +297,7 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
-def create_task(client,  # pylint:disable=too-many-arguments
+def create_task(client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
                 environment_settings=None, affinity_info=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,

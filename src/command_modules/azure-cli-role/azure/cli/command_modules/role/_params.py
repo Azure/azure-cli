@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+import argparse
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import enum_choice_list
-from .custom import get_role_definition_name_completion_list, x509_type
-from ._validators import validate_group, validate_member_id, VARIANT_GROUP_ID_ARGS
+from .custom import get_role_definition_name_completion_list
+from ._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
 
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
 register_cli_argument('ad app', 'display_name', help='the display name of the application')
@@ -16,8 +17,8 @@ register_cli_argument('ad app', 'homepage', help='the url where users can sign i
 register_cli_argument('ad app', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id')
 register_cli_argument('ad app', 'identifier_uris', nargs='+', help='space separated unique URIs that Azure AD can use for this app.')
 register_cli_argument('ad app', 'reply_urls', nargs='+', help='space separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
-register_cli_argument('ad app', 'start_date', help='the start date after which password or key would be valid. Default value is current time')
-register_cli_argument('ad app', 'end_date', help='the end date till which password or key is valid. Default value is one year after current time')
+register_cli_argument('ad app', 'start_date', help="Date or datetime at which credentials become valid(e.g. '2017-01-01T01:00:00+00:00' or '2017-01-01'). Default value is current time")
+register_cli_argument('ad app', 'end_date', help="Date or datetime after which credentials expire(e.g. '2017-12-31T11:59:59+00:00' or '2017-12-31'). Default value is one year after current time")
 register_cli_argument('ad app', 'available_to_other_tenants', action='store_true', help='the application can be used from any Azure AD tenants')
 register_cli_argument('ad app', 'key_value', help='the value for the key credentials associated with the application')
 # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
@@ -28,19 +29,18 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('ad sp', 'identifier', options_list=('--id',), help='service principal name, or object id')
 register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id of the associated application')
-register_cli_argument('ad sp create-for-rbac', 'name', name_arg_type)
-register_cli_argument('ad sp create-for-rbac', 'password', options_list=('--password', '-p'))
-register_cli_argument('ad sp create-for-rbac', 'years', type=int, default=None)
 register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
-register_cli_argument('ad sp create-for-rbac', 'create_cert', action='store_true', help='create and upload self-signed certificate which you can use to login')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
-register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
-register_cli_argument('ad sp create-for-rbac', 'cert', type=x509_type)
+register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help=argparse.SUPPRESS)
 
-register_cli_argument('ad sp reset-credentials', 'name', name_arg_type)
-register_cli_argument('ad sp reset-credentials', 'years', type=int, default=None)
-register_cli_argument('ad sp reset-credentials', 'create_cert', action='store_true', help='re-create and upload self-signed certificate')
+for item in ['create-for-rbac', 'reset-credentials']:
+    register_cli_argument('ad sp {}'.format(item), 'name', name_arg_type)
+    register_cli_argument('ad sp {}'.format(item), 'cert', arg_group='Credential', validator=validate_cert)
+    register_cli_argument('ad sp {}'.format(item), 'password', options_list=('--password', '-p'), arg_group='Credential')
+    register_cli_argument('ad sp {}'.format(item), 'years', type=int, default=None, arg_group='Credential')
+    register_cli_argument('ad sp {}'.format(item), 'create_cert', action='store_true', arg_group='Credential')
+    register_cli_argument('ad sp {}'.format(item), 'keyvault', arg_group='Credential')
 
 register_cli_argument('ad', 'display_name', help='object\'s display name or its prefix')
 register_cli_argument('ad', 'identifier_uri', help='graph application identifier, must be in uri format')

@@ -8,7 +8,6 @@ from prompt_toolkit.styles import style_from_dict
 from pygments.token import Token
 
 
-# pylint: disable=too-many-arguments
 def color_mapping(curr_completion, completion, prompt, command, subcommand,
                   param, text, line, example, toolbar):
 

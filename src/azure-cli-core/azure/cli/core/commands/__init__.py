@@ -37,7 +37,7 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context', 'container', 'shell']
+BLACKLISTED_MODS = ['context', 'container', 'shell', 'documentdb']
 
 
 class VersionConstraint(object):
@@ -447,36 +447,32 @@ def create_command(module_name, name, operation,
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)
-            try:
+            for _ in range(2):  # for possible retry, we do maximum 2 times.
                 try:
                     result = op(client, **kwargs) if client else op(**kwargs)
-                except CloudError as ex:
+                    if no_wait_param and kwargs.get(no_wait_param, None):
+                        return None  # return None for 'no-wait'
+
+                    # apply results transform if specified
+                    if transform_result:
+                        return transform_result(result)
+
+                    # otherwise handle based on return type of results
+                    if _is_poller(result):
+                        return LongRunningOperation('Starting {}'.format(name))(result)
+                    elif _is_paged(result):
+                        return list(result)
+                    return result
+                except Exception as ex:  # pylint: disable=broad-except
                     rp = _check_rp_not_registered_err(ex)
                     if rp:
                         _register_rp(rp)
-                        result = op(client, **kwargs) if client else op(**kwargs)
+                        continue  # retry
+                    if exception_handler:
+                        exception_handler(ex)
+                        return
                     else:
                         reraise(*sys.exc_info())
-
-                if no_wait_param and kwargs.get(no_wait_param, None):
-                    return None  # return None for 'no-wait'
-
-                # apply results transform if specified
-                if transform_result:
-                    return transform_result(result)
-
-                # otherwise handle based on return type of results
-                if _is_poller(result):
-                    return LongRunningOperation('Starting {}'.format(name))(result)
-                elif _is_paged(result):
-                    return list(result)
-                return result
-            except Exception as ex:  # pylint: disable=broad-except
-                if exception_handler:
-                    exception_handler(ex)
-                else:
-                    reraise(*sys.exc_info())
-
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
