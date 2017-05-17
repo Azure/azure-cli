@@ -73,12 +73,13 @@ def scrub(text):
     next_scrub = False
     values = []
     for arg in args:
-        if next_scrub:
-            arg = '*****'
-            next_scrub = False
         if arg.startswith('-'):
             next_scrub = True
-        values.append(arg)
+            values.append(arg)
+        elif next_scrub:
+            values.append('*****')
+        else:
+            values.append(arg)
     return ' '.join(values)
 
 
