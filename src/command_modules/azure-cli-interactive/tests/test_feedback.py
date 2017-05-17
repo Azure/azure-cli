@@ -35,6 +35,9 @@ def _mock_update3():
 
 class FeedbackTest(unittest.TestCase):
     """ tests the frequncy heuristic """
+    def __init__(self, *args, **kwargs):
+        super(FeedbackTest, self).__init__(*args, **kwargs)
+        self.norm_update = fh.update_frequency
 
     def test_heuristic(self):
         """ test the correct logging of time for frequency """
@@ -49,6 +52,8 @@ class FeedbackTest(unittest.TestCase):
 
     def test_update_freq(self):
         """ tests updating the files for frequency """
+        fh.update_frequency = self.norm_update
+
         freq_path = os.path.join(shell_config(), SHELL_CONFIG.get_frequency())
         if os.path.exists(freq_path):
             os.remove(freq_path)
