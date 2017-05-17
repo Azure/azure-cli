@@ -45,7 +45,7 @@ register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name
 register_cli_argument('monitor alert create', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
 register_cli_argument('monitor alert create', 'custom_emails', nargs='+', arg_group='Action')
-register_cli_argument('monitor alert create', 'disabled', help='Create the rule in a disabled state.', **three_state_flag())
+register_cli_argument('monitor alert create', 'disabled', **three_state_flag())
 register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', **three_state_flag())
 register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+', arg_group='Action')
 register_cli_argument('monitor alert create', 'condition', action=ConditionAction, nargs='+')

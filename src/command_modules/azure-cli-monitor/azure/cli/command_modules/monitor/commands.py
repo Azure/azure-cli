@@ -5,6 +5,7 @@
 
 from ._client_factory import (cf_monitor,
                               cf_alert_rules, cf_metrics, cf_metric_def,
+                              cf_alert_rule_incidents,
                               get_monitor_log_profiles_operation,
                               get_monitor_autoscale_settings_operation,
                               get_monitor_diagnostic_settings_operation,
@@ -34,8 +35,8 @@ cli_generic_update_command(__name__, 'monitor alert update',
                            custom_function_op=custom_path + 'update_metric_rule')
 
 ari_path = 'azure.mgmt.monitor.operations.alert_rule_incidents_operations#AlertRuleIncidentsOperations.'
-cli_command(__name__, 'monitor alert show-incident', ari_path + 'get', cf_monitor)
-cli_command(__name__, 'monitor alert list-incidents', ari_path + 'list_by_alert_rule', cf_monitor)
+cli_command(__name__, 'monitor alert show-incident', ari_path + 'get', cf_alert_rule_incidents)
+cli_command(__name__, 'monitor alert list-incidents', ari_path + 'list_by_alert_rule', cf_alert_rule_incidents)
 
 # endregion
 

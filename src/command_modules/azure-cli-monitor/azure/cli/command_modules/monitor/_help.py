@@ -26,13 +26,15 @@ helps['monitor alert create'] = """
         - name: --action -a
           short-summary: Add an action to fire when the alert is triggered.
           long-summary: |
-            Usage:   --add-action TYPE KEY [ARG ...]
-            Email:   --add-action email bob@contoso.com ann@contoso.com
-            Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
-            Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+            Usage:   --action TYPE KEY [ARG ...]
+            Email:   --action email bob@contoso.com ann@contoso.com
+            Webhook: --action webhook https://www.contoso.com/alert apiKey=value
+            Webhook: --action webhook https://www.contoso.com/alert?apiKey=value
             To specify multiple actions, add multiple --add-action ARGS entries.
         - name: --description
           short-summary: Free-text description of the rule. Defaults to the condition expression.
+        - name: --disabled
+          short-summary: Create the rule in a disabled state.
         - name: --condition
           short-summary: The condition expression upon which to trigger the rule.
           long-summary: |

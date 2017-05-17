@@ -15,6 +15,10 @@ def cf_alert_rules(kwargs):
     return cf_monitor(kwargs).alert_rules
 
 
+def cf_alert_rule_incidents(kwargs):
+    return cf_monitor(kwargs).alert_rule_incidents
+
+
 def get_monitor_autoscale_settings_operation(kwargs):
     return cf_monitor(kwargs).autoscale_settings
 
