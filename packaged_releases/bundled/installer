@@ -18,6 +18,8 @@ import stat
 
 PACKAGES = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages')
 VIRTUALENV_ARCHIVE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'virtualenv.tar.gz')
+COMPLETION_FILENAME = 'az.completion'
+COMPLETION_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), COMPLETION_FILENAME)
 
 AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
@@ -25,6 +27,7 @@ AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 DEFAULT_INSTALL_DIR = os.path.expanduser(os.path.join('~', 'lib', 'azure-cli'))
 DEFAULT_EXEC_DIR = os.path.expanduser(os.path.join('~', 'bin'))
 EXECUTABLE_NAME = 'az'
+
 
 class CLIInstallError(Exception):
     pass
@@ -152,6 +155,10 @@ def verify_native_dependencies(override_native_check):
     else:
         _print_status("Unable to verify native dependencies. dist={}, version={}. Continuing...".format(distname, version))
 
+def add_completion_file(install_dir):
+    completion_file_path = os.path.join(install_dir, COMPLETION_FILENAME)
+    shutil.copy(COMPLETION_PATH, completion_file_path)
+
 def main(install_dir, bin_dir, overwrite_install_dir, override_python_version_check, override_native_check):
     tmp_dir = tempfile.mkdtemp()
     verify_python_version(override_python_version_check)
@@ -163,7 +170,7 @@ def main(install_dir, bin_dir, overwrite_install_dir, override_python_version_ch
     create_virtualenv(tmp_dir, install_dir)
     install_cli(tmp_dir, install_dir)
     create_executable(bin_dir, install_dir)
-    # TODO Tab completion set up?
+    add_completion_file(install_dir)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
