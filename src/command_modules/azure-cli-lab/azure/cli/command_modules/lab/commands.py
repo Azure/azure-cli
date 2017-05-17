@@ -84,13 +84,13 @@ with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
         c.command('start', 'start')
         c.command('stop', 'stop')
         c.command('apply-artifacts', 'apply_artifacts')
-        c.command('claim', 'claim')
 
 # Virtual Machine Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
                   custom_operations) as s:
     with s.group('lab vm') as c:
         c.command('list', 'list_vm', table_transformer=transform_vm_list)
+        c.command('claim', 'claim_vm')
 
 # Lab Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_lab_operation,

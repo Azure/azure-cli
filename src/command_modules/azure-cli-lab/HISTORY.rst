@@ -5,6 +5,7 @@ Release History
 unreleased
 +++++++++++++++++++++
 
+* Adding support for claiming any vm in the lab through `az lab vm claim`
 * Adding support for claiming existing vm in the lab through `az lab vm claim`
 * Adding table output formatter for `az lab vm list` & `az lab vm show`
 
