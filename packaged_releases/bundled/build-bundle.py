@@ -24,6 +24,11 @@ except ImportError:
     # Import python 2 version
     from urllib import urlretrieve
 
+try:
+    import xmlrpclib
+except ImportError:
+    import xmlrpc.client as xmlrpclib
+
 CLI_VERSION = os.getenv('CLI_VERSION')
 CLI_SOURCE_ARCHIVE_SHA256 = os.getenv('CLI_DOWNLOAD_SHA256')
 
@@ -38,6 +43,11 @@ VIRTUALENV_VERSION = '15.0.0'
 VIRTUALENV_ARCHIVE = 'virtualenv-'+VIRTUALENV_VERSION+'.tar.gz'
 VIRTUALENV_DOWNLOAD_URL = 'https://pypi.python.org/packages/source/v/virtualenv/'+VIRTUALENV_ARCHIVE
 VIRTUALENV_ARCHIVE_SHA256 = '70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19'
+
+PLATFORM_SPECIFIC_DEPENDENCIES = [
+    ('cryptography', '1.8.1'),
+    ('cffi', '1.10.0')
+]
 
 def _error_exit(msg):
     print('ERROR: '+msg, file=sys.stderr)
@@ -103,14 +113,30 @@ def build_packages(source_dir):
         _build_package(p, dist_dir)
     return dist_dir
 
+def _add_platform_dep_packages(packages_dest):
+    """ Install all platform specific dependencies. """
+    for dep in PLATFORM_SPECIFIC_DEPENDENCIES:
+        client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+        pypi_hits = client.release_urls(dep[0], dep[1])
+        for h in pypi_hits:
+            dest = os.path.join(packages_dest, h['filename'])
+            if not os.path.isfile(dest):
+                urlretrieve(h['url'], dest)
+
+def _get_pip_args(python, cli_packages, cli_dist_dir, packages_dest):
+    args = [python, '-m', 'pip', 'download']
+    args.extend([os.path.join(cli_dist_dir, p) for p in cli_packages])
+    args.extend(['--dest', packages_dest])
+    return args
+
 def add_packages_to_bundle(bundle_working_dir, cli_dist_dir):
     """ Add the CLI packages (and all dependencies) to bundle """
     cli_packages = os.listdir(cli_dist_dir)
     packages_dest = os.path.join(bundle_working_dir, 'packages')
-    args = ['pip', 'download']
-    args.extend([os.path.join(cli_dist_dir, p) for p in cli_packages])
-    args.extend(['--dest', packages_dest])
-    _exec_command(args)
+    _exec_command(_get_pip_args('python', cli_packages, cli_dist_dir, packages_dest))
+    _exec_command(_get_pip_args('python3', cli_packages, cli_dist_dir, packages_dest))
+    # 'pip download' only downloads packages for current platform. But we need all..
+    _add_platform_dep_packages(packages_dest)
 
 def add_completion_to_bundle(bundle_working_dir, cli_source_dir):
     src = os.path.join(cli_source_dir, COMPLETION_FILE_NAME)

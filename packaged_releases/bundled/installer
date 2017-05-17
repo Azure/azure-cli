@@ -60,14 +60,14 @@ def verify_python_version(override_python_version_check):
                               "Create an Anaconda virtual environment and install with 'pip'")
     _print_status('Python version {}.{}.{} okay.'.format(v.major, v.minor, v.micro))
 
-def create_install_dir(install_dir, allow_overwrite_install_dir):
+def create_install_dir(install_dir, overwrite_install_dir):
     _create_dir(install_dir)
     if os.listdir(install_dir):
-        if allow_overwrite_install_dir:
+        if overwrite_install_dir:
             shutil.rmtree(install_dir)
             _create_dir(install_dir)
         else:
-            raise CLIInstallError("The install directory '{}' is not empty and may contain a previous installation. Use --allow-overwrite-install-dir to overwrite.".format(install_dir))
+            raise CLIInstallError("The install directory '{}' is not empty and may contain a previous installation. Use --overwrite-install-dir to overwrite.".format(install_dir))
     _print_status("Install directory is '{}'".format(install_dir))
 
 def create_exec_dir(bin_dir):
@@ -152,11 +152,11 @@ def verify_native_dependencies(override_native_check):
     else:
         _print_status("Unable to verify native dependencies. dist={}, version={}. Continuing...".format(distname, version))
 
-def main(install_dir, bin_dir, allow_overwrite_install_dir, override_python_version_check, override_native_check):
+def main(install_dir, bin_dir, overwrite_install_dir, override_python_version_check, override_native_check):
     tmp_dir = tempfile.mkdtemp()
     verify_python_version(override_python_version_check)
     verify_native_dependencies(override_native_check)
-    create_install_dir(install_dir, allow_overwrite_install_dir)
+    create_install_dir(install_dir, overwrite_install_dir)
     create_exec_dir(bin_dir)
     exec_path = os.path.join(bin_dir, EXECUTABLE_NAME)
     verify_install_dir_exec_path_conflict(install_dir, exec_path)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     parser.add_argument('--bin-dir', '-b',
                         help="In what directory would you like to place the executable?",
                         type=_parse_dir, default=DEFAULT_EXEC_DIR)
-    parser.add_argument('--allow-overwrite-install-dir',
+    parser.add_argument('--overwrite-install-dir',
                         help='Override the install directory if it exists.',
                         default=False, action='store_true')
     parser.add_argument('--override-python-version-check',
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     try:
         main(args.install_dir,
              args.bin_dir,
-             args.allow_overwrite_install_dir,
+             args.overwrite_install_dir,
              args.override_python_version_check,
              args.override_native_check)
     except CLIInstallError as cie:

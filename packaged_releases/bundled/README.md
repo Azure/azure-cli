@@ -6,6 +6,7 @@ Updating the Debian package
 ---------------------------
 
 On a build machine (e.g. new Ubuntu 14.04 VM), run the build script.
+Requires both Python 2 and Python 3 (as we package for both).
 
 For example:
 
