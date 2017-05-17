@@ -132,16 +132,26 @@ helps['lab vm apply-artifacts'] = """
             """
 helps['lab vm claim'] = """
             type: command
-            short-summary: Take ownership of an existing virtual machine in Azure DevTest Lab.
+            short-summary: Claim a specific virtual machine or any available from the Lab.
             parameters:
                 - name: --ids
-                  short-summary: One or more resource IDs (space delimited). If provided, no other arguments should be specified
+                  short-summary: Space separated list of VM IDs to claim.
                 - name: --resource-group -g
                   short-summary: Name of lab's resource group
                 - name: --lab-name
                   short-summary: Name of the Lab
                 - name: --name -n
                   short-summary: Name of the virtual machine
+            examples:
+                - name: Claim any available virtual machine in the lab.
+                  text: >
+                    az lab vm claim -g MyRG --lab-name MyLab
+                - name: Claim a specific virtual machine in the lab.
+                  text: >
+                    az lab vm claim -g MyRG --lab-name MyLab --name MyVM
+                - name: Claim multiple virtual machines in the lab using --ids.
+                  text: >
+                    az lab vm claim --ids /subscriptions/{SubID}/resourcegroups/{MyRG}/providers/microsoft.devtestlab/labs/{MyLab}/virtualmachines/{MyVM1} /subscriptions/{SubID}/resourcegroups/{MyRG}/providers/microsoft.devtestlab/labs/{MyLab}/virtualmachines/{MyVM2}
             """
 helps['lab custom-image'] = """
             type: group

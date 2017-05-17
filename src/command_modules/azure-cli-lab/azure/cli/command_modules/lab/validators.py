@@ -114,6 +114,12 @@ def validate_template_id(namespace):
                                              grandchild_name=namespace.arm_template)
 
 
+def validate_claim_vm(namespace):
+    if namespace.name is None and namespace.lab_name is None or namespace.resource_group is None:
+        raise CLIError("usage error: --ids IDs | --lab-name LabName --resource-group ResourceGroup --name VMName"
+                       " | --lab-name LabName --resource-group ResourceGroup")
+
+
 def _get_owner_object_id():
     from azure.cli.core._profile import Profile, CLOUD
     from azure.graphrbac.models import GraphErrorException
