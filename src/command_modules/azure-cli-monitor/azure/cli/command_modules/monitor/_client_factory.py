@@ -19,15 +19,15 @@ def cf_alert_rule_incidents(kwargs):
     return cf_monitor(kwargs).alert_rule_incidents
 
 
-def get_monitor_autoscale_settings_operation(kwargs):
+def cf_autoscale(kwargs):
     return cf_monitor(kwargs).autoscale_settings
 
 
-def get_monitor_diagnostic_settings_operation(kwargs):
+def cf_diagnostics(kwargs):
     return cf_monitor(kwargs).service_diagnostic_settings
 
 
-def get_monitor_log_profiles_operation(kwargs):
+def cf_log_profiles(kwargs):
     return cf_monitor(kwargs).log_profiles
 
 
@@ -46,5 +46,5 @@ def cf_metric_def(kwargs):
     return cf_monitor_data(kwargs).metric_definitions
 
 
-def get_monitor_activity_log_operation(kwargs):
+def cf_activity_log(kwargs):
     return cf_monitor_data(kwargs).activity_logs
