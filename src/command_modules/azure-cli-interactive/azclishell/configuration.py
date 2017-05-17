@@ -64,7 +64,6 @@ class Configuration(object):
         self.config.add_section('Layout')
         self.config.set('Help Files', 'command', 'help_dump.json')
         self.config.set('Help Files', 'history', 'history.txt')
-        self.config.set('Help Files', 'frequency', 'frequency.json')
         self.config.set('Layout', 'command_description', 'yes')
         self.config.set('Layout', 'param_description', 'yes')
         self.config.set('Layout', 'examples', 'yes')
