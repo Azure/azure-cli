@@ -6,100 +6,100 @@
 from azure.cli.core.help_files import helps
 
 
-def add_helps(commnad_group, server_type):
-    helps['{}'.format(commnad_group)] = """
-                type: group
-                short-summary: Commands to manage Azure %s servers.
-                """ % server_type
-    helps['{} server'.format(commnad_group)] = """
+def add_helps(command_group, server_type):
+    helps['{}'.format(command_group)] = """
                 type: group
                 short-summary: Commands to manage %s servers.
                 """ % server_type
-    helps['{} server create'.format(commnad_group)] = """
-                type: command
-                short-summary: Creates a new %s server
+    helps['{} server'.format(command_group)] = """
+                type: group
+                short-summary: Commands to manage %s servers.
                 """ % server_type
-    helps['{} server update'.format(commnad_group)] = """
+    helps['{} server create'.format(command_group)] = """
                 type: command
-                short-summary: Updates a %s server.
+                short-summary: Create an %s server
                 """ % server_type
-    helps['{} server delete'.format(commnad_group)] = """
+    helps['{} server update'.format(command_group)] = """
                 type: command
-                short-summary: Deletes a %s server.
+                short-summary: Update an %s server.
                 """ % server_type
-    helps['{} server show'.format(commnad_group)] = """
+    helps['{} server delete'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a %s server.
+                short-summary: Delete an %s server.
                 """ % server_type
-    helps['{} server list'.format(commnad_group)] = """
+    helps['{} server show'.format(command_group)] = """
+                type: command
+                short-summary: Show the details of an %s server.
+                """ % server_type
+    helps['{} server list'.format(command_group)] = """
                 type: command
                 short-summary: List all the %s servers belong to given resource group.
                 """ % server_type
-    helps['{} server firewall-rule'.format(commnad_group)] = """
+    helps['{} server firewall-rule'.format(command_group)] = """
                 type: group
-                short-summary: Commands to manage Azure %s server's firewall rules
+                short-summary: Commands to manage firewall rules for an %s server
                 """ % server_type
-    helps['{} server firewall-rule create'.format(commnad_group)] = """
+    helps['{} server firewall-rule create'.format(command_group)] = """
                 type: command
-                short-summary: Creates a firewall rule
+                short-summary: Create a firewall rule for an %s server
                 """
-    helps['{} server firewall-rule update'.format(commnad_group)] = """
+    helps['{} server firewall-rule update'.format(command_group)] = """
                 type: command
-                short-summary: Updates a firewall rule
+                short-summary: Update a firewall rule for an %s server
                 """
-    helps['{} server firewall-rule delete'.format(commnad_group)] = """
+    helps['{} server firewall-rule delete'.format(command_group)] = """
                 type: command
-                short-summary: Deletes a firewall rule
+                short-summary: Delete a firewall rule for an %s server
                 """
-    helps['{} server firewall-rule show'.format(commnad_group)] = """
+    helps['{} server firewall-rule show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a firewall rule
+                short-summary: Show the details of a firewall rule for an %s server
                 """
-    helps['{} server firewall-rule list'.format(commnad_group)] = """
+    helps['{} server firewall-rule list'.format(command_group)] = """
                 type: command
-                short-summary: List all the firewall rules of a given server
+                short-summary: List all the firewall rules for an %s server
                 """
-    helps['{} server configuration'.format(commnad_group)] = """
+    helps['{} server configuration'.format(command_group)] = """
                 type: group
-                short-summary: Commands to manage %s server configurations
+                short-summary: Commands to configure an %s server
                 """ % server_type
-    helps['{} server configuration set'.format(commnad_group)] = """
+    helps['{} server configuration set'.format(command_group)] = """
                 type: command
-                short-summary: Updates the value of a server configuration
+                short-summary: Update the configuration of an %s server
                 """
-    helps['{} server configuration show'.format(commnad_group)] = """
+    helps['{} server configuration show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a server configuration
+                short-summary: Show the configuration of an %s server
                 """
-    helps['{} server configuration list'.format(commnad_group)] = """
+    helps['{} server configuration list'.format(command_group)] = """
                 type: command
-                short-summary: List all the configurations of a given server
+                short-summary: List the configurations of an %s server
                 """
-    helps['{} server-logs'.format(commnad_group)] = """
+    helps['{} server-logs'.format(command_group)] = """
                 type: group
                 short-summary: Commands to manage %s server logs.
                 """ % server_type
-    helps['{} db'.format(commnad_group)] = """
+    helps['{} db'.format(command_group)] = """
                 type: group
                 short-summary: Commands to manage %s databases
                 """ % server_type
-    helps['{} db create'.format(commnad_group)] = """
+    helps['{} db create'.format(command_group)] = """
                 type: command
-                short-summary: Creates a database
+                short-summary: Create a database for %s
                 """
-    helps['{} db delete'.format(commnad_group)] = """
+    helps['{} db delete'.format(command_group)] = """
                 type: command
-                short-summary: Deletes a database
+                short-summary: Delete a database for %s
                 """
-    helps['{} db show'.format(commnad_group)] = """
+    helps['{} db show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a database
+                short-summary: Show the details of a database for %s
                 """
-    helps['{} db list'.format(commnad_group)] = """
+    helps['{} db list'.format(command_group)] = """
                 type: command
-                short-summary: List all the databases of a given server
+                short-summary: List the databases of an %s server
                 """
 
 
-add_helps("mysql", "MySQL")
-add_helps("postgres", "PostgreSQL")
+add_helps("mysql", "Azure Database for MySQL")
+add_helps("postgres", "Azure Database for PostgreSQL")
