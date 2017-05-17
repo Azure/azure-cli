@@ -1475,9 +1475,11 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     public_ip_address = public_ip.ip_address
 
     # loop around inboundnatrule
-    instance_addresses = []
+    instance_addresses = {}
     for rule in lb.inbound_nat_rules:
-        instance_addresses.append('{}:{}'.format(public_ip_address, rule.frontend_port))
+        instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
+        instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
+                                                                       rule.frontend_port)
 
     return instance_addresses
 
