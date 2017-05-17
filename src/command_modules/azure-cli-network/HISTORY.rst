@@ -6,6 +6,7 @@ Release History
 unreleased
 ++++++++++++++++++
 
+* `express-route peering create`: fix bug when creating a peering without route filtering.
 * `network watcher show-topology`: Fix bug with location defaulting logic.
 
 2.0.6 (2017-05-09)

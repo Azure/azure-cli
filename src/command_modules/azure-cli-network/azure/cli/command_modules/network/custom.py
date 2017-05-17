@@ -1727,7 +1727,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
         RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
         peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(
