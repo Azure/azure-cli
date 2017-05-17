@@ -119,6 +119,7 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss start', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss show', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
 register_cli_argument('vmss', 'instance_id', id_part='child_name')

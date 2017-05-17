@@ -861,7 +861,7 @@ def get_boot_log(resource_group_name, vm_name):
 def list_extensions(resource_group_name, vm_name):
     vm = get_vm(resource_group_name, vm_name)
     extension_type = 'Microsoft.Compute/virtualMachines/extensions'
-    result = [r for r in vm.resources if r.type == extension_type]
+    result = [r for r in (vm.resources or []) if r.type == extension_type]
     return result
 
 
