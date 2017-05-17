@@ -14,15 +14,15 @@ from dateutil import tz
 from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
 
 from azure.cli.core.util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck)
 
 from azure.cli.command_modules.keyvault._params import secret_encoding_values
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-def _create_keyvault(test,  # pylint: disable=too-many-arguments
+def _create_keyvault(test,
                      vault_name, resource_group, location, retry_wait=30, max_retries=10):
     # need premium KeyVault to store keys in HSM
     test.cmd('keyvault create -g {} -n {} -l {} --sku premium'.format(resource_group, vault_name,
@@ -488,7 +488,24 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
             if os.path.exists(dest_string):
                 os.remove(dest_string)
 
+    def _test_keyvault_certificate_get_default_policy(self):
+        result = self.cmd('keyvault certificate get-default-policy')
+        self.assertEqual(result['keyProperties']['keyType'], 'RSA')
+        self.assertEqual(result['issuerParameters']['name'], 'Self')
+        self.assertEqual(result['secretProperties']['contentType'], 'application/x-pkcs12')
+        subject = 'CN=CLIGetDefaultPolicy'
+        self.assertEqual(result['x509CertificateProperties']['subject'], subject)
+
+        result = self.cmd('keyvault certificate get-default-policy --scaffold')
+        self.assertIn('RSA or RSA-HSM', result['keyProperties']['keyType'])
+        self.assertIn('Self', result['issuerParameters']['name'])
+        self.assertIn('application/x-pkcs12', result['secretProperties']['contentType'])
+        self.assertIn('Contoso', result['x509CertificateProperties']['subject'])
+
     def body(self):
+
+        self._test_keyvault_certificate_get_default_policy()
+
         _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
 
         kv = self.keyvault_name

@@ -5,6 +5,12 @@ Release History
 unreleased
 +++++++++++++++++++++
 
+* Adding support for claiming existing vm in the lab through `az lab vm claim`
+* Adding table output formatter for `az lab vm list` & `az lab vm show`
+
+0.0.4 (2017-05-05)
++++++++++++++++++++++
+
 * Adding table output formatter for az lab arm-template & az lab artifact-source
 
 0.0.3 (2017-04-28)

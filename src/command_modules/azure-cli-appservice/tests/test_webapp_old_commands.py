@@ -10,8 +10,8 @@ from six import StringIO
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
-                                                     JMESPathCheck, NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
+                                             JMESPathCheck, NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -221,7 +221,7 @@ class WebappConfigureTestOld(ResourceGroupVCRTestBase):
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 3),
             JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
             JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
@@ -230,7 +230,7 @@ class WebappConfigureTestOld(ResourceGroupVCRTestBase):
             JMESPathCheck("[?name=='c3']|[0].slotSetting", True),
         ])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].slotSetting', False),
             JMESPathCheck('[0].name', 'c2')
@@ -383,12 +383,12 @@ class WebappSlotScenarioTestOld(ResourceGroupVCRTestBase):
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
         result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1', 's4']))
-        result = self.cmd('webapp config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['c2']))
 
         result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's3']))
-        result = self.cmd('webapp config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['c1']))
 
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
@@ -545,7 +545,7 @@ class WebappBackupRestoreScenarioTestOld(ResourceGroupVCRTestBase):
         import time
         time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
 
-        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite --debug'
+        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 
 

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.monitor.help  # pylint: disable=unused-import
+import azure.cli.command_modules.monitor._help  # pylint: disable=unused-import
 
 
 def load_params(_):
