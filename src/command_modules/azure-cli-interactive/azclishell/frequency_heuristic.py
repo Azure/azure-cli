@@ -24,13 +24,13 @@ def day_format(now):
 
 def update_frequency():
     """ updates the frequency from files """
-    try:
+    if os.path.exists(os.path.join(shell_config(), SHELL_CONFIG.get_frequency())):
         with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'r') as freq:
             try:
                 frequency = json.load(freq)
             except ValueError:
                 frequency = {}
-    except IOError:
+    else:
         open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w')
         frequency = {}
 

@@ -142,9 +142,6 @@ class Shell(object):
         self.output = output_custom
         self.config_default = ""
         self.default_command = ""
-        self.threads = []
-        self.curr_thread = None
-        self.spin_val = -1
 
     @property
     def cli(self):
