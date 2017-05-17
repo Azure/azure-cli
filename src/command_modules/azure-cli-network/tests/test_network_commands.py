@@ -1317,15 +1317,16 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
             checks=JMESPathCheck('routingWeight', 25))
 
+        # TODO: Re-enable test once issue #3385 is fixed.
         # test network watcher troubleshooting commands
-        storage_account = 'clitestnwstorage2'
-        container_name = 'troubleshooting-results'
-        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
-        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
-        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
-        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
-        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
-        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
+        # storage_account = 'clitestnwstorage2'
+        # container_name = 'troubleshooting-results'
+        # self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
+        # self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
+        # storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
+        # self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
+        # self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
+        # self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
@@ -1509,15 +1510,16 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
 
-        capture = 'capture1'
-        location = 'westus'
-        self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
-        self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
-        self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        # TODO: Re-enable once issue #3385 is resolved
+        #capture = 'capture1'
+        #location = 'westus'
+        #self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
+        #self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
 
         nsg = '{}NSG'.format(vm)
         self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))
