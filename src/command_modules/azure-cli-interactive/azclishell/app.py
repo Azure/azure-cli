@@ -423,10 +423,7 @@ class Shell(object):
                 if cmd.strip() and cmd.split()[0] == 'cd':
                     handle_cd(parse_quotes(cmd))
                     continue_flag = True
-                if cmd.split() and cmd.split()[0]:
-                    telemetry.track_ssg('outside', cmd.split()[0])
-                else:
-                    telemetry.track_ssg('outside', '')
+                telemetry.track_ssg('outside', '')
 
             elif text[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
