@@ -586,6 +586,9 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
         config_file = _write_config_file(user_name)
 
         try:
+            self.cmd('vm extension list --vm-name {} --resource-group {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('length([])', 0)
+            ])
             self.cmd('vm extension set -n {} --publisher {} --version 1.2  --vm-name {} --resource-group {} --protected-settings "{}"'
                      .format(extension_name, publisher, self.vm_name, self.resource_group, config_file))
             self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[

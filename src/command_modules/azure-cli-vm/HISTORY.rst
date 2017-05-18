@@ -7,6 +7,9 @@ unreleased
 * disk: support cross subscription blob import
 * vm: support license type on create
 * BC: vm open-port: command always returns the NSG. Previously it returned the NIC or Subnet.
+* vm: fix "vm extension list" crash if the VM has no extensions
+* vmss: update arg description for 'vmss delete-instances --instance-ids'
+* vmss: hide arg 'vmss show --ids', which is not supposed to work because of 'instance-id' arg
 
 2.0.6 (2017-05-09)
 ++++++++++++++++++
