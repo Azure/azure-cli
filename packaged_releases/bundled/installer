@@ -107,8 +107,8 @@ def create_executable(bin_dir, install_dir):
         exec_file.write(AZ_DISPATCH_TEMPLATE.format(install_dir=install_dir))
     cur_stat = os.stat(exec_filepath)
     os.chmod(exec_filepath, cur_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    _print_status("The executable is available at '{}'.".format(exec_filepath))
-    _print_status("Tip: Add the executable to your path: e.g. 'export PATH=$PATH:{}'.".format(bin_dir))
+    _print_status("The executable is available at '{}'".format(exec_filepath))
+    _print_status("Tip: Add the executable to your path: e.g. 'export PATH=$PATH:{}'".format(bin_dir))
 
 def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
     try:
@@ -175,6 +175,7 @@ def main(install_dir, bin_dir, overwrite_install_dir, override_python_version_ch
     install_cli(tmp_dir, install_dir)
     create_executable(bin_dir, install_dir)
     add_completion_file(install_dir)
+    _print_status("Tip: Want to retain {} on your PATH and tab completion enabled? Add these two lines to your shell profile (e.g. ~/.bashrc, ~/.bash_profile, ~/.profile)".format(EXECUTABLE_NAME))
     _print_status("Done.")
 
 if __name__ == '__main__':
