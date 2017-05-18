@@ -112,7 +112,7 @@ class Configuration(object):
 
     def has_feedback(self):
         """ returns whether user has given feedback """
-        return az_config.has_option('core', 'given feedback') and az_config.getboolean('core', 'given feedback')
+        return az_config.getboolean('core', 'given feedback', fallback='false')
 
     def set_feedback(self, value):
         """ sets the feedback in the config """
