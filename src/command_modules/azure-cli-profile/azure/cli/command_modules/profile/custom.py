@@ -44,18 +44,18 @@ def show_subscription(subscription=None, expanded_view=None):
 
 def get_access_token(subscription=None, resource=None):
     '''
-    return AAD token for access to specified resource
+    get AAD token to access to a specified resource
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
-    Use 'az cloud show' command for other ones
+    Use 'az cloud show' command for other Azure resources
     '''
     profile = Profile()
-    accessToken, subscription, tenant = profile.get_login_credentials(subscription_id=subscription,
-                                                                      resource=resource,
-                                                                      return_token=True)
+    creds, subscription, tenant = profile.get_login_credentials(subscription_id=subscription,
+                                                                resource=resource,
+                                                                return_token=True)
     return {
-        'accessToken': accessToken[1],
-        'tokeType': accessToken[0],
-        'expireOn': accessToken[2]['expiresOn'],
+        'tokeType': creds[0],
+        'accessToken': creds[1],
+        'expireOn': creds[2]['expiresOn'],
         'subscription': subscription,
         'tenant': tenant
     }
