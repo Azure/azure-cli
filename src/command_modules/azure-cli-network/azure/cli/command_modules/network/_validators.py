@@ -729,11 +729,10 @@ def process_nw_topology_namespace(namespace):
 
     location = namespace.location
     if not location:
-
         resource_client = \
             get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
         resource_group = resource_client.get(namespace.target_resource_group_name)
-        location = resource_group.location  # pylint: disable=no-member
+        namespace.location = resource_group.location  # pylint: disable=no-member
 
     get_network_watcher_from_location(
         watcher_name='network_watcher_name', rg_name='resource_group_name')(namespace)
