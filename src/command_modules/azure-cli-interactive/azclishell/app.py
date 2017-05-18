@@ -209,7 +209,7 @@ class Shell(object):
             pass
 
         curr_cloud = "Cloud: {}".format(get_active_cloud_name())
-        tool_val = '{}'.format('Subscription: {}'.format(sub_name) if sub_name else curr_cloud)
+        tool_val = 'Subscription: {}'.format(sub_name) if sub_name else curr_cloud
 
         settings_items = [
             " [F1]Layout",

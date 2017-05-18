@@ -53,10 +53,10 @@ class FeedbackTest(unittest.TestCase):
     def test_update_freq(self):
         """ tests updating the files for frequency """
         fh.update_frequency = self.norm_update
+        fh.FREQUENCY_PATH = os.path.join(shell_config(), 'mock_freq.json')
 
-        freq_path = os.path.join(shell_config(), SHELL_CONFIG.get_frequency())
-        if os.path.exists(freq_path):
-            os.remove(freq_path)
+        if os.path.exists(fh.FREQUENCY_PATH):
+            os.remove(fh.FREQUENCY_PATH)
         # without a file already written
         json_freq = fh.update_frequency()
         now = fh.day_format(datetime.datetime.now())
@@ -65,6 +65,9 @@ class FeedbackTest(unittest.TestCase):
         # with a file
         json_freq = fh.update_frequency()
         self.assertEqual(json_freq, {now: 2})
+
+        if os.path.exists(fh.FREQUENCY_PATH):
+            os.remove(fh.FREQUENCY_PATH)
 
 
 if __name__ == '__main__':

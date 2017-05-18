@@ -15,6 +15,7 @@ SHELL_CONFIG = CONFIGURATION
 DAYS_AGO = 28
 ACTIVE_STATUS = 5
 DISPLAY_TIME = 20
+FREQUENCY_PATH = os.path.join(shell_config(), SHELL_CONFIG.get_frequency())
 
 
 def day_format(now):
@@ -24,17 +25,17 @@ def day_format(now):
 
 def update_frequency():
     """ updates the frequency from files """
-    if os.path.exists(os.path.join(shell_config(), SHELL_CONFIG.get_frequency())):
-        with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'r') as freq:
+    if os.path.exists(FREQUENCY_PATH):
+        with open(FREQUENCY_PATH, 'r') as freq:
             try:
                 frequency = json.load(freq)
             except ValueError:
                 frequency = {}
     else:
-        open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w')
+        open(FREQUENCY_PATH, 'w')
         frequency = {}
 
-    with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w') as freq:
+    with open(FREQUENCY_PATH, 'w') as freq:
         now = day_format(datetime.datetime.utcnow())
         val = frequency.get(now)
         frequency[now] = val + 1 if val else 1
