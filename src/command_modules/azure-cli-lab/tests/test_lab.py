@@ -78,13 +78,20 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('lab vm list -g {} --lab-name {} --claimable'
                  .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
 
-        # claim a vm
+        # claim a specific vm
         self.cmd('lab vm claim -g {} --lab-name {} --name {}'
                  .format(rg, LAB_NAME, linux_vm_name), checks=[NoneCheck()])
 
         # List my vms - we have already claimed one VM
         self.cmd('lab vm list -g {} --lab-name {}'
                  .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 1)])
+
+        # claim any vm
+        self.cmd('lab vm claim -g {} --lab-name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])
+
+        # List my vms - we have claimed both VMs
+        self.cmd('lab vm list -g {} --lab-name {}'
+                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
 
         # Delete all the vms
         self.cmd('lab vm delete -g {} --lab-name {} --name {}'

@@ -95,7 +95,7 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
 
         # min params - apply to existing NIC (updates existing NSG)
-        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['id']
         nsg_name = os.path.split(nsg_id)[1]
         self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
                  checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))

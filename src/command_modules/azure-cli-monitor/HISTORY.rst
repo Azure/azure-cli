@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++++
+
+* Include autoscale template file to fix `az monitor autoscale-settings get-parameters-template` command (#3349)
+
 0.0.4 (2017-05-09)
 +++++++++++++++++++++
 
