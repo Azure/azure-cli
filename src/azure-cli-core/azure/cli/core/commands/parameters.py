@@ -148,12 +148,12 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
         def __call__(self, parser, namespace, values, option_string=None):
             if invert:
                 if values:
-                    values = positive_label if values == negative_label else negative_label
+                    values = positive_label if values.lower() == negative_label else negative_label
                 else:
                     values = values or negative_label
             else:
                 values = values or positive_label
-            setattr(namespace, self.dest, values == positive_label)
+            setattr(namespace, self.dest, values.lower() == positive_label)
 
     params = {
         'choices': CaseInsensitiveList(choices),
