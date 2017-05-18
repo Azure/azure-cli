@@ -6,6 +6,7 @@ Release History
 unreleased
 ^^^^^^^^^^^^^^^^^^
 * Command paths are no longer case sensitive.
+* Certain boolean-type parameters are no longer case sensitive.
 
 2.0.6 (2017-05-09)
 ^^^^^^^^^^^^^^^^^^
