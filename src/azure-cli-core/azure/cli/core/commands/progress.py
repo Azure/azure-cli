@@ -149,7 +149,6 @@ class DeterminateStandardOut(ProgressViewBase):
         message = args.get('message', '')
 
         if percent:
-            percent = percent
             progress = _format_value(message, percent)
             self.out.write(progress)
 
