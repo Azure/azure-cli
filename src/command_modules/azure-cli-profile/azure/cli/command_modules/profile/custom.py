@@ -42,6 +42,22 @@ def show_subscription(subscription=None, expanded_view=None):
         return profile.get_expanded_subscription_info(subscription)
 
 
+def get_access_token(subscription=None, resource=None):
+    '''
+    return AAD token for access to specified resource
+    :param resource: Azure resource endpoints. Default to Azure Resource Manager. 
+    Use 'az cloud show' command for other ones
+    '''
+    profile = Profile()
+    accessToken, subscription, tenant = profile.get_login_credentials(subscription_id=subscription, return_token=True)
+    return {
+        'accessToken': accessToken[1],
+        'tokeType': accessToken[0],
+        'subscription': subscription,
+        'tenant': tenant
+    }
+
+
 def set_active_subscription(subscription):
     """Set the current subscription"""
     if not id:

@@ -59,3 +59,8 @@ helps['account show'] = """
     short-summary: Show the details of a subscription.
     long-summary: If the subscription isn't specified, shows the details of the default subscription.
 """
+
+helps['account get-access-token'] = """
+    type: command
+    long-summary: If the subscription isn't specified, use the current account.
+"""

@@ -310,7 +310,7 @@ class Profile(object):
         return access_token
 
     def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
-                              subscription_id=None):
+                              subscription_id=None, return_token=False):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -322,9 +322,11 @@ class Profile(object):
             else:
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                               resource)
-
-        from azure.cli.core.adal_authentication import AdalAuthentication
-        auth_object = AdalAuthentication(_retrieve_token)
+        if return_token:
+            auth_object = _retrieve_token()  # only used when users invoke the command to see the token
+        else:
+            from azure.cli.core.adal_authentication import AdalAuthentication
+            auth_object = AdalAuthentication(_retrieve_token)
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
