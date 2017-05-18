@@ -14,6 +14,7 @@ from azclishell import __version__
 
 from azure.cli.core._profile import Profile
 from azure.cli.core.telemetry import _user_agrees_to_telemetry
+from azclishell.util import parse_quotes
 
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
 
@@ -34,7 +35,7 @@ class Telemetry(TelemetryClient):
 
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
-        self.track_event('Shell Specific Gesture', {gesture: cmd})
+        self.track_event('Shell Specific Gesture', {gesture: scrub(cmd)})
 
     def track_key(self, key):
         """ tracks the special key bindings """
@@ -64,6 +65,22 @@ class TelThread(threading.Thread):
 
     def run(self):
         self.threadfunc()
+
+
+def scrub(text):
+    """ scrubs the parameter values from args """
+    args = parse_quotes(text)
+    next_scrub = False
+    values = []
+    for arg in args:
+        if arg.startswith('-'):
+            next_scrub = True
+            values.append(arg)
+        elif next_scrub:
+            values.append('*****')
+        else:
+            values.append(arg)
+    return ' '.join(values)
 
 
 TC = Telemetry(INSTRUMENTATION_KEY)
