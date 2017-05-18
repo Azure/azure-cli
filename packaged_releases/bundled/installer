@@ -55,6 +55,8 @@ def _bin():
 def verify_python_version(override_python_version_check):
     if override_python_version_check:
         return
+    if platform.system() == 'Windows':
+        raise CLIInstallError('This script does not support Windows.')
     v = sys.version_info
     if v < (2, 7):
         raise CLIInstallError('The CLI does not support Python versions less than 2.7.')
@@ -106,6 +108,7 @@ def create_executable(bin_dir, install_dir):
     cur_stat = os.stat(exec_filepath)
     os.chmod(exec_filepath, cur_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     _print_status("The executable is available at '{}'.".format(exec_filepath))
+    _print_status("Tip: Add the executable to your path: e.g. 'export PATH=$PATH:{}'.".format(bin_dir))
 
 def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
     try:
@@ -158,6 +161,7 @@ def verify_native_dependencies(override_native_check):
 def add_completion_file(install_dir):
     completion_file_path = os.path.join(install_dir, COMPLETION_FILENAME)
     shutil.copy(COMPLETION_PATH, completion_file_path)
+    _print_status("Tip: Enable tab completion: e.g. 'source {}'".format(completion_file_path))
 
 def main(install_dir, bin_dir, overwrite_install_dir, override_python_version_check, override_native_check):
     tmp_dir = tempfile.mkdtemp()
@@ -178,10 +182,14 @@ if __name__ == '__main__':
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('--install-dir', '-i',
-                        help='In what directory would you like to place the install?',
+                        help="In what directory would you like to place the install? "
+                             "Tab completion can be enabled with the completion file in the install directory. "
+                             "For example: source <install-dir>/{}".format(COMPLETION_FILENAME),
                         type=_parse_dir, default=DEFAULT_INSTALL_DIR)
     parser.add_argument('--bin-dir', '-b',
-                        help="In what directory would you like to place the executable?",
+                        help="In what directory would you like to place the executable? "
+                             "After the installation, add this directory to your path if it is not already. "
+                             "For example: export PATH=$PATH:<bin-dir>",
                         type=_parse_dir, default=DEFAULT_EXEC_DIR)
     parser.add_argument('--overwrite-install-dir',
                         help='Override the install directory if it exists.',
