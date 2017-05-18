@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* `network watcher show-topology`: Fix bug with location defaulting logic.
+
 2.0.6 (2017-05-09)
 ++++++++++++++++++
 
