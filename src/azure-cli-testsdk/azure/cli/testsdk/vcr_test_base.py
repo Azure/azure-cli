@@ -109,7 +109,7 @@ def _mock_subscriptions(self):  # pylint: disable=unused-argument
 
 
 def _mock_user_access_token(_, _1, _2, _3):  # pylint: disable=unused-argument
-    return ('Bearer', 'top-secret-token-for-you')
+    return ('Bearer', 'top-secret-token-for-you', None)
 
 
 def _mock_operation_delay(_):
