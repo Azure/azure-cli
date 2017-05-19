@@ -58,7 +58,8 @@ _COMMON_TENANT = 'common'
 
 def _authentication_context_factory(authority, cache):
     import adal
-    return adal.AuthenticationContext(authority, cache=cache, api_version=None)
+    return adal.AuthenticationContext(authority, cache=cache, api_version=None,
+                                      validate_authority=(not is_adfs(authority)))
 
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
@@ -70,7 +71,13 @@ logger.debug('Current cloud config:\n%s', str(CLOUD))
 
 
 def get_authority_url(tenant=None):
-    return CLOUD.endpoints.active_directory + '/' + (tenant or _COMMON_TENANT)
+    authority_url = CLOUD.endpoints.active_directory
+    return (authority_url + '/' + (tenant or _COMMON_TENANT)
+            if not is_adfs(authority_url) else authority_url)
+
+
+def is_adfs(authority_url):
+    return authority_url.lower().endswith('/adfs')
 
 
 def _load_tokens_from_file(file_path):
