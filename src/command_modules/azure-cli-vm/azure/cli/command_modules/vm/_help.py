@@ -964,6 +964,12 @@ helps['disk update'] = """
     short-summary: Update a managed disk.
 """
 
+helps['disk wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the managed disk is met.
+"""
+
+
 helps['disk grant-access'] = """
     type: command
     short-summary: Grant read access to a managed disk.
