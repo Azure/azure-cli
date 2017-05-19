@@ -95,7 +95,7 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
 
         # min params - apply to existing NIC (updates existing NSG)
-        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['id']
         nsg_name = os.path.split(nsg_id)[1]
         self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
                  checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))
@@ -586,6 +586,9 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
         config_file = _write_config_file(user_name)
 
         try:
+            self.cmd('vm extension list --vm-name {} --resource-group {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('length([])', 0)
+            ])
             self.cmd('vm extension set -n {} --publisher {} --version 1.2  --vm-name {} --resource-group {} --protected-settings "{}"'
                      .format(extension_name, publisher, self.vm_name, self.resource_group, config_file))
             self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[

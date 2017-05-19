@@ -298,7 +298,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        source_storage_account_id=None):
+                        source_storage_account_id=None, no_wait=False):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -319,7 +319,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
     disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
                 account_type=sku)
     client = _compute_client_factory()
-    return client.disks.create_or_update(resource_group_name, disk_name, disk)
+    return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
 
 
 def update_managed_disk(instance, size_gb=None, sku=None):
@@ -861,7 +861,7 @@ def get_boot_log(resource_group_name, vm_name):
 def list_extensions(resource_group_name, vm_name):
     vm = get_vm(resource_group_name, vm_name)
     extension_type = 'Microsoft.Compute/virtualMachines/extensions'
-    result = [r for r in vm.resources if r.type == extension_type]
+    result = [r for r in (vm.resources or []) if r.type == extension_type]
     return result
 
 
@@ -1177,6 +1177,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         raise CLIError("No NIC associated with VM '{}'".format(vm_name))
 
     # get existing NSG or create a new one
+    created_nsg = False
     nic = network.network_interfaces.get(resource_group_name, os.path.split(nic_ids[0].id)[1])
     if not apply_to_subnet:
         nsg = nic.network_security_group
@@ -1197,6 +1198,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
                 parameters=NetworkSecurityGroup(location=location)
             )
         )
+        created_nsg = True
 
     # update the NSG with the new rule to allow inbound traffic
     SecurityRule = get_sdk(ResourceType.MGMT_NETWORK, 'SecurityRule', mod='models')
@@ -1210,23 +1212,21 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
             resource_group_name, nsg_name, rule_name, rule)
     )
 
-    # update the NIC or subnet
-    if not apply_to_subnet:
+    # update the NIC or subnet if a new NSG was created
+    if created_nsg and not apply_to_subnet:
         nic.network_security_group = nsg
-        return LongRunningOperation('Updating NIC')(
-            network.network_interfaces.create_or_update(
-                resource_group_name, nic.name, nic)
-        )
-    else:
+        LongRunningOperation('Updating NIC')(network.network_interfaces.create_or_update(
+            resource_group_name, nic.name, nic))
+    elif created_nsg and apply_to_subnet:
         subnet.network_security_group = nsg
-        return LongRunningOperation('Updating subnet')(
-            network.subnets.create_or_update(
-                resource_group_name=resource_group_name,
-                virtual_network_name=subnet_id['name'],
-                subnet_name=subnet_id['child_name'],
-                subnet_parameters=subnet
-            )
-        )
+        LongRunningOperation('Updating subnet')(network.subnets.create_or_update(
+            resource_group_name=resource_group_name,
+            virtual_network_name=subnet_id['name'],
+            subnet_name=subnet_id['child_name'],
+            subnet_parameters=subnet
+        ))
+
+    return network.network_security_groups.get(resource_group_name, nsg_name)
 
 
 def _build_nic_list(nic_ids):

@@ -5,7 +5,15 @@ unreleased
 ----------
 * diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
 * disk: support cross subscription blob import
+* disk: add --no-wait flag to disk create, update, and delete.
+* disk: add `az disk wait` command.
+* BC: disk: add confirmation prompt to `az disk delete`.
 * vm: support license type on create
+* BC: vm open-port: command always returns the NSG. Previously it returned the NIC or Subnet.
+* vm: fix "vm extension list" crash if the VM has no extensions
+* vmss: update arg description for 'vmss delete-instances --instance-ids'
+* vmss: hide arg 'vmss show --ids', which is not supposed to work because of 'instance-id' arg
+
 
 2.0.6 (2017-05-09)
 ++++++++++++++++++

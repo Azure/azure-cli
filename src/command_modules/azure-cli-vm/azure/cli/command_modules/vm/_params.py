@@ -119,6 +119,7 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss start', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss show', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
 register_cli_argument('vmss', 'instance_id', id_part='child_name')
@@ -142,6 +143,8 @@ register_cli_argument('vmss extension image', 'orderby', help='The sort to apply
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
+for scope in ['update-instances', 'delete-instances']:
+    register_cli_argument('vmss ' + scope, 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')

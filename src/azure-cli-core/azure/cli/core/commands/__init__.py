@@ -18,6 +18,7 @@ from importlib import import_module
 import six
 from six import string_types, reraise
 
+from azure.cli.core.application import APPLICATION
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
@@ -127,6 +128,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, start_msg='', finish_msg='',
                  poller_done_interval_ms=1000.0, progress_controller=None):
+
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms

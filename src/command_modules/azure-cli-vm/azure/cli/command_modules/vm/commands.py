@@ -247,16 +247,18 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'
     # VM Disk
     op_var = 'disks_operations'
     op_class = 'DisksOperations'
-    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'))
+    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'), no_wait_param='no_wait')
     cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'))
     cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404)
-    cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks)
+    cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks, no_wait_param='raw', confirmation=True)
     cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
     cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
     cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
                                'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
                                custom_function_op=custom_path.format('update_managed_disk'),
-                               setter_arg_name='disk', factory=cf_disks)
+                               setter_arg_name='disk', factory=cf_disks, no_wait_param='raw')
+    cli_generic_wait_command(__name__, 'disk wait', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class), cf_disks)
+
     op_var = 'snapshots_operations'
     op_class = 'SnapshotsOperations'
     cli_command(__name__, 'snapshot create', custom_path.format('create_snapshot'))

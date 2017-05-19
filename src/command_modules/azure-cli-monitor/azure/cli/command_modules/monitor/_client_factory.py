@@ -5,46 +5,46 @@
 
 
 # MANAGEMENT CLIENT FACTORIES
-def get_monitor_management_client(_):
+def cf_monitor(_):
     from azure.mgmt.monitor import MonitorManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(MonitorManagementClient)
 
 
-def get_monitor_autoscale_settings_operation(kwargs):
-    return get_monitor_management_client(kwargs).autoscale_settings
+def cf_alert_rules(kwargs):
+    return cf_monitor(kwargs).alert_rules
 
 
-def get_monitor_diagnostic_settings_operation(kwargs):
-    return get_monitor_management_client(kwargs).service_diagnostic_settings
+def cf_alert_rule_incidents(kwargs):
+    return cf_monitor(kwargs).alert_rule_incidents
 
 
-def get_monitor_alert_rules_operation(kwargs):
-    return get_monitor_management_client(kwargs).alert_rules
+def cf_autoscale(kwargs):
+    return cf_monitor(kwargs).autoscale_settings
 
 
-def get_monitor_alert_rule_incidents_operation(kwargs):
-    return get_monitor_management_client(kwargs).alert_rule_incidents
+def cf_diagnostics(kwargs):
+    return cf_monitor(kwargs).service_diagnostic_settings
 
 
-def get_monitor_log_profiles_operation(kwargs):
-    return get_monitor_management_client(kwargs).log_profiles
+def cf_log_profiles(kwargs):
+    return cf_monitor(kwargs).log_profiles
 
 
 # DATA CLIENT FACTORIES
-def get_monitor_client(_):
+def cf_monitor_data(_):
     from azure.monitor import MonitorClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(MonitorClient)
 
 
-def get_monitor_activity_log_operation(kwargs):
-    return get_monitor_client(kwargs).activity_logs
+def cf_metrics(kwargs):
+    return cf_monitor_data(kwargs).metrics
 
 
-def get_monitor_metric_definitions_operation(kwargs):
-    return get_monitor_client(kwargs).metric_definitions
+def cf_metric_def(kwargs):
+    return cf_monitor_data(kwargs).metric_definitions
 
 
-def get_monitor_metrics_operation(kwargs):
-    return get_monitor_client(kwargs).metrics
+def cf_activity_log(kwargs):
+    return cf_monitor_data(kwargs).activity_logs

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from io import StringIO
 import six
 
 import azclishell.command_tree as tree
