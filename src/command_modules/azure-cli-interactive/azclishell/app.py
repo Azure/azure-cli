@@ -662,6 +662,7 @@ class ProgressViewThread(threading.Thread):
         except KeyboardInterrupt:
             pass
 
+
 def progress_patch(self):
     """ forces to use the Shell Progress """
     from azclishell.progress import ShellProgressView
