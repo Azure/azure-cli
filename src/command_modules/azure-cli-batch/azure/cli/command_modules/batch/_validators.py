@@ -186,8 +186,8 @@ def application_enabled(namespace):
 
 def validate_pool_resize_parameters(namespace):
     """Validate pool resize parameters correct"""
-    if not namespace.abort and not namespace.target_dedicated:
-        raise ValueError("The target-dedicated parameter is required to resize the pool.")
+    if not namespace.abort and not namespace.target_dedicated_nodes:
+        raise ValueError("The target-dedicated-nodes parameter is required to resize the pool.")
 
 
 def validate_json_file(namespace):

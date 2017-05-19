@@ -11,7 +11,7 @@ from msrest.exceptions import DeserializationError, ValidationError, ClientReque
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
-                                     UpdateApplicationParameters)
+                                     ApplicationUpdateParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
@@ -98,11 +98,11 @@ def login_account(client, resource_group_name, account_name, shared_key_auth=Fal
     set_global_config(az_config.config_parser)
 
 
-@transfer_doc(UpdateApplicationParameters)
+@transfer_doc(ApplicationUpdateParameters)
 def update_application(client,
                        resource_group_name, account_name, application_id, allow_updates=None,
                        display_name=None, default_version=None):
-    parameters = UpdateApplicationParameters(allow_updates=allow_updates,
+    parameters = ApplicationUpdateParameters(allow_updates=allow_updates,
                                              display_name=display_name,
                                              default_version=default_version)
     return client.update(resource_group_name=resource_group_name,
@@ -207,7 +207,7 @@ def delete_certificate(client, thumbprint, abort=False):
 
 
 @transfer_doc(PoolResizeParameter)
-def resize_pool(client, pool_id, target_dedicated=None,
+def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
@@ -219,7 +219,8 @@ def resize_pool(client, pool_id, target_dedicated=None,
                                                        if_unmodified_since=if_unmodified_since)
             return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
         else:
-            param = PoolResizeParameter(target_dedicated,
+            param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
+                                        target_low_priority_nodes=target_low_priority_nodes,
                                         resize_timeout=resize_timeout,
                                         node_deallocation_option=node_deallocation_option)
             resize_option = PoolResizeOptions(if_match=if_match,
