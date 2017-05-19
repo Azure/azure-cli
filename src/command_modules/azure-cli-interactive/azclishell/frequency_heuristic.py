@@ -32,7 +32,6 @@ def update_frequency():
             except ValueError:
                 frequency = {}
     else:
-        open(FREQUENCY_PATH, 'w')
         frequency = {}
 
     with open(FREQUENCY_PATH, 'w') as freq:

@@ -56,11 +56,12 @@ class FeedbackTest(unittest.TestCase):
         fh.update_frequency = self.norm_update
         now = fh.day_format(datetime.datetime.now())
 
-        json_text = '{' + now + ': ' + str(1) + '}'
-        tempfile.mkstemp('json', 'mock_freq', text=json_text)
+        temp_file = tempfile.mkstemp('json', 'mock_freq')
         fh.FREQUENCY_PATH = 'mock_freq.json'
 
         # with a file
+        json_freq = fh.update_frequency()
+        self.assertEqual(json_freq, {now: 1})
         json_freq = fh.update_frequency()
         self.assertEqual(json_freq, {now: 2})
 
