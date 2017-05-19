@@ -6,6 +6,7 @@
 import os
 import datetime
 import unittest
+import tempfile
 
 import azclishell.frequency_heuristic as fh
 from azclishell.configuration import CONFIGURATION, get_config_dir as shell_config
@@ -53,18 +54,28 @@ class FeedbackTest(unittest.TestCase):
     def test_update_freq(self):
         """ tests updating the files for frequency """
         fh.update_frequency = self.norm_update
-        fh.FREQUENCY_PATH = os.path.join(shell_config(), 'mock_freq.json')
-
-        if os.path.exists(fh.FREQUENCY_PATH):
-            os.remove(fh.FREQUENCY_PATH)
-        # without a file already written
-        json_freq = fh.update_frequency()
         now = fh.day_format(datetime.datetime.now())
-        self.assertEqual(json_freq, {now: 1})
+
+        json_text = '{' + now + ': ' + str(1) + '}'
+        tempfile.mkstemp('json', 'mock_freq', text=json_text)
+        fh.FREQUENCY_PATH = 'mock_freq.json'
 
         # with a file
         json_freq = fh.update_frequency()
         self.assertEqual(json_freq, {now: 2})
+
+    def test_update_freq_no_file(self):
+        """ tests updating the files for frequency with no file written """
+        fh.update_frequency = self.norm_update
+        fh.FREQUENCY_PATH = os.path.join(shell_config(), 'mock_freq.json')
+
+        if os.path.exists(fh.FREQUENCY_PATH):
+            os.remove(fh.FREQUENCY_PATH)
+
+        # without a file already written
+        json_freq = fh.update_frequency()
+        now = fh.day_format(datetime.datetime.now())
+        self.assertEqual(json_freq, {now: 1})
 
         if os.path.exists(fh.FREQUENCY_PATH):
             os.remove(fh.FREQUENCY_PATH)
