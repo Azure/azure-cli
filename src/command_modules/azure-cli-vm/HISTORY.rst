@@ -10,7 +10,8 @@ unreleased
 * vm: fix "vm extension list" crash if the VM has no extensions
 * vmss: update arg description for 'vmss delete-instances --instance-ids'
 * vmss: hide arg 'vmss show --ids', which is not supposed to work because of 'instance-id' arg
-* vmss: including instance ids in list_vmss_instance_connectio_info
+* BC: vmss list-instance-connection-info: include instance IDs in the output
+
 
 2.0.6 (2017-05-09)
 ++++++++++++++++++
