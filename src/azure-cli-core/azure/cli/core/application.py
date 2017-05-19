@@ -130,8 +130,8 @@ class Application(object):
         self.configuration = configuration
         self.progress_controller = progress.ProgressHook()
 
-    def get_progress_controller(self):
-        self.progress_controller.init_progress(progress.get_progress_view())
+    def get_progress_controller(self, det=False):
+        self.progress_controller.init_progress(progress.get_progress_view(det))
         return self.progress_controller
 
     def initialize(self, configuration):

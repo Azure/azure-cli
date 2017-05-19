@@ -154,8 +154,11 @@ class DeterminateStandardOut(ProgressViewBase):
             progress = _format_value(message, percent)
             self.out.write(progress)
 
+    def clear(self):
+        self.out.write('\n')
+
     def flush(self):
-        pass
+        self.out.flush()
 
 
 def get_progress_view(determinant=False, outstream=sys.stderr):

@@ -598,7 +598,7 @@ class Shell(object):
         except SystemExit as ex:
             self.last_exit = int(ex.code)
 
-    def progress_patch(self):
+    def progress_patch(self, _=False):
         """ forces to use the Shell Progress """
         from azure.cli.core.application import APPLICATION
 
