@@ -298,7 +298,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        source_storage_account_id=None):
+                        source_storage_account_id=None, no_wait=False):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -319,7 +319,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
     disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
                 account_type=sku)
     client = _compute_client_factory()
-    return client.disks.create_or_update(resource_group_name, disk_name, disk)
+    return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
 
 
 def update_managed_disk(instance, size_gb=None, sku=None):
