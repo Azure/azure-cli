@@ -40,13 +40,13 @@ BlockBlobService, BaseBlobService, \
                            'queue#QueueService')
 
 
-HOOK = APPLICATION.progress_controller
-HOOK.init_progress(get_progress_view(determinant=True))
-
-
 def _update_progress(current, total):
+    HOOK = APPLICATION.get_progress_controller(APPLICATION)
+
     if total:
         HOOK.add(message='Alive', value=current, total_val=total)
+        if total == current:
+            HOOK.end()
 
 
 # CUSTOM METHODS

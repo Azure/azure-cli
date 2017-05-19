@@ -583,15 +583,14 @@ class Shell(object):
         except SystemExit as ex:
             self.last_exit = int(ex.code)
 
-    def progress_patch(self):
-        from azclishell.progress import ShellProgressView
-        self.app.progress_controller.init_progress(ShellProgressView())
-        return self.app.progress_controller
-
     def run(self):
         """ starts the REPL """
         telemetry.start()
-        self.app.get_progress_controller = self.progress_patch
+        from azure.cli.core.commands.progress import get_progress_view
+        from azure.cli.core.application import APPLICATION
+        self.app.get_progress_controller = progress_patch
+        APPLICATION.get_progress_controller = progress_patch
+        # get_progress_view = progress_patch
 
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
@@ -665,3 +664,9 @@ class ProgressViewThread(threading.Thread):
                 time.sleep(.25)
         except KeyboardInterrupt:
             pass
+
+def progress_patch(self):
+    """ forces to use the Shell Progress """
+    from azclishell.progress import ShellProgressView
+    self.progress_controller.init_progress(ShellProgressView())
+    return self.progress_controller

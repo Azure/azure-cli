@@ -69,6 +69,7 @@ class ProgressHook(object):
     def init_progress(self, progress_view):
         """ activate a view """
         self.active_progress = progress_view
+        self.reporter.closed = False
 
     def add(self, **kwargs):
         """ adds a progress report """
