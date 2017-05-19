@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
 
 from prompt_toolkit.completion import Completer, Completion
 
@@ -19,6 +20,10 @@ from azure.cli.core.util import CLIError
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
 BLACKLISTED_COMPLETIONS = ['interactive']
+
+
+def error_pass(_, message):  # pylint: disable=unused-argument
+    return
 
 
 def dynamic_param_logic(text):
@@ -115,6 +120,7 @@ class AzCompleter(Completer):
         self.output_options = commands.output_options if global_params else []
         self.global_param_descriptions = commands.global_param_descriptions if global_params else []
 
+        AzCliCommandParser.error = error_pass  # mutes the parsing
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
@@ -205,7 +211,6 @@ class AzCompleter(Completer):
                             for comp in gen_dyn_completion(
                                     comp, started_param, prefix, text):
                                 yield comp
-
                     except TypeError:
                         try:
                             for comp in self.cmdtab[self.curr_command].\

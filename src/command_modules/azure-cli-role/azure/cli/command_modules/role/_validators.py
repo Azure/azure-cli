@@ -45,8 +45,8 @@ def validate_member_id(namespace):
 
 
 def validate_cert(namespace):
-    cred_usage_error = CLIError('Usage error: --cert STRING | --create-cert [--key-vault VAULT --cert NAME] | '
-                                '--password STRING | --key-vault VAULT --cert NAME')
+    cred_usage_error = CLIError('Usage error: --cert STRING | --create-cert [--keyvault VAULT --cert NAME] | '
+                                '--password STRING | --keyvault VAULT --cert NAME')
     cert = namespace.cert
     create_cert = namespace.create_cert
     keyvault = namespace.keyvault
@@ -77,5 +77,5 @@ def validate_cert(namespace):
         from azure.cli.command_modules.role.custom import _try_x509_pem, _try_x509_der
         x509 = _try_x509_pem(cert) or _try_x509_der(cert)
         if not x509:
-            raise CLIError('usage error: --cert STRING | --cert NAME --key-vault VAULT')
+            raise CLIError('usage error: --cert STRING | --cert NAME --keyvault VAULT')
         namespace.cert = x509
