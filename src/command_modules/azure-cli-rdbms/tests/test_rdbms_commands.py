@@ -364,7 +364,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('value', new_value)])
 
         # test list log files
-        result = self.cmd('{} server-logs list -g {} -s {}'
+        result = self.cmd('{} server-logs list -g {} -s {} --file-last-written 43800'  # ensure recording good for at least 5 years!
                           .format(database_engine, rg, server),
                           checks=[
                               JMESPathCheck('length(@)', 1),
