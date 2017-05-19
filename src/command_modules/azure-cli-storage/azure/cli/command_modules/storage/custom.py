@@ -47,6 +47,8 @@ def _update_progress(current, total):
         HOOK.add(message='Alive', value=current, total_val=total)
         if total == current:
             HOOK.end()
+    else:
+        HOOK.begin(value=0.001, total_val=1)
 
 
 # CUSTOM METHODS

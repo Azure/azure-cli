@@ -586,11 +586,8 @@ class Shell(object):
     def run(self):
         """ starts the REPL """
         telemetry.start()
-        from azure.cli.core.commands.progress import get_progress_view
         from azure.cli.core.application import APPLICATION
-        self.app.get_progress_controller = progress_patch
         APPLICATION.get_progress_controller = progress_patch
-        # get_progress_view = progress_patch
 
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(

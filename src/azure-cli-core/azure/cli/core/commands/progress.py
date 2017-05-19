@@ -69,7 +69,6 @@ class ProgressHook(object):
     def init_progress(self, progress_view):
         """ activate a view """
         self.active_progress = progress_view
-        self.reporter.closed = False
 
     def add(self, **kwargs):
         """ adds a progress report """
@@ -91,6 +90,7 @@ class ProgressHook(object):
         """ start reporting progress """
         kwargs['message'] = kwargs.get('message', 'Starting')
         self.add(**kwargs)
+        self.reporter.closed = False
 
     def end(self, **kwargs):
         """ ending reporting of progress """
