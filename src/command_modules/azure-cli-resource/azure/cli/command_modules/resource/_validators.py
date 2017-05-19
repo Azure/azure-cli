@@ -64,8 +64,8 @@ def internal_validate_lock_parameters(resource_group_name, resource_provider_nam
 
 
 def validate_lock_parameters(namespace):
-    internal_validate_lock_parameters(namespace.get('resource_group_name', None),
-                                      namespace.get('resource_provider_namespace', None),
-                                      namespace.get('parent_resource_path', None),
-                                      namespace.get('resource_type', None),
-                                      namespace.get('resource_name', None))
+    internal_validate_lock_parameters(getattr(namespace, 'resource_group_name', None),
+                                      getattr(namespace, 'resource_provider_namespace', None),
+                                      getattr(namespace, 'parent_resource_path', None),
+                                      getattr(namespace, 'resource_type', None),
+                                      getattr(namespace, 'resource_name', None))
