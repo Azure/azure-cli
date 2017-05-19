@@ -669,4 +669,3 @@ class ProgressViewThread(threading.Thread):
                 time.sleep(.25)
         except KeyboardInterrupt:
             pass
-
