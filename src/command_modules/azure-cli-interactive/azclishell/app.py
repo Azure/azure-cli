@@ -606,7 +606,6 @@ class Shell(object):
         APPLICATION.progress_controller.init_progress(ShellProgressView())
         return APPLICATION.progress_controller
 
-
     def run(self):
         """ starts the REPL """
         telemetry.start()
