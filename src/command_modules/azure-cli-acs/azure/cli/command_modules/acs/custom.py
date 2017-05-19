@@ -13,6 +13,7 @@ import uuid
 import datetime
 import platform
 import random
+import ssl
 import stat
 import string
 import subprocess
@@ -23,7 +24,7 @@ import webbrowser
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
-from six.moves.urllib.request import (urlretrieve, urlopen)  # pylint: disable=import-error
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 from msrestazure.azure_exceptions import CloudError
@@ -94,7 +95,7 @@ def wait_then_open(url):
     """
     for _ in range(1, 10):
         try:
-            urlopen(url)
+            urlopen(url, context=_ssl_context())
         except URLError:
             time.sleep(1)
         break
@@ -237,6 +238,19 @@ def acs_install_cli(resource_group, name, install_location=None, client_version=
         raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
 
 
+def _ssl_context():
+    if sys.version_info < (3, 4):
+        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    else:
+        return ssl.create_default_context()
+
+
+def _urlretrieve(url, filename):
+    req = urlopen(url, context=_ssl_context())
+    with open(filename, "wb") as out:
+        out.write(req.read())
+
+
 def dcos_install_cli(install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
@@ -260,7 +274,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
 
     logger.warning('Downloading client to %s', install_location)
     try:
-        urlretrieve(file_url, install_location)
+        _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
@@ -273,7 +287,8 @@ def k8s_install_cli(client_version='latest', install_location=None):
     """
 
     if client_version == 'latest':
-        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt').read()
+        context = _ssl_context()
+        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt', context=context).read()
         client_version = version.decode('UTF-8').strip()
 
     file_url = ''
@@ -291,7 +306,7 @@ def k8s_install_cli(client_version='latest', install_location=None):
 
     logger.warning('Downloading client to %s from %s', install_location, file_url)
     try:
-        urlretrieve(file_url, install_location)
+        _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
