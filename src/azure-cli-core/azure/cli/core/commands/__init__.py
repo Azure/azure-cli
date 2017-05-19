@@ -18,7 +18,6 @@ from importlib import import_module
 import six
 from six import string_types, reraise
 
-from azure.cli.core.application import APPLICATION
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
