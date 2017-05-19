@@ -38,15 +38,14 @@ BlockBlobService, BaseBlobService, \
                            'queue#QueueService')
 
 
+# pylint: disable=too-many-function-args
 def _update_progress(current, total):
-    HOOK = APPLICATION.get_progress_controller(APPLICATION)
+    HOOK = APPLICATION.get_progress_controller()
 
     if total:
         HOOK.add(message='Alive', value=current, total_val=total)
         if total == current:
             HOOK.end()
-    else:
-        HOOK.begin(value=0.001, total_val=1)
 
 
 # CUSTOM METHODS

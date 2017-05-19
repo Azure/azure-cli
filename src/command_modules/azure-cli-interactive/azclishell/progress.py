@@ -25,7 +25,8 @@ class ShellProgressView(ProgressViewBase):
 
     def write(self, args):
         """ writes the progres """
-        global PROGRESS, PROGRESS_BAR
+        global PROGRESS, PROGRESS_BAR, DONE
+        DONE = False
         message = args.get('message', '')
         percent = args.get('percent', None)
         if percent:
@@ -46,8 +47,10 @@ class ShellProgressView(ProgressViewBase):
         pass
 
     def clear(self):
-        global DONE
+        global PROGRESS, PROGRESS_BAR, DONE
         DONE = True
+        PROGRESS = ''
+        PROGRESS_BAR = ''
 
 
 def get_progress_message():
@@ -69,6 +72,7 @@ def progress_view(shell):
 
     if PROGRESS_BAR:
         doc = u'{}:{}'.format(progress, PROGRESS_BAR)
+        shell.spin_val = -1
     else:
         if progress and not DONE:
             if shell.spin_val >= 0:
@@ -91,6 +95,7 @@ def progress_view(shell):
         initial_document=Document(doc))
     shell.cli.request_redraw()
     if DONE:
+        shell.spin_val = -1
         return True
 
 
