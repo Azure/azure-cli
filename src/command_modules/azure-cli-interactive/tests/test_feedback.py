@@ -56,7 +56,7 @@ class FeedbackTest(unittest.TestCase):
         fh.update_frequency = self.norm_update
         now = fh.day_format(datetime.datetime.now())
 
-        temp_file = tempfile.mkstemp('json', 'mock_freq')
+        tempfile.mkstemp('json', 'mock_freq')
         fh.FREQUENCY_PATH = 'mock_freq.json'
 
         # with a file
