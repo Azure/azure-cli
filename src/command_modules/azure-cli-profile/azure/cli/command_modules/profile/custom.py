@@ -50,8 +50,7 @@ def get_access_token(subscription=None, resource=None):
     '''
     profile = Profile()
     creds, subscription, tenant = profile.get_raw_token(subscription_id=subscription,
-                                                        resource=resource,
-                                                        return_token=True)
+                                                        resource=resource)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
