@@ -53,9 +53,9 @@ def get_access_token(subscription=None, resource=None):
                                                                 resource=resource,
                                                                 return_token=True)
     return {
-        'tokeType': creds[0],
+        'tokenType': creds[0],
         'accessToken': creds[1],
-        'expireOn': creds[2]['expiresOn'],
+        'expiresOn': creds[2]['expiresOn'],
         'subscription': subscription,
         'tenant': tenant
     }
