@@ -369,7 +369,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
-    def test_get_login_credentials_for_token(self, mock_get_token, mock_read_cred_file):
+    def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1,
@@ -382,8 +382,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                                      False)
         profile._set_subscriptions(consolidated)
         # action
-        creds, sub, tenant = profile.get_login_credentials(resource='https://foo',
-                                                           return_token=True)
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
 
         # verify
         self.assertEqual(creds[0], self.token_entry1['tokenType'])

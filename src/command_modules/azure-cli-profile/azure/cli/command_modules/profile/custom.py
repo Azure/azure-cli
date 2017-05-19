@@ -49,9 +49,9 @@ def get_access_token(subscription=None, resource=None):
     Use 'az cloud show' command for other Azure resources
     '''
     profile = Profile()
-    creds, subscription, tenant = profile.get_login_credentials(subscription_id=subscription,
-                                                                resource=resource,
-                                                                return_token=True)
+    creds, subscription, tenant = profile.get_raw_token(subscription_id=subscription,
+                                                        resource=resource,
+                                                        return_token=True)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
