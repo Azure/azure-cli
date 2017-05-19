@@ -56,8 +56,7 @@ class FeedbackTest(unittest.TestCase):
         fh.update_frequency = self.norm_update
         now = fh.day_format(datetime.datetime.now())
 
-        tempfile.mkstemp('json', 'mock_freq')
-        fh.FREQUENCY_PATH = 'mock_freq.json'
+        _, fh.FREQUENCY_PATH = tempfile.mkstemp()
 
         # with a file
         json_freq = fh.update_frequency()
@@ -68,7 +67,8 @@ class FeedbackTest(unittest.TestCase):
     def test_update_freq_no_file(self):
         """ tests updating the files for frequency with no file written """
         fh.update_frequency = self.norm_update
-        fh.FREQUENCY_PATH = os.path.join(shell_config(), 'mock_freq.json')
+
+        _, fh.FREQUENCY_PATH = tempfile.mkstemp()
 
         if os.path.exists(fh.FREQUENCY_PATH):
             os.remove(fh.FREQUENCY_PATH)
