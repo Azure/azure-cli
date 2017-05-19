@@ -5,6 +5,7 @@
 
 from collections import OrderedDict
 
+
 def transform_invoice_output(result):
     new_entry = OrderedDict()
     new_entry['id'] = result.id
@@ -18,11 +19,13 @@ def transform_invoice_output(result):
         new_entry['billingPeriodIds'] = result.billing_period_ids
     return new_entry
 
+
 def transform_invoice_list_output(result):
     new_result = []
     for item in result:
         new_result.append(transform_invoice_output(item))
     return new_result
+
 
 def transform_billing_period_output(result):
     new_entry = OrderedDict()
@@ -35,9 +38,9 @@ def transform_billing_period_output(result):
         new_entry['invoiceIds'] = result.invoice_ids
     return new_entry
 
+
 def transform_billing_period_list_output(result):
     new_result = []
     for item in result:
         new_result.append(transform_billing_period_output(item))
     return new_result
-

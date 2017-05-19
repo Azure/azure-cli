@@ -3,16 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.billing._client_factory import \
     (invoices_mgmt_client_factory,
      billing_periods_mgmt_client_factory)
 from azure.cli.command_modules.billing._transformers import \
-    (transform_invoice_list_output, 
-     transform_invoice_output, 
-     transform_billing_period_output, 
+    (transform_invoice_list_output,
+     transform_invoice_output,
+     transform_billing_period_output,
      transform_billing_period_list_output)
 
 invoices_path = 'azure.mgmt.billing.operations.invoices_operations#{}'

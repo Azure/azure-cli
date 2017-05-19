@@ -5,6 +5,7 @@
 
 from datetime import datetime
 
+
 def get_datetime_type():
     """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """

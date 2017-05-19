@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+
 from collections import OrderedDict
+
 
 def transform_usage_output(result):
     new_entry = OrderedDict()
@@ -41,12 +44,13 @@ def transform_usage_output(result):
         if result.meter_details.meter_location:
             new_entry['meterDetails']['meterLocation'] = result.meter_details.meter_location
         if result.meter_details.total_included_quantity:
-           new_entry['meterDetails']['totalIncludedQuantity'] = str(result.meter_details.total_included_quantity)
+            new_entry['meterDetails']['totalIncludedQuantity'] = str(result.meter_details.total_included_quantity)
         if result.meter_details.pretax_standard_rate:
             new_entry['meterDetails']['pretaxStandardRate'] = str(result.meter_details.pretax_standard_rate)
     if result.additional_properties:
         new_entry['additionalProperties'] = result.additional_properties
     return new_entry
+
 
 def transform_usage_list_output(result):
     new_result = []

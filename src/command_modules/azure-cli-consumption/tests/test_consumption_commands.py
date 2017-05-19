@@ -5,23 +5,24 @@
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck)
 
+
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
     def _validate_usage(self, usage, includeMeterDetails=False):
         assert usage
         assert usage['type'] == 'Microsoft.Consumption/usageDetails'
-        assert usage['id'] and usage['name'] 
-        assert usage['usageStart'] and usage['usageEnd'] 
-        assert usage['usageStart'] <= usage['usageEnd'] 
-        assert usage['billingPeriodId'] 
-        assert usage['instanceName'] 
-        assert usage['currency'] 
-        assert usage['meterId'] 
+        assert usage['id'] and usage['name']
+        assert usage['usageStart'] and usage['usageEnd']
+        assert usage['usageStart'] <= usage['usageEnd']
+        assert usage['billingPeriodId']
+        assert usage['instanceName']
+        assert usage['currency']
+        assert usage['meterId']
         assert usage['pretaxCost'] and usage['usageQuantity'] and usage['billableQuantity']
         if includeMeterDetails:
             assert usage['meterDetails']
             assert usage['meterDetails']['meterName']
         else:
-            assert not 'meterDetails' in usage
+            assert 'meterDetails' not in usage
 
     def test_list_usages_billing_period(self):
         billing_period = '201705-1'
@@ -52,5 +53,3 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         assert len(usages_list) > 0
         assert len(usages_list) <= 5
         self._validate_usage(usages_list[0], False)
-
-
