@@ -531,8 +531,7 @@ class Shell(object):
             CONFIG.load(os.path.join(azure_folder, 'az.json'))
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-            config = Configuration()
-            self.app.initialize(config)
+            self.app.initialize(Configuration())
             result = self.app.execute(args)
             self.last_exit = 0
             if result and result.result is not None:
