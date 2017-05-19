@@ -56,10 +56,14 @@ _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
 
-def _authentication_context_factory(authority, cache):
+def _authentication_context_factory(tenant, cache):
     import adal
-    return adal.AuthenticationContext(authority, cache=cache, api_version=None,
-                                      validate_authority=(not is_adfs(authority)))
+    authority_url = CLOUD.endpoints.active_directory
+    is_adfs = authority_url.lower().endswith('/adfs')
+    if not is_adfs:
+        authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
+    return adal.AuthenticationContext(authority_url, cache=cache, api_version=None,
+                                      validate_authority=(not is_adfs))
 
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
@@ -68,16 +72,6 @@ init_known_clouds(force=True)
 CLOUD = get_active_cloud()
 
 logger.debug('Current cloud config:\n%s', str(CLOUD))
-
-
-def get_authority_url(tenant=None):
-    authority_url = CLOUD.endpoints.active_directory
-    return (authority_url + '/' + (tenant or _COMMON_TENANT)
-            if not is_adfs(authority_url) else authority_url)
-
-
-def is_adfs(authority_url):
-    return authority_url.lower().endswith('/adfs')
 
 
 def _load_tokens_from_file(file_path):
@@ -400,7 +394,7 @@ class SubscriptionFinder(object):
         self.tenants = []
 
     def find_from_user_account(self, username, password, tenant, resource):
-        context = self._create_auth_context(tenant or _COMMON_TENANT)
+        context = self._create_auth_context(tenant)
         token_entry = context.acquire_token_with_username_password(
             resource,
             username,
@@ -415,8 +409,7 @@ class SubscriptionFinder(object):
         return result
 
     def find_through_interactive_flow(self, tenant, resource):
-
-        context = self._create_auth_context(tenant or _COMMON_TENANT)
+        context = self._create_auth_context(tenant)
         code = context.acquire_user_code(resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
@@ -437,8 +430,7 @@ class SubscriptionFinder(object):
 
     def _create_auth_context(self, tenant, use_token_cache=True):
         token_cache = self._adal_token_cache if use_token_cache else None
-        authority = get_authority_url(tenant)
-        return self._auth_context_factory(authority, token_cache)
+        return self._auth_context_factory(tenant, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
         import adal
@@ -521,8 +513,7 @@ class CredsCache(object):
                 cred_file.write(json.dumps(all_creds))
 
     def retrieve_token_for_user(self, username, tenant, resource):
-        authority = get_authority_url(tenant)
-        context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
+        context = self._auth_ctx_factory(tenant, cache=self.adal_token_cache)
         token_entry = context.acquire_token(resource, username, _CLIENT_ID)
         if not token_entry:
             raise CLIError("Could not retrieve token from local cache, please run 'az login'.")
@@ -537,8 +528,7 @@ class CredsCache(object):
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]
-        authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT])
-        context = self._auth_ctx_factory(authority_url, None)
+        context = self._auth_ctx_factory(cred[_SERVICE_PRINCIPAL_TENANT], None)
         sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
                                        cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None))
         token_entry = sp_auth.acquire_token(context, resource, sp_id)
