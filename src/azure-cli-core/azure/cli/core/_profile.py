@@ -330,8 +330,8 @@ class Profile(object):
                 str(account[_TENANT_ID]))
 
     def get_raw_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
-                      subscription_id=None):
-        account = self.get_subscription(subscription_id)
+                      subscription=None):
+        account = self.get_subscription(subscription)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 

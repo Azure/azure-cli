@@ -736,8 +736,8 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         # action
         mgmt_resource = 'https://management.core.windows.net/'
-        token_type, token, entry = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
-                                                                       mgmt_resource)
+        token_type, token, _ = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
+                                                                   mgmt_resource)
         mock_adal_auth_context.acquire_token.assert_called_once_with(
             'https://management.core.windows.net/',
             self.user1,
