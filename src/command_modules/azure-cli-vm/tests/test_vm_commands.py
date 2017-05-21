@@ -287,6 +287,55 @@ class VMWindowsLicenseTest(ScenarioTest):
         ])
 
 
+class VMCustomImageTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_custom_image(self, resource_group, resource_group_location):
+        # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made generalized vms
+        prepared_vm_unmanaged = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-um'
+        prepared_vm = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-m'
+
+        image1 = 'image1'  # for image captured from vm with unmanaged disk
+        self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image1, prepared_vm_unmanaged), checks=[
+            JMESPathCheckV2('name', image1)
+        ])
+        self.cmd('vm create -g {} -n vm1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image1), checks=[
+                JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
+        ])
+        self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage')
+        ])
+        self.cmd('vmss create -g {} -n vmss1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image1), checks=[
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
+        ])
+
+        image2 = 'image2'  # for image captured from vm with managed os disk and data disk
+        self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image2, prepared_vm), checks=[
+            JMESPathCheckV2('name', image2)
+        ])
+        self.cmd('vm create -g {} -n vm2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image2), checks=[
+                JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
+        ])
+        self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage')
+        ])
+        self.cmd('vmss create -g {} -n vmss2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image2), checks=[
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            JMESPathCheckV2("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage')
+        ])
+
+
 class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
