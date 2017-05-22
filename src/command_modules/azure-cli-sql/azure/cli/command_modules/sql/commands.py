@@ -8,7 +8,8 @@ from ._util import (
     get_sql_firewall_rules_operations,
     get_sql_databases_operations,
     get_sql_elastic_pools_operations,
-    get_sql_capabilities_operations,
+    get_sql_capabilities_operations)
+from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup)
 
@@ -22,7 +23,7 @@ capabilities_operations = create_service_adapter(
     'azure.mgmt.sql.operations.capabilities_operations',
     'CapabilitiesOperations')
 
-with ServiceGroup(__name__, get_sql_capabilities_operations, capabilities_operations) as s:
+with ServiceGroup(__name__, get_sql_capabilities_operations, capabilities_operations, custom_path) as s:
     with s.group('sql') as c:
         c.custom_command('show-capabilities', 'capabilities_get')
 
