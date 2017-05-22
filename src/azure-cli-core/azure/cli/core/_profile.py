@@ -94,17 +94,11 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
 
 
-_GLOBAL_CREDS_CACHE = None
-
-
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True):
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         if use_global_creds_cache:
-            global _GLOBAL_CREDS_CACHE  # pylint: disable=global-statement
-            if _GLOBAL_CREDS_CACHE is None:
-                _GLOBAL_CREDS_CACHE = CredsCache(self.auth_ctx_factory, async_persist=True)
             self._creds_cache = _GLOBAL_CREDS_CACHE
         else:
             self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
@@ -498,7 +492,7 @@ class CredsCache(object):
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
                             os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
-        self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
+        self._auth_ctx_factory = auth_ctx_factory
         self._adal_token_cache_attr = None
         self._should_flush_to_disk = False
         self._async_persist = async_persist
@@ -618,6 +612,9 @@ class CredsCache(object):
     def remove_all_cached_creds(self):
         # we can clear file contents, but deleting it is simpler
         _delete_file(self._token_file)
+
+
+_GLOBAL_CREDS_CACHE = CredsCache(_AUTH_CTX_FACTORY, async_persist=True)
 
 
 class ServicePrincipalAuth(object):
