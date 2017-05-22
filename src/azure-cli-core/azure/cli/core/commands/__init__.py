@@ -144,26 +144,15 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def _template_progress(self, correlation_id):
         if correlation_id is not None:
-            queries = [
-                "[][].operationName.value",
-                "[][].status.value",
-            ]
+
             """
             self.authorization = authorization
             self.claims = claims
-            self.caller = caller
             self.description = description
             self.id = id
             self.event_data_id = event_data_id
-            self.correlation_id = correlation_id
             self.event_name = event_name
-            self.category = category
-            self.http_request = http_request
             self.level = level
-            self.resource_group_name = resource_group_name
-            self.resource_provider_name = resource_provider_name
-            self.resource_id = resource_id
-            self.resource_type = resource_type
             self.operation_id = operation_id
             self.operation_name = operation_name
             self.properties = properties
@@ -171,9 +160,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             self.sub_status = sub_status
             self.event_timestamp = event_timestamp
             self.submission_timestamp = submission_timestamp
-            self.subscription_id = subscription_id
-            self.tenant_id = tenant_id
-        """
+            """
             formatter = "eventTimestamp ge {} and eventTimestamp le {}"
 
             end_time = datetime.datetime.utcnow()
@@ -195,48 +182,13 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     break
                 results = list(results)
 
+            messages = ''
             if results:
                 for event in results:
-                    print(event.operation_name.value)
-                    print(event.status.value)
+                    messages += event.status.value + ': ' + event.operation_name.value
+                    messages += '\n'
 
-            # print(results)
-            # print(get_mgmt_service_client(MonitorClient).activity_logs.list(raw=True))
-            # result = results
-            # print(activity_log)
-
-            # log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
-            # # pylint: disable=line-too-long
-            # result = subprocess.Popen(
-            #     log, shell=True,stderr=subprocess.PIPE).communicate()[0]
-            # result = {monitor custom code}
-
-            # if hasattr(result, '__dict__'):
-            #     input_dict = dict(result)
-            # else:
-            #     # input_json = json.loads(result)
-            #     input_dict = result
-            #     # print(json.dumps(input_json, indent=3))
-            # if input_dict is None:
-            #     input_dict = ''
-
-            # query_values = {}
-
-            # for query in queries:
-            #     words = jmespath.search(query, input_dict)
-            #     query_values[query] = words
-
-            # return_val = ''
-            # if query_values[query_values.keys()[0]]:
-            #     len_of_op = len(query_values[query_values.keys()[0]])
-            # else:
-            #     len_of_op = 0
-            # if len(query_values.keys()) > 0:
-            #     for counter in range(len_of_op):
-            #         return_val += '\n'
-            #         for query in query_values:
-            #             return_val += query_values[query][counter] + ' : '
-            # self.progress_controller.add(message=return_val)
+            self.progress_controller.add(message=messages)
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
