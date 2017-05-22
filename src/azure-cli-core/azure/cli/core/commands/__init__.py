@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import datetime
 import json
 import pkgutil
 import re
@@ -32,6 +33,8 @@ from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
 
 logger = azlogging.get_az_logger(__name__)
+
+DEFAULT_QUERY_TIME_RANGE = 3600000
 
 
 # pylint: disable=too-many-arguments,too-few-public-methods
@@ -144,51 +147,96 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             queries = [
                 "[][].operationName.value",
                 "[][].status.value",
-                "[][].description"
             ]
-            """ TODO fix this
-                    collection = [correlation_id, resource_group, resource_id, resource_provider]
+            """
+            self.authorization = authorization
+            self.claims = claims
+            self.caller = caller
+            self.description = description
+            self.id = id
+            self.event_data_id = event_data_id
+            self.correlation_id = correlation_id
+            self.event_name = event_name
+            self.category = category
+            self.http_request = http_request
+            self.level = level
+            self.resource_group_name = resource_group_name
+            self.resource_provider_name = resource_provider_name
+            self.resource_id = resource_id
+            self.resource_type = resource_type
+            self.operation_id = operation_id
+            self.operation_name = operation_name
+            self.properties = properties
+            self.status = status
+            self.sub_status = sub_status
+            self.event_timestamp = event_timestamp
+            self.submission_timestamp = submission_timestamp
+            self.subscription_id = subscription_id
+            self.tenant_id = tenant_id
+        """
+            formatter = "eventTimestamp ge {} and eventTimestamp le {}"
 
-                    odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group,
-                                                                    resource_id, resource_provider,
-                                                                    start_time, end_time,
-                                                                    caller, status)
+            end_time = datetime.datetime.utcnow()
+            start_time = end_time - datetime.timedelta(seconds=DEFAULT_QUERY_TIME_RANGE)
+            odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                             end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
-                if max_events:
-                    max_events = int(max_events)
+            odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
-                select_filters = _activity_log_select_filter_builder(select)
-                activity_log = client.list(filter=odata_filters, select=select_filters)
-                return _limit_results(activity_log, max_events) """
+            from azure.cli.core.commands.client_factory import get_mgmt_service_client
+            from azure.monitor import MonitorClient
 
-            log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
-            # pylint: disable=line-too-long
-            result = subprocess.Popen(
-                log, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+            activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
+            results = []
+            for index, item in enumerate(activity_log):
+                if index < 50:
+                    results.append(item)
+                else:
+                    break
+                results = list(results)
 
-            if hasattr(result, '__dict__'):
-                input_dict = dict(result)
-            else:
-                input_json = json.loads(result.decode())
-                input_dict = input_json
-                # print(json.dumps(input_json, indent=3))
-            if input_dict is None:
-                input_dict = ''
+            if results:
+                for event in results:
+                    print(event.operation_name.value)
+                    print(event.status.value)
 
-            query_values = {}
+            # print(results)
+            # print(get_mgmt_service_client(MonitorClient).activity_logs.list(raw=True))
+            # result = results
+            # print(activity_log)
 
-            for query in queries:
-                words = jmespath.search(query, input_dict)
-                query_values[query] = words
+            # log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
+            # # pylint: disable=line-too-long
+            # result = subprocess.Popen(
+            #     log, shell=True,stderr=subprocess.PIPE).communicate()[0]
+            # result = {monitor custom code}
 
-            return_val = ''
-            len_of_op = len(query_values[query_values.keys()[0]])
-            if len(query_values.keys()) > 0:
-                for counter in range(len_of_op):
-                    return_val += '\n'
-                    for query in query_values:
-                        return_val += query_values[query][counter] + ' : '
-            self.progress_controller.add(message=return_val)
+            # if hasattr(result, '__dict__'):
+            #     input_dict = dict(result)
+            # else:
+            #     # input_json = json.loads(result)
+            #     input_dict = result
+            #     # print(json.dumps(input_json, indent=3))
+            # if input_dict is None:
+            #     input_dict = ''
+
+            # query_values = {}
+
+            # for query in queries:
+            #     words = jmespath.search(query, input_dict)
+            #     query_values[query] = words
+
+            # return_val = ''
+            # if query_values[query_values.keys()[0]]:
+            #     len_of_op = len(query_values[query_values.keys()[0]])
+            # else:
+            #     len_of_op = 0
+            # if len(query_values.keys()) > 0:
+            #     for counter in range(len_of_op):
+            #         return_val += '\n'
+            #         for query in query_values:
+            #             return_val += query_values[query][counter] + ' : '
+            # self.progress_controller.add(message=return_val)
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
