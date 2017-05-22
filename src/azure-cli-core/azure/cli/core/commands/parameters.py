@@ -12,7 +12,7 @@ from azure.cli.core.commands import \
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
@@ -66,7 +66,10 @@ def get_resources_in_resource_group(resource_group_name, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
-    return list(rcf.resources.list_by_resource_group(resource_group_name, filter=filter_str))
+    if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, max_api='2016-09-01'):
+        return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
+    else:
+        return list(rcf.resources.list_by_resource_group(resource_group_name, filter=filter_str))
 
 
 def get_resources_in_subscription(resource_type=None):
