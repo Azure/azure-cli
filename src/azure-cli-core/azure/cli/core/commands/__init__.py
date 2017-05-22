@@ -185,8 +185,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             messages = ''
             if results:
                 for event in results:
-                    messages += event.status.value + ': ' + event.operation_name.value
                     messages += '\n'
+                    messages += event.status.value + ': ' + event.operation_name.value
 
             self.progress_controller.add(message=messages)
 
@@ -208,13 +208,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_id = None
 
             try:
+                self._template_progress(correlation_id)
                 self._delay()
             except KeyboardInterrupt:
                 self.progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
-
-            self._template_progress(correlation_id)
 
         try:
             result = poller.result()
