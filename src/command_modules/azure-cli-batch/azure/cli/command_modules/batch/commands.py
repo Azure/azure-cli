@@ -99,7 +99,7 @@ cli_batch_data_plane_command('batch job create', data_path.format('job', 'JobOpe
                              ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.on_task_failure',
                                      'job.job_manager_task.kill_job_on_completion', 'job.common_environment_settings', 'job.on_all_tasks_complete',
                                      'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references',
-                                     'job.job_manager_task.user_identity'])
+                                     'job.job_manager_task.user_identity', 'job.job_manager_task.allow_low_priority_node'])
 cli_batch_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), job_client_factory)
 cli_batch_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), job_client_factory)
 cli_batch_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), job_client_factory, flatten=2)
@@ -116,7 +116,8 @@ cli_batch_data_plane_command('batch job-schedule create', data_path.format('job_
                                      'cloud_job_schedule.job_specification.job_manager_task.kill_job_on_completion',
                                      'cloud_job_schedule.job_specification.job_manager_task.run_exclusive',
                                      'cloud_job_schedule.job_specification.job_manager_task.application_package_references',
-                                     'cloud_job_schedule.job_specification.job_manager_task.environment_settings'])
+                                     'cloud_job_schedule.job_specification.job_manager_task.environment_settings',
+                                     'cloud_job_schedule.job_specification.job_manager_task.allow_low_priority_node'])
 cli_batch_data_plane_command('batch job-schedule delete', data_path.format('job_schedule', 'JobScheduleOperations.delete'), job_schedule_client_factory)
 cli_batch_data_plane_command('batch job-schedule show', data_path.format('job_schedule', 'JobScheduleOperations.get'), job_schedule_client_factory)
 cli_batch_data_plane_command('batch job-schedule set', data_path.format('job_schedule', 'JobScheduleOperations.patch'), job_schedule_client_factory,
@@ -126,7 +127,8 @@ cli_batch_data_plane_command('batch job-schedule set', data_path.format('job_sch
                                      'job_schedule_patch_parameter.job_specification.on_task_failure',
                                      'job_schedule_patch_parameter.job_specification.job_manager_task.kill_job_on_completion',
                                      'job_schedule_patch_parameter.job_specification.job_manager_task.run_exclusive',
-                                     'job_schedule_patch_parameter.job_specification.job_manager_task.constraints'])
+                                     'job_schedule_patch_parameter.job_specification.job_manager_task.constraints',
+                                     'job_schedule_patch_parameter.job_specification.job_manager_task.allow_low_priority_node'])
 cli_batch_data_plane_command('batch job-schedule reset', data_path.format('job_schedule', 'JobScheduleOperations.update'), job_schedule_client_factory,
                              ignore=['job_schedule_update_parameter.job_specification.job_preparation_task',
                                      'job_schedule_update_parameter.job_specification.job_release_task',
@@ -134,7 +136,8 @@ cli_batch_data_plane_command('batch job-schedule reset', data_path.format('job_s
                                      'job_schedule_update_parameter.job_specification.on_task_failure',
                                      'job_schedule_update_parameter.job_specification.job_manager_task.kill_job_on_completion',
                                      'job_schedule_update_parameter.job_specification.job_manager_task.run_exclusive',
-                                     'job_schedule_update_parameter.job_specification.job_manager_task.constraints'])
+                                     'job_schedule_update_parameter.job_specification.job_manager_task.constraints',
+                                     'job_schedule_update_parameter.job_specification.job_manager_task.allow_low_priority_node'])
 cli_batch_data_plane_command('batch job-schedule disable', data_path.format('job_schedule', 'JobScheduleOperations.disable'), job_schedule_client_factory)
 cli_batch_data_plane_command('batch job-schedule enable', data_path.format('job_schedule', 'JobScheduleOperations.enable'), job_schedule_client_factory)
 cli_batch_data_plane_command('batch job-schedule stop', data_path.format('job_schedule', 'JobScheduleOperations.terminate'), job_schedule_client_factory)
