@@ -12,9 +12,11 @@ import sys
 import time
 import timeit
 import traceback
+import subprocess
 from collections import OrderedDict, defaultdict
 from importlib import import_module
 
+import jmespath
 import six
 from six import string_types, reraise
 
@@ -137,71 +139,47 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
+    def _template_progress(self, correlation_id):
+        if correlation_id is not None:
+            queries = [
+                "[][].operationName.value",
+                "[][].status.value",
+            ]
+
+            log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
+            # pylint: disable=line-too-long
+            result = subprocess.Popen(
+                log, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+
+            if hasattr(result, '__dict__'):
+                input_dict = dict(result)
+            else:
+                input_json = json.loads(result)
+                input_dict = input_json
+            if input_dict is None:
+                input_dict = ''
+
+            query_values = {}
+
+            for query in queries:
+                words = jmespath.search(query, input_dict)
+                query_values[query] = words
+
+            return_val = ''
+            len_of_op = len(query_values[query_values.keys()[0]])
+            if len(query_values.keys()) > 0:
+                for counter in range(len_of_op):
+                    return_val += '\n'
+                    for query in query_values:
+                        return_val += query_values[query][counter] + ' : '
+            self.progress_controller.add(message=return_val)
+
+
     def __call__(self, poller):
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         self.progress_controller.begin()
-        
-        from threading import Thread
-        class TemplateThread(Thread):
-            def __init__(self, poller):
-                super(TemplateThread, self).__init__()
-                self.queries = [
-                    # "[].authorization.action",
-                    # "[].authorization.scope",
-                    "[].description",
-                    "[].eventName",
-                    "[].operationName.value",
-                    "[].status.value",
-                    "[].level"
-                ]
-                self.poller = poller
-
-            def run(self):
-                import jmespath, subprocess
-                try:
-                    while not self.poller.done():
-                        # pylint: disable=protected-access
-                        try:
-                            correlation_id = json.loads(
-                                self.poller._response.__dict__['_content'])['properties']['correlationId']
-                        except Exception as e:  # pylint: disable=bare-except
-                            time.sleep(.25)
-                            correlation_id = ''
-                            pass
-
-                        log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
-                        # result = APPLICATION.execute(log)
-                        result, _ = subprocess.Popen(log, shell=True).communicate()
-                        print(result)
-                        # self.progress_controller.add(message=result)
-                        if hasattr(result, '__dict__'):
-                            input_dict = dict(result)
-                        else:
-                            input_dict = result
-                        if input_dict is None:
-                            input_dict = ''
-                        str_res = ''
-                        for query in self.queries:
-                            str_res = jmespath.search(query, input_dict)
-                            if isinstance(str_res, str):
-                                print(str_res)
-                            else:
-                                print(json.dumps(str_res, sort_keys=True, indent=2))
-
-                except KeyboardInterrupt:
-                    pass
-
-        # template = TemplateThread(poller)
-        # template.daemon = True
-        # template.start()
-
-#         # like no wait this and send the lower command and that send whats on the wire
-#         # probably a table format would work well
-#         log = 'az monitor activity-log list --correlation-id {} '.format(correlation_id)
-#         for query in list_queries:
-            # log.jmspathquery(log.query(query))
 
         while not poller.done():
             self.progress_controller.add(message='Running')
@@ -211,10 +189,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     poller._response.__dict__['_content'])['properties']['correlationId']
 
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
-                print(correlation_id)
             except:  # pylint: disable=bare-except
                 correlation_id = None
-                pass
 
             try:
                 self._delay()
@@ -223,35 +199,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
 
-            if correlation_id:
-                queries = [
-                    # "[].authorization.action",
-                    # "[].authorization.scope",
-                    "[].description",
-                    "[].eventName",
-                    "[].operationName.value",
-                    "[].status.value",
-                    "[].level"
-                ]
-                import jmespath, subprocess
-
-                log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
-                result, _ = subprocess.Popen(log, shell=True).communicate()
-                print(result)
-                # self.progress_controller.add(message=result)
-                if hasattr(result, '__dict__'):
-                    input_dict = dict(result)
-                else:
-                    input_dict = result
-                if input_dict is None:
-                    input_dict = ''
-                str_res = ''
-                for query in queries:
-                    str_res = jmespath.search(query, input_dict)
-                    if isinstance(str_res, str):
-                        print(str_res)
-                    else:
-                        print(json.dumps(str_res, sort_keys=True, indent=2))
+            self._template_progress(correlation_id)
 
         try:
             result = poller.result()
