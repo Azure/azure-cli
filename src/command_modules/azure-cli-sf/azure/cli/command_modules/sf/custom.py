@@ -148,7 +148,10 @@ def sf_select(endpoint, cert=None,
         set_global_config_value("servicefabric", "security", "none")
 
     if ca:
+        set_global_config_value("servicefabric", "use_ca", "True")
         set_global_config_value("servicefabric", "ca_path", ca)
+    else:
+        set_global_config_value("servicefabric", "use_ca", "False")
 
     if no_verify:
         set_global_config_value("servicefabric", "no_verify", "True")
@@ -156,40 +159,6 @@ def sf_select(endpoint, cert=None,
         set_global_config_value("servicefabric", "no_verify", "False")
 
     set_global_config_value("servicefabric", "endpoint", endpoint)
-
-
-def sf_get_verify_setting():
-    az_config.config_parser.read(CONFIG_PATH)
-    no_verify = az_config.get("servicefabric", "no_verify", fallback="False")
-    return no_verify == "True"
-
-
-def sf_get_ca_cert_info():
-    az_config.config_parser.read(CONFIG_PATH)
-    ca_cert = az_config.get("servicefabric", "ca_path", fallback=None)
-    return ca_cert
-
-
-def sf_get_connection_endpoint():
-    az_config.config_parser.read(CONFIG_PATH)
-    return az_config.get("servicefabric", "endpoint", fallback=None)
-
-
-def sf_get_cert_info():
-    az_config.config_parser.read(CONFIG_PATH)
-    security_type = str(az_config.get("servicefabric",
-                                      "security", fallback=""))
-    if security_type == "pem":
-        pem_path = az_config.get("servicefabric", "pem_path", fallback=None)
-        return pem_path
-    elif security_type == "cert":
-        cert_path = az_config.get("servicefabric", "cert_path", fallback=None)
-        key_path = az_config.get("servicefabric", "key_path", fallback=None)
-        return cert_path, key_path
-    elif security_type == "none":
-        return None
-    else:
-        raise CLIError("Cluster security type not set")
 
 
 def sf_upload_app(path, show_progress=False):
@@ -207,13 +176,17 @@ def sf_upload_app(path, show_progress=False):
     :param str path: The path to your local application package
     :param bool show_progress: Show file upload progress
     """
+    from azure.cli.command_modules.sf.config import SfConfigParser
+
     abspath = os.path.abspath(path)
     basename = os.path.basename(abspath)
-    endpoint = sf_get_connection_endpoint()
-    cert = sf_get_cert_info()
+
+    sf_config = SfConfigParser()
+    endpoint = sf_config.connection_endpoint()
+    cert = sf_config.cert_info()
     ca_cert = False
     if cert is not None:
-        ca_cert = sf_get_ca_cert_info()
+        ca_cert = sf_config.ca_cert_info()
     total_files_count = 0
     current_files_count = 0
     total_files_size = 0
