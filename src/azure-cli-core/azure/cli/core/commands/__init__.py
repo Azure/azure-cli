@@ -142,6 +142,50 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         self.progress_controller.begin()
+        from threading import Thread
+        class TemplateThread(Thread):
+            def __init__(self, poller):
+                super(TemplateThread, self).__init__()
+                self.queries = [
+                    # "[].authorization.action",
+                    # "[].authorization.scope",
+                    "[].description",
+                    "[].eventName",
+                    "[].operationName.value",
+                    "[].status.value",
+                    "[].level"
+                ]
+                self.poller = poller
+
+            def run(self):
+                import jmespath, subprocess
+                try:
+                    while not poller.done():
+                        # pylint: disable=protected-access
+                        for query in self.queries:
+                            try:
+                                correlation_id = json.loads(
+                                    poller._response.__dict__['_content'])['properties']['correlationId']
+                                log = 'az monitor activity-log list --correlation-id {} --query {}'.format(correlation_id, query)
+                                subprocess.Popen(log, shell=True).communicate()
+                                self.progress_controller.add(message=result)
+                            except:  # pylint: disable=bare-except
+                                # time.sleep(.25)
+                                pass
+
+                except KeyboardInterrupt:
+                    pass
+
+        template = TemplateThread(poller)
+        template.daemon = True
+        template.start()
+
+#         # like no wait this and send the lower command and that send whats on the wire
+#         # probably a table format would work well
+#         log = 'az monitor activity-log list --correlation-id {} '.format(correlation_id)
+#         for query in list_queries:
+            # log.jmspathquery(log.query(query))
+
         while not poller.done():
             self.progress_controller.add(message='Running')
             try:
