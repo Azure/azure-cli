@@ -369,6 +369,34 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
+        mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1,
+                                       Test_Profile.token_entry1)
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        consolidated = Profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # action
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+
+        # verify
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        # the last in the tuple is the whole token entry which has several fields
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+                                               'https://foo')
+        self.assertEqual(mock_get_token.call_count, 1)
+        self.assertEqual(sub, '1')
+        self.assertEqual(tenant, self.tenant_id)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
@@ -740,8 +768,8 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         # action
         mgmt_resource = 'https://management.core.windows.net/'
-        token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
-                                                                mgmt_resource)
+        token_type, token, _ = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
+                                                                   mgmt_resource)
         mock_adal_auth_context.acquire_token.assert_called_once_with(
             'https://management.core.windows.net/',
             self.user1,
