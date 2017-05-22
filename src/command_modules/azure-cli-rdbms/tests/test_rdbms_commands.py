@@ -189,6 +189,10 @@ class ServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
+        # test list servers without resource group
+        self.cmd('{} server list'.format(database_engine),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, rg, servers[0]), checks=NoneCheck())
