@@ -1510,6 +1510,8 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
 
+        #self.cmd('network watcher test-connectivity -g {} --source-resource {} --dest-address www.microsoft.com --dest-port 80'.format(resource_group, vm))
+
         # TODO: Re-enable once issue #3385 is resolved
         #capture = 'capture1'
         #location = 'westus'
