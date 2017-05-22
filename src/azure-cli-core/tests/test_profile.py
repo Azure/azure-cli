@@ -454,19 +454,19 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
     @mock.patch('azure.cli.core._profile.CLOUD', autospec=True)
-    def test_find_subscriptions_thru_username_password_azure_stack(self, mock_get_cloud, mock_acquire_token,
-                                                                   mock_acquire_token_username_password):
+    def test_find_subscriptions_thru_username_password_adfs(self, mock_get_cloud, mock_acquire_token,
+                                                            mock_acquire_token_username_password):
         TEST_ADFS_AUTH_URL = 'https://adfs.local.azurestack.external/adfs'
 
-        def test_acuqire_token(self, resource, username, password, client_id):
-            global acuqire_token_invoked
-            acuqire_token_invoked = True
+        def test_acquire_token(self, resource, username, password, client_id):
+            global acquire_token_invoked
+            acquire_token_invoked = True
             if (self.authority.url == TEST_ADFS_AUTH_URL and self.authority.is_adfs_authority):
                 return Test_Profile.token_entry1
             else:
                 raise ValueError('AuthContext was not initialized correctly for ADFS')
 
-        mock_acquire_token_username_password.side_effect = test_acuqire_token
+        mock_acquire_token_username_password.side_effect = test_acquire_token
         mock_acquire_token.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
@@ -481,7 +481,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         # assert
         self.assertEqual([self.subscription1], subs)
-        self.assertTrue(acuqire_token_invoked)
+        self.assertTrue(acquire_token_invoked)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile.logger', autospec=True)
