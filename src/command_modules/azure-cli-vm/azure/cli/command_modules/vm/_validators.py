@@ -425,7 +425,7 @@ def _validate_vm_create_availability_set(namespace):
             name=name)
 
 
-def _validate_vm_create_vnet(namespace, for_scale_set=False):
+def _validate_create_vnet(namespace, for_scale_set=False):
 
     vnet = namespace.vnet_name
     subnet = namespace.subnet
@@ -454,6 +454,8 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
                         if _subnet_capacity_check(subnet_mask, namespace.instance_count):
                             result = s
                             break
+                if namespace.app_gateway_type == 'new' and namespace.app_gateway_subnet_address_prefix is None :
+                    namespace.app_gateway_subnet_address_prefix = _get_available_subnet_addr_suffix(namespace.vnet_address_prefix, [s.addres_prefix for a in vnet_match.subnets])
             if not result:
                 continue
             namespace.subnet = result.name
@@ -500,8 +502,23 @@ def _validate_vmss_create_subnet(namespace):
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
         if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
-            raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
-                           'application gateway.')
+            namespace.app_gateway_subnet_address_prefix = _get_available_subnet_addr_suffix(namespace.vnet_address_prefix,
+                                                                                            [namespace.subnet_address_prefix])
+
+
+def _get_available_subnet_addr_suffix(vnet_cidr, subnet_cidrs):
+    def _convert_to_int(address, bit_mask_len):
+        a, b, c, d = [int(x) for x in address.split('.')]
+        result = '{0:08b}{1:08b}{2:08b}{3:08b}'.format(a, b, c, d)
+        return int(result[:-bit_mask_len], 2)
+    processed = [c.split('/') for c in subnet_cidrs]
+    processed2 = [(p[0], int(p[1])) for p in processed]
+    bit_mask_len = 32 - min([p[1] for p in processed2])
+    candidate_int = max([_convert_to_int(p[0], bit_mask_len) for p in processed2]) + 1
+    candaidate_str = '{0:32b}'.format(candidate_int<<bit_mask_len)
+    # there is no size requirement, just pick 24 
+    return '{0}.{1}.{2}.{3}/24'.format(int(candaidate_str[0:8],2), int(candaidate_str[8:16], 2),
+                                       int(candaidate_str[16:24], 2), int(candaidate_str[24:32],2))
 
 
 def _validate_vm_create_nsg(namespace):
@@ -569,7 +586,7 @@ def _validate_vm_create_nics(namespace):
     namespace.public_ip_type = None
 
 
-def _validate_vm_create_auth(namespace):
+def _validate_create_auth(namespace):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -736,11 +753,11 @@ def process_vm_create_namespace(namespace):
         _validate_vm_create_storage_account(namespace)
 
     _validate_vm_create_availability_set(namespace)
-    _validate_vm_create_vnet(namespace)
+    _validate_create_vnet(namespace)
     _validate_vm_create_nsg(namespace)
     _validate_vm_create_public_ip(namespace)
     _validate_vm_create_nics(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
@@ -804,9 +821,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
         # AppGateway frontend
         required = []
-        if namespace.app_gateway_type == 'new':
-            required.append('app_gateway_subnet_address_prefix')
-        elif namespace.app_gateway_type == 'existing':
+        if namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
         forbidden = ['nat_pool_name', 'load_balancer']
         _validate_network_balancer_required_forbidden_parameters(
@@ -834,11 +849,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
+    _validate_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer_or_app_gateway(namespace)
-    _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_create_auth(namespace)
 
 # endregion
 
