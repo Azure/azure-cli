@@ -144,7 +144,22 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             queries = [
                 "[][].operationName.value",
                 "[][].status.value",
+                "[][].description"
             ]
+            """ TODO fix this
+                    collection = [correlation_id, resource_group, resource_id, resource_provider]
+
+                    odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group,
+                                                                    resource_id, resource_provider,
+                                                                    start_time, end_time,
+                                                                    caller, status)
+
+                if max_events:
+                    max_events = int(max_events)
+
+                select_filters = _activity_log_select_filter_builder(select)
+                activity_log = client.list(filter=odata_filters, select=select_filters)
+                return _limit_results(activity_log, max_events) """
 
             log = 'az monitor activity-log list --correlation-id {}'.format(correlation_id)
             # pylint: disable=line-too-long
@@ -154,8 +169,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             if hasattr(result, '__dict__'):
                 input_dict = dict(result)
             else:
-                input_json = json.loads(result)
+                input_json = json.loads(result.decode())
                 input_dict = input_json
+                # print(json.dumps(input_json, indent=3))
             if input_dict is None:
                 input_dict = ''
 
@@ -174,7 +190,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         return_val += query_values[query][counter] + ' : '
             self.progress_controller.add(message=return_val)
 
-
     def __call__(self, poller):
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
@@ -186,10 +201,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
-                    poller._response.__dict__['_content'])['properties']['correlationId']
+                    poller._response.__dict__['_content'].decode())['properties']['correlationId']
 
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
-            except:  # pylint: disable=bare-except
+            except Exception as e:  # pylint: disable=bare-except
                 correlation_id = None
 
             try:
