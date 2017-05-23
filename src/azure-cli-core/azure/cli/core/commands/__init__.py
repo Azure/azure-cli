@@ -404,6 +404,12 @@ def _load_client_exception_class():
     return ClientException
 
 
+def _load_validation_error_class():
+    # Since loading msrest is expensive, we avoid it until we have to
+    from msrest.exceptions import ValidationError
+    return ValidationError
+
+
 def _load_azure_exception_class():
     # Since loading msrest is expensive, we avoid it until we have to
     from azure.common import AzureException
@@ -473,6 +479,11 @@ def create_command(module_name, name, operation,
                         return
                     else:
                         reraise(*sys.exc_info())
+        except _load_validation_error_class() as validation_error:
+            fault_type = name.replace(' ', '-') + '-validation-error'
+            telemetry.set_exception(validation_error, fault_type=fault_type,
+                                    summary='SDK validation error')
+            raise CLIError(validation_error)
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
