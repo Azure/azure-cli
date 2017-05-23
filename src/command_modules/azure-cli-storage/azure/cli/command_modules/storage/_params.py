@@ -338,7 +338,11 @@ register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_l
 
 register_cli_argument('storage blob exists', 'blob_name', required=True)
 
-register_cli_argument('storage blob list', 'include', help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.', validator=validate_included_datasets)
+with CommandContext('storage blob list') as c:
+    c.reg_arg('include',
+              help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.',
+              validator=validate_included_datasets)
+    c.reg_arg('num_results', type=int)
 
 for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
