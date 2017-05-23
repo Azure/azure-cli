@@ -10,6 +10,7 @@ import math
 import os
 import subprocess
 import sys
+import uuid
 
 import jmespath
 from six.moves import configparser
@@ -51,6 +52,7 @@ PROFILE = Profile()
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
 CLEAR_WORD = get_os_clear_screen_word()
+ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
 
 def handle_cd(cmd):
@@ -533,6 +535,14 @@ class Shell(object):
 
             config = Configuration()
             self.app.initialize(config)
+            self.app.session = {
+                'headers': {
+                    'x-ms-client-request-id': str(uuid.uuid1())
+                },
+                'command': 'unknown',
+                'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
+                'query_active': False
+            }
             result = self.app.execute(args)
             self.last_exit = 0
             if result and result.result is not None:
