@@ -58,6 +58,16 @@ def transform_arm_template(result):
                         ('publisher', result.get('publisher'))])
 
 
+def transform_vm_list(vm_list):
+    return [transform_vm(v) for v in vm_list]
+
+
+def transform_vm(result):
+    return OrderedDict([('name', result['name']),
+                        ('location', result['location']),
+                        ('osType', result['osType'])])
+
+
 # Custom Command's service adapter
 custom_operations = create_service_adapter(custom_path)
 
@@ -69,7 +79,7 @@ virtual_machine_operations = create_service_adapter(
 with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
                   virtual_machine_operations) as s:
     with s.group('lab vm') as c:
-        c.command('show', 'get')
+        c.command('show', 'get', table_transformer=transform_vm)
         c.command('delete', 'delete')
         c.command('start', 'start')
         c.command('stop', 'stop')
@@ -79,7 +89,8 @@ with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
 with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
                   custom_operations) as s:
     with s.group('lab vm') as c:
-        c.command('list', 'list_vm')
+        c.command('list', 'list_vm', table_transformer=transform_vm_list)
+        c.command('claim', 'claim_vm')
 
 # Lab Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_lab_operation,

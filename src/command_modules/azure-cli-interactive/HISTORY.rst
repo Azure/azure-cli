@@ -3,10 +3,18 @@
 Release History
 ===============
 
+
+0.3.2 (2017-05-18)
+++++++++++++++++++
+
+* Bug fixes.
+* Remove 'interactive' from completions (#3324)
+
 0.3.1 (2017-05-09)
 ++++++++++++++++++
 
 * Add link to blog in ‘az interactive —help’ (#3252)
+
 
 0.3.0 (2017-05-05)
 ++++++++++++++++++
@@ -14,6 +22,7 @@ Release History
 * Integrate interactive into az
 * Colors Options
 * Rename 'shell' => 'interactive'
+
 
 0.2.1
 ++++++++++++++++++

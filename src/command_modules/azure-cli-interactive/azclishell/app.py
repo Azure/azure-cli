@@ -425,14 +425,14 @@ class Shell(object):
                 if cmd.strip() and cmd.split()[0] == 'cd':
                     handle_cd(parse_quotes(cmd))
                     continue_flag = True
-                telemetry.track_ssg('outside', cmd)
+                telemetry.track_ssg('outside', '')
 
             elif text[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
 
                 print(meaning + ": " + str(self.last_exit))
                 continue_flag = True
-                telemetry.track_ssg('exit code', cmd)
+                telemetry.track_ssg('exit code', '')
 
             elif text[0] == SELECT_SYMBOL['query']:  # query previous output
                 continue_flag = self.handle_jmespath_query(text, continue_flag)
@@ -543,6 +543,7 @@ class Shell(object):
                 'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
                 'query_active': False
             }
+
             result = self.app.execute(args)
             self.last_exit = 0
             if result and result.result is not None:

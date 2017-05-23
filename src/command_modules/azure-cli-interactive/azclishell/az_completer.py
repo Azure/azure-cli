@@ -18,6 +18,8 @@ from azure.cli.core.util import CLIError
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
+BLACKLISTED_COMPLETIONS = ['interactive']
+
 
 def dynamic_param_logic(text):
     """ validates parameter values for dynamic completion """
@@ -75,7 +77,11 @@ def sort_completions(gen):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 
-    return sorted(list(gen), key=_get_weight)
+    completions = []
+    for comp in gen:
+        if comp.text not in BLACKLISTED_COMPLETIONS:
+            completions.append(comp)
+    return sorted(completions, key=_get_weight)
 
 
 # pylint: disable=too-many-instance-attributes

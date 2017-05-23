@@ -1,6 +1,6 @@
-# Azure CLI Interactive Shell
+# Azure CLI Interactive Mode
 
-## The interactive shell for Microsoft Azure CLI (Command Line Interface)
+## The interactive mode for Microsoft Azure CLI (Command Line Interface)
 
 - Interactive Tutorials
 - Lightweight Drop Down Completions 
@@ -16,6 +16,15 @@
 - Fun Colors 
 
 ![Overview](docs/shell.gif)
+
+
+## Updates
+
+Azure CLI Shell is now Azure CLI Interactive Mode. To get updates, install the newest version of the CLI! First, uninstall the deprecated shell applications with:
+
+```bash
+   $ pip uninstall azure-cli-shell
+```
 
 ## Running
 
