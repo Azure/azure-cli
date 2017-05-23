@@ -13,7 +13,7 @@ from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, SpendingLimit)
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, CLOUD)
+                                     ServicePrincipalAuth, CLOUD, _AUTH_CTX_FACTORY)
 from azure.cli.core.util import CLIError
 
 
@@ -369,6 +369,34 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
+        mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1,
+                                       Test_Profile.token_entry1)
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        consolidated = Profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # action
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+
+        # verify
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        # the last in the tuple is the whole token entry which has several fields
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+                                               'https://foo')
+        self.assertEqual(mock_get_token.call_count, 1)
+        self.assertEqual(sub, '1')
+        self.assertEqual(tenant, self.tenant_id)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
@@ -450,6 +478,38 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
             mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
+    @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
+    @mock.patch('azure.cli.core._profile.CLOUD', autospec=True)
+    def test_find_subscriptions_thru_username_password_adfs(self, mock_get_cloud, mock_acquire_token,
+                                                            mock_acquire_token_username_password):
+        TEST_ADFS_AUTH_URL = 'https://adfs.local.azurestack.external/adfs'
+
+        def test_acquire_token(self, resource, username, password, client_id):
+            global acquire_token_invoked
+            acquire_token_invoked = True
+            if (self.authority.url == TEST_ADFS_AUTH_URL and self.authority.is_adfs_authority):
+                return Test_Profile.token_entry1
+            else:
+                raise ValueError('AuthContext was not initialized correctly for ADFS')
+
+        mock_acquire_token_username_password.side_effect = test_acquire_token
+        mock_acquire_token.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_get_cloud.endpoints.active_directory = TEST_ADFS_AUTH_URL
+        finder = SubscriptionFinder(_AUTH_CTX_FACTORY,
+                                    None,
+                                    lambda _: mock_arm_client)
+        mgmt_resource = 'https://management.core.windows.net/'
+        # action
+        subs = finder.find_from_user_account(self.user1, 'bar', None, mgmt_resource)
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
+        self.assertTrue(acquire_token_invoked)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile.logger', autospec=True)
@@ -708,8 +768,8 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         # action
         mgmt_resource = 'https://management.core.windows.net/'
-        token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
-                                                                mgmt_resource)
+        token_type, token, _ = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
+                                                                   mgmt_resource)
         mock_adal_auth_context.acquire_token.assert_called_once_with(
             'https://management.core.windows.net/',
             self.user1,

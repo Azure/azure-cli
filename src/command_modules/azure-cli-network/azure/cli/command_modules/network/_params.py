@@ -41,7 +41,7 @@ from azure.cli.command_modules.network._validators import \
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 from azure.cli.core.util import get_json_object
 
 ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
@@ -51,7 +51,7 @@ ExpressRouteCircuitSkuFamily, \
 ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution, \
 ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, \
 SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, \
-IPAllocationMethod, RouteNextHopType, Direction, Protocol = \
+IPAllocationMethod, RouteNextHopType, Direction, Protocol, IPVersion = \
     get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySkuName',
             'ApplicationGatewayCookieBasedAffinity', 'ApplicationGatewayFirewallMode',
             'ApplicationGatewayProtocol', 'ApplicationGatewayRequestRoutingRuleType',
@@ -60,7 +60,7 @@ IPAllocationMethod, RouteNextHopType, Direction, Protocol = \
             'LoadDistribution', 'ProbeProtocol', 'TransportProtocol', 'SecurityRuleAccess',
             'SecurityRuleProtocol', 'SecurityRuleDirection', 'VirtualNetworkGatewayType',
             'VirtualNetworkGatewaySkuName', 'VpnType', 'IPAllocationMethod', 'RouteNextHopType',
-            'Direction', 'Protocol', mod='models')
+            'Direction', 'Protocol', 'IPVersion', mod='models')
 
 # CHOICE LISTS
 
@@ -258,7 +258,11 @@ register_cli_argument('network application-gateway url-path-map rule', 'address_
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
 register_cli_argument('network application-gateway waf-config', 'enabled', help='Specify whether the application firewall is enabled.', **enum_choice_list(['true', 'false']))
-register_cli_argument('network application-gateway waf-config', 'firewall_mode', help='Web application firewall mode.', **enum_choice_list(ApplicationGatewayFirewallMode))
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+    register_cli_argument('network application-gateway waf-config', 'firewall_mode', help='Web application firewall mode.', default=ApplicationGatewayFirewallMode.detection.value, **enum_choice_list(ApplicationGatewayFirewallMode))
+else:
+    register_cli_argument('network application-gateway waf-config', 'firewall_mode', ignore_type)
 
 for item in ['ssl-policy', 'waf-config']:
     register_cli_argument('network application-gateway {}'.format(item), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
@@ -318,7 +322,10 @@ register_cli_argument('network nic', 'internal_dns_name_label', options_list=('-
 
 register_cli_argument('network nic create', 'enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', action='store_true')
 register_cli_argument('network nic create', 'network_interface_name', nic_type, options_list=('--name', '-n'), id_part=None, validator=process_nic_create_namespace)
-register_cli_argument('network nic create', 'private_ip_address_version', help='The private IP address version to use.')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+    register_cli_argument('network nic create', 'private_ip_address_version', help='The private IP address version to use.', default=IPVersion.ipv4.value)
+else:
+    register_cli_argument('network nic create', 'private_ip_address_version', ignore_type)
 
 public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
 register_cli_argument('network nic create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -395,7 +402,10 @@ register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
 
 for item in ['create', 'update']:
     register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))
-    register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', **enum_choice_list(IPVersion))
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+        register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', default=IPVersion.ipv4.value, **enum_choice_list(IPVersion))
+    else:
+        register_cli_argument('network public-ip {}'.format(item), 'version', ignore_type)
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')

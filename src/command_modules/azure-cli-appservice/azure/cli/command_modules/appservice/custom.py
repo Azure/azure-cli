@@ -185,7 +185,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
 # in the method
 def update_site_configs(resource_group_name, name, slot=None,
                         linux_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
-                        node_version=None, net_framework_version=None,  # pylint: disable=unused-argument
+                        net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument

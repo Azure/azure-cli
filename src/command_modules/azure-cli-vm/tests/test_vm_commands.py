@@ -16,6 +16,8 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck)
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -93,7 +95,7 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
 
         # min params - apply to existing NIC (updates existing NSG)
-        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['id']
         nsg_name = os.path.split(nsg_id)[1]
         self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
                  checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))
@@ -274,6 +276,17 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
+class VMWindowsLicenseTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_windows_vm_license_type(self, resource_group):
+        vm_name = 'winvm'
+        self.cmd('vm create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server'.format(resource_group, vm_name))
+        self.cmd('vm show -g {} -n {}'.format(resource_group, vm_name), checks=[
+            JMESPathCheckV2('licenseType', 'Windows_Server')
+        ])
+
+
 class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -288,7 +301,10 @@ class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
         vm1 = 'vm1'
         self.cmd('vm create -g {} -n {} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password'.format(
             self.resource_group, vm1))
-        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1))
+        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1), checks=[
+            JMESPathCheck('name', vm1),
+            JMESPathCheck('licenseType', None)
+        ])
         self.cmd('vm stop -g {} -n {}'.format(self.resource_group, vm1))
 
         # import the unmanaged os disk into a specialized managed disk
@@ -570,6 +586,9 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
         config_file = _write_config_file(user_name)
 
         try:
+            self.cmd('vm extension list --vm-name {} --resource-group {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('length([])', 0)
+            ])
             self.cmd('vm extension set -n {} --publisher {} --version 1.2  --vm-name {} --resource-group {} --protected-settings "{}"'
                      .format(extension_name, publisher, self.vm_name, self.resource_group, config_file))
             self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[
@@ -1643,6 +1662,8 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
+        result = self.cmd('vmss list-instance-connection-info --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.assertTrue(result['instance 0'].split('.')[1], '5000')
         self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))

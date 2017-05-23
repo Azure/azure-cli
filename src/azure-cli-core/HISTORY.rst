@@ -3,6 +3,12 @@
 Release History
 ===============
 
+unreleased
+^^^^^^^^^^^^^^^^^^
+* Command paths are no longer case sensitive.
+* Certain boolean-type parameters are no longer case sensitive.
+* Support login to ADFS on prem server like Azure Stack
+
 2.0.6 (2017-05-09)
 ^^^^^^^^^^^^^^^^^^
 * RP Auto-Reg: capture missing subscription registration error on LRO (#3268)

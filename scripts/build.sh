@@ -41,4 +41,6 @@ if [[ "$CI" == "true" ]]; then
     $scripts_root/package_verify.sh
 fi
 
+python -m automation.tests.verify_doc_source_map
+
 python $scripts_root/license/verify.py
