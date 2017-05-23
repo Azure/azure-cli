@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
+# pylint: disable=too-many-locals
 
 from __future__ import print_function
 
