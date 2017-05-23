@@ -25,8 +25,12 @@ helps['sql show-capabilities'] = """
         - name: Show all available database service objectives and elastic pool DTU limits
                 for Standard edition. Hide lower layers of the tree.
           text: az sql show-capabilities -l westus --edition Standard --depth 3
-        - name: Show available max database sizes for S2 service objective
-          text: az sql show-capabilities -l westus --service-objective S2
+        - name: Show available max database sizes for P1 service objective
+          text: az sql show-capabilities -l westus --service-objective P1
+        - name: Show default values for Premium edition
+          text: az sql show-capabilities -l westus --edition Premium --status Default
+        - name: Show default values for P1 service objective
+          text: az sql show-capabilities -l westus --service-objective P1 --status Default
     """
 helps['sql db'] = """
     type: group
