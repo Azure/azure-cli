@@ -5,9 +5,9 @@
 
 import itertools
 from enum import Enum
-from .custom import CapabilityDetail
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
+    create_enum_type,
     enum_choice_list,
     ignore_type)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
@@ -86,25 +86,28 @@ with ParametersContext(command='sql show-capabilities') as c:
 
     c.argument('status',
                arg_group=filter_group,
-               help='Minimum status',
-               **enum_choice_list(CapabilityStatus))
+               help='Filter capabilities by status. If Default is specified, only default '
+               'values will be shown. If Available is specified, all available and default values '
+               'will be shown. If Visible is specified, all values (including values that are '
+               'unavailable) will be shown.  '
+               'Allowed values: Default, Available, Visible.  Default value: Available.',
+               type=create_enum_type([CapabilityStatus.default.value, CapabilityStatus.available.value, CapabilityStatus.visible.value]))
 
-    c.argument('hide',
+    c.argument('depth',
                arg_group=filter_group,
-               help='Level of detail to hide. Use this to prune deeper layers from the'
-               ' capabilities tree.',
-               **enum_choice_list(CapabilityDetail))
+               help='Depth of capabilities tree to show. Values deeper than this are output as an '
+               'empty list. This can be used to control output verbosity.')
 
     search_group = 'Search'
 
     c.argument('edition',
                arg_group=search_group,
-               help='Edition name to find in the capabilities tree.',
+               help='Edition name to find in the capabilities tree. If specified, all other editions are hidden.',
                **enum_choice_list(DatabaseEdition))
 
     c.argument('service_objective',
                arg_group=search_group,
-               help='Service objective to find in the capabilities tree.',
+               help='Service objective to find in the capabilities tree. If specified, all other service objectives are hidden.',
                **enum_choice_list(ServiceObjectiveName))
 
 

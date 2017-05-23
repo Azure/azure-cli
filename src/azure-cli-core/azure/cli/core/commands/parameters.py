@@ -103,6 +103,12 @@ def model_choice_list(resource_type, model_name):
     return enum_choice_list(model) if model else {}
 
 
+def create_enum_type(choices):
+    """ Creates the type for a supplied enum type or list of strings. """
+    def _type(value):
+        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
+
+
 def enum_choice_list(data):
     """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
     # transform enum types, otherwise assume list of string choices
@@ -113,11 +119,9 @@ def enum_choice_list(data):
     except AttributeError:
         choices = data
 
-    def _type(value):
-        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
     params = {
         'choices': CaseInsensitiveList(choices),
-        'type': _type
+        'type': create_enum_type(choices)
     }
     return params
 

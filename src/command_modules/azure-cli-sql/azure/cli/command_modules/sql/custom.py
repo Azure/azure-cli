@@ -49,23 +49,30 @@ def get_server_location(server_name, resource_group_name):
 ###############################################
 
 
-class CapabilityDetail(Enum):
-    edition = 'edition'
-    service_objective = 'service-objective'
-    max_size = 'max-size'
-
-
 def capabilities_get(  # pylint: disable=too-many-arguments
         client,
         location_id,
-        hide=None,
-        status=CapabilityStatus.available.value,
+        status=None,
         edition=None,
-        service_objective=None):
+        service_objective=None,
+        depth=3):
+    
+    # For reference, below is the tree structure of location capabilities:
+    # - location
+    #     - supportedServerVersions
+    #         - supportedEditions
+    #             - supportedServiceLevelObjectives
+    #                 - supportedMaxSizes
+    #         - supportedElasticPoolEditions
+    #             - supportedElasticPoolDtus
+    #                 - supportedMaxSizes
+    #                 - supportedPerDatabaseMaxDtus
+    #                     - supportedPerDatabaseMinDtus
+    #                 - supportedPerDatabaseMaxSizes
 
-    # Convert inputs to enum type
-    hide = CapabilityDetail(hide) if hide is not None else None
-    status = CapabilityStatus(status)
+    # Convert inputs to correct type
+    status = CapabilityStatus(status) if status else CapabilityStatus.available
+    depth = int(depth)
 
     # Get capabilities tree from server
     capabilities = client.list_by_location(location_id)
@@ -178,25 +185,45 @@ def capabilities_get(  # pylint: disable=too-many-arguments
 
     # ############# Phase 4: Prune tree based on requested depth. #############
 
-    for sv in capabilities.supported_server_versions:
-        # Prune edition and below if that is too much detail
-        if hide == CapabilityDetail.edition:
-            del sv.supported_editions
-        else:
-            for e in sv.supported_editions:
-                # Prune service objectives and below if that is too much detail
-                if hide == CapabilityDetail.service_objective:
-                    del e.supported_service_level_objectives
-                else:
-                    for slo in e.supported_service_level_objectives:
-                        # Prune max sizes if that is too much detail
-                        if hide == CapabilityDetail.max_size:
-                            del slo.supported_max_sizes
+    # Prune server versions and below if that is too much detail
+    if depth < 1:
+        capabilities.supported_server_versions = []
+    else:
+        for sv in capabilities.supported_server_versions:
+            # Prune edition and below if that is too much detail
+            if depth < 2:
+                sv.supported_editions = []
+            else:
+                for e in sv.supported_editions:
+                    # Prune service objectives and below if that is too much detail
+                    if depth < 3:
+                        e.supported_service_level_objectives = []
+                    else:
+                        for slo in e.supported_service_level_objectives:
+                            # Prune max sizes if that is too much detail
+                            if depth < 4:
+                                slo.supported_max_sizes = []
 
-            # for e in sv.supported_elastic_pool_editions:
-            #     # Prune supported dtus and below if that is too much detail
-            #     if hide == CapabilityDetail.service_objective:
-            #         del e.supported_elastic_pool_dtus
+            # Prune elastic pool edition and below if that is too much detail
+            if depth < 2:
+                sv.supported_elastic_pool_editions = []
+            else:
+                for e in sv.supported_elastic_pool_editions:
+                    # Prune supported dtus and below if that is too much detail
+                    if depth < 3:
+                        e.supported_elastic_pool_dtus = []
+                    else:
+                        for dtu in e.supported_elastic_pool_dtus:
+                            # Prune max sizes/dtus and below if that is too much detail
+                            if depth < 4:
+                                dtu.supported_max_sizes = []
+                                dtu.supported_per_database_max_dtus = []
+                                dtu.supported_per_database_max_sizes = []
+                            else:
+                                for max_dtu in dtu.supported_per_database_max_dtus:
+                                    # Prune min dtus and below if that is too much detail
+                                    if depth < 5:
+                                        max_dtu.supported_per_database_min_dtus = []
 
     return capabilities
 
