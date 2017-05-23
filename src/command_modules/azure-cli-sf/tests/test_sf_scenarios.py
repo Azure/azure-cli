@@ -2,10 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+from mock import patch
 from azure.cli.testsdk import (
     ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck
 )
-from mock import patch
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
@@ -13,10 +14,11 @@ logger = azlogging.get_az_logger(__name__)
 # Should be fixed unless recordings are being recreated for new versions of Service Fabric
 test_endpoint = "http://eddertester.westus2.cloudapp.azure.com:19080"
 test_node_name = "_basic_0"
-test_partition_id = "00000000-0000-0000-0000-000000000001S"
+test_partition_id = "00000000-0000-0000-0000-000000000001"
 test_replica_id = "131397086129396088"
 
 
+# pylint: disable=too-many-public-methods
 class ServiceFabricScenarioTests(ScenarioTest):
 
     # Application tests
@@ -109,7 +111,7 @@ class ServiceFabricScenarioTests(ScenarioTest):
         instance.connection_endpoint.return_value = test_endpoint
         instance.cert_info.return_value = False
 
-        self.cmd("az sf compose list", checks=[JMESPathCheckExists("items")])
+        self.cmd("az sf compose list", checks=[JMESPathCheck("continuationToken", "")])
 
     # Node tests
 
@@ -149,8 +151,8 @@ class ServiceFabricScenarioTests(ScenarioTest):
         command = "az sf node replica-list --application-id System --node-name {0}"
         command = command.format(test_node_name)
         self.cmd(command, checks=[
-            JMESPathCheckExists("replicaRole"),
-            JMESPathCheckExists("replicaStatus")
+            JMESPathCheckExists("[0].replicaRole"),
+            JMESPathCheckExists("[0].replicaStatus")
         ])
 
     @patch("azure.cli.command_modules.sf._factory.SfConfigParser")
@@ -164,8 +166,8 @@ class ServiceFabricScenarioTests(ScenarioTest):
         command = "az sf node service-package-list --application-id System --node-name {0}"
         command = command.format(test_node_name)
         self.cmd(command, checks=[
-            JMESPathCheckExists("name"),
-            JMESPathCheckExists("servicePackageActivationId")
+            JMESPathCheckExists("[0].name"),
+            JMESPathCheckExists("[0].status")
         ])
 
     @patch("azure.cli.command_modules.sf._factory.SfConfigParser")
@@ -179,8 +181,8 @@ class ServiceFabricScenarioTests(ScenarioTest):
         command = "az sf node service-type-list --application-id System --node-name {0}"
         command = command.format(test_node_name)
         self.cmd(command, checks=[
-            JMESPathCheckExists("codePackageName"),
-            JMESPathCheckExists("serviceTypeName")
+            JMESPathCheckExists("[0].codePackageName"),
+            JMESPathCheckExists("[0].serviceTypeName")
         ])
 
     # Partition tests
@@ -297,4 +299,3 @@ class ServiceFabricScenarioTests(ScenarioTest):
 
         command = "az sf service list --application-id System"
         self.cmd(command, checks=[JMESPathCheckExists("items")])
-
