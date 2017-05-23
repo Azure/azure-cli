@@ -435,9 +435,7 @@ def _validate_create_vnet(namespace, for_scale_set=False):
 
     if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.cli.core.profiles import ResourceType
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
+        client = get_network_client().virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
@@ -807,10 +805,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            if check_existence(namespace.application_gateway, namespace.resource_group_name,
-                               'Microsoft.Network', 'applicationGateways'):
+            client = get_network_client().application_gateways
+            try:
+                client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
-            else:
+            except CloudError:
                 namespace.app_gateway_type = 'new'
         elif namespace.application_gateway == '':
             namespace.app_gateway_type = None
@@ -844,6 +843,12 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             namespace.load_balancer_type = None
         elif namespace.load_balancer is None:
             namespace.load_balancer_type = 'new'
+
+
+def get_network_client():
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
 
 
 def process_vmss_create_namespace(namespace):
