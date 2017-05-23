@@ -501,10 +501,10 @@ def _validate_vmss_create_subnet(namespace):
 
         if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
             namespace.app_gateway_subnet_address_prefix = _get_next_subnet_addr_suffix(
-                namespace.vnet_address_prefix, namespace.subnet_address_prefix, 24)
+                namespace.subnet_address_prefix, 24)
 
 
-def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
+def _get_next_subnet_addr_suffix(subnet_cidr, new_mask):
     def _convert_to_int(address, bit_mask_len):
         a, b, c, d = [int(x) for x in address.split('.')]
         result = '{0:08b}{1:08b}{2:08b}{3:08b}'.format(a, b, c, d)
@@ -512,11 +512,12 @@ def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
     ip_address, mask = subnet_cidr.split('/')
     bit_mask_len = 32 - int(mask)
     candidate_int = _convert_to_int(ip_address, bit_mask_len) + 1
-    candaidate_str = '{0:32b}'.format(candidate_int<<bit_mask_len)
-    # there is no size requirement, just pick 24 
-    return '{0}.{1}.{2}.{3}/{4}'.format(int(candaidate_str[0:8],2), int(candaidate_str[8:16], 2),
-                                       int(candaidate_str[16:24], 2), int(candaidate_str[24:32],2),
-                                       new_mask)
+    candaidate_str = '{0:32b}'.format(candidate_int << bit_mask_len)
+    # there is no size requirement, just pick 24
+    return '{0}.{1}.{2}.{3}/{4}'.format(int(candaidate_str[0:8], 2), int(candaidate_str[8:16], 2),
+                                        int(candaidate_str[16:24], 2), int(candaidate_str[24:32], 2),
+                                        new_mask)
+
 
 def _validate_vm_create_nsg(namespace):
 

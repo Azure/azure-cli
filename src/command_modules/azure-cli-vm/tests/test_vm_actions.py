@@ -172,18 +172,18 @@ class TestActions(unittest.TestCase):
         self.assertEqual('publisher1', np.plan_publisher)
 
     def test_get_next_subnet_addr_suffix(self):
-        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
+        result = _get_next_subnet_addr_suffix('10.0.0.0/24', 24)
         self.assertEqual(result, '10.0.1.0/24')
 
         # for 254~510 instances VMSS
-        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/23', 24)
+        result = _get_next_subnet_addr_suffix('10.0.0.0/23', 24)
         self.assertEqual(result, '10.0.2.0/24')
 
-        # a bit complex, 
-        result = _get_next_subnet_addr_suffix('12.0.255.0/16', '12.0.255.0/24', 24)
+        # a bit complex involving carry bits to the next section
+        result = _get_next_subnet_addr_suffix('12.0.255.0/24', 24)
         self.assertEqual(result, '12.1.0.0/24')
 
-        # veriofy end to end
+        # verify end to end
         np_mock = mock.MagicMock()
         np_mock.vnet_type = 'new'
         np_mock.vnet_address_prefix = '10.0.0.0/16'
