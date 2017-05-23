@@ -13,11 +13,9 @@ import sys
 import time
 import timeit
 import traceback
-import subprocess
 from collections import OrderedDict, defaultdict
 from importlib import import_module
 
-import jmespath
 import six
 from six import string_types, reraise
 
@@ -204,7 +202,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     poller._response.__dict__['_content'].decode())['properties']['correlationId']
 
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
-            except Exception as e:  # pylint: disable=bare-except
+            except:  # pylint: disable=bare-except
                 correlation_id = None
 
             try:
