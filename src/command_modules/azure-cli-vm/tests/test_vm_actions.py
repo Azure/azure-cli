@@ -16,7 +16,9 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
                                                       _parse_image_argument,
-                                                      process_disk_or_snapshot_create_namespace)
+                                                      process_disk_or_snapshot_create_namespace,
+                                                      _validate_vmss_create_subnet,
+                                                      _get_next_subnet_addr_suffix)
 
 
 class TestActions(unittest.TestCase):
@@ -168,3 +170,26 @@ class TestActions(unittest.TestCase):
         self.assertEqual('plan1', np.plan_name)
         self.assertEqual('product1', np.plan_product)
         self.assertEqual('publisher1', np.plan_publisher)
+
+    def test_get_next_subnet_addr_suffix(self):
+        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
+        self.assertEqual(result, '10.0.1.0/24')
+
+        # for 254~510 instances VMSS
+        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/23', 24)
+        self.assertEqual(result, '10.0.2.0/24')
+
+        # a bit complex, 
+        result = _get_next_subnet_addr_suffix('12.0.255.0/16', '12.0.255.0/24', 24)
+        self.assertEqual(result, '12.1.0.0/24')
+
+        # veriofy end to end
+        np_mock = mock.MagicMock()
+        np_mock.vnet_type = 'new'
+        np_mock.vnet_address_prefix = '10.0.0.0/16'
+        np_mock.subnet_address_prefix = None
+        np_mock.instance_count = 1000
+        np_mock.app_gateway_type = 'new'
+        np_mock.app_gateway_subnet_address_prefix = None
+        _validate_vmss_create_subnet(np_mock)
+        self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.4.0/24')
