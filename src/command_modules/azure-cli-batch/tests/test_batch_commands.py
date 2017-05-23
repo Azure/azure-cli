@@ -330,7 +330,7 @@ class TestBatchParser(unittest.TestCase):
 
         tree.queue_argument('id', 'pool', 'id', {}, 'str', ['vm_size', 'id'])
         tree.queue_argument('vm_size', 'pool', 'vm_size', {}, 'str', ['vm_size', 'id'])
-        tree.queue_argument('target_dedicated', 'pool', 'target_dedicated', {}, 'int',
+        tree.queue_argument('target_dedicated_nodes', 'pool', 'target_dedicated_nodes', {}, 'int',
                             ['vm_size', 'id'])
         tree.queue_argument('command_line', 'pool.start_task', 'command_line', {}, 'str',
                             ['command_line'])
@@ -358,7 +358,7 @@ class TestBatchParser(unittest.TestCase):
         ns = TestObj()
         ns.id = None
         ns.vm_size = None
-        ns.target_dedicated = 3
+        ns.target_dedicated_nodes = 3
         ns.command_line = None
         ns.run_elevated = None
         ns.node_agent_sku_id = None
@@ -432,7 +432,7 @@ class TestBatchParser(unittest.TestCase):
                                                      'pool.cloud_service_configuration'])
 
         siblings = tree._get_siblings("pool")
-        self.assertEqual(sorted(siblings), ["id", "target_dedicated", "vm_size"])
+        self.assertEqual(sorted(siblings), ["id", "target_dedicated_nodes", "vm_size"])
         siblings = tree._get_siblings("pool.virtual_machine_configuration")
         self.assertEqual(sorted(siblings), ["node_agent_sku_id"])
         children = tree._get_children("pool.virtual_machine_configuration")
@@ -558,7 +558,6 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse(self.command_job._cancel_operation({}, config, user))
         self.assertFalse(self.command_job._cancel_operation({'yes': True}, config, user))
         self.assertFalse(self.command_delete._cancel_operation({'yes': True}, config, user))
-        self.assertTrue(self.command_delete._cancel_operation({'yes': None}, config, user))
 
     def test_batch_should_flatten(self):
         self.assertFalse(self.command_task._should_flatten('task.depends_on'))
@@ -571,7 +570,7 @@ class TestBatchLoader(unittest.TestCase):
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
         self.assertEqual(len(attrs), 3)
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
-        self.assertEqual(len(attrs), 11)
+        self.assertEqual(len(attrs), 13)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
         self.assertEqual(len(attrs), 10)
 
@@ -579,7 +578,7 @@ class TestBatchLoader(unittest.TestCase):
         # pylint: disable=too-many-statements
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 32)
+        self.assertEqual(len(args), 34)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -618,15 +617,16 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.job_schedule_operations.JobScheduleOperations.add
-        args = list(self.command_conflicts._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 46)
-        self.assertTrue('id' in [a for a, _ in args])
-        self.assertTrue('job_manager_task_id' in [a for a, _ in args])
-        self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, _ in args])
-        self.assertTrue('job_max_wall_clock_time' in [a for a, _ in args])
-        self.assertFalse('yes' in [a for a, _ in args])
-        self.assertTrue('json_file' in [a for a, _ in args])
-        self.assertFalse('destination' in [a for a, _ in args])
+        args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
+        self.assertEqual(len(args), 47)
+        self.assertTrue('id' in args)
+        self.assertTrue('job_manager_task_id' in args)
+        self.assertTrue('job_manager_task_max_wall_clock_time' in args)
+        self.assertTrue('job_max_wall_clock_time' in args)
+        self.assertTrue('allow_low_priority_node' in args)
+        self.assertFalse('yes' in args)
+        self.assertTrue('json_file' in args)
+        self.assertFalse('destination' in args)
 
     def test_batch_execute_command(self):
         def function_result(client, **kwargs):
@@ -641,7 +641,7 @@ class TestBatchLoader(unittest.TestCase):
         args = list(self.command_pool._load_transformed_arguments(handler))
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -649,14 +649,14 @@ class TestBatchLoader(unittest.TestCase):
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
             error = models.BatchError()
             error.code = 'InvalidHeaderValue'
             error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
-                                                         'headers is not in the correct format')
+                                                'headers is not in the correct format')
             error.values = [
                 models.BatchErrorDetail('HeaderName', 'Content-Type'),
                 models.BatchErrorDetail('HeaderValue', 'application/json')
@@ -666,7 +666,7 @@ class TestBatchLoader(unittest.TestCase):
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -681,5 +681,5 @@ class TestBatchLoader(unittest.TestCase):
         kwargs = {a: None for a, _ in args}
         kwargs['json_file'] = json_file
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
-            result = self.command_pool.cmd(kwargs=kwargs)
+            result = self.command_pool.cmd.execute(kwargs=kwargs)
             self.assertEqual(result, "Pool Created")

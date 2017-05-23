@@ -1662,6 +1662,8 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
+        result = self.cmd('vmss list-instance-connection-info --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.assertTrue(result['instance 0'].split('.')[1], '5000')
         self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
