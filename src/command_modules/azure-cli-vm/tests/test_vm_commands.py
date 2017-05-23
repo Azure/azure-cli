@@ -1543,11 +1543,12 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
     @ResourceGroupPreparer()
     def test_vmss_create_with_app_gateway(self, resource_group):
         vmss_name = 'vmss1'
-        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --app-gateway apt1 --instance-count 5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"), checks=[
-            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')  # ensure it does gets created
+        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --app-gateway apt1 --instance-count 5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
+            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
         ])
-        # spot check it uses gateway
+        # spot check it is using gateway
         self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('sku.capacity', 5),
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
         ])
 
