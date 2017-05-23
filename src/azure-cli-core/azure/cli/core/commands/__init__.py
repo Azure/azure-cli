@@ -143,22 +143,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
     def _template_progress(self, correlation_id):
         if correlation_id is not None:
 
-            """
-            self.authorization = authorization
-            self.claims = claims
-            self.description = description
-            self.id = id
-            self.event_data_id = event_data_id
-            self.event_name = event_name
-            self.level = level
-            self.operation_id = operation_id
-            self.operation_name = operation_name
-            self.properties = properties
-            self.status = status
-            self.sub_status = sub_status
-            self.event_timestamp = event_timestamp
-            self.submission_timestamp = submission_timestamp
-            """
             formatter = "eventTimestamp ge {} and eventTimestamp le {}"
 
             end_time = datetime.datetime.utcnow()
