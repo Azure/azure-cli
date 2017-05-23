@@ -168,3 +168,17 @@ def _list_log_files_with_filter(  # pylint: disable=too-many-arguments
         files.append(f)
 
     return files
+
+
+#        Custom funcs for list servers        #
+def _server_list_custom_func(
+        client,
+        resource_group_name=None):
+    """
+    List servers by resource group name or subscription
+    """
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    else:
+        return client.list()

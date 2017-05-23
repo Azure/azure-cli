@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import \
      model_choice_list, enum_default, location_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
-from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType, VersionConstraint
 
 from azure.common import AzureMissingResourceHttpError
 
@@ -343,14 +343,17 @@ register_cli_argument('storage blob list', 'include', help='Specifies additional
 for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
     register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int)
-    register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
+    with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
+        c.register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
 
 for item in ['update', 'upload', 'upload-batch']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
 register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
 register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
-register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
+    c.register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+
 # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
 register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)
 
@@ -376,10 +379,11 @@ register_cli_argument('storage blob upload-batch', 'blob_type',
 register_cli_argument('storage blob upload-batch', 'maxsize_condition',
                       help='The max length in bytes permitted for an append blob.',
                       arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'validate_content',
-                      help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by' +
-                      ' the service when the chunk has arrived.',
-                      arg_group='Content Control')
+with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
+    c.register_cli_argument('storage blob upload-batch', 'validate_content',
+                            help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by' +
+                            ' the service when the chunk has arrived.',
+                            arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'lease_id', help='Required if the blob has an active lease')
 register_cli_argument('storage blob upload-batch', 'content_encoding', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'content_disposition', arg_group='Content Control')
@@ -409,8 +413,10 @@ with CommandContext('storage file upload-batch') as c:
     c.reg_arg('destination', options_list=('--destination', '-d'))
 
     with c.arg_group('Download Control') as group:
-        group.reg_arg('validate_content')
         group.reg_arg('max_connections')
+
+        with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as vc:
+            vc.register_cli_argument('storage file upload-batch', 'validate_content')
 
 register_content_settings_argument('storage file upload-batch', FileContentSettings,
                                    update=False, arg_group='Content Settings')
@@ -421,8 +427,10 @@ with CommandContext('storage file download-batch') as c:
     c.reg_arg('destination', options_list=('--destination', '-d'))
 
     with c.arg_group('Download Control') as group:
-        group.reg_arg('validate_content')
         group.reg_arg('max_connections')
+
+        with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as vc:
+            vc.register_cli_argument('storage file download-batch', 'validate_content')
 
 # FILE COPY-BATCH PARAMETERS
 with CommandContext('storage file copy start-batch') as c:

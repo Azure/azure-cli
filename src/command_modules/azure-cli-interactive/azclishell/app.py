@@ -11,6 +11,8 @@ import os
 import subprocess
 import sys
 import uuid
+import datetime
+
 
 import jmespath
 from six.moves import configparser
@@ -27,6 +29,7 @@ from prompt_toolkit.shortcuts import create_eventloop
 import azclishell.configuration
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
+from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
@@ -51,6 +54,7 @@ NOTIFICATIONS = ""
 PROFILE = Profile()
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
+START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
@@ -97,26 +101,6 @@ def space_examples(list_examples, rows):
     return example + page_number
 
 
-def _toolbar_info():
-    sub_name = ""
-    try:
-        sub_name = PROFILE.get_subscription()[_SUBSCRIPTION_NAME]
-    except CLIError:
-        pass
-
-    curr_cloud = "Cloud: {}".format(get_active_cloud_name())
-    tool_val = '{}'.format('Subscription: {}'.format(sub_name) if sub_name else curr_cloud)
-
-    settings_items = [
-        " [F1]Layout",
-        "[F2]Defaults",
-        "[F3]Keys",
-        "[Ctrl+D]Quit",
-        tool_val
-    ]
-    return settings_items
-
-
 def space_toolbar(settings_items, cols, empty_space):
     """ formats the toolbar """
     counter = 0
@@ -136,7 +120,8 @@ class Shell(object):
 
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdout, output_custom=None):
+                 app=None, input_custom=sys.stdout, output_custom=None,
+                 user_feedback=False):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -154,6 +139,7 @@ class Shell(object):
         self._env = os.environ
         self.last = None
         self.last_exit = 0
+        self.user_feedback = user_feedback
         self.input = input_custom
         self.output = output_custom
         self.config_default = ""
@@ -171,13 +157,8 @@ class Shell(object):
         """
         brings up the metadata for the command if there is a valid command already typed
         """
-        _, cols = get_window_dim()
-        cols = int(cols)
         document = cli.current_buffer.document
         text = document.text
-        empty_space = ""
-        for i in range(cols):  # pylint: disable=unused-variable
-            empty_space += " "
 
         text = text.replace('az', '')
         if self.default_command:
@@ -190,20 +171,57 @@ class Shell(object):
 
         self._update_default_info()
 
-        settings, empty_space = space_toolbar(_toolbar_info(), cols, empty_space)
-
         cli.buffers['description'].reset(
             initial_document=Document(self.description_docs, cursor_position=0))
         cli.buffers['parameter'].reset(
             initial_document=Document(self.param_docs))
         cli.buffers['examples'].reset(
             initial_document=Document(self.example_docs))
-        cli.buffers['bottom_toolbar'].reset(
-            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
         cli.buffers['default_values'].reset(
             initial_document=Document(
                 u'{}'.format(self.config_default if self.config_default else 'No Default Values')))
+        self._update_toolbar()
         cli.request_redraw()
+
+    def _update_toolbar(self):
+        cli = self.cli
+        _, cols = get_window_dim()
+        cols = int(cols)
+
+        empty_space = ""
+        for _ in range(cols):
+            empty_space += " "
+
+        delta = datetime.datetime.utcnow() - START_TIME
+        if self.user_feedback and delta.seconds < DISPLAY_TIME:
+            toolbar = [
+                ' Try out the \'feedback\' command',
+                'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
+        else:
+            toolbar = self._toolbar_info()
+
+        toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
+        cli.buffers['bottom_toolbar'].reset(
+            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, toolbar, empty_space)))
+
+    def _toolbar_info(self):
+        sub_name = ""
+        try:
+            sub_name = PROFILE.get_subscription()[_SUBSCRIPTION_NAME]
+        except CLIError:
+            pass
+
+        curr_cloud = "Cloud: {}".format(get_active_cloud_name())
+        tool_val = 'Subscription: {}'.format(sub_name) if sub_name else curr_cloud
+
+        settings_items = [
+            " [F1]Layout",
+            "[F2]Defaults",
+            "[F3]Keys",
+            "[Ctrl+D]Quit",
+            tool_val
+        ]
+        return settings_items
 
     def generate_help_text(self, text):
         """ generates the help text based on commands typed """
@@ -268,7 +286,7 @@ class Shell(object):
             'bottom_toolbar': Buffer(is_multiline=True),
             'example_line': Buffer(is_multiline=True),
             'default_values': Buffer(),
-            'symbols': Buffer()
+            'symbols': Buffer(),
         }
 
         writing_buffer = Buffer(
@@ -522,9 +540,15 @@ class Shell(object):
         return continue_flag, cmd
 
     def cli_execute(self, cmd):
+        """ sends the command to the CLI to be executed """
+
         try:
             args = parse_quotes(cmd)
             azlogging.configure_logging(args)
+
+            if len(args) > 0 and args[0] == 'feedback':
+                SHELL_CONFIGURATION.set_feedback('yes')
+                self.user_feedback = False
 
             azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):
@@ -543,7 +567,6 @@ class Shell(object):
                 'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
                 'query_active': False
             }
-
             result = self.app.execute(args)
             self.last_exit = 0
             if result and result.result is not None:
@@ -562,7 +585,7 @@ class Shell(object):
             self.last_exit = int(ex.code)
 
     def run(self):
-
+        """ starts the REPL """
         telemetry.start()
 
         from azclishell.configuration import SHELL_HELP
@@ -600,6 +623,7 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
+
             except KeyboardInterrupt:  # CTRL C
                 self.set_prompt()
                 continue
