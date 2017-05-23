@@ -55,7 +55,7 @@ def capabilities_get(  # pylint: disable=too-many-arguments
         status=None,
         edition=None,
         service_objective=None,
-        depth=3):
+        depth=None):
     
     # For reference, below is the tree structure of location capabilities:
     # - location
@@ -71,8 +71,8 @@ def capabilities_get(  # pylint: disable=too-many-arguments
     #                 - supportedPerDatabaseMaxSizes
 
     # Convert inputs to correct type
-    status = CapabilityStatus(status) if status else CapabilityStatus.available
-    depth = int(depth)
+    status = CapabilityStatus(status) if status else CapabilityStatus.visible
+    depth = int(depth) if depth is not None else 999
 
     # Get capabilities tree from server
     capabilities = client.list_by_location(location_id)
@@ -115,6 +115,11 @@ def capabilities_get(  # pylint: disable=too-many-arguments
                     # service objective. Remember to be more lenient to it and its parents when
                     # filtering by status.
                     lenient_nodes += [sv, e, slo]
+
+        # If service objective filter is requested then apply it.
+        # Elastic pool doesn't have "service objective", so hide all elastic pools.
+        if service_objective is not None:
+            sv.supported_elastic_pool_editions = []
 
     # ############# Phase 2: Filter by status. #############
 

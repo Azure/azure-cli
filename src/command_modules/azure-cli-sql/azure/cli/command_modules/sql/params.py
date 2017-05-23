@@ -90,7 +90,7 @@ with ParametersContext(command='sql show-capabilities') as c:
                'values will be shown. If Available is specified, all available and default values '
                'will be shown. If Visible is specified, all values (including values that are '
                'unavailable) will be shown.  '
-               'Allowed values: Default, Available, Visible.  Default value: Available.',
+               'Allowed values: Default, Available, Visible.  Default value: Visible.',
                type=create_enum_type([CapabilityStatus.default.value, CapabilityStatus.available.value, CapabilityStatus.visible.value]))
 
     c.argument('depth',

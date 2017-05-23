@@ -11,6 +11,23 @@ helps['sql'] = """
     type: group
     short-summary: Manage Azure SQL Databases and Data Warehouses.
     """
+helps['sql show-capabilities'] = """
+    type: command
+    short-summary: Shows Azure SQL Database capabilities that are available for your subscription.
+    long-summary: Capabilities are expressed as a tree that includes available editions, service 
+                  objectives, DTU limits, and storage limits.
+    examples:
+        - name: Show all capabilities in a location.
+          text: az sql show-capabilities -l westus
+        - name: Show all available database and elastic pool editions in a location. Hide lower 
+                layers of the tree.
+          text: az sql show-capabilities -l westus --depth 2
+        - name: Show all available database service objectives and elastic pool DTU limits
+                for Standard edition. Hide lower layers of the tree.
+          text: az sql show-capabilities -l westus --edition Standard --depth 3
+        - name: Show available max database sizes for S2 service objective
+          text: az sql show-capabilities -l westus --service-objective S2
+    """
 helps['sql db'] = """
     type: group
     short-summary: Manage databases.
