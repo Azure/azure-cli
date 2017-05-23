@@ -91,7 +91,9 @@ with ParametersContext(command='sql show-capabilities') as c:
                'will be shown. If Visible is specified, all values (including values that are '
                'unavailable) will be shown.  '
                'Allowed values: Default, Available, Visible.  Default value: Visible.',
-               type=create_enum_type([CapabilityStatus.default.value, CapabilityStatus.available.value, CapabilityStatus.visible.value]))
+               type=create_enum_type([CapabilityStatus.default.value,
+                                      CapabilityStatus.available.value,
+                                      CapabilityStatus.visible.value]))
 
     c.argument('depth',
                arg_group=filter_group,
@@ -102,12 +104,14 @@ with ParametersContext(command='sql show-capabilities') as c:
 
     c.argument('edition',
                arg_group=search_group,
-               help='Edition name to find in the capabilities tree. If specified, all other editions are hidden.',
+               help='Edition name to find in the capabilities tree. If specified, all other '
+               'editions are hidden.',
                **enum_choice_list(DatabaseEdition))
 
     c.argument('service_objective',
                arg_group=search_group,
-               help='Service objective to find in the capabilities tree. If specified, all other service objectives are hidden.',
+               help='Service objective to find in the capabilities tree. If specified, all other '
+               'service objectives are hidden.',
                **enum_choice_list(ServiceObjectiveName))
 
 

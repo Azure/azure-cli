@@ -1009,6 +1009,17 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class SqlServerCapabilityScenarioTest(ScenarioTest):
+    def test_sql_capabilities(self):
+        location = 'westus'
+
+        # New capabilities are added quite frequently and the state of each capability depends
+        # on your subscription. So it's not a good idea to make strict checks against exactly
+        # which capabilities are returned. The idea is to just check the overall structure.
+        self.cmd('sql show-capabilities -l {}'.format(location),
+                 checks=[])
+
+
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()

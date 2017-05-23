@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from enum import Enum
-
 from ._util import (
     get_sql_servers_operations,
     get_sql_elastic_pools_operations
@@ -56,7 +54,7 @@ def capabilities_get(  # pylint: disable=too-many-arguments
         edition=None,
         service_objective=None,
         depth=None):
-    
+
     # For reference, below is the tree structure of location capabilities:
     # - location
     #     - supportedServerVersions
@@ -164,15 +162,17 @@ def capabilities_get(  # pylint: disable=too-many-arguments
 
             for pool_dtu in e.supported_elastic_pool_dtus:
                 # Filter per database max DTUs
-                pool_dtu.supported_per_database_max_dtus = filter_by_status(pool_dtu.supported_per_database_max_dtus)
+                pool_dtu.supported_per_database_max_dtus = \
+                    filter_by_status(pool_dtu.supported_per_database_max_dtus)
 
                 for db_max_dtu in pool_dtu.supported_per_database_max_dtus:
                     # Filter per database min DTUs
-                    db_max_dtu.supported_per_database_min_dtus = filter_by_status(db_max_dtu.supported_per_database_min_dtus)
+                    db_max_dtu.supported_per_database_min_dtus = \
+                        filter_by_status(db_max_dtu.supported_per_database_min_dtus)
 
                 # Filter per database max size
-                pool_dtu.supported_per_database_max_sizes = filter_by_status(pool_dtu.supported_per_database_max_sizes)                 
-
+                pool_dtu.supported_per_database_max_sizes = \
+                    filter_by_status(pool_dtu.supported_per_database_max_sizes)
 
     # ############# Phase 3: Prune items which have no children due to filters. #############
     # This must be completed before pruning based on depth, because after depth-pruning the
@@ -190,17 +190,13 @@ def capabilities_get(  # pylint: disable=too-many-arguments
 
     # ############# Phase 4: Prune tree based on requested depth. #############
 
-    # Prune server versions and below if that is too much detail
     if depth < 1:
         capabilities.supported_server_versions = []
-    else:
         for sv in capabilities.supported_server_versions:
-            # Prune edition and below if that is too much detail
             if depth < 2:
                 sv.supported_editions = []
             else:
                 for e in sv.supported_editions:
-                    # Prune service objectives and below if that is too much detail
                     if depth < 3:
                         e.supported_service_level_objectives = []
                     else:
@@ -209,17 +205,14 @@ def capabilities_get(  # pylint: disable=too-many-arguments
                             if depth < 4:
                                 slo.supported_max_sizes = []
 
-            # Prune elastic pool edition and below if that is too much detail
             if depth < 2:
                 sv.supported_elastic_pool_editions = []
             else:
                 for e in sv.supported_elastic_pool_editions:
-                    # Prune supported dtus and below if that is too much detail
                     if depth < 3:
                         e.supported_elastic_pool_dtus = []
                     else:
                         for dtu in e.supported_elastic_pool_dtus:
-                            # Prune max sizes/dtus and below if that is too much detail
                             if depth < 4:
                                 dtu.supported_max_sizes = []
                                 dtu.supported_per_database_max_dtus = []
