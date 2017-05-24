@@ -7,7 +7,7 @@ from .base import ScenarioTest, LiveTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer,
                         RoleBasedServicePrincipalPreparer, KeyVaultPreparer)
 from .exceptions import CliTestError
-from .checkers import JMESPathCheck, JMESPathCheckExists, NoneCheck, StringCheck, StringContainCheck
+from .checkers import JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck, StringContainCheck
 from .decorators import live_only, record_only
 from .utilities import get_sha1_hash
 

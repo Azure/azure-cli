@@ -7,6 +7,7 @@ from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
     JMESPathCheck,
+    JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
@@ -1016,7 +1017,58 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
+
+        # Get all capabilities
         self.cmd('sql show-capabilities -l {}'.format(location),
+                 checks=[
+                     # All statuses (default, available, and visible) are shown
+                     JMESPathCheckGreaterThan(
+                         "length(supportedServerVersions[].supportedEditions[]"
+                         ".supportedServiceLevelObjectives[?status == 'Default'])", 0),
+                     JMESPathCheckGreaterThan(
+                         "length(supportedServerVersions[].supportedEditions[]"
+                         ".supportedServiceLevelObjectives[?status == 'Available'])", 0),
+                     JMESPathCheckGreaterThan(
+                         "length(supportedServerVersions[].supportedEditions[]"
+                         ".supportedServiceLevelObjectives[?status == 'Visible'])", 0),
+                     # Full depth is preserved
+                     JMESPathCheckGreaterThan(
+                         'length(supportedServerVersions[].supportedElasticPoolEditions[]'
+                         '.supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[]'
+                         '.supportedPerDatabaseMinDtus[])', 0)
+                ])
+
+        # Filter by various depths
+        self.cmd('sql show-capabilities -l {} --depth 0'.format(location),
+                 checks=[])
+        self.cmd('sql show-capabilities -l {} --depth 1'.format(location),
+                 checks=[])
+        self.cmd('sql show-capabilities -l {} --depth 2'.format(location),
+                 checks=[])
+        self.cmd('sql show-capabilities -l {} --depth 3'.format(location),
+                 checks=[])
+        self.cmd('sql show-capabilities -l {} --depth 4'.format(location),
+                 checks=[])
+
+        # Search for edition that exists for both db and pool
+        edition1 = 'Premium'
+        self.cmd('sql show-capabilities -l {} --edition {}'.format(location, edition1),
+                 checks=[])
+
+        # Search for edition that exists for db only
+        edition2 = 'DataWarehouse'
+        self.cmd('sql show-capabilities -l {} --edition {}'.format(location, edition2),
+                 checks=[])
+
+        # Search for service objective
+        service_objective = 'P2'
+        self.cmd('sql show-capabilities -l {} --service-objective {}'
+                 .format(location, service_objective),
+                 checks=[])
+
+        # Show default only
+        self.cmd('sql show-capabilities -l {} --service-objective {} --status Default'
+                 .format(location, service_objective),
                  checks=[])
 
 
