@@ -954,18 +954,21 @@ def set_diagnostics_extension(
     '''Enable diagnostics on a virtual machine
     '''
     client = _compute_client_factory()
-    vm = client.virtual_machines.get_instance_view(resource_group_name, vm_name)
+    vm = client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
     # pylint: disable=no-member
     is_linux_os = _detect_os_type_for_diagnostics_ext(vm.os_profile)
-    if is_linux_os:
+    vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
+    if is_linux_os:  # check incompatible version
         exts = vm.instance_view.extensions or []
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
-        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and not e.type_handler_version.startswith(major_ver + '.')), None):
-            logger.warning('Looks like you have older version of diagnostics extension installed. We will update it with a new version')
-            poller = client.virtual_machine_extensions.delete(resource_group_name, vm_name, _LINUX_ACCESS_EXT)
+        if next((e for e in exts if e.name == vm_extension_name and
+                 not e.type_handler_version.startswith(major_ver + '.')), None):
+            logger.warning('There is incompatible version of diagnostics extension installed. '
+                           'We will update it with a new version')
+            poller = client.virtual_machine_extensions.delete(resource_group_name, vm_name,
+                                                              vm_extension_name)
             LongRunningOperation()(poller)
 
-    vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     return set_extension(resource_group_name, vm_name, vm_extension_name,
                          extension_mappings[vm_extension_name]['publisher'],
                          version or extension_mappings[vm_extension_name]['version'],
@@ -979,26 +982,37 @@ def set_vmss_diagnostics_extension(
         no_auto_upgrade=False):
     '''Enable diagnostics on a virtual machine scale set
     '''
+    from azure.mgmt.compute.models import UpgradeMode
     client = _compute_client_factory()
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
-                                                 vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
     is_linux_os = _detect_os_type_for_diagnostics_ext(vmss.virtual_machine_profile.os_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
-    if is_linux_os:
-        exts = vmss.virtual_machine_profile.extension_profile or []
+    if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
+        exts = vmss.virtual_machine_profile.extension_profile.extensions or []
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
-        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and not e.type_handler_version.startswith(major_ver + '.')), None):
-            logger.warning('Looks like you have older version of diagnostics extension installed. We will update it with new ones')
-            LongRunningOperation()(delete_vmss_extension(resource_group_name, vmss_name, _LINUX_DIAG_EXT))
+        # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
+        # the removal done before we can install the newer one
+        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
+                 not e.type_handler_version.startswith(major_ver + '.')), None):
+            delete_cmd = 'az vmss extension delete -g {} --vmss-name {} -n {}'.format(
+                resource_group_name, vmss_name, vm_extension_name)
+            raise CLIError("There is an incompatible version of diagnostics extension installed. "
+                           "Please remove it by running '{}', and retry. 'az vmss update-instances'"
+                           " might be needed if with manual upgrade policy".format(delete_cmd))
 
-    return set_vmss_extension(resource_group_name, vmss_name, vm_extension_name,
-                              extension_mappings[vm_extension_name]['publisher'],
-                              version or extension_mappings[vm_extension_name]['version'],
-                              settings,
-                              protected_settings,
-                              no_auto_upgrade)
+    poller = set_vmss_extension(resource_group_name, vmss_name, vm_extension_name,
+                                extension_mappings[vm_extension_name]['publisher'],
+                                version or extension_mappings[vm_extension_name]['version'],
+                                settings,
+                                protected_settings,
+                                no_auto_upgrade)
 
+    result = LongRunningOperation()(poller)
+    if vmss.upgrade_policy.mode == UpgradeMode.manual:
+        poller2 = update_vmss_instances(resource_group_name, vmss_name, '*')
+        LongRunningOperation()(poller2)
+    return result
 
 # Same logic also applies on vmss
 
