@@ -16,7 +16,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                              NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
@@ -1477,27 +1477,24 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
                  .format(zone_name, self.resource_group, zone_file_path))
         self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
 
-class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
+class NetworkWatcherScenarioTest(ScenarioTest):
+    import mock
 
-    def __init__(self, test_method):
-        super(NetworkWatcherScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_network_watcher')
+    def _mock_thread_count():
+        return 1
+    
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    def test_network_watcher(self, resource_group, storage_account):
 
-    def test_network_watcher(self):
-        self.execute()
-
-    def body(self):
-
-        resource_group = self.resource_group
-        storage_account = 'clitestnwstorage1'
-
-        self.cmd('network watcher configure -g {} --locations westus westus2 --enabled'.format(resource_group))
+        self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
 
         vm = 'vm1'
         # create VM with NetworkWatcher extension
-        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
         self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
 
@@ -1510,7 +1507,7 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
 
-        #self.cmd('network watcher test-connectivity -g {} --source-resource {} --dest-address www.microsoft.com --dest-port 80'.format(resource_group, vm))
+        self.cmd('network watcher test-connectivity -g {} --source-resource {} --dest-address www.microsoft.com --dest-port 80'.format(resource_group, vm))
 
         # TODO: Re-enable once issue #3385 is resolved
         #capture = 'capture1'
