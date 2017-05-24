@@ -58,9 +58,9 @@ def claim_vm(client, lab_name=None, name=None, resource_group=None):
 
     if name is not None:
         return client.claim(resource_group, lab_name, name)
-    else:
-        from ._client_factory import get_devtestlabs_lab_operation
-        return get_devtestlabs_lab_operation(None).claim_any_vm(resource_group, lab_name)
+
+    from ._client_factory import get_devtestlabs_lab_operation
+    return get_devtestlabs_lab_operation(None).claim_any_vm(resource_group, lab_name)
 
 
 # pylint: disable=too-many-locals, unused-argument

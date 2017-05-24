@@ -167,7 +167,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 message = '{} {}'.format(
                     str(message),
-                    json.loads(client_exception.response.text)['error']['details'][0]['message'])
+                    json.loads(client_exception.response.text)['error']['details'][0]['message'])  # pylint: disable=no-member
             except:  # pylint: disable=bare-except
                 pass
 
@@ -195,9 +195,9 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
         elif isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return None
-        else:
-            # --validate returns a 'normal' response
-            return result
+
+        # --validate returns a 'normal' response
+        return result
 
 
 class CommandTable(dict):
@@ -392,8 +392,7 @@ def get_op_handler(operation):
             op = getattr(op, part)
         if isinstance(op, types.FunctionType):
             return op
-        else:
-            return six.get_method_function(op)
+        return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -443,7 +442,6 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-        from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \

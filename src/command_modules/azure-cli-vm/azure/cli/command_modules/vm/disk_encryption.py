@@ -193,9 +193,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
         'SequenceVersion': sequence_version,
     }
 
-    from azure.mgmt.compute.models import (VirtualMachineExtension, DiskEncryptionSettings,
-                                           KeyVaultSecretReference, KeyVaultKeyReference,
-                                           SubResource)
+    from azure.mgmt.compute.models import VirtualMachineExtension, DiskEncryptionSettings
 
     ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],

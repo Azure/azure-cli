@@ -51,7 +51,7 @@ def internal_validate_lock_parameters(resource_group_name, resource_provider_nam
             raise CLIError('--parent is ignored if --resource-name is not given.')
         return
 
-    if resource_type is None or len(resource_type) == 0:
+    if not resource_type:
         raise CLIError('--resource-type is required if --resource-name is present')
 
     parts = resource_type.split('/')

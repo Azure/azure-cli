@@ -11,4 +11,4 @@ def load_params(_):
 
 
 def load_commands():
-    import azure.cli.command_modules.feedback.commands  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.feedback.commands  # pylint: disable=redefined-outer-name, unused-variable

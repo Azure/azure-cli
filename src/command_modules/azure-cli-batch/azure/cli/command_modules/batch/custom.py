@@ -76,7 +76,6 @@ def update_account(client, resource_group_name, account_name,
 
 def login_account(client, resource_group_name, account_name, shared_key_auth=False):
     from azure.cli.core._config import az_config, set_global_config
-    from azure.cli.core._profile import Profile
 
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)
@@ -218,16 +217,16 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
                                                        if_modified_since=if_modified_since,
                                                        if_unmodified_since=if_unmodified_since)
             return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
-        else:
-            param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
-                                        target_low_priority_nodes=target_low_priority_nodes,
-                                        resize_timeout=resize_timeout,
-                                        node_deallocation_option=node_deallocation_option)
-            resize_option = PoolResizeOptions(if_match=if_match,
-                                              if_none_match=if_none_match,
-                                              if_modified_since=if_modified_since,
-                                              if_unmodified_since=if_unmodified_since)
-            return client.resize(pool_id, param, pool_resize_options=resize_option)
+
+        param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
+                                    target_low_priority_nodes=target_low_priority_nodes,
+                                    resize_timeout=resize_timeout,
+                                    node_deallocation_option=node_deallocation_option)
+        resize_option = PoolResizeOptions(if_match=if_match,
+                                          if_none_match=if_none_match,
+                                          if_modified_since=if_modified_since,
+                                          if_unmodified_since=if_unmodified_since)
+        return client.resize(pool_id, param, pool_resize_options=resize_option)
 
     return _handle_batch_exception(action)
 
@@ -288,11 +287,11 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
                                                     expand=expand)
             return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
                                                       job_list_from_job_schedule_options=option1))
-        else:
-            option2 = JobListOptions(filter=filter,
-                                     select=select,
-                                     expand=expand)
-            return list(client.list(job_list_options=option2))
+
+        option2 = JobListOptions(filter=filter,
+                                 select=select,
+                                 expand=expand)
+        return list(client.list(job_list_options=option2))
 
     return _handle_batch_exception(action)
 
@@ -307,9 +306,9 @@ def create_task(client,
         if task is not None:
             client.add(job_id=job_id, task=task)
             return client.get(job_id=job_id, task_id=task.id)
-        else:
-            result = client.add_collection(job_id=job_id, value=tasks)
-            return result.value
+
+        result = client.add_collection(job_id=job_id, value=tasks)
+        return result.value
 
     task = None
     if json_file:
