@@ -18,6 +18,7 @@ from azure.cli.core.cloud import (Cloud,
                                   get_active_cloud_name,
                                   init_known_clouds,
                                   AZURE_PUBLIC_CLOUD,
+                                  KNOWN_CLOUDS,
                                   CloudEndpointNotSetException)
 from azure.cli.core._config import get_config_parser
 from azure.cli.core._profile import Profile
@@ -169,6 +170,24 @@ class TestCloud(unittest.TestCase):
             actual_val = config.get(AZURE_PUBLIC_CLOUD.name, 'endpoint_batch_resource_id')
             expected_val = AZURE_PUBLIC_CLOUD.endpoints.batch_resource_id
             self.assertEqual(actual_val, expected_val)
+
+    def test_init_known_clouds_force_concurrent(self):
+        ''' Support multiple concurrent calls to clouds init method '''
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+                config_file:
+            from multiprocessing import Pool
+
+            pool_size = 20
+            with Pool(pool_size) as p:
+                p.map(init_known_clouds, [True] * pool_size)
+
+            # Check we can read the file with no exceptions
+            config = get_config_parser()
+            config.read(config_file)
+
+            # Check that we can get all the known clouds without any exceptions
+            for kc in KNOWN_CLOUDS:
+                get_cloud(kc.name)
 
 
 if __name__ == '__main__':
