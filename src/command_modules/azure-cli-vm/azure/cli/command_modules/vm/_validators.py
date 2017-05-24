@@ -511,7 +511,6 @@ def _get_next_subnet_addr_suffix(subnet_cidr, new_mask):
     bit_mask_len = 32 - int(mask)
     candidate_int = _convert_to_int(ip_address, bit_mask_len) + 1
     candaidate_str = '{0:32b}'.format(candidate_int << bit_mask_len)
-    # there is no size requirement, just pick 24
     return '{0}.{1}.{2}.{3}/{4}'.format(int(candaidate_str[0:8], 2), int(candaidate_str[8:16], 2),
                                         int(candaidate_str[16:24], 2), int(candaidate_str[24:32], 2),
                                         new_mask)
