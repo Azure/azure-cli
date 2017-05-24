@@ -193,7 +193,6 @@ def test_adls_item(account_name,
     return cf_dls_filesystem(account_name).exists(path)
 
 
-# pylint: disable=redefined-variable-type
 def preview_adls_item(account_name,
                       path,
                       length=None,

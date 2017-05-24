@@ -29,7 +29,6 @@ except ImportError:
 
 import vcr
 import jmespath
-from six import StringIO
 
 # TODO Should not depend on azure.cli.main package here.
 # Will be ok if this test file is not part of azure.cli.core.utils
@@ -414,8 +413,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
     # COMMAND METHODS
 
-    def cmd(self, command, checks=None, allowed_exceptions=None,
-            debug=False):  # pylint: disable=no-self-use
+    def cmd(self, command, checks=None, allowed_exceptions=None, debug=False):  # pylint: disable=no-self-use
+        from six import StringIO
+
         allowed_exceptions = allowed_exceptions or []
         if not isinstance(allowed_exceptions, list):
             allowed_exceptions = [allowed_exceptions]

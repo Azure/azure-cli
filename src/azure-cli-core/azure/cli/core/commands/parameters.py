@@ -68,8 +68,7 @@ def get_resources_in_resource_group(resource_group_name, resource_type=None):
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, max_api='2016-09-01'):
         return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
-    else:
-        return list(rcf.resources.list_by_resource_group(resource_group_name, filter=filter_str))
+    return list(rcf.resources.list_by_resource_group(resource_group_name, filter=filter_str))
 
 
 def get_resources_in_subscription(resource_type=None):
@@ -84,8 +83,7 @@ def get_resource_name_completion_list(resource_type=None):
         if getattr(parsed_args, 'resource_group_name', None):
             rg = parsed_args.resource_group_name
             return [r.name for r in get_resources_in_resource_group(rg, resource_type=resource_type)]
-        else:
-            return [r.name for r in get_resources_in_subscription(resource_type=resource_type)]
+        return [r.name for r in get_resources_in_subscription(resource_type=resource_type)]
     return completer
 
 
