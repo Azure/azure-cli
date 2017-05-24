@@ -3,14 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import unittest
 import six
 
 import azclishell.command_tree as tree
 from azclishell.az_completer import AzCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
-
-import unittest
 
 
 class _Commands():

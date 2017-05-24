@@ -198,7 +198,7 @@ class ACSClient(object):
         """
         Gets a random, available local port
         """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # pylint: disable=no-member
         s.bind(('', 0))
         s.listen(1)
         port = s.getsockname()[1]

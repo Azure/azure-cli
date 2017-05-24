@@ -1657,13 +1657,13 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
     if bandwidth_in_mbps is not None:
-        instance.service_provider_properties.bandwith = bandwidth_in_mbps
+        instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
 
     if peering_location is not None:
         instance.service_provider_properties.peering_location = peering_location
 
     if service_provider_name is not None:
-        instance.service_provider_properties.provider = service_provider_name
+        instance.service_provider_properties.service_provider_name = service_provider_name
 
     if sku_family is not None:
         instance.sku.family = sku_family
@@ -1727,7 +1727,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
         RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
         peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(

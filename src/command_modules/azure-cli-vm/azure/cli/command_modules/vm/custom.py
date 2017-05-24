@@ -298,7 +298,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        source_storage_account_id=None):
+                        source_storage_account_id=None, no_wait=False):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -319,7 +319,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
     disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
                 account_type=sku)
     client = _compute_client_factory()
-    return client.disks.create_or_update(resource_group_name, disk_name, disk)
+    return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
 
 
 def update_managed_disk(instance, size_gb=None, sku=None):
@@ -1475,9 +1475,11 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     public_ip_address = public_ip.ip_address
 
     # loop around inboundnatrule
-    instance_addresses = []
+    instance_addresses = {}
     for rule in lb.inbound_nat_rules:
-        instance_addresses.append('{}:{}'.format(public_ip_address, rule.frontend_port))
+        instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
+        instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
+                                                                       rule.frontend_port)
 
     return instance_addresses
 
