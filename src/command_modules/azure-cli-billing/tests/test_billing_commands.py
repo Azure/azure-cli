@@ -17,7 +17,7 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         if includeUrl:
             assert invoice['downloadUrl']
         else:
-            assert 'downloadUrl' not in invoice
+            assert invoice['downloadUrl'] is None
 
     def test_list_invoices_no_url(self):
         # list
@@ -30,7 +30,7 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         self._validate_invoice(invoice, True)
 
     def test_list_invoices_with_url(self):
-        invoices_list = self.cmd('billing invoice list -g').get_output_in_json()
+        invoices_list = self.cmd('billing invoice list -d').get_output_in_json()
         assert len(invoices_list) > 0
         self._validate_invoice(invoices_list[0], True)
 

@@ -22,7 +22,7 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
             assert usage['meterDetails']
             assert usage['meterDetails']['meterName']
         else:
-            assert 'meterDetails' not in usage
+            assert usage['meterDetails'] is None
 
     def test_list_usages_billing_period(self):
         billing_period = '201705-1'
