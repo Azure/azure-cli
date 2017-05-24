@@ -41,7 +41,7 @@ def _get_token(server, resource, scope):  # pylint: disable=unused-argument
 def get_keyvault_name_completion_list(resource_name):
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = KeyVaultClient(
-            KeyVaultAuthentication(_get_token))  # pylint: disable=redefined-variable-type
+            KeyVaultAuthentication(_get_token))
         func_name = 'get_{}s'.format(resource_name)
         vault = parsed_args.vault_base_url
         items = []
@@ -56,7 +56,7 @@ def get_keyvault_name_completion_list(resource_name):
 def get_keyvault_version_completion_list(resource_name):
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = KeyVaultClient(
-            KeyVaultAuthentication(_get_token))  # pylint: disable=redefined-variable-type
+            KeyVaultAuthentication(_get_token))
         func_name = 'get_{}_versions'.format(resource_name)
         vault = parsed_args.vault_base_url
         name = getattr(parsed_args, '{}_name'.format(resource_name))

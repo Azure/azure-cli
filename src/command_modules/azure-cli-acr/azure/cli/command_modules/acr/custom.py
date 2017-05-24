@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation
+import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.containerregistry.models import (
     RegistryUpdateParameters,
@@ -20,7 +21,6 @@ from ._utils import (
     get_location_from_resource_group
 )
 
-import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -42,8 +42,8 @@ def acr_list(resource_group_name=None):
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-    else:
-        return client.list()
+
+    return client.list()
 
 
 def acr_create(registry_name,

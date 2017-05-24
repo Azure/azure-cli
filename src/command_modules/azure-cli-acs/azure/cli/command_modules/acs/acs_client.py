@@ -128,8 +128,8 @@ class ACSClient(object):
             t.daemon = True
             t.start()
             return
-        else:
-            return self._run_cmd(command)
+
+        return self._run_cmd(command)
 
     def _run_cmd(self, command):
         """

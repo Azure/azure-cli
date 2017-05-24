@@ -26,9 +26,8 @@ def collect_blobs(blob_service, container, pattern=None):
 
     if not _pattern_has_wildcards(pattern):
         return [pattern]
-    else:
-        return (blob.name for blob in blob_service.list_blobs(container)
-                if _match_path(pattern, blob.name))
+
+    return (blob.name for blob in blob_service.list_blobs(container) if _match_path(pattern, blob.name))
 
 
 def collect_files(file_service, share, pattern=None):
@@ -89,7 +88,7 @@ def glob_files_remotely(client, share_name, pattern):
                               'file.models#File')
 
     queue = deque([""])
-    while len(queue) > 0:
+    while queue:
         current_dir = queue.pop()
         for f in client.list_directories_and_files(share_name, current_dir):
             if isinstance(f, File):
@@ -142,7 +141,4 @@ def _pattern_has_wildcards(p):
 
 
 def _match_path(pattern, *args):
-    if not pattern:
-        return True
-    else:
-        return fnmatch(os.path.join(*args), pattern)
+    return fnmatch(os.path.join(*args), pattern) if pattern else True

@@ -13,10 +13,10 @@ from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.util import CLIError, random_string
-from ._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
+from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -46,13 +46,9 @@ def _get_resource_id(val, resource_group, resource_type, resource_namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
-    else:
-        return resource_id(
-            name=val,
-            resource_group=resource_group,
-            namespace=resource_namespace,
-            type=resource_type,
-            subscription=get_subscription_id())
+
+    return resource_id(name=val, resource_group=resource_group, namespace=resource_namespace, type=resource_type,
+                       subscription=get_subscription_id())
 
 
 def _get_nic_id(val, resource_group):
@@ -162,7 +158,7 @@ def _parse_image_argument(namespace):
                                                                  namespace.os_sku,
                                                                  top=1,
                                                                  orderby='name desc')
-            if len(top_one) == 0:
+            if not top_one:
                 raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
 
             image_version = top_one[0].name
@@ -274,7 +270,7 @@ def _validate_managed_disk_sku(sku):
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
 
-# pylint: disable=too-many-branches, too-many-statements, redefined-variable-type
+# pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
 
     # use minimal parameters to resolve the expected storage profile
