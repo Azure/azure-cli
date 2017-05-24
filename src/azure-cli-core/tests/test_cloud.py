@@ -178,8 +178,8 @@ class TestCloud(unittest.TestCase):
             from multiprocessing import Pool
 
             pool_size = 20
-            with Pool(pool_size) as p:
-                p.map(init_known_clouds, [True] * pool_size)
+            p = Pool(pool_size)
+            p.map(init_known_clouds, [True] * pool_size)
 
             # Check we can read the file with no exceptions
             config = get_config_parser()
