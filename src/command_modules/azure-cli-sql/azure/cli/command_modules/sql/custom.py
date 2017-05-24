@@ -209,6 +209,7 @@ def _capabilities_prune_empty(capabilities):
 def _capabilities_prune_by_depth(capabilities, depth):
     if depth < 1:
         capabilities.supported_server_versions = []
+    else:
         for sv in capabilities.supported_server_versions:
             if depth < 2:
                 sv.supported_editions = []
