@@ -953,9 +953,18 @@ def set_diagnostics_extension(
         no_auto_upgrade=False):
     '''Enable diagnostics on a virtual machine
     '''
-    vm = get_vm(resource_group_name, vm_name)
+    client = _compute_client_factory()
+    vm = client.virtual_machines.get_instance_view(resource_group_name, vm_name)
     # pylint: disable=no-member
     is_linux_os = _detect_os_type_for_diagnostics_ext(vm.os_profile)
+    if is_linux_os:
+        exts = vm.instance_view.extensions or []
+        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
+        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and not e.type_handler_version.startswith(major_ver + '.')), None):
+            logger.warning('Looks like you have older version of diagnostics extension installed. We will update it with a new version')
+            poller = client.virtual_machine_extensions.delete(resource_group_name, vm_name, _LINUX_ACCESS_EXT)
+            LongRunningOperation()(poller)
+
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     return set_extension(resource_group_name, vm_name, vm_extension_name,
                          extension_mappings[vm_extension_name]['publisher'],
@@ -976,6 +985,13 @@ def set_vmss_diagnostics_extension(
     # pylint: disable=no-member
     is_linux_os = _detect_os_type_for_diagnostics_ext(vmss.virtual_machine_profile.os_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
+    if is_linux_os:
+        exts = vmss.virtual_machine_profile.extension_profile or []
+        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
+        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and not e.type_handler_version.startswith(major_ver + '.')), None):
+            logger.warning('Looks like you have older version of diagnostics extension installed. We will update it with new ones')
+            LongRunningOperation()(delete_vmss_extension(resource_group_name, vmss_name, _LINUX_DIAG_EXT))
+
     return set_vmss_extension(resource_group_name, vmss_name, vm_extension_name,
                               extension_mappings[vm_extension_name]['publisher'],
                               version or extension_mappings[vm_extension_name]['version'],
@@ -1075,7 +1091,15 @@ def _merge_secrets(secrets):
 
 def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
-    return get_default_diag_config(is_windows_os)
+    public_settings = get_default_diag_config(is_windows_os)
+    # pylint: disable=line-too-long
+    protected_settings_info = json.dumps({
+        'storageAccountName': "__STORAGE_ACCOUNT_NAME__",
+        # LAD and WAD are not consistent on sas token format. Call it out here
+        "storageAccountSasToken": "__SAS_TOKEN_{}__".format("WITH_LEADING_QUESTION_MARK" if is_windows_os else "WITHOUT_LEADING_QUESTION_MARK")
+    }, indent=2)
+    logger.warning('Protected settings with storage account info is required to work with the default configurations, e.g. \n' + protected_settings_info)
+    return public_settings
 
 
 def vm_show_nic(resource_group_name, vm_name, nic):
