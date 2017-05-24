@@ -314,9 +314,8 @@ class Profile(object):
             if user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
-            else:
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                              resource)
+            return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+
         from azure.cli.core.adal_authentication import AdalAuthentication
         auth_object = AdalAuthentication(_retrieve_token)
 
@@ -395,9 +394,7 @@ class SubscriptionFinder(object):
         def create_arm_client_factory(config):
             if arm_client_factory:
                 return arm_client_factory(config)
-            else:
-                return change_ssl_cert_verification(SubscriptionClient(
-                    config, base_url=CLOUD.endpoints.resource_manager))
+            return change_ssl_cert_verification(SubscriptionClient(config, base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
@@ -635,12 +632,9 @@ class ServicePrincipalAuth(object):
 
     def acquire_token(self, authentication_context, resource, client_id):
         if hasattr(self, 'secret'):
-            return authentication_context.acquire_token_with_client_credentials(resource,
-                                                                                client_id,
-                                                                                self.secret)
-        else:
-            return authentication_context.acquire_token_with_client_certificate(
-                resource, client_id, self.cert_file_string, self.thumbprint)
+            return authentication_context.acquire_token_with_client_credentials(resource, client_id, self.secret)
+        return authentication_context.acquire_token_with_client_certificate(resource, client_id, self.cert_file_string,
+                                                                            self.thumbprint)
 
     def get_entry_to_persist(self, sp_id, tenant):
         entry = {

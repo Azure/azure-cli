@@ -138,7 +138,7 @@ class Application(object):
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
-        if len(argv) == 0:
+        if not argv:
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
@@ -273,8 +273,9 @@ class Application(object):
             return arg
         elif ix == 0:
             return Application._load_file(poss_file)
-        else:  # if @ not at the start it can't be a file
-            return arg
+
+        # if @ not at the start it can't be a file
+        return arg
 
     @staticmethod
     def _expand_file_prefix(arg):

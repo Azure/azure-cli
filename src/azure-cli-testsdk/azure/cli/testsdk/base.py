@@ -160,8 +160,8 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
             name = create_random_name(prefix, length)
             self.name_replacer.register_name_pair(name, moniker)
             return name
-        else:
-            return moniker
+
+        return moniker
 
     def _process_request_recording(self, request):
         if self.in_recording:

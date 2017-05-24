@@ -121,9 +121,8 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         for b in source_blobs or []:
             logger.warning('  - %s', b)
         return []
-    else:
-        return list(_download_blob(client, source_container_name, destination, blob) for blob in
-                    source_blobs)
+
+    return list(_download_blob(client, source_container_name, destination, blob) for blob in source_blobs)
 
 
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,

@@ -7,10 +7,8 @@ import azure.cli.command_modules.cdn._help
 
 
 def load_params(_):
-    # pylint: disable=redefined-outer-name
-    import azure.cli.command_modules.cdn._params
+    import azure.cli.command_modules.cdn._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():
-    # pylint: disable=redefined-outer-name
-    import azure.cli.command_modules.cdn.commands
+    import azure.cli.command_modules.cdn.commands  # pylint: disable=redefined-outer-name, unused-variable

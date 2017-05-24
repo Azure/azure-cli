@@ -5,12 +5,12 @@
 
 # pylint: disable=line-too-long
 
+from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
 from ._client_factory import \
     (cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles,
      cf_autoscale, cf_diagnostics, cf_activity_log)
 from ._exception_handler import monitor_exception_handler
-from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
 
 
 def monitor_command(*args, **kwargs):

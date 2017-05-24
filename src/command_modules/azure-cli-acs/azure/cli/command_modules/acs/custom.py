@@ -241,8 +241,8 @@ def acs_install_cli(resource_group, name, install_location=None, client_version=
 def _ssl_context():
     if sys.version_info < (3, 4):
         return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-    else:
-        return ssl.create_default_context()
+
+    return ssl.create_default_context()
 
 
 def _urlretrieve(url, filename):
@@ -541,7 +541,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     windows_profile = None
     os_type = 'Linux'
     if windows:
-        if len(admin_password) == 0:
+        if not admin_password:
             raise CLIError('--admin-password is required.')
         if len(admin_password) < 6:
             raise CLIError('--admin-password must be at least 6 characters')
@@ -911,7 +911,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if not end_date:
         end_date = start_date + relativedelta(years=1)
     elif isinstance(end_date, str):
-        end_date = dateutil.parser.parse(end_date)  # pylint: disable=redefined-variable-type
+        end_date = dateutil.parser.parse(end_date)
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -921,8 +921,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if password:
         password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()), key_usage, key_type)]
 
     return (password_creds, key_creds)
 
