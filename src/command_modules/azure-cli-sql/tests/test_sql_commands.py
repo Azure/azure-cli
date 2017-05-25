@@ -1034,7 +1034,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                          0)])
 
         # Get all db capabilities with size data
-        self.cmd('sql db list-capabilities -l {} --details max-size'.format(location),
+        self.cmd('sql db list-capabilities -l {} --detail max-size'.format(location),
                  checks=[
                      # Max size data is included
                      JMESPathCheckGreaterThan(

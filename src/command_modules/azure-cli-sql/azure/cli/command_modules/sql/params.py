@@ -280,7 +280,7 @@ with ParametersContext(command='sql db list') as c:
 
 
 with ParametersContext(command='sql db list-capabilities') as c:
-    c.argument('details',
+    c.argument('detail',
                help='List of additional details to include in output.',
                **enum_choice_list(DatabaseCapabilitiesAdditionalDetails),
                nargs='+')
@@ -521,13 +521,15 @@ with ParametersContext(command='sql elastic-pool create') as c:
 
 
 with ParametersContext(command='sql elastic-pool list-capabilities') as c:
-    c.argument('details',
+    c.argument('detail',
                help='List of additional details to include in output.',
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
                nargs='+')
     c.argument('edition',
                help='Edition to search for. If unspecified, all editions are shown.',
                **enum_choice_list(ElasticPoolEdition))
+    c.argument('dtu',
+               help='Elastic pool DTU limit to search for. If unspecified, all DTU limits are shown.')
 
 
 with ParametersContext(command='sql elastic-pool update') as c:

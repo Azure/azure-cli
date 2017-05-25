@@ -250,7 +250,7 @@ def db_list_capabilities(
         location,
         edition=None,
         service_objective=None,
-        details=None):
+        detail=None):
 
     # Fixup parameters
     if details is None:
@@ -761,11 +761,12 @@ def elastic_pool_list_capabilities(
         location,
         edition=None,
         dtu=None,
-        details=None):
+        detail=None):
 
     # Fixup parameters
     if details is None:
         details = []
+    dtu = int(dtu)
 
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)
@@ -783,7 +784,7 @@ def elastic_pool_list_capabilities(
         for e in editions:
             e.supported_elastic_pool_dtus = [
                 d for d in e.supported_elastic_pool_dtus
-                if d.limit == int(dtu)]
+                if d.limit == dtu]
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if len(e.supported_elastic_pool_dtus) > 0]

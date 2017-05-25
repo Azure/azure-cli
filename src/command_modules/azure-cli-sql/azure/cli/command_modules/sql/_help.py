@@ -43,7 +43,7 @@ helps['sql db list-capabilities'] = """
         - name: Show all available database service objectives for Standard edition.
           text: az sql db list-capabilities -l westus --edition Standard
         - name: Show available max database sizes for P1 service objective
-          text: az sql db list-capabilities -l westus --service-objective P1 --details max-size
+          text: az sql db list-capabilities -l westus --service-objective P1 --detail max-size
     """
 helps['sql db show'] = """
     type: command
@@ -213,10 +213,10 @@ helps['sql elastic-pool list-capabilities'] = """
         - name: Show all elastic pool capabilities for Standard edition.
           text: az sql elastic-pool list-capabilities -l westus --edition Standard
         - name: Show available max sizes for elastic pools with 100 DTUs
-          text: az sql elastic-pool list-capabilities -l westus --dtu 100 --details max-size
+          text: az sql elastic-pool list-capabilities -l westus --dtu 100 --detail max-size
         - name: Show available per database settings for Standard 100 DTU elastic pools
           text: az sql elastic-pool list-capabilities -l westus --edition Standard --dtu 100
-                --details db-dtu-min db-dtu-max db-max-size
+                --detail db-dtu-min db-dtu-max db-max-size
     """
 helps['sql elastic-pool update'] = """
     type: command
@@ -264,7 +264,7 @@ helps['sql server firewall-rule update'] = """
     """
 helps['sql server firewall-rule show'] = """
     type: command
-    short-summary: Shows the details of a firewall rule.
+    short-summary: Shows the detail of a firewall rule.
     """
 helps['sql server firewall-rule list'] = """
     type: command
