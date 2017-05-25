@@ -7,6 +7,7 @@ from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
     JMESPathCheck,
+    JMESPathCheckExists,
     JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
@@ -1018,59 +1019,63 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
 
-        # Get all capabilities
-        self.cmd('sql show-capabilities -l {}'.format(location),
+        # Get all db capabilities
+        self.cmd('sql db list-capabilities -l {}'.format(location),
                  checks=[
-                     # All statuses (default, available, and visible) are shown
+                     # At least standard and premium edition exist
+                     JMESPathCheckExists("[?name == 'Standard']"),
+                     JMESPathCheckExists("[?name == 'Premium']"),
+                     # At least s0 and p1 service objectives exist
+                     JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
+                     JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'P1']"),
+                     # Max size data is omitted
+                     JMESPathCheck(
+                         'length([].supportedServiceLevelObjectives[].supportedMaxSizes[])',
+                         0)])
+
+        # Get all db capabilities with size data
+        self.cmd('sql db list-capabilities -l {} --show max-size'.format(location),
+                 checks=[
+                     # Max size data is included
                      JMESPathCheckGreaterThan(
-                         "length(supportedServerVersions[].supportedEditions[]"
-                         ".supportedServiceLevelObjectives[?status == 'Default'])", 0),
-                     JMESPathCheckGreaterThan(
-                         "length(supportedServerVersions[].supportedEditions[]"
-                         ".supportedServiceLevelObjectives[?status == 'Available'])", 0),
-                     JMESPathCheckGreaterThan(
-                         "length(supportedServerVersions[].supportedEditions[]"
-                         ".supportedServiceLevelObjectives[?status == 'Visible'])", 0),
-                     # Full depth is preserved
-                     JMESPathCheckGreaterThan(
-                         'length(supportedServerVersions[].supportedElasticPoolEditions[]'
-                         '.supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[]'
-                         '.supportedPerDatabaseMinDtus[])', 0)
-                ])
+                         'length([].supportedServiceLevelObjectives[].supportedMaxSizes[])',
+                         0)])
 
-        # Filter by various depths
-        self.cmd('sql show-capabilities -l {} --depth 0'.format(location),
-                 checks=[])
-        self.cmd('sql show-capabilities -l {} --depth 1'.format(location),
-                 checks=[])
-        self.cmd('sql show-capabilities -l {} --depth 2'.format(location),
-                 checks=[])
-        self.cmd('sql show-capabilities -l {} --depth 3'.format(location),
-                 checks=[])
-        self.cmd('sql show-capabilities -l {} --depth 4'.format(location),
-                 checks=[])
+        # Search for db edition - note that it's case insensitive
+        self.cmd('sql db list-capabilities -l {} --edition standard'.format(location),
+                 checks=[
+                     # Standard edition exists, other editions don't
+                     JMESPathCheckExists("[?name == 'Standard']"),
+                     JMESPathCheck("length([?name != 'Standard'])", 0),
+                 ])
 
-        # Search for edition that exists for both db and pool
-        edition1 = 'Premium'
-        self.cmd('sql show-capabilities -l {} --edition {}'.format(location, edition1),
-                 checks=[])
+        # Search for db service objective - note that it's case insensitive
+        self.cmd('sql db list-capabilities -l {} --edition standard --service-objective s0'
+                 .format(location), checks=[
+                     # Standard edition exists, other editions don't
+                     JMESPathCheckExists("[?name == 'Standard']"),
+                     JMESPathCheck("length([?name != 'Standard'])", 0),
+                     # S0 service objective exists, others don't exist
+                     JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
+                     JMESPathCheck(
+                         "length([].supportedServiceLevelObjectives[] | [?name != 'S0'])", 
+                         0),
+                 ])
 
-        # Search for edition that exists for db only
-        edition2 = 'DataWarehouse'
-        self.cmd('sql show-capabilities -l {} --edition {}'.format(location, edition2),
-                 checks=[])
+        # Get all elastic pool capabilities
+        self.cmd('sql elastic-pool list-capabilities -l {}'.format(location))
 
-        # Search for service objective
-        service_objective = 'P2'
-        self.cmd('sql show-capabilities -l {} --service-objective {}'
-                 .format(location, service_objective),
-                 checks=[])
+        # Search for elastic pool edition - note that it's case insensitive
+        self.cmd('sql db list-capabilities -l {} --edition standard'.format(location),
+                 checks=[
+                     # Standard edition exists, other editions don't
+                     JMESPathCheckExists("[?name == 'Standard']"),
+                     JMESPathCheck("length([?name != 'Standard'])", 0),
+                 ])
 
-        # Show default only
-        self.cmd('sql show-capabilities -l {} --service-objective {} --status Default'
-                 .format(location, service_objective),
-                 checks=[])
-
+        # Get all db capabilities with per db max size - TODO
+        # Get all db capabilities with per db max dtu - TODO
+        # Get all db capabilities with per db min dtu - TODO
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
