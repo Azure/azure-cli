@@ -10,7 +10,7 @@ from azure.cli.command_modules.consumption._client_factory import cf_consumption
 
 
 def cli_consumption_list_usage(client, invoice_name=None, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
-    '''List all usage details of the subscription'''
+    """List all usage details of the subscription"""
     if include_additional_properties and include_meter_details:
         expand = 'additionalProperties,meterDetails'
     elif include_additional_properties:

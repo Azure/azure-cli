@@ -16,7 +16,6 @@ from azure.cli.command_modules.billing._transformers import \
      transform_billing_period_list_output)
 from ._exception_handler import billing_exception_handler
 
-invoices_path = 'azure.mgmt.billing.operations.invoices_operations#'
 billing_periods_path = 'azure.mgmt.billing.operations.billing_periods_operations#'
 custom_path = 'azure.cli.command_modules.billing.custom#'
 
@@ -27,6 +26,5 @@ def billing_command(*args, **kwargs):
 
 billing_command(__name__, 'billing invoice list', custom_path + 'cli_billing_list_invoices', invoices_mgmt_client_factory, transform=transform_invoice_list_output)
 billing_command(__name__, 'billing invoice show', custom_path + 'cli_billing_get_invoice', invoices_mgmt_client_factory, transform=transform_invoice_output)
-billing_command(__name__, 'billing invoice show-latest', invoices_path + 'InvoicesOperations.get_latest', invoices_mgmt_client_factory, transform=transform_invoice_output)
-billing_command(__name__, 'billing period list', billing_periods_path + 'BillingPeriodsOperations.list', billing_periods_mgmt_client_factory, transform=transform_billing_period_list_output)
-billing_command(__name__, 'billing period show', custom_path + 'cli_billing_get_billing_period', billing_periods_mgmt_client_factory, transform=transform_billing_period_output)
+billing_command(__name__, 'billing period list', custom_path + 'cli_billing_list_periods', billing_periods_mgmt_client_factory, transform=transform_billing_period_list_output)
+billing_command(__name__, 'billing period show', billing_periods_path + 'BillingPeriodsOperations.get', billing_periods_mgmt_client_factory, transform=transform_billing_period_output)
