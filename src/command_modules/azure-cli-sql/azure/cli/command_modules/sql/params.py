@@ -526,10 +526,15 @@ with ParametersContext(command='sql elastic-pool list-capabilities') as c:
                help='List of additional details to include in output.',
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
                nargs='+')
+
+    search_arg_group = 'Search'
+
     c.argument('edition',
+               arg_group=search_arg_group,
                help='Edition to search for. If unspecified, all editions are shown.',
                **enum_choice_list(ElasticPoolEdition))
     c.argument('dtu',
+               arg_group=search_arg_group,
                help='Elastic pool DTU limit to search for. If unspecified, all DTU limits are shown.')
 
 
