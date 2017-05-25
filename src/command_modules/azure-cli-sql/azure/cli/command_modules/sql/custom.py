@@ -240,7 +240,7 @@ def db_failover(
         link_id=primary_link.name)
 
 
-class DatabaseCapabilitiesAdditionalDetails(Enum):
+class DatabaseCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
     max_size = 'max-size'
 
 
@@ -746,7 +746,7 @@ def elastic_pool_update(
     return instance
 
 
-class ElasticPoolCapabilitiesAdditionalDetails(Enum):
+class ElasticPoolCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
     max_size = 'max-size'
     db_min_dtu = 'db-min-dtu'
     db_max_dtu = 'db-max-dtu'
