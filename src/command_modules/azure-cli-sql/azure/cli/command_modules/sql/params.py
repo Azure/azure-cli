@@ -279,7 +279,8 @@ with ParametersContext(command='sql db list') as c:
 
 
 with ParametersContext(command='sql db list-capabilities') as c:
-    c.argument('detail',
+    c.argument('show_details',
+               options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
                **enum_choice_list(DatabaseCapabilitiesAdditionalDetails),
                nargs='+')
@@ -520,7 +521,8 @@ with ParametersContext(command='sql elastic-pool create') as c:
 
 
 with ParametersContext(command='sql elastic-pool list-capabilities') as c:
-    c.argument('detail',
+    c.argument('show_details',
+               options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
                nargs='+')

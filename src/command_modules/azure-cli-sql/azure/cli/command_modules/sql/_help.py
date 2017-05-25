@@ -43,7 +43,7 @@ helps['sql db list-capabilities'] = """
         - name: Show all available database service objectives for Standard edition.
           text: az sql db list-capabilities -l westus --edition Standard
         - name: Show available max database sizes for P1 service objective
-          text: az sql db list-capabilities -l westus --service-objective P1 --detail max-size
+          text: az sql db list-capabilities -l westus --service-objective P1 --show-details max-size
     """
 helps['sql db show'] = """
     type: command
@@ -213,10 +213,10 @@ helps['sql elastic-pool list-capabilities'] = """
         - name: Show all elastic pool capabilities for Standard edition.
           text: az sql elastic-pool list-capabilities -l westus --edition Standard
         - name: Show available max sizes for elastic pools with 100 DTUs
-          text: az sql elastic-pool list-capabilities -l westus --dtu 100 --detail max-size
+          text: az sql elastic-pool list-capabilities -l westus --dtu 100 --show-details max-size
         - name: Show available per database settings for Standard 100 DTU elastic pools
           text: az sql elastic-pool list-capabilities -l westus --edition Standard --dtu 100
-                --detail db-min-dtu db-max-dtu db-max-size
+                --show-details db-min-dtu db-max-dtu db-max-size
     """
 helps['sql elastic-pool update'] = """
     type: command
