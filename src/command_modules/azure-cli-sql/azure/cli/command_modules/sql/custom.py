@@ -253,8 +253,8 @@ def db_list_capabilities(
         detail=None):
 
     # Fixup parameters
-    if details is None:
-        details = []
+    if detail is None:
+        detail = []
 
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)
@@ -278,7 +278,7 @@ def db_list_capabilities(
     editions = [e for e in editions if len(e.supported_service_level_objectives) > 0]
 
     # Optionally hide supported max sizes
-    if DatabaseCapabilitiesAdditionalDetails.max_size.value not in details:
+    if DatabaseCapabilitiesAdditionalDetails.max_size.value not in detail:
         for e in editions:
             for slo in e.supported_service_level_objectives:
                 slo.supported_max_sizes = []
@@ -764,14 +764,15 @@ def elastic_pool_list_capabilities(
         detail=None):
 
     # Fixup parameters
-    if details is None:
-        details = []
-    dtu = int(dtu)
+    if detail is None:
+        detail = []
+    if dtu is not None:
+        dtu = int(dtu)
 
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)
 
-    # Get subtree related to databases
+    # Get subtree related to elastic pools
     editions = next(sv for sv in capabilities.supported_server_versions
                     if sv.name == _default_server_version).supported_elastic_pool_editions
 
@@ -792,18 +793,18 @@ def elastic_pool_list_capabilities(
     for e in editions:
         for d in e.supported_elastic_pool_dtus:
             # Optionally hide supported max sizes
-            if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in details:
+            if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in detail:
                 d.supported_max_sizes = []
 
             # Optionally hide per database min & max dtus
-            if ElasticPoolCapabilitiesAdditionalDetails.db_dtu_min.value not in details:
+            if ElasticPoolCapabilitiesAdditionalDetails.db_dtu_min.value not in detail:
                 for db_max_dtu in d.supported_per_database_max_dtus:
                     db_max_dtu.supported_per_database_min_dtus = []
-            elif ElasticPoolCapabilitiesAdditionalDetails.db_dtu_max.value not in details:
+            elif ElasticPoolCapabilitiesAdditionalDetails.db_dtu_max.value not in detail:
                 d.supported_per_database_max_dtus = []
 
             # Optionally hide supported per db max sizes
-            if ElasticPoolCapabilitiesAdditionalDetails.db_max_size.value not in details:
+            if ElasticPoolCapabilitiesAdditionalDetails.db_max_size.value not in detail:
                 d.supported_per_database_max_sizes = []
 
     return editions
