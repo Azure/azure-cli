@@ -6,7 +6,8 @@
 import itertools
 from enum import Enum
 from .custom import (
-    DatabaseCapabilitiesShow
+    DatabaseCapabilitiesAdditionalDetails,
+    ElasticPoolCapabilitiesAdditionalDetails,
 )
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
@@ -281,8 +282,9 @@ with ParametersContext(command='sql db list') as c:
 
 with ParametersContext(command='sql db list-capabilities') as c:
     c.argument('show',
-               **enum_choice_list(DatabaseCapabilitiesShow),
+               **enum_choice_list(DatabaseCapabilitiesAdditionalDetails),
                nargs='+')
+
 
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
@@ -491,19 +493,6 @@ with ParametersContext(command='sql elastic-pool') as c:
     c.argument('elastic_pool_name',
                options_list=('--name', '-n'),
                help='The name of the elastic pool.')
-
-
-# Recommended elastic pools will not be included in the first batch of GA commands
-# with ParametersContext(command='sql elastic-pool recommended') as c:
-#     c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
-
-
-# with ParametersContext(command='sql elastic-pool recommended db') as c:
-#     c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool',))
-#     c.register_alias('database_name', ('--name', '-n'))
-
-
-with ParametersContext(command='sql elastic-pool') as c:
     c.argument('server_name', arg_type=server_param_type)
     c.register_alias('database_dtu_max', ('--db-dtu-max',))
     c.register_alias('database_dtu_min', ('--db-dtu-min',))
@@ -519,6 +508,12 @@ with ParametersContext(command='sql elastic-pool create') as c:
     # We have a wrapper function that determines server location so user doesn't need to specify
     # it as param.
     c.ignore('location')
+
+
+with ParametersContext(command='sql elastic-pool list-capabilities') as c:
+    c.argument('show',
+               **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
+               nargs='+')
 
 
 with ParametersContext(command='sql elastic-pool update') as c:

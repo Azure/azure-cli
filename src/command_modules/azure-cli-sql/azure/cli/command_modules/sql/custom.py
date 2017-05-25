@@ -44,6 +44,9 @@ def get_server_location(server_name, resource_group_name):
         resource_group_name=resource_group_name).location
 
 
+_default_server_version = "12.0"
+
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -239,14 +242,13 @@ def db_failover(
         link_id=primary_link.name)
 
 
-class DatabaseCapabilitiesShow(Enum):
+class DatabaseCapabilitiesAdditionalDetails(Enum):
     max_size = 'max-size'
 
 
 def db_list_capabilities(
         client,
         location,
-        server_version="12.0",
         edition=None,
         service_objective=None,
         show=[]):
@@ -255,7 +257,8 @@ def db_list_capabilities(
     capabilities = client.list_by_location(location)
 
     # Get subtree related to databases
-    editions = next(sv for sv in capabilities.supported_server_versions if sv.name == server_version).supported_editions
+    editions = next(sv for sv in capabilities.supported_server_versions 
+                    if sv.name == _default_server_version).supported_editions
 
     # Filter by edition
     if edition is not None:
@@ -270,7 +273,7 @@ def db_list_capabilities(
     editions = [e for e in editions if len(e.supported_service_level_objectives) > 0]
 
     # Optionally hide supported max sizes
-    if DatabaseCapabilitiesShow.max_size.value not in show:
+    if DatabaseCapabilitiesAdditionalDetails.max_size.value not in show:
         for e in editions:
             for slo in e.supported_service_level_objectives:
                 del slo.supported_max_sizes
@@ -741,10 +744,15 @@ def elastic_pool_update(
     return instance
 
 
+class ElasticPoolCapabilitiesAdditionalDetails(Enum):
+    max_size = 'max-size'
+    db_dtu_min = 'db-dtu-min'
+    db_dtu_max = 'db-dtu-max'
+
+
 def elastic_pool_list_capabilities(
         client,
         location,
-        server_version="12.0",
         edition=None,
         show=[]):
     
@@ -752,7 +760,8 @@ def elastic_pool_list_capabilities(
     capabilities = client.list_by_location(location)
 
     # Get subtree related to databases
-    editions = next(sv for sv in capabilities.supported_server_versions if sv.name == server_version).supported_elastic_pool_editions
+    editions = next(sv for sv in capabilities.supported_server_versions 
+                    if sv.name == _default_server_version).supported_elastic_pool_editions
 
     # Filter by edition
     if edition is not None:
@@ -761,14 +770,17 @@ def elastic_pool_list_capabilities(
     for e in editions:
         for dtu in e.supported_elastic_pool_dtus:
             # Optionally hide supported max sizes
-            if not show_max_sizes:
+            if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in show:
                 del dtu.supported_max_sizes
 
-            # Optionally hide per database max dtus
-            if not show_db_dtu_max:
+            # Optionally hide per database min & max dtus
+            if ElasticPoolCapabilitiesAdditionalDetails.db_dtu_max.value not in show:
                 del dtu.supported_per_database_max_dtus
-    
-            # Always hide per database max sizes
+            elif ElasticPoolCapabilitiesAdditionalDetails.db_dtu_min.value not in show:
+                for db_max_dtu in dtu.supported_per_database_max_dtus:
+                    del db_max_dtu.supported_per_database_min_dtus
+
+            # Always delete supported per db max sizes
             del dtu.supported_per_database_max_sizes
 
     return editions
