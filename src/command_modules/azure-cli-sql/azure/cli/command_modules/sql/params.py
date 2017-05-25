@@ -503,8 +503,8 @@ with ParametersContext(command='sql elastic-pool') as c:
                options_list=('--name', '-n'),
                help='The name of the elastic pool.')
     c.argument('server_name', arg_type=server_param_type)
-    c.register_alias('database_dtu_max', ('--db-dtu-max',))
-    c.register_alias('database_dtu_min', ('--db-dtu-min',))
+    c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
+    c.register_alias('database_dtu_min', ('--db-dtu-min', '--db-min-dtu'))
 
     c.argument('storage_mb', options_list=('--storage',),
                type=SizeWithUnitConverter('MB', result_type=int),

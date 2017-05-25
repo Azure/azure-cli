@@ -216,7 +216,7 @@ helps['sql elastic-pool list-capabilities'] = """
           text: az sql elastic-pool list-capabilities -l westus --dtu 100 --detail max-size
         - name: Show available per database settings for Standard 100 DTU elastic pools
           text: az sql elastic-pool list-capabilities -l westus --edition Standard --dtu 100
-                --detail db-dtu-min db-dtu-max db-max-size
+                --detail db-min-dtu db-max-dtu db-max-size
     """
 helps['sql elastic-pool update'] = """
     type: command

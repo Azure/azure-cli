@@ -748,8 +748,8 @@ def elastic_pool_update(
 
 class ElasticPoolCapabilitiesAdditionalDetails(Enum):
     max_size = 'max-size'
-    db_dtu_min = 'db-dtu-min'
-    db_dtu_max = 'db-dtu-max'
+    db_min_dtu = 'db-min-dtu'
+    db_max_dtu = 'db-max-dtu'
     db_max_size = 'db-max-size'
 
 
@@ -793,12 +793,14 @@ def elastic_pool_list_capabilities(
             if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in detail:
                 d.supported_max_sizes = []
 
-            # Optionally hide per database min & max dtus
-            if ElasticPoolCapabilitiesAdditionalDetails.db_dtu_min.value not in detail:
-                for db_max_dtu in d.supported_per_database_max_dtus:
-                    db_max_dtu.supported_per_database_min_dtus = []
-            elif ElasticPoolCapabilitiesAdditionalDetails.db_dtu_max.value not in detail:
-                d.supported_per_database_max_dtus = []
+            # Optionally hide per database min & max dtus. min dtus are nested inside max dtus,
+            # so only hide max dtus if both min and max should be hidden.
+            if ElasticPoolCapabilitiesAdditionalDetails.db_min_dtu.value not in detail:
+                if ElasticPoolCapabilitiesAdditionalDetails.db_max_dtu.value not in detail:
+                    d.supported_per_database_max_dtus = []
+
+                for md in d.supported_per_database_max_dtus:
+                    md.supported_per_database_min_dtus = []
 
             # Optionally hide supported per db max sizes
             if ElasticPoolCapabilitiesAdditionalDetails.db_max_size.value not in detail:
