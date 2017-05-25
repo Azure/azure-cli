@@ -292,9 +292,8 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None):
-    Disk = get_sdk(ResourceType.MGMT_COMPUTE, 'Disk', mod='models')
-    CreationData = get_sdk(ResourceType.MGMT_COMPUTE, 'CreationData', mod='models')
-    DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskCreateOption', mod='models')
+    Disk, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Disk', 'CreationData',
+                                                   'DiskCreateOption', mod='models')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -405,9 +404,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     tags=None):
-    Snapshot = get_sdk(ResourceType.MGMT_COMPUTE, 'Snapshot', mod='models')
-    CreationData = get_sdk(ResourceType.MGMT_COMPUTE, 'CreationData', mod='models')
-    DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskCreateOption', mod='models')
+    Snapshot, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Snapshot', 'CreationData',
+                                                       'DiskCreateOption', mod='models')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -479,12 +477,9 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, data_disks=None, tags=None):
-    ImageOSDisk = get_sdk(ResourceType.MGMT_COMPUTE, 'ImageOSDisk', mod='models')
-    ImageDataDisk = get_sdk(ResourceType.MGMT_COMPUTE, 'ImageDataDisk', mod='models')
-    ImageStorageProfile = get_sdk(ResourceType.MGMT_COMPUTE, 'ImageStorageProfile', mod='models')
-    Image = get_sdk(ResourceType.MGMT_COMPUTE, 'Image', mod='models')
-    SubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
-    OperatingSystemStateTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'OperatingSystemStateTypes', mod='models')
+    ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = get_sdk(
+        ResourceType.MGMT_COMPUTE, 'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource',
+        'OperatingSystemStateTypes', mod='models')
 
     # pylint: disable=line-too-long
     if source_virtual_machine:
