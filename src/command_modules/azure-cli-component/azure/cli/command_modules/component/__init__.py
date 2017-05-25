@@ -7,8 +7,8 @@ import azure.cli.command_modules.component._help  # pylint: disable=unused-impor
 
 
 def load_params(_):
-    import azure.cli.command_modules.component._params  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.component._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():
-    import azure.cli.command_modules.component.commands  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.component.commands  # pylint: disable=redefined-outer-name, unused-variable

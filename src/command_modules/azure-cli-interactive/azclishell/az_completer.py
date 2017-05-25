@@ -127,7 +127,7 @@ class AzCompleter(Completer):
         from azclishell._dump_commands import CMD_TABLE
         self.cmdtab = CMD_TABLE
         self.parser.load_command_table(CMD_TABLE)
-        self.argsfinder = ArgsFinder(self.parser)
+        self.argsfinder = ArgsFinder(self.parser, outstream)
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """

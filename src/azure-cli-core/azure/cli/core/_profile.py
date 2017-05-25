@@ -94,17 +94,11 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
 
 
-_GLOBAL_CREDS_CACHE = None
-
-
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True):
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         if use_global_creds_cache:
-            global _GLOBAL_CREDS_CACHE  # pylint: disable=global-statement
-            if _GLOBAL_CREDS_CACHE is None:
-                _GLOBAL_CREDS_CACHE = CredsCache(self.auth_ctx_factory, async_persist=True)
             self._creds_cache = _GLOBAL_CREDS_CACHE
         else:
             self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
@@ -320,9 +314,8 @@ class Profile(object):
             if user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
-            else:
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                              resource)
+            return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+
         from azure.cli.core.adal_authentication import AdalAuthentication
         auth_object = AdalAuthentication(_retrieve_token)
 
@@ -401,9 +394,7 @@ class SubscriptionFinder(object):
         def create_arm_client_factory(config):
             if arm_client_factory:
                 return arm_client_factory(config)
-            else:
-                return change_ssl_cert_verification(SubscriptionClient(
-                    config, base_url=CLOUD.endpoints.resource_manager))
+            return change_ssl_cert_verification(SubscriptionClient(config, base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
@@ -471,7 +462,6 @@ class SubscriptionFinder(object):
                 temp_credentials[_ACCESS_TOKEN])
             all_subscriptions.extend(subscriptions)
 
-        self.tenants = tenants
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
@@ -484,7 +474,7 @@ class SubscriptionFinder(object):
         for s in subscriptions:
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
-        self.tenants = [tenant]
+        self.tenants.append(tenant)
         return all_subscriptions
 
 
@@ -498,7 +488,7 @@ class CredsCache(object):
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
                             os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
-        self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
+        self._auth_ctx_factory = auth_ctx_factory
         self._adal_token_cache_attr = None
         self._should_flush_to_disk = False
         self._async_persist = async_persist
@@ -620,6 +610,9 @@ class CredsCache(object):
         _delete_file(self._token_file)
 
 
+_GLOBAL_CREDS_CACHE = CredsCache(_AUTH_CTX_FACTORY, async_persist=True)
+
+
 class ServicePrincipalAuth(object):
 
     def __init__(self, password_arg_value):
@@ -639,12 +632,9 @@ class ServicePrincipalAuth(object):
 
     def acquire_token(self, authentication_context, resource, client_id):
         if hasattr(self, 'secret'):
-            return authentication_context.acquire_token_with_client_credentials(resource,
-                                                                                client_id,
-                                                                                self.secret)
-        else:
-            return authentication_context.acquire_token_with_client_certificate(
-                resource, client_id, self.cert_file_string, self.thumbprint)
+            return authentication_context.acquire_token_with_client_credentials(resource, client_id, self.secret)
+        return authentication_context.acquire_token_with_client_certificate(resource, client_id, self.cert_file_string,
+                                                                            self.thumbprint)
 
     def get_entry_to_persist(self, sp_id, tenant):
         entry = {
