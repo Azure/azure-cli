@@ -91,7 +91,6 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
 def _get_default_value(balancer, property_name, option_name):
     values = [x.name for x in getattr(balancer, property_name)]
     if len(values) > 1:
-        from azure.cli.core.util import CLIError
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
     return values[0]

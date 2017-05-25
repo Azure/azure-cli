@@ -219,6 +219,16 @@ register_cli_argument('network application-gateway http-listener', 'ssl_cert', h
 register_cli_argument('network application-gateway http-listener', 'protocol', ignore_type)
 register_cli_argument('network application-gateway http-listener', 'host_name', help='Host name to use for multisite gateways.')
 
+# Add help text to clarify the "default if one" policy.
+default_existing = 'If only one exists, omit to use as default.'
+register_cli_argument('network application-gateway http-listener create', 'frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+register_cli_argument('network application-gateway rule create', 'address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
+register_cli_argument('network application-gateway rule create', 'http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
+register_cli_argument('network application-gateway rule create', 'http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
+register_cli_argument('network lb rule create', 'backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
+register_cli_argument('network lb rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+register_cli_argument('network lb inbound-nat-rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
 register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
 register_cli_argument('network application-gateway http-settings', 'timeout', help='Request timeout in seconds.')
 register_cli_argument('network application-gateway http-settings', 'probe', help='Name or ID of the probe to associate with the HTTP settings.', validator=process_ag_http_settings_create_namespace, completer=get_ag_subresource_completion_list('probes'))
