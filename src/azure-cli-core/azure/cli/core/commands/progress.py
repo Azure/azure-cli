@@ -162,7 +162,9 @@ class DeterminateStandardOut(ProgressViewBase):
 
 def get_progress_view(determinant=False, outstream=sys.stderr):
     """ gets your view """
+    view = None
     if determinant:
-        return DeterminateStandardOut(out=outstream)
+        view = DeterminateStandardOut(out=outstream)
     else:
-        return IndeterminateStandardOut(out=outstream)
+        view = IndeterminateStandardOut(out=outstream)
+    return view
