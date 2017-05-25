@@ -506,7 +506,7 @@ with ParametersContext(command='sql elastic-pool') as c:
     c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
     c.register_alias('database_dtu_min', ('--db-dtu-min', '--db-min-dtu'))
 
-    c.argument('storage_mb', options_list=('--storage',),
+    c.argument('storage_mb', options_list=('--storage', '--max-size',),
                type=SizeWithUnitConverter('MB', result_type=int),
                help='The max storage size of the elastic pool. If no unit is specified, defaults'
                ' to megabytes (MB).')
