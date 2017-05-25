@@ -43,7 +43,7 @@ def get_server_location(server_name, resource_group_name):
         resource_group_name=resource_group_name).location
 
 
-_default_server_version = "12.0"
+_DEFAULT_SERVER_VERSION = "12.0"
 
 
 ###############################################
@@ -261,7 +261,7 @@ def db_list_capabilities(
 
     # Get subtree related to databases
     editions = next(sv for sv in capabilities.supported_server_versions
-                    if sv.name == _default_server_version).supported_editions
+                    if sv.name == _DEFAULT_SERVER_VERSION).supported_editions
 
     # Filter by edition
     if edition is not None:
@@ -275,7 +275,7 @@ def db_list_capabilities(
                 if slo.name.lower() == service_objective.lower()]
 
     # Remove editions with no service objectives (due to filters)
-    editions = [e for e in editions if len(e.supported_service_level_objectives) > 0]
+    editions = [e for e in editions if len(e.supported_service_level_objectives)]
 
     # Optionally hide supported max sizes
     if DatabaseCapabilitiesAdditionalDetails.max_size.value not in detail:
@@ -774,7 +774,7 @@ def elastic_pool_list_capabilities(
 
     # Get subtree related to elastic pools
     editions = next(sv for sv in capabilities.supported_server_versions
-                    if sv.name == _default_server_version).supported_elastic_pool_editions
+                    if sv.name == _DEFAULT_SERVER_VERSION).supported_elastic_pool_editions
 
     # Filter by edition
     if edition is not None:
@@ -788,7 +788,7 @@ def elastic_pool_list_capabilities(
                 if d.limit == dtu]
 
     # Remove editions with no service objectives (due to filters)
-    editions = [e for e in editions if len(e.supported_elastic_pool_dtus) > 0]
+    editions = [e for e in editions if len(e.supported_elastic_pool_dtus)]
 
     for e in editions:
         for d in e.supported_elastic_pool_dtus:
