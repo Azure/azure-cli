@@ -264,11 +264,11 @@ def db_list_capabilities(
                     if sv.name == _DEFAULT_SERVER_VERSION).supported_editions
 
     # Filter by edition
-    if edition is not None:
+    if edition:
         editions = [e for e in editions if e.name.lower() == edition.lower()]
 
     # Filter by service objective
-    if service_objective is not None:
+    if service_objective:
         for e in editions:
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
@@ -539,18 +539,18 @@ def _db_security_policy_update(
         use_secondary_key):
 
     # Validate storage endpoint arguments
-    if storage_endpoint is not None and storage_account is not None:
+    if storage_endpoint and storage_account:
         raise CLIError('--storage-endpoint and --storage-account cannot both be specified.')
 
     # Set storage endpoint
-    if storage_endpoint is not None:
+    if storage_endpoint:
         instance.storage_endpoint = storage_endpoint
-    if storage_account is not None:
+    if storage_account:
         storage_resource_group = _find_storage_account_resource_group(storage_account)
         instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
 
     # Set storage access key
-    if storage_account_access_key is not None:
+    if storage_account_access_key:
         # Access key is specified
         instance.storage_account_access_key = storage_account_access_key
     elif enabled:
@@ -583,7 +583,7 @@ def db_audit_policy_update(
         retention_days=None):
 
     # Apply state
-    if state is not None:
+    if state:
         # pylint: disable=unsubscriptable-object
         instance.state = BlobAuditingPolicyState[state.lower()]
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
@@ -598,10 +598,10 @@ def db_audit_policy_update(
         instance.is_storage_secondary_key_in_use)
 
     # Set other properties
-    if audit_actions_and_groups is not None:
+    if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
-    if retention_days is not None:
+    if retention_days:
         instance.retention_days = retention_days
 
     return instance
@@ -620,7 +620,7 @@ def db_threat_detection_policy_update(
         email_account_admins=None):
 
     # Apply state
-    if state is not None:
+    if state:
         # pylint: disable=unsubscriptable-object
         instance.state = SecurityAlertPolicyState[state.lower()]
     enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
@@ -635,16 +635,16 @@ def db_threat_detection_policy_update(
         False)
 
     # Set other properties
-    if retention_days is not None:
+    if retention_days:
         instance.retention_days = retention_days
 
-    if email_addresses is not None:
+    if email_addresses:
         instance.email_addresses = ";".join(email_addresses)
 
-    if disabled_alerts is not None:
+    if disabled_alerts:
         instance.disabled_alerts = ";".join(disabled_alerts)
 
-    if email_account_admins is not None:
+    if email_account_admins:
         instance.email_account_admins = email_account_admins
 
     return instance
@@ -764,9 +764,9 @@ def elastic_pool_list_capabilities(
         detail=None):
 
     # Fixup parameters
-    if detail is None:
+    if not detail:
         detail = []
-    if dtu is not None:
+    if dtu:
         dtu = int(dtu)
 
     # Get capabilities tree from server
@@ -777,11 +777,11 @@ def elastic_pool_list_capabilities(
                     if sv.name == _DEFAULT_SERVER_VERSION).supported_elastic_pool_editions
 
     # Filter by edition
-    if edition is not None:
+    if edition:
         editions = [e for e in editions if e.name.lower() == edition.lower()]
 
     # Filter by dtu
-    if dtu is not None:
+    if dtu:
         for e in editions:
             e.supported_elastic_pool_dtus = [
                 d for d in e.supported_elastic_pool_dtus
