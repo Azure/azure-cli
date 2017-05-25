@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
+
 from ._util import (
     get_sql_servers_operations,
     get_sql_elastic_pools_operations
@@ -237,13 +239,17 @@ def db_failover(
         link_id=primary_link.name)
 
 
+class DatabaseCapabilitiesShow(Enum):
+    max_size = 'max-size'
+
+
 def db_list_capabilities(
         client,
         location,
         server_version="12.0",
         edition=None,
         service_objective=None,
-        show_max_sizes=False):
+        show=[]):
     
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)
@@ -264,7 +270,7 @@ def db_list_capabilities(
     editions = [e for e in editions if len(e.supported_service_level_objectives) > 0]
 
     # Optionally hide supported max sizes
-    if not show_max_sizes:
+    if DatabaseCapabilitiesShow.max_size.value not in show:
         for e in editions:
             for slo in e.supported_service_level_objectives:
                 del slo.supported_max_sizes
@@ -740,8 +746,7 @@ def elastic_pool_list_capabilities(
         location,
         server_version="12.0",
         edition=None,
-        show_max_sizes=False,
-        show_db_dtu_max=False):
+        show=[]):
     
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)

@@ -5,6 +5,9 @@
 
 import itertools
 from enum import Enum
+from .custom import (
+    DatabaseCapabilitiesShow
+)
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     create_enum_type,
@@ -275,6 +278,11 @@ with ParametersContext(command='sql db list') as c:
     c.argument('elastic_pool_name',
                help='If specified, lists only the databases in this elastic pool')
 
+
+with ParametersContext(command='sql db list-capabilities') as c:
+    c.argument('show',
+               **enum_choice_list(DatabaseCapabilitiesShow),
+               nargs='+')
 
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
