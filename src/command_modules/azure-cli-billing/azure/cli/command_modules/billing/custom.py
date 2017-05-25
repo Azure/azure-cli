@@ -10,7 +10,7 @@ def cli_billing_list_invoices(client, generate_url=False):
     return list(invoices)
 
 
-def cli_billing_get_invoice(client, name):
+def cli_billing_get_invoice(client, name=None):
     """Retrieve invoice of specific name of the subscription"""
     if name:
         return client.get(name)
