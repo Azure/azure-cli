@@ -485,7 +485,13 @@ class Shell(object):
                     result = jmespath.search(
                         query_text, input_dict)
                 if isinstance(result, str):
+                    print(result)
                     cmd.replace(query_text, result)
+                    continue_flag = True
+                elif isinstance(result, list):
+                    cmd_base = text.partition(SELECT_SYMBOL['query'])[0]
+                    cmd = cmd_base + " " + result[0]
+                    print(cmd)
                     continue_flag = False
                 else:
                     print(json.dumps(result, sort_keys=True, indent=2))
@@ -493,7 +499,7 @@ class Shell(object):
             except jmespath.exceptions.ParseError:
                 print("Invalid Query")
         telemetry.track_ssg('query', text)
-        return continue_flag
+        return continue_flag, cmd
 
     def handle_scoping_input(self, continue_flag, cmd, text):
         default_split = text.partition(SELECT_SYMBOL['scope'])[2].split()
