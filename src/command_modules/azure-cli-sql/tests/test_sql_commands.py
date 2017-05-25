@@ -1063,7 +1063,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         pool_max_size_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedMaxSizes[])'
         pool_db_max_dtu_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[])'
         pool_db_min_dtu_length_jmespath = ('length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[]'
-                                    '.supportedPerDatabaseMinDtus[])')
+                                           '.supportedPerDatabaseMinDtus[])')
         pool_db_max_size_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxSizes[])'
 
         # Get all elastic pool capabilities
