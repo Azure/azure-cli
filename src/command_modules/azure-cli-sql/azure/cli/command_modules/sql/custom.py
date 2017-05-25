@@ -252,7 +252,7 @@ def db_list_capabilities(
         detail=None):
 
     # Fixup parameters
-    if detail is None:
+    if not detail:
         detail = []
 
     # Get capabilities tree from server
@@ -559,7 +559,7 @@ def _db_security_policy_update(
         # This doesn't work if the user used generic update args, i.e. `--set state=Enabled`
         # instead of `--state Enabled`, since the generic update args are applied after this custom
         # function, but at least we tried.
-        if storage_account is None:
+        if not storage_account:
             storage_account = _get_storage_account_name(instance.storage_endpoint)
             storage_resource_group = _find_storage_account_resource_group(storage_account)
 
