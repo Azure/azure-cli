@@ -274,7 +274,7 @@ def db_list_capabilities(
                 if slo.name.lower() == service_objective.lower()]
 
     # Remove editions with no service objectives (due to filters)
-    editions = [e for e in editions if len(e.supported_service_level_objectives)]
+    editions = [e for e in editions if e.supported_service_level_objectives]
 
     # Optionally hide supported max sizes
     if DatabaseCapabilitiesAdditionalDetails.max_size.value not in show_details:
@@ -785,7 +785,7 @@ def elastic_pool_list_capabilities(
                 if d.limit == dtu]
 
     # Remove editions with no service objectives (due to filters)
-    editions = [e for e in editions if len(e.supported_elastic_pool_dtus)]
+    editions = [e for e in editions if e.supported_elastic_pool_dtus]
 
     for e in editions:
         for d in e.supported_elastic_pool_dtus:
