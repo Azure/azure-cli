@@ -278,7 +278,7 @@ def db_list_capabilities(
     if DatabaseCapabilitiesAdditionalDetails.max_size.value not in show:
         for e in editions:
             for slo in e.supported_service_level_objectives:
-                del slo.supported_max_sizes
+                slo.supported_max_sizes = []
 
     return editions
 
@@ -773,14 +773,14 @@ def elastic_pool_list_capabilities(
         for dtu in e.supported_elastic_pool_dtus:
             # Optionally hide supported max sizes
             if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in show:
-                del dtu.supported_max_sizes
+                dtu.supported_max_sizes = []
 
             # Optionally hide per database min & max dtus
-            if ElasticPoolCapabilitiesAdditionalDetails.db_dtu_max.value not in show:
-                del dtu.supported_per_database_max_dtus
-            elif ElasticPoolCapabilitiesAdditionalDetails.db_dtu_min.value not in show:
+            if ElasticPoolCapabilitiesAdditionalDetails.db_dtu_min.value not in show:
                 for db_max_dtu in dtu.supported_per_database_max_dtus:
-                    del db_max_dtu.supported_per_database_min_dtus
+                    db_max_dtu.supported_per_database_min_dtus = []
+            elif ElasticPoolCapabilitiesAdditionalDetails.db_dtu_max.value not in show:
+                dtu.supported_per_database_max_dtus = []
 
             # Always delete supported per db max sizes
             del dtu.supported_per_database_max_sizes
