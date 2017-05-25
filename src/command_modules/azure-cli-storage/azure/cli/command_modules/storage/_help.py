@@ -30,8 +30,28 @@ helps['storage blob upload'] = """
     short-summary: Upload a specified file to a storage blob.
     long-summary: Creates a new blob from a file path, or updates the content of an existing blob, with automatic chunking and progress notifications.
     examples:
-        - name: Upload to a blob with all required fields.
-          text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
+        - name: Download a blob to a file destination with all required fields.
+          text: az storage blob upload -f /path/to/write/to -c MyContainer -n MyBlob
+"""
+
+helps['storage blob generate-sas'] = """
+    type: command
+    short-summary: Generates a shared access signature for a blob.
+    long-summary: Use the returned signature with the sas_token parameter of any Blob Service.
+    examples:
+        - name: Generate a shared access signature with all required fields.
+          text: az storage blob generate-sas -c MyContainer -n MyBlob
+        - name: Assign a read-only shared access signature  to a variable name.
+          readAccessSAS =$(az storage blob generate-sas -c container1 -n mypic3.png  --permissions r)
+"""
+
+helps['storage blob download'] = """
+    type: command
+    short-summary: Download a specified file from a storage blob.
+    long-summary: Downloads a blob to a file path, with automatic chunking and progress notifications.
+    examples:
+        - name: Download to a blob with all required fields.
+          text: az storage blob download -f /path/to/file -c MyContainer -n MyBlob
 """
 
 helps['storage file upload'] = """
@@ -128,6 +148,8 @@ helps['storage account show-connection-string'] = """
     examples:
         - name: Get a connection string for a storage account.
           text: az storage account show-connection-string -g MyResourceGroup -n MyStorageAccount
+        - name: Set the AZURE_STORAGE_CONNECTION_STRING environment variable.
+          text: export AZURE_STORAGE_CONNECTION_STRING=$(az storage account show-connection-string -n MyStorageAccount -g MyResourceGroup)
 """
 
 helps['storage'] = """
@@ -156,6 +178,10 @@ helps['storage account keys list'] = """
     examples:
         - name: List the primary and secondary keys for a storage account.
           text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
+        - name: Set the AZURE_STORAGE_ACCESS_KEY environment variable using awk.
+          text: export AZURE_STORAGE_ACCESS_KEY=$( az storage account keys list -n MyStorageAccount -g MyResourceGroup -o tsv | awk '{if ($1=="key1") print $3;}')
+        - name: Set the AZURE_STORAGE_ACCESS_KEY environment variable using JMESPath.
+          text: export AZURE_STORAGE_ACCESS_KEY=$( az storage account keys list -n MyStorageAccounte -g MyResourceGroup --query "[].{keyName:keyName,value:value}|[?keyName=='key1']|[].value")
 """
 
 helps['storage blob'] = """
@@ -197,16 +223,27 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
+
+helps['storage blob copy start'] = """
+    type: command
+    short-summary: Copies a blob asynchronously.
+    examples:
+        - name: copy a blob to another container in the same account.  Destination will be overwritten if it exists.
+          text: az storage blob copy start --source-blob MyBlob --source-container MyContainer --destination-blob 'newfile.txt' --destination-container TargetContainer
+        - name: copy a blob to a container from a URL.  Destination will be overwritten if it exists.
+          text: az storage blob copy start --source-uri http://SourceURL.org/file.txt --destination-blob 'newfile.txt' --destination-container TargetContainer
+"""
+
 helps['storage blob copy start-batch'] = """
     type: command
     short-summary: Copy multiple blobs or files to a blob container.
     parameters:
         - name: --destination-container
           type: string
-          short-summary: The blob container where the selected source files or blobs to be copied to.
+          short-summary: The blob container where the selected source files or blobs will be copied.
         - name: --pattern
           type: string
-          short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
           short-summary: List of files or blobs to be uploaded. No actual data transfer will occur.
@@ -228,6 +265,11 @@ helps['storage blob copy start-batch'] = """
         - name: --source-sas
           type: string
           short-summary: The shared access signature for the source storage account.
+      examples:
+        - name: copy all files in a container to another container in the same storage account.
+          text: az storage blob copy start batch --source-container MyContainer --pattern '*' --destination-container TargetContainer
+        - name: Test a copy of files to a container from a URL.  Response will be a list of files that will be copied.
+          text: az storage blob copy start batch --dryrun --source-uri http://SourceURL.org/files/ --destination-container TargetContainer
 """
 helps['storage container'] = """
     type: group
@@ -402,7 +444,6 @@ helps['storage file copy start-batch'] = """
           short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-
           short-summary: The list of files or blobs to be uploaded. No actual data transfer occurs.
         - name: --source-account-name
           type: string
