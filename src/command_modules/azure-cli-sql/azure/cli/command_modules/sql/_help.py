@@ -205,7 +205,7 @@ helps['sql elastic-pool list-capabilities'] = """
     type: command
     short-summary: Shows elastic pool capabilities that are available for your subscription.
     long-summary: Capabilities are expressed as a tree that includes available editions, service
-                  objectives, storage limits, and per database dtu settings. In order to reduce 
+                  objectives, storage limits, and per database dtu settings. In order to reduce
                   verbosity, storage limits and per database settingsare hidden by default.
     examples:
         - name: Show all elastic pool capabilities in a location.
@@ -215,7 +215,7 @@ helps['sql elastic-pool list-capabilities'] = """
         - name: Show available max sizes for elastic pools with 100 DTUs
           text: az sql elastic-pool list-capabilities -l westus --dtu 100 --details max-size
         - name: Show available per database settings for Standard 100 DTU elastic pools
-          text: az sql elastic-pool list-capabilities -l westus --edition Standard --dtu 100 
+          text: az sql elastic-pool list-capabilities -l westus --edition Standard --dtu 100
                 --details db-dtu-min db-dtu-max db-max-size
     """
 helps['sql elastic-pool update'] = """

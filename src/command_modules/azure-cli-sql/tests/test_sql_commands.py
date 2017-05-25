@@ -1034,7 +1034,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                          0)])
 
         # Get all db capabilities with size data
-        self.cmd('sql db list-capabilities -l {} --show max-size'.format(location),
+        self.cmd('sql db list-capabilities -l {} --details max-size'.format(location),
                  checks=[
                      # Max size data is included
                      JMESPathCheckGreaterThan(
@@ -1058,7 +1058,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                      # S0 service objective exists, others don't exist
                      JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
                      JMESPathCheck(
-                         "length([].supportedServiceLevelObjectives[] | [?name != 'S0'])", 
+                         "length([].supportedServiceLevelObjectives[] | [?name != 'S0'])",
                          0),
                  ])
 
@@ -1076,6 +1076,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         # Get all db capabilities with per db max size - TODO
         # Get all db capabilities with per db max dtu - TODO
         # Get all db capabilities with per db min dtu - TODO
+
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()

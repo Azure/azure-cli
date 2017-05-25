@@ -11,7 +11,6 @@ from .custom import (
 )
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
-    create_enum_type,
     enum_choice_list,
     ignore_type)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
@@ -24,9 +23,9 @@ from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
-    CapabilityStatus,
     CreateMode,
     DatabaseEdition,
+    ElasticPoolEdition,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
     ServiceObjectiveName,
@@ -280,7 +279,7 @@ with ParametersContext(command='sql db list') as c:
                help='If specified, lists only the databases in this elastic pool')
 
 
-with ParametersContext(command='sql db list-capabilities') as c:   
+with ParametersContext(command='sql db list-capabilities') as c:
     c.argument('details',
                help='List of additional details to include in output.',
                **enum_choice_list(DatabaseCapabilitiesAdditionalDetails),
@@ -290,10 +289,12 @@ with ParametersContext(command='sql db list-capabilities') as c:
 
     c.argument('edition',
                arg_group=search_arg_group,
-               help='Edition to search for. If unspecified, all editions are shown.')
+               help='Edition to search for. If unspecified, all editions are shown.',
+               **enum_choice_list(DatabaseEdition))
     c.argument('service_objective',
                arg_group=search_arg_group,
-               help='Service objective to search for. If unspecified, all editions are shown.')
+               help='Service objective to search for. If unspecified, all editions are shown.',
+               **enum_choice_list(ServiceObjectiveName))
 
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
@@ -525,7 +526,8 @@ with ParametersContext(command='sql elastic-pool list-capabilities') as c:
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
                nargs='+')
     c.argument('edition',
-               help='Edition to search for. If unspecified, all editions are shown.')
+               help='Edition to search for. If unspecified, all editions are shown.',
+               **enum_choice_list(ElasticPoolEdition))
 
 
 with ParametersContext(command='sql elastic-pool update') as c:

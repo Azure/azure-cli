@@ -16,7 +16,6 @@ from azure.cli.core.commands.client_factory import (
 from azure.cli.core.util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
-    CapabilityStatus,
     CreateMode,
     DatabaseEdition,
     ReplicationRole,
@@ -251,24 +250,28 @@ def db_list_capabilities(
         location,
         edition=None,
         service_objective=None,
-        details=[]):
-    
+        details=None):
+
+    # Fixup parameters
+    if details is None:
+        details = []
+
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)
 
     # Get subtree related to databases
-    editions = next(sv for sv in capabilities.supported_server_versions 
+    editions = next(sv for sv in capabilities.supported_server_versions
                     if sv.name == _default_server_version).supported_editions
 
     # Filter by edition
     if edition is not None:
         editions = [e for e in editions if e.name.lower() == edition.lower()]
-    
+
     # Filter by service objective
     if service_objective is not None:
         for e in editions:
-            e.supported_service_level_objectives = [slo 
-                for slo in e.supported_service_level_objectives
+            e.supported_service_level_objectives = [
+                slo for slo in e.supported_service_level_objectives
                 if slo.name.lower() == service_objective.lower()]
 
     # Remove editions with no service objectives (due to filters)
@@ -758,24 +761,28 @@ def elastic_pool_list_capabilities(
         location,
         edition=None,
         dtu=None,
-        details=[]):
-    
+        details=None):
+
+    # Fixup parameters
+    if details is None:
+        details = []
+
     # Get capabilities tree from server
     capabilities = client.list_by_location(location)
 
     # Get subtree related to databases
-    editions = next(sv for sv in capabilities.supported_server_versions 
+    editions = next(sv for sv in capabilities.supported_server_versions
                     if sv.name == _default_server_version).supported_elastic_pool_editions
 
     # Filter by edition
     if edition is not None:
         editions = [e for e in editions if e.name.lower() == edition.lower()]
-    
+
     # Filter by dtu
     if dtu is not None:
         for e in editions:
-            e.supported_elastic_pool_dtus = [d 
-                for d in e.supported_elastic_pool_dtus
+            e.supported_elastic_pool_dtus = [
+                d for d in e.supported_elastic_pool_dtus
                 if d.limit == int(dtu)]
 
     # Remove editions with no service objectives (due to filters)
