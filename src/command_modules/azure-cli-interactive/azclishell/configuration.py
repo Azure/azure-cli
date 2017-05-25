@@ -23,7 +23,7 @@ SELECT_SYMBOL = {
 GESTURE_INFO = {
     SELECT_SYMBOL['outside'] + "[cmd]": "use commands outside the application",
     # pylint: disable=line-too-long
-    "[cmd] + [parameters]" + SELECT_SYMBOL['query'] + "[path]": "Inject the query result from previous command using jmespath syntax",
+    "[cmd] + [param] " + SELECT_SYMBOL['query'] + "[query]": "Inject jmespath query from previous command",
     "[cmd] " + SELECT_SYMBOL['example'] + " [num]": "do a step by step tutorial of example",
     SELECT_SYMBOL['exit_code']: "get the exit code of the previous command",
     SELECT_SYMBOL['scope'] + '[cmd]': "set a scope, and scopes can be chained with spaces",
@@ -34,7 +34,7 @@ GESTURE_INFO = {
 
 CONFIG_FILE_NAME = 'shell-config'
 
-GESTURE_LENGTH = 20
+GESTURE_LENGTH = max(len(key) for key in GESTURE_INFO.keys()) + 1
 
 
 def help_text(values):
