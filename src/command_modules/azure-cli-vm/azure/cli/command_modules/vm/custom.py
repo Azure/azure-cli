@@ -963,7 +963,7 @@ def set_diagnostics_extension(
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
         if next((e for e in exts if e.name == vm_extension_name and
                  not e.type_handler_version.startswith(major_ver + '.')), None):
-            logger.warning('There is incompatible version of diagnostics extension installed. '
+            logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
             poller = client.virtual_machine_extensions.delete(resource_group_name, vm_name,
                                                               vm_extension_name)
@@ -982,7 +982,6 @@ def set_vmss_diagnostics_extension(
         no_auto_upgrade=False):
     '''Enable diagnostics on a virtual machine scale set
     '''
-    from azure.mgmt.compute.models import UpgradeMode
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
@@ -1009,6 +1008,7 @@ def set_vmss_diagnostics_extension(
                                 no_auto_upgrade)
 
     result = LongRunningOperation()(poller)
+    UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, "UpgradeMode", mod='models')
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         poller2 = update_vmss_instances(resource_group_name, vmss_name, '*')
         LongRunningOperation()(poller2)
