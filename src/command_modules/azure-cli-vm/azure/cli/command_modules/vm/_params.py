@@ -58,7 +58,8 @@ disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum
 
 register_cli_argument('vm', 'vm_name', existing_vm_name)
 register_cli_argument('vm', 'size', completer=get_vm_size_completion_list)
-register_cli_argument('vm', 'tags', tags_type)
+for scope in ['vm', 'disk', 'snapshot', 'image']:
+    register_cli_argument(scope, 'tags', tags_type)
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
 for item in ['show', 'list']:

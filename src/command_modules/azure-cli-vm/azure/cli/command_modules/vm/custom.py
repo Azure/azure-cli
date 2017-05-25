@@ -291,7 +291,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        source_storage_account_id=None, no_wait=False):
+                        source_storage_account_id=None, no_wait=False, tags=None):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -310,7 +310,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
         raise CLIError('usage error: --size-gb required to create an empty disk')
 
     disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
-                account_type=sku)
+                account_type=sku, tags=(tags or {}))
     client = _compute_client_factory()
     return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
 
@@ -400,7 +400,8 @@ def grant_disk_access(resource_group_name, disk_name, duration_in_seconds):
 def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None):
+                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
+                    tags=None):
     from azure.mgmt.compute.models import Snapshot, CreationData, DiskCreateOption
 
     location = location or get_resource_group_location(resource_group_name)
@@ -420,7 +421,7 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
         raise CLIError('Please supply size for the snapshots')
 
     snapshot = Snapshot(location, disk_size_gb=size_gb, creation_data=creation_data,
-                        account_type=sku)
+                        account_type=sku, tags=(tags or {}))
     client = _compute_client_factory()
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
@@ -472,7 +473,7 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
                  source_virtual_machine=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, data_disks=None):
+                 os_disk=None, data_disks=None, tags=None):
     from azure.mgmt.compute.models import (ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource,
                                            OperatingSystemStateTypes)
     # pylint: disable=line-too-long
@@ -503,7 +504,7 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
         image_storage_profile = image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
         location = location or get_resource_group_location(resource_group_name)
         # pylint disable=no-member
-        image = Image(location, storage_profile=image_storage_profile)
+        image = Image(location, storage_profile=image_storage_profile, tags=(tags or {}))
 
     client = _compute_client_factory()
     return client.images.create_or_update(resource_group_name, name, image)
