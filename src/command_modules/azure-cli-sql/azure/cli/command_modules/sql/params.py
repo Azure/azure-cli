@@ -280,11 +280,20 @@ with ParametersContext(command='sql db list') as c:
                help='If specified, lists only the databases in this elastic pool')
 
 
-with ParametersContext(command='sql db list-capabilities') as c:
-    c.argument('show',
+with ParametersContext(command='sql db list-capabilities') as c:   
+    c.argument('details',
+               help='List of additional details to include in output.',
                **enum_choice_list(DatabaseCapabilitiesAdditionalDetails),
                nargs='+')
 
+    search_arg_group = 'Search'
+
+    c.argument('edition',
+               arg_group=search_arg_group,
+               help='Edition to search for. If unspecified, all editions are shown.')
+    c.argument('service_objective',
+               arg_group=search_arg_group,
+               help='Service objective to search for. If unspecified, all editions are shown.')
 
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
@@ -511,9 +520,12 @@ with ParametersContext(command='sql elastic-pool create') as c:
 
 
 with ParametersContext(command='sql elastic-pool list-capabilities') as c:
-    c.argument('show',
+    c.argument('details',
+               help='List of additional details to include in output.',
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
                nargs='+')
+    c.argument('edition',
+               help='Edition to search for. If unspecified, all editions are shown.')
 
 
 with ParametersContext(command='sql elastic-pool update') as c:
