@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
-from ._exception_handler import billing_exception_handler
 from azure.cli.command_modules.billing._client_factory import \
     (invoices_mgmt_client_factory,
      billing_periods_mgmt_client_factory)
@@ -15,6 +14,7 @@ from azure.cli.command_modules.billing._transformers import \
      transform_invoice_output,
      transform_billing_period_output,
      transform_billing_period_list_output)
+from ._exception_handler import billing_exception_handler
 
 invoices_path = 'azure.mgmt.billing.operations.invoices_operations#'
 billing_periods_path = 'azure.mgmt.billing.operations.billing_periods_operations#'
