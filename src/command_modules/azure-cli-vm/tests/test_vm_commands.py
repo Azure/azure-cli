@@ -290,7 +290,7 @@ class VMWindowsLicenseTest(ScenarioTest):
 class VMCustomImageTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_custom_image(self, resource_group, resource_group_location):
+    def test_custom_image(self, resource_group):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made generalized vms
         prepared_vm_unmanaged = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-um'
         prepared_vm = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-m'
@@ -407,9 +407,10 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
         image_name = 'i1'
 
         # create a disk and update
-        data_disk = self.cmd('disk create -g {} -n {} --size-gb {}'.format(self.resource_group, disk_name, 1), checks=[
+        data_disk = self.cmd('disk create -g {} -n {} --size-gb {} --tags tag1=d1'.format(self.resource_group, disk_name, 1), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
-            JMESPathCheck('diskSizeGb', 1)
+            JMESPathCheck('diskSizeGb', 1),
+            JMESPathCheck('tags.tag1', 'd1')
         ])
         self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Standard_LRS'), checks=[
             JMESPathCheck('accountType', 'Standard_LRS'),
@@ -420,10 +421,11 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
         data_disk2 = self.cmd('disk create -g {} -n {} --source {}'.format(self.resource_group, disk_name2, data_disk['id']))
 
         # create a snpashot
-        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {}'.format(
+        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {} --tags tag1=s1'.format(
             self.resource_group, snapshot_name, 1, 'Premium_LRS'), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
-            JMESPathCheck('diskSizeGb', 1)
+            JMESPathCheck('diskSizeGb', 1),
+            JMESPathCheck('tags.tag1', 's1')
         ])
         # update the sku
         self.cmd('snapshot update -g {} -n {} --sku {}'.format(self.resource_group, snapshot_name, 'Standard_LRS'), checks=[
@@ -437,11 +439,12 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
         # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
         # pylint: disable=too-many-format-args
-        self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux'.format(
+        self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux --tags tag1=i1'.format(
             self.resource_group, image_name, snapshot_name, disk_name, data_snapshot['id'], data_disk2['id']), checks=[
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),
             JMESPathCheck('storageProfile.osDisk.snapshot.id', os_snapshot['id']),
-            JMESPathCheck('length(storageProfile.dataDisks)', 3)
+            JMESPathCheck('length(storageProfile.dataDisks)', 3),
+            JMESPathCheck('tags.tag1', 'i1')
         ])
 
     def test_managed_disk(self):
@@ -951,7 +954,8 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         checks = [
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].publisher', "Microsoft.Azure.Diagnostics"),
-            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account)
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account),
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].typeHandlerVersion', '3.0')
         ]
 
         self.cmd("vmss diagnostics set -g {} --vmss-name {} --settings {} --protected-settings {}".format(
@@ -959,11 +963,18 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
         self.cmd("vmss show -g {} -n {}".format(self.resource_group, self.vmss), checks=checks)
 
+        # test standalone VM, we will start with an old version
+        self.cmd('vm extension set -g {} --vm-name {} -n LinuxDiagnostic --version 2.3.9025 --publisher Microsoft.OSTCExtensions --settings {} --protected-settings {}'.format(
+            self.resource_group, self.vm, public_settings, protected_settings), checks=[
+            JMESPathCheck('typeHandlerVersion', '2.3')
+        ])
+        # see the 'diagnostics set' command upgrades to newer version
         self.cmd("vm diagnostics set -g {} --vm-name {} --settings {} --protected-settings {}".format(
             self.resource_group, self.vm, public_settings, protected_settings), checks=[
                 JMESPathCheck('name', 'LinuxDiagnostic'),
                 JMESPathCheck('publisher', 'Microsoft.Azure.Diagnostics'),
-                JMESPathCheck('settings.StorageAccount', self.storage_account)
+                JMESPathCheck('settings.StorageAccount', self.storage_account),
+                JMESPathCheck('typeHandlerVersion', '3.0')
         ])
 
         self.cmd("vm show -g {} -n {}".format(self.resource_group, self.vm), checks=[
