@@ -172,16 +172,30 @@ class TestActions(unittest.TestCase):
         self.assertEqual('publisher1', np.plan_publisher)
 
     def test_get_next_subnet_addr_suffix(self):
-        result = _get_next_subnet_addr_suffix('10.0.0.0/24', 24)
+        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
         self.assertEqual(result, '10.0.1.0/24')
 
         # for 254~510 instances VMSS
-        result = _get_next_subnet_addr_suffix('10.0.0.0/23', 24)
+        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/23', 24)
         self.assertEqual(result, '10.0.2.0/24')
 
-        # a bit complex involving carry bits to the next section
-        result = _get_next_subnet_addr_suffix('12.0.255.0/24', 24)
+        # +1 overflows, so we go with -1
+        result = _get_next_subnet_addr_suffix('12.0.0.0/16', '12.0.255.0/24', 24)
+        self.assertEqual(result, '12.0.254.0/24')
+
+        # handle carry bits to the next section
+        result = _get_next_subnet_addr_suffix('12.0.0.0/15', '12.0.255.0/24', 24)
         self.assertEqual(result, '12.1.0.0/24')
+
+        # error cases
+        with self.assertRaises(CLIError):
+            _get_next_subnet_addr_suffix('12.0.0.0/16', '12.0.255.0/15', 24)
+
+        with self.assertRaises(CLIError):
+            _get_next_subnet_addr_suffix('12.0.0.0/16', '12.1.0.0/16', 24)
+
+        with self.assertRaises(CLIError):
+            _get_next_subnet_addr_suffix('12.0.0.0/22', '12.0.0.0/22', 24)
 
         # verify end to end
         np_mock = mock.MagicMock()

@@ -425,7 +425,7 @@ def _validate_vm_create_availability_set(namespace):
             name=name)
 
 
-def _validate_create_vnet(namespace, for_scale_set=False):
+def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
 
     vnet = namespace.vnet_name
     subnet = namespace.subnet
@@ -499,18 +499,35 @@ def _validate_vmss_create_subnet(namespace):
 
         if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
             namespace.app_gateway_subnet_address_prefix = _get_next_subnet_addr_suffix(
-                namespace.subnet_address_prefix, 24)
+                namespace.vnet_address_prefix, namespace.subnet_address_prefix, 24)
 
 
-def _get_next_subnet_addr_suffix(subnet_cidr, new_mask):
+def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
     def _convert_to_int(address, bit_mask_len):
         a, b, c, d = [int(x) for x in address.split('.')]
         result = '{0:08b}{1:08b}{2:08b}{3:08b}'.format(a, b, c, d)
         return int(result[:-bit_mask_len], 2)
-    ip_address, mask = subnet_cidr.split('/')
-    bit_mask_len = 32 - int(mask)
-    candidate_int = _convert_to_int(ip_address, bit_mask_len) + 1
-    candaidate_str = '{0:32b}'.format(candidate_int << bit_mask_len)
+
+    error_msg = "usage error: --subnet-address-prefix value should be a subrange of --vnet-address-prefix's"
+    # extract vnet information needed to verify the defaults we are coming out
+    vnet_ip_address, mask = vnet_cidr.split('/')
+    vnet_bit_mask_len = 32 - int(mask)
+    vnet_int = _convert_to_int(vnet_ip_address, vnet_bit_mask_len)
+
+    subnet_ip_address, mask = subnet_cidr.split('/')
+    subnet_bit_mask_len = 32 - int(mask)
+
+    if vnet_bit_mask_len <= subnet_bit_mask_len:
+        raise CLIError(error_msg)
+
+    candidate_int = _convert_to_int(subnet_ip_address, subnet_bit_mask_len) + 1
+    if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:  # overflows?
+        candidate_int = candidate_int - 2  # try the other way around
+        if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:
+            raise CLIError(error_msg)
+
+    # format back to the cidr
+    candaidate_str = '{0:32b}'.format(candidate_int << subnet_bit_mask_len)
     return '{0}.{1}.{2}.{3}/{4}'.format(int(candaidate_str[0:8], 2), int(candaidate_str[8:16], 2),
                                         int(candaidate_str[16:24], 2), int(candaidate_str[24:32], 2),
                                         new_mask)
@@ -581,7 +598,7 @@ def _validate_vm_create_nics(namespace):
     namespace.public_ip_type = None
 
 
-def _validate_create_auth(namespace):
+def _validate_vm_vmss_create_auth(namespace):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -748,11 +765,11 @@ def process_vm_create_namespace(namespace):
         _validate_vm_create_storage_account(namespace)
 
     _validate_vm_create_availability_set(namespace)
-    _validate_create_vnet(namespace)
+    _validate_vm_vmss_create_vnet(namespace)
     _validate_vm_create_nsg(namespace)
     _validate_vm_create_public_ip(namespace)
     _validate_vm_create_nics(namespace)
-    _validate_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
@@ -853,11 +870,11 @@ def get_network_client():
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
-    _validate_create_vnet(namespace, for_scale_set=True)
+    _validate_vm_vmss_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer_or_app_gateway(namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
-    _validate_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace)
 
 # endregion
 

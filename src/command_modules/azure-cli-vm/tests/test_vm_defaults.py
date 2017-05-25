@@ -12,10 +12,10 @@ except ImportError:
 
 from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.vm._validators import (_validate_create_vnet,
+from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
                                                       _validate_vmss_create_subnet,
                                                       _validate_vm_create_storage_account,
-                                                      _validate_create_auth)
+                                                      _validate_vm_vmss_create_auth)
 
 # pylint: disable=method-hidden
 # pylint: disable=line-too-long
@@ -119,7 +119,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_vnet(self):
         self._set_ns('emptyrg', 'eastus')
-        _validate_create_vnet(self.ns)
+        _validate_vm_vmss_create_vnet(self.ns)
         self.assertIsNone(self.ns.vnet_name)
         self.assertIsNone(self.ns.subnet)
         self.assertEqual(self.ns.vnet_type, 'new')
@@ -127,7 +127,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_vnet_specified_location(self):
         self._set_ns('rg1', 'eastus')
-        _validate_create_vnet(self.ns)
+        _validate_vm_vmss_create_vnet(self.ns)
         self.assertEqual(self.ns.vnet_name, 'vnet1')
         self.assertEqual(self.ns.subnet, 'vnet1subnet')
         self.assertEqual(self.ns.vnet_type, 'existing')
@@ -149,7 +149,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
     def test_matching_vnet_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 5
-        _validate_create_vnet(ns, for_scale_set=True)
+        _validate_vm_vmss_create_vnet(ns, for_scale_set=True)
         self.assertEqual(ns.vnet_name, 'vnet1')
         self.assertEqual(ns.subnet, 'vnet1subnet')
         self.assertEqual(ns.vnet_type, 'existing')
@@ -158,14 +158,14 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
     def test_matching_vnet_no_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 1000
-        _validate_create_vnet(ns, for_scale_set=True)
+        _validate_vm_vmss_create_vnet(ns, for_scale_set=True)
         self.assertIsNone(ns.vnet_name)
         self.assertIsNone(ns.subnet)
         self.assertEqual(ns.vnet_type, 'new')
 
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 255
-        _validate_create_vnet(ns, for_scale_set=True)
+        _validate_vm_vmss_create_vnet(ns, for_scale_set=True)
         self.assertEqual(ns.vnet_type, 'new')
 
     def test_new_subnet_size_for_big_vmss(self):
@@ -245,7 +245,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.authentication_type = None
         ns.admin_username = 'user12345'
         ns.admin_password = 'verySecret123'
-        _validate_create_auth(ns)
+        _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'password')
 
     def test_default_linux(self):
@@ -256,7 +256,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.admin_username = test_user
         ns.admin_password = None
         ns.ssh_key_value = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n'
-        _validate_create_auth(ns)
+        _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'ssh')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(test_user))
 
@@ -266,14 +266,14 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.authentication_type = 'password'
         ns.admin_username = 'user12345'
         ns.admin_password = 'verySecret!!!'
-        _validate_create_auth(ns)
+        _validate_vm_vmss_create_auth(ns)
         # still has 'password'
         self.assertEqual(ns.authentication_type, 'password')
 
         # throw when conflict with ssh key value
         ns.ssh_key_value = 'junk but does not matter'
         with self.assertRaises(ValueError) as context:
-            _validate_create_auth(ns)
+            _validate_vm_vmss_create_auth(ns)
         self.assertTrue("incorrect usage for authentication-type 'password':" in str(context.exception))
 
 
