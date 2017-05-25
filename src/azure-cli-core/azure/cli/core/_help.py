@@ -45,7 +45,7 @@ def show_help(nouns, parser, is_group):
 
     help_file.load(parser)
 
-    if len(nouns) == 0:
+    if not nouns:
         print("\nFor version info, use 'az --version'")
         help_file.command = ''
 
@@ -80,7 +80,7 @@ def print_detailed_help(help_file):
     elif help_file.type == 'group':
         _print_groups(help_file)
 
-    if len(help_file.examples) > 0:
+    if help_file.examples:
         _print_examples(help_file)
 
 
@@ -104,7 +104,7 @@ def print_arguments(help_file):
         _print_indent('')
         return
 
-    if len(help_file.parameters) == 0:
+    if not help_file.parameters:
         _print_indent('none', indent)
     required_tag = ' [Required]'
     max_name_length = max(len(p.name) + (len(required_tag) if p.required else 0)
@@ -207,7 +207,7 @@ def _print_groups(help_file):
 
     indent = 1
     max_name_length = max(len(c.name) for c in help_file.children) \
-        if len(help_file.children) > 0 \
+        if help_file.children \
         else 0
     subgroups = [c for c in help_file.children if isinstance(c, GroupHelpFile)]
     subcommands = [c for c in help_file.children if c not in subgroups]
@@ -275,7 +275,7 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
     def __init__(self, delimiters):
         super(HelpFile, self).__init__()
         self.delimiters = delimiters
-        self.name = delimiters.split()[-1] if len(delimiters) > 0 else delimiters
+        self.name = delimiters.split()[-1] if delimiters else delimiters
         self.command = delimiters
         self.type = ''
         self.short_summary = ''

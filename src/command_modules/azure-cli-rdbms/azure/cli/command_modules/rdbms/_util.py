@@ -35,7 +35,7 @@ def get_mysql_management_client(_):
                 tenant=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication
-            credentials = Authentication()  # pylint: disable=redefined-variable-type
+            credentials = Authentication()
 
         return MySQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
@@ -64,7 +64,7 @@ def get_postgresql_management_client(_):
                 tenant=getenv(TENANT_ID))
         else:
             from msrest.authentication import Authentication
-            credentials = Authentication()  # pylint: disable=redefined-variable-type
+            credentials = Authentication()
 
         return PostgreSQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),

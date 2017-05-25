@@ -15,6 +15,7 @@ import shlex
 import sys
 import tempfile
 import traceback
+import logging
 from random import choice
 from string import digits, ascii_lowercase
 
@@ -28,7 +29,6 @@ except ImportError:
 
 import vcr
 import jmespath
-from six import StringIO
 
 # TODO Should not depend on azure.cli.main package here.
 # Will be ok if this test file is not part of azure.cli.core.utils
@@ -45,6 +45,7 @@ MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
+logger = logging.getLogger('vcr_test_base')
 
 # MOCK METHODS
 
@@ -109,7 +110,7 @@ def _mock_subscriptions(self):  # pylint: disable=unused-argument
 
 
 def _mock_user_access_token(_, _1, _2, _3):  # pylint: disable=unused-argument
-    return ('Bearer', 'top-secret-token-for-you', None)
+    return 'Bearer', 'top-secret-token-for-you', None
 
 
 def _mock_operation_delay(_):
@@ -284,7 +285,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             self.exception = CLIError('No recorded result provided for {}.'.format(self.test_name))
 
         if debug_vcr:
-            import logging
             logging.basicConfig()
             vcr_log = logging.getLogger('vcr')
             vcr_log.setLevel(logging.INFO)
@@ -413,8 +413,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
     # COMMAND METHODS
 
-    def cmd(self, command, checks=None, allowed_exceptions=None,
-            debug=False):  # pylint: disable=no-self-use
+    def cmd(self, command, checks=None, allowed_exceptions=None, debug=False):  # pylint: disable=no-self-use
+        from six import StringIO
+
         allowed_exceptions = allowed_exceptions or []
         if not isinstance(allowed_exceptions, list):
             allowed_exceptions = [allowed_exceptions]
@@ -427,8 +428,11 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             cli_main(command_list, file=output)
         except Exception as ex:  # pylint: disable=broad-except
             ex_msg = str(ex)
+            logger.error('Command "%s" => %s. Output: %s', command, ex_msg, output.getvalue())
             if not next((x for x in allowed_exceptions if x in ex_msg), None):
                 raise ex
+
+        logger.info('Command "%s" => %s.', command, 'success')
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()

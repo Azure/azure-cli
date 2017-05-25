@@ -118,8 +118,8 @@ def list_share_files(client, share_name, directory_name=None, timeout=None,
                                                   timeout=timeout)
     if exclude_dir:
         return list(f for f in generator if isinstance(f.properties, FileProperties))
-    else:
-        return generator
+
+    return generator
 
 
 @transfer_doc(FileService.list_directories_and_files)

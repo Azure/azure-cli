@@ -27,6 +27,7 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
+
 def _log_pprint_template(template):
     import json
     logger.info('==== BEGIN TEMPLATE ====')
@@ -92,8 +93,8 @@ def _generic_list(operation_name, resource_group_name):
     operation_group = getattr(ncf, operation_name)
     if resource_group_name:
         return operation_group.list(resource_group_name)
-    else:
-        return operation_group.list_all()
+
+    return operation_group.list_all()
 
 def list_vnet(resource_group_name=None):
     return _generic_list('virtual_networks', resource_group_name)
@@ -140,7 +141,6 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
@@ -1436,10 +1436,10 @@ def clear_vpn_conn_ipsec_policies(resource_group_name, connection_name, no_wait=
     conn.use_policy_based_traffic_selectors = False
     if no_wait:
         return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
-    else:
-        from azure.cli.core.commands import LongRunningOperation
-        poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
-        return LongRunningOperation()(poller).ipsec_policies
+
+    from azure.cli.core.commands import LongRunningOperation
+    poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    return LongRunningOperation()(poller).ipsec_policies
 
 
 def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
@@ -1657,13 +1657,13 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
     if bandwidth_in_mbps is not None:
-        instance.service_provider_properties.bandwith = bandwidth_in_mbps
+        instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
 
     if peering_location is not None:
         instance.service_provider_properties.peering_location = peering_location
 
     if service_provider_name is not None:
-        instance.service_provider_properties.provider = service_provider_name
+        instance.service_provider_properties.service_provider_name = service_provider_name
 
     if sku_family is not None:
         instance.sku.family = sku_family
@@ -1727,7 +1727,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
         RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
         peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(
@@ -1805,23 +1805,25 @@ update_route.__doc__ = Route.__doc__
 
 #region RouteFilter Commands
 
+
 def create_route_filter(client, resource_group_name, route_filter_name, location=None, tags=None):
     RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
     return client.create_or_update(resource_group_name, route_filter_name,
                                    RouteFilter(location=location, tags=tags))
 
+
 def list_route_filters(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-    else:
-        return client.list()
 
-def create_route_filter_rule(client, resource_group_name, route_filter_name, rule_name, access,
-                             communities, location=None, tags=None):
+    return client.list()
+
+
+def create_route_filter_rule(client, resource_group_name, route_filter_name, rule_name, access, communities,
+                             location=None, tags=None):
     RouteFilterRule = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilterRule', mod='models')
     return client.create_or_update(resource_group_name, route_filter_name, rule_name,
-                                   RouteFilterRule(access, communities,
-                                                   location=location, tags=tags))
+                                   RouteFilterRule(access, communities, location=location, tags=tags))
 
 #endregion
 
@@ -1867,8 +1869,8 @@ def list_traffic_manager_profiles(resource_group_name=None):
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
         return client.list_by_in_resource_group(resource_group_name)
-    else:
-        return client.list_all()
+
+    return client.list_all()
 
 
 def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
@@ -1977,8 +1979,8 @@ def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:
         return ncf.list_by_resource_group(resource_group_name)
-    else:
-        return ncf.list()
+
+    return ncf.list()
 
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
@@ -1992,8 +1994,8 @@ create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
 def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
     if record_type:
         return client.list_by_type(resource_group_name, zone_name, record_type)
-    else:
-        return client.list_by_dns_zone(resource_group_name, zone_name)
+
+    return client.list_by_dns_zone(resource_group_name, zone_name)
 
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
@@ -2352,7 +2354,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)  # pylint: disable=redefined-variable-type
+        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)
 
     _add_record(record_set, record, record_type, is_list)
 
@@ -2384,9 +2386,8 @@ def _remove_record(record, record_type, record_set_name, resource_group_name, zo
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
         return ncf.delete(resource_group_name, zone_name, record_set_name, record_type)
-    else:
-        return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                    record_type, record_set)
+
+    return ncf.create_or_update(resource_group_name, zone_name, record_set_name, record_type, record_set)
 
 def dict_matches_filter(d, filter_dict):
     sentinel = object()

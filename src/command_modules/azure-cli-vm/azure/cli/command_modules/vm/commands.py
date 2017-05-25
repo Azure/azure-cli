@@ -64,6 +64,26 @@ def transform_vm_create_output(result):
         return None if isinstance(result, ClientRawResponse) else result
 
 
+def transform_vm_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
+def transform_vm_usage_table(result):
+    transformed = []
+    for item in result:
+        transformed.append(OrderedDict([
+            ('Name', item['localName']),
+            ('CurrentValue', item['currentValue']),
+            ('Limit', item['limit'])
+        ]))
+    return transformed
+
+
 def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
@@ -217,7 +237,7 @@ cli_command(__name__, 'vm image list-skus', mgmt_path.format(op_var, op_class, '
 cli_command(__name__, 'vm image list', custom_path.format('list_vm_images'))
 
 # VM Usage
-cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage)
+cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage, transform=transform_vm_usage_list, table_transformer=transform_vm_usage_table)
 
 # VMSS
 cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, no_wait_param='raw')

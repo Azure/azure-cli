@@ -22,9 +22,9 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
     if slot is None:
         return (m(resource_group_name, name)
                 if extra_parameter is None else m(resource_group_name, name, extra_parameter))
-    else:
-        return (m(resource_group_name, name, slot)
-                if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
+
+    return (m(resource_group_name, name, slot)
+            if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
 
 
 def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
