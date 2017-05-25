@@ -55,6 +55,7 @@ DEPENDENCIES = [
     'applicationinsights',
     'argcomplete>=1.8.0',
     'colorama',
+    'humanfriendly>=2.4',
     'jmespath',
     'msrest>=0.4.4',
     'msrestazure>=0.4.7',

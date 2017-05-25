@@ -17,7 +17,6 @@ import ssl
 import stat
 import string
 import subprocess
-import sys
 import threading
 import time
 import webbrowser
@@ -36,6 +35,7 @@ from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.prompting import spin
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
@@ -322,8 +322,11 @@ def _validate_service_principal(client, sp_id):
             'Failed to validate service principal, if this persists try deleting $HOME/.azure/acsServicePrincipal.json')
 
 
-def _build_service_principal(client, name, url, client_secret):
-    sys.stdout.write('creating service principal')
+def _build_service_principal(client, name, url, client_secret, output=True):
+    if output:
+        spinner = spin('creating service principal')
+        spinner.step()
+
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
@@ -331,17 +334,20 @@ def _build_service_principal(client, name, url, client_secret):
             create_service_principal(service_principal)
         # TODO figure out what exception AAD throws here sometimes.
         except:  # pylint: disable=bare-except
-            sys.stdout.write('.')
-            sys.stdout.flush()
+            spinner.step()
             time.sleep(2 + 2 * x)
-    print('done')
+    if output:
+        print()
+        print('done')
     return service_principal
 
 
 def _add_role_assignment(role, service_principal, delay=2, output=True):
     # AAD can have delays in propagating data, so sleep and retry
     if output:
-        sys.stdout.write('waiting for AAD role to propagate.')
+        spinner = spin('Waiting for AAD role to propogate')
+        spinner.step()
+
     for x in range(0, 10):
         try:
             # TODO: break this out into a shared utility library
@@ -354,11 +360,12 @@ def _add_role_assignment(role, service_principal, delay=2, output=True):
         except:  # pylint: disable=bare-except
             pass
         if output:
-            sys.stdout.write('.')
+            spinner.step()
             time.sleep(delay + delay * x)
     else:
         return False
     if output:
+        print()
         print('done')
     return True
 
@@ -373,7 +380,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                agent_vm_size="Standard_D2_v2", location=None, master_count=1,
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
-               validate=False, no_wait=False):
+               validate=False, no_wait=False, quiet=False):
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
@@ -464,11 +471,11 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
                 url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-                service_principal = _build_service_principal(client, name, url, client_secret)
+                service_principal = _build_service_principal(client, name, url, client_secret, output=(not quiet))
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
-            if not _add_role_assignment('Contributor', service_principal):
+            if not _add_role_assignment('Contributor', service_principal, output=(not quiet)):
                 raise CLIError(
                     'Could not create a service principal with the right permissions. Are you an Owner on this project?')
         else:
