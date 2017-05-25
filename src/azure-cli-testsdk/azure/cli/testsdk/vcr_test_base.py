@@ -118,6 +118,51 @@ def _mock_operation_delay(_):
     return
 
 
+class _MockOutstream(object):
+    """ mock outstream for testing """
+    def __init__(self):
+        self.string = ''
+
+    def write(self, message):
+        self.string = message
+
+    def flush(self):
+        pass
+
+    def clear(self):
+        pass
+
+
+class MockProgressHook(object):
+    def init_progress(self, progress_view):
+        pass
+
+    def add(self, **kwargs):
+        pass
+
+    def update(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def begin(self, **kwargs):
+        pass
+
+    def end(self, **kwargs):
+        pass
+
+    def is_running(self):
+        pass
+
+
+def _mock_get_progress_view(determinant=False, out=None):  # pylint: disable=unused-argument
+    return _MockOutstream()
+
+
+def _mock_get_progress_controller(*args, **kwargs):  # pylint: disable=unused-argument
+    return MockProgressHook()
+
 # TEST CHECKS
 
 
@@ -372,6 +417,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
+    @mock.patch('azure.cli.core.application.Application.get_progress_controller', _mock_get_progress_controller)
+    @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
                 _mock_user_access_token)  # pylint: disable=line-too-long
