@@ -457,8 +457,8 @@ class Shell(object):
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
 
-            elif text[0] == SELECT_SYMBOL['query']:  # query previous output
-                continue_flag = self.handle_jmespath_query(text, continue_flag)
+            elif SELECT_SYMBOL['query'] in text:  # query previous output
+                continue_flag, cmd = self.handle_jmespath_query(cmd, text, continue_flag)
 
             elif "|" in text or ">" in text:  # anything I don't parse, send off
                 outside = True
@@ -472,7 +472,7 @@ class Shell(object):
 
         return break_flag, continue_flag, outside, cmd
 
-    def handle_jmespath_query(self, text, continue_flag):
+    def handle_jmespath_query(self, cmd, text, continue_flag):
         if self.last and self.last.result:
             if hasattr(self.last.result, '__dict__'):
                 input_dict = dict(self.last.result)
@@ -485,12 +485,13 @@ class Shell(object):
                     result = jmespath.search(
                         query_text, input_dict)
                 if isinstance(result, str):
-                    print(result)
+                    cmd.replace(query_text, result)
+                    continue_flag = False
                 else:
                     print(json.dumps(result, sort_keys=True, indent=2))
+                    continue_flag = True
             except jmespath.exceptions.ParseError:
                 print("Invalid Query")
-        continue_flag = True
         telemetry.track_ssg('query', text)
         return continue_flag
 
