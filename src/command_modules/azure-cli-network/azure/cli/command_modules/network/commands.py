@@ -32,7 +32,8 @@ from ._format import \
      transform_nsg_create_output, transform_vnet_gateway_create_output,
      transform_vpn_connection, transform_vpn_connection_list,
      transform_vpn_connection_create_output, transform_geographic_hierachy_table_output,
-     transform_service_community_table_output, transform_waf_rule_sets_table_output)
+     transform_service_community_table_output, transform_waf_rule_sets_table_output,
+     transform_network_usage_list, transform_network_usage_table)
 
 
 custom_path = 'azure.cli.command_modules.network.custom#'
@@ -357,7 +358,7 @@ cli_generic_update_command(__name__, 'network vnet subnet update',
 
 # Usages operations
 usage_path = 'azure.mgmt.network.operations.usages_operations#UsagesOperations.'
-cli_command(__name__, 'network list-usages', usage_path + 'list', cf_usages)
+cli_command(__name__, 'network list-usages', usage_path + 'list', cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
 
 # VirtualNetworkGatewayConnectionsOperations
 vpn_conn_path = 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.'
