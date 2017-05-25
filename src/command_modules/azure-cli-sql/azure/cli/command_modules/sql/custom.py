@@ -262,12 +262,14 @@ def db_list_capabilities(
 
     # Filter by edition
     if edition is not None:
-        editions = [e for e in editions if e.name == edition]
+        editions = [e for e in editions if e.name.lower() == edition.lower()]
     
     # Filter by service objective
     if service_objective is not None:
         for e in editions:
-            e.supported_service_level_objectives = [slo for slo in e.supported_service_level_objectives if slo.name == service_objective]
+            e.supported_service_level_objectives = [slo 
+                for slo in e.supported_service_level_objectives
+                if slo.name.lower() == service_objective.lower()]
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if len(e.supported_service_level_objectives) > 0]
@@ -765,7 +767,7 @@ def elastic_pool_list_capabilities(
 
     # Filter by edition
     if edition is not None:
-        editions = [e for e in editions if e.name == edition]
+        editions = [e for e in editions if e.name.lower() == edition.lower()]
     
     for e in editions:
         for dtu in e.supported_elastic_pool_dtus:
