@@ -8,8 +8,8 @@ import azure.cli.command_modules.appservice._help  # pylint: disable=unused-impo
 
 
 def load_params(_):
-    import azure.cli.command_modules.appservice._params  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.appservice._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():
-    import azure.cli.command_modules.appservice.commands  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.appservice.commands  # pylint: disable=redefined-outer-name, unused-variable

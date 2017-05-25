@@ -212,7 +212,7 @@ def group_title(path):
         return group
 
     group_path = path.split('.')
-    group_path = list(map(filter_group, group_path))  # pylint: disable=bad-builtin
+    group_path = list(map(filter_group, group_path))
     title = ': '.join(group_path)
     for group in group_path:
         title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
@@ -570,8 +570,8 @@ class AzureBatchDataPlaneCommand(object):
                 # Otherwise handle based on return type of results
                 elif isinstance(result, Paged):
                     return list(result)
-                else:
-                    return result
+
+                return result
             except BatchErrorException as ex:
                 try:
                     message = ex.error.message.value

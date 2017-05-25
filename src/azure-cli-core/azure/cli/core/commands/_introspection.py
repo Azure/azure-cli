@@ -27,7 +27,7 @@ def _option_descriptions(operation):
     option_descs = {}
     lines = inspect.getdoc(operation)
     param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
-    if lines:
+    if lines:  # pylint: disable=too-many-nested-blocks
         lines = lines.splitlines()
         index = 0
         while index < len(lines):

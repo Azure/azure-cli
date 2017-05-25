@@ -25,7 +25,7 @@ def _server_restore(
         if len(source_server.split('/')) == 1:
             from azure.cli.core.commands.client_factory import get_subscription_id
             from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
-            provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'  # pylint: disable=line-too-long
+            provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
             source_server = resource_id(subscription=get_subscription_id(),
                                         resource_group=resource_group_name,
                                         namespace=provider,
@@ -180,5 +180,4 @@ def _server_list_custom_func(
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-    else:
-        return client.list()
+    return client.list()
