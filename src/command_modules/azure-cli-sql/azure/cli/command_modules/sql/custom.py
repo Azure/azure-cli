@@ -43,205 +43,6 @@ def get_server_location(server_name, resource_group_name):
 
 
 ###############################################
-#                sql                          #
-###############################################
-
-
-def capabilities_get(  # pylint: disable=too-many-arguments
-        client,
-        location_id,
-        status=None,
-        edition=None,
-        service_objective=None,
-        depth=None):
-
-    # For reference, below is the tree structure of location capabilities:
-    # - location
-    #     - supportedServerVersions
-    #         - supportedEditions
-    #             - supportedServiceLevelObjectives
-    #                 - supportedMaxSizes
-    #         - supportedElasticPoolEditions
-    #             - supportedElasticPoolDtus
-    #                 - supportedMaxSizes
-    #                 - supportedPerDatabaseMaxDtus
-    #                     - supportedPerDatabaseMinDtus
-    #                 - supportedPerDatabaseMaxSizes
-
-    # Convert inputs to correct type
-    status = CapabilityStatus(status) if status else CapabilityStatus.visible
-    depth = int(depth) if depth is not None else 999
-
-    # Get capabilities tree from server
-    capabilities = client.list_by_location(location_id)
-
-    # ############# Phase 1: Find nodes that the user requested by name. #############
-    # If a user requested a node by name (e.g. service_objective=='P2') and also requested a status
-    # filter of status=='Default', then naive code would find P2 and then later filter it out
-    # because P2 has 'Available' status which is less prominent than 'Default'. We want to be
-    # smarter and only apply the 'Default' status filter to the found node's children. This means
-    # when applying status filter, we need to be more lenient to the found node and its parents.
-    # If they are 'Available' we want to keep them even if the status filter was 'Default'.
-    # Return these lenient nodes so they can be passed to filter by status function.
-    lenient_nodes = _capabilities_search(capabilities, edition, service_objective)
-
-    # ############# Phase 2: Filter by status. #############
-    _capabilities_filter_by_status(capabilities, status, lenient_nodes)
-
-    # ############# Phase 3: Prune items which have no children due to filters. #############
-    # This must be completed before pruning based on depth, because after depth-pruning the
-    # remaining leaf nodes will have no children; we don't want no-children-pruning to prune those
-    # leaves, otherwise we will end up pruning the entire tree.
-    _capabilities_prune_empty(capabilities)
-
-    # ############# Phase 4: Prune tree based on requested depth. #############
-    _capabilities_prune_by_depth(capabilities, depth)
-
-    return capabilities
-
-
-def _capabilities_search(capabilities, edition, service_objective):
-    lenient_nodes = []
-
-    for sv in capabilities.supported_server_versions:
-
-        # If edition filter is requested then apply it.
-        if edition is not None:
-            sv.supported_editions = [e for e in sv.supported_editions if e.name == edition]
-            for e in sv.supported_editions:
-                # This edition was not removed by the filter, so this is the chosen edition.
-                # Remember to be more lenient to it and its parents when filtering by status.
-                lenient_nodes += [sv, e]
-
-            sv.supported_elastic_pool_editions = [e for e in sv.supported_elastic_pool_editions if e.name == edition]
-            for e in sv.supported_elastic_pool_editions:
-                # This edition was not removed by the filter, so this is the chosen edition.
-                # Remember to be more lenient to it and its parents when filtering by status.
-                lenient_nodes += [sv, e]
-
-        for e in sv.supported_editions:
-
-            # If service objective filter is requested then apply it.
-            if service_objective is not None:
-                e.supported_service_level_objectives = [
-                    slo for slo in e.supported_service_level_objectives
-                    if slo.name == service_objective]
-                for slo in e.supported_service_level_objectives:
-                    # This service objective was not removed by the filter, so this is the chosen
-                    # service objective. Remember to be more lenient to it and its parents when
-                    # filtering by status.
-                    lenient_nodes += [sv, e, slo]
-
-        # If service objective filter is requested then apply it.
-        # Elastic pool doesn't have "service objective", so hide all elastic pools.
-        if service_objective is not None:
-            sv.supported_elastic_pool_editions = []
-
-    return lenient_nodes
-
-
-def _capabilities_filter_by_status(capabilities, status, lenient_nodes):
-    # Ordered list of statuses. Lowest status is first.
-    status_list = [CapabilityStatus.disabled, CapabilityStatus.visible,
-                   CapabilityStatus.available, CapabilityStatus.default]
-
-    def _has_min_status(node, min_status):
-        # Returns true if the status is at least as high as the filter
-        return status_list.index(node.status) >= status_list.index(min_status)
-
-    def _filter_by_status(nodes):
-        # Returns a new list with the status filter applied. If a node is in lenient_nodes, then
-        # keep it even if the status filter is 'Default' and the node's status is only 'Available'.
-        return [n for n in nodes if _has_min_status(n, status) or (
-            _has_min_status(n, CapabilityStatus.available) and n in lenient_nodes
-        )]
-
-    # Filter server versions.
-    capabilities.supported_server_versions = (
-        _filter_by_status(capabilities.supported_server_versions))
-
-    for sv in capabilities.supported_server_versions:
-        # Filter editions.
-        sv.supported_editions = _filter_by_status(sv.supported_editions)
-
-        for e in sv.supported_editions:
-            # Filter service objectives.
-            e.supported_service_level_objectives = (
-                _filter_by_status(e.supported_service_level_objectives))
-
-            for slo in e.supported_service_level_objectives:
-                # Filter max sizes.
-                slo.supported_max_sizes = _filter_by_status(slo.supported_max_sizes)
-
-        # Filter elastic pool editions
-        sv.supported_elastic_pool_editions = _filter_by_status(sv.supported_elastic_pool_editions)
-
-        for e in sv.supported_elastic_pool_editions:
-            # Filter supported DTUs
-            e.supported_elastic_pool_dtus = _filter_by_status(e.supported_elastic_pool_dtus)
-
-            for pool_dtu in e.supported_elastic_pool_dtus:
-                # Filter per database max DTUs
-                pool_dtu.supported_per_database_max_dtus = \
-                    _filter_by_status(pool_dtu.supported_per_database_max_dtus)
-
-                for db_max_dtu in pool_dtu.supported_per_database_max_dtus:
-                    # Filter per database min DTUs
-                    db_max_dtu.supported_per_database_min_dtus = \
-                        _filter_by_status(db_max_dtu.supported_per_database_min_dtus)
-
-                # Filter per database max size
-                pool_dtu.supported_per_database_max_sizes = \
-                    _filter_by_status(pool_dtu.supported_per_database_max_sizes)
-
-
-def _capabilities_prune_empty(capabilities):
-    for sv in capabilities.supported_server_versions:
-        # Remove editions with no service objectives (due to filters)
-        sv.supported_editions = [e for e in sv.supported_editions
-                                 if len(e.supported_service_level_objectives) > 0]
-
-    # Remove server versions with no editions (due to filters)
-    capabilities.supported_server_versions = [sv for sv in capabilities.supported_server_versions
-                                              if len(sv.supported_editions) > 0]
-
-
-def _capabilities_prune_by_depth(capabilities, depth):
-    if depth < 1:
-        capabilities.supported_server_versions = []
-    else:
-        for sv in capabilities.supported_server_versions:
-            if depth < 2:
-                sv.supported_editions = []
-            else:
-                for e in sv.supported_editions:
-                    if depth < 3:
-                        e.supported_service_level_objectives = []
-                    else:
-                        for slo in e.supported_service_level_objectives:
-                            # Prune max sizes if that is too much detail
-                            if depth < 4:
-                                slo.supported_max_sizes = []
-
-            if depth < 2:
-                sv.supported_elastic_pool_editions = []
-            else:
-                for e in sv.supported_elastic_pool_editions:
-                    if depth < 3:
-                        e.supported_elastic_pool_dtus = []
-                    else:
-                        for dtu in e.supported_elastic_pool_dtus:
-                            if depth < 4:
-                                dtu.supported_max_sizes = []
-                                dtu.supported_per_database_max_dtus = []
-                                dtu.supported_per_database_max_sizes = []
-                            else:
-                                for max_dtu in dtu.supported_per_database_max_dtus:
-                                    # Prune min dtus and below if that is too much detail
-                                    if depth < 5:
-                                        max_dtu.supported_per_database_min_dtus = []
-
-###############################################
 #                sql db                       #
 ###############################################
 
@@ -434,6 +235,41 @@ def db_failover(
         server_name=server_name,
         resource_group_name=resource_group_name,
         link_id=primary_link.name)
+
+
+def db_list_capabilities(
+        client,
+        location,
+        server_version="12.0",
+        edition=None,
+        service_objective=None,
+        show_max_sizes=False):
+    
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location)
+
+    # Get subtree related to databases
+    editions = next(sv for sv in capabilities.supported_server_versions if sv.name == server_version).supported_editions
+
+    # Filter by edition
+    if edition is not None:
+        editions = [e for e in editions if e.name == edition]
+    
+    # Filter by service objective
+    if service_objective is not None:
+        for e in editions:
+            e.supported_service_level_objectives = [slo for slo in e.supported_service_level_objectives if slo.name == service_objective]
+
+    # Remove editions with no service objectives (due to filters)
+    editions = [e for e in editions if len(e.supported_service_level_objectives) > 0]
+
+    # Optionally hide supported max sizes
+    if not show_max_sizes:
+        for e in editions:
+            for slo in e.supported_service_level_objectives:
+                del slo.supported_max_sizes
+
+    return editions
 
 
 def db_delete_replica_link(
@@ -897,6 +733,40 @@ def elastic_pool_update(
     instance.storage_mb = storage_mb or instance.storage_mb
 
     return instance
+
+
+def elastic_pool_list_capabilities(
+        client,
+        location,
+        server_version="12.0",
+        edition=None,
+        show_max_sizes=False,
+        show_db_dtu_max=False):
+    
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location)
+
+    # Get subtree related to databases
+    editions = next(sv for sv in capabilities.supported_server_versions if sv.name == server_version).supported_elastic_pool_editions
+
+    # Filter by edition
+    if edition is not None:
+        editions = [e for e in editions if e.name == edition]
+    
+    for e in editions:
+        for dtu in e.supported_elastic_pool_dtus:
+            # Optionally hide supported max sizes
+            if not show_max_sizes:
+                del dtu.supported_max_sizes
+
+            # Optionally hide per database max dtus
+            if not show_db_dtu_max:
+                del dtu.supported_per_database_max_dtus
+    
+            # Always hide per database max sizes
+            del dtu.supported_per_database_max_sizes
+
+    return editions
 
 
 ###############################################
