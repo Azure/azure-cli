@@ -951,7 +951,8 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         checks = [
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].publisher', "Microsoft.Azure.Diagnostics"),
-            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account)
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account),
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].typeHandlerVersion', '3.0')
         ]
 
         self.cmd("vmss diagnostics set -g {} --vmss-name {} --settings {} --protected-settings {}".format(
@@ -959,11 +960,18 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
         self.cmd("vmss show -g {} -n {}".format(self.resource_group, self.vmss), checks=checks)
 
+        # test standalone VM, we will start with an old version
+        self.cmd('vm extension set -g {} --vm-name {} -n LinuxDiagnostic --version 2.3.9025 --publisher Microsoft.OSTCExtensions --settings {} --protected-settings {}'.format(
+            self.resource_group, self.vm, public_settings, protected_settings), checks=[
+            JMESPathCheck('typeHandlerVersion', '2.3')
+        ])
+        # see the 'diagnostics set' command upgrades to newer version
         self.cmd("vm diagnostics set -g {} --vm-name {} --settings {} --protected-settings {}".format(
             self.resource_group, self.vm, public_settings, protected_settings), checks=[
                 JMESPathCheck('name', 'LinuxDiagnostic'),
                 JMESPathCheck('publisher', 'Microsoft.Azure.Diagnostics'),
-                JMESPathCheck('settings.StorageAccount', self.storage_account)
+                JMESPathCheck('settings.StorageAccount', self.storage_account),
+                JMESPathCheck('typeHandlerVersion', '3.0')
         ])
 
         self.cmd("vm show -g {} -n {}".format(self.resource_group, self.vm), checks=[
