@@ -458,7 +458,7 @@ class Shell(object):
                 telemetry.track_ssg('exit code', '')
 
             elif SELECT_SYMBOL['query'] in text:  # query previous output
-                continue_flag, cmd = self.handle_jmespath_query(cmd, text, continue_flag)
+                continue_flag = self.handle_jmespath_query(text, continue_flag)
 
             elif "|" in text or ">" in text:  # anything I don't parse, send off
                 outside = True
@@ -472,34 +472,33 @@ class Shell(object):
 
         return break_flag, continue_flag, outside, cmd
 
-    def handle_jmespath_query(self, cmd, text, continue_flag):
+    def handle_jmespath_query(self, text, continue_flag):
         if self.last and self.last.result:
             if hasattr(self.last.result, '__dict__'):
                 input_dict = dict(self.last.result)
             else:
                 input_dict = self.last.result
             try:
+                cmd_base = text.partition(SELECT_SYMBOL['query'])[0]
                 query_text = text.partition(SELECT_SYMBOL['query'])[2]
                 result = ""
                 if query_text:
                     result = jmespath.search(
                         query_text, input_dict)
                 if isinstance(result, str):
-                    print(result)
-                    cmd.replace(query_text, result)
+                    self.cli_execute(cmd_base + " " + result)
                     continue_flag = True
                 elif isinstance(result, list):
-                    cmd_base = text.partition(SELECT_SYMBOL['query'])[0]
-                    cmd = cmd_base + " " + result[0]
-                    print(cmd)
-                    continue_flag = False
+                    for res in result:
+                        self.cli_execute(cmd_base + " " + res)
+                    continue_flag = True
                 else:
                     print(json.dumps(result, sort_keys=True, indent=2))
                     continue_flag = True
             except jmespath.exceptions.ParseError:
                 print("Invalid Query")
         telemetry.track_ssg('query', text)
-        return continue_flag, cmd
+        return continue_flag
 
     def handle_scoping_input(self, continue_flag, cmd, text):
         default_split = text.partition(SELECT_SYMBOL['scope'])[2].split()
