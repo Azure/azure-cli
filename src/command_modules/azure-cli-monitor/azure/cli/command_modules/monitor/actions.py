@@ -15,8 +15,7 @@ def period_type(value):
     def _get_substring(indices):
         if indices == tuple([-1, -1]):
             return ''
-        else:
-            return value[indices[0]: indices[1]]
+        return value[indices[0]: indices[1]]
 
     regex = r'(p)?(\d+y)?(\d+m)?(\d+d)?(t)?(\d+h)?(\d+m)?(\d+s)?'
     match = re.match(regex, value.lower())
@@ -26,14 +25,14 @@ def period_type(value):
     # simply return value if a valid ISO8601 string is supplied
     if match.regs[1] != tuple([-1, -1]) and match.regs[5] != tuple([-1, -1]):
         return value
-    else:
-        # if shorthand is used, only support days, minutes, hours, seconds
-        # ensure M is interpretted as minutes
-        days = _get_substring(match.regs[4])
-        minutes = _get_substring(match.regs[6]) or _get_substring(match.regs[3])
-        hours = _get_substring(match.regs[7])
-        seconds = _get_substring(match.regs[8])
-        return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
+
+    # if shorthand is used, only support days, minutes, hours, seconds
+    # ensure M is interpretted as minutes
+    days = _get_substring(match.regs[4])
+    minutes = _get_substring(match.regs[6]) or _get_substring(match.regs[3])
+    hours = _get_substring(match.regs[7])
+    seconds = _get_substring(match.regs[8])
+    return 'P{}T{}{}{}'.format(days, minutes, hours, seconds).upper()
 
 
 # pylint: disable=too-few-public-methods
@@ -67,10 +66,9 @@ class AlertAddAction(argparse._AppendAction):
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
-        action = None
         if _type == 'email':
             from azure.mgmt.monitor.models import RuleEmailAction
-            action = RuleEmailAction(custom_emails=values[1:])
+            return RuleEmailAction(custom_emails=values[1:])
         elif _type == 'webhook':
             from azure.mgmt.monitor.models import RuleWebhookAction
             uri = values[1]
@@ -78,11 +76,9 @@ class AlertAddAction(argparse._AppendAction):
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
                 raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
-            action = RuleWebhookAction(uri, properties)  # pylint: disable=redefined-variable-type
-        else:
-            raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+            return RuleWebhookAction(uri, properties)
 
-        return action
+        raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AlertRemoveAction(argparse._AppendAction):

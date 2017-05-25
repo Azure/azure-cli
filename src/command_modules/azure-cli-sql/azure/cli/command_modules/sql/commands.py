@@ -3,15 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.sdk.util import (
+    create_service_adapter,
+    ServiceGroup)
 from ._util import (
     get_sql_servers_operations,
     get_sql_firewall_rules_operations,
     get_sql_databases_operations,
     get_sql_elastic_pools_operations,
     get_sql_capabilities_operations)
-from azure.cli.core.sdk.util import (
-    create_service_adapter,
-    ServiceGroup)
 
 custom_path = 'azure.cli.command_modules.sql.custom#{}'
 

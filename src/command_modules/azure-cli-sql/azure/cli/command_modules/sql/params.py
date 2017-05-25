@@ -5,10 +5,6 @@
 
 import itertools
 from enum import Enum
-from .custom import (
-    DatabaseCapabilitiesAdditionalDetails,
-    ElasticPoolCapabilitiesAdditionalDetails,
-)
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
@@ -30,7 +26,10 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     SecurityAlertPolicyEmailAccountAdmins,
     ServiceObjectiveName,
     StorageKeyType)
-
+from .custom import (
+    DatabaseCapabilitiesAdditionalDetails,
+    ElasticPoolCapabilitiesAdditionalDetails,
+)
 
 #####
 #           Reusable param type definitions

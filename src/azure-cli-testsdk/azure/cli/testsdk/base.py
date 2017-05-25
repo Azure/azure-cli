@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-import datetime
 import unittest
 import os
 import inspect
@@ -19,7 +17,7 @@ import vcr
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_time_sleep_api)
+                      patch_time_sleep_api, patch_progress_controller)
 from .exceptions import CliExecutionError
 from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
 from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
@@ -29,7 +27,7 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
 from .utilities import create_random_name
 from .decorators import live_only
 
-logger = logging.getLogger('azuer.cli.testsdk')
+logger = logging.getLogger('azure.cli.testsdk')
 
 
 class IntegrationTestBase(unittest.TestCase):
@@ -37,19 +35,9 @@ class IntegrationTestBase(unittest.TestCase):
         super(IntegrationTestBase, self).__init__(method_name)
         self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
 
-    def cmd(self, command, checks=None, expect_failure=False):
-        if self.diagnose:
-            begin = datetime.datetime.now()
-            print('\nExecuting command: {}'.format(command))
-
-        result = execute(command, expect_failure=expect_failure)
-
-        if self.diagnose:
-            duration = datetime.datetime.now() - begin
-            print('\nCommand accomplished in {} s. Exit code {}.\n{}'.format(
-                duration.total_seconds(), result.exit_code, result.output))
-
-        return result.assert_with_checks(checks)
+    @classmethod
+    def cmd(cls, command, checks=None, expect_failure=False):
+        return execute(command, expect_failure=expect_failure).assert_with_checks(checks)
 
     def create_random_name(self, prefix, length):  # pylint: disable=no-self-use
         return create_random_name(prefix=prefix, length=length)
@@ -160,6 +148,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
             patch_long_run_operation_delay(self)
             patch_load_cached_subscriptions(self)
             patch_retrieve_token_for_user(self)
+            patch_progress_controller(self)
 
     def tearDown(self):
         os.environ = self.original_env
@@ -172,8 +161,8 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
             name = create_random_name(prefix, length)
             self.name_replacer.register_name_pair(name, moniker)
             return name
-        else:
-            return moniker
+
+        return moniker
 
     def _process_request_recording(self, request):
         if self.in_recording:
@@ -238,16 +227,20 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
 
 class ExecutionResult(object):  # pylint: disable=too-few-public-methods
     def __init__(self, command, expect_failure=False, in_process=True):
-        logger.info('Execute command %s', command)
         if in_process:
             self._in_process_execute(command)
         else:
             self._out_of_process_execute(command)
 
         if expect_failure and self.exit_code == 0:
-            raise AssertionError('The command is expected to fail but it doesn\'.')
+            logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s', command,
+                         self.exit_code, self.output)
+            raise AssertionError('The command did not fail as it was expected.')
         elif not expect_failure and self.exit_code != 0:
+            logger.error('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
+
+        logger.info('Command "%s" => %d.', command, self.exit_code)
 
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
@@ -259,8 +252,6 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
                 checks.extend(each)
             elif callable(each):
                 checks.append(each)
-
-        logger.info('Checkers to be executed %s', len(checks))
 
         if not self.skip_assert:
             for c in checks:

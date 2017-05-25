@@ -94,8 +94,8 @@ def transform_vpn_connection(result):
                 delattr(result, prop)
             else:
                 null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-                for prop in null_props:
-                    delattr(prop_val, prop)
+                for null_prop in null_props:
+                    delattr(prop_val, null_prop)
     return result
 
 
@@ -110,9 +110,9 @@ def transform_vpn_connection_create_output(result):
     elif isinstance(result, ClientRawResponse):
         # returns a raw response if --no-wait used
         return
-    else:
-        # returns a plain response (not a poller) if --validate used
-        return result
+
+    # returns a plain response (not a poller) if --validate used
+    return result
 
 
 def transform_vnet_create_output(result):
@@ -185,4 +185,23 @@ def transform_waf_rule_sets_table_output(result):
                 item_obj['ruleGroup'] = rule_group_name
                 transformed.append(item_obj)
     return transformed
-    
+
+
+def transform_network_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
+def transform_network_usage_table(result):
+    transformed = []
+    for item in result:
+        transformed.append(OrderedDict([
+            ('Name', item['localName']),
+            ('CurrentValue', item['currentValue']),
+            ('Limit', item['limit'])
+        ]))
+    return transformed

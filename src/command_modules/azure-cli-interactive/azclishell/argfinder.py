@@ -11,8 +11,9 @@ from argcomplete.compat import USING_PYTHON2, ensure_bytes
 
 class ArgsFinder(CompletionFinder):
     """ gets the parsed args """
-    def __init__(self, parser):
+    def __init__(self, parser, outstream=None):
         super(ArgsFinder, self).__init__(parser)
+        self.outstream = outstream
 
     def get_parsed_args(self, comp_words):
         """ gets the parsed args from a patched parser """
