@@ -35,7 +35,7 @@ GESTURE_INFO = {
 
 CONFIG_FILE_NAME = 'shell-config'
 
-GESTURE_LENGTH = max(len(key) for key in GESTURE_INFO.keys()) + 1
+GESTURE_LENGTH = max(len(key) for key in GESTURE_INFO) + 1
 
 
 def help_text(values):
