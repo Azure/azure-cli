@@ -87,6 +87,18 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
 
     collection.append(obj_to_add)
 
+
+def _get_default_value(balancer, property_name, option_name):
+    values = [x.name for x in getattr(balancer, property_name)]
+    if len(values) > 1:
+        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
+                       "explicitly.".format(option_name, ', '.join(values)))
+    elif not values:
+        raise CLIError("No existing values found for '{0}'. Create one first and try "
+                       "again.".format(option_name))
+    return values[0]
+
+
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):
     ncf = _network_client_factory()
@@ -312,7 +324,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: d
     return parent
 
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
-                            frontend_ip, frontend_port, host_name=None, ssl_cert=None,
+                            frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
                             no_wait=False):
     ApplicationGatewayHttpListener = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -320,6 +332,8 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    if not frontend_ip:
+        frontend_ip = _get_default_value(ag, 'frontend_ip_configurations', '--frontend-ip')
     new_listener = ApplicationGatewayHttpListener(
         name=item_name,
         frontend_ip_configuration=SubResource(frontend_ip),
@@ -433,14 +447,21 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
     return parent
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
-                                   address_pool, http_settings, http_listener, url_path_map=None,
-                                   rule_type='Basic', no_wait=False):
+                                   address_pool=None, http_settings=None, http_listener=None,
+                                   url_path_map=None, rule_type='Basic', no_wait=False):
     ApplicationGatewayRequestRoutingRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayRequestRoutingRule',
         mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    if not address_pool:
+        address_pool = _get_default_value(ag, 'backend_address_pools', '--address-pool')
+    if not http_settings:
+        http_settings = _get_default_value(ag, 'backend_http_settings_collection',
+                                           '--http-settings')
+    if not http_listener:
+        http_listener = _get_default_value(ag, 'http_listeners', '--http-listener')
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
@@ -732,9 +753,12 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
 
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        frontend_ip_name, backend_port, floating_ip="false", idle_timeout=None):
+        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
+                                              '--frontend-ip-name')
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) # pylint: disable=no-member
     new_rule = InboundNatRule(
         name=item_name, protocol=protocol,
@@ -869,11 +893,17 @@ def set_lb_probe(instance, parent, item_name, protocol=None, port=None, # pylint
 
 def create_lb_rule(
         resource_group_name, load_balancer_name, item_name,
-        protocol, frontend_port, backend_port, frontend_ip_name,
-        backend_address_pool_name, probe_name=None, load_distribution='default',
+        protocol, frontend_port, backend_port, frontend_ip_name=None,
+        backend_address_pool_name=None, probe_name=None, load_distribution='default',
         floating_ip='false', idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
+                                              '--frontend-ip-name')
+    if not backend_address_pool_name:
+        backend_address_pool_name = _get_default_value(lb, 'backend_address_pools',
+                                                       '--backend-pool-name')
     new_rule = LoadBalancingRule(
         name=item_name,
         protocol=protocol,

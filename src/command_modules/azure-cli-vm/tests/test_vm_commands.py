@@ -18,6 +18,7 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              NoneCheck)
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
+from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -1521,28 +1522,35 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         ])
 
 
-class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, test_method):
-        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_none_options')
-
-    def test_vmss_create_none_options(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_vmss_create_none_options(self, resource_group):
         vmss_name = 'vmss1'
 
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
                  ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
-                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
-        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
-            JMESPathCheck('availabilitySet', None),
-            JMESPathCheck('tags', {}),
-            JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+                 .format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), [
+            JMESPathCheckV2('availabilitySet', None),
+            JMESPathCheckV2('tags', {}),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
         ])
-        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(self.resource_group, vmss_name),
-                 checks=JMESPathCheck('tags.test', 'success'))
-        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, self.resource_group), checks=NoneCheck(), allowed_exceptions='was not found')
+        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(resource_group, vmss_name),
+                 checks=JMESPathCheckV2('tags.test', 'success'))
+        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, resource_group), checks=NoneCheckV2())
+
+    @ResourceGroupPreparer()
+    def test_vmss_create_with_app_gateway(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --app-gateway apt1 --instance-count 5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
+            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
+        ])
+        # spot check it is using gateway
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('sku.capacity', 5),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
+        ])
 
 
 class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
