@@ -25,10 +25,10 @@ capabilities_operations = create_service_adapter(
 
 with ServiceGroup(__name__, get_sql_capabilities_operations, capabilities_operations, custom_path) as s:
     with s.group('sql db') as c:
-        c.custom_command('list-capabilities', 'db_list_capabilities')
+        c.custom_command('list-editions', 'db_list_capabilities')
 
     with s.group('sql elastic-pool') as c:
-        c.custom_command('list-capabilities', 'elastic_pool_list_capabilities')
+        c.custom_command('list-editions', 'elastic_pool_list_capabilities')
 
 
 ###############################################

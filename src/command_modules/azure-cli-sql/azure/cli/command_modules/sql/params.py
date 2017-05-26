@@ -278,7 +278,7 @@ with ParametersContext(command='sql db list') as c:
                help='If specified, lists only the databases in this elastic pool')
 
 
-with ParametersContext(command='sql db list-capabilities') as c:
+with ParametersContext(command='sql db list-editions') as c:
     c.argument('show_details',
                options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
@@ -287,14 +287,15 @@ with ParametersContext(command='sql db list-capabilities') as c:
 
     search_arg_group = 'Search'
 
+    # We could used **enum_choice_list here, but that will validate the inputs which means there
+    # will be no way to query for new editions/service objectives that are made available after
+    # this version of CLI is released.
     c.argument('edition',
                arg_group=search_arg_group,
-               help='Edition to search for. If unspecified, all editions are shown.',
-               **enum_choice_list(DatabaseEdition))
+               help='Edition to search for. If unspecified, all editions are shown.')
     c.argument('service_objective',
                arg_group=search_arg_group,
-               help='Service objective to search for. If unspecified, all editions are shown.',
-               **enum_choice_list(ServiceObjectiveName))
+               help='Service objective to search for. If unspecified, all editions are shown.')
 
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
@@ -520,7 +521,7 @@ with ParametersContext(command='sql elastic-pool create') as c:
     c.ignore('location')
 
 
-with ParametersContext(command='sql elastic-pool list-capabilities') as c:
+with ParametersContext(command='sql elastic-pool list-editions') as c:
     c.argument('show_details',
                options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
@@ -529,10 +530,12 @@ with ParametersContext(command='sql elastic-pool list-capabilities') as c:
 
     search_arg_group = 'Search'
 
+    # We could used **enum_choice_list here, but that will validate the inputs which means there
+    # will be no way to query for new editions that are made available after
+    # this version of CLI is released.
     c.argument('edition',
                arg_group=search_arg_group,
-               help='Edition to search for. If unspecified, all editions are shown.',
-               **enum_choice_list(ElasticPoolEdition))
+               help='Edition to search for. If unspecified, all editions are shown.')
     c.argument('dtu',
                arg_group=search_arg_group,
                help='Elastic pool DTU limit to search for. If unspecified, all DTU limits are shown.')

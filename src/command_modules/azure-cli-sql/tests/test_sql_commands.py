@@ -1022,7 +1022,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         db_max_size_length_jmespath = 'length([].supportedServiceLevelObjectives[].supportedMaxSizes[])'
 
         # Get all db capabilities
-        self.cmd('sql db list-capabilities -l {}'.format(location),
+        self.cmd('sql db list-editions -l {}'.format(location),
                  checks=[
                      # At least standard and premium edition exist
                      JMESPathCheckExists("[?name == 'Standard']"),
@@ -1034,13 +1034,13 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                      JMESPathCheck(db_max_size_length_jmespath, 0)])
 
         # Get all db capabilities with size data
-        self.cmd('sql db list-capabilities -l {} --show-details max-size'.format(location),
+        self.cmd('sql db list-editions -l {} --show-details max-size'.format(location),
                  checks=[
                      # Max size data is included
                      JMESPathCheckGreaterThan(db_max_size_length_jmespath, 0)])
 
         # Search for db edition - note that it's case insensitive
-        self.cmd('sql db list-capabilities -l {} --edition standard'.format(location),
+        self.cmd('sql db list-editions -l {} --edition standard'.format(location),
                  checks=[
                      # Standard edition exists, other editions don't
                      JMESPathCheckExists("[?name == 'Standard']"),
@@ -1048,7 +1048,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Search for db service objective - note that it's case insensitive
-        self.cmd('sql db list-capabilities -l {} --edition standard --service-objective s0'
+        self.cmd('sql db list-editions -l {} --edition standard --service-objective s0'
                  .format(location), checks=[
                      # Standard edition exists, other editions don't
                      JMESPathCheckExists("[?name == 'Standard']"),
@@ -1067,7 +1067,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         pool_db_max_size_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxSizes[])'
 
         # Get all elastic pool capabilities
-        self.cmd('sql elastic-pool list-capabilities -l {}'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {}'.format(location),
                  checks=[
                      # At least standard and premium edition exist
                      JMESPathCheckExists("[?name == 'Standard']"),
@@ -1080,7 +1080,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Search for elastic pool edition - note that it's case insensitive
-        self.cmd('sql elastic-pool list-capabilities -l {} --edition standard'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --edition standard'.format(location),
                  checks=[
                      # Standard edition exists, other editions don't
                      JMESPathCheckExists("[?name == 'Standard']"),
@@ -1088,7 +1088,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Search for dtu limit
-        self.cmd('sql elastic-pool list-capabilities -l {} --dtu 100'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
                      JMESPathCheckGreaterThan('length([].supportedElasticPoolDtus[?limit == `100`][])', 0),
@@ -1096,7 +1096,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Get all db capabilities with pool max size
-        self.cmd('sql elastic-pool list-capabilities -l {} --show-details max-size'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --show-details max-size'.format(location),
                  checks=[
                      JMESPathCheckGreaterThan(pool_max_size_length_jmespath, 0),
                      JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
@@ -1105,7 +1105,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Get all db capabilities with per db max size
-        self.cmd('sql elastic-pool list-capabilities -l {} --show-details db-max-size'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --show-details db-max-size'.format(location),
                  checks=[
                      JMESPathCheck(pool_max_size_length_jmespath, 0),
                      JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
@@ -1114,7 +1114,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Get all db capabilities with per db max dtu
-        self.cmd('sql elastic-pool list-capabilities -l {} --edition standard --show-details db-max-dtu'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-max-dtu'.format(location),
                  checks=[
                      JMESPathCheck(pool_max_size_length_jmespath, 0),
                      JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
@@ -1123,7 +1123,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Get all db capabilities with per db min dtu (which is nested under per db max dtu)
-        self.cmd('sql elastic-pool list-capabilities -l {} --edition standard --show-details db-min-dtu'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-min-dtu'.format(location),
                  checks=[
                      JMESPathCheck(pool_max_size_length_jmespath, 0),
                      JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
@@ -1132,7 +1132,7 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  ])
 
         # Get all db capabilities with everything
-        self.cmd('sql elastic-pool list-capabilities -l {} --edition standard --show-details db-min-dtu db-max-dtu db-max-size max-size'.format(location),
+        self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-min-dtu db-max-dtu db-max-size max-size'.format(location),
                  checks=[
                      JMESPathCheckGreaterThan(pool_max_size_length_jmespath, 0),
                      JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
