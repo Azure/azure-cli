@@ -575,13 +575,13 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                         "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + '-k8s-agents',
                             "osType": os_type,
@@ -633,13 +633,13 @@ def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix
                         "orchestratorType": orchestrator_type
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix + 'mgmt'
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + 'agents'
                         }
