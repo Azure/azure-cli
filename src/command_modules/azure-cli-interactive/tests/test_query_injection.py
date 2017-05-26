@@ -70,7 +70,7 @@ class QueryInjection(unittest.TestCase):
                 'group': 'mygroup3',
                 'name': 'myname3'
             }
-            ]
+        ]
         flag = self.shell.handle_jmespath_query(args, False)
         self.assertTrue(flag)
         results = self.stream.getvalue().strip().split('\n')
@@ -81,7 +81,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_quotes(self):
         """ tests that it parses correctly with quotes in the command """
-        self.shell.last.result = {'x' : 'result'}
+        self.shell.last.result = {'x': 'result'}
         # pylint: disable=protected-access
         b_flag, c_flag, out, cmd = self.shell._special_cases(
             "this is 'url?what' negative", "this is 'url?what' negative", False)
