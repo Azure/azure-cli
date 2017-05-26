@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
 import os.path
+import mock
 from six import StringIO
 
 from azure.cli.core.util import CLIError
@@ -13,6 +13,10 @@ from azure.cli.command_modules.resource._validators import (
     validate_deployment_name,
     validate_lock_parameters,
 )
+
+
+class NamespaceObject:
+    pass
 
 
 class Test_resource_validators(unittest.TestCase):
@@ -59,9 +63,12 @@ class Test_resource_validators(unittest.TestCase):
             }
         ]
         for valid_namespace in valid:
+            namespace_obj = NamespaceObject()
+            for key in valid_namespace:
+                setattr(namespace_obj, key, valid_namespace[key])
             try:
                 # If unexpected invalid, this throws, so no need for asserts
-                validate_lock_parameters(valid_namespace)
+                validate_lock_parameters(namespace_obj)
             except CLIError as ex:
                 self.fail('Test {} failed. {}'.format(valid_namespace['test'], ex))
 
@@ -102,7 +109,10 @@ class Test_resource_validators(unittest.TestCase):
         ]
         for invalid_namespace in invalid:
             with self.assertRaises(CLIError):
-                validate_lock_parameters(invalid_namespace)
+                namespace_obj = NamespaceObject()
+                for key in invalid_namespace:
+                    setattr(namespace_obj, key, invalid_namespace[key])
+                validate_lock_parameters(namespace_obj)
 
     def test_generate_deployment_name_from_file(self):
         # verify auto-gen from uri
