@@ -106,8 +106,11 @@ class QueryInjection(unittest.TestCase):
                 'group': 'mygroup3',
             }
             ]
-        # flag = self.shell.handle_jmespath_query(args, False)
-        # self.assertTrue(flag)
+        flag = self.shell.handle_jmespath_query(args, False)
+        self.assertTrue(flag)
+        results = self.stream.getvalue().split('\n')
+        print(results)
+        # self.assertEqual(results[0], u'vm show -g mygroup -n myname')
 
     def test_singleton(self):
         """ tests a singleton example """
