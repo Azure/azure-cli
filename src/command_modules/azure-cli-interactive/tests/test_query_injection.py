@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import json
 import six
 from azclishell.app import Shell
 
 
-class _mock_values():
+# pylint: disable=too-few-public-methods
+class MockValues(object):
     def __init__(self):
         self.result = None
 
@@ -21,7 +21,7 @@ class QueryInjection(unittest.TestCase):
         self.stream = six.StringIO()
         self.shell = Shell(output_custom=self.stream)
         self.shell.cli_execute = self._mock_execute
-        self.shell.last = _mock_values()
+        self.shell.last = MockValues()
 
     def _mock_execute(self, cmd):
         self.stream.write(cmd)
@@ -92,25 +92,23 @@ class QueryInjection(unittest.TestCase):
 
     def test_errors(self):
         """ tests invalid query """
-        args = 'vm show -g ?group -n ?name'.split()
+        args = 'vm show -g ?[].group -n ?[].name'.split()
         self.shell.last.result = [
             {
                 'group': 'mygroup',
                 'name': 'myname'
             },
             {
-                'group': 'mygroup2',
-                'name': 'myname2'
-            },
-            {
                 'group': 'mygroup3',
             }
             ]
         flag = self.shell.handle_jmespath_query(args, False)
-        self.assertTrue(flag)
         results = self.stream.getvalue().split('\n')
-        print(results)
-        # self.assertEqual(results[0], u'vm show -g mygroup -n myname')
+        self.assertTrue(flag)
+        self.assertEqual(results[0], 'vm show -g mygroup -n myname')
+        self.assertEqual(
+            results[1], 'Invalid Input, the query gesture must have same number of items')
+
 
     def test_singleton(self):
         """ tests a singleton example """

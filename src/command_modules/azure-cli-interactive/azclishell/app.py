@@ -505,14 +505,20 @@ class Shell(object):
                     self.cli_execute(cmd_base)
                     continue_flag = True
                 elif all(isinstance(result, list) for result in results):
+                    try:
+                        for res_counter, _ in enumerate(results[0]):
+                            base = cmd_base
+                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                                base = base.replace(
+                                    SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                            self.cli_execute(base)
+                        continue_flag = True
 
-                    for res_counter, _ in enumerate(results[0]):
-                        base = cmd_base
-                        for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                            base = base.replace(
-                                SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                        self.cli_execute(base)
-                    continue_flag = True
+                    except IndexError:
+                        continue_flag = True
+                        print(
+                            'Invalid Input, the query gesture must have same number of items',
+                            file=self.output)
         except (jmespath.exceptions.ParseError, CLIError):
             print("Invalid Query", file=self.output)
         return continue_flag
