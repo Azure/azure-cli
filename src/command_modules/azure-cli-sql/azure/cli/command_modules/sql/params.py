@@ -502,9 +502,19 @@ with ParametersContext(command='sql elastic-pool') as c:
                options_list=('--name', '-n'),
                help='The name of the elastic pool.')
     c.argument('server_name', arg_type=server_param_type)
+
+    # --db-dtu-max and --db-dtu-min were the original param names, which is consistent with the
+    # underlying REST API.
+    # --db-max-dtu and --db-min-dtu are aliases which are consistent with the `sql elastic-pool
+    # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
+    # consistent with other az sql commands, but the original can't be removed due to
+    # compatibility.
     c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
     c.register_alias('database_dtu_min', ('--db-dtu-min', '--db-min-dtu'))
 
+    # --storage was the original param name, which is consistent with the underlying REST API.
+    # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
+    # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
     c.argument('storage_mb', options_list=('--storage', '--max-size',),
                type=SizeWithUnitConverter('MB', result_type=int),
                help='The max storage size of the elastic pool. If no unit is specified, defaults'
@@ -519,6 +529,8 @@ with ParametersContext(command='sql elastic-pool create') as c:
 
 
 with ParametersContext(command='sql elastic-pool list-editions') as c:
+    # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
+    # other commands, such as `sql elastic-pool create --db-max-dtu --db-min-dtu --max-size`.
     c.argument('show_details',
                options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
