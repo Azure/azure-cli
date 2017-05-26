@@ -417,6 +417,7 @@ class Shell(object):
     def _special_cases(self, text, cmd, outside):
         break_flag = False
         continue_flag = False
+        args = parse_quotes(text)
 
         if text and len(text.split()) > 0 and text.split()[0].lower() == 'az':
             telemetry.track_ssg('az', text)
@@ -457,8 +458,10 @@ class Shell(object):
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
 
-            elif SELECT_SYMBOL['query'] in text:  # query previous output
-                continue_flag = self.handle_jmespath_query(text, continue_flag)
+            elif any(arg.startswith(SELECT_SYMBOL['query']) for arg in args) and \
+                    self.last and self.last.result:
+                continue_flag = self.handle_jmespath_query(args, continue_flag)
+                telemetry.track_ssg('query', text)
 
             elif "|" in text or ">" in text:  # anything I don't parse, send off
                 outside = True
@@ -472,32 +475,53 @@ class Shell(object):
 
         return break_flag, continue_flag, outside, cmd
 
-    def handle_jmespath_query(self, text, continue_flag):
-        if self.last and self.last.result:
-            if hasattr(self.last.result, '__dict__'):
-                input_dict = dict(self.last.result)
-            else:
-                input_dict = self.last.result
-            try:
-                cmd_base = text.partition(SELECT_SYMBOL['query'])[0]
-                query_text = text.partition(SELECT_SYMBOL['query'])[2]
-                result = ""
-                if query_text:
-                    result = jmespath.search(
-                        query_text, input_dict)
-                if isinstance(result, str):
-                    self.cli_execute(cmd_base + " " + result)
-                    continue_flag = True
-                elif isinstance(result, list):
-                    for res in result:
-                        self.cli_execute(cmd_base + " " + res)
-                    continue_flag = True
+    def handle_jmespath_query(self, args, continue_flag):
+        if hasattr(self.last.result, '__dict__'):
+            input_dict = dict(self.last.result)
+        else:
+            input_dict = self.last.result
+        try:
+            queries = []
+            results = []
+            injected_command = []
+            for arg in args:
+                if arg.startswith(SELECT_SYMBOL['query']):
+                    query = arg[len(SELECT_SYMBOL['query']):]
+                    queries.append(query)
+                    results.append(jmespath.search(query, input_dict))
+                    injected_command.append(SELECT_SYMBOL['query'])
                 else:
-                    print(json.dumps(result, sort_keys=True, indent=2))
+                    injected_command.append(arg)
+
+            if len(args) > 0 and args[0].startswith(SELECT_SYMBOL['query']):
+                # then push out the query
+                print(json.dumps(results[0], sort_keys=True, indent=2))
+                continue_flag = True
+            # inject into cmd
+            else:
+                cmd_base = ' '.join(injected_command)
+                if all(isinstance(result, str) for result in results):
+                    for result in results:
+                        cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
+                    self.cli_execute(cmd_base)
+                    print(cmd_base)
                     continue_flag = True
-            except jmespath.exceptions.ParseError:
-                print("Invalid Query")
-        telemetry.track_ssg('query', text)
+                elif all(isinstance(result, list) for result in results):
+                    # length = len(results[0])
+                    # if all(len(res) == length for res in results):
+                    #     raise CLIError("Invalid Query")
+
+                    for res_counter, _ in enumerate(results[0]):
+                        base = cmd_base
+                        for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                            base = base.replace(
+                                SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                        # commands.append(base)
+                        self.cli_execute(base)
+                        print(base)
+                    continue_flag = True
+        except (jmespath.exceptions.ParseError, CLIError):
+            print("Invalid Query")
         return continue_flag
 
     def handle_scoping_input(self, continue_flag, cmd, text):

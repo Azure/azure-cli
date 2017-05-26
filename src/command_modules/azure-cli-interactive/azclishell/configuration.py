@@ -24,6 +24,7 @@ GESTURE_INFO = {
     SELECT_SYMBOL['outside'] + "[cmd]": "use commands outside the application",
     # pylint: disable=line-too-long
     "[cmd] + [param] " + SELECT_SYMBOL['query'] + "[query]": "Inject jmespath query from previous command",
+    SELECT_SYMBOL['query'] + "[query]": "Jmespath query of the previous command",
     "[cmd] " + SELECT_SYMBOL['example'] + " [num]": "do a step by step tutorial of example",
     SELECT_SYMBOL['exit_code']: "get the exit code of the previous command",
     SELECT_SYMBOL['scope'] + '[cmd]': "set a scope, and scopes can be chained with spaces",
