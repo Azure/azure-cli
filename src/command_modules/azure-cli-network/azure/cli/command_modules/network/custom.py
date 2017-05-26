@@ -912,6 +912,19 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
 
+def _add_vm_to_address_pool(resource_group_name, ip_config, load_balancer_name,
+                            application_gateway_name, nic_name, vm_name, availability_set_name):
+    pass
+
+def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, ip_config=None, 
+                              nic_name=None, vm_name=None, availability_set_name=None):
+    return _add_vm_to_address_pool(resource_group_name, ip_config, load_balancer_name, None,
+                                   nic_name, vm_name, availability_set_name)
+
+def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, ip_config=None, 
+                              nic_name=None, vm_name=None, availability_set_name=None):
+    return _add_vm_to_address_pool(resource_group_name, ip_config, None, application_gateway_name, 
+                                   nic_name, vm_name, availability_set_name)
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
