@@ -6,6 +6,7 @@ unreleased
 ++++++++++++++++++
 
 * Update underlying Data Lake Store filesystem SDK version, addressing a performance issue.
+* Update to add a new command: `az dls enable-key-vault`. This command attempts to enable a user provided Key Vault for use encrypting the data in a Data Lake Store account.
 
 0.0.6 (2017-05-09)
 ++++++++++++++++++
