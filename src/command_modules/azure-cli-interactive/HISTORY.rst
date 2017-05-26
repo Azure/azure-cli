@@ -7,7 +7,7 @@ Release History
 ++++++++++++++++++
 
 * --progress flag
-* Change the '?' gesture to inject into the next command
+* Enhance the '?' gesture to also inject into the next command
 * Removed --debug and --verbose from completions
 
 
