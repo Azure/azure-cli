@@ -59,18 +59,6 @@ START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
-def handle_cd(cmd):
-    """changes dir """
-    if len(cmd) != 2:
-        print("Invalid syntax: cd path")
-        return
-    path = os.path.expandvars(os.path.expanduser(cmd[1]))
-    try:
-        os.chdir(path)
-    except OSError as ex:
-        print("cd: %s\n" % ex)
-
-
 def space_examples(list_examples, rows):
     """ makes the example text """
     examples_with_index = []
@@ -120,7 +108,7 @@ class Shell(object):
 
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdout, output_custom=None,
+                 app=None, input_custom=sys.stdin, output_custom=sys.stdout,
                  user_feedback=False):
         self.styles = styles
         if styles:
@@ -155,6 +143,17 @@ class Shell(object):
             self._cli = self.create_interface()
             self.refresh_cli = False
         return self._cli
+
+    def handle_cd(self, cmd):
+        """changes dir """
+        if len(cmd) != 2:
+            print("Invalid syntax: cd path", file=self.output)
+            return
+        path = os.path.expandvars(os.path.expanduser(cmd[1]))
+        try:
+            os.chdir(path)
+        except OSError as ex:
+            print("cd: %s\n" % ex, file=self.output)
 
     def on_input_timeout(self, cli):
         """
@@ -345,14 +344,14 @@ class Shell(object):
         try:
             num = int(num) - 1
         except ValueError:
-            print("An Integer should follow the colon")
+            print("An Integer should follow the colon", file=self.output)
             return ""
         if cmd in self.completer.command_examples:
             if num >= 0 and num < len(self.completer.command_examples[cmd]):
                 example = self.completer.command_examples[cmd][num][1]
                 example = example.replace('\n', '')
             else:
-                print('Invalid example number')
+                print('Invalid example number', file=self.output)
                 return '', True
 
         example = example.replace('az', '')
@@ -439,7 +438,7 @@ class Shell(object):
         if '--version' in text:
             try:
                 continue_flag = True
-                show_version_info_exit(sys.stdout)
+                show_version_info_exit(self.output)
             except SystemExit:
                 pass
         if text:
@@ -447,14 +446,14 @@ class Shell(object):
                 cmd = text[1:]
                 outside = True
                 if cmd.strip() and cmd.split()[0] == 'cd':
-                    handle_cd(parse_quotes(cmd))
+                    self.handle_cd(parse_quotes(cmd))
                     continue_flag = True
                 telemetry.track_ssg('outside', '')
 
             elif text[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
 
-                print(meaning + ": " + str(self.last_exit))
+                print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
 
@@ -495,7 +494,7 @@ class Shell(object):
 
             if len(args) > 0 and args[0].startswith(SELECT_SYMBOL['query']):
                 # then push out the query
-                print(json.dumps(results[0], sort_keys=True, indent=2))
+                print(json.dumps(results[0], sort_keys=True, indent=2), file=self.output)
                 continue_flag = True
             # inject into cmd
             else:
@@ -504,24 +503,18 @@ class Shell(object):
                     for result in results:
                         cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
                     self.cli_execute(cmd_base)
-                    print(cmd_base)
                     continue_flag = True
                 elif all(isinstance(result, list) for result in results):
-                    # length = len(results[0])
-                    # if all(len(res) == length for res in results):
-                    #     raise CLIError("Invalid Query")
 
                     for res_counter, _ in enumerate(results[0]):
                         base = cmd_base
                         for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
                             base = base.replace(
                                 SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                        # commands.append(base)
                         self.cli_execute(base)
-                        print(base)
                     continue_flag = True
         except (jmespath.exceptions.ParseError, CLIError):
-            print("Invalid Query")
+            print("Invalid Query", file=self.output)
         return continue_flag
 
     def handle_scoping_input(self, continue_flag, cmd, text):
@@ -534,7 +527,7 @@ class Shell(object):
             if not default_split:
                 self.default_command = ""
                 set_scope("", add=False)
-                print('unscoping all')
+                print('unscoping all', file=self.output)
 
                 return continue_flag, cmd
 
@@ -551,7 +544,7 @@ class Shell(object):
 
                 if in_tree(self.completer.command_tree, tree_val.strip()):
                     self.set_scope(value)
-                    print("defaulting: " + value)
+                    print("defaulting: " + value, file=self.output)
                     cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
                     telemetry.track_ssg('scope command', value)
 
@@ -564,10 +557,10 @@ class Shell(object):
                     if not self.default_command.strip():
                         self.default_command = self.default_command.strip()
                     set_scope(self.default_command, add=False)
-                    print('unscoping: ' + value)
+                    print('unscoping: ' + value, file=self.output)
 
                 elif SELECT_SYMBOL['unscope'] not in text:
-                    print("Scope must be a valid command")
+                    print("Scope must be a valid command", file=self.output)
 
                 default_split = default_split[1:]
         else:
@@ -619,7 +612,7 @@ class Shell(object):
                 else:
                     formatter = OutputProducer.get_formatter(
                         self.app.configuration.output_format)
-                    OutputProducer(formatter=formatter, file=sys.stdout).out(result)
+                    OutputProducer(formatter=formatter, file=self.output).out(result)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except
@@ -681,7 +674,7 @@ class Shell(object):
                 self.set_prompt()
                 continue
 
-        print('Have a lovely day!!')
+        print('Have a lovely day!!', file=self.output)
         telemetry.conclude()
 
 
