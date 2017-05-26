@@ -20,11 +20,8 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
     CreateMode,
-    DatabaseEdition,
-    ElasticPoolEdition,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
-    ServiceObjectiveName,
     StorageKeyType)
 from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
