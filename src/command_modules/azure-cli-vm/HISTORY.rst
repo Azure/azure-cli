@@ -16,6 +16,7 @@ unreleased
 * BC: vmss list-instance-connection-info: include instance IDs in the output
 * vm/vmss diagnostics: provide protected settings samples, handle extension major version upgrade, etc.
 * disk/snapshot/image: expose '--tags' in the create command
+* vmss: provides default for '--app-gateway-subnet-address-prefix' when creating a new vnet
 
 2.0.6 (2017-05-09)
 ++++++++++++++++++
