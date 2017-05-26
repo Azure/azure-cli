@@ -93,6 +93,9 @@ def _get_default_value(balancer, property_name, option_name):
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
+    elif not values:
+        raise CLIError("No existing values found for '{0}'. Create one first and try "
+                       "again.".format(option_name))
     return values[0]
 
 
