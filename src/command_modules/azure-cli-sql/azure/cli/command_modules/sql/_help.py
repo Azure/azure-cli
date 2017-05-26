@@ -203,13 +203,13 @@ helps['sql elastic-pool create'] = """
 helps['sql elastic-pool list-editions'] = """
     type: command
     short-summary: Shows elastic pool editions that are available for your subscription.
-    long-summary: Also includes available pool dtu settings, storage limits, and per database
+    long-summary: Also includes available pool DTU settings, storage limits, and per database
                   settings. In order to reduce verbosity, additional storage limits and per
                   database settings are hidden by default.
     examples:
-        - name: Show all elastic pool editions in a location.
+        - name: Show all elastic pool editions and pool DTU limits in a location.
           text: az sql elastic-pool list-editions -l westus
-        - name: Show all elastic pool editions for Standard edition.
+        - name: Show all pool DTU limits for Standard edition.
           text: az sql elastic-pool list-editions -l westus --edition Standard
         - name: Show available max sizes for elastic pools with 100 DTUs
           text: az sql elastic-pool list-editions -l westus --dtu 100 --show-details max-size
