@@ -38,7 +38,7 @@ class QueryInjection(unittest.TestCase):
     def test_just_query(self):
         """ tests flushing just the query """
         args = ['?x']
-        self.shell.last.result = {'x' : 'result'}
+        self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args, False)
         self.assertTrue(flag)
         self.assertEqual('"result"\n', self.stream.getvalue())
@@ -101,14 +101,13 @@ class QueryInjection(unittest.TestCase):
             {
                 'group': 'mygroup3',
             }
-            ]
+        ]
         flag = self.shell.handle_jmespath_query(args, False)
         results = self.stream.getvalue().split('\n')
         self.assertTrue(flag)
         self.assertEqual(results[0], 'vm show -g mygroup -n myname')
         self.assertEqual(
             results[1], 'Invalid Input, the query gesture must have same number of items')
-
 
     def test_singleton(self):
         """ tests a singleton example """
