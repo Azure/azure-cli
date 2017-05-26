@@ -108,7 +108,7 @@ class Shell(object):
 
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdin, output_custom=sys.stdout,
+                 app=None, input_custom=sys.stdin, output_custom=None,
                  user_feedback=False):
         self.styles = styles
         if styles:
@@ -469,12 +469,13 @@ class Shell(object):
             elif SELECT_SYMBOL['example'] in text:
                 cmd, continue_flag = self.handle_example(cmd, continue_flag)
                 telemetry.track_ssg('tutorial', text)
-
-        continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text)
+            elif len(text) > 2 and SELECT_SYMBOL['scope'] == text[0:2]:
+                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text)
 
         return break_flag, continue_flag, outside, cmd
 
     def handle_jmespath_query(self, args, continue_flag):
+        """ handles the jmespath query for injection or printing """
         if hasattr(self.last.result, '__dict__'):
             input_dict = dict(self.last.result)
         else:
@@ -496,8 +497,7 @@ class Shell(object):
                 # then push out the query
                 print(json.dumps(results[0], sort_keys=True, indent=2), file=self.output)
                 continue_flag = True
-            # inject into cmd
-            else:
+            else:  # inject into cmd
                 cmd_base = ' '.join(injected_command)
                 if all(isinstance(result, str) for result in results):
                     for result in results:
@@ -518,53 +518,51 @@ class Shell(object):
         return continue_flag
 
     def handle_scoping_input(self, continue_flag, cmd, text):
+        """ handles what to do with a scoping gesture """
         default_split = text.partition(SELECT_SYMBOL['scope'])[2].split()
         cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
 
-        if text and SELECT_SYMBOL['scope'] == text[0:2]:
-            continue_flag = True
+        continue_flag = True
 
-            if not default_split:
-                self.default_command = ""
-                set_scope("", add=False)
-                print('unscoping all', file=self.output)
+        if not default_split:
+            self.default_command = ""
+            set_scope("", add=False)
+            print('unscoping all', file=self.output)
 
-                return continue_flag, cmd
-
-            while default_split:
-                if not text:
-                    value = ''
-                else:
-                    value = default_split[0]
-
-                if self.default_command:
-                    tree_val = self.default_command + " " + value
-                else:
-                    tree_val = value
-
-                if in_tree(self.completer.command_tree, tree_val.strip()):
-                    self.set_scope(value)
-                    print("defaulting: " + value, file=self.output)
-                    cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
-                    telemetry.track_ssg('scope command', value)
-
-                elif SELECT_SYMBOL['unscope'] == default_split[0] and \
-                        len(self.default_command.split()) > 0:
-
-                    value = self.default_command.split()[-1]
-                    self.default_command = ' ' + ' '.join(self.default_command.split()[:-1])
-
-                    if not self.default_command.strip():
-                        self.default_command = self.default_command.strip()
-                    set_scope(self.default_command, add=False)
-                    print('unscoping: ' + value, file=self.output)
-
-                elif SELECT_SYMBOL['unscope'] not in text:
-                    print("Scope must be a valid command", file=self.output)
-
-                default_split = default_split[1:]
-        else:
             return continue_flag, cmd
+
+        while default_split:
+            if not text:
+                value = ''
+            else:
+                value = default_split[0]
+
+            if self.default_command:
+                tree_val = self.default_command + " " + value
+            else:
+                tree_val = value
+
+            if in_tree(self.completer.command_tree, tree_val.strip()):
+                self.set_scope(value)
+                print("defaulting: " + value, file=self.output)
+                cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
+                telemetry.track_ssg('scope command', value)
+
+            elif SELECT_SYMBOL['unscope'] == default_split[0] and \
+                    len(self.default_command.split()) > 0:
+
+                value = self.default_command.split()[-1]
+                self.default_command = ' ' + ' '.join(self.default_command.split()[:-1])
+
+                if not self.default_command.strip():
+                    self.default_command = self.default_command.strip()
+                set_scope(self.default_command, add=False)
+                print('unscoping: ' + value, file=self.output)
+
+            elif SELECT_SYMBOL['unscope'] not in text:
+                print("Scope must be a valid command", file=self.output)
+
+            default_split = default_split[1:]
         return continue_flag, cmd
 
     def cli_execute(self, cmd):
@@ -608,7 +606,8 @@ class Shell(object):
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
                 if self.output:
-                    self.output.out(result)
+                    self.output.write(result)
+                    self.output.flush()
                 else:
                     formatter = OutputProducer.get_formatter(
                         self.app.configuration.output_format)
