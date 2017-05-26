@@ -8,6 +8,7 @@ Release History
 
 * --progress flag
 * Change the '?' gesture to inject into the next command
+* Removed --debug and --verbose from completions
 
 
 0.3.2 (2017-05-18)
