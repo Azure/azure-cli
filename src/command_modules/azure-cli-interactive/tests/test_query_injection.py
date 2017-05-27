@@ -5,7 +5,14 @@
 
 import unittest
 import six
-from azclishell.app import Shell
+from azclishell.gather_commands import GatherCommands
+
+
+def pass_gather(_):
+    pass
+
+
+GatherCommands.gather_from_files = pass_gather
 
 
 # pylint: disable=too-few-public-methods
@@ -18,6 +25,8 @@ class QueryInjection(unittest.TestCase):
     """ tests using the query gesture for the interactive mode """
     def __init__(self, *args, **kwargs):
         super(QueryInjection, self).__init__(*args, **kwargs)
+        from azclishell.app import Shell
+
         self.stream = six.StringIO()
         self.shell = Shell(output_custom=self.stream)
         self.shell.cli_execute = self._mock_execute
