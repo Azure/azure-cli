@@ -6,11 +6,8 @@ Release History
 0.3.2 (unreleased)
 ++++++++++++++++++
 * --progress flag
-<<<<<<< HEAD
 * Progress for Template Deployment
-=======
 * Removed --debug and --verbose from completions
->>>>>>> 30e4c6be496148a808831006888c146b9caa245d
 
 
 0.3.2 (2017-05-18)
