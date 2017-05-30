@@ -36,4 +36,6 @@ fi
 
 python -m automation.tests.verify_doc_source_map
 
+python -m automation.commandlint.run
+
 python $scripts_root/license/verify.py
