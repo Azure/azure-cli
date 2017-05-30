@@ -33,6 +33,7 @@ class ShellProgressView(ProgressViewBase):
             PROGRESS_BAR = self._format_value(message, percent)
             if int(percent) == 1:
                 PROGRESS_BAR = None
+
         PROGRESS = message
 
     def _format_value(self, msg, percent=0.0):
@@ -91,10 +92,10 @@ def progress_view(shell):
                 len_beat = len(HEART_BEAT)
                 if len_beat > buffer_size:
                     HEART_BEAT = HEART_BEAT[len_beat - buffer_size:]
+
                 while len(HEART_BEAT) < buffer_size:
                     beat = HEART_BEAT_VALUES[_get_heart_frequency()]
                     HEART_BEAT += beat
-
 
             else:
                 shell.spin_val = 0
