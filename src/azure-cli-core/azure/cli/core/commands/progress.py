@@ -165,7 +165,3 @@ def get_progress_view(determinant=False, outstream=sys.stderr):
     if determinant:
         return DeterminateStandardOut(out=outstream)
     return IndeterminateStandardOut(out=outstream)
-<<<<<<< HEAD
-
-=======
->>>>>>> e9bb5aedb71936e6c278e44c6cd879b557d25c23
