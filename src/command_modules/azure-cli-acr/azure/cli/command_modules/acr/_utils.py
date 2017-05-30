@@ -27,7 +27,7 @@ def _arm_get_resource_by_name(resource_name, resource_type):
     result = get_resources_in_subscription(resource_type)
     elements = [item for item in result if item.name.lower() == resource_name.lower()]
 
-    if len(elements) == 0:
+    if not elements:
         raise CLIError(
             'No resource with type {} can be found with name: {}'.format(
                 resource_type, resource_name))

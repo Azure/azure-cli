@@ -12,5 +12,4 @@ def _load_help_file(delimiters):
     import yaml
     if delimiters in helps:
         return yaml.load(helps[delimiters])
-    else:
-        return None
+    return None

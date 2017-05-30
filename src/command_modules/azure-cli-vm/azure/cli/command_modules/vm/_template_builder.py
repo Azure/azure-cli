@@ -77,7 +77,6 @@ class StorageProfile(Enum):
 
 
 def build_deployment_resource(name, template, dependencies=None):
-    from azure.cli.core.util import random_string
     dependencies = dependencies or []
     deployment = {
         'name': name,

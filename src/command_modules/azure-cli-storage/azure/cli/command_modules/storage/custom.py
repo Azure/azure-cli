@@ -9,7 +9,7 @@ from __future__ import print_function
 
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
@@ -118,8 +118,8 @@ def list_share_files(client, share_name, directory_name=None, timeout=None,
                                                   timeout=timeout)
     if exclude_dir:
         return list(f for f in generator if isinstance(f.properties, FileProperties))
-    else:
-        return generator
+
+    return generator
 
 
 @transfer_doc(FileService.list_directories_and_files)
@@ -190,15 +190,21 @@ def upload_blob(  # pylint: disable=too-many-locals
                 if_match=if_match,
                 if_none_match=if_none_match,
                 timeout=timeout)
-        return client.append_blob_from_path(
-            container_name=container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=_update_progress,
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            timeout=timeout)
+
+        append_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'maxsize_condition': maxsize_condition,
+            'lease_id': lease_id,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            append_blob_args['validate_content'] = validate_content
+
+        return client.append_blob_from_path(**append_blob_args)
 
     def upload_block_blob():
         import os
@@ -208,22 +214,26 @@ def upload_blob(  # pylint: disable=too-many-locals
             client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
             client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
 
-        return client.create_blob_from_path(
-            container_name=container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=_update_progress,
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            max_connections=max_connections,
-            lease_id=lease_id,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            timeout=timeout
-        )
+        create_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'max_connections': max_connections,
+            'lease_id': lease_id,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            create_blob_args['validate_content'] = validate_content
+
+        return client.create_blob_from_path(**create_blob_args)
 
     type_func = {
         'append': upload_append_blob,

@@ -206,10 +206,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     :return: policy dict
     :rtype: dict
     """
-    if scaffold:
-        return _scaffold_certificate_profile()
-    else:
-        return _default_certificate_profile()
+    return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
 
 
 def create_keyvault(client,
@@ -541,7 +538,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             message = getattr(client_exception, 'message', client_exception)
 
             try:
-                ex_message = json.loads(client_exception.response.text)
+                ex_message = json.loads(client_exception.response.text)  # pylint: disable=no-member
                 message = str(message) + ' ' + ex_message['error']['details'][0]['message']
             except:  # pylint: disable=bare-except
                 pass
@@ -641,7 +638,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
                 import base64
                 encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
                 if isinstance(encoded, bytes):
-                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                    encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
                 f.write(encoded.encode("utf-8"))
     except Exception as ex:  # pylint: disable=broad-except
@@ -676,8 +673,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
     if remaining.contact_list:
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
-    else:
-        return client.delete_certificate_contacts(vault_base_url)
+    return client.delete_certificate_contacts(vault_base_url)
 
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,

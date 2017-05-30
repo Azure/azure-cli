@@ -38,7 +38,7 @@ def register(application):
         del args._jmespath_query
         if query_expression:
             def filter_output(**kwargs):
-                from jmespath import search, Options
+                from jmespath import Options
                 kwargs['event_data']['result'] = query_expression.search(
                     kwargs['event_data']['result'], Options(collections.OrderedDict))
                 application.remove(application.FILTER_RESULT, filter_output)

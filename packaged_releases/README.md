@@ -67,7 +67,7 @@ $ shasum -a 256 azure-cli_packaged_{VERSION}.tar.gz
 3 - Build/Release for Debian, Docker, Homebrew
 ----------------------------------------------
 
-Follow the instructions in the `debian`, `docker`, `windows` and `homebrew` subdirectories to create these releases.
+Follow the instructions in the `debian`, `docker`, `windows`, `bundled` and `homebrew` subdirectories to create these releases.
 
 
 4 - Modify HISTORY.md
