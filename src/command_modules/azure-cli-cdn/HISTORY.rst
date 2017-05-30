@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+0.0.3 (2017-05-30)
 ++++++++++++++++++
 
 * Add exception handler for endpoint list that provides a better message when the profile specified
