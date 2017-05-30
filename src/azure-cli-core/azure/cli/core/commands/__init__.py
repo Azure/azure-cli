@@ -141,6 +141,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
     def _template_progress(self, correlation_id):
+        """ gets the progress for template deployments """
         if correlation_id is not None:
 
             formatter = "eventTimestamp ge {} and eventTimestamp le {}"
