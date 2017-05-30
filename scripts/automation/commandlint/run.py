@@ -89,8 +89,7 @@ if __name__ == '__main__':
 
     if failed_commands or result != 0:
         print('==== FAILED COMMANDS ====')
-        for com in failed_commands:
-            print(com)
+        print(json.dumps(failed_commands, indent=True))
     else:
         print('==== ALL COMMANDS PASS! ====')
 
