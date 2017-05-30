@@ -60,7 +60,7 @@ def patch_load_cached_subscriptions(unit_test):
 
 def patch_retrieve_token_for_user(unit_test):
     def _retrieve_token_for_user(*args, **kwargs):  # pylint: disable=unused-argument
-        return 'Bearer', 'top-secret-token-for-you'
+        return 'Bearer', 'top-secret-token-for-you', None
 
     _mock_in_unit_test(unit_test,
                        'azure.cli.core._profile.CredsCache.retrieve_token_for_user',

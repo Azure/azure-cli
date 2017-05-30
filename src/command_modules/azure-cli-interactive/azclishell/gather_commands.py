@@ -19,8 +19,6 @@ TOLERANCE = 10
 LINE_MINIMUM = math.floor(int(COLS) / 2 - 15)
 
 GLOBAL_PARAM_DESCRIPTIONS = {
-    '--verbose': 'Increase logging verbosity. Use --debug for full debug logs.',
-    '--debug': 'Increase logging verbosity to show all debug logs.',
     '--output': 'Output format',
     '-o': 'Output format',
     '--help': 'Get more information about a command',

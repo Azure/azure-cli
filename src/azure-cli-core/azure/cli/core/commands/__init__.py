@@ -210,7 +210,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 message = '{} {}'.format(
                     str(message),
-                    json.loads(client_exception.response.text)['error']['details'][0]['message'])
+                    json.loads(client_exception.response.text)['error']['details'][0]['message'])  # pylint: disable=no-member
             except:  # pylint: disable=bare-except
                 pass
 
@@ -239,9 +239,9 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
         elif isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return None
-        else:
-            # --validate returns a 'normal' response
-            return result
+
+        # --validate returns a 'normal' response
+        return result
 
 
 class CommandTable(dict):
@@ -438,8 +438,7 @@ def get_op_handler(operation):
             op = getattr(op, part)
         if isinstance(op, types.FunctionType):
             return op
-        else:
-            return six.get_method_function(op)
+        return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -448,6 +447,12 @@ def _load_client_exception_class():
     # Since loading msrest is expensive, we avoid it until we have to
     from msrest.exceptions import ClientException
     return ClientException
+
+
+def _load_validation_error_class():
+    # Since loading msrest is expensive, we avoid it until we have to
+    from msrest.exceptions import ValidationError
+    return ValidationError
 
 
 def _load_azure_exception_class():
@@ -483,7 +488,6 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-        from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
@@ -519,6 +523,11 @@ def create_command(module_name, name, operation,
                         return
                     else:
                         reraise(*sys.exc_info())
+        except _load_validation_error_class() as validation_error:
+            fault_type = name.replace(' ', '-') + '-validation-error'
+            telemetry.set_exception(validation_error, fault_type=fault_type,
+                                    summary='SDK validation error')
+            raise CLIError(validation_error)
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,

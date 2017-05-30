@@ -13,10 +13,10 @@ from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.util import CLIError, random_string
-from ._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
+from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -46,13 +46,9 @@ def _get_resource_id(val, resource_group, resource_type, resource_namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
-    else:
-        return resource_id(
-            name=val,
-            resource_group=resource_group,
-            namespace=resource_namespace,
-            type=resource_type,
-            subscription=get_subscription_id())
+
+    return resource_id(name=val, resource_group=resource_group, namespace=resource_namespace, type=resource_type,
+                       subscription=get_subscription_id())
 
 
 def _get_nic_id(val, resource_group):
@@ -162,7 +158,7 @@ def _parse_image_argument(namespace):
                                                                  namespace.os_sku,
                                                                  top=1,
                                                                  orderby='name desc')
-            if len(top_one) == 0:
+            if not top_one:
                 raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
 
             image_version = top_one[0].name
@@ -274,7 +270,7 @@ def _validate_managed_disk_sku(sku):
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
 
-# pylint: disable=too-many-branches, too-many-statements, redefined-variable-type
+# pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
 
     # use minimal parameters to resolve the expected storage profile
@@ -429,7 +425,7 @@ def _validate_vm_create_availability_set(namespace):
             name=name)
 
 
-def _validate_vm_create_vnet(namespace, for_scale_set=False):
+def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
 
     vnet = namespace.vnet_name
     subnet = namespace.subnet
@@ -439,9 +435,7 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
 
     if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.cli.core.profiles import ResourceType
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
+        client = get_network_client().virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
@@ -504,8 +498,39 @@ def _validate_vmss_create_subnet(namespace):
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
         if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
-            raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
-                           'application gateway.')
+            namespace.app_gateway_subnet_address_prefix = _get_next_subnet_addr_suffix(
+                namespace.vnet_address_prefix, namespace.subnet_address_prefix, 24)
+
+
+def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
+    def _convert_to_int(address, bit_mask_len):
+        a, b, c, d = [int(x) for x in address.split('.')]
+        result = '{0:08b}{1:08b}{2:08b}{3:08b}'.format(a, b, c, d)
+        return int(result[:-bit_mask_len], 2)
+
+    error_msg = "usage error: --subnet-address-prefix value should be a subrange of --vnet-address-prefix's"
+    # extract vnet information needed to verify the defaults we are coming out
+    vnet_ip_address, mask = vnet_cidr.split('/')
+    vnet_bit_mask_len = 32 - int(mask)
+    vnet_int = _convert_to_int(vnet_ip_address, vnet_bit_mask_len)
+
+    subnet_ip_address, mask = subnet_cidr.split('/')
+    subnet_bit_mask_len = 32 - int(mask)
+
+    if vnet_bit_mask_len <= subnet_bit_mask_len:
+        raise CLIError(error_msg)
+
+    candidate_int = _convert_to_int(subnet_ip_address, subnet_bit_mask_len) + 1
+    if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:  # overflows?
+        candidate_int = candidate_int - 2  # try the other way around
+        if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:
+            raise CLIError(error_msg)
+
+    # format back to the cidr
+    candaidate_str = '{0:32b}'.format(candidate_int << subnet_bit_mask_len)
+    return '{0}.{1}.{2}.{3}/{4}'.format(int(candaidate_str[0:8], 2), int(candaidate_str[8:16], 2),
+                                        int(candaidate_str[16:24], 2), int(candaidate_str[24:32], 2),
+                                        new_mask)
 
 
 def _validate_vm_create_nsg(namespace):
@@ -573,7 +598,7 @@ def _validate_vm_create_nics(namespace):
     namespace.public_ip_type = None
 
 
-def _validate_vm_create_auth(namespace):
+def _validate_vm_vmss_create_auth(namespace):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -740,11 +765,11 @@ def process_vm_create_namespace(namespace):
         _validate_vm_create_storage_account(namespace)
 
     _validate_vm_create_availability_set(namespace)
-    _validate_vm_create_vnet(namespace)
+    _validate_vm_vmss_create_vnet(namespace)
     _validate_vm_create_nsg(namespace)
     _validate_vm_create_public_ip(namespace)
     _validate_vm_create_nics(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
@@ -796,10 +821,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            if check_existence(namespace.application_gateway, namespace.resource_group_name,
-                               'Microsoft.Network', 'applicationGateways'):
+            client = get_network_client().application_gateways
+            try:
+                client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
-            else:
+            except CloudError:
                 namespace.app_gateway_type = 'new'
         elif namespace.application_gateway == '':
             namespace.app_gateway_type = None
@@ -808,7 +834,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
         # AppGateway frontend
         required = []
-        if namespace.app_gateway_type == 'new':
+        if namespace.app_gateway_type == 'new' and namespace.vnet_type != 'new':
             required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
@@ -835,14 +861,20 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             namespace.load_balancer_type = 'new'
 
 
+def get_network_client():
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
+
+
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
+    _validate_vm_vmss_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer_or_app_gateway(namespace)
-    _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace)
 
 # endregion
 

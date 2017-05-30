@@ -326,13 +326,13 @@ def get_content_setting_validator(settings_class, update):
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
-                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings  # pylint: disable=line-too-long
+                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings
             elif _class_name(settings_class) == _class_name(FileContentSettings):
-                client = get_storage_data_service_client(FileService, account, key, cs, sas)  # pylint: disable=redefined-variable-type
+                client = get_storage_data_service_client(FileService, account, key, cs, sas)
                 share = ns.get('share_name')
                 directory = ns.get('directory_name')
                 filename = ns.get('file_name')
-                props = client.get_file_properties(share, directory, filename).properties.content_settings  # pylint: disable=line-too-long
+                props = client.get_file_properties(share, directory, filename).properties.content_settings
 
         # create new properties
         new_props = settings_class(
@@ -772,8 +772,8 @@ def get_datetime_type(to_string):
             try:
                 if to_string:
                     return datetime.strptime(string, form).strftime(form)
-                else:
-                    return datetime.strptime(string, form)
+
+                return datetime.strptime(string, form)
             except ValueError:
                 continue
         raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
 
 def _network_client_factory(**_):
     from azure.cli.core.profiles import ResourceType
@@ -12,7 +11,6 @@ def _network_client_factory(**_):
 
 
 def resource_client_factory(**_):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -131,11 +129,14 @@ def cf_dns_mgmt_record_sets(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(DnsManagementClient).record_sets
 
+
 def cf_route_filters(_):
     return _network_client_factory().route_filters
 
+
 def cf_route_filter_rules(_):
     return _network_client_factory().route_filter_rules
+
 
 def cf_service_community(_):
     return _network_client_factory().bgp_service_communities

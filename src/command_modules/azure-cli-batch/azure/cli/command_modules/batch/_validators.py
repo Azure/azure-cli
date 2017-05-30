@@ -129,7 +129,6 @@ def validate_required_parameter(ns, parser):
 
 def storage_account_id(namespace):
     """Validate storage account name"""
-    from azure.mgmt.storage import StorageManagementClient
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
@@ -186,8 +185,8 @@ def application_enabled(namespace):
 
 def validate_pool_resize_parameters(namespace):
     """Validate pool resize parameters correct"""
-    if not namespace.abort and not namespace.target_dedicated:
-        raise ValueError("The target-dedicated parameter is required to resize the pool.")
+    if not namespace.abort and not namespace.target_dedicated_nodes:
+        raise ValueError("The target-dedicated-nodes parameter is required to resize the pool.")
 
 
 def validate_json_file(namespace):

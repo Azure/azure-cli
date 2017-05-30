@@ -29,7 +29,7 @@ def load_commands_from_factory(server_type, command_group_name, management_clien
             c.custom_command('restore', '_server_restore')
             c.command('delete', 'delete', confirmation=True)
             c.command('show', 'get')
-            c.command('list', 'list_by_resource_group')
+            c.custom_command('list', '_server_list_custom_func')
             c.generic_update_command('update', 'get', 'update',
                                      custom_func_name='_server_update_custom_func')
 

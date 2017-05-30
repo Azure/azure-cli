@@ -77,7 +77,6 @@ class ProgressHook(object):
 
     def update(self):
         """ updates the view with the progress """
-        # TODO APPROPRIATE PROGRESS SENT
         self.active_progress.write(self.reporter.report())
         self.active_progress.flush()
 
@@ -165,5 +164,4 @@ def get_progress_view(determinant=False, outstream=sys.stderr):
     """ gets your view """
     if determinant:
         return DeterminateStandardOut(out=outstream)
-    else:
-        return IndeterminateStandardOut(out=outstream)
+    return IndeterminateStandardOut(out=outstream)
