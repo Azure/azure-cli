@@ -2,7 +2,8 @@
 
 Release History
 ===============
-(unreleased)
+
+0.1.7 (2017-05-30)
 ++++++++++++++++++++
 * webapp: add reliability fixes in configuring source control (#3245)
 * BC: az webapp config update: Remove unsupported --node-version argument for Windows webapps. Instead use "az webapp config appsettings set" with the WEBSITE_NODE_DEFAULT_VERSION key.
