@@ -74,7 +74,7 @@ def dump_no_help(modules):
         "parameters": parameters
     }
 
-    return exit_val
+    return exit_val, data
 
 
 if __name__ == '__main__':
@@ -84,4 +84,14 @@ if __name__ == '__main__':
                                      pkgutil.iter_modules(mods_ns_pkg.__path__)]
     except ImportError:
         pass
-    sys.exit(dump_no_help(installed_command_modules))
+
+    result, failed_commands = dump_no_help(installed_command_modules)
+
+    if failed_commands or result != 0:
+        print('==== FAILED COMMANDS ====')
+        for com in failed_commands:
+            print(com)
+    else:
+        print('==== ALL COMMANDS PASS! ====')
+
+    sys.exit(result)
