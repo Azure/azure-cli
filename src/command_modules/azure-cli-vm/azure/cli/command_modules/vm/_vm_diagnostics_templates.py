@@ -274,7 +274,7 @@ def get_default_diag_config(is_windows):
                     }
                 }
             },
-            "storageAccount": "<name of a storage account>"
+            "storageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__"
         }
     else:
         return {
@@ -291,7 +291,7 @@ def get_default_diag_config(is_windows):
                                 "scheduledTransferPeriod": "PT1M"
                             }
                         ], 
-                        "resourceId": "__VM_RESOURCE_ID__"
+                        "resourceId": "__VM_OR_VMSS_RESOURCE_ID__"
                     }, 
                     "performanceCounters": {
                         "performanceCounterConfiguration": [
