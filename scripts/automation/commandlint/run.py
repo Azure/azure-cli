@@ -19,8 +19,8 @@ from azure.cli.core.commands import load_params, _update_command_definitions
 from azure.cli.core.help_files import helps
 
 
-
 def dump_no_help(modules):
+    APPLICATION.initialize(Configuration())
     cmd_table = APPLICATION.configuration.get_command_table()
 
     exit_val = 0
@@ -69,14 +69,13 @@ def dump_no_help(modules):
                     parameters.pop(cmd, None)
 
     data = {
-        "subgroups" : subgroups_list,
-        "commands" : command_list,
-        "parameters" : parameters
+        "subgroups": subgroups_list,
+        "commands": command_list,
+        "parameters": parameters
     }
 
-    print(json.dumps(data, indent=2, sort_keys=True))
-
     return exit_val
+
 
 if __name__ == '__main__':
     try:
@@ -85,6 +84,4 @@ if __name__ == '__main__':
                                      pkgutil.iter_modules(mods_ns_pkg.__path__)]
     except ImportError:
         pass
-    exit_value = dump_no_help(installed_command_modules)
-    sys.exit(exit_value)
-
+    sys.exit(dump_no_help(installed_command_modules))
