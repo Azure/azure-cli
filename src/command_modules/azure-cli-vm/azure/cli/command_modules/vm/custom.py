@@ -345,7 +345,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     else:
         params = ManagedDiskParameters(id=disk,
                                        storage_account_type=sku)
-        data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params)
+        data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params, caching=caching)
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(vm)
