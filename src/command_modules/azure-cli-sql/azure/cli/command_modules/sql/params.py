@@ -279,8 +279,8 @@ with ParametersContext(command='sql db list-editions') as c:
     c.argument('show_details',
                options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
-               **enum_choice_list(DatabaseCapabilitiesAdditionalDetails),
-               nargs='+')
+               nargs='+',
+               **enum_choice_list(DatabaseCapabilitiesAdditionalDetails))
 
     search_arg_group = 'Search'
 
@@ -534,8 +534,8 @@ with ParametersContext(command='sql elastic-pool list-editions') as c:
     c.argument('show_details',
                options_list=('--show-details', '-d'),
                help='List of additional details to include in output.',
-               **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails),
-               nargs='+')
+               nargs='+',
+               **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails))
 
     search_arg_group = 'Search'
 
