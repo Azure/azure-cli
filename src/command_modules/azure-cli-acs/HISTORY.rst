@@ -3,6 +3,11 @@
 Release History
 ===============
 
+Unreleased
+++++++++++++++++++
+
+* convert master and agent count to integer
+
 2.0.6 (2017-05-09)
 ++++++++++++++++++
 
