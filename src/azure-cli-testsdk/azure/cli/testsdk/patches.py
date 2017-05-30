@@ -8,7 +8,7 @@ from .const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 
 def patch_progress_controller(unit_test):
-    def _mock_pass(*args):  # pylint: disable=unused-argument
+    def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
         pass
 
     _mock_in_unit_test(
