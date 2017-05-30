@@ -23,6 +23,8 @@ if [ "$CODE_COVERAGE" == "True" ]; then
     pip install -qqq coverage codecov
     coverage run -m automation.tests.run
 
+    coverage run -m automation.commandlint.run
+
     coverage combine
     coverage report
     codecov
@@ -35,7 +37,5 @@ if [[ "$CI" == "true" ]]; then
 fi
 
 python -m automation.tests.verify_doc_source_map
-
-python -m automation.commandlint.run
 
 python $scripts_root/license/verify.py
