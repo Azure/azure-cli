@@ -1,10 +1,37 @@
 .. :changelog:
-
 Release History
 ===============
-2.0.5 (unreleased)
+unreleased
+----------
+* diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
+* disk: support cross subscription blob import
+* disk: add --no-wait flag to disk create, update, and delete.
+* disk: add `az disk wait` command.
+* BC: disk: add confirmation prompt to `az disk delete`.
+* vm: support license type on create
+* BC: vm open-port: command always returns the NSG. Previously it returned the NIC or Subnet.
+* vm: fix "vm extension list" crash if the VM has no extensions
+* vmss: update arg description for 'vmss delete-instances --instance-ids'
+* vmss: hide arg 'vmss show --ids', which is not supposed to work because of 'instance-id' arg
+* BC: vmss list-instance-connection-info: include instance IDs in the output
+* vm/vmss diagnostics: provide protected settings samples, handle extension major version upgrade, etc.
+* disk/snapshot/image: expose '--tags' in the create command
+* vmss: provides default for '--app-gateway-subnet-address-prefix' when creating a new vnet
+
+2.0.6 (2017-05-09)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.5 (2017-05-05)
 ++++++++++++++++++
 * avail-set: make UD&FD domain counts optional
+
+note: VM commands in sovereign clouds
+Please avoid managed disk related features, including the following:
+1.       az disk/snapshot/image
+2.       az vm/vmss disk
+3.       Inside "az vm/vmss create", use "—use-unmanaged-disk" to avoid managed disk
+Other commands should work
 
 2.0.4 (2017-04-28)
 ++++++++++++++++++

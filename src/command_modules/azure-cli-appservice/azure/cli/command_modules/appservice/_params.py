@@ -14,7 +14,7 @@ from ._client_factory import web_client_factory
 from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
-def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
+def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
     m = getattr(client.web_apps,
@@ -22,9 +22,9 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
     if slot is None:
         return (m(resource_group_name, name)
                 if extra_parameter is None else m(resource_group_name, name, extra_parameter))
-    else:
-        return (m(resource_group_name, name, slot)
-                if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
+
+    return (m(resource_group_name, name, slot)
+            if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
 
 
 def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
@@ -79,7 +79,7 @@ register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), he
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
-register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help='canonicalized web runtime in the format of Framework|Version. For example, PHP|5.6')  # TODO ADD completer
+register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. PHP|5.6. Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
 
 register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -98,7 +98,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment user', 'user_name', help='user name')
     register_cli_argument(scope + ' deployment user', 'password', help='password, will prompt if not specified')
     register_cli_argument(scope + ' deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
-    register_cli_argument(scope + ' deployment source', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
+    register_cli_argument(scope + ' deployment source', 'repo_url', options_list=('--repo-url', '-u'), help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
     register_cli_argument(scope + ' deployment source', 'branch', help='the branch name of the repository')
     register_cli_argument(scope + ' deployment source', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
     register_cli_argument(scope + ' deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
@@ -121,6 +121,8 @@ register_cli_argument('webapp deployment slot', 'auto_swap_slot', help='target s
 register_cli_argument('webapp deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('webapp deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('webapp deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
+register_cli_argument('webapp deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 
 
 two_states_switch = ['true', 'false']
@@ -152,7 +154,6 @@ register_cli_argument('webapp config set', 'web_sockets_enabled', help='enable o
 register_cli_argument('webapp config set', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config set', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config set', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config set', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
 register_cli_argument('webapp config set', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('webapp config set', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('webapp config set', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
@@ -211,7 +212,8 @@ register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
-
+register_cli_argument('appservice web deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 register_cli_argument('appservice web log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
@@ -236,7 +238,6 @@ register_cli_argument('appservice web config update', 'web_sockets_enabled', hel
 register_cli_argument('appservice web config update', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
-register_cli_argument('appservice web config update', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
 register_cli_argument('appservice web config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('appservice web config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('appservice web config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")

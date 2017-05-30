@@ -13,7 +13,7 @@ from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, SpendingLimit)
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, CLOUD)
+                                     ServicePrincipalAuth, CLOUD, _AUTH_CTX_FACTORY)
 from azure.cli.core.util import CLIError
 
 
@@ -76,7 +76,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_update_add_two_different_subscriptions(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         # add the first and verify
         consolidated = Profile._normalize_properties(self.user1,
@@ -127,7 +127,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_update_with_same_subscription_added_twice(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         # add one twice and verify we will have one but with new token
         consolidated = Profile._normalize_properties(self.user1,
@@ -149,7 +149,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_set_active_subscription(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -169,7 +169,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_default_active_subscription_to_non_disabled_one(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         subscriptions = profile._normalize_properties(
             self.user2, [self.subscription2, self.subscription1], False)
@@ -182,7 +182,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_get_subscription(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -200,7 +200,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_get_expanded_subscription_info(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -236,7 +236,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
 
         storage_mock = {'subscriptions': []}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
         profile.find_subscriptions_on_login(False,
                                             '1234',
@@ -255,7 +255,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                          extended_info['endpoints'].active_directory)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_create_account_without_subscriptions(self, mock_auth_context):
+    def test_create_account_without_subscriptions_thru_service_principal(self, mock_auth_context):
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = []
@@ -264,7 +264,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
 
         storage_mock = {'subscriptions': []}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
 
         # action
@@ -277,7 +277,42 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                                      subscription_finder=finder)
 
         # assert
-        self.assertTrue(1, len(result))
+        self.assertEqual(1, len(result))
+        self.assertEqual(result[0]['id'], self.tenant_id)
+        self.assertEqual(result[0]['state'], 'Enabled')
+        self.assertEqual(result[0]['tenantId'], self.tenant_id)
+        self.assertEqual(result[0]['name'], 'N/A(tenant level account)')
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_create_account_without_subscriptions_thru_common_tenant(self, mock_auth_context):
+        mock_auth_context.acquire_token.return_value = self.token_entry1
+        mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
+        tenant_object = mock.MagicMock()
+        tenant_object.id = "foo-bar"
+        tenant_object.tenant_id = self.tenant_id
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = []
+        mock_arm_client.tenants.list.return_value = (x for x in [tenant_object])
+
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': []}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        profile._management_resource_uri = 'https://management.core.windows.net/'
+
+        # action
+        result = profile.find_subscriptions_on_login(False,
+                                                     '1234',
+                                                     'my-secret',
+                                                     False,
+                                                     None,
+                                                     allow_no_subscriptions=True,
+                                                     subscription_finder=finder)
+
+        # assert
+        self.assertEqual(1, len(result))
         self.assertEqual(result[0]['id'], self.tenant_id)
         self.assertEqual(result[0]['state'], 'Enabled')
         self.assertEqual(result[0]['tenantId'], self.tenant_id)
@@ -288,7 +323,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         finder = mock.MagicMock()
         finder.find_through_interactive_flow.return_value = []
         storage_mock = {'subscriptions': []}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         # action
         result = profile.find_subscriptions_on_login(True,
@@ -308,7 +343,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -322,7 +357,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', return_value=None)
     def test_create_token_cache(self, mock_read_file):
         mock_read_file.return_value = []
-        profile = Profile()
+        profile = Profile(use_global_creds_cache=False)
         cache = profile._creds_cache.adal_token_cache
         self.assertFalse(cache.read_items())
         self.assertTrue(mock_read_file.called)
@@ -330,7 +365,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_load_cached_tokens(self, mock_read_file):
         mock_read_file.return_value = [Test_Profile.token_entry1]
-        profile = Profile()
+        profile = Profile(use_global_creds_cache=False)
         cache = profile._creds_cache.adal_token_cache
         matched = cache.find({
             "_authority": "https://login.microsoftonline.com/common",
@@ -348,7 +383,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -369,13 +404,41 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
+        mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1,
+                                       Test_Profile.token_entry1)
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        consolidated = Profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # action
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+
+        # verify
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        # the last in the tuple is the whole token entry which has several fields
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+                                               'https://foo')
+        self.assertEqual(mock_get_token.call_count, 1)
+        self.assertEqual(sub, '1')
+        self.assertEqual(tenant, self.tenant_id)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1, [self.subscription1],
                                                      False)
         profile._set_subscriptions(consolidated)
@@ -395,7 +458,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -413,7 +476,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     def test_logout_all(self, mock_delete_cred_file):
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -450,6 +513,38 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
             mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
+    @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
+    @mock.patch('azure.cli.core._profile.CLOUD', autospec=True)
+    def test_find_subscriptions_thru_username_password_adfs(self, mock_get_cloud, mock_acquire_token,
+                                                            mock_acquire_token_username_password):
+        TEST_ADFS_AUTH_URL = 'https://adfs.local.azurestack.external/adfs'
+
+        def test_acquire_token(self, resource, username, password, client_id):
+            global acquire_token_invoked
+            acquire_token_invoked = True
+            if (self.authority.url == TEST_ADFS_AUTH_URL and self.authority.is_adfs_authority):
+                return Test_Profile.token_entry1
+            else:
+                raise ValueError('AuthContext was not initialized correctly for ADFS')
+
+        mock_acquire_token_username_password.side_effect = test_acquire_token
+        mock_acquire_token.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_get_cloud.endpoints.active_directory = TEST_ADFS_AUTH_URL
+        finder = SubscriptionFinder(_AUTH_CTX_FACTORY,
+                                    None,
+                                    lambda _: mock_arm_client)
+        mgmt_resource = 'https://management.core.windows.net/'
+        # action
+        subs = finder.find_from_user_account(self.user1, 'bar', None, mgmt_resource)
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
+        self.assertTrue(acquire_token_invoked)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile.logger', autospec=True)
@@ -584,7 +679,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_file.return_value = [self.token_entry1, test_sp]
 
         # action
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # assert
         token_entries = [entry for _, entry in creds_cache.load_adal_token_cache().read_items()]
@@ -601,7 +696,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_file.return_value = [test_sp]
 
         # action
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
         creds_cache.load_adal_token_cache()
 
         # assert
@@ -623,7 +718,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         }
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [self.token_entry1, test_sp]
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # action
         creds_cache.save_service_principal_cred(test_sp2)
@@ -645,7 +740,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         }
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [test_sp]
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # action
         creds_cache.save_service_principal_cred(test_sp)
@@ -664,7 +759,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         }
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [self.token_entry1, test_sp]
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # action #1, logout a user
         creds_cache.remove_cached_creds(self.user1)
@@ -704,12 +799,12 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_adal_auth_context.acquire_token.side_effect = acquire_token_side_effect
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [self.token_entry1]
-        creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
+        creds_cache = CredsCache(auth_ctx_factory=get_auth_context, async_persist=False)
 
         # action
         mgmt_resource = 'https://management.core.windows.net/'
-        token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
-                                                                mgmt_resource)
+        token_type, token, _ = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
+                                                                   mgmt_resource)
         mock_adal_auth_context.acquire_token.assert_called_once_with(
             'https://management.core.windows.net/',
             self.user1,

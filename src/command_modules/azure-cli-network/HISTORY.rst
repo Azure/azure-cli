@@ -6,6 +6,24 @@ Release History
 unreleased
 ++++++++++++++++++
 
+* `express-route peering create`: fix bug when creating a peering without route filtering.
+* `express-route update`: fix bug where --provider and --bandwidth arguments did not work.
+* `network watcher show-topology`: Fix bug with location defaulting logic.
+* `network list-usages`: improve output for TSV and table format.
+* `application-gateway http-listener create`: Default frontend IP if only one exists.
+* `application-gateway rule create`: Default address pool, HTTP settings, and HTTP listener if
+   only one exists.
+* `lb rule create`: Default frontend IP and backend pool if only one exists.
+* `lb inbound-nat-rule create`: Default frontend IP if only one exists.
+
+2.0.6 (2017-05-09)
+++++++++++++++++++
+
+* Minor fixes.
+
+2.0.5 (2017-05-05)
+++++++++++++++++++
+
 * Add `network watcher test-connectivity` command.
 * Add support for `--filters` parameter for `network watcher packet-capture create`.
 

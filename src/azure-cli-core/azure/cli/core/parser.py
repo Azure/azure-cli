@@ -161,7 +161,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
         self._handle_command_package_error(message)
-
         args = {'prog': self.prog, 'message': message}
         logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)
@@ -190,7 +189,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             or a command. Anything that has a func default is considered
             a group. This includes any dummy commands served up by the
             "filter out irrelevant commands based on argv" command filter """
-        return not self._defaults.get('func', None)
+        cmd = self._defaults.get('func', None)
+        return not (cmd and cmd.handler)
 
     def __getattribute__(self, name):
         """ Since getting the description can be expensive (require module loads), we defer

@@ -83,6 +83,40 @@ class TestApplication(unittest.TestCase):
         self.assertEqual(hellos[1]['hello'], 'sir')
         self.assertEqual(hellos[1]['something'], 'else')
 
+    def test_case_insensitive_command_path(self):
+        import argparse
+
+        def handler(args):
+            return 'PASSED'
+
+        command = CliCommand('test command', handler)
+        command.add_argument('var', '--var', '-v')
+        cmd_table = {'test command': command}
+
+        def _test(cmd_line):
+            argv = cmd_line.split()
+            config = Configuration()
+            config.get_command_table = lambda argv: cmd_table
+            application = Application(config)
+            return application.execute(argv[1:])
+
+        # case insensitive command paths
+        result = _test('az TEST command --var blah')
+        self.assertEqual(result.result, 'PASSED')
+
+        result = _test('az test COMMAND --var blah')
+        self.assertEqual(result.result, 'PASSED')
+
+        result = _test('az test command -v blah')
+        self.assertEqual(result.result, 'PASSED')
+
+        # verify that long and short options remain case sensitive
+        with self.assertRaises(SystemExit):
+            _test('az test command --vAR blah')
+
+        with self.assertRaises(SystemExit):
+            _test('az test command -V blah')
+
     def test_expand_file_prefixed_files(self):
         f = tempfile.NamedTemporaryFile(delete=False)
         f.close()

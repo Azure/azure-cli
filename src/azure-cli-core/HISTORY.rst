@@ -2,10 +2,23 @@
 
 Release History
 ===============
-2.0.5 (Unreleased)
+
+unreleased
+^^^^^^^^^^^^^^^^^^
+* Command paths are no longer case sensitive.
+* Certain boolean-type parameters are no longer case sensitive.
+* Support login to ADFS on prem server like Azure Stack
+* Fix concurrent writes to clouds.config (#3255)
+
+2.0.6 (2017-05-09)
+^^^^^^^^^^^^^^^^^^
+* RP Auto-Reg: capture missing subscription registration error on LRO (#3268)
+
+2.0.5 (2017-05-05)
 ^^^^^^^^^^^^^^^^^^
 * core: capture exceptions caused by unregistered provider and auto-register it   
 * login: avoid the bad exception when the user account has no subscription and no tenants
+* perf: persist adal token cache in memory till process exits (#2603)
 
 2.0.4 (2017-04-28)
 ^^^^^^^^^^^^^^^^^^

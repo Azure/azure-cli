@@ -50,7 +50,7 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  management=None,
                  resource_manager=None,
                  sql_management=None,
@@ -89,7 +89,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
 
 class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  storage_endpoint=None,
                  keyvault_dns=None,
                  sql_server_hostname=None,
@@ -113,7 +113,6 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 class Cloud(object):  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
-    # pylint: disable=too-many-arguments
     def __init__(self,
                  name,
                  endpoints=None,
@@ -236,7 +235,11 @@ def init_known_clouds(force=False):
     stored_cloud_names = config.sections()
     for c in KNOWN_CLOUDS:
         if force or c.name not in stored_cloud_names:
-            _save_cloud(c, overwrite=force)
+            _config_add_cloud(config, c, overwrite=force)
+    if not os.path.isdir(GLOBAL_CONFIG_DIR):
+        os.makedirs(GLOBAL_CONFIG_DIR)
+    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
+        config.write(configfile)
 
 
 def get_clouds():
@@ -341,9 +344,8 @@ def switch_active_cloud(cloud_name):
     _set_active_subscription(cloud_name)
 
 
-def _save_cloud(cloud, overwrite=False):
-    config = get_config_parser()
-    config.read(CLOUD_CONFIG_FILE)
+def _config_add_cloud(config, cloud, overwrite=False):
+    """ Add a cloud to a config object """
     try:
         config.add_section(cloud.name)
     except configparser.DuplicateSectionError:
@@ -357,6 +359,12 @@ def _save_cloud(cloud, overwrite=False):
     for k, v in cloud.suffixes.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'suffix_{}'.format(k), v)
+
+
+def _save_cloud(cloud, overwrite=False):
+    config = get_config_parser()
+    config.read(CLOUD_CONFIG_FILE)
+    _config_add_cloud(config, cloud, overwrite=overwrite)
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

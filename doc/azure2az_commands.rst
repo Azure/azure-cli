@@ -1,7 +1,7 @@
 
 Azure XPlat CLI to Azure CLI 2.0 commands
 =========================================
-Below is a list of common Azure XPlat commands and their Azure CLI 2.0 Preview equivalent.
+Below is a list of common Azure XPlat commands and their Azure CLI 2.0 equivalent.
 
 Services included:
 

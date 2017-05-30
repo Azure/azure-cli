@@ -28,7 +28,7 @@ def _load_key(key_filename):
     return pkey
 
 
-def SecureCopy(user, host, src, dest,  # pylint: disable=too-many-arguments
+def SecureCopy(user, host, src, dest,
                key_filename=None,
                allow_agent=True):
     ssh = paramiko.SSHClient()
@@ -71,7 +71,7 @@ class ACSClient(object):
         if self.tunnel_server is not None:
             self.tunnel_server.close_tunnel()
 
-    def connect(self, host, username, port=2200,  # pylint: disable=too-many-arguments
+    def connect(self, host, username, port=2200,
                 key_filename=None):
         """
         Creates a connection to the remote server.
@@ -128,8 +128,8 @@ class ACSClient(object):
             t.daemon = True
             t.start()
             return
-        else:
-            return self._run_cmd(command)
+
+        return self._run_cmd(command)
 
     def _run_cmd(self, command):
         """
@@ -198,7 +198,7 @@ class ACSClient(object):
         """
         Gets a random, available local port
         """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # pylint: disable=no-member
         s.bind(('', 0))
         s.listen(1)
         port = s.getsockname()[1]

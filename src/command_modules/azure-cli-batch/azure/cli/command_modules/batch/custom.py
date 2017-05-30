@@ -11,7 +11,7 @@ from msrest.exceptions import DeserializationError, ValidationError, ClientReque
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
-                                     UpdateApplicationParameters)
+                                     ApplicationUpdateParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
@@ -46,7 +46,7 @@ def list_accounts(client, resource_group_name=None):
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def create_account(client,  # pylint:disable=too-many-arguments
+def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
@@ -64,7 +64,7 @@ def create_account(client,  # pylint:disable=too-many-arguments
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
+def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -76,7 +76,6 @@ def update_account(client, resource_group_name, account_name,  # pylint:disable=
 
 def login_account(client, resource_group_name, account_name, shared_key_auth=False):
     from azure.cli.core._config import az_config, set_global_config
-    from azure.cli.core._profile import Profile
 
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)
@@ -98,11 +97,11 @@ def login_account(client, resource_group_name, account_name, shared_key_auth=Fal
     set_global_config(az_config.config_parser)
 
 
-@transfer_doc(UpdateApplicationParameters)
-def update_application(client,  # pylint:disable=too-many-arguments
+@transfer_doc(ApplicationUpdateParameters)
+def update_application(client,
                        resource_group_name, account_name, application_id, allow_updates=None,
                        display_name=None, default_version=None):
-    parameters = UpdateApplicationParameters(allow_updates=allow_updates,
+    parameters = ApplicationUpdateParameters(allow_updates=allow_updates,
                                              display_name=display_name,
                                              default_version=default_version)
     return client.update(resource_group_name=resource_group_name,
@@ -137,7 +136,7 @@ def _upload_package_blob(package_file, url):
 
 
 @transfer_doc(ApplicationPackageOperations.create)
-def create_application_package(client,  # pylint:disable=too-many-arguments
+def create_application_package(client,
                                resource_group_name, account_name, application_id, version,
                                package_file):
     # create application if not exist
@@ -207,7 +206,7 @@ def delete_certificate(client, thumbprint, abort=False):
 
 
 @transfer_doc(PoolResizeParameter)
-def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-many-arguments
+def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
@@ -218,21 +217,22 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
                                                        if_modified_since=if_modified_since,
                                                        if_unmodified_since=if_unmodified_since)
             return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
-        else:
-            param = PoolResizeParameter(target_dedicated,
-                                        resize_timeout=resize_timeout,
-                                        node_deallocation_option=node_deallocation_option)
-            resize_option = PoolResizeOptions(if_match=if_match,
-                                              if_none_match=if_none_match,
-                                              if_modified_since=if_modified_since,
-                                              if_unmodified_since=if_unmodified_since)
-            return client.resize(pool_id, param, pool_resize_options=resize_option)
+
+        param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
+                                    target_low_priority_nodes=target_low_priority_nodes,
+                                    resize_timeout=resize_timeout,
+                                    node_deallocation_option=node_deallocation_option)
+        resize_option = PoolResizeOptions(if_match=if_match,
+                                          if_none_match=if_none_match,
+                                          if_modified_since=if_modified_since,
+                                          if_unmodified_since=if_unmodified_since)
+        return client.resize(pool_id, param, pool_resize_options=resize_option)
 
     return _handle_batch_exception(action)
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client,  # pylint:disable=too-many-arguments
+def update_pool(client,
                 pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
                 application_package_references=None, metadata=None,
                 start_task_environment_settings=None, start_task_wait_for_success=None,
@@ -287,17 +287,17 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
                                                     expand=expand)
             return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
                                                       job_list_from_job_schedule_options=option1))
-        else:
-            option2 = JobListOptions(filter=filter,
-                                     select=select,
-                                     expand=expand)
-            return list(client.list(job_list_options=option2))
+
+        option2 = JobListOptions(filter=filter,
+                                 select=select,
+                                 expand=expand)
+        return list(client.list(job_list_options=option2))
 
     return _handle_batch_exception(action)
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
-def create_task(client,  # pylint:disable=too-many-arguments
+def create_task(client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
                 environment_settings=None, affinity_info=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,
@@ -306,9 +306,9 @@ def create_task(client,  # pylint:disable=too-many-arguments
         if task is not None:
             client.add(job_id=job_id, task=task)
             return client.get(job_id=job_id, task_id=task.id)
-        else:
-            result = client.add_collection(job_id=job_id, value=tasks)
-            return result.value
+
+        result = client.add_collection(job_id=job_id, value=tasks)
+        return result.value
 
     task = None
     if json_file:

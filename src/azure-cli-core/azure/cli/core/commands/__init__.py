@@ -14,12 +14,13 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+
+import six
 from six import string_types, reraise
 
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
-from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
@@ -35,7 +36,7 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context', 'container']
+BLACKLISTED_MODS = ['context', 'container', 'shell', 'documentdb']
 
 
 class VersionConstraint(object):
@@ -124,10 +125,14 @@ class CliCommandArgument(object):
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='',
+                 poller_done_interval_ms=1000.0, progress_controller=None):
+
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
+        from azure.cli.core.application import APPLICATION
+        self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -136,7 +141,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
+        self.progress_controller.begin()
         while not poller.done():
+            self.progress_controller.add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -149,8 +156,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 self._delay()
             except KeyboardInterrupt:
+                self.progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
+
         try:
             result = poller.result()
         except ClientException as client_exception:
@@ -159,11 +168,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 fault_type='failed-long-running-operation',
                 summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
             message = getattr(client_exception, 'message', client_exception)
+            self.progress_controller.stop()
 
             try:
                 message = '{} {}'.format(
                     str(message),
-                    json.loads(client_exception.response.text)['error']['details'][0]['message'])
+                    json.loads(client_exception.response.text)['error']['details'][0]['message'])  # pylint: disable=no-member
             except:  # pylint: disable=bare-except
                 pass
 
@@ -174,6 +184,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
+        self.progress_controller.end()
         return result
 
 
@@ -191,9 +202,9 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
         elif isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return None
-        else:
-            # --validate returns a 'normal' response
-            return result
+
+        # --validate returns a 'normal' response
+        return result
 
 
 class CommandTable(dict):
@@ -230,6 +241,8 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     @staticmethod
     def _should_load_description():
+        from azure.cli.core.application import APPLICATION
+
         return not APPLICATION.session['completer_active']
 
     def load_arguments(self):
@@ -375,6 +388,8 @@ def get_op_handler(operation):
     # Patch the unversioned sdk path to include the appropriate API version for the
     # resource type in question.
     from azure.cli.core._profile import CLOUD
+    import types
+
     for rt in ResourceType:
         if operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
@@ -384,7 +399,9 @@ def get_op_handler(operation):
         op = import_module(mod_to_import)
         for part in attr_path.split('.'):
             op = getattr(op, part)
-        return op
+        if isinstance(op, types.FunctionType):
+            return op
+        return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -393,6 +410,12 @@ def _load_client_exception_class():
     # Since loading msrest is expensive, we avoid it until we have to
     from msrest.exceptions import ClientException
     return ClientException
+
+
+def _load_validation_error_class():
+    # Since loading msrest is expensive, we avoid it until we have to
+    from msrest.exceptions import ValidationError
+    return ValidationError
 
 
 def _load_azure_exception_class():
@@ -428,7 +451,6 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-        from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
@@ -438,36 +460,37 @@ def create_command(module_name, name, operation,
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)
-            try:
+            for _ in range(2):  # for possible retry, we do maximum 2 times.
                 try:
                     result = op(client, **kwargs) if client else op(**kwargs)
-                except CloudError as ex:
+                    if no_wait_param and kwargs.get(no_wait_param, None):
+                        return None  # return None for 'no-wait'
+
+                    # apply results transform if specified
+                    if transform_result:
+                        return transform_result(result)
+
+                    # otherwise handle based on return type of results
+                    if _is_poller(result):
+                        return LongRunningOperation('Starting {}'.format(name))(result)
+                    elif _is_paged(result):
+                        return list(result)
+                    return result
+                except Exception as ex:  # pylint: disable=broad-except
                     rp = _check_rp_not_registered_err(ex)
                     if rp:
                         _register_rp(rp)
-                        result = op(client, **kwargs) if client else op(**kwargs)
+                        continue  # retry
+                    if exception_handler:
+                        exception_handler(ex)
+                        return
                     else:
                         reraise(*sys.exc_info())
-
-                if no_wait_param and kwargs.get(no_wait_param, None):
-                    return None  # return None for 'no-wait'
-
-                # apply results transform if specified
-                if transform_result:
-                    return transform_result(result)
-
-                # otherwise handle based on return type of results
-                if _is_poller(result):
-                    return LongRunningOperation('Starting {}'.format(name))(result)
-                elif _is_paged(result):
-                    return list(result)
-                return result
-            except Exception as ex:  # pylint: disable=broad-except
-                if exception_handler:
-                    exception_handler(ex)
-                else:
-                    reraise(*sys.exc_info())
-
+        except _load_validation_error_class() as validation_error:
+            fault_type = name.replace(' ', '-') + '-validation-error'
+            telemetry.set_exception(validation_error, fault_type=fault_type,
+                                    summary='SDK validation error')
+            raise CLIError(validation_error)
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,

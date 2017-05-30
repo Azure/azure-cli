@@ -29,8 +29,7 @@ def _user_agrees_to_telemetry(func):
     def _wrapper(*args, **kwargs):
         if not _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True):
             return
-        else:
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return _wrapper
 
@@ -334,8 +333,7 @@ def _get_shell_type():
         return 'ksh'
     elif 'WINDIR' in os.environ:
         return 'cmd'
-    else:
-        return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
+    return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 
 @decorators.suppress_all_exceptions(fallback_return='')

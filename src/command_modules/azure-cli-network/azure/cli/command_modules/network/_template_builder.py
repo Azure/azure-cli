@@ -3,14 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-many-arguments
 
 from collections import OrderedDict
 import json
 
 
 class ArmTemplateBuilder(object):
-
     def __init__(self):
         template = OrderedDict()
         template['$schema'] = \
@@ -45,8 +43,9 @@ class ArmTemplateBuilder(object):
                    output_type='string', path=None):
 
         if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
-                provider=provider, type=property_type, property=property_name)
+            template = "[reference(resourceId('{provider}/{type}', '{property}')," \
+                       "providers('{provider}', '{type}').apiVersions[0])"
+            value = template.format(provider=provider, type=property_type, property=property_name)
         else:
             value = "[reference('{}')".format(property_name)
         value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
@@ -86,14 +85,11 @@ def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_i
 
 
 # pylint: disable=too-many-locals
-def build_application_gateway_resource(name, location, tags, sku_name, sku_tier, capacity,
-                                       servers, frontend_port,
-                                       private_ip_address, private_ip_allocation,
-                                       cert_data, cert_password,
-                                       cookie_based_affinity,
-                                       http_settings_protocol, http_settings_port,
-                                       http_listener_protocol, routing_rule_type, public_ip_id,
-                                       subnet_id, connection_draining_timeout):
+def build_application_gateway_resource(name, location, tags, sku_name, sku_tier, capacity, servers, frontend_port,
+                                       private_ip_address, private_ip_allocation, cert_data, cert_password,
+                                       cookie_based_affinity, http_settings_protocol, http_settings_port,
+                                       http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
+                                       connection_draining_timeout):
     from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
 
     # set the default names
@@ -211,12 +207,10 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
     return ag
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name,
-                                 frontend_ip_name, public_ip_id, subnet_id,
+def build_load_balancer_resource(name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id, subnet_id,
                                  private_ip_address, private_ip_allocation):
-
-    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id,
-                                                   private_ip_address, private_ip_allocation)
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
+                                                   private_ip_allocation)
 
     lb_properties = {
         'backendAddressPools': [
@@ -240,7 +234,6 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name,
 
 
 def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None):
-
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -258,8 +251,7 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
     return public_ip
 
 
-def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
-                        subnet_prefix=None, dns_servers=None):
+def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None):
     vnet = {
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
@@ -285,10 +277,9 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type,
-                                  authorization_key, enable_bgp, routing_weight, shared_key,
-                                  use_policy_based_traffic_selectors):
-    from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
+def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type, authorization_key, enable_bgp,
+                                  routing_weight, shared_key, use_policy_based_traffic_selectors):
+    from azure.cli.core.profiles import ResourceType, supported_api_version
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'authorizationKey': authorization_key,
@@ -325,4 +316,3 @@ def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_
         'properties': vpn_properties if vpn_type != 'VpnClient' else {}
     }
     return vpn_connection
-

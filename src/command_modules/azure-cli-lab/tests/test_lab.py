@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.core.test_utils.vcr_test_base import (
+from azure.cli.testsdk.vcr_test_base import (
     ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -36,13 +36,13 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, TEMPLATE),
                  checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
 
-        # Create linux vm in the lab
+        # Create claimable linux vm in the lab
         self.cmd('lab vm create -g {} --lab-name {} --name {} '
-                 '--image {} --image-type {} --size {} --admin-password {}'
+                 '--image {} --image-type {} --size {} --admin-password {} --allow-claim'
                  .format(rg, LAB_NAME, linux_vm_name, linux_image, image_type, size, password),
                  checks=[NoneCheck()])
 
-        self.cmd('lab vm show -g {} --lab-name {} --name {} '
+        self.cmd('lab vm show -g {} --lab-name {} --name {}'
                  .format(rg, LAB_NAME, linux_vm_name),
                  checks=[
                      JMESPathCheck('name', linux_vm_name),
@@ -57,7 +57,7 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # Create windows vm in the lab
         self.cmd('lab vm create -g {} --lab-name {} --name {} '
-                 '--image {} --image-type {} --size {} --admin-password {}'
+                 '--image {} --image-type {} --size {} --admin-password {} --allow-claim'
                  .format(rg, LAB_NAME, windows_vm_name, windows_image, image_type, size, password),
                  checks=[NoneCheck()])
 
@@ -73,6 +73,25 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('artifactDeploymentStatus.totalArtifacts', 0),
                      JMESPathCheck('galleryImageReference.publisher', 'MicrosoftWindowsServer')
                  ])
+
+        # List claimable vms
+        self.cmd('lab vm list -g {} --lab-name {} --claimable'
+                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
+
+        # claim a specific vm
+        self.cmd('lab vm claim -g {} --lab-name {} --name {}'
+                 .format(rg, LAB_NAME, linux_vm_name), checks=[NoneCheck()])
+
+        # List my vms - we have already claimed one VM
+        self.cmd('lab vm list -g {} --lab-name {}'
+                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 1)])
+
+        # claim any vm
+        self.cmd('lab vm claim -g {} --lab-name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])
+
+        # List my vms - we have claimed both VMs
+        self.cmd('lab vm list -g {} --lab-name {}'
+                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
 
         # Delete all the vms
         self.cmd('lab vm delete -g {} --lab-name {} --name {}'

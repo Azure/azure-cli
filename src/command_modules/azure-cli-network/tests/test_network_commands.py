@@ -14,10 +14,12 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck, MOCKED_SUBSCRIPTION_ID)
+
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck, MOCKED_SUBSCRIPTION_ID)
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
@@ -1315,15 +1317,16 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
             checks=JMESPathCheck('routingWeight', 25))
 
+        # TODO: Re-enable test once issue #3385 is fixed.
         # test network watcher troubleshooting commands
-        storage_account = 'clitestnwstorage2'
-        container_name = 'troubleshooting-results'
-        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
-        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
-        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
-        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
-        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
-        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
+        # storage_account = 'clitestnwstorage2'
+        # container_name = 'troubleshooting-results'
+        # self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
+        # self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
+        # storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
+        # self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
+        # self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
+        # self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
@@ -1474,31 +1477,28 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
                  .format(zone_name, self.resource_group, zone_file_path))
         self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
 
-class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
+class NetworkWatcherScenarioTest(ScenarioTest):
+    import mock
 
-    def __init__(self, test_method):
-        super(NetworkWatcherScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_network_watcher')
+    def _mock_thread_count():
+        return 1
+    
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    def test_network_watcher(self, resource_group, storage_account):
 
-    def test_network_watcher(self):
-        self.execute()
-
-    def body(self):
-
-        resource_group = self.resource_group
-        storage_account = 'clitestnwstorage1'
-
-        self.cmd('network watcher configure -g {} --locations westus westus2 --enabled'.format(resource_group))
+        self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
 
         vm = 'vm1'
         # create VM with NetworkWatcher extension
-        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password PassPass10!)'.format(resource_group, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
 
-        self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))
+        self.cmd('network watcher show-topology -g {}'.format(resource_group))
 
         self.cmd('network watcher test-ip-flow -g {} --vm {} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*'.format(resource_group, vm))
         self.cmd('network watcher test-ip-flow -g {} --vm {} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80'.format(resource_group, vm))
@@ -1507,15 +1507,18 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
 
-        capture = 'capture1'
-        location = 'westus'
-        self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
-        self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
-        self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        self.cmd('network watcher test-connectivity -g {} --source-resource {} --dest-address www.microsoft.com --dest-port 80'.format(resource_group, vm))
+
+        # TODO: Re-enable once issue #3385 is resolved
+        #capture = 'capture1'
+        #location = 'westus'
+        #self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
+        #self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
 
         nsg = '{}NSG'.format(vm)
         self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))

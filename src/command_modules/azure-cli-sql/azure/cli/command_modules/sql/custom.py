@@ -3,11 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._util import (
-    get_sql_servers_operations,
-    get_sql_elastic_pools_operations
-)
-
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
@@ -26,6 +21,11 @@ from azure.mgmt.storage import StorageManagementClient
 
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
+
+from ._util import (
+    get_sql_servers_operations,
+    get_sql_elastic_pools_operations
+)
 
 ###############################################
 #                Common funcs                 #
@@ -125,7 +125,7 @@ def _db_create_special(
 
 
 # Copies a database. Wrapper function to make create mode more convenient.
-def db_copy(  # pylint: disable=too-many-arguments
+def db_copy(
         client,
         database_name,
         server_name,
@@ -150,7 +150,7 @@ def db_copy(  # pylint: disable=too-many-arguments
 
 
 # Copies a replica. Wrapper function to make create mode more convenient.
-def db_create_replica(  # pylint: disable=too-many-arguments
+def db_create_replica(
         client,
         database_name,
         server_name,
@@ -176,7 +176,7 @@ def db_create_replica(  # pylint: disable=too-many-arguments
 
 # Creates a database from a database point in time backup.
 # Wrapper function to make create mode more convenient.
-def db_restore(  # pylint: disable=too-many-arguments
+def db_restore(
         client,
         database_name,
         server_name,
@@ -212,7 +212,7 @@ def db_failover(
         server_name=server_name,
         resource_group_name=resource_group_name))
 
-    if len(links) == 0:
+    if not links:
         raise CLIError('The specified database has no replication links.')
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
@@ -236,7 +236,7 @@ def db_failover(
         link_id=primary_link.name)
 
 
-def db_delete_replica_link(  # pylint: disable=too-many-arguments
+def db_delete_replica_link(
         client,
         database_name,
         server_name,
@@ -273,7 +273,7 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         link_id=link.name)
 
 
-def db_export(  # pylint: disable=too-many-arguments
+def db_export(
         client,
         database_name,
         server_name,
@@ -295,7 +295,7 @@ def db_export(  # pylint: disable=too-many-arguments
         parameters=kwargs)
 
 
-def db_import(  # pylint: disable=too-many-arguments
+def db_import(
         client,
         database_name,
         server_name,
@@ -343,11 +343,9 @@ def db_list(
             resource_group_name=resource_group_name,
             elastic_pool_name=elastic_pool_name,
             filter=filter)
-    else:
+
         # List all databases in the server
-        return client.list_by_server(
-            resource_group_name=resource_group_name,
-            server_name=server_name)
+    return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
 # Update database. Custom update function to apply parameters to instance.
@@ -420,7 +418,7 @@ def _find_storage_account_resource_group(name):
     client = get_mgmt_service_client(ResourceManagementClient)
     resources = list(client.resources.list(filter=query))
 
-    if len(resources) == 0:
+    if not resources:
         raise CLIError("No storage account with name '{}' was found.".format(name))
 
     if len(resources) > 1:
@@ -480,7 +478,7 @@ def _get_storage_key(
 
 
 # Common code for updating audit and threat detection policy
-def _db_security_policy_update(  # pylint: disable=too-many-arguments
+def _db_security_policy_update(
         instance,
         enabled,
         storage_account,
@@ -523,7 +521,7 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
 
 
 # Update audit policy. Custom update function to apply parameters to instance.
-def db_audit_policy_update(  # pylint: disable=too-many-arguments
+def db_audit_policy_update(
         instance,
         state=None,
         storage_account=None,
@@ -558,7 +556,7 @@ def db_audit_policy_update(  # pylint: disable=too-many-arguments
 
 
 # Update threat detection policy. Custom update function to apply parameters to instance.
-def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
+def db_threat_detection_policy_update(
         instance,
         state=None,
         storage_account=None,
@@ -744,7 +742,7 @@ def firewall_rule_allow_all_azure_ips(
 
 # Update firewall rule. Custom update function is required,
 # see https://github.com/Azure/azure-cli/issues/2264
-def firewall_rule_update(  # pylint: disable=too-many-arguments
+def firewall_rule_update(
         client,
         firewall_rule_name,
         server_name,

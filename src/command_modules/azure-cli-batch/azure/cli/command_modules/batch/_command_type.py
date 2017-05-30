@@ -212,7 +212,7 @@ def group_title(path):
         return group
 
     group_path = path.split('.')
-    group_path = list(map(filter_group, group_path))  # pylint: disable=bad-builtin
+    group_path = list(map(filter_group, group_path))
     title = ': '.join(group_path)
     for group in group_path:
         title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
@@ -352,7 +352,7 @@ class BatchArgumentTree(object):
             if kwargs[self._request_param['name']] is None:
                 raise ValueError(message.format(self._request_param['model']))
 
-    def queue_argument(self, name=None, path=None, root=None,  # pylint:disable=too-many-arguments
+    def queue_argument(self, name=None, path=None, root=None,
                        options=None, type=None,  # pylint: disable=redefined-builtin
                        dependencies=None):
         """Add pending command line argument
@@ -570,8 +570,8 @@ class AzureBatchDataPlaneCommand(object):
                 # Otherwise handle based on return type of results
                 elif isinstance(result, Paged):
                     return list(result)
-                else:
-                    return result
+
+                return result
             except BatchErrorException as ex:
                 try:
                     message = ex.error.message.value
@@ -697,7 +697,7 @@ class AzureBatchDataPlaneCommand(object):
                 options['options_list'] = [arg_name(param)]
                 yield (param, CliCommandArgument(param, **options))
 
-    def _resolve_conflict(self,  # pylint:disable=too-many-arguments
+    def _resolve_conflict(self,
                           arg, param, path, options, typestr, dependencies, conflicting):
         """Resolve conflicting command line arguments.
         :param str arg: Name of the command line argument.
@@ -900,7 +900,7 @@ def validate_client_parameters(namespace):
         namespace.account_key = None
 
 
-def cli_batch_data_plane_command(name,  # pylint:disable=too-many-arguments
+def cli_batch_data_plane_command(name,
                                  operation, client_factory, transform=None, flatten=FLATTEN,
                                  ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a

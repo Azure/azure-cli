@@ -23,6 +23,7 @@ class Session(collections.MutableMapping):
     '''
 
     def __init__(self, encoding=None):
+        super(Session, self).__init__()
         self.filename = None
         self.data = {}
         self._encoding = encoding if encoding else 'utf-8-sig'

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-many-arguments
 
 from collections import OrderedDict
 import json
@@ -78,7 +77,6 @@ class StorageProfile(Enum):
 
 
 def build_deployment_resource(name, template, dependencies=None):
-    from azure.cli.core.util import random_string
     dependencies = dependencies or []
     deployment = {
         'name': name,
@@ -257,7 +255,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None, secrets=None):
+        custom_data=None, secrets=None, license_type=None):
 
     def _build_os_profile():
 
@@ -376,6 +374,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
     if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
+
+    if license_type:
+        vm_properties['licenseType'] = license_type
 
     vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     vm = {

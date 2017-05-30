@@ -64,6 +64,26 @@ def transform_vm_create_output(result):
         return None if isinstance(result, ClientRawResponse) else result
 
 
+def transform_vm_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
+def transform_vm_usage_table(result):
+    transformed = []
+    for item in result:
+        transformed.append(OrderedDict([
+            ('Name', item['localName']),
+            ('CurrentValue', item['currentValue']),
+            ('Limit', item['limit'])
+        ]))
+    return transformed
+
+
 def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
@@ -217,7 +237,7 @@ cli_command(__name__, 'vm image list-skus', mgmt_path.format(op_var, op_class, '
 cli_command(__name__, 'vm image list', custom_path.format('list_vm_images'))
 
 # VM Usage
-cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage)
+cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage, transform=transform_vm_usage_list, table_transformer=transform_vm_usage_table)
 
 # VMSS
 cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, no_wait_param='raw')
@@ -247,16 +267,18 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'
     # VM Disk
     op_var = 'disks_operations'
     op_class = 'DisksOperations'
-    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'))
+    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'), no_wait_param='no_wait')
     cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'))
     cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404)
-    cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks)
+    cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks, no_wait_param='raw', confirmation=True)
     cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
     cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
     cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
                                'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
                                custom_function_op=custom_path.format('update_managed_disk'),
-                               setter_arg_name='disk', factory=cf_disks)
+                               setter_arg_name='disk', factory=cf_disks, no_wait_param='raw')
+    cli_generic_wait_command(__name__, 'disk wait', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class), cf_disks)
+
     op_var = 'snapshots_operations'
     op_class = 'SnapshotsOperations'
     cli_command(__name__, 'snapshot create', custom_path.format('create_snapshot'))

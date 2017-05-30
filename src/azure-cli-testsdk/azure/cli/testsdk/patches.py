@@ -7,6 +7,24 @@ from .exceptions import CliExecutionError, CliTestError
 from .const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 
+def patch_progress_controller(unit_test):
+    def _handle_progress_update(*args):  # pylint: disable=unused-argument
+        pass
+
+    def _handle_progress_add(*args, **kwargs):  # pylint: disable=unused-argument
+        pass
+
+    def _mock_update_progress(*args, **kwargs):  # pylint: disable=unused-argument
+        pass
+
+    _mock_in_unit_test(
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.update', _handle_progress_update)
+    _mock_in_unit_test(
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.add', _handle_progress_add)
+    _mock_in_unit_test(
+        unit_test, 'azure.cli.command_modules.storage.custom._update_progress', _mock_update_progress)
+
+
 def patch_main_exception_handler(unit_test):
     from vcr.errors import CannotOverwriteExistingCassetteException
 
@@ -42,7 +60,7 @@ def patch_load_cached_subscriptions(unit_test):
 
 def patch_retrieve_token_for_user(unit_test):
     def _retrieve_token_for_user(*args, **kwargs):  # pylint: disable=unused-argument
-        return 'Bearer', 'top-secret-token-for-you'
+        return 'Bearer', 'top-secret-token-for-you', None
 
     _mock_in_unit_test(unit_test,
                        'azure.cli.core._profile.CredsCache.retrieve_token_for_user',

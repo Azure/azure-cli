@@ -97,10 +97,7 @@ class ResourceId(str):
 
 
 def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
-    '''Checks if the given resource exists.
-    '''
-    from azure.mgmt.resource import ResourceManagementClient
-
+    ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
     client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
@@ -109,10 +106,8 @@ def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disa
 
 
 def add_id_parameters(command_table):
-
     def split_action(arguments):
         class SplitAction(argparse.Action):  # pylint: disable=too-few-public-methods
-
             def __call__(self, parser, namespace, values, option_string=None):
                 ''' The SplitAction will take the given ID parameter and spread the parsed
                 parts of the id into the individual backing fields.
@@ -120,7 +115,7 @@ def add_id_parameters(command_table):
                 Since the id value is expected to be of type `IterateValue`, all the backing
                 (dest) fields will also be of type `IterateValue`
                 '''
-                try:
+                try:  # pylint: disable=too-many-nested-blocks
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.id_part]:
@@ -132,7 +127,7 @@ def add_id_parameters(command_table):
                                 if isinstance(existing_values, str):
                                     if not getattr(arg.type, 'configured_default_applied', None):
                                         logger.warning(
-                                            "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
+                                            "Property '%s=%s' being overriden by value '%s' from IDs parameter.",
                                             arg.name, existing_values, parts[arg.id_part]
                                         )
                                     existing_values = IterateValue()
@@ -222,7 +217,6 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-# pylint: disable=too-many-arguments
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None,
                                setter_arg_name='parameters', table_transformer=None,
                                child_collection_prop_name=None, child_collection_key='name',
@@ -504,7 +498,7 @@ def _split_key_value_pair(expression):
         value = []
         brackets = False
         chars = list(expression)
-        while len(chars) > 0:
+        while chars:
             c = chars.pop(0)
             if c == '=' and not brackets:
                 # keys done the rest is value
@@ -520,15 +514,12 @@ def _split_key_value_pair(expression):
                 # normal character
                 key += c
 
-        key = ''.join(key)  # pylint: disable=redefined-variable-type
-        value = ''.join(value)  # pylint: disable=redefined-variable-type
-        return key, value
+        return ''.join(key), ''.join(value)
 
     equals_count = expression.count('=')
     if equals_count == 1:
         return expression.split('=', 1)
-    else:
-        return _find_split()
+    return _find_split()
 
 
 def set_properties(instance, expression):

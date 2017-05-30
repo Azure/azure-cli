@@ -16,6 +16,11 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
+from azure.mgmt.resource.managedapplications.models import Appliance
+from azure.mgmt.resource.managedapplications.models import Plan
+from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
+from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
+
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
@@ -28,7 +33,8 @@ from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
                               _resource_lock_client_factory,
                               _resource_links_client_factory,
-                              _authorization_management_client)
+                              _authorization_management_client,
+                              _resource_managedapps_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -45,7 +51,7 @@ def list_resource_groups(tag=None):  # pylint: disable=no-self-use
         filters.append("tagname eq '{}'".format(key))
         filters.append("tagvalue eq '{}'".format(tag[key]))
 
-    filter_text = ' and '.join(filters) if len(filters) > 0 else None
+    filter_text = ' and '.join(filters) if filters else None
 
     groups = rcf.resource_groups.list(filter=filter_text)
     return list(groups)
@@ -65,6 +71,125 @@ def create_resource_group(rg_name, location, tags=None):
         tags=tags
     )
     return rcf.resource_groups.create_or_update(rg_name, parameters)
+
+
+def create_appliance(resource_group_name,
+                     appliance_name, managedby_resource_group_id,
+                     location, kind, managedapp_definition_id=None,
+                     plan_name=None, plan_publisher=None, plan_product=None,
+                     plan_version=None, tags=None, parameters=None):
+    """ Create a new managed application.
+    :param str resource_group_name:the desired resource group name
+    :param str appliance_name:the managed application name
+    :param str kind:the managed application kind. can be marketplace or servicecatalog
+    :param str plan_name:the managed application package plan name
+    :param str plan_publisher:the managed application package plan publisher
+    :param str plan_product:the managed application package plan product
+    :param str plan_version:the managed application package plan version
+    :param str tags:tags in 'a=b c' format
+    """
+    racf = _resource_managedapps_client_factory()
+    appliance = Appliance(
+        location=location,
+        managed_resource_group_id=managedby_resource_group_id,
+        kind=kind,
+        tags=tags
+    )
+
+    if kind.lower() == 'servicecatalog':
+        if managedapp_definition_id:
+            appliance.appliance_definition_id = managedapp_definition_id
+        else:
+            raise CLIError('--managedapp-definition-id is required if kind is ServiceCatalog')
+    elif kind.lower() == 'marketplace':
+        if (plan_name is None and plan_product is None and
+                plan_publisher is None and plan_version is None):
+            raise CLIError('--plan-name, --plan-product, --plan-publisher and \
+            --plan-version are all required if kind is MarketPlace')
+        else:
+            appliance.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
+
+    applianceParameters = None
+
+    if parameters:
+        if os.path.exists(parameters):
+            applianceParameters = get_file_json(parameters)
+        else:
+            applianceParameters = shell_safe_json_parse(parameters)
+
+    appliance.parameters = applianceParameters
+
+    return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
+
+
+def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=None):
+    """ Gets a managed application.
+    :param str resource_group_name:the resource group name
+    :param str appliance_name:the managed application name
+    """
+    racf = _resource_managedapps_client_factory()
+    if managedapp_id:
+        appliance = racf.appliances.get_by_id(managedapp_id)
+    else:
+        appliance = racf.appliances.get(resource_group_name, appliance_name)
+    return appliance
+
+
+def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None,
+                             managedapp_definition_id=None):
+    """ Gets a managed application definition.
+    :param str resource_group_name:the resource group name
+    :param str appliance_definition_name:the managed application definition name
+    """
+    racf = _resource_managedapps_client_factory()
+    if managedapp_definition_id:
+        appliancedef = racf.appliance_definitions.get_by_id(managedapp_definition_id)
+    else:
+        appliancedef = racf.appliance_definitions.get(resource_group_name,
+                                                      appliance_definition_name)
+    return appliancedef
+
+
+def create_appliancedefinition(resource_group_name,
+                               appliance_definition_name, location,
+                               lock_level, package_file_uri, authorizations,
+                               description, display_name, tags=None):
+    """ Create a new managed application definition.
+    :param str resource_group_name:the desired resource group name
+    :param str appliance_definition_name:the managed application definition name
+    :param str description:the managed application definition description
+    :param str display_name:the managed application definition display name
+    :param str package_file_uri:the managed application definition package file uri
+    :param str tags:tags in 'a=b c' format
+    """
+    racf = _resource_managedapps_client_factory()
+    authorizations = authorizations or []
+    applianceAuthList = []
+
+    for name_value in authorizations:
+        # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
+        principalId, roleDefinitionId = name_value.split(':', 1)
+        applianceAuth = ApplianceProviderAuthorization(principalId, roleDefinitionId)
+        applianceAuthList.append(applianceAuth)
+
+    applianceDef = ApplianceDefinition(lock_level, applianceAuthList, package_file_uri)
+    applianceDef.display_name = display_name
+    applianceDef.description = description
+    applianceDef.location = location
+    applianceDef.tags = tags
+
+    return racf.appliance_definitions.create_or_update(resource_group_name,
+                                                       appliance_definition_name, applianceDef)
+
+
+def list_appliances(resource_group_name=None):
+    racf = _resource_managedapps_client_factory()
+
+    if resource_group_name:
+        appliances = racf.appliances.list_by_resource_group(resource_group_name)
+    else:
+        appliances = racf.appliances.list_by_subscription()
+    return list(appliances)
 
 
 def export_group_as_template(
@@ -97,7 +222,7 @@ def export_group_as_template(
     print(json.dumps(result.template, indent=2))
 
 
-def deploy_arm_template(resource_group_name,  # pylint: disable=too-many-arguments
+def deploy_arm_template(resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
                         parameters=None, mode='incremental', no_wait=False):
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
@@ -147,6 +272,7 @@ def _prompt_for_parameters(missing_parameters):
                 break
             elif param_type == 'securestring':
                 value = prompt_pass(prompt_str, help_string=description)
+                result[param_name] = value
             elif param_type == 'int':
                 int_value = prompt_int(prompt_str, help_string=description)
                 result[param_name] = int_value
@@ -157,9 +283,10 @@ def _prompt_for_parameters(missing_parameters):
                 break
             else:
                 value = prompt(prompt_str, help_string=description)
-            if len(value) > 0:
+                result[param_name] = value
+            if value:
                 break
-    return {}
+    return result
 
 
 def _merge_parameters(parameter_list):
@@ -172,6 +299,17 @@ def _merge_parameters(parameter_list):
             parameters = params_object
         else:
             parameters.update(params_object)
+    return parameters
+
+
+def _get_missing_parameters(parameters, template, prompt_fn):
+    missing = _find_missing_parameters(parameters, template)
+    if missing:
+        prompt_parameters = prompt_fn(missing)
+        for param_name in prompt_parameters:
+            parameters[param_name] = {
+                "value": prompt_parameters[param_name]
+            }
     return parameters
 
 
@@ -188,7 +326,8 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
         raise CLIError('please provide either template file path or uri, but not both')
 
     parameters = _merge_parameters(parameter_list)
-
+    if parameters is None:
+        parameters = {}
     template = None
     template_link = None
     if template_uri:
@@ -196,22 +335,15 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
     else:
         template = get_file_json(template_file)
 
-    missing = _find_missing_parameters(parameters, template)
-    if len(missing) > 0:
-        prompt_parameters = _prompt_for_parameters(missing)
-        for param_name in prompt_parameters:
-            parameters[param_name] = prompt_parameters[param_name]
+    parameters = _get_missing_parameters(parameters, template, _prompt_for_parameters)
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
 
     smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
-        return smc.deployments.validate(resource_group_name, deployment_name,
-                                        properties, raw=no_wait)
-    else:
-        return smc.deployments.create_or_update(resource_group_name, deployment_name,
-                                                properties, raw=no_wait)
+        return smc.deployments.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def export_deployment_as_template(resource_group_name, deployment_name):
@@ -220,7 +352,7 @@ def export_deployment_as_template(resource_group_name, deployment_name):
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
-def create_resource(properties,  # pylint: disable=too-many-arguments
+def create_resource(properties,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None, location=None, is_full_object=False):
@@ -230,7 +362,7 @@ def create_resource(properties,  # pylint: disable=too-many-arguments
     return res.create_resource(properties, location, is_full_object)
 
 
-def show_resource(resource_group_name=None,  # pylint: disable=too-many-arguments
+def show_resource(resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -239,7 +371,7 @@ def show_resource(resource_group_name=None,  # pylint: disable=too-many-argument
     return res.get_resource()
 
 
-def delete_resource(resource_group_name=None,  # pylint: disable=too-many-arguments
+def delete_resource(resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                     resource_name=None, resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -248,7 +380,7 @@ def delete_resource(resource_group_name=None,  # pylint: disable=too-many-argume
     return res.delete()
 
 
-def update_resource(parameters,  # pylint: disable=too-many-arguments
+def update_resource(parameters,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None):
@@ -258,7 +390,7 @@ def update_resource(parameters,  # pylint: disable=too-many-arguments
     return res.update(parameters)
 
 
-def tag_resource(tags,  # pylint: disable=too-many-arguments
+def tag_resource(tags,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None):
@@ -280,7 +412,7 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
     return result
 
 
-def list_resources(resource_group_name=None,  # pylint: disable=too-many-arguments
+def list_resources(resource_group_name=None,
                    resource_provider_namespace=None, resource_type=None, name=None, tag=None,
                    location=None):
     rcf = _resource_client_factory()
@@ -295,7 +427,7 @@ def list_resources(resource_group_name=None,  # pylint: disable=too-many-argumen
     return list(resources)
 
 
-def _list_resources_odata_filter_builder(resource_group_name=None,  # pylint: disable=too-many-arguments
+def _list_resources_odata_filter_builder(resource_group_name=None,
                                          resource_provider_namespace=None,
                                          resource_type=None, name=None, tag=None, location=None):
     """Build up OData filter string from parameters
@@ -437,8 +569,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
 def list_features(client, resource_provider_namespace=None):
     if resource_provider_namespace:
         return client.list(resource_provider_namespace=resource_provider_namespace)
-    else:
-        return client.list_all()
+    return client.list_all()
 
 
 def create_policy_assignment(policy, name=None, display_name=None,
@@ -570,7 +701,7 @@ def get_policy_assignment_completion_list(prefix, **kwargs):  # pylint: disable=
     return [i.name for i in result]
 
 
-def list_locks(resource_group_name=None,  # pylint: disable=too-many-arguments
+def list_locks(resource_group_name=None,
                resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                resource_name=None, filter_string=None):
     """
@@ -603,7 +734,7 @@ def list_locks(resource_group_name=None,  # pylint: disable=too-many-arguments
         resource_name, filter=filter_string)
 
 
-def _validate_lock_params_match_lock(  # pylint: disable=too-many-arguments
+def _validate_lock_params_match_lock(
         lock_client, name, resource_group_name, resource_provider_namespace, parent_resource_path,
         resource_type, resource_name):
     """
@@ -671,7 +802,7 @@ def get_lock(name, resource_group_name=None):
     return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
 
 
-def delete_lock(name,  # pylint: disable=too-many-arguments
+def delete_lock(name,
                 resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None):
     """
@@ -723,7 +854,7 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(name,  # pylint: disable=too-many-arguments
+def create_lock(name,
                 resource_group_name=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None):
     """
@@ -841,7 +972,7 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
 
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None, rcf=None):
@@ -916,27 +1047,25 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def delete(self):
         if self.resource_id:
             return self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
-        else:
-            return self.rcf.resources.delete(self.resource_group_name,
-                                             self.resource_provider_namespace,
-                                             self.parent_resource_path or '',
-                                             self.resource_type,
-                                             self.resource_name,
-                                             self.api_version)
+        return self.rcf.resources.delete(self.resource_group_name,
+                                         self.resource_provider_namespace,
+                                         self.parent_resource_path or '',
+                                         self.resource_type,
+                                         self.resource_name,
+                                         self.api_version)
 
     def update(self, parameters):
         if self.resource_id:
             return self.rcf.resources.create_or_update_by_id(self.resource_id,
                                                              self.api_version,
                                                              parameters)
-        else:
-            return self.rcf.resources.create_or_update(self.resource_group_name,
-                                                       self.resource_provider_namespace,
-                                                       self.parent_resource_path or '',
-                                                       self.resource_type,
-                                                       self.resource_name,
-                                                       self.api_version,
-                                                       parameters)
+        return self.rcf.resources.create_or_update(self.resource_group_name,
+                                                   self.resource_provider_namespace,
+                                                   self.parent_resource_path or '',
+                                                   self.resource_type,
+                                                   self.resource_name,
+                                                   self.api_version,
+                                                   parameters)
 
     def tag(self, tags):
         resource = self.get_resource()
@@ -954,15 +1083,13 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         if self.resource_id:
             return self.rcf.resources.create_or_update_by_id(self.resource_id, self.api_version,
                                                              parameters)
-        else:
-            return self.rcf.resources.create_or_update(
-                self.resource_group_name,
-                self.resource_provider_namespace,
-                self.parent_resource_path or '',
-                self.resource_type,
-                self.resource_name,
-                self.api_version,
-                parameters)
+        return self.rcf.resources.create_or_update(self.resource_group_name,
+                                                   self.resource_provider_namespace,
+                                                   self.parent_resource_path or '',
+                                                   self.resource_type,
+                                                   self.resource_name,
+                                                   self.api_version,
+                                                   parameters)
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):

@@ -27,7 +27,8 @@ def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     if not all:
         enabled_ones = [s for s in subscriptions if s['state'] == 'Enabled']
         if len(enabled_ones) != len(subscriptions):
-            logger.warning("A few accounts are skipped as they don't have 'Enabled' state. Use '--all' to display them.")  # pylint: disable=line-too-long
+            logger.warning("A few accounts are skipped as they don't have 'Enabled' state. "
+                           "Use '--all' to display them.")
             subscriptions = enabled_ones
     return subscriptions
 
@@ -36,8 +37,28 @@ def show_subscription(subscription=None, expanded_view=None):
     profile = Profile()
     if not expanded_view:
         return profile.get_subscription(subscription)
-    else:
-        return profile.get_expanded_subscription_info(subscription)
+
+    logger.warning("'--expanded-view' is deprecating and will be removed in a future release. You can get the same "
+                   "information using 'az cloud show'")
+    return profile.get_expanded_subscription_info(subscription)
+
+
+def get_access_token(subscription=None, resource=None):
+    '''
+    get AAD token to access to a specified resource
+    :param resource: Azure resource endpoints. Default to Azure Resource Manager
+    Use 'az cloud show' command for other Azure resources
+    '''
+    profile = Profile()
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription,
+                                                        resource=resource)
+    return {
+        'tokenType': creds[0],
+        'accessToken': creds[1],
+        'expiresOn': creds[2]['expiresOn'],
+        'subscription': subscription,
+        'tenant': tenant
+    }
 
 
 def set_active_subscription(subscription):

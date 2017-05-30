@@ -10,8 +10,8 @@ from six import StringIO
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
-                                                     JMESPathCheck, NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
+                                             JMESPathCheck, NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -221,7 +221,7 @@ class WebappConfigureTestOld(ResourceGroupVCRTestBase):
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 3),
             JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
             JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
@@ -230,7 +230,7 @@ class WebappConfigureTestOld(ResourceGroupVCRTestBase):
             JMESPathCheck("[?name=='c3']|[0].slotSetting", True),
         ])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].slotSetting', False),
             JMESPathCheck('[0].name', 'c2')
@@ -333,7 +333,7 @@ class WebappSlotScenarioTestOld(ResourceGroupVCRTestBase):
         slot = 'staging'
         slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
-        test_node_version = '6.6.0'
+        test_php_version = '5.6'
 
         # create a few app-settings to test they can be cloned
         self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
@@ -349,32 +349,16 @@ class WebappSlotScenarioTestOld(ResourceGroupVCRTestBase):
 
         import time
         import requests
-
-        # comment out the git sync testing as it requires to pre-load a git token
-        # the rest test steps should be sufficient to verify the slot functionalities.
-
-        # verify the slot wires up the git repo/branch
-        # time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-        # r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
-        # self.assertTrue('Staging' in str(r.content))
-
         # swap with prod and verify the git branch also switched
         self.cmd('appservice web deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
-        # time.sleep(30)  # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
-        # r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
-        # self.assertTrue('Staging' in str(r.content))
         result = self.cmd('appservice web config appsettings show -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
-        self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
+        self.assertEqual(set([x['name'] for x in result]), set(['s1']))
 
         # create a new slot by cloning from prod slot
-        self.cmd('appservice web config update -g {} -n {} --node-version {}'.format(self.resource_group, self.webapp, test_node_version))
+        self.cmd('appservice web config update -g {} -n {} --php-version {}'.format(self.resource_group, self.webapp, test_php_version))
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
-        self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
-            JMESPathCheck("length([])", 1),
-            JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION')
-        ])
         self.cmd('appservice web config show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
-            JMESPathCheck("nodeVersion", test_node_version),
+            JMESPathCheck("phpVersion", test_php_version),
         ])
         self.cmd('appservice web config appsettings update -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
         self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
@@ -382,13 +366,13 @@ class WebappSlotScenarioTestOld(ResourceGroupVCRTestBase):
         # verify we can swap with non production slot
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
         result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
-        self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1', 's4']))
-        result = self.cmd('webapp config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's4']))
+        result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['c2']))
 
         result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
-        self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's3']))
-        result = self.cmd('webapp config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        self.assertTrue(set(['s3']).issubset(set([x['name'] for x in result])))
+        result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['c1']))
 
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
@@ -545,7 +529,7 @@ class WebappBackupRestoreScenarioTestOld(ResourceGroupVCRTestBase):
         import time
         time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
 
-        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite --debug'
+        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 
 

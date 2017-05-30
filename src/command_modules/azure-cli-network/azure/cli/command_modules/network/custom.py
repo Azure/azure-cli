@@ -27,6 +27,7 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
+
 def _log_pprint_template(template):
     import json
     logger.info('==== BEGIN TEMPLATE ====')
@@ -86,14 +87,26 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
 
     collection.append(obj_to_add)
 
+
+def _get_default_value(balancer, property_name, option_name):
+    values = [x.name for x in getattr(balancer, property_name)]
+    if len(values) > 1:
+        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
+                       "explicitly.".format(option_name, ', '.join(values)))
+    elif not values:
+        raise CLIError("No existing values found for '{0}'. Create one first and try "
+                       "again.".format(option_name))
+    return values[0]
+
+
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):
     ncf = _network_client_factory()
     operation_group = getattr(ncf, operation_name)
     if resource_group_name:
         return operation_group.list(resource_group_name)
-    else:
-        return operation_group.list_all()
+
+    return operation_group.list_all()
 
 def list_vnet(resource_group_name=None):
     return _generic_list('virtual_networks', resource_group_name)
@@ -140,7 +153,6 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
@@ -312,7 +324,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: d
     return parent
 
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
-                            frontend_ip, frontend_port, host_name=None, ssl_cert=None,
+                            frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
                             no_wait=False):
     ApplicationGatewayHttpListener = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -320,6 +332,8 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    if not frontend_ip:
+        frontend_ip = _get_default_value(ag, 'frontend_ip_configurations', '--frontend-ip')
     new_listener = ApplicationGatewayHttpListener(
         name=item_name,
         frontend_ip_configuration=SubResource(frontend_ip),
@@ -433,14 +447,21 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
     return parent
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
-                                   address_pool, http_settings, http_listener, url_path_map=None,
-                                   rule_type='Basic', no_wait=False):
+                                   address_pool=None, http_settings=None, http_listener=None,
+                                   url_path_map=None, rule_type='Basic', no_wait=False):
     ApplicationGatewayRequestRoutingRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayRequestRoutingRule',
         mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    if not address_pool:
+        address_pool = _get_default_value(ag, 'backend_address_pools', '--address-pool')
+    if not http_settings:
+        http_settings = _get_default_value(ag, 'backend_http_settings_collection',
+                                           '--http-settings')
+    if not http_listener:
+        http_listener = _get_default_value(ag, 'http_listeners', '--http-listener')
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
@@ -571,7 +592,7 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 
 
 def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 firewall_mode=None,
                                  no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -585,7 +606,7 @@ def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 firewall_mode=None,
                                  rule_set_type='OWASP', rule_set_version=None,
                                  disabled_rule_groups=None,
                                  disabled_rules=None, no_wait=False):
@@ -732,9 +753,12 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
 
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        frontend_ip_name, backend_port, floating_ip="false", idle_timeout=None):
+        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
+                                              '--frontend-ip-name')
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) # pylint: disable=no-member
     new_rule = InboundNatRule(
         name=item_name, protocol=protocol,
@@ -869,11 +893,17 @@ def set_lb_probe(instance, parent, item_name, protocol=None, port=None, # pylint
 
 def create_lb_rule(
         resource_group_name, load_balancer_name, item_name,
-        protocol, frontend_port, backend_port, frontend_ip_name,
-        backend_address_pool_name, probe_name=None, load_distribution='default',
+        protocol, frontend_port, backend_port, frontend_ip_name=None,
+        backend_address_pool_name=None, probe_name=None, load_distribution='default',
         floating_ip='false', idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
+                                              '--frontend-ip-name')
+    if not backend_address_pool_name:
+        backend_address_pool_name = _get_default_value(lb, 'backend_address_pools',
+                                                       '--backend-pool-name')
     new_rule = LoadBalancingRule(
         name=item_name,
         protocol=protocol,
@@ -928,7 +958,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                load_balancer_backend_address_pool_ids=None,
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
-               private_ip_address=None, private_ip_address_version=IPVersion.ipv4.value,
+               private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
@@ -985,7 +1015,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
                          private_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                         private_ip_address_version=IPVersion.ipv4.value,
+                         private_ip_address_version=None,
                          make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
@@ -1173,7 +1203,7 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=IPVersion.ipv4.value):
+                     idle_timeout=4, reverse_fqdn=None, version=None):
     client = _network_client_factory().public_ip_addresses
 
     public_ip_args = {
@@ -1436,10 +1466,10 @@ def clear_vpn_conn_ipsec_policies(resource_group_name, connection_name, no_wait=
     conn.use_policy_based_traffic_selectors = False
     if no_wait:
         return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
-    else:
-        from azure.cli.core.commands import LongRunningOperation
-        poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
-        return LongRunningOperation()(poller).ipsec_policies
+
+    from azure.cli.core.commands import LongRunningOperation
+    poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    return LongRunningOperation()(poller).ipsec_policies
 
 
 def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
@@ -1657,13 +1687,13 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
     if bandwidth_in_mbps is not None:
-        instance.service_provider_properties.bandwith = bandwidth_in_mbps
+        instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
 
     if peering_location is not None:
         instance.service_provider_properties.peering_location = peering_location
 
     if service_provider_name is not None:
-        instance.service_provider_properties.provider = service_provider_name
+        instance.service_provider_properties.service_provider_name = service_provider_name
 
     if sku_family is not None:
         instance.sku.family = sku_family
@@ -1727,7 +1757,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
         RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
         peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(
@@ -1805,23 +1835,25 @@ update_route.__doc__ = Route.__doc__
 
 #region RouteFilter Commands
 
+
 def create_route_filter(client, resource_group_name, route_filter_name, location=None, tags=None):
     RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
     return client.create_or_update(resource_group_name, route_filter_name,
                                    RouteFilter(location=location, tags=tags))
 
+
 def list_route_filters(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-    else:
-        return client.list()
 
-def create_route_filter_rule(client, resource_group_name, route_filter_name, rule_name, access,
-                             communities, location=None, tags=None):
+    return client.list()
+
+
+def create_route_filter_rule(client, resource_group_name, route_filter_name, rule_name, access, communities,
+                             location=None, tags=None):
     RouteFilterRule = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilterRule', mod='models')
     return client.create_or_update(resource_group_name, route_filter_name, rule_name,
-                                   RouteFilterRule(access, communities,
-                                                   location=location, tags=tags))
+                                   RouteFilterRule(access, communities, location=location, tags=tags))
 
 #endregion
 
@@ -1867,8 +1899,8 @@ def list_traffic_manager_profiles(resource_group_name=None):
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
         return client.list_by_in_resource_group(resource_group_name)
-    else:
-        return client.list_all()
+
+    return client.list_all()
 
 
 def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
@@ -1977,8 +2009,8 @@ def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:
         return ncf.list_by_resource_group(resource_group_name)
-    else:
-        return ncf.list()
+
+    return ncf.list()
 
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
@@ -1992,8 +2024,8 @@ create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
 def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
     if record_type:
         return client.list_by_type(resource_group_name, zone_name, record_type)
-    else:
-        return client.list_by_dns_zone(resource_group_name, zone_name)
+
+    return client.list_by_dns_zone(resource_group_name, zone_name)
 
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
@@ -2352,7 +2384,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)  # pylint: disable=redefined-variable-type
+        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)
 
     _add_record(record_set, record, record_type, is_list)
 
@@ -2384,9 +2416,8 @@ def _remove_record(record, record_type, record_set_name, resource_group_name, zo
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
         return ncf.delete(resource_group_name, zone_name, record_set_name, record_type)
-    else:
-        return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                    record_type, record_set)
+
+    return ncf.create_or_update(resource_group_name, zone_name, record_set_name, record_type, record_set)
 
 def dict_matches_filter(d, filter_dict):
     sentinel = object()

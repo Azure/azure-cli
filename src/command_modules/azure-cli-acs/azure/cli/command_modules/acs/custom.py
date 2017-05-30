@@ -13,17 +13,19 @@ import uuid
 import datetime
 import platform
 import random
-import stat
+import ssl
 import string
 import subprocess
 import sys
 import threading
 import time
 import webbrowser
+
+import stat
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
-from six.moves.urllib.request import (urlretrieve, urlopen)  # pylint: disable=import-error
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 from msrestazure.azure_exceptions import CloudError
@@ -94,7 +96,7 @@ def wait_then_open(url):
     """
     for _ in range(1, 10):
         try:
-            urlopen(url)
+            urlopen(url, context=_ssl_context())
         except URLError:
             time.sleep(1)
         break
@@ -237,6 +239,19 @@ def acs_install_cli(resource_group, name, install_location=None, client_version=
         raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
 
 
+def _ssl_context():
+    if sys.version_info < (3, 4):
+        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def _urlretrieve(url, filename):
+    req = urlopen(url, context=_ssl_context())
+    with open(filename, "wb") as out:
+        out.write(req.read())
+
+
 def dcos_install_cli(install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
@@ -260,7 +275,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
 
     logger.warning('Downloading client to %s', install_location)
     try:
-        urlretrieve(file_url, install_location)
+        _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
@@ -273,7 +288,8 @@ def k8s_install_cli(client_version='latest', install_location=None):
     """
 
     if client_version == 'latest':
-        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt').read()
+        context = _ssl_context()
+        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt', context=context).read()
         client_version = version.decode('UTF-8').strip()
 
     file_url = ''
@@ -291,7 +307,7 @@ def k8s_install_cli(client_version='latest', install_location=None):
 
     logger.warning('Downloading client to %s from %s', install_location, file_url)
     try:
-        urlretrieve(file_url, install_location)
+        _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as err:
@@ -526,7 +542,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     windows_profile = None
     os_type = 'Linux'
     if windows:
-        if len(admin_password) == 0:
+        if not admin_password:
             raise CLIError('--admin-password is required.')
         if len(admin_password) < 6:
             raise CLIError('--admin-password must be at least 6 characters')
@@ -559,13 +575,13 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                         "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + '-k8s-agents',
                             "osType": os_type,
@@ -617,13 +633,13 @@ def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix
                         "orchestratorType": orchestrator_type
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix + 'mgmt'
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + 'agents'
                         }
@@ -866,7 +882,7 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def create_application(client, display_name, homepage, identifier_uris,  # pylint: disable=too-many-arguments
+def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
@@ -883,7 +899,7 @@ def create_application(client, display_name, homepage, identifier_uris,  # pylin
     return client.create(app_create_param)
 
 
-def _build_application_creds(password=None, key_value=None, key_type=None,  # pylint: disable=too-many-arguments
+def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
     if password and key_value:
         raise CLIError('specify either --password or --key-value, but not both.')
@@ -896,7 +912,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,  # py
     if not end_date:
         end_date = start_date + relativedelta(years=1)
     elif isinstance(end_date, str):
-        end_date = dateutil.parser.parse(end_date)  # pylint: disable=redefined-variable-type
+        end_date = dateutil.parser.parse(end_date)
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -906,8 +922,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,  # py
     if password:
         password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()), key_usage, key_type)]
 
     return (password_creds, key_creds)
 
@@ -940,7 +955,7 @@ def create_role_assignment(role, assignee, resource_group_name=None, scope=None)
     return _create_role_assignment(role, assignee, resource_group_name, scope)
 
 
-def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,  # pylint: disable=too-many-arguments
+def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments

@@ -938,14 +938,8 @@ helps['network lb inbound-nat-rule create'] = """
     examples:
         - name: Create a basic inbound NAT rule for port 80.
           text: >
-            az network lb inbound-nat-rule create
-            -g MyResourceGroup
-            --lb-name MyLb
-            -n MyNatRule
-            --protocol Tcp
-            --frontend-ip-name MyIpConfig
-            --frontend-port 80
-            --backend-port 80
+            az network lb inbound-nat-rule create -g MyResourceGroup --lb-name MyLb -n MyNatRule
+            --protocol Tcp --frontend-port 80 --backend-port 80
 """
 
 helps['network lb inbound-nat-rule delete'] = """
@@ -1026,15 +1020,8 @@ helps['network lb rule create'] = """
         - name: Create a basic load balancing rule that assigns a front-facing IP configuration
                 and port to a backend address pool and port.
           text: >
-            az network lb rule create
-            -g MyResourceGroup
-            --lb-name MyLb
-            -n MyLbRule
-            --protocol Tcp
-            --frontend-ip-name MyIpConfig
-            --frontend-port 80
-            --backend-pool-name m_pool
-            --backend-port 80
+            az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule
+            --protocol Tcp --frontend-port 80 --backend-port 80
 """
 
 helps['network lb rule delete'] = """
