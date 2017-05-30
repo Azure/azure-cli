@@ -727,7 +727,7 @@ if __name__ == '__main__':
 
     if failed_commands or result != 0:
         print('==== FAILED COMMANDS ====')
-        print(json.dumps(failed_commands, sort_keys=True, indent=True))
+        print(json.dumps(failed_commands, sort_keys=True, indent=4))
     else:
         print('==== ALL COMMANDS PASS! ====')
 
