@@ -1,8 +1,9 @@
 .. :changelog:
 Release History
 ===============
-unreleased
-----------
+
+2.0.7 (2017-05-09)
+++++++++++++++++++
 * diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
 * disk: support cross subscription blob import
 * disk: add --no-wait flag to disk create, update, and delete.
