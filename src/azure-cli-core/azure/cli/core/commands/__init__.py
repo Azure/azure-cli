@@ -14,15 +14,17 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+
+import six
 from six import string_types, reraise
 
+from azure.cli.core.application import APPLICATION
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
-from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
 from ._introspection import (extract_args_from_signature,
@@ -35,7 +37,36 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context']
+BLACKLISTED_MODS = ['context', 'container', 'shell', 'documentdb']
+
+
+class VersionConstraint(object):
+    def __init__(self, resource_type, min_api=None, max_api=None):
+        self._type = resource_type
+        self._min_api = min_api
+        self._max_api = max_api
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def register_cli_argument(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            register_cli_argument(*args, **kwargs)
+        else:
+            from azure.cli.core.commands.parameters import ignore_type
+            kwargs = {'arg_type': ignore_type}
+            register_cli_argument(*args, **kwargs)
+
+    def register_extra_cli_argument(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            register_extra_cli_argument(*args, **kwargs)
+
+    def cli_command(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            cli_command(*args, **kwargs)
 
 
 class CliArgumentType(object):
@@ -95,7 +126,8 @@ class CliCommandArgument(object):
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='',
+                 poller_done_interval_ms=1000.0):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
@@ -122,6 +154,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             except KeyboardInterrupt:
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
+
         try:
             result = poller.result()
         except ClientException as client_exception:
@@ -186,7 +219,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
-                 formatter_class=None):
+                 formatter_class=None, deprecate_info=None):
         self.name = name
         self.handler = handler
         self.help = None
@@ -197,6 +230,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
         self.formatter_class = formatter_class
+        self.deprecate_info = deprecate_info
 
     @staticmethod
     def _should_load_description():
@@ -218,8 +252,12 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         arg.type.update(other=argtype)
 
     def _resolve_default_value_from_cfg_file(self, arg, overrides):
+        if not hasattr(arg.type, 'required_tooling'):
+            required = arg.type.settings.get('required', False)
+            setattr(arg.type, 'required_tooling', required)
         if 'configured_default' in overrides.settings:
             def_config = overrides.settings.pop('configured_default', None)
+            setattr(arg.type, 'default_name_tooling', def_config)
             # same blunt mechanism like we handled id-parts, for create command, no name default
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
@@ -231,7 +269,15 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
                 overrides.settings['required'] = False
 
     def execute(self, **kwargs):
-        return self.handler(**kwargs)
+        return self(**kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self.deprecate_info is not None:
+            text = 'This command is deprecating and will be removed in future releases.'
+            if self.deprecate_info:
+                text += " Use '{}' instead.".format(self.deprecate_info)
+            logger.warning(text)
+        return self.handler(*args, **kwargs)
 
 
 command_table = CommandTable()
@@ -319,12 +365,13 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None):
+                formatter_class=None, deprecate_info=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param, confirmation=confirmation,
                                          exception_handler=exception_handler,
-                                         formatter_class=formatter_class)
+                                         formatter_class=formatter_class,
+                                         deprecate_info=deprecate_info)
 
 
 def get_op_handler(operation):
@@ -332,6 +379,8 @@ def get_op_handler(operation):
     # Patch the unversioned sdk path to include the appropriate API version for the
     # resource type in question.
     from azure.cli.core._profile import CLOUD
+    import types
+
     for rt in ResourceType:
         if operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
@@ -341,7 +390,10 @@ def get_op_handler(operation):
         op = import_module(mod_to_import)
         for part in attr_path.split('.'):
             op = getattr(op, part)
-        return op
+        if isinstance(op, types.FunctionType):
+            return op
+        else:
+            return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -380,12 +432,12 @@ def _is_poller(obj):
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None):
+                   formatter_class=None, deprecate_info=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-
+        from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
@@ -395,32 +447,37 @@ def create_command(module_name, name, operation,
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)
-            try:
-                result = op(client, **kwargs) if client else op(**kwargs)
-                if no_wait_param and kwargs.get(no_wait_param, None):
-                    return None  # return None for 'no-wait'
+            for _ in range(2):  # for possible retry, we do maximum 2 times.
+                try:
+                    result = op(client, **kwargs) if client else op(**kwargs)
+                    if no_wait_param and kwargs.get(no_wait_param, None):
+                        return None  # return None for 'no-wait'
 
-                # apply results transform if specified
-                if transform_result:
-                    return transform_result(result)
+                    # apply results transform if specified
+                    if transform_result:
+                        return transform_result(result)
 
-                # otherwise handle based on return type of results
-                if _is_poller(result):
-                    return LongRunningOperation('Starting {}'.format(name))(result)
-                elif _is_paged(result):
-                    return list(result)
-                return result
-            except Exception as ex:  # pylint: disable=broad-except
-                if exception_handler:
-                    exception_handler(ex)
-                else:
-                    reraise(*sys.exc_info())
+                    # otherwise handle based on return type of results
+                    if _is_poller(result):
+                        return LongRunningOperation('Starting {}'.format(name))(result)
+                    elif _is_paged(result):
+                        return list(result)
+                    return result
+                except Exception as ex:  # pylint: disable=broad-except
+                    rp = _check_rp_not_registered_err(ex)
+                    if rp:
+                        _register_rp(rp)
+                        continue  # retry
+                    if exception_handler:
+                        exception_handler(ex)
+                        return
+                    else:
+                        reraise(*sys.exc_info())
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
-            message = getattr(client_exception, 'message', client_exception)
-            raise _polish_rp_not_registerd_error(CLIError(message))
+            raise client_exception
         except _load_azure_exception_class() as azure_exception:
             fault_type = name.replace(' ', '-') + '-service-error'
             telemetry.set_exception(azure_exception, fault_type=fault_type,
@@ -432,8 +489,6 @@ def create_command(module_name, name, operation,
             telemetry.set_exception(value_error, fault_type=fault_type,
                                     summary='Unexpected value exception during command creation')
             raise CLIError(value_error)
-        except CLIError as cli_error:
-            raise _polish_rp_not_registerd_error(cli_error)
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
@@ -446,7 +501,7 @@ def create_command(module_name, name, operation,
 
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader,
-                     formatter_class=formatter_class)
+                     formatter_class=formatter_class, deprecate_info=deprecate_info)
     if confirmation:
         cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
                          action='store_true',
@@ -466,26 +521,29 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-def _polish_rp_not_registerd_error(cli_error):
-    msg = str(cli_error)
-    pertinent_text_namespace = 'The subscription must be registered to use namespace'
-    pertinent_text_feature = 'is not registered for feature'
-    # pylint: disable=line-too-long
-    if pertinent_text_namespace in msg:
-        reg = r".*{} '(.*)'".format(pertinent_text_namespace)
-        match = re.match(reg, msg)
-        cli_error = CLIError(
-            "Run 'az provider register -n {}' to register the namespace first".format(
-                match.group(1)))
-    elif pertinent_text_feature in msg:
-        reg = r".*{}\s+([^\s]+)\s+".format(pertinent_text_feature)
-        match = re.match(reg, msg)
-        parts = match.group(1).split('/')
-        if len(parts) == 2:
-            cli_error = CLIError(
-                "Run 'az feature register --namespace {} -n {}' to enable the feature first".format(
-                    parts[0], parts[1]))
-    return cli_error
+def _check_rp_not_registered_err(ex):
+    try:
+        response = json.loads(ex.response.content.decode())
+        if response['error']['code'] == 'MissingSubscriptionRegistration':
+            match = re.match(r".*'(.*)'", response['error']['message'])
+            return match.group(1)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return None
+
+
+def _register_rp(rp):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    logger.warning("Resource provider '%s' used by the command is not "
+                   "registered. We are registering for you", rp)
+    rcf.providers.register(rp)
+    while True:
+        time.sleep(10)
+        rp_info = rcf.providers.get(rp)
+        if rp_info.registration_state == 'Registered':
+            logger.warning("Registration succeeded.")
+            break
 
 
 def _get_cli_argument(command, argname):

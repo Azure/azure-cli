@@ -13,9 +13,13 @@ import unittest
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                           NoneCheck, MOCKED_SUBSCRIPTION_ID)
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.core.profiles import supported_api_version, ResourceType
+
+from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck, MOCKED_SUBSCRIPTION_ID)
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
@@ -122,12 +126,14 @@ class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         rg = self.resource_group
-        self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg), checks=NoneCheck())
+        self.cmd('network application-gateway create -g {} -n ag1 --no-wait --connection-draining-timeout 180'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway create -g {} -n ag2 --no-wait'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag1 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag2 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway show -g {} -n ag1'.format(rg), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded')
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.enabled', True),
+            JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.drainTimeoutInSec', 180),
             ])
         self.cmd('network application-gateway show -g {} -n ag2'.format(rg), checks=[
             JMESPathCheck('provisioningState', 'Succeeded')
@@ -180,36 +186,59 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
 
-class NetworkAppGatewayWafScenarioTest(ResourceGroupVCRTestBase):
 
-    def __init__(self, test_method):
-        super(NetworkAppGatewayWafScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_waf')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
 
-    def test_network_app_gateway_waf(self):
-        self.execute()
+    class NetworkAppGatewayWafConfigScenarioTest(ScenarioTest):
 
-    def body(self):
-        rg = self.resource_group
-        public_ip_name = 'pip1'
-        self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet4 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
-            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
-            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
-        ])
-        self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode detection --no-wait'.format(rg))
-        self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
-            JMESPathCheck('enabled', True),
-            JMESPathCheck('firewallMode', 'Detection')
-        ])
-        self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --no-wait'.format(rg))
-        self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
-            JMESPathCheck('enabled', True),
-            JMESPathCheck('firewallMode', 'Prevention')
-        ])
-        self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled false --no-wait'.format(rg))
-        self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
-            JMESPathCheck('enabled', False),
-            JMESPathCheck('firewallMode', 'Detection')
-        ])
+        @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
+        def test_network_app_gateway_waf_config(self, resource_group):
+            rg = resource_group
+            public_ip_name = 'pip1'
+            self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet1 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
+                JMESPathCheckV2("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+                JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheckV2('enabled', True),
+                JMESPathCheckV2('firewallMode', 'Prevention'),
+                JMESPathCheckV2('length(disabledRuleGroups)', 2),
+                JMESPathCheckV2('length(disabledRuleGroups[1].rules)', 2)
+            ])
+else:
+
+    class NetworkAppGatewayWafScenarioTest(ResourceGroupVCRTestBase):
+
+        def __init__(self, test_method):
+            super(NetworkAppGatewayWafScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_waf')
+
+        def test_network_app_gateway_waf(self):
+            self.execute()
+
+        def body(self):
+            rg = self.resource_group
+            public_ip_name = 'pip1'
+            self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet4 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
+                JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+                JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode detection --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheck('enabled', True),
+                JMESPathCheck('firewallMode', 'Detection')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheck('enabled', True),
+                JMESPathCheck('firewallMode', 'Prevention')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled false --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheck('enabled', False),
+                JMESPathCheck('firewallMode', 'Detection')
+            ])
+
 
 class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
@@ -1288,15 +1317,16 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
             checks=JMESPathCheck('routingWeight', 25))
 
+        # TODO: Re-enable test once issue #3385 is fixed.
         # test network watcher troubleshooting commands
-        storage_account = 'clitestnwstorage2'
-        container_name = 'troubleshooting-results'
-        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
-        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
-        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
-        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
-        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
-        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
+        # storage_account = 'clitestnwstorage2'
+        # container_name = 'troubleshooting-results'
+        # self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
+        # self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
+        # storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
+        # self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
+        # self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
+        # self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
@@ -1468,10 +1498,10 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
         vm = 'vm1'
         # create VM with NetworkWatcher extension
         self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password PassPass10!)'.format(resource_group, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
 
-        self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))
+        self.cmd('network watcher show-topology -g {}'.format(resource_group))
 
         self.cmd('network watcher test-ip-flow -g {} --vm {} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*'.format(resource_group, vm))
         self.cmd('network watcher test-ip-flow -g {} --vm {} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80'.format(resource_group, vm))
@@ -1480,15 +1510,16 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
 
-        capture = 'capture1'
-        location = 'westus'
-        self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
-        self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
-        self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
-        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        # TODO: Re-enable once issue #3385 is resolved
+        #capture = 'capture1'
+        #location = 'westus'
+        #self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
+        #self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
+        #self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
 
         nsg = '{}NSG'.format(vm)
         self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))

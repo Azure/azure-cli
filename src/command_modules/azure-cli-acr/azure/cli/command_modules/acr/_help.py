@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 helps['acr'] = """
     type: group

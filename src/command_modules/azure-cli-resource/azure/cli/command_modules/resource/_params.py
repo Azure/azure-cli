@@ -8,13 +8,14 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.mgmt.resource.locks.models import LockLevel
+from azure.mgmt.resource.managedapplications.models import ApplianceLockLevel
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
                                                 enum_choice_list, no_wait_type, file_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import validate_deployment_name
+from ._validators import validate_deployment_name, validate_lock_parameters
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -44,10 +45,11 @@ register_cli_argument('resource create', 'is_full_object', action='store_true',
                       help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
 
 register_cli_argument('provider', 'top', ignore_type)
+register_cli_argument('provider register', 'wait', action='store_true', help='wait for the registration to finish')
+register_cli_argument('provider unregister', 'wait', action='store_true', help='wait for unregistration to finish')
 register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,
                       help=_PROVIDER_HELP_TEXT)
 register_cli_argument('provider operation', 'api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for latest)")
-
 
 register_cli_argument('feature', 'resource_provider_namespace', options_list=('--namespace',), required=True, help=_PROVIDER_HELP_TEXT)
 register_cli_argument('feature list', 'resource_provider_namespace', options_list=('--namespace',), required=False, help=_PROVIDER_HELP_TEXT)
@@ -86,10 +88,24 @@ register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
-register_cli_argument('lock', 'name', options_list=('--name', '-n'))
+register_cli_argument('lock', 'name', options_list=('--name', '-n'), validator=validate_lock_parameters)
 register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list(LockLevel))
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
                       completer=get_resource_types_completion_list,)
 register_cli_argument('lock', 'resource_name', options_list=('--resource-name'), help='The name of the resource this lock applies to.')
+
+register_cli_argument('managedapp', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application')
+register_cli_argument('managedapp', 'appliance_name', options_list=('--name', '-n'))
+register_cli_argument('managedapp', 'managedapp_id', options_list=('--id',), help='The managed application resource ID')
+register_cli_argument('managedapp definition', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition')
+register_cli_argument('managedapp definition', 'appliance_definition_name', options_list=('--name', '-n'))
+register_cli_argument('managedapp definition', 'managedapp_definition_id', options_list=('--id',), help='The managed application definition resource ID')
+register_cli_argument('managedapp create', 'name', options_list=('--name', '-n'), help='name of the new managed application', completer=None)
+register_cli_argument('managedapp create', 'location', help='the managed application location')
+register_cli_argument('managedapp create', 'managedapp_definition_id', options_list=('--managedapp-definition-id', '-d'), help='the full qualified managed application definition id')
+register_cli_argument('managedapp create', 'managedby_resource_group_id', options_list=('--managed-rg-id', '-m'), help='the resource group managed by the managed application')
+register_cli_argument('managedapp create', 'parameters', help='JSON formatted string or a path to a file with such content', type=file_type)
+register_cli_argument('managedapp definition create', 'lock_level', **enum_choice_list(ApplianceLockLevel))
+register_cli_argument('managedapp definition create', 'authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space separated authorization pairs in a format of <principalId>:<roleDefinitionId>")

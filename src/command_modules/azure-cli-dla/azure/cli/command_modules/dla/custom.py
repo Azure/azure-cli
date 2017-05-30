@@ -32,7 +32,6 @@ def list_adla_account(client, resource_group_name=None):
     return list(account_list)
 
 
-# pylint: disable=too-many-arguments
 def list_adla_jobs(client,
                    account_name,
                    top=500,
@@ -50,9 +49,9 @@ def list_adla_jobs(client,
     if name:
         odata_filter_list.append("name eq '{}'".format(name))
     if state:
-        odata_filter_list.append("({})".format(" or ".join(["state eq '{}'".format(f.value) for f in state])))
+        odata_filter_list.append("({})".format(" or ".join(["state eq '{}'".format(f) for f in state])))
     if result:
-        odata_filter_list.append("({})".format(" or ".join(["result eq '{}'".format(f.value) for f in result])))
+        odata_filter_list.append("({})".format(" or ".join(["result eq '{}'".format(f) for f in result])))
     if submitted_after:
         odata_filter_list.append("submitTime ge datetimeoffset'{}'".format(submitted_after.isoformat()))
     if submitted_before:
@@ -78,7 +77,6 @@ def list_adla_jobs(client,
     return to_return
 
 
-# pylint: disable=too-many-arguments
 def create_adla_account(client,
                         resource_group_name,
                         account_name,
@@ -104,7 +102,6 @@ def create_adla_account(client,
     return client.create(resource_group_name, account_name, create_params)
 
 
-# pylint: disable=too-many-arguments
 def update_adla_account(client,
                         account_name,
                         resource_group_name,
@@ -128,7 +125,6 @@ def update_adla_account(client,
 
 
 # firewall customizations
-# pylint: disable=too-many-arguments
 def add_adla_firewall_rule(client,
                            account_name,
                            firewall_rule_name,
@@ -143,7 +139,6 @@ def add_adla_firewall_rule(client,
 
 
 # catalog customizations
-# pylint: disable=too-many-arguments
 def create_adla_catalog_credential(client,
                                    account_name,
                                    database_name,
@@ -165,7 +160,6 @@ def create_adla_catalog_credential(client,
     client.create_credential(account_name, database_name, credential_name, create_params)
 
 
-# pylint: disable=too-many-arguments
 def update_adla_catalog_credential(client,
                                    account_name,
                                    database_name,
@@ -195,8 +189,55 @@ def update_adla_catalog_credential(client,
     client.update_credential(account_name, database_name, credential_name, update_params)
 
 
+# customizations for listing catalog items that support multiple ancestor levels of listing.
+def list_catalog_tables(client,
+                        account_name,
+                        database_name,
+                        schema_name=None):
+    if not schema_name:
+        return client.list_tables_by_database(account_name, database_name)
+
+    return client.list_tables(account_name, database_name, schema_name)
+
+
+def list_catalog_views(client,
+                       account_name,
+                       database_name,
+                       schema_name=None):
+    if not schema_name:
+        return client.list_views_by_database(account_name, database_name)
+
+    return client.list_views(account_name, database_name, schema_name)
+
+
+def list_catalog_tvfs(client,
+                      account_name,
+                      database_name,
+                      schema_name=None):
+    if not schema_name:
+        return client.list_table_valued_functions_by_database(account_name, database_name)
+
+    return client.list_table_valued_functions(account_name, database_name, schema_name)
+
+
+def list_catalog_table_statistics(client,
+                                  account_name,
+                                  database_name,
+                                  schema_name=None,
+                                  table_name=None):
+    if not schema_name and table_name:
+        logger.warning('--table-name must be specified with --schema-name to be used. Defaulting to list all statistics in the database: %s', database_name)
+
+    if not schema_name:
+        return client.list_table_statistics_by_database(account_name, database_name)
+
+    if not table_name:
+        return client.list_table_statistics_by_database_and_schema(account_name, database_name, schema_name)
+
+    return client.list_table_statistics(account_name, database_name, schema_name, table_name)
+
+
 # job customizations
-# pylint: disable=too-many-arguments
 def submit_adla_job(client,
                     account_name,
                     job_name,

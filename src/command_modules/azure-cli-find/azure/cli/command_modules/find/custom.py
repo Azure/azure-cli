@@ -33,6 +33,7 @@ def _get_schema():
         long_summary=TEXT(stored=True, analyzer=stem_ana),
         examples=TEXT(stored=True, analyzer=stem_ana))
 
+
 def _cli_index_corpus():
     return build_command_table()
 

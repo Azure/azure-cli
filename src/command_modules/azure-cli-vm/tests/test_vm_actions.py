@@ -15,7 +15,8 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _figure_out_storage_source,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
-                                                      _parse_image_argument)
+                                                      _parse_image_argument,
+                                                      process_disk_or_snapshot_create_namespace)
 
 
 class TestActions(unittest.TestCase):
@@ -68,6 +69,19 @@ class TestActions(unittest.TestCase):
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
+
+    def test_source_storage_account_err_case(self):
+        np = mock.MagicMock()
+        np.source_storage_account_id = '/subscriptions/123/resourceGroups/ygsrc/providers/Microsoft.Storage/storageAccounts/s123'
+        np.source = '/subscriptions/123/resourceGroups/yugangw/providers/Microsoft.Compute/disks/d2'
+
+        # action (should throw)
+        with self.assertRaises(CLIError):
+            process_disk_or_snapshot_create_namespace(np)
+
+        # with blob uri, should be fine
+        np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
+        process_disk_or_snapshot_create_namespace(np)
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long

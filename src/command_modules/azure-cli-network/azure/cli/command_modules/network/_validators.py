@@ -170,6 +170,16 @@ def validate_private_ip_address(namespace):
     if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
 
+def validate_route_filter(namespace):
+    if namespace.route_filter:
+        if not is_valid_resource_id(namespace.route_filter):
+            namespace.route_filter = resource_id(
+                subscription=get_subscription_id(),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='routeFilters',
+                name=namespace.route_filter)
+
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
                             default_none=False):
     """ Retrieves a validator for public IP address. Accepting all defaults will perform a check
@@ -476,7 +486,8 @@ def process_tm_endpoint_create_namespace(namespace):
         'min_child_endpoints': '--min-child-endpoints',
         'priority': '--priority',
         'weight': '--weight',
-        'endpoint_location': '--endpoint-location'
+        'endpoint_location': '--endpoint-location',
+        'geo_mapping': '--geo-mapping'
     }
     required_options = []
 
@@ -497,6 +508,9 @@ def process_tm_endpoint_create_namespace(namespace):
     if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and \
         routing_type.lower() == 'performance':
         required_options.append('endpoint_location')
+
+    if routing_type.lower() == 'geographic':
+        required_options.append('geo_mapping')
 
     # ensure required options are provided
     missing_options = [props_to_options[x] for x in required_options \
@@ -647,9 +661,38 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
     return _validator
 
 
-def process_nw_flow_log_set_namespace(namespace):
+def process_nw_test_connectivity_namespace(namespace):
 
     from azure.cli.core.commands.arm import parse_resource_id
+
+    compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
+    vm_name = parse_resource_id(namespace.source_resource)['name']
+    rg = namespace.resource_group_name or \
+        parse_resource_id(namespace.source_resource).get('resource_group', None)
+    if not rg:
+        raise CLIError('usage error: --source-resource ID | '
+                       '--source-resource NAME --resource-group NAME')
+    vm = compute_client.get(rg, vm_name)
+    namespace.location = vm.location  # pylint: disable=no-member
+    get_network_watcher_from_location(remove=True)(namespace)
+
+    if namespace.source_resource and not is_valid_resource_id(namespace.source_resource):
+        namespace.source_resource = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.source_resource)
+
+    if namespace.dest_resource and not is_valid_resource_id(namespace.dest_resource):
+        namespace.dest_resource = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.dest_resource)
+
+def process_nw_flow_log_set_namespace(namespace):
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
@@ -686,11 +729,10 @@ def process_nw_topology_namespace(namespace):
 
     location = namespace.location
     if not location:
-
         resource_client = \
             get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
         resource_group = resource_client.get(namespace.target_resource_group_name)
-        location = resource_group.location  # pylint: disable=no-member
+        namespace.location = resource_group.location  # pylint: disable=no-member
 
     get_network_watcher_from_location(
         watcher_name='network_watcher_name', rg_name='resource_group_name')(namespace)

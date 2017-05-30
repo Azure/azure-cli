@@ -6,18 +6,20 @@
 from __future__ import print_function
 import datetime
 import unittest
-import os.path
+import os
 import inspect
 import subprocess
 import json
 import shlex
 import tempfile
 import shutil
+import logging
 import six
 import vcr
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
-                      patch_retrieve_token_for_user, patch_long_run_operation_delay)
+                      patch_retrieve_token_for_user, patch_long_run_operation_delay,
+                      patch_time_sleep_api)
 from .exceptions import CliExecutionError
 from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
 from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
@@ -26,6 +28,8 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
                                    DeploymentNameReplacer)
 from .utilities import create_random_name
 from .decorators import live_only
+
+logger = logging.getLogger('azuer.cli.testsdk')
 
 
 class IntegrationTestBase(unittest.TestCase):
@@ -47,15 +51,16 @@ class IntegrationTestBase(unittest.TestCase):
 
         return result.assert_with_checks(checks)
 
-    def create_random_name(self, prefix, length):  # for override pylint: disable=no-self-use
-        return create_random_name(prefix, length)
+    def create_random_name(self, prefix, length):  # pylint: disable=no-self-use
+        return create_random_name(prefix=prefix, length=length)
 
     def create_temp_file(self, size_kb, full_random=False):
         """
         Create a temporary file for testing. The test harness will delete the file during tearing
         down.
         """
-        _, path = tempfile.mkstemp()
+        fd, path = tempfile.mkstemp()
+        os.close(fd)
         self.addCleanup(lambda: os.remove(path))
 
         with open(path, mode='r+b') as f:
@@ -151,6 +156,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
         patch_main_exception_handler(self)
 
         if not self.in_recording:
+            patch_time_sleep_api(self)
             patch_long_run_operation_delay(self)
             patch_load_cached_subscriptions(self)
             patch_retrieve_token_for_user(self)
@@ -232,6 +238,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
 
 class ExecutionResult(object):  # pylint: disable=too-few-public-methods
     def __init__(self, command, expect_failure=False, in_process=True):
+        logger.info('Execute command %s', command)
         if in_process:
             self._in_process_execute(command)
         else:
@@ -245,11 +252,15 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
 
-    def assert_with_checks(self, checks):
-        if not checks:
-            checks = []
-        elif not isinstance(checks, list):
-            checks = [checks]
+    def assert_with_checks(self, *args):
+        checks = []
+        for each in args:
+            if isinstance(each, list):
+                checks.extend(each)
+            elif callable(each):
+                checks.append(each)
+
+        logger.info('Checkers to be executed %s', len(checks))
 
         if not self.skip_assert:
             for c in checks:

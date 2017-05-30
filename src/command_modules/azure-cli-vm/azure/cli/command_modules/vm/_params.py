@@ -90,8 +90,9 @@ register_cli_argument('vm availability-set', 'availability_set_name', name_arg_t
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
-register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int, help='Update Domain count. Example: 2')
-register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count. Example: 2')
+register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int,
+                      help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
+register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
@@ -118,6 +119,7 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss start', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss show', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
 register_cli_argument('vmss', 'instance_id', id_part='child_name')
@@ -141,6 +143,8 @@ register_cli_argument('vmss extension image', 'orderby', help='The sort to apply
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
+for scope in ['update-instances', 'delete-instances']:
+    register_cli_argument('vmss ' + scope, 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
@@ -233,6 +237,8 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_caching', options_list=['--storage-caching', '--os-disk-caching'], arg_group='Storage', help='Storage caching type for the VM OS disk.', **enum_choice_list([CachingTypes.read_only.value, CachingTypes.read_write.value]))
     register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
 
+    register_cli_argument(scope, 'license_type', help="license type if the Windows image or disk used was licensed on-premises", **enum_choice_list(['Windows_Server', 'Windows_Client']))
+
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
@@ -283,10 +289,11 @@ register_cli_argument('image create', 'data_snapshots', ignore_type)
 
 for scope in ['disk', 'snapshot']:
     register_extra_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
-                                help='source to create the disk from, including a sas uri to a blob, managed disk id or name, or snapshot id or name')
+                                help='source to create the disk from, including a sas blob uri to a blob, managed disk id or name, or snapshot id or name')
     register_cli_argument(scope, 'source_blob_uri', ignore_type)
     register_cli_argument(scope, 'source_disk', ignore_type)
     register_cli_argument(scope, 'source_snapshot', ignore_type)
+    register_cli_argument(scope, 'source_storage_account_id', help='used when source blob is in a different subscription')
     register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 

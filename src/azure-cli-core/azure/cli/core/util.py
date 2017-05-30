@@ -119,11 +119,13 @@ def read_file_content(file_path, allow_binary=False):
     for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
         try:
             with codecs_open(file_path, encoding=encoding) as f:
+                logger.debug("attempting to read file %s as %s", file_path, encoding)
                 return f.read()
         except UnicodeDecodeError:
             if allow_binary:
                 with open(file_path, 'rb') as input_file:
-                    return input_file.read()
+                    logger.debug("attempting to read file %s as binary", file_path)
+                    return base64.b64encode(input_file.read()).decode("utf-8")
             else:
                 raise
         except UnicodeError:
@@ -202,7 +204,10 @@ def b64_to_hex(s):
     :rtype: str
     """
     decoded = base64.b64decode(s)
-    return binascii.hexlify(decoded).upper()
+    hex_data = binascii.hexlify(decoded).upper()
+    if isinstance(hex_data, bytes):
+        return str(hex_data.decode("utf-8"))
+    return hex_data
 
 
 def random_string(length=16, force_lower=False, digits_only=False):

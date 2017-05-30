@@ -11,12 +11,13 @@ import tempfile
 import unittest
 
 import six
-
 from azure.cli.core.util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
-                                                     ResourceGroupVCRTestBase,
-                                                     JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
+                                             ResourceGroupVCRTestBase,
+                                             JMESPathCheck,
+                                             NoneCheck)
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -94,7 +95,7 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
 
         # min params - apply to existing NIC (updates existing NSG)
-        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['id']
         nsg_name = os.path.split(nsg_id)[1]
         self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
                  checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))
@@ -275,6 +276,17 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
+class VMWindowsLicenseTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_windows_vm_license_type(self, resource_group):
+        vm_name = 'winvm'
+        self.cmd('vm create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server'.format(resource_group, vm_name))
+        self.cmd('vm show -g {} -n {}'.format(resource_group, vm_name), checks=[
+            JMESPathCheckV2('licenseType', 'Windows_Server')
+        ])
+
+
 class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -289,7 +301,10 @@ class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
         vm1 = 'vm1'
         self.cmd('vm create -g {} -n {} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password'.format(
             self.resource_group, vm1))
-        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1))
+        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1), checks=[
+            JMESPathCheck('name', vm1),
+            JMESPathCheck('licenseType', None)
+        ])
         self.cmd('vm stop -g {} -n {}'.format(self.resource_group, vm1))
 
         # import the unmanaged os disk into a specialized managed disk
@@ -520,13 +535,23 @@ class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm availability-set create -g {} -n {} --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
+        self.cmd('vm availability-set create -g {} -n {}'.format(
             self.resource_group, self.name), checks=[
                 JMESPathCheck('name', self.name),
+                JMESPathCheck('platformFaultDomainCount', 2),
+                JMESPathCheck('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheck('sku.managed', True)
+        ])
+
+        # create with explict UD count
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
+            self.resource_group), checks=[
                 JMESPathCheck('platformFaultDomainCount', 2),
                 JMESPathCheck('platformUpdateDomainCount', 2),
                 JMESPathCheck('sku.managed', True)
         ])
+        self.cmd('vm availability-set delete -g {} -n avset2'.format(self.resource_group))
+
         self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(self.resource_group, self.name),
                  checks=JMESPathCheck('tags.test', 'success'))
         self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[
@@ -561,6 +586,9 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
         config_file = _write_config_file(user_name)
 
         try:
+            self.cmd('vm extension list --vm-name {} --resource-group {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('length([])', 0)
+            ])
             self.cmd('vm extension set -n {} --publisher {} --version 1.2  --vm-name {} --resource-group {} --protected-settings "{}"'
                      .format(extension_name, publisher, self.vm_name, self.resource_group, config_file))
             self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[
@@ -832,10 +860,13 @@ def _write_config_file(user_name):
 
 
 class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
+    """
+    Note that this is currently only for a Linux VM. There's currently no test of this feature for a Windows VM.
+    """
 
     def __init__(self, test_method):
         super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_vmss_diagnostics_extension')
-        self.storage_account = 'clitestdiagextsa20170227'
+        self.storage_account = 'clitestdiagextsa20170510'
         self.vm = 'testdiagvm'
         self.vmss = 'testdiagvmss'
 
@@ -849,13 +880,12 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        storage_key = '123'  # use junk keys, do not retrieve real keys which will get into the recording
+        storage_sastoken = '123'  # use junk keys, do not retrieve real keys which will get into the recording
         _, protected_settings = tempfile.mkstemp()
         with open(protected_settings, 'w') as outfile:
             json.dump({
                 "storageAccountName": self.storage_account,
-                "storageAccountKey": storage_key,
-                "storageAccountEndPoint": "https://{}.blob.core.windows.net/".format(self.storage_account)
+                "storageAccountSasToken": storage_sastoken
             }, outfile)
         protected_settings = protected_settings.replace('\\', '\\\\')
 
@@ -864,14 +894,15 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         template_file = os.path.join(curr_dir, 'sample-public.json').replace('\\', '\\\\')
         with open(template_file) as data_file:
             data = json.load(data_file)
-        data["storageAccount"] = self.storage_account
+        data["StorageAccount"] = self.storage_account
         with open(public_settings, 'w') as outfile:
             json.dump(data, outfile)
         public_settings = public_settings.replace('\\', '\\\\')
 
         checks = [
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
-            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.storageAccount', self.storage_account)
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].publisher', "Microsoft.Azure.Diagnostics"),
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account)
         ]
 
         self.cmd("vmss diagnostics set -g {} --vmss-name {} --settings {} --protected-settings {}".format(
@@ -882,12 +913,14 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         self.cmd("vm diagnostics set -g {} --vm-name {} --settings {} --protected-settings {}".format(
             self.resource_group, self.vm, public_settings, protected_settings), checks=[
                 JMESPathCheck('name', 'LinuxDiagnostic'),
-                JMESPathCheck('settings.storageAccount', self.storage_account)
+                JMESPathCheck('publisher', 'Microsoft.Azure.Diagnostics'),
+                JMESPathCheck('settings.StorageAccount', self.storage_account)
         ])
 
         self.cmd("vm show -g {} -n {}".format(self.resource_group, self.vm), checks=[
             JMESPathCheck('resources[0].name', 'LinuxDiagnostic'),
-            JMESPathCheck('resources[0].settings.storageAccount', self.storage_account)
+            JMESPathCheck('resources[0].publisher', 'Microsoft.Azure.Diagnostics'),
+            JMESPathCheck('resources[0].settings.StorageAccount', self.storage_account)
         ])
 
 
@@ -1629,6 +1662,8 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
+        result = self.cmd('vmss list-instance-connection-info --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.assertTrue(result['instance 0'].split('.')[1], '5000')
         self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))

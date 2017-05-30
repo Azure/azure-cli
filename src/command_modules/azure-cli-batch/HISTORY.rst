@@ -3,6 +3,28 @@
 Release History
 ===============
 
+3.0.0 (2017-05-29)
+++++++++++++++++++
+
+* Updated to Batch SDK 3.0.0 with support for low-priority VMs in pools.
+* Changes to the pool create command: --target-dedicated has been renamed to --target-dedicated-nodes and two
+  new options have been added; --target-low-priority-nodes and --application-licenses
+
+2.0.4 (2017-05-09)
+++++++++++++++++++++
+
+* Minor fixes.
+
+2.0.3 (2017-05-05)
+++++++++++++++++++++
+
+* Minor fixes.
+
+2.0.2 (2017-04-28)
+++++++++++++++++++++
+
+* New packaging system.
+
 2.0.1 (2017-04-17)
 ++++++++++++++++++++
 

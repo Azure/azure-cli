@@ -2,9 +2,24 @@
 
 Release History
 ===============
-2.0.3 (unreleased)
+2.0.5 (unreleased)
+++++++++++++++++++
+* ad: for 'app create' command, mention time format in the arg descriptions for --start-date/--end-date
+* output deprecating information on using '--expanded-view'
+
+unreleased
+++++++++++++++++++
+* Add Key Vault integration to the create-for-rbac and reset-credentials commands.
+
+
+2.0.4 (2017-05-09)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.3 (2017-04-28)
 ++++++++++++++++++
 * create-for-rbac: ensure SP's end date will not exceed certificate's expiration date (#2989)
+* RBAC: add full support for 'ad group' (#2016)
 
 2.0.2 (2017-04-17)
 ++++++++++++++++++

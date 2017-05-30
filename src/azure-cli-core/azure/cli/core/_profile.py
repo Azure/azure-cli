@@ -16,7 +16,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import CLIError, get_file_json
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -56,20 +56,22 @@ _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
 
-def _authentication_context_factory(authority, cache):
+def _authentication_context_factory(tenant, cache):
     import adal
-    return adal.AuthenticationContext(authority, cache=cache, api_version=None)
+    authority_url = CLOUD.endpoints.active_directory
+    is_adfs = authority_url.lower().endswith('/adfs')
+    if not is_adfs:
+        authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
+    return adal.AuthenticationContext(authority_url, cache=cache, api_version=None,
+                                      validate_authority=(not is_adfs))
 
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
+init_known_clouds(force=True)
 CLOUD = get_active_cloud()
 
 logger.debug('Current cloud config:\n%s', str(CLOUD))
-
-
-def get_authority_url(tenant=None):
-    return CLOUD.endpoints.active_directory + '/' + (tenant or _COMMON_TENANT)
 
 
 def _load_tokens_from_file(file_path):
@@ -92,15 +94,24 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
 
 
+_GLOBAL_CREDS_CACHE = None
+
+
 class Profile(object):
-    def __init__(self, storage=None, auth_ctx_factory=None):
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True):
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(self.auth_ctx_factory)
+        if use_global_creds_cache:
+            global _GLOBAL_CREDS_CACHE  # pylint: disable=global-statement
+            if _GLOBAL_CREDS_CACHE is None:
+                _GLOBAL_CREDS_CACHE = CredsCache(self.auth_ctx_factory, async_persist=True)
+            self._creds_cache = _GLOBAL_CREDS_CACHE
+        else:
+            self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
         self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
-    def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
+    def find_subscriptions_on_login(self,
                                     interactive,
                                     username,
                                     password,
@@ -144,6 +155,8 @@ class Profile(object):
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             subscriptions = Profile._build_tenant_level_accounts(bare_tenants)
+            if not subscriptions:
+                return []
 
         consolidated = Profile._normalize_properties(subscription_finder.user_id,
                                                      subscriptions,
@@ -291,6 +304,12 @@ class Profile(object):
     def get_subscription_id(self):
         return self.get_subscription()[_SUBSCRIPTION_ID]
 
+    def get_access_token_for_resource(self, username, tenant, resource):
+        tenant = tenant or 'common'
+        _, access_token, _ = self._creds_cache.retrieve_token_for_user(
+            username, tenant, resource)
+        return access_token
+
     def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
@@ -304,11 +323,26 @@ class Profile(object):
             else:
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                               resource)
-
         from azure.cli.core.adal_authentication import AdalAuthentication
         auth_object = AdalAuthentication(_retrieve_token)
 
         return (auth_object,
+                str(account[_SUBSCRIPTION_ID]),
+                str(account[_TENANT_ID]))
+
+    def get_raw_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
+                      subscription=None):
+        account = self.get_subscription(subscription)
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+
+        if user_type == _USER:
+            creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                              account[_TENANT_ID], resource)
+        else:
+            creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                           resource)
+        return (creds,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
@@ -375,7 +409,7 @@ class SubscriptionFinder(object):
         self.tenants = []
 
     def find_from_user_account(self, username, password, tenant, resource):
-        context = self._create_auth_context(tenant or _COMMON_TENANT)
+        context = self._create_auth_context(tenant)
         token_entry = context.acquire_token_with_username_password(
             resource,
             username,
@@ -390,8 +424,7 @@ class SubscriptionFinder(object):
         return result
 
     def find_through_interactive_flow(self, tenant, resource):
-
-        context = self._create_auth_context(tenant or _COMMON_TENANT)
+        context = self._create_auth_context(tenant)
         code = context.acquire_user_code(resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
@@ -412,8 +445,7 @@ class SubscriptionFinder(object):
 
     def _create_auth_context(self, tenant, use_token_cache=True):
         token_cache = self._adal_token_cache if use_token_cache else None
-        authority = get_authority_url(tenant)
-        return self._auth_context_factory(authority, token_cache)
+        return self._auth_context_factory(tenant, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
         import adal
@@ -461,40 +493,49 @@ class CredsCache(object):
     also be handled
     '''
 
-    def __init__(self, auth_ctx_factory=None):
+    def __init__(self, auth_ctx_factory=None, async_persist=True):
         # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
                             os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._adal_token_cache_attr = None
+        self._should_flush_to_disk = False
+        self._async_persist = async_persist
+        if async_persist:
+            import atexit
+            atexit.register(self.flush_to_disk)
 
     def persist_cached_creds(self):
-        with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
-                       'w+') as cred_file:
-            items = self.adal_token_cache.read_items()
-            all_creds = [entry for _, entry in items]
-
-            # trim away useless fields (needed for cred sharing with xplat)
-            for i in all_creds:
-                for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
-                    i.pop(key, None)
-
-            all_creds.extend(self._service_principal_creds)
-            cred_file.write(json.dumps(all_creds))
-
+        self._should_flush_to_disk = True
+        if not self._async_persist:
+            self.flush_to_disk()
         self.adal_token_cache.has_state_changed = False
 
+    def flush_to_disk(self):
+        if self._should_flush_to_disk:
+            with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
+                           'w+') as cred_file:
+                items = self.adal_token_cache.read_items()
+                all_creds = [entry for _, entry in items]
+
+                # trim away useless fields (needed for cred sharing with xplat)
+                for i in all_creds:
+                    for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
+                        i.pop(key, None)
+
+                all_creds.extend(self._service_principal_creds)
+                cred_file.write(json.dumps(all_creds))
+
     def retrieve_token_for_user(self, username, tenant, resource):
-        authority = get_authority_url(tenant)
-        context = self._auth_ctx_factory(authority, cache=self.adal_token_cache)
+        context = self._auth_ctx_factory(tenant, cache=self.adal_token_cache)
         token_entry = context.acquire_token(resource, username, _CLIENT_ID)
         if not token_entry:
             raise CLIError("Could not retrieve token from local cache, please run 'az login'.")
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
-        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
+        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
     def retrieve_token_for_service_principal(self, sp_id, resource):
         self.load_adal_token_cache()
@@ -502,12 +543,11 @@ class CredsCache(object):
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]
-        authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT])
-        context = self._auth_ctx_factory(authority_url, None)
+        context = self._auth_ctx_factory(cred[_SERVICE_PRINCIPAL_TENANT], None)
         sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
                                        cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None))
         token_entry = sp_auth.acquire_token(context, resource, sp_id)
-        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
+        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
     def retrieve_secret_of_service_principal(self, sp_id):
         self.load_adal_token_cache()

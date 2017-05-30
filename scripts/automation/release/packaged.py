@@ -79,7 +79,7 @@ def create_packaged_archive(version, components, archive_dest=None, use_version_
         check_call(['git', 'checkout', git_tag], cwd=REPO_ROOT_DIR)
         patcher = VersionPatcher(use_version_patch, c_name, c_path)
         patcher.patch()
-        sub_dir = 'command_modules' if 'command_modules' in c_path else ''
+        sub_dir = 'command_modules' if '/command_modules/' in c_path else ''
         shutil.copytree(c_path, os.path.join(working_dir, 'src', sub_dir, c_name))
         patcher.unpatch()
     check_call(['git', 'checkout', cur_git_commitish], cwd=REPO_ROOT_DIR)

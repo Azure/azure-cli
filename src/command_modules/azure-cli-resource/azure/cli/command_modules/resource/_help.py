@@ -3,9 +3,52 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long, too-many-lines
+# pylint: disable=line-too-long, too-many-lines
+helps['managedapp'] = """
+    type: group
+    short-summary: Manage template solutions provided and maintained by the ISV using managedapp and managedapp definitions.
+"""
+helps['managedapp definition'] = """
+    type: group
+    short-summary: Manage managed application definitions.
+"""
+helps['managedapp create'] = """
+    type: command
+    short-summary: Creates a managed application.
+    examples:
+        - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition id.
+          text: >
+            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -d "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Solutions/applianceDefinitions/myManagedAppDef"
+        - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product
+          text: >
+            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
+"""
+helps['managedapp definition create'] = """
+    type: command
+    short-summary: Creates a managed application definition.
+    examples:
+        - name: Create a managed application defintion.
+          text: >
+            az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None --package-file-uri "https://path/to/myPackage.zip"
+"""
+helps['managedapp definition delete'] = """
+    type: command
+    short-summary: Delete a managed application definition.
+"""
+helps['managedapp definition list'] = """
+    type: command
+    short-summary: Lists managed application definitions.
+"""
+helps['managedapp delete'] = """
+    type: command
+    short-summary: Delete a managed application.
+"""
+helps['managedapp list'] = """
+    type: command
+    short-summary: Lists managed applications by resource group, or by subscription.
+"""
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
@@ -128,7 +171,7 @@ helps['resource show'] = """
             az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
         - name: Show an application gateway path rule.
           text: >
-            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
+            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
 """
 
 helps['resource delete'] = """
@@ -242,7 +285,7 @@ helps['group deployment create'] = """
         - name: Create a deployment from a remote template file.
           text: >
             az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-        - name: Create a deployment from a local template file and use parameter values in a string. 
+        - name: Create a deployment from a local template file and use parameter values in a string.
           text: >
             az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
 """

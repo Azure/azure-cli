@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-#pylint: disable=line-too-long
 
 import unittest
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
@@ -24,8 +23,10 @@ class TestSasTokenAuth(unittest.TestCase):
         self.assertIn('SharedAccessSignature ', token)
         self.assertIn('sig=RTNrGy6n%2Fs2uLLZFuVHBIJtdxIJP1LuKfhKjHwwbu7A%3D', token)
         self.assertIn('se=1471940363', token)
-        self.assertIn('sr=iot-hub-for-test.azure-devices.net%252fdevices%252fiot-device-for-test', token)
+        self.assertIn('sr=iot-hub-for-test.azure-devices.net%252fdevices%252fiot-device-for-test',
+                      token)
         self.assertIn('skn=iothubowner', token)
+
 
 if __name__ == '__main__':
     unittest.main()

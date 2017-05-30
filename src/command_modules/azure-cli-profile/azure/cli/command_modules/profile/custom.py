@@ -37,7 +37,27 @@ def show_subscription(subscription=None, expanded_view=None):
     if not expanded_view:
         return profile.get_subscription(subscription)
     else:
+        logger.warning("'--expanded-view' is deprecating and will be removed in a future release. "
+                       "You can get the same information using 'az cloud show'")
         return profile.get_expanded_subscription_info(subscription)
+
+
+def get_access_token(subscription=None, resource=None):
+    '''
+    get AAD token to access to a specified resource
+    :param resource: Azure resource endpoints. Default to Azure Resource Manager
+    Use 'az cloud show' command for other Azure resources
+    '''
+    profile = Profile()
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription,
+                                                        resource=resource)
+    return {
+        'tokenType': creds[0],
+        'accessToken': creds[1],
+        'expiresOn': creds[2]['expiresOn'],
+        'subscription': subscription,
+        'tenant': tenant
+    }
 
 
 def set_active_subscription(subscription):

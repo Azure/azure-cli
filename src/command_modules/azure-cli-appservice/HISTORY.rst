@@ -2,14 +2,34 @@
 
 Release History
 ===============
-0.1.4 (unreleased)
+(unreleased)
 ++++++++++++++++++++
+* webapp: add reliability fixes in configuring source control (#3245)
+* BC: az webapp config update: Remove unsupported --node-version argument for Windows webapps. Instead use "az webapp config appsettings set" with the WEBSITE_NODE_DEFAULT_VERSION key.
+
+0.1.6 (2017-05-09)
+++++++++++++++++++++
+* webapp: fix broken log tail commands
+
+0.1.5 (2017-05-05)
+++++++++++++++++++++
+* functionapp: add full functionapp supports, including create, show, list, delete, hostname, ssl, etc
+* Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
+* Create "az webapp" to replace "az appservice web" (for backward compat, "az appservice web" will stay for 2 releases)
+* Expose arguments to configure deployment and "runtime stacks" on webapp create
+* Expose "webapp list-runtimes"
+* support configure connection strings (#2647)
+* support slot swap with preview
+
+0.1.4 (2017-04-28)
+++++++++++++++++++++
+
 * Rename arg of '-n/--name' to '--hostname', and wire up default webapp name (#2946, #2947, #2949)
 * Polish errors from appservice commands (#2948)
+* New packaging system.
 
 0.1.3 (2017-04-17)
 ++++++++++++++++++++
-
 * Use the app service plan's resource group for cert operations (#2750)
 
 0.1.2 (2017-04-03)

@@ -3,6 +3,26 @@
 Release History
 ===============
 
+2.0.6 (2017-05-09)
+^^^^^^^^^^^^^^^^^^
+
+* documentdb renamed to cosmosdb
+* Add rdbms
+
+2.0.5 (2017-05-05)
+^^^^^^^^^^^^^^^^^^
+
+* Include Data Lake Analytics and Data Lake Store modules.
+* Include Cognitive Services module.
+* Include Service Fabric module.
+* Include Interactive module.
+* Remove Container module
+
+2.0.4 (2017-04-28)
+^^^^^^^^^^^^^^^^^^
+
+* Add 'az -v' as shortcut for 'az --version' (#2926)
+
 2.0.3 (2017-04-17)
 ^^^^^^^^^^^^^^^^^^
 

@@ -11,10 +11,12 @@ from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
                                   CloudSuffixes,
                                   add_cloud,
+                                  get_cloud,
                                   get_clouds,
                                   get_custom_clouds,
                                   remove_cloud,
                                   get_active_cloud_name,
+                                  init_known_clouds,
                                   AZURE_PUBLIC_CLOUD,
                                   CloudEndpointNotSetException)
 from azure.cli.core._config import get_config_parser
@@ -61,7 +63,7 @@ class TestCloud(unittest.TestCase):
     def test_add_get_cloud_with_profile(self):
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2015-00-00-preview'
+        profile = '2017-03-09-profile-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -104,7 +106,7 @@ class TestCloud(unittest.TestCase):
         endpoint_rm = 'http://management.contoso.com'
         endpoint_mgmt = 'http://management.core.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
-        profile = '2016-00-00-preview'
+        profile = '2017-03-09-profile-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)
@@ -121,7 +123,7 @@ class TestCloud(unittest.TestCase):
             if only ARM endpoint is set '''
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2016-00-00-preview'
+        profile = '2017-03-09-profile-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)
@@ -137,6 +139,36 @@ class TestCloud(unittest.TestCase):
         expected = AZURE_PUBLIC_CLOUD.name
         actual = get_active_cloud_name()
         self.assertEqual(expected, actual)
+
+    def test_known_cloud_missing_endpoint(self):
+        ''' New endpoints in cloud config should be saved in config for the known clouds '''
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+                config_file:
+            # Save the clouds to config to get started
+            init_known_clouds()
+            cloud = get_cloud(AZURE_PUBLIC_CLOUD.name)
+            self.assertEqual(cloud.endpoints.batch_resource_id,
+                             AZURE_PUBLIC_CLOUD.endpoints.batch_resource_id)
+            # Remove an endpoint from the cloud config (leaving other config values as is)
+            config = get_config_parser()
+            config.read(config_file)
+            config.remove_option(AZURE_PUBLIC_CLOUD.name, 'endpoint_batch_resource_id')
+            with open(config_file, 'w') as cf:
+                config.write(cf)
+            # Verify that it was removed
+            config.read(config_file)
+            self.assertFalse(config.has_option(AZURE_PUBLIC_CLOUD.name,
+                                               'endpoint_batch_resource_id'))
+            # Init the known clouds again (this should add the missing endpoint)
+            init_known_clouds(force=True)
+            config.read(config_file)
+            # The missing endpoint should have been added by init_known_clouds as 'force' was used.
+            self.assertTrue(config.has_option(AZURE_PUBLIC_CLOUD.name,
+                                              'endpoint_batch_resource_id'),
+                            'Expected the missing endpoint to be added but it was not.')
+            actual_val = config.get(AZURE_PUBLIC_CLOUD.name, 'endpoint_batch_resource_id')
+            expected_val = AZURE_PUBLIC_CLOUD.endpoints.batch_resource_id
+            self.assertEqual(actual_val, expected_val)
 
 
 if __name__ == '__main__':

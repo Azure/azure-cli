@@ -12,7 +12,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = '0.0.2+dev'
+VERSION = '0.0.4+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -31,7 +31,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-monitor==0.3.0',
-    'azure-mgmt-monitor==0.2.0'
+    'azure-mgmt-monitor==0.2.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -55,6 +55,7 @@ setup(
         'azure.cli.command_modules',
         'azure.cli.command_modules.monitor'
     ],
+    package_data={'azure.cli.command_modules.monitor': ['autoscale-parameters-template.json']},
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
 )

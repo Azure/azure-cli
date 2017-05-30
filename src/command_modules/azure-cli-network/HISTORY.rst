@@ -6,6 +6,28 @@ Release History
 unreleased
 ++++++++++++++++++
 
+* `network watcher show-topology`: Fix bug with location defaulting logic.
+
+2.0.6 (2017-05-09)
+++++++++++++++++++
+
+* Minor fixes.
+
+2.0.5 (2017-05-05)
+++++++++++++++++++
+
+* Add `network watcher test-connectivity` command.
+* Add support for `--filters` parameter for `network watcher packet-capture create`.
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+
+* Add support for Application Gateway connection draining.
+* Add support for Application Gateway WAF rule set configuration.
+* Add support for ExpressRoute route filters and rules.
+* Add support for TrafficManager geographic routing.
+* Add support for VPN connection policy-based traffic selectors.
+* Add support for VPN connection IPSec policies.
 * Fix bug with `vpn-connection create` when using the `--no-wait` or `--validate` parameters.
 
 2.0.3 (2017-04-17)

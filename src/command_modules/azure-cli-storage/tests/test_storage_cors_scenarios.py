@@ -14,23 +14,23 @@ class StorageCorsTests(ScenarioTest):
         connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
                                      .format(account, resource_group)).output
 
-        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+        self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
                  checks=JMESPathCheck('length(@)', 0))
 
         self.cmd('storage cors add --method POST --origins http://example.com --services bfq '
-                 '--max-age 60 --connection-string {}'.format(connection_string))
+                 '--max-age 60 --connection-string "{}"'.format(connection_string))
 
-        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+        self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
                  checks=JMESPathCheck('length(@)', 3))
 
-        self.cmd('storage cors clear --services bf --connection-string {}'
+        self.cmd('storage cors clear --services bf --connection-string "{}"'
                  .format(connection_string))
 
-        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+        self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
                  checks=JMESPathCheck('length(@)', 1))
 
-        self.cmd('storage cors clear --services bfq --connection-string {}'
+        self.cmd('storage cors clear --services bfq --connection-string "{}"'
                  .format(connection_string))
 
-        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+        self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
                  checks=JMESPathCheck('length(@)', 0))

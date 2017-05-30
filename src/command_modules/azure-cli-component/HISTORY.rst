@@ -3,6 +3,21 @@
 Release History
 ===============
 
+2.0.4 (2017-05-09)
+++++++++++++++++++
+
+* Remove references to CLI being in preview (#3273)
+
+2.0.3 (2017-05-02)
+++++++++++++++++++
+
+* Reinstall azure-nspkg and azure-mgmt-nspkg.
+
+2.0.2 (2017-04-28)
+++++++++++++++++++
+
+* New packaging system
+
 2.0.1 (2017-04-17)
 ++++++++++++++++++
 

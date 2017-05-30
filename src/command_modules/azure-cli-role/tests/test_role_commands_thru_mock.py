@@ -121,6 +121,7 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom.logger', autospec=True)
     def test_create_for_rbac_use_cert_date(self, logger_mock, graph_client_mock, auth_client_mock):
+        import OpenSSL.crypto
         test_app_id = 'app_id_123'
         app = Application(app_id=test_app_id)
 
@@ -140,7 +141,7 @@ class TestRoleMocked(unittest.TestCase):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         cert_file = os.path.join(curr_dir, 'cert.pem').replace('\\', '\\\\')
         with open(cert_file) as f:
-            cert = f.read()
+            cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, f.read())
 
         name = 'mysp'
         faked_graph_client.applications.create.side_effect = mock_app_create

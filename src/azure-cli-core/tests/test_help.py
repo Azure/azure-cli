@@ -615,10 +615,6 @@ Global Arguments
                 except Exception as ex:
                     raise _help.HelpAuthoringException('{}, {}'.format(name, ex))
 
-            extras = [k for k in azure.cli.core.help_files.helps.keys() if k not in parser_dict]
-            self.assertTrue(len(extras) == 0,
-                            'Found help files that don\'t map to a command: ' + str(extras))
-
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():

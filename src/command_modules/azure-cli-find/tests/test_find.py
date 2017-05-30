@@ -39,12 +39,7 @@ def execute(cmd):
     return out[0]
 
 
-def exec_json(cmd):
-    shell_safe_json_parse(execute(cmd))
-
-
 class SearchIndexTest(unittest.TestCase):
-
     def setUp(self):
         _purge()
 

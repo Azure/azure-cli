@@ -35,13 +35,12 @@ class AcrCommandsTests(ScenarioTest):
         registry_name = self.create_random_name('clireg', 50)
 
         if storage_account_for_create is None:
-            self.cmd('acr create -n {} -g {} -l {} --sku {} '
-                     '--deployment-name {}'.format(
-                         registry_name,
-                         resource_group,
-                         location,
-                         'Basic',
-                         'Microsoft.ContainerRegistry'),
+            self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
+                     registry_name,
+                     resource_group,
+                     location,
+                     'Basic',
+                     'Microsoft.ContainerRegistry'),
                      checks=[
                          JMESPathCheck('name', registry_name),
                          JMESPathCheck('location', location),
@@ -80,15 +79,13 @@ class AcrCommandsTests(ScenarioTest):
             registry_name, resource_group), checks=[
                 JMESPathCheck('name', registry_name),
                 JMESPathCheck('location', location),
-                JMESPathCheck('adminUserEnabled', False)
-            ])
+                JMESPathCheck('adminUserEnabled', False)])
         # enable admin user
         self.cmd('acr update -n {} -g {} --admin-enabled true'.format(
             registry_name, resource_group), checks=[
                 JMESPathCheck('name', registry_name),
                 JMESPathCheck('location', location),
-                JMESPathCheck('adminUserEnabled', True)
-            ])
+                JMESPathCheck('adminUserEnabled', True)])
         # test credential module
         credential = self.cmd('acr credential show -n {} -g {}'.format(
             registry_name, resource_group)).get_output_in_json()

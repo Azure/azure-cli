@@ -39,15 +39,16 @@ class StorageBlobUploadLiveTests(LiveTest):
     @StorageAccountPreparer()
     def test_storage_blob_upload_10G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
-                                             'block')
+                                             'block', skip_download=True)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_page_blob_upload_10G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
-                                             'page')
+                                             'page', skip_download=True)
 
-    def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type):
+    def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
+                                        skip_download=False):
         container = self.create_random_name(prefix='cont', length=24)
         local_dir = self.create_temp_dir()
         local_file = self.create_temp_file(file_size_kb, full_random=True)
@@ -72,9 +73,10 @@ class StorageBlobUploadLiveTests(LiveTest):
         self.cmd('storage blob show -n {} -c {}'.format(blob_name, container),
                  checks=JMESPathCheck('properties.contentLength', file_size_kb * 1024))
 
-        downloaded = os.path.join(local_dir, 'test.file')
-        self.cmd('storage blob download -n {} -c {} --file {}'
-                 .format(blob_name, container, downloaded))
-        self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
-        self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
-                         'The download file size is not right.')
+        if not skip_download:
+            downloaded = os.path.join(local_dir, 'test.file')
+            self.cmd('storage blob download -n {} -c {} --file {}'
+                     .format(blob_name, container, downloaded))
+            self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
+            self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
+                             'The download file size is not right.')

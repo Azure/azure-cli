@@ -110,10 +110,11 @@ class AzCliCommandParser(argparse.ArgumentParser):
                             raise
                 param.completer = arg.completer
 
-            command_parser.set_defaults(func=metadata.handler,
-                                        command=command_name,
-                                        _validators=argument_validators,
-                                        _parser=command_parser)
+            command_parser.set_defaults(
+                func=metadata,
+                command=command_name,
+                _validators=argument_validators,
+                _parser=command_parser)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
@@ -177,12 +178,20 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         is_group)
         self.exit()
 
+    def _check_value(self, action, value):
+        # Override to customize the error message when a argument is not among the available choices
+        # converted value must be one of the choices (if specified)
+        if action.choices is not None and value not in action.choices:
+            msg = 'invalid choice: {}'.format(value)
+            raise argparse.ArgumentError(action, msg)
+
     def is_group(self):
         """ Determine if this parser instance represents a group
             or a command. Anything that has a func default is considered
             a group. This includes any dummy commands served up by the
             "filter out irrelevant commands based on argv" command filter """
-        return not self._defaults.get('func', None)
+        cmd = self._defaults.get('func', None)
+        return not (cmd and cmd.handler)
 
     def __getattribute__(self, name):
         """ Since getting the description can be expensive (require module loads), we defer
