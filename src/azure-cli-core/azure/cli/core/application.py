@@ -15,6 +15,7 @@ import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
+import azure.cli.core.commands.progress as progress
 
 import azure.cli.core.telemetry as telemetry
 
@@ -127,6 +128,11 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.configuration = configuration
+        self.progress_controller = progress.ProgressHook()
+
+    def get_progress_controller(self, det=False):
+        self.progress_controller.init_progress(progress.get_progress_view(det))
+        return self.progress_controller
 
     def initialize(self, configuration):
         self.configuration = configuration
@@ -138,7 +144,7 @@ class Application(object):
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
-        if len(argv) == 0:
+        if not argv:
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
@@ -273,8 +279,9 @@ class Application(object):
             return arg
         elif ix == 0:
             return Application._load_file(poss_file)
-        else:  # if @ not at the start it can't be a file
-            return arg
+
+        # if @ not at the start it can't be a file
+        return arg
 
     @staticmethod
     def _expand_file_prefix(arg):

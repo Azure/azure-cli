@@ -67,6 +67,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                          container, local_file, blob_name, blob_type)
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
+        self.storage_cmd('storage blob list -c {} -otable --num-results 1', account_info, container)
 
         self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('name', blob_name))

@@ -77,11 +77,9 @@ def exception_handler_chain_builder(handlers):
 
 
 def network_exception_handler(ex):
-    import requests as requests
     # wraps a connection exception in CLIError
-    # pylint:disable=line-too-long
-    if isinstance(ex, requests.exceptions.ConnectionError) or \
-            isinstance(ex, requests.exceptions.HTTPError):
+    import requests.exceptions
+    if isinstance(ex, (requests.exceptions.ConnectionError, requests.exceptions.HTTPError)):
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(ex))
     raise ex
 

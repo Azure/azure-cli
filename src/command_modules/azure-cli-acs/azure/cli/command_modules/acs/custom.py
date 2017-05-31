@@ -14,13 +14,14 @@ import datetime
 import platform
 import random
 import ssl
-import stat
 import string
 import subprocess
 import sys
 import threading
 import time
 import webbrowser
+
+import stat
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
@@ -241,8 +242,8 @@ def acs_install_cli(resource_group, name, install_location=None, client_version=
 def _ssl_context():
     if sys.version_info < (3, 4):
         return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-    else:
-        return ssl.create_default_context()
+
+    return ssl.create_default_context()
 
 
 def _urlretrieve(url, filename):
@@ -328,11 +329,13 @@ def _build_service_principal(client, name, url, client_secret):
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         try:
-            create_service_principal(service_principal)
+            create_service_principal(service_principal, client=client)
+            break
         # TODO figure out what exception AAD throws here sometimes.
-        except:  # pylint: disable=bare-except
+        except Exception as ex:  # pylint: disable=broad-except
             sys.stdout.write('.')
             sys.stdout.flush()
+            logger.info(ex)
             time.sleep(2 + 2 * x)
     print('done')
     return service_principal
@@ -541,7 +544,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     windows_profile = None
     os_type = 'Linux'
     if windows:
-        if len(admin_password) == 0:
+        if not admin_password:
             raise CLIError('--admin-password is required.')
         if len(admin_password) < 6:
             raise CLIError('--admin-password must be at least 6 characters')
@@ -574,13 +577,13 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                         "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + '-k8s-agents',
                             "osType": os_type,
@@ -632,13 +635,13 @@ def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix
                         "orchestratorType": orchestrator_type
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix + 'mgmt'
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + 'agents'
                         }
@@ -911,7 +914,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if not end_date:
         end_date = start_date + relativedelta(years=1)
     elif isinstance(end_date, str):
-        end_date = dateutil.parser.parse(end_date)  # pylint: disable=redefined-variable-type
+        end_date = dateutil.parser.parse(end_date)
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -921,18 +924,14 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if password:
         password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()), key_usage, key_type)]
 
     return (password_creds, key_creds)
 
 
-def create_service_principal(identifier):
-    return _create_service_principal(identifier)
-
-
-def _create_service_principal(identifier, resolve_app=True):
-    client = _graph_client_factory()
+def create_service_principal(identifier, resolve_app=True, client=None):
+    if client is None:
+        client = _graph_client_factory()
 
     if resolve_app:
         try:

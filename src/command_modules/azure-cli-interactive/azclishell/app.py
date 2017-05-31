@@ -12,6 +12,7 @@ import subprocess
 import sys
 import uuid
 import datetime
+import threading
 
 
 import jmespath
@@ -33,11 +34,13 @@ from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
+from azclishell.progress import get_progress_message, progress_view
 from azclishell.telemetry import TC as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import Configuration
+from azure.cli.core.commands import LongRunningOperation, get_op_handler
 from azure.cli.core.cloud import get_active_cloud_name
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
@@ -144,6 +147,9 @@ class Shell(object):
         self.output = output_custom
         self.config_default = ""
         self.default_command = ""
+        self.threads = []
+        self.curr_thread = None
+        self.spin_val = -1
 
     @property
     def cli(self):
@@ -212,6 +218,7 @@ class Shell(object):
             pass
 
         curr_cloud = "Cloud: {}".format(get_active_cloud_name())
+
         tool_val = 'Subscription: {}'.format(sub_name) if sub_name else curr_cloud
 
         settings_items = [
@@ -287,6 +294,7 @@ class Shell(object):
             'example_line': Buffer(is_multiline=True),
             'default_values': Buffer(),
             'symbols': Buffer(),
+            'progress': Buffer(is_multiline=False)
         }
 
         writing_buffer = Buffer(
@@ -568,6 +576,25 @@ class Shell(object):
                 'query_active': False
             }
             result = self.app.execute(args)
+            self.app.initialize(Configuration())
+
+            if '--progress' in args:
+                args.remove('--progress')
+                thread = ExecuteThread(self.app.execute, args)
+                thread.daemon = True
+                thread.start()
+                self.threads.append(thread)
+                self.curr_thread = thread
+
+                thread = ProgressViewThread(progress_view, self)
+                thread.daemon = True
+                thread.start()
+                self.threads.append(thread)
+                result = None
+
+            else:
+                result = self.app.execute(args)
+
             self.last_exit = 0
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
@@ -584,9 +611,19 @@ class Shell(object):
         except SystemExit as ex:
             self.last_exit = int(ex.code)
 
+    def progress_patch(self, _=False):
+        """ forces to use the Shell Progress """
+        from azure.cli.core.application import APPLICATION
+
+        from azclishell.progress import ShellProgressView
+        APPLICATION.progress_controller.init_progress(ShellProgressView())
+        return APPLICATION.progress_controller
+
     def run(self):
         """ starts the REPL """
         telemetry.start()
+        from azure.cli.core.application import APPLICATION
+        APPLICATION.get_progress_controller = self.progress_patch
 
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
@@ -630,3 +667,33 @@ class Shell(object):
 
         print('Have a lovely day!!')
         telemetry.conclude()
+
+
+class ExecuteThread(threading.Thread):
+    """ thread for executing commands """
+    def __init__(self, func, args):
+        super(ExecuteThread, self).__init__()
+        self.args = args
+        self.func = func
+
+    def run(self):
+        self.func(self.args)
+
+
+class ProgressViewThread(threading.Thread):
+    """ thread to keep the toolbar spinner spinning """
+    def __init__(self, func, arg):
+        super(ProgressViewThread, self).__init__()
+        self.func = func
+        self.arg = arg
+
+    def run(self):
+        import time
+        try:
+            while True:
+                if self.func(self.arg):
+                    time.sleep(4)
+                    break
+                time.sleep(.25)
+        except KeyboardInterrupt:
+            pass
