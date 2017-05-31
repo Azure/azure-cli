@@ -5,7 +5,7 @@
 
 import os
 import unittest
-from azure.cli.core.profiles import supported_api_version
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from .const import ENV_LIVE_TEST
 
 
@@ -22,5 +22,4 @@ def record_only():
 
 
 def profile_version_constraint(**kwargs):
-    return unittest.skipUnless(supported_api_version(None, **kwargs),
-                               "Test not supported by current profile.")
+    return unittest.skipUnless(supported_api_version(PROFILE_TYPE, **kwargs), "Test not supported by current profile.")
