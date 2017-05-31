@@ -514,6 +514,8 @@ register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(Tran
 for item in ['backend_pool_name', 'backend_address_pool_name']:
     register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
+register_cli_argument('network lb address-pool add-vm', 'vm', nargs='+')
+
 register_cli_argument('network lb create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_lb_create_namespace)
 register_cli_argument('network lb create', 'public_ip_address_allocation', **enum_choice_list(IPAllocationMethod))
 register_cli_argument('network lb create', 'public_ip_dns_name', help='Globally unique DNS name for a new public IP.')

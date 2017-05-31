@@ -12,7 +12,8 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.network._client_factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import \
+    (_network_client_factory)
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -912,19 +913,71 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
 
-def _add_vm_to_address_pool(resource_group_name, ip_config, load_balancer_name,
-                            application_gateway_name, nic_name, vm_name, availability_set_name):
-    pass
 
-def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, ip_config=None, 
-                              nic_name=None, vm_name=None, availability_set_name=None):
-    return _add_vm_to_address_pool(resource_group_name, ip_config, load_balancer_name, None,
-                                   nic_name, vm_name, availability_set_name)
+def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application_gateway_name, 
+                            address_pool_name, vm):
+    
+    # 1 Retrieve load balancer address pool
+    ncf = _network_client_factory()
+    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
 
-def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, ip_config=None, 
-                              nic_name=None, vm_name=None, availability_set_name=None):
-    return _add_vm_to_address_pool(resource_group_name, ip_config, None, application_gateway_name, 
-                                   nic_name, vm_name, availability_set_name)
+    address_pool = None
+    if address_pool_name:
+        address_pool = next((x for x in lb.backend_address_pools if x.name == address_pool_name), None)
+        if not address_pool:
+            raise CLIError("Address pool '{}' not found on load balancer '{}'.".format(
+                address_pool_name, load_balancer_name))
+    elif len(lb.backend_address_pools) == 1:
+        address_pool = lb.backend_address_pools[0]
+    elif len(lb.backend_address_pools) > 1:
+        raise CLIError("Multiple address pools found on load balancer '{}'. "
+                       "Specify --address-pool-name NAME".format(load_balancer_name))
+    else:
+        raise CLIError("No backend address pools found for load balancer '{}'. "
+                       "Create one and try again.".format(load_balancer_name))
+
+    # 2 Associate the address pool with the NIC IP configurations
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    ccf = get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
+
+    for item in vm:
+        vm_params = parse_resource_id(item)
+        vm_obj = ccf.virtual_machines.get(vm_params.get('resource_group', resource_group_name),
+                                            vm_params['name'])
+        nic_id = None
+        if len(vm_obj.network_profile.network_interfaces) == 1:
+            nic_id = vm_obj.network_profile.network_interfaces[0].id
+        else:
+            nic_id = next((x.id for x in vm_obj.network_profile.network_interfaces if x.primary), None)
+        if not nic_id:
+            raise CLIError("No primary NIC found for VM '{}'.".format(vm_obj.name))
+
+        nic_params = parse_resource_id(nic_id)
+        nic = ncf.network_interfaces.get(nic_params['resource_group'], nic_params['name'])
+        if len(nic.ip_configurations) == 1:
+            config = nic.ip_configurations[0]
+            _upsert(config, 'load_balancer_backend_address_pools', address_pool, 'id')
+            try:
+                config_params = parse_resource_id(config.id)
+                ncf.network_interfaces.create_or_update(
+                    config_params['resource_group'], config_params['name'], nic).result()
+            except Exception as ex:
+                logger.error(ex)
+        elif len(nic.ip_configurations) > 1:
+            logger.warning('Multiple IP configurations found on primary NIC. Skipping...')
+        else:
+            raise CLIError("No IP configurations found for NIC '{}'!".format(nic.name))
+
+
+def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, vm, item_name=None):
+    return _add_vm_to_address_pool(resource_group_name, load_balancer_name, None,
+                                   item_name, vm)
+
+def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, vm, 
+                              item_name=None):
+    return _add_vm_to_address_pool(resource_group_name, None, application_gateway_name,
+                                   item_name, vm)
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):

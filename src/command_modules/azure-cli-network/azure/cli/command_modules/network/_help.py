@@ -835,6 +835,26 @@ helps['network lb address-pool'] = """
     short-summary: Manage backend address pools for a load balancer.
 """
 
+helps['network lb address-pool add-vm'] = """
+    type: command
+    short-summary: Add virtual machines to a backend address pool.
+    long-summary: Under the hood, this is accomplished by looking up the primary NIC associated
+        with the VM and associating its IP configuration with the backend pool. To add non-primary
+        NICs or NICs with multiple IP configurations, this command WILL NOT WORK. For these
+        scenarios, use `az network nic ip-config address-pool add`.
+    parameters:
+        - name: --vm
+          short-summary: Names or IDs or Virtual Machines to add to the backend pool.
+          long-summary: Only the primary NIC will be used, and VMs whose primary NIC has multiple
+            IP configurations will be ignored.
+        - name: --name -n
+          short-summary: Name of the backend address pool. Can be omitted if only a single address
+            pool exists.
+    examples:
+        - name: Add a VM to a load balancer's default backend address pool.
+          text: az network lb address-pool add-vm -g myRG --lb-name myLB --vm myVM
+"""
+
 helps['network lb address-pool create'] = """
     type: command
     short-summary: Create a backend address pool.
