@@ -21,7 +21,7 @@ def _load_key(key_filename):
     try:
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
     except paramiko.PasswordRequiredException:
-        key_pass = prompt_pass('Password:')
+        key_pass = prompt_pass('Password for private key:')
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
     if pkey is None:
         raise CLIError('failed to load key: {}'.format(key_filename))
