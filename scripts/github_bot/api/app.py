@@ -16,7 +16,7 @@ from flask import Flask, jsonify, request, Response
 from subprocess import check_call, CalledProcessError
 from uritemplate import URITemplate, expand
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 
 # GitHub API constants
 GITHUB_UA_PREFIX = 'GitHub-Hookshot/'
