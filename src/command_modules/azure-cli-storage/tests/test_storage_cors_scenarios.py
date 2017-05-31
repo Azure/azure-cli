@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, profile_version_constraint)
+                               StorageAccountPreparer, api_version_constraint)
+from azure.cli.core.profiles import ResourceType
 
 
-@profile_version_constraint(min_api='latest')
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageCorsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account')

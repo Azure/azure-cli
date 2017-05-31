@@ -5,10 +5,11 @@
 
 import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck, profile_version_constraint)
+                               JMESPathCheck, NoneCheck, api_version_constraint)
+from azure.cli.core.profiles import ResourceType
 
 
-@profile_version_constraint(min_api='latest')
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageQueueScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
