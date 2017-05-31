@@ -61,7 +61,7 @@ View HISTORY.rst of the module for a changelog.
 
 {}
 
-Full changelog at https://docs.microsoft.com/en-us/cli/azure/release-notes-azure-cli
+Full release notes at https://docs.microsoft.com/en-us/cli/azure/release-notes-azure-cli
 
 """
 
