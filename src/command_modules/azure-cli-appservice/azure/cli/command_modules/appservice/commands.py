@@ -63,6 +63,7 @@ cli_command(__name__, 'webapp delete', custom_path + 'delete_webapp')
 cli_command(__name__, 'webapp stop', custom_path + 'stop_webapp')
 cli_command(__name__, 'webapp start', custom_path + 'start_webapp')
 cli_command(__name__, 'webapp restart', custom_path + 'restart_webapp')
+cli_command(__name__, 'webapp production-test', custom_path + 'production_test')
 
 cli_command(__name__, 'webapp config set', custom_path + 'update_site_configs')
 cli_command(__name__, 'webapp config show', custom_path + 'get_site_configs', exception_handler=empty_on_404)

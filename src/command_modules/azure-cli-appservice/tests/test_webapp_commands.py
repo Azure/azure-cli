@@ -411,9 +411,6 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('branch', slot)
         ])
 
-        import time
-        import requests
-
         # swap with prod and verify the git branch also switched
         self.cmd('webapp deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         result = self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
@@ -445,6 +442,14 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("length([?name=='{}'])".format(slot2), 1),
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
+
+        self.cmd('webapp production-test -g {} -n {} --static-routings {}=15 {}=20'.format(self.resource_group, self.webapp, slot, slot2), checks=[
+            JMESPathCheck("experiments.rampUpRules[0].actionHostName", slot + '.azurewebsites.net'),
+            JMESPathCheck("experiments.rampUpRules[0].reroutePercentage", 15.0),
+            JMESPathCheck("experiments.rampUpRules[1].actionHostName", slot2 + '.azurewebsites.net'),
+            JMESPathCheck("experiments.rampUpRules[1].reroutePercentage", 20.0),
+        ])
+
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
 
 

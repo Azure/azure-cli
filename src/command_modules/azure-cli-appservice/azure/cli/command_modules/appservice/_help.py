@@ -428,6 +428,11 @@ helps['webapp stop'] = """
     short-summary: Stop a web app.
 """
 
+helps['webapp production-test'] = """
+    type: command
+    short-summary: test in production, including configuring static routings.
+"""
+
 helps['functionapp'] = """
     type: group
     short-summary: Manage your function app.
