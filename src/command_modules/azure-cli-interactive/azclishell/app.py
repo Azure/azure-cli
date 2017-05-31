@@ -416,7 +416,7 @@ class Shell(object):
     def _special_cases(self, text, cmd, outside):
         break_flag = False
         continue_flag = False
-        args = parse_quotes(text)
+        args = parse_quotes(text, priority_string=SELECT_SYMBOL['query'])
         args_no_quotes = []
         for arg in args:
             args_no_quotes.append(arg.strip("/'").strip('/"'))
@@ -510,13 +510,16 @@ class Shell(object):
                 elif all(isinstance(result, list) for result in results):
                     for res_counter, _ in enumerate(results[0]):
                         base = cmd_base
+                        skip = False
+
                         for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
                             if counter < len(results) and res_counter < len(results[counter]):
                                 base = base.replace(
                                     SELECT_SYMBOL['query'], results[counter][res_counter], 1)
                             else:  # if there aren't an even number of results, skip it
-                                continue
-                        self.cli_execute(base)
+                                skip = True
+                        if not skip:
+                            self.cli_execute(base)
                     continue_flag = True
 
         except (jmespath.exceptions.ParseError, CLIError):

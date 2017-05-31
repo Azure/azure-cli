@@ -5,8 +5,8 @@
 
 import unittest
 import six
+from azclishell.util import parse_quotes
 from azclishell.gather_commands import GatherCommands
-
 
 def pass_gather(_):
     pass
@@ -46,7 +46,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_just_query(self):
         """ tests flushing just the query """
-        args = ['?x']
+        args = ['??x']
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args, False)
         self.assertTrue(flag)
@@ -54,7 +54,11 @@ class QueryInjection(unittest.TestCase):
 
     def test_string_replacement(self):
         """ tests that the query replaces the values in the command """
-        args = 'vm show -g ?group -n ?name'.split()
+        args = 'vm show -g "??group" -n "??name"'
+        args = parse_quotes(args)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = {
             'group': 'mygroup',
             'name': 'myname'
@@ -65,7 +69,11 @@ class QueryInjection(unittest.TestCase):
 
     def test_list_replacement(self):
         """ tests that the query replaces the values in the command """
-        args = 'vm show -g ?[].group -n ?[].name'.split()
+        args = 'vm show -g "??[].group" -n "??[].name"'
+        args = parse_quotes(args)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = [
             {
                 'group': 'mygroup',
@@ -93,15 +101,19 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {'x': 'result'}
         # pylint: disable=protected-access
         b_flag, c_flag, out, cmd = self.shell._special_cases(
-            "this is 'url?what' negative", "this is 'url?what' negative", False)
+            "this is 'url??what' negative", "this is 'url??what' negative", False)
         self.assertFalse(b_flag)
         self.assertFalse(c_flag)
         self.assertFalse(out)
-        self.assertEqual(cmd, "this is 'url?what' negative")
+        self.assertEqual(cmd, "this is 'url??what' negative")
 
     def test_errors(self):
         """ tests invalid query """
-        args = 'vm show -g ?[].group -n ?[].name'.split()
+        args = 'vm show -g "??[].group" -n "??[].name"'
+        args = parse_quotes(args)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = [
             {
                 'group': 'mygroup',
@@ -115,11 +127,15 @@ class QueryInjection(unittest.TestCase):
         results = self.stream.getvalue().split('\n')
         self.assertTrue(flag)
         self.assertEqual(results[0], 'vm show -g mygroup -n myname')
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 2)
 
     def test_singleton(self):
         """ tests a singleton example """
-        args = 'vm show -g ?group -n ?name'.split()
+        args = 'vm show -g "??group" -n "??name"'
+        args = parse_quotes(args)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = {
             'group': 'mygroup',
             'name': 'myname'
@@ -129,6 +145,29 @@ class QueryInjection(unittest.TestCase):
         self.assertTrue(flag)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g mygroup -n myname')
+
+    def test_spaces(self):
+        """ tests quotes with spaces """
+        args = 'vm show -g "??[?group == \"mygroup is\"].name"'
+        args = parse_quotes(args, priority_string='??')
+        print(args)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
+        print(args_no_quotes)
+        self.shell.last.result = [
+            {
+                'group': 'mygroup is',
+                'name': 'fred'
+            },
+            {
+                'group': 'mygroup3',
+                'name': 'myname3'
+            }
+        ]
+        self.shell.handle_jmespath_query(args_no_quotes, False)
+        results = self.stream.getvalue().split('\n')
+        self.assertEqual(results[0], u'fred')
 
 
 if __name__ == '__main__':
