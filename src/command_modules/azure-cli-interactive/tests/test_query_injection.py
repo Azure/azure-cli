@@ -115,8 +115,7 @@ class QueryInjection(unittest.TestCase):
         results = self.stream.getvalue().split('\n')
         self.assertTrue(flag)
         self.assertEqual(results[0], 'vm show -g mygroup -n myname')
-        self.assertEqual(
-            results[1], 'Invalid Input, the query gesture must have same number of items')
+        self.assertEqual(len(results), 1)
 
     def test_singleton(self):
         """ tests a singleton example """

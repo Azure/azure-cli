@@ -508,8 +508,11 @@ class Shell(object):
                     for res_counter, _ in enumerate(results[0]):
                         base = cmd_base
                         for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                            base = base.replace(  # TODO: index error check
-                                SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                            if counter < len(results) and res_counter < len(results[counter]):
+                                base = base.replace(
+                                    SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                            else:  # if there aren't an even number of results, skip it
+                                continue
                         self.cli_execute(base)
                     continue_flag = True
 
