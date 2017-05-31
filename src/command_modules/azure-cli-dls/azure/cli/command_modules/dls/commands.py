@@ -17,6 +17,7 @@ cli_command(__name__, 'dls account update', adls_custom_format_path.format('upda
 cli_command(__name__, 'dls account list', adls_custom_format_path.format('list_adls_account'), cf_dls_account)
 cli_command(__name__, 'dls account delete', adls_format_path.format('account_operations', 'AccountOperations', 'delete'), cf_dls_account)
 cli_command(__name__, 'dls account show', adls_format_path.format('account_operations', 'AccountOperations', 'get'), cf_dls_account)
+cli_command(__name__, 'dls account enable-key-vault', adls_format_path.format('account_operations', 'AccountOperations', 'enable_key_vault'), cf_dls_account)
 
 # account firewall operations
 cli_command(__name__, 'dls account firewall create', adls_custom_format_path.format('add_adls_firewall_rule'), cf_dls_account_firewall)
