@@ -487,9 +487,7 @@ class Shell(object):
             queries = []
             results = []
             injected_command = []
-            print(args)
             for arg in args:
-                print(arg)
                 if arg.startswith(SELECT_SYMBOL['query']):
                     query = arg[len(SELECT_SYMBOL['query']):]
                     queries.append(query)
@@ -523,7 +521,6 @@ class Shell(object):
 
         except (jmespath.exceptions.ParseError, CLIError):
             print("Invalid Query", file=self.output)
-            print(queries)
             continue_flag = True
         return continue_flag
 
