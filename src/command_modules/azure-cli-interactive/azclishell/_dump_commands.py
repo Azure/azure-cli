@@ -24,8 +24,10 @@ CMD_TABLE = APPLICATION.configuration.get_command_table()
 
 def install_modules():
     for cmd in CMD_TABLE:
-        CMD_TABLE[cmd].load_arguments()
-
+        try:
+            CMD_TABLE[cmd].load_arguments()
+        except (ImportError, ValueError):
+            pass
     try:
         mods_ns_pkg = import_module('azure.cli.command_modules')
         installed_command_modules = [modname for _, modname, _ in
