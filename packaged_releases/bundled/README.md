@@ -18,8 +18,8 @@ First copy the build scripts onto the build machine.
 
 Then execute it with the appropriate environment variable values.
 ```
-export CLI_VERSION=0.2.9 \
-  && export CLI_DOWNLOAD_SHA256=6f949162d6bbf6848177cc009d60520c12cf2c1dfc068e9e5bbeac0ff6e55e4f \
+export CLI_VERSION=0.2.10 \
+  && export CLI_DOWNLOAD_SHA256=be72ddb0983b3466e868602e68e4d3bf67379fbe080bdaa6aa321c03f9bcce48 \
   && python ~/build-bundle.py
 ```
 
@@ -32,7 +32,7 @@ Verification
 ```
 tmp_dir=$(mktemp -d)
 tar -xvzf azure-cli_bundle.tar.gz
-azure-cli_bundle_*/installer
+azure-cli_bundle_*/installer --install-dir $(mktemp -d) --bin-dir $(mktemp -d)
 az --version
 ```
 
@@ -54,7 +54,7 @@ az storage blob url -c bundled -n azure-cli_bundle_{VERSION}.tar.gz
 
 An example URL is `https://azurecliprod.blob.core.windows.net/bundled/azure-cli_bundle_{VERSION}.tar.gz`.
 
-Get the SHA256 checksum:
+Get the SHA256 checksum (if needed):
 ```
 shasum -a 256 azure-cli_bundle_{VERSION}.tar.gz
 ```

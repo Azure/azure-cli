@@ -2,6 +2,14 @@
 
 Release History
 ===============
+
+2.0.5 (2017-05-30)
+++++++++++++++++++++
+
+* [Role] Service Principal KeyVault integration (#3133)
+* Update KeyVault dataplane to 0.3.2. (#3307)
+* [KeyVault] Update data plane SDK to 0.3.0 (#3251)
+
 2.0.3 (2017-05-05)
 ++++++++++++++++++++
 
