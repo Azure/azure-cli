@@ -417,6 +417,9 @@ class Shell(object):
         break_flag = False
         continue_flag = False
         args = parse_quotes(text)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
 
         if text and len(text.split()) > 0 and text.split()[0].lower() == 'az':
             telemetry.track_ssg('az', text)
@@ -457,9 +460,9 @@ class Shell(object):
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
 
-            elif any(arg.startswith(SELECT_SYMBOL['query']) for arg in args) and \
+            elif any(arg.startswith(SELECT_SYMBOL['query']) for arg in args_no_quotes) and \
                     self.last and self.last.result:
-                continue_flag = self.handle_jmespath_query(args, continue_flag)
+                continue_flag = self.handle_jmespath_query(args_no_quotes, continue_flag)
                 telemetry.track_ssg('query', text)
 
             elif "|" in text or ">" in text:  # anything I don't parse, send off
@@ -484,7 +487,9 @@ class Shell(object):
             queries = []
             results = []
             injected_command = []
+            print(args)
             for arg in args:
+                print(arg)
                 if arg.startswith(SELECT_SYMBOL['query']):
                     query = arg[len(SELECT_SYMBOL['query']):]
                     queries.append(query)
@@ -518,6 +523,8 @@ class Shell(object):
 
         except (jmespath.exceptions.ParseError, CLIError):
             print("Invalid Query", file=self.output)
+            print(queries)
+            continue_flag = True
         return continue_flag
 
     def handle_scoping_input(self, continue_flag, cmd, text):
@@ -656,14 +663,13 @@ class Shell(object):
                 else:
                     b_flag, c_flag, outside, cmd = self._special_cases(text, cmd, outside)
 
+                    if not self.default_command:
+                        self.history.append(text)
                     if b_flag:
                         break
                     if c_flag:
                         self.set_prompt()
                         continue
-
-                    if not self.default_command:
-                        self.history.append(text)
 
                     self.set_prompt()
 
@@ -672,7 +678,7 @@ class Shell(object):
                     else:
                         self.cli_execute(cmd)
 
-            except KeyboardInterrupt:  # CTRL C
+            except (KeyboardInterrupt, ValueError):  # CTRL C
                 self.set_prompt()
                 continue
 
