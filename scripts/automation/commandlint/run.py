@@ -55,8 +55,8 @@ def dump_no_help(modules):
             exit_val = 1
         group_name = " ".join(cmd.split()[:-1])
         if group_name not in helps:
-            exit_val = 1
             if group_name not in subgroups_list and group_name not in white_list_subgroups:
+                exit_val = 1
                 subgroups_list.append(group_name)
 
         param_list = []
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     result, failed_commands = dump_no_help(installed_command_modules)
 
-    if failed_commands or result != 0:
+    if any(len(failed_commands[key]) > 0 for key in failed_commands) or result != 0:
         print('==== FAILED COMMANDS ====')
         print(json.dumps(failed_commands, sort_keys=True, indent=4))
 
