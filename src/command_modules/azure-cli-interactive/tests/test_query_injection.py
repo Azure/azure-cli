@@ -8,6 +8,7 @@ import six
 from azclishell.util import parse_quotes
 from azclishell.gather_commands import GatherCommands
 
+
 def pass_gather(_):
     pass
 
