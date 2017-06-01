@@ -42,11 +42,10 @@ def find_recording_dir(test_file):
     from azure.cli.core._profile import get_active_cloud
     api_profile = get_active_cloud().profile
 
-    if api_profile is 'latest':
+    if api_profile == 'latest':
         latest_recording_dir = os.path.join(base_dir, 'latest')
         return latest_recording_dir if os.path.isdir(latest_recording_dir) else base_dir
-    else:
-        return os.path.join(base_dir, api_profile)
+    return os.path.join(base_dir, api_profile)
 
 
 class IntegrationTestBase(unittest.TestCase):
