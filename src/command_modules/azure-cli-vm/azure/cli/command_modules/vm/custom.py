@@ -548,14 +548,14 @@ def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=
 
 def _get_disk_lun(data_disks):
     # start from 0, search for unused int for lun
-    if data_disks:
-        existing_luns = sorted([d.lun for d in data_disks])
-        for i in range(len(existing_luns)):  # pylint: disable=consider-using-enumerate
-            if existing_luns[i] != i:
-                return i
-        return len(existing_luns)
+    if not data_disks:
+        return 0
 
-    return 0
+    existing_luns = sorted([d.lun for d in data_disks])
+    for i, current in enumerate(existing_luns):
+        if current != i:
+            return i
+    return len(existing_luns)
 
 
 def resize_vm(resource_group_name, vm_name, size, no_wait=False):

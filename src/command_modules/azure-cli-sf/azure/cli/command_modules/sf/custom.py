@@ -13,8 +13,8 @@ import sys
 try:
     from urllib.parse import urlparse, urlencode, urlunparse
 except ImportError:
+    from urllib import urlencode  # pylint: disable=no-name-in-module
     from urlparse import urlparse, urlunparse  # pylint: disable=import-error
-    from urllib import urlencode  # pylint: disable=no-name-in-module, ungrouped-imports
 
 import requests
 import azure.cli.core.azlogging as azlogging

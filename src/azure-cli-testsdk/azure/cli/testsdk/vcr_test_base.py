@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=wrong-import-order
-
 from __future__ import print_function
 
 import collections
@@ -16,16 +14,17 @@ import sys
 import tempfile
 import traceback
 import logging
-from random import choice
-from string import digits, ascii_lowercase
-
-from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
-
 import unittest
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
+
+from random import choice
+from string import digits, ascii_lowercase
+
+from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
+
 
 import vcr
 import jmespath
