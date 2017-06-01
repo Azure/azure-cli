@@ -567,14 +567,7 @@ class Shell(object):
 
             config = Configuration()
             self.app.initialize(config)
-            self.app.session = {
-                'headers': {
-                    'x-ms-client-request-id': str(uuid.uuid1())
-                },
-                'command': 'unknown',
-                'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
-                'query_active': False
-            }
+            self.app.session['headers'] = {'x-ms-client-request-id': str(uuid.uuid1())}
             result = self.app.execute(args)
             self.app.initialize(Configuration())
 
