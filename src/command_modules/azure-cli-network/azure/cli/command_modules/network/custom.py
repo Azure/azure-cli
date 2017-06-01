@@ -1958,8 +1958,8 @@ def create_local_gateway(resource_group_name, local_network_gateway_name, gatewa
 
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
-        AddressSpace(local_address_prefix or []), location=location, tags=tags,
-        gateway_ip_address=gateway_ip_address)
+        local_network_address_space=AddressSpace(local_address_prefix or []),
+        location=location, tags=tags, gateway_ip_address=gateway_ip_address)
     if bgp_peering_address or asn or peer_weight:
         local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
     return client.create_or_update(
