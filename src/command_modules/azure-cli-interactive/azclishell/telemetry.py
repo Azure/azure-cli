@@ -36,7 +36,7 @@ class Telemetry(TelemetryClient):
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
-        self.track_event('az/interactive/gesture/{}'.format(gesture), {gesture: scrub(cmd)})
+        self.track_event('az/interactive/gesture', {gesture: scrub(cmd)})
 
     @_user_agrees_to_telemetry
     def track_key(self, key):
@@ -52,8 +52,8 @@ class Telemetry(TelemetryClient):
     def conclude(self):
         """ concludings recording stuff """
         self.end_time = str(datetime.datetime.now())
-        self.track_event('Run', {'start time': self.start_time,
-                                 'end time': self.end_time})
+        self.track_event('Run', {'StartTime': str(self.start_time),
+                                 'EndTime': str(self.end_time)})
         telthread = TelThread(self.flush)
         telthread.start()
 
