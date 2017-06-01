@@ -19,7 +19,7 @@ from azure.cli.core.help_files import helps
 from azure.cli.core.commands.arm import add_id_parameters
 
 
-WHITE_DATA_FILE = 'allowed-error.json'
+WHITE_DATA_FILE = os.path.join(os.path.dirname(__file__), 'allowed-error.json')
 
 
 def dump_no_help(modules):
