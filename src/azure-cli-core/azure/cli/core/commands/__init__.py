@@ -159,8 +159,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
             results = []
+            max_events = 50  # default max value for events in list_activity_log
             for index, item in enumerate(activity_log):
-                if index < 50:
+                if index < max_events:
                     results.append(item)
                 else:
                     break
