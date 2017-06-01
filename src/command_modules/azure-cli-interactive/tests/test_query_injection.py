@@ -148,16 +148,14 @@ class QueryInjection(unittest.TestCase):
 
     def test_spaces(self):
         """ tests quotes with spaces """
-        args = 'vm show -g "??[?group == \"mygroup is\"].name"'
-        args = parse_quotes(args, priority_string='??')
-        print(args)
+        args = 'vm show -g "??[?group == \'mygroup\'].name"'
+        args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
             args_no_quotes.append(arg.strip("/'").strip('/"'))
-        print(args_no_quotes)
         self.shell.last.result = [
             {
-                'group': 'mygroup is',
+                'group': 'mygroup',
                 'name': 'fred'
             },
             {
@@ -165,9 +163,10 @@ class QueryInjection(unittest.TestCase):
                 'name': 'myname3'
             }
         ]
+
         self.shell.handle_jmespath_query(args_no_quotes, False)
         results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'fred')
+        self.assertEqual(results[0], u'vm show -g fred')
 
 
 if __name__ == '__main__':

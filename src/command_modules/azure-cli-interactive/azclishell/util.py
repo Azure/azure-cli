@@ -52,12 +52,10 @@ def _size_windows():
         return lines, columns
 
 
-def parse_quotes(cmd, quotes=True, string=True, priority_string=None):
+def parse_quotes(cmd, quotes=True, string=True):
     """ parses quotes """
     import shlex
 
-    # if priority_string:
-    #     shlex.split(cmd)
     if quotes:
         args = shlex.split(cmd)
     else:

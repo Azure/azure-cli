@@ -416,7 +416,7 @@ class Shell(object):
     def _special_cases(self, text, cmd, outside):
         break_flag = False
         continue_flag = False
-        args = parse_quotes(text, priority_string=SELECT_SYMBOL['query'])
+        args = parse_quotes(text)
         args_no_quotes = []
         for arg in args:
             args_no_quotes.append(arg.strip("/'").strip('/"'))
