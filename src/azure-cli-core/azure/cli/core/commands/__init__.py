@@ -32,8 +32,6 @@ from ._introspection import (extract_args_from_signature,
 logger = azlogging.get_az_logger(__name__)
 
 
-# pylint: disable=too-many-arguments,too-few-public-methods
-
 CONFIRM_PARAM_NAME = 'yes'
 
 BLACKLISTED_MODS = ['context', 'container', 'shell', 'documentdb']
@@ -68,7 +66,7 @@ class VersionConstraint(object):
             cli_command(*args, **kwargs)
 
 
-class CliArgumentType(object):
+class CliArgumentType(object):  # pylint: disable=too-few-public-methods
     REMOVE = '---REMOVE---'
 
     def __init__(self, overrides=None, **kwargs):
@@ -86,7 +84,7 @@ class CliArgumentType(object):
         self.settings.update(**kwargs)
 
 
-class CliCommandArgument(object):
+class CliCommandArgument(object):  # pylint: disable=too-few-public-methods
     _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
 
     def __init__(self, dest=None, argtype=None, **kwargs):

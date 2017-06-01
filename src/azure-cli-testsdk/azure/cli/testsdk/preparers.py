@@ -184,10 +184,9 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 # KeyVault Preparer and its shorthand decorator
 
 class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self,  # pylint: disable=too-many-arguments
-                 name_prefix='clitest', sku='standard', location='westus',
-                 parameter_name='key_vault', resource_group_parameter_name='resource_group',
-                 skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
+    def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
+                 resource_group_parameter_name='resource_group', skip_delete=True,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
         self.location = location
         self.sku = sku
