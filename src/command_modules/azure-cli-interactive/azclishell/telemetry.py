@@ -35,12 +35,12 @@ class Telemetry(TelemetryClient):
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
-        self.track_event('Shell Specific Gesture', {gesture: cmd})
+        self.track_event('az/interactive/gesture/{}'.format(gesture), {gesture: cmd})
 
     @_user_agrees_to_telemetry
     def track_key(self, key):
         """ tracks the special key bindings """
-        self.track_event('Key Press', {"key": key})
+        self.track_event('az/interactive/key/{}'.format(key))
 
     @_user_agrees_to_telemetry
     def start(self):
@@ -53,8 +53,8 @@ class Telemetry(TelemetryClient):
         self.end_time = str(datetime.datetime.now())
         self.track_event('Run', {'start time': self.start_time,
                                  'end time': self.end_time})
-        TELTHREAD = TelThread(self.flush)
-        TELTHREAD.start()
+        telthread = TelThread(self.flush)
+        telthread.start()
 
 
 class TelThread(threading.Thread):
