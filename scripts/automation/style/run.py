@@ -71,9 +71,7 @@ if __name__ == '__main__':
         return_code_sum = run_pylint(selected_modules)
 
         # Run flake8 on modules
-        pep8_ready_modules = automation_path.filter_blacklisted_modules('network')
-
-        return_code_sum += run_pep8(pep8_ready_modules)
+        return_code_sum += run_pep8(selected_modules)
 
         sys.exit(return_code_sum)
 

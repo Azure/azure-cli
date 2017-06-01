@@ -125,7 +125,7 @@ class TestBatchValidators(unittest.TestCase):
         self.assertEqual(ns.ocp_range, "bytes=0-150")
 
         del ns.ocp_range
-        ns.start_range = 11  # pylint: disable=redefined-variable-type
+        ns.start_range = 11
         ns.end_range = 22
         _validators.validate_options(ns)
         self.assertFalse(hasattr(ns, 'start_range'))

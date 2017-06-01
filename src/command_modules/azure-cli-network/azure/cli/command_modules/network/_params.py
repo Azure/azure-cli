@@ -44,23 +44,33 @@ from azure.cli.command_modules.network.custom import list_traffic_manager_endpoi
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 from azure.cli.core.util import get_json_object
 
-ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
-ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
-ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol, \
-ExpressRouteCircuitSkuFamily, \
-ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution, \
-ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, \
-SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, \
-IPAllocationMethod, RouteNextHopType, Direction, Protocol, IPVersion = \
-    get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySkuName',
-            'ApplicationGatewayCookieBasedAffinity', 'ApplicationGatewayFirewallMode',
-            'ApplicationGatewayProtocol', 'ApplicationGatewayRequestRoutingRuleType',
-            'ApplicationGatewaySslProtocol', 'ExpressRouteCircuitSkuFamily',
-            'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitPeeringType', 'IPVersion',
-            'LoadDistribution', 'ProbeProtocol', 'TransportProtocol', 'SecurityRuleAccess',
-            'SecurityRuleProtocol', 'SecurityRuleDirection', 'VirtualNetworkGatewayType',
-            'VirtualNetworkGatewaySkuName', 'VpnType', 'IPAllocationMethod', 'RouteNextHopType',
-            'Direction', 'Protocol', 'IPVersion', mod='models')
+(ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, ApplicationGatewayFirewallMode,
+ ApplicationGatewayProtocol, ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol,
+ ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
+ ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection,
+ VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, IPAllocationMethod, RouteNextHopType, Direction,
+ Protocol, IPVersion) = get_sdk(ResourceType.MGMT_NETWORK,
+                                'ApplicationGatewaySkuName',
+                                'ApplicationGatewayCookieBasedAffinity',
+                                'ApplicationGatewayFirewallMode',
+                                'ApplicationGatewayProtocol',
+                                'ApplicationGatewayRequestRoutingRuleType',
+                                'ApplicationGatewaySslProtocol',
+                                'ExpressRouteCircuitSkuFamily',
+                                'ExpressRouteCircuitSkuTier',
+                                'ExpressRouteCircuitPeeringType',
+                                'IPVersion',
+                                'LoadDistribution', 'ProbeProtocol',
+                                'TransportProtocol',
+                                'SecurityRuleAccess',
+                                'SecurityRuleProtocol',
+                                'SecurityRuleDirection',
+                                'VirtualNetworkGatewayType',
+                                'VirtualNetworkGatewaySkuName',
+                                'VpnType', 'IPAllocationMethod',
+                                'RouteNextHopType',
+                                'Direction', 'Protocol', 'IPVersion',
+                                mod='models')
 
 # CHOICE LISTS
 
@@ -70,8 +80,9 @@ device_path_values = ['primary', 'secondary']
 
 # COMPLETERS
 
+
 def get_subnet_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         if parsed_args.resource_group_name and parsed_args.virtual_network_name:
             rg = parsed_args.resource_group_name
@@ -79,8 +90,9 @@ def get_subnet_completion_list():
             return [r.name for r in client.subnets.list(resource_group_name=rg, virtual_network_name=vnet)]
     return completer
 
+
 def get_lb_subresource_completion_list(prop):
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         try:
             lb_name = parsed_args.load_balancer_name
@@ -93,7 +105,7 @@ def get_lb_subresource_completion_list(prop):
 
 
 def get_ag_subresource_completion_list(prop):
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         try:
             ag_name = parsed_args.application_gateway_name
@@ -104,8 +116,9 @@ def get_ag_subresource_completion_list(prop):
             return [r.name for r in getattr(ag, prop)]
     return completer
 
+
 def get_ag_url_map_rule_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         try:
             ag_name = parsed_args.application_gateway_name
@@ -113,16 +126,18 @@ def get_ag_url_map_rule_completion_list():
             ag_name = parsed_args.resource_name
         if parsed_args.resource_group_name and ag_name:
             ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
-            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None) # pylint: disable=no-member
+            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None)  # pylint: disable=no-member
             return [r.name for r in url_map.path_rules]
     return completer
 
+
 def get_tm_endpoint_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         return list_traffic_manager_endpoints(parsed_args.resource_group_name, parsed_args.profile_name) \
             if parsed_args.resource_group_name and parsed_args.profile_name \
             else []
     return completer
+
 
 # BASIC PARAMETER CONFIGURATION
 

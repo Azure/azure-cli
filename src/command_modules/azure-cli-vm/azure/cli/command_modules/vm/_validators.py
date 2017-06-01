@@ -433,7 +433,7 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
     location = namespace.location
     nics = getattr(namespace, 'nics', None)
 
-    if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
+    if not vnet and not subnet and not nics:
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         client = get_network_client().virtual_networks
 
@@ -443,15 +443,15 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
             # 1 - find a suitable existing vnet/subnet
             result = None
             if not for_scale_set:
-                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'),
-                              None)
+                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'), None)
             else:
-                for s in vnet_match.subnets:
-                    if s.name.lower() != 'gatewaysubnet':
-                        subnet_mask = s.address_prefix.split('/')[-1]
-                        if _subnet_capacity_check(subnet_mask, namespace.instance_count):
-                            result = s
-                            break
+                def _check_subnet(s):
+                    if s.name.lower() == 'gatewaysubnet':
+                        return False
+                    subnet_mask = s.address_prefix.split('/')[-1]
+                    return _subnet_capacity_check(subnet_mask, namespace.instance_count)
+
+                result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
             if not result:
                 continue
             namespace.subnet = result.name

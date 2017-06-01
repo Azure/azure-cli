@@ -439,7 +439,6 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, snapshot_name2, disk_name, 'Premium_LRS'))
 
         # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
-        # pylint: disable=too-many-format-args
         self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux --tags tag1=i1'.format(
             self.resource_group, image_name, snapshot_name, disk_name, data_snapshot['id'], data_disk2['id']), checks=[
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),

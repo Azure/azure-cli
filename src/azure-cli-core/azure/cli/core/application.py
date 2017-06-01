@@ -160,14 +160,15 @@ class Application(object):
 
         # Rudimentary parsing to get the command
         nouns = []
-        for i in range(len(argv)):  # pylint: disable=consider-using-enumerate
+        for i, current in enumerate(argv):
             try:
-                if argv[i][0] == '-':
+                if current[0] == '-':
                     break
             except IndexError:
                 pass
-            argv[i] = argv[i].lower()
+            argv[i] = current.lower()
             nouns.append(argv[i])
+
         command = ' '.join(nouns)
 
         if argv[-1] in ('--help', '-h') or command in command_table:

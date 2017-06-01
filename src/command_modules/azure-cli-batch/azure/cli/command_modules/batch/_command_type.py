@@ -728,13 +728,14 @@ class AzureBatchDataPlaneCommand(object):
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
 
-    def _flatten_object(self, path, param_model,  # pylint: disable=dangerous-default-value
-                        conflict_names=[]):
+    def _flatten_object(self, path, param_model, conflict_names=None):
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
         :param list conflict_name: List of argument names that conflict.
         """
+        conflict_names = conflict_names or []
+
         if self._should_flatten(path):
             validations = param_model._validation.items()  # pylint: disable=protected-access
             required_attrs = [key for key, val in validations if val.get('required')]

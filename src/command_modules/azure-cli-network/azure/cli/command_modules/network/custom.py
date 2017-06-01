@@ -27,13 +27,6 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
-
-def _log_pprint_template(template):
-    import json
-    logger.info('==== BEGIN TEMPLATE ====')
-    logger.info(json.dumps(template, indent=2))
-    logger.info('==== END TEMPLATE ====')
-
 VirtualNetworkPeering, ApplicationGatewayFirewallMode, \
     ApplicationGatewaySkuName, IPVersion = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -70,8 +63,14 @@ SecurityRuleDirection, Probe, VpnClientConfiguration, VpnClientRevokedCertificat
         mod='models')
 
 
-def _upsert(parent, collection_name, obj_to_add, key_name):
+def _log_pprint_template(template):
+    import json
+    logger.info('==== BEGIN TEMPLATE ====')
+    logger.info(json.dumps(template, indent=2))
+    logger.info('==== END TEMPLATE ====')
 
+
+def _upsert(parent, collection_name, obj_to_add, key_name):
     if not getattr(parent, collection_name, None):
         setattr(parent, collection_name, [])
     collection = getattr(parent, collection_name, None)
@@ -99,7 +98,7 @@ def _get_default_value(balancer, property_name, option_name):
     return values[0]
 
 
-#region Generic list commands
+# region Generic list commands
 def _generic_list(operation_name, resource_group_name):
     ncf = _network_client_factory()
     operation_group = getattr(ncf, operation_name)
@@ -108,36 +107,46 @@ def _generic_list(operation_name, resource_group_name):
 
     return operation_group.list_all()
 
+
 def list_vnet(resource_group_name=None):
     return _generic_list('virtual_networks', resource_group_name)
+
 
 def list_express_route_circuits(resource_group_name=None):
     return _generic_list('express_route_circuits', resource_group_name)
 
+
 def list_lbs(resource_group_name=None):
     return _generic_list('load_balancers', resource_group_name)
+
 
 def list_nics(resource_group_name=None):
     return _generic_list('network_interfaces', resource_group_name)
 
+
 def list_nsgs(resource_group_name=None):
     return _generic_list('network_security_groups', resource_group_name)
+
 
 def list_public_ips(resource_group_name=None):
     return _generic_list('public_ip_addresses', resource_group_name)
 
+
 def list_route_tables(resource_group_name=None):
     return _generic_list('route_tables', resource_group_name)
+
 
 def list_application_gateways(resource_group_name=None):
     return _generic_list('application_gateways', resource_group_name)
 
+
 def list_network_watchers(resource_group_name=None):
     return _generic_list('network_watchers', resource_group_name)
 
-#endregion
 
-#region Application Gateway commands
+# endregion
+
+# region Application Gateway commands
 
 # pylint: disable=too-many-locals
 def create_application_gateway(application_gateway_name, resource_group_name, location=None,
@@ -247,9 +256,11 @@ def create_ag_authentication_certificate(resource_group_name, application_gatewa
     _upsert(ag, 'authentication_certificates', new_cert, 'name')
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_authentication_certificate(instance, parent, item_name, cert_data): # pylint: disable=unused-argument
+
+def update_ag_authentication_certificate(instance, parent, item_name, cert_data):  # pylint: disable=unused-argument
     instance.data = cert_data
     return parent
+
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
                                    servers, no_wait=False):
@@ -264,15 +275,17 @@ def create_ag_backend_address_pool(resource_group_name, application_gateway_name
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_backend_address_pool(instance, parent, item_name, servers=None): # pylint: disable=unused-argument
+
+def update_ag_backend_address_pool(instance, parent, item_name, servers=None):  # pylint: disable=unused-argument
     if servers is not None:
         instance.backend_addresses = servers
     return parent
 
+
 def create_ag_frontend_ip_configuration(resource_group_name, application_gateway_name, item_name,
                                         public_ip_address=None, subnet=None,
-                                        virtual_network_name=None, private_ip_address=None, # pylint: disable=unused-argument
-                                        private_ip_address_allocation=None, no_wait=False): # pylint: disable=unused-argument
+                                        virtual_network_name=None, private_ip_address=None,  # pylint: disable=unused-argument
+                                        private_ip_address_allocation=None, no_wait=False):  # pylint: disable=unused-argument
     ApplicationGatewayFrontendIPConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayFrontendIPConfiguration',
@@ -293,8 +306,9 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_address=None, # pylint: disable=unused-argument
-                                        subnet=None, virtual_network_name=None, # pylint: disable=unused-argument
+
+def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_address=None,  # pylint: disable=unused-argument
+                                        subnet=None, virtual_network_name=None,  # pylint: disable=unused-argument
                                         private_ip_address=None):
     if public_ip_address is not None:
         instance.public_ip_address = SubResource(public_ip_address)
@@ -304,6 +318,7 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
         instance.private_ip_address = private_ip_address
         instance.private_ip_allocation_method = 'Static'
     return parent
+
 
 def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port,
                             no_wait=False):
@@ -318,10 +333,12 @@ def create_ag_frontend_port(resource_group_name, application_gateway_name, item_
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: disable=unused-argument
+
+def update_ag_frontend_port(instance, parent, item_name, port=None):  # pylint: disable=unused-argument
     if port is not None:
         instance.port = port
     return parent
+
 
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
@@ -346,7 +363,8 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None, # pylint: disable=unused-argument
+
+def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None,  # pylint: disable=unused-argument
                             host_name=None, ssl_cert=None):
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(frontend_ip)
@@ -361,9 +379,9 @@ def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, front
             instance.protocol = 'Http'
     if host_name is not None:
         instance.host_name = host_name or None
-    instance.require_server_name_indication = instance.host_name and \
-        instance.protocol.lower() == 'https'
+    instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
+
 
 def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
                                                item_name, port, probe=None, protocol='http',
@@ -392,7 +410,8 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None, # pylint: disable=unused-argument
+
+def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None,  # pylint: disable=unused-argument
                                                protocol=None, cookie_based_affinity=None,
                                                timeout=None, connection_draining_timeout=None):
     if port is not None:
@@ -409,6 +428,7 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
         instance.connection_draining.enabled = bool(connection_draining_timeout)
         instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout
     return parent
+
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False):
@@ -430,7 +450,8 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=None, # pylint: disable=unused-argument
+
+def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=None,  # pylint: disable=unused-argument
                     interval=None, timeout=None, threshold=None):
     if protocol is not None:
         instance.protocol = protocol
@@ -445,6 +466,7 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
     if threshold is not None:
         instance.unhealthy_threshold = threshold
     return parent
+
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
                                    address_pool=None, http_settings=None, http_listener=None,
@@ -473,7 +495,8 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_request_routing_rule(instance, parent, item_name, address_pool=None, # pylint: disable=unused-argument
+
+def update_ag_request_routing_rule(instance, parent, item_name, address_pool=None,  # pylint: disable=unused-argument
                                    http_settings=None, http_listener=None, url_path_map=None,
                                    rule_type=None):
     if address_pool is not None:
@@ -487,6 +510,7 @@ def update_ag_request_routing_rule(instance, parent, item_name, address_pool=Non
     if rule_type is not None:
         instance.rule_type = rule_type
     return parent
+
 
 def create_ag_ssl_certificate(resource_group_name, application_gateway_name, item_name, cert_data,
                               cert_password, no_wait=False):
@@ -502,12 +526,14 @@ def create_ag_ssl_certificate(resource_group_name, application_gateway_name, ite
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None): # pylint: disable=unused-argument
+
+def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):  # pylint: disable=unused-argument
     if cert_data is not None:
         instance.data = cert_data
     if cert_password is not None:
         instance.password = cert_password
     return parent
+
 
 def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
                       clear=False, no_wait=False):
@@ -520,13 +546,15 @@ def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ss
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
+
 def show_ag_ssl_policy(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(
         resource_group_name, application_gateway_name).ssl_policy
 
+
 def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
                            paths, address_pool, http_settings, rule_name='default',
-                           default_address_pool=None, default_http_settings=None, no_wait=False): # pylint: disable=unused-argument
+                           default_address_pool=None, default_http_settings=None, no_wait=False):  # pylint: disable=unused-argument
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', mod='models')
@@ -534,10 +562,10 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_map = ApplicationGatewayUrlPathMap(
         name=item_name,
-        default_backend_address_pool=SubResource(default_address_pool) \
-            if default_address_pool else SubResource(address_pool),
-        default_backend_http_settings=SubResource(default_http_settings) \
-            if default_http_settings else SubResource(http_settings),
+        default_backend_address_pool=SubResource(default_address_pool) if default_address_pool else SubResource(
+            address_pool),
+        default_backend_http_settings=SubResource(default_http_settings) if default_http_settings else SubResource(
+            http_settings),
         path_rules=[ApplicationGatewayPathRule(
             name=rule_name,
             backend_address_pool=SubResource(address_pool),
@@ -548,13 +576,15 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None, # pylint: disable=unused-argument
-                           default_http_settings=None, no_wait=False): # pylint: disable=unused-argument
+
+def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None,  # pylint: disable=unused-argument
+                           default_http_settings=None, no_wait=False):  # pylint: disable=unused-argument
     if default_address_pool is not None:
         instance.default_backend_address_pool = SubResource(default_address_pool)
     if default_http_settings is not None:
         instance.default_backend_http_settings = SubResource(default_http_settings)
     return parent
+
 
 def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None,
@@ -570,13 +600,14 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     new_rule = ApplicationGatewayPathRule(
         name=item_name,
         paths=paths,
-        backend_address_pool=SubResource(address_pool) \
-            if address_pool else SubResource(url_map.default_backend_address_pool.id),
-        backend_http_settings=SubResource(http_settings) \
-            if http_settings else SubResource(url_map.default_backend_http_settings.id))
+        backend_address_pool=SubResource(address_pool) if address_pool else SubResource(
+            url_map.default_backend_address_pool.id),
+        backend_http_settings=SubResource(http_settings) if http_settings else SubResource(
+            url_map.default_backend_http_settings.id))
     _upsert(url_map, 'path_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
+
 
 def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name):
@@ -605,6 +636,7 @@ def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, 
 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
+
 def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, enabled,
                                  firewall_mode=None,
                                  rule_set_type='OWASP', rule_set_version=None,
@@ -618,7 +650,7 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(
             enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
-    if disabled_rule_groups or disabled_rules:  # pylint: disable=too-many-nested-blocks
+    if disabled_rule_groups or disabled_rules:
         ApplicationGatewayFirewallDisabledRuleGroup = get_sdk(
             ResourceType.MGMT_NETWORK,
             'ApplicationGatewayFirewallDisabledRuleGroup', mod='models')
@@ -629,20 +661,23 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
         for group in disabled_rule_groups or []:
             disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
 
+        def _flatten(collection, expand_property_fn):
+            for each in collection:
+                for value in expand_property_fn(each):
+                    yield value
+
         # for disabled rules, we have to look up the IDs
         if disabled_rules:
-            results = list_ag_waf_rule_sets(
-                ncf, _type=rule_set_type, version=rule_set_version, group='*')
-            for item in results:
-                for group in item.rule_groups:
-                    disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
-                        group.rule_group_name, [])
+            results = list_ag_waf_rule_sets(ncf, _type=rule_set_type, version=rule_set_version, group='*')
+            for group in _flatten(results, lambda r: r.rule_groups):
+                disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
+                    group.rule_group_name, [])
 
-                    for rule in group.rules:
-                        if str(rule.rule_id) in disabled_rules:
-                            disabled_group.rules.append(rule.rule_id)
-                    if disabled_group.rules:
-                        disabled_groups.append(disabled_group)
+                for rule in group.rules:
+                    if str(rule.rule_id) in disabled_rules:
+                        disabled_group.rules.append(rule.rule_id)
+                if disabled_group.rules:
+                    disabled_groups.append(disabled_group)
         ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
@@ -677,9 +712,10 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
     return filtered_results
 
-#endregion
 
-#region Load Balancer subresource commands
+# endregion
+
+# region Load Balancer subresource commands
 
 def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
@@ -759,7 +795,7 @@ def create_lb_inbound_nat_rule(
     if not frontend_ip_name:
         frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
                                               '--frontend-ip-name')
-    frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) # pylint: disable=no-member
+    frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
     new_rule = InboundNatRule(
         name=item_name, protocol=protocol,
         frontend_port=frontend_port, backend_port=backend_port,
@@ -770,8 +806,9 @@ def create_lb_inbound_nat_rule(
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_rules, item_name)
 
+
 def set_lb_inbound_nat_rule(
-        instance, parent, item_name, protocol=None, frontend_port=None, # pylint: disable=unused-argument
+        instance, parent, item_name, protocol=None, frontend_port=None,  # pylint: disable=unused-argument
         frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
@@ -786,6 +823,7 @@ def set_lb_inbound_nat_rule(
     _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
 
     return parent
+
 
 def create_lb_inbound_nat_pool(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
@@ -805,8 +843,9 @@ def create_lb_inbound_nat_pool(
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_pools, item_name)
 
+
 def set_lb_inbound_nat_pool(
-        instance, parent, item_name, protocol=None, # pylint: disable=unused-argument
+        instance, parent, item_name, protocol=None,  # pylint: disable=unused-argument
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
         frontend_ip_name=None):
     _set_param(instance, 'protocol', protocol)
@@ -822,9 +861,10 @@ def set_lb_inbound_nat_pool(
 
     return parent
 
+
 def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        subnet=None, virtual_network_name=None, private_ip_address=None, # pylint: disable=unused-argument
+        subnet=None, virtual_network_name=None, private_ip_address=None,  # pylint: disable=unused-argument
         private_ip_address_allocation='dynamic'):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -840,9 +880,9 @@ def create_lb_frontend_ip_configuration(
 
 
 def set_lb_frontend_ip_configuration(
-        instance, parent, item_name, private_ip_address=None, # pylint: disable=unused-argument
+        instance, parent, item_name, private_ip_address=None,  # pylint: disable=unused-argument
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None): # pylint: disable=unused-argument
+        virtual_network_name=None):  # pylint: disable=unused-argument
     if private_ip_address == '':
         instance.private_ip_allocation_method = private_ip_address_allocation
         instance.private_ip_address = None
@@ -862,6 +902,7 @@ def set_lb_frontend_ip_configuration(
 
     return parent
 
+
 def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item_name):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -869,6 +910,7 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     _upsert(lb, 'backend_address_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
+
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
@@ -881,7 +923,8 @@ def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().probes, item_name)
 
-def set_lb_probe(instance, parent, item_name, protocol=None, port=None, # pylint: disable=unused-argument
+
+def set_lb_probe(instance, parent, item_name, protocol=None, port=None,  # pylint: disable=unused-argument
                  path=None, interval=None, threshold=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'port', port)
@@ -890,6 +933,7 @@ def set_lb_probe(instance, parent, item_name, protocol=None, port=None, # pylint
     _set_param(instance, 'number_of_probes', threshold)
 
     return parent
+
 
 def create_lb_rule(
         resource_group_name, load_balancer_name, item_name,
@@ -921,8 +965,9 @@ def create_lb_rule(
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().load_balancing_rules, item_name)
 
+
 def set_lb_rule(
-        instance, parent, item_name, protocol=None, frontend_port=None, # pylint: disable=unused-argument
+        instance, parent, item_name, protocol=None, frontend_port=None,  # pylint: disable=unused-argument
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None):
     _set_param(instance, 'protocol', protocol)
@@ -948,9 +993,11 @@ def set_lb_rule(
         instance.probe = _get_property(parent.probes, probe_name)
 
     return parent
-#endregion
 
-#region NIC commands
+
+# endregion
+
+# region NIC commands
 
 # pylint: disable=unused-argument
 def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
@@ -992,7 +1039,6 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
 
 def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
                internal_dns_name_label=None):
-
     if enable_ip_forwarding is not None:
         instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
 
@@ -1010,7 +1056,7 @@ def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
 
 
 def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
+                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,  # pylint: disable=unused-argument
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
@@ -1047,11 +1093,12 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
         resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
-def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: disable=unused-argument
-                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
+
+def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,  # pylint: disable=unused-argument
+                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None,  # pylint: disable=unused-argument
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
-                      private_ip_address=None, private_ip_address_allocation=None, # pylint: disable=unused-argument
+                      private_ip_address=None, private_ip_address_allocation=None,  # pylint: disable=unused-argument
                       private_ip_address_version='ipv4', make_primary=False):
     if make_primary:
         for config in parent.ip_configurations:
@@ -1091,6 +1138,7 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
 
     return parent
 
+
 def _get_nic_ip_config(nic, name):
     if nic.ip_configurations:
         ip_config = next(
@@ -1101,9 +1149,10 @@ def _get_nic_ip_config(nic, name):
         raise CLIError('IP configuration {} not found.'.format(name))
     return ip_config
 
+
 def add_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None): # pylint: disable=unused-argument
+        load_balancer_name=None):  # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
@@ -1113,22 +1162,22 @@ def add_nic_ip_config_address_pool(
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
+
 def remove_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None): # pylint: disable=unused-argument
+        load_balancer_name=None):  # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
-    keep_items = \
-        [x for x in ip_config.load_balancer_backend_address_pools or [] \
-            if x.id != backend_address_pool]
+    keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
     ip_config.load_balancer_backend_address_pools = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return  _get_property(poller.result().ip_configurations, ip_config_name)
+    return _get_property(poller.result().ip_configurations, ip_config_name)
+
 
 def add_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None): # pylint: disable=unused-argument
+        load_balancer_name=None):  # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
@@ -1136,11 +1185,12 @@ def add_nic_ip_config_inbound_nat_rule(
             InboundNatRule(inbound_nat_rule),
             'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return  _get_property(poller.result().ip_configurations, ip_config_name)
+    return _get_property(poller.result().ip_configurations, ip_config_name)
+
 
 def remove_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None): # pylint: disable=unused-argument
+        load_balancer_name=None):  # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
@@ -1148,10 +1198,12 @@ def remove_nic_ip_config_inbound_nat_rule(
         [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
-    return  _get_property(poller.result().ip_configurations, ip_config_name)
-#endregion
+    return _get_property(poller.result().ip_configurations, ip_config_name)
 
-#region Network Security Group commands
+
+# endregion
+
+# region Network Security Group commands
 
 def create_nsg(resource_group_name, network_security_group_name, location=None, tags=None):
     client = _network_client_factory().network_security_groups
@@ -1164,8 +1216,7 @@ def create_nsg_rule(resource_group_name, network_security_group_name, security_r
                     access=SecurityRuleAccess.allow.value,
                     direction=SecurityRuleDirection.inbound.value,
                     source_port_range='*', source_address_prefix='*',
-                    destination_port_range=80, destination_address_prefix='*',
-                   ):
+                    destination_port_range=80, destination_address_prefix='*'):
     settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
                             destination_address_prefix=destination_address_prefix, access=access,
                             direction=direction,
@@ -1175,16 +1226,18 @@ def create_nsg_rule(resource_group_name, network_security_group_name, security_r
     ncf = _network_client_factory()
     return ncf.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
+
+
 create_nsg_rule.__doc__ = SecurityRule.__doc__
+
 
 def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
                     destination_address_prefix=None, access=None, direction=None, description=None,
                     source_port_range=None, destination_port_range=None, priority=None):
-    #No client validation as server side returns pretty good errors
+    # No client validation as server side returns pretty good errors
     instance.protocol = protocol if protocol is not None else instance.protocol
-    #pylint: disable=line-too-long
-    instance.source_address_prefix = (source_address_prefix if source_address_prefix is not None \
-        else instance.source_address_prefix)
+    instance.source_address_prefix = (source_address_prefix if source_address_prefix is not None
+                                      else instance.source_address_prefix)
     instance.destination_address_prefix = destination_address_prefix \
         if destination_address_prefix is not None else instance.destination_address_prefix
     instance.access = access if access is not None else instance.access
@@ -1196,10 +1249,14 @@ def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
         if destination_port_range is not None else instance.destination_port_range
     instance.priority = priority if priority is not None else instance.priority
     return instance
-update_nsg_rule.__doc__ = SecurityRule.__doc__
-#endregion
 
-#region Public IP commands
+
+update_nsg_rule.__doc__ = SecurityRule.__doc__
+
+
+# endregion
+
+# region Public IP commands
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
@@ -1223,6 +1280,7 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
             reverse_fqdn=reverse_fqdn)
     return client.create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
+
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
                      idle_timeout=None, reverse_fqdn=None, tags=None):
     if dns_name is not None or reverse_fqdn is not None:
@@ -1243,9 +1301,10 @@ def update_public_ip(instance, dns_name=None, allocation_method=None, version=No
         instance.tags = tags
     return instance
 
-#endregion
 
-#region Vnet Peering commands
+# endregion
+
+# region Vnet Peering commands
 
 def create_vnet_peering(resource_group_name, virtual_network_name, virtual_network_peering_name,
                         remote_virtual_network, allow_virtual_network_access=False,
@@ -1267,10 +1326,14 @@ def create_vnet_peering(resource_group_name, virtual_network_name, virtual_netwo
     ncf = _network_client_factory()
     return ncf.virtual_network_peerings.create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
-create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
-#endregion
 
-#region Vnet/Subnet commands
+
+create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
+
+
+# endregion
+
+# region Vnet/Subnet commands
 
 # pylint: disable=too-many-locals
 def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
@@ -1289,11 +1352,12 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
 
 
 def update_vnet(instance, vnet_prefixes=None):
-    #server side validation reports pretty good error message on invalid CIDR,
-    #so we don't validate at client side
+    # server side validation reports pretty good error message on invalid CIDR,
+    # so we don't validate at client side
     if vnet_prefixes:
         instance.address_space.address_prefixes = vnet_prefixes
     return instance
+
 
 def _set_route_table(ncf, resource_group_name, route_table, subnet):
     if route_table:
@@ -1307,6 +1371,7 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
         subnet.route_table = rt
     elif route_table == '':
         subnet.route_table = None
+
 
 def create_subnet(resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
@@ -1326,6 +1391,7 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
+
 def update_subnet(instance, resource_group_name, address_prefix=None, network_security_group=None,
                   route_table=None):
     '''update existing virtual sub network
@@ -1338,13 +1404,16 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(network_security_group)
-    elif network_security_group == '': #clear it
+    elif network_security_group == '':  # clear it
         instance.network_security_group = None
 
     _set_route_table(_network_client_factory(), resource_group_name, route_table, instance)
 
     return instance
+
+
 update_nsg_rule.__doc__ = SecurityRule.__doc__
+
 
 # endregion
 
@@ -1436,6 +1505,7 @@ def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=N
 
     return instance
 
+
 def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
                               sa_life_time_seconds, sa_data_size_kilobytes,
                               ipsec_encryption, ipsec_integrity,
@@ -1451,9 +1521,12 @@ def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
         conn.ipsec_policies = [new_policy]
     return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
 
+
 if supported_api_version(ResourceType.MGMT_NETWORK, '2017-03-01'):
     IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
     add_vpn_conn_ipsec_policy.__doc__ = IpsecPolicy.__doc__
+
+
 def list_vpn_conn_ipsec_policies(resource_group_name, connection_name):
     ncf = _network_client_factory().virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
@@ -1489,6 +1562,7 @@ def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
             raise CLIError(
                 'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
 
+
 # region VNet Gateway Commands
 
 def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
@@ -1506,6 +1580,7 @@ def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert
     _upsert(config, 'vpn_client_root_certificates', cert, 'name')
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
+
 def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
@@ -1519,12 +1594,14 @@ def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
+
 def create_vnet_gateway_revoked_cert(resource_group_name, gateway_name, thumbprint, cert_name):
     config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
 
     cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
     _upsert(config, 'vpn_client_revoked_certificates', cert, 'name')
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
 
 def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
     ncf = _network_client_factory().virtual_network_gateways
@@ -1538,6 +1615,7 @@ def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_nam
     config.vpn_client_revoked_certificates.remove(cert)
 
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
+
 
 def _prep_cert_create(gateway_name, resource_group_name):
     ncf = _network_client_factory().virtual_network_gateways
@@ -1564,14 +1642,13 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
                         sku=VirtualNetworkGatewaySkuName.basic.value,
                         vpn_type=VpnType.route_based.value,
                         asn=None, bgp_peering_address=None, peer_weight=None):
-    VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, \
-        VirtualNetworkGatewaySku = get_sdk(
-            ResourceType.MGMT_NETWORK,
-            'VirtualNetworkGateway',
-            'BgpSettings',
-            'VirtualNetworkGatewayIPConfiguration',
-            'VirtualNetworkGatewaySku',
-            mod='models')
+    VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku = get_sdk(
+        ResourceType.MGMT_NETWORK,
+        'VirtualNetworkGateway',
+        'BgpSettings',
+        'VirtualNetworkGatewayIPConfiguration',
+        'VirtualNetworkGatewaySku',
+        mod='models')
 
     client = _network_client_factory().virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
@@ -1659,6 +1736,7 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 
     return instance
 
+
 # endregion
 
 # region Express Route commands
@@ -1667,8 +1745,7 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
                          service_provider_name, location=None, tags=None, no_wait=False,
                          sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
                          sku_tier=ExpressRouteCircuitSkuTier.standard.value):
-    ExpressRouteCircuit, ExpressRouteCircuitSku, \
-    ExpressRouteCircuitServiceProviderProperties = get_sdk(
+    ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ExpressRouteCircuit',
         'ExpressRouteCircuitSku',
@@ -1683,6 +1760,7 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
         sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
     )
     return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
+
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
@@ -1706,6 +1784,7 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
 
     return instance
 
+
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
@@ -1725,8 +1804,7 @@ def create_express_route_peering(
     :param str customer_asn: Autonomous system number of the customer.
     :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
     """
-    ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, \
-    ExpressRouteCircuitPeeringType = get_sdk(
+    ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ExpressRouteCircuitPeering',
         'ExpressRouteCircuitPeeringConfig',
@@ -1738,19 +1816,19 @@ def create_express_route_peering(
     circuit = _network_client_factory().express_route_circuits.get(
         resource_group_name, circuit_name)
     if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
-        circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
+       circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
         raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
     for peering in circuit.peerings:
         if peering.vlan_id == vlan_id:
             raise CLIError(
                 "VLAN ID '{}' already in use by peering '{}'".format(vlan_id, peering.name))
-    #endregion
+    # endregion
 
     peering_config = ExpressRouteCircuitPeeringConfig(
         advertised_public_prefixes=advertised_public_prefixes,
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
-            if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
+        if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
@@ -1762,6 +1840,7 @@ def create_express_route_peering(
         peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
+
 
 def update_express_route_peering(instance, peer_asn=None, primary_peer_address_prefix=None,
                                  secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
@@ -1797,11 +1876,14 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
                        "--routing-registry-name are only applicable for 'MicrosoftPeering'")
 
     return instance
+
+
 update_express_route_peering.__doc__ = create_express_route_peering.__doc__
 
-#endregion
 
-#region Route Table commands
+# endregion
+
+# region Route Table commands
 
 def update_route_table(instance, tags=None):
     if tags == '':
@@ -1810,13 +1892,16 @@ def update_route_table(instance, tags=None):
         instance.tags = tags
     return instance
 
+
 def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
                  next_hop_ip_address=None):
     route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
     ncf = _network_client_factory()
     return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
 
+
 create_route.__doc__ = Route.__doc__
+
 
 def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_address=None):
     if address_prefix is not None:
@@ -1829,11 +1914,13 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
         instance.next_hop_ip_address = next_hop_ip_address
     return instance
 
+
 update_route.__doc__ = Route.__doc__
 
-#endregion
 
-#region RouteFilter Commands
+# endregion
+
+# region RouteFilter Commands
 
 
 def create_route_filter(client, resource_group_name, route_filter_name, location=None, tags=None):
@@ -1855,10 +1942,11 @@ def create_route_filter_rule(client, resource_group_name, route_filter_name, rul
     return client.create_or_update(resource_group_name, route_filter_name, rule_name,
                                    RouteFilterRule(access, communities, location=location, tags=tags))
 
-#endregion
+
+# endregion
 
 
-#region Local Gateway commands
+# region Local Gateway commands
 
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
                          location=None, tags=None, local_address_prefix=None, asn=None,
@@ -1877,9 +1965,9 @@ def create_local_gateway(resource_group_name, local_network_gateway_name, gatewa
     return client.create_or_update(
         resource_group_name, local_network_gateway_name, local_gateway, raw=no_wait)
 
+
 def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, tags=None):
-
     _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
 
     if gateway_ip_address is not None:
@@ -1890,9 +1978,10 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
         instance.tags = tags
     return instance
 
-#endregion
 
-#region Traffic Manager Commands
+# endregion
+
+# region Traffic Manager Commands
 
 def list_traffic_manager_profiles(resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
@@ -1939,6 +2028,7 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
 
     return instance
 
+
 def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
@@ -1957,6 +2047,7 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
 
     return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                 endpoint)
+
 
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
@@ -1983,19 +2074,22 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
 
     return instance
 
+
 def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_type=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     profile = client.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
-#endregion
 
-#region DNS Commands
+
+# endregion
+
+# region DNS Commands
 
 def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
                     if_none_match=False):
     kwargs = {
-        'resource_group_name':resource_group_name,
+        'resource_group_name': resource_group_name,
         'zone_name': zone_name,
         'parameters': Zone(location, tags=tags)
     }
@@ -2005,12 +2099,14 @@ def create_dns_zone(client, resource_group_name, zone_name, location='global', t
 
     return client.create_or_update(**kwargs)
 
+
 def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:
         return ncf.list_by_resource_group(resource_group_name)
 
     return ncf.list()
+
 
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
@@ -2019,13 +2115,17 @@ def create_dns_record_set(resource_group_name, zone_name, record_set_name, recor
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_set_type, record_set, if_match=if_match,
                                 if_none_match='*' if if_none_match else None)
+
+
 create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
+
 
 def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
     if record_type:
         return client.list_by_type(resource_group_name, zone_name, record_type)
 
     return client.list_by_dns_zone(resource_group_name, zone_name)
+
 
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
@@ -2034,7 +2134,6 @@ def update_dns_record_set(instance, metadata=None):
 
 
 def _type_to_property_name(key):
-
     type_dict = {
         'a': 'arecords',
         'aaaa': 'aaaa_records',
@@ -2119,7 +2218,6 @@ def export_zone(resource_group_name, zone_name):
 
 # pylint: disable=too-many-return-statements
 def _build_record(data):
-
     record_type = data['type'].lower()
     try:
         if record_type == 'aaaa':
@@ -2145,6 +2243,7 @@ def _build_record(data):
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
+
 
 # pylint: disable=too-many-statements
 def import_zone(resource_group_name, zone_name, file_name):
@@ -2239,11 +2338,13 @@ def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_ad
     record_type = 'aaaa'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
+
 def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address):
     record = ARecord(ipv4_address)
     record_type = 'a'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             'arecords')
+
 
 def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
     record = CnameRecord(cname)
@@ -2251,20 +2352,24 @@ def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname)
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False)
 
+
 def add_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange):
     record = MxRecord(int(preference), exchange)
     record_type = 'mx'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
 
 def add_dns_ns_record(resource_group_name, zone_name, record_set_name, dname):
     record = NsRecord(dname)
     record_type = 'ns'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
+
 def add_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
     record = PtrRecord(dname)
     record_type = 'ptr'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
 
 def update_dns_soa_record(resource_group_name, zone_name, host=None, email=None,
                           serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
@@ -2287,11 +2392,13 @@ def update_dns_soa_record(resource_group_name, zone_name, host=None, email=None,
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False)
 
+
 def add_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target):
     record = SrvRecord(priority, weight, port, target)
     record_type = 'srv'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
+
 
 def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     record = TxtRecord(value)
@@ -2309,12 +2416,14 @@ def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     assert original_len == final_len
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
+
 def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address,
                            keep_empty_record_set=False):
     record = AaaaRecord(ipv6_address)
     record_type = 'aaaa'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
+
 
 def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address,
                         keep_empty_record_set=False):
@@ -2323,12 +2432,14 @@ def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_ad
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
+
 def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname,
                             keep_empty_record_set=False):
     record = CnameRecord(cname)
     record_type = 'cname'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           is_list=False, keep_empty_record_set=keep_empty_record_set)
+
 
 def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange,
                          keep_empty_record_set=False):
@@ -2337,12 +2448,14 @@ def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, prefer
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
+
 def remove_dns_ns_record(resource_group_name, zone_name, record_set_name, dname,
                          keep_empty_record_set=False):
     record = NsRecord(dname)
     record_type = 'ns'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
+
 
 def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname,
                           keep_empty_record_set=False):
@@ -2351,12 +2464,14 @@ def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
+
 def remove_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
                           port, target, keep_empty_record_set=False):
     record = SrvRecord(priority, weight, port, target)
     record_type = 'srv'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
+
 
 def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value,
                           keep_empty_record_set=False):
@@ -2365,8 +2480,8 @@ def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
-def _add_record(record_set, record, record_type, is_list=False):
 
+def _add_record(record_set, record, record_type, is_list=False):
     record_property = _type_to_property_name(record_type)
 
     if is_list:
@@ -2377,6 +2492,7 @@ def _add_record(record_set, record, record_type, is_list=False):
         record_list.append(record)
     else:
         setattr(record_set, record_property, record)
+
 
 def _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True):
@@ -2390,6 +2506,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
 
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_type, record_set)
+
 
 def _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
@@ -2419,12 +2536,14 @@ def _remove_record(record, record_type, record_set_name, resource_group_name, zo
 
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name, record_type, record_set)
 
+
 def dict_matches_filter(d, filter_dict):
     sentinel = object()
-    return all(filter_dict.get(key, None) is None
-               or str(filter_dict[key]) == str(d.get(key, sentinel))
-               or lists_match(filter_dict[key], d.get(key, []))
+    return all(not filter_dict.get(key, None) or
+               str(filter_dict[key]) == str(d.get(key, sentinel)) or
+               lists_match(filter_dict[key], d.get(key, []))
                for key in filter_dict)
+
 
 def lists_match(l1, l2):
     try:
@@ -2432,7 +2551,8 @@ def lists_match(l1, l2):
     except TypeError:
         return False
 
-#endregion
+
+# endregion
 
 def _create_network_watchers(client, resource_group_name, locations, tags):
     if resource_group_name is None:
@@ -2443,6 +2563,7 @@ def _create_network_watchers(client, resource_group_name, locations, tags):
         client.create_or_update(
             resource_group_name, '{}-watcher'.format(location),
             NetworkWatcher(location=location, tags=tags))
+
 
 def _update_network_watchers(client, watchers, tags):
     NetworkWatcher = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkWatcher', mod='models')
@@ -2455,6 +2576,7 @@ def _update_network_watchers(client, watchers, tags):
             watcher_rg, watcher_name,
             NetworkWatcher(location=watcher.location, tags=watcher_tags))
 
+
 def _delete_network_watchers(client, watchers):
     for watcher in watchers:
         from azure.cli.core.commands import LongRunningOperation
@@ -2465,6 +2587,7 @@ def _delete_network_watchers(client, watchers):
             "Disabling Network Watcher for region '%s' by deleting resource '%s'",
             watcher.location, watcher.id)
         LongRunningOperation()(client.delete(watcher_rg, watcher_name))
+
 
 def configure_network_watcher(client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
@@ -2547,7 +2670,6 @@ def show_nw_next_hop(client, resource_group_name, vm, watcher_rg, watcher_name,
 
 
 def show_nw_security_view(client, resource_group_name, vm, watcher_rg, watcher_name, location=None):
-
     if not is_valid_resource_id(vm):
         vm = resource_id(
             subscription=get_subscription_id(), resource_group=resource_group_name,
@@ -2596,6 +2718,7 @@ def start_nw_troubleshooting(client, watcher_name, watcher_rg, resource, storage
                                         mod='models')
     params = TroubleshootingParameters(resource, storage_account, storage_path)
     return client.get_troubleshooting(watcher_rg, watcher_name, params, raw=no_wait)
+
 
 def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, resource_type=None,
                                    resource_group_name=None):
