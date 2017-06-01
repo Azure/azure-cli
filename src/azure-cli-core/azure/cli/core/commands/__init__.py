@@ -32,6 +32,7 @@ from ._introspection import (extract_args_from_signature,
 
 logger = azlogging.get_az_logger(__name__)
 
+# 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
 
@@ -142,6 +143,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def _template_progress(self, correlation_id):
         """ gets the progress for template deployments """
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        from azure.monitor import MonitorClient
+
         if correlation_id is not None:
 
             formatter = "eventTimestamp ge {} and eventTimestamp le {}"
@@ -152,9 +156,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                                              end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
-
-            from azure.cli.core.commands.client_factory import get_mgmt_service_client
-            from azure.monitor import MonitorClient
 
             activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
             results = []
