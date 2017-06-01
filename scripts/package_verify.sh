@@ -3,6 +3,8 @@ set -ex
 export PYTHONPATH=
 virtualenv package-verify-env
 . package-verify-env/bin/activate
+pip install pip==9.0.1
+pip install setuptools==30.4.0
 pip install -e scripts
 python -m automation.tests.verify_packages
 python -m automation.tests.verify_dependencies
