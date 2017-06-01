@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint:disable=unused-import,invalid-sequence-index,unsubscriptable-object,line-too-long,too-few-public-methods
+# pylint:disable=unused-import,invalid-sequence-index,line-too-long,too-few-public-methods
 
 import logging
 import unittest
