@@ -650,7 +650,7 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(
             enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
-    if disabled_rule_groups or disabled_rules:  # pylint: disable=too-many-nested-blocks
+    if disabled_rule_groups or disabled_rules:
         ApplicationGatewayFirewallDisabledRuleGroup = get_sdk(
             ResourceType.MGMT_NETWORK,
             'ApplicationGatewayFirewallDisabledRuleGroup', mod='models')
@@ -661,20 +661,23 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
         for group in disabled_rule_groups or []:
             disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
 
+        def _flatten(collection, expand_property_fn):
+            for each in collection:
+                for value in expand_property_fn(each):
+                    yield value
+
         # for disabled rules, we have to look up the IDs
         if disabled_rules:
-            results = list_ag_waf_rule_sets(
-                ncf, _type=rule_set_type, version=rule_set_version, group='*')
-            for item in results:
-                for group in item.rule_groups:
-                    disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
-                        group.rule_group_name, [])
+            results = list_ag_waf_rule_sets(ncf, _type=rule_set_type, version=rule_set_version, group='*')
+            for group in _flatten(results, lambda r: r.rule_groups):
+                disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
+                    group.rule_group_name, [])
 
-                    for rule in group.rules:
-                        if str(rule.rule_id) in disabled_rules:
-                            disabled_group.rules.append(rule.rule_id)
-                    if disabled_group.rules:
-                        disabled_groups.append(disabled_group)
+                for rule in group.rules:
+                    if str(rule.rule_id) in disabled_rules:
+                        disabled_group.rules.append(rule.rule_id)
+                if disabled_group.rules:
+                    disabled_groups.append(disabled_group)
         ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
