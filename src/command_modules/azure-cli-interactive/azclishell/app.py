@@ -46,6 +46,7 @@ from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
+import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import (show_version_info_exit, handle_exception)
 from azure.cli.core.util import CLIError
 
@@ -653,6 +654,7 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
+                        telemetry.conclude()
 
             except KeyboardInterrupt:  # CTRL C
                 self.set_prompt()
