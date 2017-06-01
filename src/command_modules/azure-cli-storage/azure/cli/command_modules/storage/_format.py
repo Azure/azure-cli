@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint:disable=line-too-long
-
 from collections import OrderedDict
 
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -18,8 +16,8 @@ def build_table_output(result, projection):
     final_list = []
 
     for item in result:
-        def _value_from_path(path):
-            obj = item  # pylint: disable=cell-var-from-loop
+        def _value_from_path(each_item, path):
+            obj = each_item
             try:
                 for part in path.split('.'):
                     obj = obj.get(part, None)
@@ -29,8 +27,9 @@ def build_table_output(result, projection):
 
         item_dict = OrderedDict()
         for element in projection:
-            item_dict[element[0]] = _value_from_path(element[1])
+            item_dict[element[0]] = _value_from_path(item, element[1])
         final_list.append(item_dict)
+
     return final_list
 
 

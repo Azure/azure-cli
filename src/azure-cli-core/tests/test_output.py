@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-# pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
+
 import unittest
 from collections import OrderedDict
 from six import StringIO
 
-from azure.cli.core._output import (OutputProducer, format_json, format_table,
-                                    format_tsv, CommandResultItem)
+from azure.cli.core._output import OutputProducer, format_json, format_table, format_tsv, CommandResultItem
 import azure.cli.core.util as util
 
 

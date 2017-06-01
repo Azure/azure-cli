@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,line-too-long
+# pylint: disable=no-self-use
 
 from __future__ import print_function
 
@@ -28,7 +28,6 @@ BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryPropert
             'queue#QueueService')
 
 
-# pylint: disable=too-many-function-args
 def _update_progress(current, total):
     HOOK = APPLICATION.get_progress_controller(True)
 

@@ -17,7 +17,7 @@ from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
 from azure.cli.core.util import CLIError
 
 
-class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-methods
+class Test_Profile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -852,7 +852,7 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin,
+    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
