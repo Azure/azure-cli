@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
 import threading
 try:
@@ -34,7 +33,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens
+# pylint:disable=no-member,superfluous-parens,too-many-lines
 
 
 def create_webapp(resource_group_name, name, plan, runtime=None,

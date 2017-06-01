@@ -278,7 +278,7 @@ def sf_upload_app(path, show_progress=False):
             total_files_size), file=sys.stderr)
 
 
-def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
+def sf_create_app(client,  # pylint: disable=too-many-locals
                   app_name, app_type, app_version, parameters=None,
                   min_node_count=0, max_node_count=0, metrics=None,
                   timeout=60):
@@ -371,7 +371,7 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     client.create_application(app_desc, timeout)
 
 
-def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
+def sf_upgrade_app(  # pylint: disable=too-many-locals
         client, app_id, app_version, parameters, mode="UnmonitoredAuto",
         replica_set_check_timeout=None, force_restart=None,
         failure_action=None, health_check_wait_duration="0",
@@ -661,7 +661,7 @@ def sup_service_update_flags(
     return str(f)
 
 
-def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
+def sf_create_service(  # pylint: disable=too-many-locals
         client, app_id, name, service_type, stateful=False, stateless=False,
         singleton_scheme=False, named_scheme=False, int_scheme=False,
         named_scheme_list=None, int_scheme_low=None, int_scheme_high=None,

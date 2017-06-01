@@ -313,10 +313,8 @@ def _get_missing_parameters(parameters, template, prompt_fn):
     return parameters
 
 
-def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
-                              template_file=None, template_uri=None, deployment_name=None,
-                              parameter_list=None, mode='incremental', validate_only=False,
-                              no_wait=False):
+def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None, deployment_name=None,
+                              parameter_list=None, mode='incremental', validate_only=False, no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
