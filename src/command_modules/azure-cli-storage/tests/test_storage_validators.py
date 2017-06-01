@@ -4,14 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from six import StringIO
 from argparse import Namespace
+from six import StringIO
 from azure.cli.command_modules.storage._validators import (
     get_permission_validator, get_datetime_type, datetime, ipv4_range_type, resource_type_type, services_type,
     process_blob_source_uri, get_char_options_validator)
 from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.testsdk import api_version_constraint
 
 
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class TestStorageValidators(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
