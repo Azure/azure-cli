@@ -600,7 +600,7 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    aad_application = create_application(graph_client.applications,  # pylint: disable=too-many-function-args
+    aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
                                          homepage='http://' + app_display_name,
                                          identifier_uris=[name],

@@ -30,8 +30,8 @@ class Test_command_registration(unittest.TestCase):
         logging.shutdown()
 
     @staticmethod
-    def sample_vm_get(resource_group_name, vm_name, opt_param=None, expand=None, custom_headers={},  # pylint: disable=dangerous-default-value, too-many-arguments
-                      raw=False, **operation_config):
+    def sample_vm_get(resource_group_name, vm_name, opt_param=None, expand=None, custom_headers=None, raw=False,
+                      **operation_config):
         """
         The operation to get a virtual machine.
 
@@ -50,6 +50,7 @@ class Test_command_registration(unittest.TestCase):
         :rtype: VirtualMachine
         :rtype: msrest.pipeline.ClientRawResponse if raw=True
         """
+        pass
 
     def test_register_cli_argument(self):
         command_table.clear()

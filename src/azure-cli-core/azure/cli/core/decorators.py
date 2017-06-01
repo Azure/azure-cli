@@ -39,8 +39,7 @@ def _should_raise(raise_in_diagnostics):
         return False
     if isinstance(is_diagnostics_mode, bool) and is_diagnostics_mode:
         return True
-    if hasattr(is_diagnostics_mode, '__call__') and \
-            is_diagnostics_mode():  # pylint: disable=not-callable
+    if hasattr(is_diagnostics_mode, '__call__') and is_diagnostics_mode():  # pylint: disable=not-callable
         return True
     return False
 

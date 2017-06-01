@@ -5,8 +5,8 @@
 
 # TODO Move this to a package shared by CLI and SDK
 from functools import total_ordering
+from importlib import import_module
 from enum import Enum
-from importlib import import_module  # pylint: disable=wrong-import-order
 
 
 class APIVersionException(Exception):
