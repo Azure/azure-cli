@@ -39,8 +39,13 @@ def find_recording_dir(test_file):
     """
     base_dir = os.path.join(os.path.dirname(test_file), 'recordings')
 
-    from azure.cli.core._profile import get_active_cloud
-    api_profile = get_active_cloud().profile
+    from azure.cli.core._profile import get_active_cloud, init_known_clouds
+    from azure.cli.core.cloud import CloudNotRegisteredException
+    try:
+        api_profile = get_active_cloud().profile
+    except CloudNotRegisteredException:
+        init_known_clouds()
+        api_profile = get_active_cloud().profile
 
     if api_profile == 'latest':
         latest_recording_dir = os.path.join(base_dir, 'latest')
