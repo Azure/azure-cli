@@ -1,0 +1,18 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+
+def cf_billing(**_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.billing import BillingManagementClient
+    return get_mgmt_service_client(BillingManagementClient)
+
+
+def invoices_mgmt_client_factory(kwargs):
+    return cf_billing(**kwargs).invoices
+
+
+def billing_periods_mgmt_client_factory(kwargs):
+    return cf_billing(**kwargs).billing_periods

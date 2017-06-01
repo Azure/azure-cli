@@ -24,11 +24,13 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'autopep8==1.2.4',
-    'coverage==4.2',
-    'flake8==3.2.1',
-    'pycodestyle==2.2.0',
-    'nose==1.3.7'
+    'autopep8>=1.2.4',
+    'coverage>=4.2',
+    'flake8>=3.2.1',
+    'pycodestyle>=2.2.0',
+    'nose>=1.3.7',
+    'six>=1.10.0',
+    'tabulate>=0.7.7'
 ]
 
 setup(

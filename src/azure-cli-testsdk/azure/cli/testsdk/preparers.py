@@ -48,7 +48,7 @@ class AbstractPreparer(object):
                 args, _, kw, _ = inspect.getargspec(fn)  # pylint: disable=deprecated-method
                 if kw is None:
                     args = set(args)
-                    for key in [k for k in kwargs.keys() if k not in args]:
+                    for key in [k for k in kwargs if k not in args]:
                         del kwargs[key]
 
             fn(test_class_instance, **kwargs)
@@ -128,10 +128,10 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
         if self.dev_setting_name:
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
-        else:
-            template = 'az group create --location {} --name {} --tag use=az-test'
-            execute(template.format(self.location, name))
-            return {self.parameter_name: name, self.parameter_name_for_location: self.location}
+
+        template = 'az group create --location {} --name {} --tag use=az-test'
+        execute(template.format(self.location, name))
+        return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
@@ -184,10 +184,9 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 # KeyVault Preparer and its shorthand decorator
 
 class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self,  # pylint: disable=too-many-arguments
-                 name_prefix='clitest', sku='standard', location='westus',
-                 parameter_name='key_vault', resource_group_parameter_name='resource_group',
-                 skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
+    def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
+                 resource_group_parameter_name='resource_group', skip_delete=True,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
         self.location = location
         self.sku = sku
@@ -203,8 +202,8 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
             template = 'az keyvault create -n {} -g {} -l {} --sku {}'
             execute(template.format(name, group, self.location, self.sku))
             return {self.parameter_name: name}
-        else:
-            return {self.parameter_name: self.dev_setting_name}
+
+        return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
@@ -241,9 +240,9 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
                 .format(name, ' --skip-assignment' if self.skip_assignment else '')
             self.result = execute(command).get_output_in_json()
             return {self.parameter_name: name, self.parameter_password: self.result['password']}
-        else:
-            return {self.parameter_name: self.dev_setting_sp_name,
-                    self.parameter_password: self.dev_setting_sp_password}
+
+        return {self.parameter_name: self.dev_setting_sp_name,
+                self.parameter_password: self.dev_setting_sp_password}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:

@@ -68,9 +68,6 @@ class Proxy(object):
 
 
 class LinuxProxy(Proxy):
-    def __init__(self):
-        super(LinuxProxy, self).__init__()
-
     def set_http_proxy(self, host, port):
         """
         Sets the HTTP proxy on Linux
@@ -89,9 +86,6 @@ class LinuxProxy(Proxy):
 
 
 class MacProxy(Proxy):
-    def __init__(self):
-        super(MacProxy, self).__init__()
-
     def set_http_proxy(self, host, port):
         """
         Sets the HTTP proxy

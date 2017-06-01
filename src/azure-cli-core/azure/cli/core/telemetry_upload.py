@@ -63,7 +63,6 @@ def upload(data_to_save):
 
 
 if __name__ == '__main__':
-    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should
-    # control.
+    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
     decorators.is_diagnostics_mode = in_diagnostic_mode
     upload(sys.argv[1])

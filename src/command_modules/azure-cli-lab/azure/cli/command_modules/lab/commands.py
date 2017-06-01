@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_custom_image_operation,
                               get_devtestlabs_gallery_image_operation,
@@ -15,7 +16,6 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_secret_operation,
                               get_devtestlabs_environment_operation,
                               get_devtestlabs_arm_template_operation)
-from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
 custom_path = 'azure.cli.command_modules.lab.custom'
@@ -84,13 +84,13 @@ with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
         c.command('start', 'start')
         c.command('stop', 'stop')
         c.command('apply-artifacts', 'apply_artifacts')
-        c.command('claim', 'claim')
 
 # Virtual Machine Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
                   custom_operations) as s:
     with s.group('lab vm') as c:
         c.command('list', 'list_vm', table_transformer=transform_vm_list)
+        c.command('claim', 'claim_vm')
 
 # Lab Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_lab_operation,

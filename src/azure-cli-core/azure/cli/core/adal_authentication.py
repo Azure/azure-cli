@@ -20,7 +20,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         session = super(AdalAuthentication, self).signed_session()
 
         try:
-            scheme, token = self._token_retriever()
+            scheme, token, _ = self._token_retriever()
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and

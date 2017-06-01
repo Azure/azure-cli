@@ -97,10 +97,7 @@ class ResourceId(str):
 
 
 def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
-    '''Checks if the given resource exists.
-    '''
-    from azure.mgmt.resource import ResourceManagementClient
-
+    ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
     client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
@@ -109,10 +106,8 @@ def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disa
 
 
 def add_id_parameters(command_table):
-
     def split_action(arguments):
         class SplitAction(argparse.Action):  # pylint: disable=too-few-public-methods
-
             def __call__(self, parser, namespace, values, option_string=None):
                 ''' The SplitAction will take the given ID parameter and spread the parsed
                 parts of the id into the individual backing fields.
@@ -124,22 +119,26 @@ def add_id_parameters(command_table):
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.id_part]:
-                            existing_values = getattr(namespace, arg.name, None)
-                            if existing_values is None:
-                                existing_values = IterateValue()
-                                existing_values.append(parts[arg.id_part])
-                            else:
-                                if isinstance(existing_values, str):
-                                    if not getattr(arg.type, 'configured_default_applied', None):
-                                        logger.warning(
-                                            "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
-                                            arg.name, existing_values, parts[arg.id_part]
-                                        )
-                                    existing_values = IterateValue()
-                                existing_values.append(parts[arg.id_part])
-                            setattr(namespace, arg.name, existing_values)
+                            self.set_argument_value(namespace, arg, parts)
                 except Exception as ex:
                     raise ValueError(ex)
+
+            @staticmethod
+            def set_argument_value(namespace, arg, parts):
+                existing_values = getattr(namespace, arg.name, None)
+                if existing_values is None:
+                    existing_values = IterateValue()
+                    existing_values.append(parts[arg.id_part])
+                else:
+                    if isinstance(existing_values, str):
+                        if not getattr(arg.type, 'configured_default_applied', None):
+                            logger.warning(
+                                "Property '%s=%s' being overriden by value '%s' from IDs parameter.",
+                                arg.name, existing_values, parts[arg.id_part]
+                            )
+                        existing_values = IterateValue()
+                    existing_values.append(parts[arg.id_part])
+                setattr(namespace, arg.name, existing_values)
 
         return SplitAction
 
@@ -503,7 +502,7 @@ def _split_key_value_pair(expression):
         value = []
         brackets = False
         chars = list(expression)
-        while len(chars) > 0:
+        while chars:
             c = chars.pop(0)
             if c == '=' and not brackets:
                 # keys done the rest is value
@@ -519,15 +518,12 @@ def _split_key_value_pair(expression):
                 # normal character
                 key += c
 
-        key = ''.join(key)  # pylint: disable=redefined-variable-type
-        value = ''.join(value)  # pylint: disable=redefined-variable-type
-        return key, value
+        return ''.join(key), ''.join(value)
 
     equals_count = expression.count('=')
     if equals_count == 1:
         return expression.split('=', 1)
-    else:
-        return _find_split()
+    return _find_split()
 
 
 def set_properties(instance, expression):
@@ -556,7 +552,7 @@ def set_properties(instance, expression):
         elif isinstance(instance, dict):
             instance[name] = value
         elif isinstance(instance, list):
-            show_options(instance, name, key.split('.'))
+            throw_and_show_options(instance, name, key.split('.'))
         else:
             # must be a property name
             name = make_snake_case(name)
@@ -567,7 +563,7 @@ def set_properties(instance, expression):
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError, TypeError):
-        show_options(instance, name, key.split('.'))
+        throw_and_show_options(instance, name, key.split('.'))
 
 
 def add_properties(instance, argument_values):
@@ -638,7 +634,7 @@ def remove_properties(instance, argument_values):
                            .format(list_index, list_attribute_path[-1]))
 
 
-def show_options(instance, part, path):
+def throw_and_show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
@@ -694,50 +690,47 @@ def _get_name_path(path):
 
 
 def _update_instance(instance, part, path):
-    try:  # pylint: disable=too-many-nested-blocks
+    try:
         index = index_or_filter_regex.match(part)
-        if index:
-            # indexing on anything but a list is not allowed
-            if not isinstance(instance, list):
-                show_options(instance, part, path)
+        if index and not isinstance(instance, list):
+            throw_and_show_options(instance, part, path)
 
-            if '=' in index.group(1):
-                key, value = index.group(1).split('=', 1)
-                try:
-                    value = shell_safe_json_parse(value)
-                except:  # pylint: disable=bare-except
-                    pass
-                matches = []
-                for x in instance:
-                    if isinstance(x, dict) and x.get(key, None) == value:
+        if index and '=' in index.group(1):
+            key, value = index.group(1).split('=', 1)
+            try:
+                value = shell_safe_json_parse(value)
+            except:  # pylint: disable=bare-except
+                pass
+            matches = []
+            for x in instance:
+                if isinstance(x, dict) and x.get(key, None) == value:
+                    matches.append(x)
+                elif not isinstance(x, dict):
+                    key = make_snake_case(key)
+                    if hasattr(x, key) and getattr(x, key, None) == value:
                         matches.append(x)
-                    elif not isinstance(x, dict):
-                        key = make_snake_case(key)
-                        if hasattr(x, key) and getattr(x, key, None) == value:
-                            matches.append(x)
-                if len(matches) == 1:
-                    instance = matches[0]
-                elif len(matches) > 1:
-                    raise CLIError("non-unique key '{}' found multiple matches on {}. "
-                                   "Key must be unique.".format(
-                                       key, path[-2]))
-                else:
-                    raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(
-                        value, key, path[-2]))
+
+            if len(matches) == 1:
+                return matches[0]
+            elif len(matches) > 1:
+                raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
+                               .format(key, path[-2]))
             else:
-                try:
-                    index_value = int(index.group(1))
-                    instance = instance[index_value]
-                except IndexError:
-                    raise CLIError('index {} doesn\'t exist on {}'.format(
-                        index_value, path[-2]))
-        elif isinstance(instance, dict):
-            instance = instance[part]
-        else:
-            instance = getattr(instance, make_snake_case(part))
+                raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
+
+        if index:
+            try:
+                index_value = int(index.group(1))
+                return instance[index_value]
+            except IndexError:
+                raise CLIError('index {} doesn\'t exist on {}'.format(index_value, path[-2]))
+
+        if isinstance(instance, dict):
+            return instance[part]
+
+        return getattr(instance, make_snake_case(part))
     except (AttributeError, KeyError):
-        show_options(instance, part, path)
-    return instance
+        throw_and_show_options(instance, part, path)
 
 
 def _find_property(instance, path):

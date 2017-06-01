@@ -357,14 +357,14 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual(result, 'extension1')
 
 
-class FakedVM:  # pylint: disable=too-few-public-methods,old-style-class
+class FakedVM(object):  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
         self.location = 'westus'
 
 
-class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods,old-style-class
+class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods
     def __init__(self, is_linux, version):
         self.name = 'VMAccessForLinux' if is_linux else 'VMAccessAgent'
         self.type_handler_version = version

@@ -5,8 +5,8 @@
 
 FROM python:3.5.2-alpine
 
-ENV CLI_VERSION 0.2.8
-ENV CLI_DOWNLOAD_SHA256 dfe1902e5f0ea14f38b2c1137b71c4d7daa2f0b27869eaf868fc3dfbdb3a366a
+ENV CLI_VERSION 0.2.10
+ENV CLI_DOWNLOAD_SHA256 be72ddb0983b3466e868602e68e4d3bf67379fbe080bdaa6aa321c03f9bcce48
 
 # Metadata as defined at http://label-schema.org
 ARG BUILD_DATE

@@ -3,6 +3,17 @@
 Release History
 ===============
 
+0.3.3 (2017-05-30)
+++++++++++++++++++
+* --progress flag
+* Removed --debug and --verbose from completions
+
+
+0.3.2 (2017-05-18)
+++++++++++++++++++
+
+* Bug fixes.
+* Remove 'interactive' from completions (#3324)
 
 0.3.1 (2017-05-09)
 ++++++++++++++++++

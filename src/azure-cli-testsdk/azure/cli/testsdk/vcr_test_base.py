@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=wrong-import-order
-
 from __future__ import print_function
 
 import collections
@@ -15,20 +13,21 @@ import shlex
 import sys
 import tempfile
 import traceback
-from random import choice
-from string import digits, ascii_lowercase
-
-from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
-
+import logging
 import unittest
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
 
+from random import choice
+from string import digits, ascii_lowercase
+
+from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
+
+
 import vcr
 import jmespath
-from six import StringIO
 
 # TODO Should not depend on azure.cli.main package here.
 # Will be ok if this test file is not part of azure.cli.core.utils
@@ -45,6 +44,7 @@ MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
+logger = logging.getLogger('vcr_test_base')
 
 # MOCK METHODS
 
@@ -109,13 +109,58 @@ def _mock_subscriptions(self):  # pylint: disable=unused-argument
 
 
 def _mock_user_access_token(_, _1, _2, _3):  # pylint: disable=unused-argument
-    return ('Bearer', 'top-secret-token-for-you')
+    return 'Bearer', 'top-secret-token-for-you', None
 
 
 def _mock_operation_delay(_):
     # don't run time.sleep()
     return
 
+
+class _MockOutstream(object):
+    """ mock outstream for testing """
+    def __init__(self):
+        self.string = ''
+
+    def write(self, message):
+        self.string = message
+
+    def flush(self):
+        pass
+
+    def clear(self):
+        pass
+
+
+class MockProgressHook(object):
+    def init_progress(self, progress_view):
+        pass
+
+    def add(self, **kwargs):
+        pass
+
+    def update(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def begin(self, **kwargs):
+        pass
+
+    def end(self, **kwargs):
+        pass
+
+    def is_running(self):
+        pass
+
+
+def _mock_get_progress_view(determinant=False, out=None):  # pylint: disable=unused-argument
+    return _MockOutstream()
+
+
+def _mock_get_progress_controller(*args, **kwargs):  # pylint: disable=unused-argument
+    return MockProgressHook()
 
 # TEST CHECKS
 
@@ -284,7 +329,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             self.exception = CLIError('No recorded result provided for {}.'.format(self.test_name))
 
         if debug_vcr:
-            import logging
             logging.basicConfig()
             vcr_log = logging.getLogger('vcr')
             vcr_log.setLevel(logging.INFO)
@@ -372,6 +416,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
+    @mock.patch('azure.cli.core.application.Application.get_progress_controller', _mock_get_progress_controller)
+    @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
                 _mock_user_access_token)  # pylint: disable=line-too-long
@@ -413,8 +459,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
     # COMMAND METHODS
 
-    def cmd(self, command, checks=None, allowed_exceptions=None,
-            debug=False):  # pylint: disable=no-self-use
+    def cmd(self, command, checks=None, allowed_exceptions=None, debug=False):  # pylint: disable=no-self-use
+        from six import StringIO
+
         allowed_exceptions = allowed_exceptions or []
         if not isinstance(allowed_exceptions, list):
             allowed_exceptions = [allowed_exceptions]
@@ -427,8 +474,11 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             cli_main(command_list, file=output)
         except Exception as ex:  # pylint: disable=broad-except
             ex_msg = str(ex)
+            logger.error('Command "%s" => %s. Output: %s', command, ex_msg, output.getvalue())
             if not next((x for x in allowed_exceptions if x in ex_msg), None):
                 raise ex
+
+        logger.info('Command "%s" => %s.', command, 'success')
         self._track_executed_commands(command_list)
         result = output.getvalue().strip()
         output.close()

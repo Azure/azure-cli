@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
 import threading
 try:
@@ -34,7 +33,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens
+# pylint:disable=no-member,superfluous-parens,too-many-lines
 
 
 def create_webapp(resource_group_name, name, plan, runtime=None,
@@ -119,9 +118,9 @@ def list_runtimes(linux=False):
                        'check out https://aka.ms/linux-stacks')
         return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9',
                 'php|5.6', 'php|7.0', 'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
-    else:
-        runtime_helper = _StackRuntimeHelper(client)
-        return [s['displayName'] for s in runtime_helper.stacks]
+
+    runtime_helper = _StackRuntimeHelper(client)
+    return [s['displayName'] for s in runtime_helper.stacks]
 
 
 def _rename_server_farm_props(webapp):
@@ -185,7 +184,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
 # in the method
 def update_site_configs(resource_group_name, name, slot=None,
                         linux_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
-                        node_version=None, net_framework_version=None,  # pylint: disable=unused-argument
+                        net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
@@ -346,20 +345,18 @@ def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
                               site_name=webapp.name)
     if slot is None:
-        return client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp.name, hostname, binding)
-    else:
-        return client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp.name, hostname, binding, slot)
+        return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
+
+    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name, webapp.name, hostname, binding,
+                                                                   slot)
 
 
 def delete_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
         return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, hostname)
-    else:
-        return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             webapp_name, slot, hostname)
+
+    return client.web_apps.delete_host_name_binding_slot(resource_group_name, webapp_name, slot, hostname)
 
 
 def list_hostnames(resource_group_name, webapp_name, slot=None):
@@ -380,9 +377,8 @@ def get_external_ip(resource_group_name, webapp_name):
         if address.internal_ip_address:
             ip_address = address.internal_ip_address
         else:
-            vip = next((s for s in webapp_name.host_name_ssl_states
-                        if s.ssl_state == SslState.ip_based_enabled), None)
-            ip_address = (vip and vip.virtual_ip) or address.service_ip_address
+            vip = next((s for s in webapp_name.host_name_ssl_states if s.ssl_state == SslState.ip_based_enabled), None)
+            ip_address = vip.virtual_ip if vip else address.service_ip_address
     else:
         ip_address = _resolve_hostname_through_dns(webapp_name.default_host_name)
 
@@ -598,8 +594,8 @@ def create_backup(resource_group_name, webapp_name, storage_account_url,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
         return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
-    else:
-        return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
+
+    return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 
 def update_backup_schedule(resource_group_name, webapp_name, storage_account_url=None,
@@ -653,11 +649,9 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
     backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name,
-                                                                backup_request, slot)
-    else:
-        return client.web_apps.update_backup_configuration(resource_group_name, webapp_name,
-                                                           backup_request)
+        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name, backup_request, slot)
+
+    return client.web_apps.update_backup_configuration(resource_group_name, webapp_name, backup_request)
 
 
 def restore_backup(resource_group_name, webapp_name, storage_account_url, backup_name,
@@ -675,8 +669,8 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
         return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request, slot)
-    else:
-        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+
+    return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
 
 
 def _create_db_setting(db_name, db_type, db_connection_string):
@@ -691,7 +685,6 @@ def _parse_frequency(frequency):
     if unit_part == 'd':
         frequency_unit = FrequencyUnit.day
     elif unit_part == 'h':
-        # pylint: disable=redefined-variable-type
         frequency_unit = FrequencyUnit.hour
     else:
         raise CLIError('Frequency must end with d or h for "day" or "hour"')
@@ -713,8 +706,7 @@ def _normalize_sku(sku):
         return 'F1'
     elif sku == 'SHARED':
         return 'D1'
-    else:
-        return sku
+    return sku
 
 
 def _get_sku_name(tier):
@@ -783,7 +775,6 @@ def set_deployment_user(user_name, password=None):
 
 
 def list_publish_profiles(resource_group_name, name, slot=None):
-    from azure.mgmt.web.models import PublishingProfileFormat
     import xmltodict
 
     content = _generic_site_operation(resource_group_name, name,
@@ -1049,15 +1040,15 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
                 return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
                                                    webapp_cert.host_names[0], ssl_type,
                                                    certificate_thumbprint, slot)
-            else:
-                query_result = list_hostnames(resource_group_name, name, slot)
-                hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-                to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
-                for h in to_update:
-                    _update_host_name_ssl_state(resource_group_name, name, webapp.location,
-                                                h, ssl_type, certificate_thumbprint, slot)
 
-                return show_webapp(resource_group_name, name, slot)
+            query_result = list_hostnames(resource_group_name, name, slot)
+            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+            to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+            for h in to_update:
+                _update_host_name_ssl_state(resource_group_name, name, webapp.location,
+                                            h, ssl_type, certificate_thumbprint, slot)
+
+            return show_webapp(resource_group_name, name, slot)
 
     raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 

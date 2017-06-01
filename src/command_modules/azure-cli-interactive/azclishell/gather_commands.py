@@ -19,8 +19,6 @@ TOLERANCE = 10
 LINE_MINIMUM = math.floor(int(COLS) / 2 - 15)
 
 GLOBAL_PARAM_DESCRIPTIONS = {
-    '--verbose': 'Increase logging verbosity. Use --debug for full debug logs.',
-    '--debug': 'Increase logging verbosity to show all debug logs.',
     '--output': 'Output format',
     '-o': 'Output format',
     '--help': 'Get more information about a command',
@@ -40,6 +38,7 @@ def add_random_new_lines(long_phrase, line_min=LINE_MINIMUM, tolerance=TOLERANCE
     skip = False
     index = 0
     if len(long_phrase) > line_min:
+
         for _ in range(int(math.floor(len(long_phrase) / line_min))):
             previous = index
             index += line_min
