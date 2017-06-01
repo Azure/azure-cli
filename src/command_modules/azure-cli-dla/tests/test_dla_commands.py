@@ -5,7 +5,6 @@
 
 # pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 from __future__ import print_function
 
 try:
