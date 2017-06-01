@@ -18,7 +18,6 @@ from azure.cli.core.commands.validators import validate_key_value_pairs
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
 
-
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 
@@ -185,8 +184,8 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri' \
-        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]'\
-        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]'\
+        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]' \
+        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]' \
         '\n\tOR --source-share --source-path' \
         '\n\tOR --source-share --source-path [--source-account-name & sas]' \
         '\n\tOR --source-share --source-path [--source-account-name & key]'
@@ -296,13 +295,12 @@ def get_content_setting_validator(settings_class, update):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
     def validator(namespace):
-        BaseBlobService, FileService, \
-            BlobContentSettings, FileContentSettings = get_sdk(
-                ResourceType.DATA_STORAGE,
-                'blob.baseblobservice#BaseBlobService',
-                'file#FileService',
-                'blob.models#ContentSettings',
-                'file.models#ContentSettings')
+        BaseBlobService, FileService, BlobContentSettings, FileContentSettings = get_sdk(
+            ResourceType.DATA_STORAGE,
+            'blob.baseblobservice#BaseBlobService',
+            'file#FileService',
+            'blob.models#ContentSettings',
+            'file.models#ContentSettings')
 
         # must run certain validators first for an update
         if update:
@@ -347,8 +345,7 @@ def get_content_setting_validator(settings_class, update):
         # if update, fill in any None values with existing
         if update:
             new_props.content_type = new_props.content_type or props.content_type
-            new_props.content_disposition = new_props.content_disposition \
-                or props.content_disposition
+            new_props.content_disposition = new_props.content_disposition or props.content_disposition
             new_props.content_encoding = new_props.content_encoding or props.content_encoding
             new_props.content_language = new_props.content_language or props.content_language
             new_props.content_md5 = new_props.content_md5 or props.content_md5
@@ -356,6 +353,7 @@ def get_content_setting_validator(settings_class, update):
 
         ns['content_settings'] = new_props
         namespace = argparse.Namespace(**ns)
+
     return validator
 
 
@@ -368,12 +366,11 @@ def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
     list of services passed in. '''
     if namespace.encryption:
-        Encryption, EncryptionServices, \
-            EncryptionService = get_sdk(ResourceType.MGMT_STORAGE,
-                                        'Encryption',
-                                        'EncryptionServices',
-                                        'EncryptionService',
-                                        mod='models')
+        Encryption, EncryptionServices, EncryptionService = get_sdk(ResourceType.MGMT_STORAGE,
+                                                                    'Encryption',
+                                                                    'EncryptionServices',
+                                                                    'EncryptionService',
+                                                                    mod='models')
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
 
@@ -411,6 +408,7 @@ def validate_entity(namespace):
                 return to_type(val)
             except ValueError:
                 return None
+
         return try_cast(int) or try_cast(float) or val
 
     # ensure numbers are converted from strings so querying will work correctly
@@ -421,6 +419,7 @@ def validate_entity(namespace):
 def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
+
     def validator(namespace):
         if not hasattr(namespace, 'path'):
             return
@@ -434,6 +433,7 @@ def get_file_path_validator(default_file_param=None):
         namespace.directory_name = dir_name
         namespace.file_name = file_name
         del namespace.path
+
     return validator
 
 
@@ -462,7 +462,6 @@ def get_permission_help_string(permission_class):
 
 
 def get_permission_validator(permission_class):
-
     allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
     allowed_string = ''.join(x[0] for x in allowed_values)
 
@@ -473,6 +472,7 @@ def get_permission_validator(permission_class):
                 raise ValueError(
                     'valid values are {} or a combination thereof.'.format(help_string))
             namespace.permission = permission_class(_str=namespace.permission)
+
     return validator
 
 
@@ -604,6 +604,7 @@ def get_source_file_or_blob_service_client(namespace):
             ns['source_client'] = FileService(account_name=identifier.account_name,
                                               sas_token=identifier.sas_token)
 
+
 # endregion
 
 # region COMMAND VALIDATORS
@@ -724,24 +725,12 @@ def process_file_download_batch_parameters(namespace):
 
 
 def process_file_download_namespace(namespace):
-
     get_file_path_validator()(namespace)
 
     dest = namespace.file_path
     if not dest or os.path.isdir(dest):
         namespace.file_path = os.path.join(dest, namespace.file_name) \
             if dest else namespace.file_name
-
-
-def process_logging_update_namespace(namespace):
-    services = namespace.services
-    if set(services) - set('bqt'):
-        raise ValueError('--services: valid values are (b)lob (q)ueue '
-                         '(t)able or a combination thereof (ex: bt).')
-    log = namespace.log
-    if set(log) - set('rwd'):
-        raise ValueError('--log: valid values are (r)ead (w)rite (d)elete '
-                         'or a combination thereof (ex: rw).')
 
 
 def process_metric_update_namespace(namespace):
@@ -755,6 +744,7 @@ def process_metric_update_namespace(namespace):
         raise argparse.ArgumentError(
             None, 'incorrect usage: specify --api when hour or minute metrics are enabled')
 
+
 # endregion
 
 # region TYPES
@@ -763,6 +753,7 @@ def process_metric_update_namespace(namespace):
 def get_datetime_type(to_string):
     """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+
     def datetime_type(string):
         """ Validates UTC datetime. Examples of accepted forms:
         2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
@@ -777,6 +768,7 @@ def get_datetime_type(to_string):
             except ValueError:
                 continue
         raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
+
     return datetime_type
 
 
@@ -806,4 +798,20 @@ def services_type(string):
         raise ValueError
     return Services(_str=''.join(set(string)))
 
+
 # endregion
+
+
+def get_char_options_validator(types, property_name):
+    def _validator(namespace):
+        service_types = set(getattr(namespace, property_name, list()))
+
+        if not service_types:
+            raise ValueError('Missing options --{}.'.format(property_name.replace('_', '-')))
+
+        if service_types - set(types):
+            raise ValueError(
+                '--{}: only valid values are: {}.'.format(property_name.replace('_', '-'), ', '.join(types)))
+
+        setattr(namespace, property_name, service_types)
+    return _validator

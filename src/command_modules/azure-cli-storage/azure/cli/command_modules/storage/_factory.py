@@ -8,7 +8,6 @@ from azure.cli.core.commands import CLIError
 from azure.cli.core._profile import CLOUD
 from azure.cli.core.profiles import get_sdk, ResourceType
 
-
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specifed to access storage service. Please provide any of the following:
     (1) account name and key (--account-name and --account-key options or
@@ -30,13 +29,11 @@ def get_storage_data_service_client(service, name=None, key=None, connection_str
                                    endpoint_suffix=CLOUD.suffixes.storage_endpoint)
 
 
-def generic_data_service_factory(service, name=None, key=None, connection_string=None,
-                                 sas_token=None):
+def generic_data_service_factory(service, name=None, key=None, connection_string=None, sas_token=None):
     try:
         return get_storage_data_service_client(service, name, key, connection_string, sas_token)
     except ValueError as val_exception:
-        _ERROR_STORAGE_MISSING_INFO = \
-            get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
+        _ERROR_STORAGE_MISSING_INFO = get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
         message = str(val_exception)
         if message == _ERROR_STORAGE_MISSING_INFO:
             message = NO_CREDENTIALS_ERROR_MESSAGE
@@ -108,3 +105,30 @@ def cloud_storage_account_service_factory(kwargs):
     sas_token = kwargs.pop('sas_token', None)
     kwargs.pop('connection_string', None)  # pylint: disable=unused-variable
     return CloudStorageAccount(account_name, account_key, sas_token)
+
+
+def multi_service_properties_factory(kwargs):
+    """Create multiple data services properties instance based on the services option"""
+    from .services_wrapper import ServiceProperties
+
+    BaseBlobService, FileService, TableService, QueueService, = \
+        get_sdk(ResourceType.DATA_STORAGE,
+                'blob.baseblobservice#BaseBlobService', 'file#FileService', 'table#TableService', 'queue#QueueService')
+
+    account_name = kwargs.pop('account_name', None)
+    account_key = kwargs.pop('account_key', None)
+    connection_string = kwargs.pop('connection_string', None)
+    sas_token = kwargs.pop('sas_token', None)
+    services = kwargs.pop('services', [])
+
+    def get_creator(name, service_type):
+        return lambda: ServiceProperties(name, service_type, account_name, account_key, connection_string, sas_token)
+
+    creators = {
+        'b': get_creator('blob', BaseBlobService),
+        'f': get_creator('file', FileService),
+        'q': get_creator('queue', QueueService),
+        't': get_creator('table', TableService)
+    }
+
+    return [creators[s]() for s in services]

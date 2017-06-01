@@ -267,16 +267,38 @@ helps['storage cors'] = """
 helps['storage cors add'] = """
     type: command
     short-summary: Add a CORS rule to a storage account.
+    parameters:
+        - name: --services
+          short-summary: The storage service(s) for which to add the CORS rules. Allowed options are (b)lob (f)ile
+                         (q)ueue (t)able. Can be combined.
+        - name: --max-age
+          short-summary: The number of seconds the client/browser should cache a preflight response.
+        - name: --origins
+          short-summary: List of origin domains that will be allowed via CORS, or "*" to allow all domains.
+        - name: --methods
+          short-summary: List of HTTP methods allowed to be executed by the origin.
+        - name: --allowed-headers
+          short-summary: List of response headers allowed to be part of the cross-origin request.
+        - name: --exposed-headers
+          short-summary: List of response headers to expose to CORS clients.
 """
 
 helps['storage cors clear'] = """
     type: command
     short-summary: Remove all CORS rules from a storage account.
+    parameters:
+        - name: --services
+          short-summary: The storage service(s) for which to add the CORS rules. Allowed options are (b)lob (f)ile
+                         (q)ueue (t)able. Can be combined.
 """
 
 helps['storage cors list'] = """
     type: command
     short-summary: List all CORS rules for a storage account.
+    parameters:
+        - name: --services
+          short-summary: The storage service(s) for which to add the CORS rules. Allowed options are (b)lob (f)ile
+                         (q)ueue (t)able. Can be combined.
 """
 
 helps['storage directory'] = """
