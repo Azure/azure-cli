@@ -3,99 +3,92 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._client_factory import (get_monitor_alert_rules_operation,
-                              get_monitor_alert_rule_incidents_operation,
-                              get_monitor_log_profiles_operation,
-                              get_monitor_autoscale_settings_operation,
-                              get_monitor_diagnostic_settings_operation,
-                              get_monitor_activity_log_operation,
-                              get_monitor_metric_definitions_operation,
-                              get_monitor_metrics_operation)
-from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
+# pylint: disable=line-too-long
+
+from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
+from ._client_factory import \
+    (cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles,
+     cf_autoscale, cf_diagnostics, cf_activity_log)
+from ._exception_handler import monitor_exception_handler
+
+
+def monitor_command(*args, **kwargs):
+    cli_command(*args, exception_handler=monitor_exception_handler, **kwargs)
 
 
 # MANAGEMENT COMMANDS
-custom_operations = create_service_adapter('azure.cli.command_modules.monitor.custom')
 
-alert_rules_operations = create_service_adapter(
-    'azure.mgmt.monitor.operations.alert_rules_operations',
-    'AlertRulesOperations')
+custom_path = 'azure.cli.command_modules.monitor.custom#'
 
-with ServiceGroup(__name__, get_monitor_alert_rules_operation, alert_rules_operations) as s:
-    with s.group('monitor alert-rules') as c:
-        c.command('create', 'create_or_update')
-        c.command('delete', 'delete')
-        c.command('show', 'get')
-        c.command('list', 'list_by_resource_group')
-        c.generic_update_command('update', 'get', 'create_or_update')
+# region Alerts
 
-alert_rule_incidents_operations = create_service_adapter(
-    'azure.mgmt.monitor.operations.alert_rule_incidents_operations',
-    'AlertRuleIncidentsOperations')
+ar_path = 'azure.mgmt.monitor.operations.alert_rules_operations#AlertRulesOperations.'
 
-with ServiceGroup(__name__, get_monitor_alert_rule_incidents_operation,
-                  alert_rule_incidents_operations) as s:
-    with s.group('monitor alert-rule-incidents') as c:
-        c.command('show', 'get')
-        c.command('list', 'list_by_alert_rule')
+monitor_command(__name__, 'monitor alert create', custom_path + 'create_metric_rule', cf_alert_rules)
+monitor_command(__name__, 'monitor alert delete', ar_path + 'delete', cf_alert_rules)
+monitor_command(__name__, 'monitor alert show', ar_path + 'get', cf_alert_rules)
+monitor_command(__name__, 'monitor alert list', ar_path + 'list_by_resource_group', cf_alert_rules)
+cli_generic_update_command(__name__, 'monitor alert update',
+                           ar_path + 'get', ar_path + 'create_or_update', cf_alert_rules,
+                           custom_function_op=custom_path + 'update_metric_rule',
+                           exception_handler=monitor_exception_handler)
 
-log_profiles_operations = create_service_adapter(
-    'azure.mgmt.monitor.operations.log_profiles_operations',
-    'LogProfilesOperations')
+ari_path = 'azure.mgmt.monitor.operations.alert_rule_incidents_operations#AlertRuleIncidentsOperations.'
+monitor_command(__name__, 'monitor alert show-incident', ari_path + 'get', cf_alert_rule_incidents)
+monitor_command(__name__, 'monitor alert list-incidents', ari_path + 'list_by_alert_rule', cf_alert_rule_incidents)
 
-with ServiceGroup(__name__, get_monitor_log_profiles_operation,
-                  log_profiles_operations) as s:
-    with s.group('monitor log-profiles') as c:
-        c.command('create', 'create_or_update')
-        c.command('delete', 'delete')
-        c.command('show', 'get')
-        c.command('list', 'list')
-        c.generic_update_command('update', 'get', 'create_or_update')
+# endregion
 
-diagnostic_settings_operations = create_service_adapter(
-    'azure.mgmt.monitor.operations.service_diagnostic_settings_operations',
-    'ServiceDiagnosticSettingsOperations')
+# region Metrics
 
-with ServiceGroup(__name__, get_monitor_diagnostic_settings_operation,
-                  diagnostic_settings_operations) as s:
-    with s.group('monitor diagnostic-settings') as c:
-        c.command('show', 'get')
-        c.generic_update_command('update', 'get', 'create_or_update')
+monitor_command(__name__, 'monitor metrics list', custom_path + 'list_metrics', cf_metrics)
+monitor_command(__name__, 'monitor metrics list-definitions', custom_path + 'list_metric_definitions', cf_metric_def)
 
-with ServiceGroup(__name__, get_monitor_diagnostic_settings_operation, custom_operations) as s:
-    with s.group('monitor diagnostic-settings') as c:
-        c.command('create', 'create_diagnostics_settings')
+# endregion
 
-autoscale_settings_operations = create_service_adapter(
-    'azure.mgmt.monitor.operations.autoscale_settings_operations',
-    'AutoscaleSettingsOperations')
+# region Log Profiles
 
-with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
-                  autoscale_settings_operations) as s:
-    with s.group('monitor autoscale-settings') as c:
-        c.command('create', 'create_or_update')
-        c.command('delete', 'delete')
-        c.command('show', 'get')
-        c.command('list', 'list_by_resource_group')
-        c.generic_update_command('update', 'get', 'create_or_update')
+lp_path = 'azure.mgmt.monitor.operations.log_profiles_operations#LogProfilesOperations.'
+monitor_command(__name__, 'monitor log-profiles create', lp_path + 'create_or_update', cf_log_profiles)
+monitor_command(__name__, 'monitor log-profiles delete', lp_path + 'delete', cf_log_profiles)
+monitor_command(__name__, 'monitor log-profiles show', lp_path + 'get', cf_log_profiles)
+monitor_command(__name__, 'monitor log-profiles list', lp_path + 'list', cf_log_profiles)
+cli_generic_update_command(__name__, 'monitor log-profiles update',
+                           lp_path + 'get', lp_path + 'create_or_update', cf_log_profiles,
+                           exception_handler=monitor_exception_handler)
 
-with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
-                  custom_operations) as s:
-    with s.group('monitor autoscale-settings') as c:
-        c.command('get-parameters-template', 'scaffold_autoscale_settings_parameters')
+# endregion
+
+# region Diagnostic Settings
+
+diag_path = 'azure.mgmt.monitor.operations.service_diagnostic_settings_operations#ServiceDiagnosticSettingsOperations.'
+monitor_command(__name__, 'monitor diagnostic-settings create', custom_path + 'create_diagnostics_settings', cf_diagnostics)
+monitor_command(__name__, 'monitor diagnostic-settings show', diag_path + 'get', cf_diagnostics)
+cli_generic_update_command(__name__, 'monitor diagnostic-settings update',
+                           diag_path + 'get', diag_path + 'create_or_update', cf_diagnostics,
+                           exception_handler=monitor_exception_handler)
+
+# endregion
 
 
-# DATA COMMANDS
-with ServiceGroup(__name__, get_monitor_activity_log_operation,
-                  custom_operations) as s:
-    with s.group('monitor activity-log') as c:
-        c.command('list', 'list_activity_log')
+# region Autoscale
 
-with ServiceGroup(__name__, get_monitor_metric_definitions_operation,
-                  custom_operations) as s:
-    with s.group('monitor metric-definitions') as c:
-        c.command('list', 'list_metric_definitions')
+autoscale_path = 'azure.mgmt.monitor.operations.autoscale_settings_operations#AutoscaleSettingsOperations.'
 
-with ServiceGroup(__name__, get_monitor_metrics_operation, custom_operations) as s:
-    with s.group('monitor metrics') as c:
-        c.command('list', 'list_metrics')
+monitor_command(__name__, 'monitor autoscale-settings create', autoscale_path + 'create_or_update', cf_autoscale)
+monitor_command(__name__, 'monitor autoscale-settings delete', autoscale_path + 'delete', cf_autoscale)
+monitor_command(__name__, 'monitor autoscale-settings show', autoscale_path + 'get', cf_autoscale)
+monitor_command(__name__, 'monitor autoscale-settings list', autoscale_path + 'list_by_resource_group', cf_autoscale)
+monitor_command(__name__, 'monitor autoscale-settings get-parameters-template', custom_path + 'scaffold_autoscale_settings_parameters', cf_autoscale)
+cli_generic_update_command(__name__, 'monitor autoscale-settings update',
+                           autoscale_path + 'get', autoscale_path + 'create_or_update', cf_autoscale,
+                           exception_handler=monitor_exception_handler)
+
+# endregion
+
+# region Activity Log
+
+monitor_command(__name__, 'monitor activity-log list', custom_path + 'list_activity_log', cf_activity_log)
+
+# endregion

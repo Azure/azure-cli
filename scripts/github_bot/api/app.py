@@ -60,6 +60,9 @@ The module has been published to PyPI.
 View HISTORY.rst of the module for a changelog.
 
 {}
+
+Full release notes at https://docs.microsoft.com/en-us/cli/azure/release-notes-azure-cli
+
 """
 
 def _verify_parse_request(req):

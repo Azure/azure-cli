@@ -42,3 +42,40 @@ def validate_member_id(namespace):
                                                           namespace.url)
     except ValueError:
         pass  # let it go, invalid values will be caught by server anyway
+
+
+def validate_cert(namespace):
+    cred_usage_error = CLIError('Usage error: --cert STRING | --create-cert [--keyvault VAULT --cert NAME] | '
+                                '--password STRING | --keyvault VAULT --cert NAME')
+    cert = namespace.cert
+    create_cert = namespace.create_cert
+    keyvault = namespace.keyvault
+    password = namespace.password
+
+    # validate allowed parameter combinations
+    if not any((cert, create_cert, password, keyvault)):
+        # 1 - Simplest scenario. Use random password
+        pass
+    elif password and not any((cert, create_cert, keyvault)):
+        # 2 - Password supplied -- no certs
+        pass
+    elif create_cert and not any((cert, keyvault, password)):
+        # 3 - User-supplied public cert data
+        pass
+    elif cert and not any((create_cert, keyvault, password)):
+        # 4 - Create local self-signed cert
+        pass
+    elif cert and keyvault and not password:
+        # 5 - Create self-signed cert in KeyVault
+        # 6 - Use existing cert from KeyVault
+        pass
+    else:
+        raise cred_usage_error
+
+    # validate cert parameter
+    if cert and not keyvault:
+        from azure.cli.command_modules.role.custom import _try_x509_pem, _try_x509_der
+        x509 = _try_x509_pem(cert) or _try_x509_der(cert)
+        if not x509:
+            raise CLIError('usage error: --cert STRING | --cert NAME --keyvault VAULT')
+        namespace.cert = x509

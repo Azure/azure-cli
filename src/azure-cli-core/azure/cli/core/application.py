@@ -15,6 +15,7 @@ import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
+import azure.cli.core.commands.progress as progress
 
 import azure.cli.core.telemetry as telemetry
 
@@ -35,7 +36,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
-        result = commands.get_command_table(argv[0] if argv else None)
+        result = commands.get_command_table(argv[0].lower() if argv else None)
 
         if argv is None:
             return result
@@ -73,7 +74,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         command_so_far = ""
         try:
             for part in parts:
-                best_match = best_match[part]
+                best_match = best_match[part.lower()]
                 command_so_far = ' '.join((command_so_far, part))
                 if isinstance(best_match, CliCommand):
                     break
@@ -127,6 +128,11 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.configuration = configuration
+        self.progress_controller = progress.ProgressHook()
+
+    def get_progress_controller(self, det=False):
+        self.progress_controller.init_progress(progress.get_progress_view(det))
+        return self.progress_controller
 
     def initialize(self, configuration):
         self.configuration = configuration
@@ -138,7 +144,7 @@ class Application(object):
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
-        if len(argv) == 0:
+        if not argv:
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
@@ -154,13 +160,14 @@ class Application(object):
 
         # Rudimentary parsing to get the command
         nouns = []
-        for noun in argv:
+        for i in range(len(argv)):  # pylint: disable=consider-using-enumerate
             try:
-                if noun[0] == '-':
+                if argv[i][0] == '-':
                     break
             except IndexError:
                 pass
-            nouns.append(noun)
+            argv[i] = argv[i].lower()
+            nouns.append(argv[i])
         command = ' '.join(nouns)
 
         if argv[-1] in ('--help', '-h') or command in command_table:
@@ -272,8 +279,9 @@ class Application(object):
             return arg
         elif ix == 0:
             return Application._load_file(poss_file)
-        else:  # if @ not at the start it can't be a file
-            return arg
+
+        # if @ not at the start it can't be a file
+        return arg
 
     @staticmethod
     def _expand_file_prefix(arg):

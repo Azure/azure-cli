@@ -39,7 +39,7 @@ def cf_plans(_):
 
 
 def cf_providers(_):
-    return web_client_factory().provider
+    return web_client_factory().provider  # pylint: disable=no-member
 
 
 def cf_web_client(_):

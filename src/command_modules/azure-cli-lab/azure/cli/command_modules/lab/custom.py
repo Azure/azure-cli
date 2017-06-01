@@ -53,6 +53,16 @@ def list_vm(client, resource_group, lab_name, order_by=None, top=None,
                        expand=expand, filter=filters, top=top, order_by=order_by)
 
 
+def claim_vm(client, lab_name=None, name=None, resource_group=None):
+    """ Command to claim a VM in the Azure DevTest Lab"""
+
+    if name is not None:
+        return client.claim(resource_group, lab_name, name)
+
+    from ._client_factory import get_devtestlabs_lab_operation
+    return get_devtestlabs_lab_operation(None).claim_any_vm(resource_group, lab_name)
+
+
 # pylint: disable=too-many-locals, unused-argument
 def create_environment(client, resource_group, lab_name, name, arm_template, parameters=None,
                        artifact_source_name=None, user_name=None, tags=None):

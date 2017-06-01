@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.0.5 (2017-05-30)
+++++++++++++++++++
+* ad: for 'app create' command, mention time format in the arg descriptions for --start-date/--end-date
+* output deprecating information on using '--expanded-view'
+* Add Key Vault integration to the create-for-rbac and reset-credentials commands.
+
+
 2.0.4 (2017-05-09)
 ++++++++++++++++++
 * Minor fixes.

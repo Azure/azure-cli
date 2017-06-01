@@ -9,7 +9,6 @@ import dateutil.parser
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
-from ._client_factory import (get_devtestlabs_management_client)
 from azure.mgmt.devtestlabs.models.gallery_image_reference import GalleryImageReference
 from azure.mgmt.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
 from azure.mgmt.devtestlabs.models.shared_public_ip_address_configuration import \
@@ -17,6 +16,7 @@ from azure.mgmt.devtestlabs.models.shared_public_ip_address_configuration import
 from azure.mgmt.devtestlabs.models.inbound_nat_rule import InboundNatRule
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.azlogging as azlogging
+from ._client_factory import (get_devtestlabs_management_client)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -112,6 +112,12 @@ def validate_template_id(namespace):
                                              child_name=namespace.artifact_source_name,
                                              grandchild_type='armTemplates',
                                              grandchild_name=namespace.arm_template)
+
+
+def validate_claim_vm(namespace):
+    if namespace.name is None and namespace.lab_name is None or namespace.resource_group is None:
+        raise CLIError("usage error: --ids IDs | --lab-name LabName --resource-group ResourceGroup --name VMName"
+                       " | --lab-name LabName --resource-group ResourceGroup")
 
 
 def _get_owner_object_id():

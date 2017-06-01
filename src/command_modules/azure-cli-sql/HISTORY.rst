@@ -1,7 +1,16 @@
 .. :changelog:
 
 Release History
-===============
+
+unreleased
+++++++++++++++++++
+
+* Added az sql db list-editions and az sql elastic-pool list-editions commands.
+
+2.0.4 (2017-05-30)
+++++++++++++++++++
+
+* Minor fixes.
 
 2.0.3 (2017-05-09)
 ++++++++++++++++++

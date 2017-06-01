@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.5 (2017-05-30)
+++++++++++++++++++
+* Output deprecating information on using '--expanded-view'
+* Add get-access-token command to provide raw AAD token
+* Support login with a user account with no associated subscriptions
+
 2.0.4 (2017-04-28)
 ++++++++++++++++++
 * Support login when there are no subscriptions found (#2560)

@@ -7,10 +7,8 @@ import azure.cli.command_modules.dla._help
 
 
 def load_params(_):
-    # pylint: disable=redefined-outer-name
-    import azure.cli.command_modules.dla._params
+    import azure.cli.command_modules.dla._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():
-    # pylint: disable=redefined-outer-name
-    import azure.cli.command_modules.dla.commands
+    import azure.cli.command_modules.dla.commands  # pylint: disable=redefined-outer-name, unused-variable

@@ -44,12 +44,12 @@ def _default_certificate_profile():
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type='RSA',
+            key_type=u'RSA',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type='application/x-pkcs12'
+            content_type=u'application/x-pkcs12'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -60,7 +60,7 @@ def _default_certificate_profile():
                 KeyUsageType.key_agreement,
                 KeyUsageType.key_cert_sign
             ],
-            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            subject=u'CN=CLIGetDefaultPolicy',
             validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
@@ -72,7 +72,7 @@ def _default_certificate_profile():
             )
         )],
         issuer_parameters=IssuerParameters(
-            name='Self',
+            name=u'Self',
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -91,12 +91,12 @@ def _scaffold_certificate_profile():
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type='(optional) RSA or RSA-HSM (default RSA)',
+            key_type=u'(optional) RSA or RSA-HSM (default RSA)',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type='application/x-pkcs12 or application/x-pem-file'
+            content_type=u'application/x-pkcs12 or application/x-pem-file'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -108,12 +108,12 @@ def _scaffold_certificate_profile():
                 KeyUsageType.key_cert_sign
             ],
             subject_alternative_names=SubjectAlternativeNames(
-                emails=['hello@contoso.com'],
-                dns_names=['hr.contoso.com', 'm.contoso.com'],
+                emails=[u'hello@contoso.com'],
+                dns_names=[u'hr.contoso.com', u'm.contoso.com'],
                 upns=[]
             ),
-            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=['1.3.6.1.5.5.7.3.1'],
+            subject=u'C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            ekus=[u'1.3.6.1.5.5.7.3.1'],
             validity_in_months=24
         ),
         lifetime_actions=[LifetimeAction(
@@ -125,8 +125,8 @@ def _scaffold_certificate_profile():
             )
         )],
         issuer_parameters=IssuerParameters(
-            name='Unknown, Self, or {IssuerName}',
-            certificate_type='(optional) DigiCert, GlobalSign or WoSign'
+            name=u'Unknown, Self, or {IssuerName}',
+            certificate_type=u'(optional) DigiCert, GlobalSign or WoSign'
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -206,10 +206,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     :return: policy dict
     :rtype: dict
     """
-    if scaffold:
-        return _scaffold_certificate_profile()
-    else:
-        return _default_certificate_profile()
+    return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
 
 
 def create_keyvault(client,
@@ -541,7 +538,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             message = getattr(client_exception, 'message', client_exception)
 
             try:
-                ex_message = json.loads(client_exception.response.text)
+                ex_message = json.loads(client_exception.response.text)  # pylint: disable=no-member
                 message = str(message) + ' ' + ex_message['error']['details'][0]['message']
             except:  # pylint: disable=bare-except
                 pass
@@ -641,7 +638,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
                 import base64
                 encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
                 if isinstance(encoded, bytes):
-                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                    encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
                 f.write(encoded.encode("utf-8"))
     except Exception as ex:  # pylint: disable=broad-except
@@ -676,8 +673,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
     if remaining.contact_list:
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
-    else:
-        return client.delete_certificate_contacts(vault_base_url)
+    return client.delete_certificate_contacts(vault_base_url)
 
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
