@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
@@ -39,6 +40,9 @@ def get_server_location(server_name, resource_group_name):
     return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
+
+
+_DEFAULT_SERVER_VERSION = "12.0"
 
 
 ###############################################
@@ -234,6 +238,51 @@ def db_failover(
         server_name=server_name,
         resource_group_name=resource_group_name,
         link_id=primary_link.name)
+
+
+class DatabaseCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
+    max_size = 'max-size'
+
+
+def db_list_capabilities(
+        client,
+        location,
+        edition=None,
+        service_objective=None,
+        show_details=None):
+
+    # Fixup parameters
+    if not show_details:
+        show_details = []
+
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location)
+
+    # Get subtree related to databases
+    editions = next(sv for sv in capabilities.supported_server_versions
+                    if sv.name == _DEFAULT_SERVER_VERSION).supported_editions
+
+    # Filter by edition
+    if edition:
+        editions = [e for e in editions if e.name.lower() == edition.lower()]
+
+    # Filter by service objective
+    if service_objective:
+        for e in editions:
+            e.supported_service_level_objectives = [
+                slo for slo in e.supported_service_level_objectives
+                if slo.name.lower() == service_objective.lower()]
+
+    # Remove editions with no service objectives (due to filters)
+    editions = [e for e in editions if e.supported_service_level_objectives]
+
+    # Optionally hide supported max sizes
+    if DatabaseCapabilitiesAdditionalDetails.max_size.value not in show_details:
+        for e in editions:
+            for slo in e.supported_service_level_objectives:
+                slo.supported_max_sizes = []
+
+    return editions
 
 
 def db_delete_replica_link(
@@ -487,18 +536,18 @@ def _db_security_policy_update(
         use_secondary_key):
 
     # Validate storage endpoint arguments
-    if storage_endpoint is not None and storage_account is not None:
+    if storage_endpoint and storage_account:
         raise CLIError('--storage-endpoint and --storage-account cannot both be specified.')
 
     # Set storage endpoint
-    if storage_endpoint is not None:
+    if storage_endpoint:
         instance.storage_endpoint = storage_endpoint
-    if storage_account is not None:
+    if storage_account:
         storage_resource_group = _find_storage_account_resource_group(storage_account)
         instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
 
     # Set storage access key
-    if storage_account_access_key is not None:
+    if storage_account_access_key:
         # Access key is specified
         instance.storage_account_access_key = storage_account_access_key
     elif enabled:
@@ -510,7 +559,7 @@ def _db_security_policy_update(
         # This doesn't work if the user used generic update args, i.e. `--set state=Enabled`
         # instead of `--state Enabled`, since the generic update args are applied after this custom
         # function, but at least we tried.
-        if storage_account is None:
+        if not storage_account:
             storage_account = _get_storage_account_name(instance.storage_endpoint)
             storage_resource_group = _find_storage_account_resource_group(storage_account)
 
@@ -531,7 +580,7 @@ def db_audit_policy_update(
         retention_days=None):
 
     # Apply state
-    if state is not None:
+    if state:
         # pylint: disable=unsubscriptable-object
         instance.state = BlobAuditingPolicyState[state.lower()]
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
@@ -546,10 +595,10 @@ def db_audit_policy_update(
         instance.is_storage_secondary_key_in_use)
 
     # Set other properties
-    if audit_actions_and_groups is not None:
+    if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
-    if retention_days is not None:
+    if retention_days:
         instance.retention_days = retention_days
 
     return instance
@@ -568,7 +617,7 @@ def db_threat_detection_policy_update(
         email_account_admins=None):
 
     # Apply state
-    if state is not None:
+    if state:
         # pylint: disable=unsubscriptable-object
         instance.state = SecurityAlertPolicyState[state.lower()]
     enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
@@ -583,16 +632,16 @@ def db_threat_detection_policy_update(
         False)
 
     # Set other properties
-    if retention_days is not None:
+    if retention_days:
         instance.retention_days = retention_days
 
-    if email_addresses is not None:
+    if email_addresses:
         instance.email_addresses = ";".join(email_addresses)
 
-    if disabled_alerts is not None:
+    if disabled_alerts:
         instance.disabled_alerts = ";".join(disabled_alerts)
 
-    if email_account_admins is not None:
+    if email_account_admins:
         instance.email_account_admins = email_account_admins
 
     return instance
@@ -695,6 +744,69 @@ def elastic_pool_update(
     instance.storage_mb = storage_mb or instance.storage_mb
 
     return instance
+
+
+class ElasticPoolCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
+    max_size = 'max-size'
+    db_min_dtu = 'db-min-dtu'
+    db_max_dtu = 'db-max-dtu'
+    db_max_size = 'db-max-size'
+
+
+def elastic_pool_list_capabilities(
+        client,
+        location,
+        edition=None,
+        dtu=None,
+        show_details=None):
+
+    # Fixup parameters
+    if not show_details:
+        show_details = []
+    if dtu:
+        dtu = int(dtu)
+
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location)
+
+    # Get subtree related to elastic pools
+    editions = next(sv for sv in capabilities.supported_server_versions
+                    if sv.name == _DEFAULT_SERVER_VERSION).supported_elastic_pool_editions
+
+    # Filter by edition
+    if edition:
+        editions = [e for e in editions if e.name.lower() == edition.lower()]
+
+    # Filter by dtu
+    if dtu:
+        for e in editions:
+            e.supported_elastic_pool_dtus = [
+                d for d in e.supported_elastic_pool_dtus
+                if d.limit == dtu]
+
+    # Remove editions with no service objectives (due to filters)
+    editions = [e for e in editions if e.supported_elastic_pool_dtus]
+
+    for e in editions:
+        for d in e.supported_elastic_pool_dtus:
+            # Optionally hide supported max sizes
+            if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in show_details:
+                d.supported_max_sizes = []
+
+            # Optionally hide per database min & max dtus. min dtus are nested inside max dtus,
+            # so only hide max dtus if both min and max should be hidden.
+            if ElasticPoolCapabilitiesAdditionalDetails.db_min_dtu.value not in show_details:
+                if ElasticPoolCapabilitiesAdditionalDetails.db_max_dtu.value not in show_details:
+                    d.supported_per_database_max_dtus = []
+
+                for md in d.supported_per_database_max_dtus:
+                    md.supported_per_database_min_dtus = []
+
+            # Optionally hide supported per db max sizes
+            if ElasticPoolCapabilitiesAdditionalDetails.db_max_size.value not in show_details:
+                d.supported_per_database_max_sizes = []
+
+    return editions
 
 
 ###############################################

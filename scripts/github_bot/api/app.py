@@ -16,7 +16,7 @@ from flask import Flask, jsonify, request, Response
 from subprocess import check_call, CalledProcessError
 from uritemplate import URITemplate, expand
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 
 # GitHub API constants
 GITHUB_UA_PREFIX = 'GitHub-Hookshot/'
@@ -60,6 +60,9 @@ The module has been published to PyPI.
 View HISTORY.rst of the module for a changelog.
 
 {}
+
+Full release notes at https://docs.microsoft.com/en-us/cli/azure/release-notes-azure-cli
+
 """
 
 def _verify_parse_request(req):

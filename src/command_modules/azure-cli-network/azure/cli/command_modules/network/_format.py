@@ -7,6 +7,7 @@
 
 from collections import OrderedDict
 
+
 def transform_dns_record_set_output(result):
     from azure.mgmt.dns.models import RecordSetPaged
 
@@ -14,6 +15,7 @@ def transform_dns_record_set_output(result):
         for prop in [x for x in dir(item) if 'record' in x]:
             if not getattr(item, prop):
                 delattr(item, prop)
+
     if isinstance(result, RecordSetPaged):
         result = list(result)
         for item in result:
@@ -40,6 +42,7 @@ def transform_dns_record_set_table_output(result):
             table_row['Metadata'] = ' '
         table_output.append(table_row)
     return table_output
+
 
 def transform_dns_zone_table_output(result):
     is_list = isinstance(result, list)
@@ -84,7 +87,6 @@ def transform_vpn_connection_list(result):
 
 
 def transform_vpn_connection(result):
-
     if result:
         properties_to_strip = \
             ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
@@ -138,6 +140,7 @@ def transform_nsg_create_output(result):
 def transform_vnet_gateway_create_output(result):
     return {'vnetGateway': result.result()}
 
+
 def transform_geographic_hierachy_table_output(result):
     transformed = []
 
@@ -149,8 +152,10 @@ def transform_geographic_hierachy_table_output(result):
             item_obj['name'] = item['name']
             transformed.append(item_obj)
             _extract_values(item['regions'])
+
     _extract_values(result['geographicHierarchy'])
     return transformed
+
 
 def transform_service_community_table_output(result):
     transformed = []

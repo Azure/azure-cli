@@ -150,8 +150,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
         backend_http_settings['properties']['connectionDraining'] = {
             'enabled': bool(connection_draining_timeout),
-            'drainTimeoutInSec': connection_draining_timeout \
-                if connection_draining_timeout else 1
+            'drainTimeoutInSec': connection_draining_timeout if connection_draining_timeout else 1
         }
 
     ag_properties = {
