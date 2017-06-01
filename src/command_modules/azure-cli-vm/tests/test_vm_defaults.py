@@ -19,7 +19,6 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_v
 
 # pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
 

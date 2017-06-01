@@ -5,7 +5,6 @@
 
 # pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 import os
 import unittest
