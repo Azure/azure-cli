@@ -29,7 +29,8 @@ DEPENDENCIES = [
     'flake8>=3.2.1',
     'pycodestyle>=2.2.0',
     'nose>=1.3.7',
-    'six>=1.10.0'
+    'six>=1.10.0',
+    'tabulate>=0.7.7'
 ]
 
 setup(
