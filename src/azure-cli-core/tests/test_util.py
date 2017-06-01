@@ -9,7 +9,8 @@ import unittest
 import tempfile
 
 from azure.cli.core.util import \
-    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex)
+    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex,
+     hash_string, random_string)
 
 
 class TestUtils(unittest.TestCase):
@@ -140,6 +141,44 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(
             len(failed_strings), 0,
             'The following patterns failed: {}'.format(failed_strings))
+
+    def test_hash_string(self):
+        def _run_test(length, force_lower, digits_only):
+            import random
+            # build a list of variable sized lists with random strings to test
+            test_lists = []
+            for x in range(20):
+                num_y = random.randint(1, 10)
+                test_list = []
+                for y in range(num_y):
+                    test_list.append(random_string())
+                test_lists.append(test_list)
+
+            # test each of the lists against eachother to verify hashing properties
+            equal_count = 0
+            for item1 in test_lists:
+                result1 = hash_string(item1, length, force_lower, digits_only)
+
+                # test against the remaining lists and against itself, but not those which have
+                # come before...
+                test_lists2 = test_lists[test_lists.index(item1):]
+                for item2 in test_lists2:
+                    result2 = hash_string(item2, length, force_lower, digits_only)
+                    if item1 == item2:
+                        self.assertEqual(result1, result2)
+                        equal_count += 1
+                    else:
+                        self.assertNotEqual(result1, result2)
+            self.assertEqual(equal_count, len(test_lists))
+
+        # Test digest replication
+        _run_test(100, False, False)
+
+        # Test force_lower
+        _run_test(16, True, False)
+
+        # Test digits_only
+        _run_test(16, False, True)
 
 
 class TestBase64ToHex(unittest.TestCase):

@@ -12,7 +12,7 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
-from azure.cli.core.util import CLIError, random_string
+from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
@@ -22,8 +22,12 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def validate_nsg_name(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
+                        namespace='Microsoft.Compute', type='virtualMachines',
+                        subscription=get_subscription_id())
     namespace.network_security_group_name = namespace.network_security_group_name \
-        or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
+        or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
 def _get_resource_group_from_vault_name(vault_name):

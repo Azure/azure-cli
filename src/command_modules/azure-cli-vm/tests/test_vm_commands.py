@@ -747,6 +747,17 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
 
+        # test for idempotency--no need to reverify, just ensure the command doesn't fail
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            vm_name=self.vm_names[0],
+            image=self.vm_image,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location
+        ))
+
 
 class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
@@ -1797,6 +1808,17 @@ class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', nic_name),
             JMESPathCheck('resourceGroup', self.resource_group),
         ])
+
+
+class VMSSCreateIdempotentTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_idempotent')
+    def test_vmss_create_idempotent(self, resource_group):
+        vmss_name = 'vmss1'
+
+        # run the command twice with the same parameters and verify it does not fail
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 # endregion
 
