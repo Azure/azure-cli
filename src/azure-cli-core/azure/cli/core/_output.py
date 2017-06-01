@@ -65,7 +65,11 @@ def format_table(obj):
     result = obj.result
     try:
         if obj.table_transformer and not obj.is_query_active:
-            result = obj.table_transformer(result)
+            if isinstance(obj.table_transformer, str):
+                from jmespath import compile, Options
+                result = compile(obj.table_transformer).search(result, Options(OrderedDict))
+            else:
+                result = obj.table_transformer(result)
         result_list = result if isinstance(result, list) else [result]
         should_sort_keys = not obj.is_query_active and not obj.table_transformer
         to = TableOutput(should_sort_keys)
