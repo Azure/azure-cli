@@ -171,8 +171,7 @@ with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_op
 #                sql server                   #
 ###############################################
 
-server_azure_ad_administrators_operations = create_service_adapter('azure.mgmt.sql.operations.server_azure_ad_administrators_operations',
-                                            'ServerAzureADAdministratorsOperations')
+server_azure_ad_administrators_operations = create_service_adapter('azure.mgmt.sql.operations.server_azure_ad_administrators_operations', 'ServerAzureADAdministratorsOperations')
                                             
 with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations, server_azure_ad_administrators_operations, custom_path) as s:
     with s.group('sql server aad-admin') as c:
