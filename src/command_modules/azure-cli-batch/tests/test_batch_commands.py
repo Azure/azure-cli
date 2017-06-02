@@ -18,13 +18,14 @@ from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
 
-class TestObj(object):
-    # pylint: disable=too-many-instance-attributes,too-few-public-methods
+class TestObj(object):  # pylint: disable=too-few-public-methods
     pass
 
 
 class TestBatchValidators(unittest.TestCase):
-    # pylint: disable=attribute-defined-outside-init,no-member
+    def __init__(self, methodName):
+        super(TestBatchValidators, self).__init__(methodName)
+        pass
 
     def test_batch_datetime_format(self):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
@@ -156,7 +157,7 @@ class TestBatchValidators(unittest.TestCase):
 
 
 class TestBatchParser(unittest.TestCase):
-    # pylint: disable=attribute-defined-outside-init,protected-access
+    # pylint: disable=protected-access
 
     def test_batch_build_prefix(self):
         resolved = _command_type._build_prefix('id', 'id', 'pool')
@@ -317,8 +318,7 @@ class TestBatchParser(unittest.TestCase):
         op = "azure.batch.operations.pool_opterations#JobScheduleOperations.get"
         self.assertEqual(_command_type.format_options_name(op), "job_schedule_get_options")
 
-    def test_batch_argument_tree(self):
-        # pylint: disable=too-many-statements
+    def test_batch_argument_tree(self):  # pylint: disable=too-many-statements
         tree = _command_type.BatchArgumentTree(None, None)
         self.assertEqual(list(tree), [])
 
@@ -442,11 +442,10 @@ class TestBatchParser(unittest.TestCase):
         self.assertEqual(len(list(tree)), 11)
 
 
-class TestBatchLoader(unittest.TestCase):
-    # pylint: disable=attribute-defined-outside-init,protected-access
+class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
 
     def setUp(self):
-        def get_client(*args):  # pylint: disable=unused-argument
+        def get_client(*_):
             creds = SharedKeyCredentials('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
             return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
 
@@ -629,12 +628,11 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse('destination' in args)
 
     def test_batch_execute_command(self):
-        def function_result(client, **kwargs):
-            # pylint: disable=function-redefined,unused-argument
+        def function_result(_, **__):
+            # pylint: disable=function-redefined
             raise ValidationError('maximum', 'id', '100')
 
-        def get_op_handler(operation):
-            # pylint: disable=unused-argument
+        def get_op_handler(_):
             return function_result
 
         handler = operations.pool_operations.PoolOperations.add
@@ -643,16 +641,16 @@ class TestBatchLoader(unittest.TestCase):
             with self.assertRaises(CLIError):
                 self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
-        def function_result(client, **kwargs):
-            # pylint: disable=function-redefined,unused-argument
+        def function_result(_, **__):
+            # pylint: disable=function-redefined
             raise ClientRequestError('Bad Response')
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
                 self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
-        def function_result(client, **kwargs):
-            # pylint: disable=function-redefined,unused-argument
+        def function_result(_, **__):
+            # pylint: disable=function-redefined
             error = models.BatchError()
             error.code = 'InvalidHeaderValue'
             error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
@@ -668,8 +666,8 @@ class TestBatchLoader(unittest.TestCase):
             with self.assertRaises(CLIError):
                 self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
-        def function_result(client, **kwargs):
-            # pylint: disable=function-redefined,unused-argument
+        def function_result(_, **__):
+            # pylint: disable=function-redefined
             self.assertIsInstance(kwargs['pool'], models.PoolAddParameter)
             self.assertEqual(kwargs['pool'].id, 'pool_id')
             self.assertEqual(kwargs['pool'].vm_size, 'small')
