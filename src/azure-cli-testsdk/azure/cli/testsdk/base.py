@@ -33,12 +33,7 @@ logger = logging.getLogger('azure.cli.testsdk')
 def find_recording_dir(test_file):
     """
     Find the directory containing the recording of given test file based on current profile.
-
-    For the sake of backward compatibility, the existing recording files under the recording
-    directory will be accept if the current profile is
     """
-    base_dir = os.path.join(os.path.dirname(test_file), 'recordings')
-
     from azure.cli.core._profile import get_active_cloud, init_known_clouds
     from azure.cli.core.cloud import CloudNotRegisteredException
     try:
@@ -47,9 +42,7 @@ def find_recording_dir(test_file):
         init_known_clouds()
         api_profile = get_active_cloud().profile
 
-    if api_profile == 'latest':
-        latest_recording_dir = os.path.join(base_dir, 'latest')
-        return latest_recording_dir if os.path.isdir(latest_recording_dir) else base_dir
+    base_dir = os.path.join(os.path.dirname(test_file), 'recordings')
     return os.path.join(base_dir, api_profile)
 
 
