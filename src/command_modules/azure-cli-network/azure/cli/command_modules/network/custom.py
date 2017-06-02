@@ -543,7 +543,8 @@ def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ss
         mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
+    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
+        disabled_ssl_protocols=disabled_ssl_protocols)
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
@@ -632,7 +633,7 @@ def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, 
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(
-            enabled == 'true', firewall_mode)
+            enabled=(enabled == 'true'), firewall_mode=firewall_mode)
 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -671,7 +672,7 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
             results = list_ag_waf_rule_sets(ncf, _type=rule_set_type, version=rule_set_version, group='*')
             for group in _flatten(results, lambda r: r.rule_groups):
                 disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
-                    group.rule_group_name, [])
+                    rule_group_name=group.rule_group_name, rules=[])
 
                 for rule in group.rules:
                     if str(rule.rule_id) in disabled_rules:
@@ -917,7 +918,7 @@ def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_probe = Probe(
-        protocol, port, interval_in_seconds=interval, number_of_probes=threshold,
+        protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
         request_path=path, name=item_name)
     _upsert(lb, 'probes', new_probe, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
@@ -1157,7 +1158,7 @@ def add_nic_ip_config_address_pool(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     _upsert(ip_config, 'load_balancer_backend_address_pools',
-            BackendAddressPool(backend_address_pool),
+            BackendAddressPool(id=backend_address_pool),
             'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
@@ -1182,7 +1183,7 @@ def add_nic_ip_config_inbound_nat_rule(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     _upsert(ip_config, 'load_balancer_inbound_nat_rules',
-            InboundNatRule(inbound_nat_rule),
+            InboundNatRule(id=inbound_nat_rule),
             'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
@@ -1385,7 +1386,7 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
     if network_security_group:
-        subnet.network_security_group = NetworkSecurityGroup(network_security_group)
+        subnet.network_security_group = NetworkSecurityGroup(id=network_security_group)
     _set_route_table(ncf, resource_group_name, route_table, subnet)
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
@@ -1403,7 +1404,7 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
         instance.address_prefix = address_prefix
 
     if network_security_group:
-        instance.network_security_group = NetworkSecurityGroup(network_security_group)
+        instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
     elif network_security_group == '':  # clear it
         instance.network_security_group = None
 
@@ -1512,9 +1513,14 @@ def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
                               ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
     ncf = _network_client_factory().virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
-    new_policy = IpsecPolicy(sa_life_time_seconds, sa_data_size_kilobytes,
-                             ipsec_encryption, ipsec_integrity,
-                             ike_encryption, ike_integrity, dh_group, pfs_group)
+    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
+                             sa_data_size_kilobyes=sa_data_size_kilobytes,
+                             ipsec_encryption=ipsec_encryption,
+                             ipsec_integrity=ipsec_integrity,
+                             ike_encryption=ike_encryption,
+                             ike_integrity=ike_integrity,
+                             dh_group=dh_group,
+                             pfs_group=pfs_group)
     if conn.ipsec_policies:
         conn.ipsec_policies.append(new_policy)
     else:
@@ -1655,7 +1661,8 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
     active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
         gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active, ip_configurations=[])
+        sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
+        ip_configurations=[])
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(
             subnet=SubResource(subnet),
@@ -1756,7 +1763,9 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
     circuit = ExpressRouteCircuit(
         location=location, tags=tags,
         service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
-            service_provider_name, peering_location, bandwidth_in_mbps),
+            service_provider_name=service_provider_name,
+            peering_location=peering_location,
+            bandwidth_in_mbps=bandwidth_in_mbps),
         sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
     )
     return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
@@ -1895,7 +1904,8 @@ def update_route_table(instance, tags=None):
 
 def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
                  next_hop_ip_address=None):
-    route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
+    route = Route(next_hop_type=next_hop_type, address_prefix=address_prefix,
+                  next_hop_ip_address=next_hop_ip_address, name=route_name)
     ncf = _network_client_factory()
     return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
 
@@ -1940,7 +1950,8 @@ def create_route_filter_rule(client, resource_group_name, route_filter_name, rul
                              location=None, tags=None):
     RouteFilterRule = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilterRule', mod='models')
     return client.create_or_update(resource_group_name, route_filter_name, rule_name,
-                                   RouteFilterRule(access, communities, location=location, tags=tags))
+                                   RouteFilterRule(access=access, communities=communities,
+                                                   location=location, tags=tags))
 
 
 # endregion
@@ -1958,10 +1969,11 @@ def create_local_gateway(resource_group_name, local_network_gateway_name, gatewa
 
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
-        AddressSpace(local_address_prefix or []), location=location, tags=tags,
-        gateway_ip_address=gateway_ip_address)
+        local_network_address_space=AddressSpace(address_prefixes=(local_address_prefix or [])),
+        location=location, tags=tags, gateway_ip_address=gateway_ip_address)
     if bgp_peering_address or asn or peer_weight:
-        local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+        local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
+                                                 peer_weight=peer_weight)
     return client.create_or_update(
         resource_group_name, local_network_gateway_name, local_gateway, raw=no_wait)
 
@@ -2001,9 +2013,9 @@ def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     profile = Profile(location='global', tags=tags, profile_status=status,
                       traffic_routing_method=routing_method,
-                      dns_config=DnsConfig(unique_dns_name, None, ttl),
-                      monitor_config=MonitorConfig(None, monitor_protocol,
-                                                   monitor_port, monitor_path))
+                      dns_config=DnsConfig(relative_name=unique_dns_name, ttl=ttl),
+                      monitor_config=MonitorConfig(protocol=monitor_protocol,
+                                                   port=monitor_port, path=monitor_path))
     return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
 
 
@@ -2091,7 +2103,7 @@ def create_dns_zone(client, resource_group_name, zone_name, location='global', t
     kwargs = {
         'resource_group_name': resource_group_name,
         'zone_name': zone_name,
-        'parameters': Zone(location, tags=tags)
+        'parameters': Zone(location=location, tags=tags)
     }
 
     if if_none_match:
@@ -2334,39 +2346,39 @@ def import_zone(resource_group_name, zone_name, file_name):
 
 
 def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
-    record = AaaaRecord(ipv6_address)
+    record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address):
-    record = ARecord(ipv4_address)
+    record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             'arecords')
 
 
 def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
-    record = CnameRecord(cname)
+    record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False)
 
 
 def add_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange):
-    record = MxRecord(int(preference), exchange)
+    record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_ns_record(resource_group_name, zone_name, record_set_name, dname):
-    record = NsRecord(dname)
+    record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
-    record = PtrRecord(dname)
+    record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
@@ -2395,13 +2407,13 @@ def update_dns_soa_record(resource_group_name, zone_name, host=None, email=None,
 
 def add_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target):
-    record = SrvRecord(priority, weight, port, target)
+    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
-    record = TxtRecord(value)
+    record = TxtRecord(value=value)
     record_type = 'txt'
     long_text = ''.join(x for x in record.value)
     long_text = long_text.replace('\\', '')
@@ -2419,7 +2431,7 @@ def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
 
 def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address,
                            keep_empty_record_set=False):
-    record = AaaaRecord(ipv6_address)
+    record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2427,7 +2439,7 @@ def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6
 
 def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address,
                         keep_empty_record_set=False):
-    record = ARecord(ipv4_address)
+    record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2435,7 +2447,7 @@ def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_ad
 
 def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname,
                             keep_empty_record_set=False):
-    record = CnameRecord(cname)
+    record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           is_list=False, keep_empty_record_set=keep_empty_record_set)
@@ -2443,7 +2455,7 @@ def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cna
 
 def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange,
                          keep_empty_record_set=False):
-    record = MxRecord(int(preference), exchange)
+    record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2451,7 +2463,7 @@ def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, prefer
 
 def remove_dns_ns_record(resource_group_name, zone_name, record_set_name, dname,
                          keep_empty_record_set=False):
-    record = NsRecord(dname)
+    record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2459,7 +2471,7 @@ def remove_dns_ns_record(resource_group_name, zone_name, record_set_name, dname,
 
 def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname,
                           keep_empty_record_set=False):
-    record = PtrRecord(dname)
+    record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2467,7 +2479,7 @@ def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname
 
 def remove_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
                           port, target, keep_empty_record_set=False):
-    record = SrvRecord(priority, weight, port, target)
+    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2475,7 +2487,7 @@ def remove_dns_srv_record(resource_group_name, zone_name, record_set_name, prior
 
 def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value,
                           keep_empty_record_set=False):
-    record = TxtRecord(value)
+    record = TxtRecord(value=value)
     record_type = 'txt'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -2622,8 +2634,8 @@ def check_nw_connectivity(client, watcher_rg, watcher_name, source_resource, sou
     ConnectivitySource, ConnectivityDestination = \
         get_sdk(ResourceType.MGMT_NETWORK, 'ConnectivitySource', 'ConnectivityDestination',
                 mod='models')
-    source = ConnectivitySource(source_resource, source_port)
-    dest = ConnectivityDestination(dest_resource, dest_address, dest_port)
+    source = ConnectivitySource(resource_id=source_resource, port=source_port)
+    dest = ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port)
     return client.check_connectivity(watcher_rg, watcher_name, source, dest)
 
 
@@ -2647,8 +2659,9 @@ def check_nw_ip_flow(client, vm, watcher_rg, watcher_name, direction, protocol, 
     return client.verify_ip_flow(
         watcher_rg, watcher_name,
         VerificationIPFlowParameters(
-            vm, direction, protocol, local_port, remote_port,
-            local_ip_address, remote_ip_address, nic))
+            target_resource_id=vm, direction=direction, protocol=protocol, local_port=local_port,
+            remote_port=remote_port, local_ip_address=local_ip_address,
+            remote_ip_address=remote_ip_address, target_nic_resource_id=nic))
 
 
 def show_nw_next_hop(client, resource_group_name, vm, watcher_rg, watcher_name,
@@ -2666,7 +2679,10 @@ def show_nw_next_hop(client, resource_group_name, vm, watcher_rg, watcher_name,
             namespace='Microsoft.Network', type='networkInterfaces', name=nic)
 
     return client.get_next_hop(
-        watcher_rg, watcher_name, NextHopParameters(vm, source_ip, dest_ip, nic))
+        watcher_rg, watcher_name, NextHopParameters(target_resource_id=vm,
+                                                    source_ip_address=source_ip,
+                                                    destination_ip_address=dest_ip,
+                                                    target_nic_resource_id=nic))
 
 
 def show_nw_security_view(client, resource_group_name, vm, watcher_rg, watcher_name, location=None):
@@ -2686,9 +2702,12 @@ def create_nw_packet_capture(client, resource_group_name, capture_name, vm,
         get_sdk(ResourceType.MGMT_NETWORK, 'PacketCapture', 'PacketCaptureStorageLocation',
                 mod='models')
 
-    storage_settings = PacketCaptureStorageLocation(storage_account, storage_path, file_path)
-    capture_params = PacketCapture(vm, storage_settings, capture_size, capture_limit, time_limit,
-                                   filters)
+    storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
+                                                    storage_path=storage_path, file_path=file_path)
+    capture_params = PacketCapture(target=vm, storage_location=storage_settings,
+                                   bytes_to_capture_per_packet=capture_size,
+                                   total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
+                                   filters=filters)
     return client.create(watcher_rg, watcher_name, capture_name, capture_params)
 
 
@@ -2703,7 +2722,7 @@ def set_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, storage_account=
     if retention is not None:
         RetentionPolicyParameters = \
             get_sdk(ResourceType.MGMT_NETWORK, 'RetentionPolicyParameters', mod='models')
-        config.retention_policy = RetentionPolicyParameters(retention, int(retention) > 0)
+        config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
@@ -2716,7 +2735,8 @@ def start_nw_troubleshooting(client, watcher_name, watcher_rg, resource, storage
                              no_wait=False):
     TroubleshootingParameters = get_sdk(ResourceType.MGMT_NETWORK, 'TroubleshootingParameters',
                                         mod='models')
-    params = TroubleshootingParameters(resource, storage_account, storage_path)
+    params = TroubleshootingParameters(target_resource_id=resource, storage_id=storage_account,
+                                       storage_path=storage_path)
     return client.get_troubleshooting(watcher_rg, watcher_name, params, raw=no_wait)
 
 
