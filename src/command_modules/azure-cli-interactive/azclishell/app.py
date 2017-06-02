@@ -581,23 +581,6 @@ class Shell(object):
             else:
                 result = self.app.execute(args)
 
-            if '--progress' in args:
-                args.remove('--progress')
-                thread = ExecuteThread(self.app.execute, args)
-                thread.daemon = True
-                thread.start()
-                self.threads.append(thread)
-                self.curr_thread = thread
-
-                thread = ProgressViewThread(progress_view, self)
-                thread.daemon = True
-                thread.start()
-                self.threads.append(thread)
-                result = None
-
-            else:
-                result = self.app.execute(args)
-
             self.last_exit = 0
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
