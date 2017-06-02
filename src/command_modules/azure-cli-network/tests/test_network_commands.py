@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 import os
