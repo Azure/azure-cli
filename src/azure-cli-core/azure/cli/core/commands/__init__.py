@@ -146,12 +146,11 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         if correlation_id is not None:
 
-            formatter = "eventTimestamp ge {} and eventTimestamp le {}"
+            formatter = "eventTimestamp ge {}"
 
             end_time = datetime.datetime.utcnow()
             start_time = end_time - datetime.timedelta(seconds=DEFAULT_QUERY_TIME_RANGE)
-            odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                                             end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
+            odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
