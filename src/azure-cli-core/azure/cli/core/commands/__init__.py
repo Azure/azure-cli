@@ -139,7 +139,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
-    def _template_progress(self, correlation_id):
+    def _template_progress(self, correlation_id):  # pylint: disable=no-self-use
         """ gets the progress for template deployments """
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         from azure.monitor import MonitorClient
@@ -170,7 +170,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     messages += '\n'
                     messages += event.status.value + ': ' + event.operation_name.value
 
-            logger.info("Progress: {}".format(messages))
+            logger.info("Progress: %s", messages)
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
