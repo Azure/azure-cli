@@ -161,7 +161,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
         self._handle_command_package_error(message)
-
         args = {'prog': self.prog, 'message': message}
         logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)

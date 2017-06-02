@@ -108,7 +108,7 @@ def prompt_choice_list(msg, a_list, default=1, help_string=None):
         if val == '?' and help_string is not None:
             print(help_string)
             continue
-        if len(val) == 0:
+        if not val:
             val = '{}'.format(default)
         try:
             ans = int(val)

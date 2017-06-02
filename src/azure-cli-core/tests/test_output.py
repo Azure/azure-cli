@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-# pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
+
 import unittest
 from collections import OrderedDict
 from six import StringIO
 
-from azure.cli.core._output import (OutputProducer, format_json, format_table,
-                                    format_tsv, CommandResultItem)
+from azure.cli.core._output import OutputProducer, format_json, format_table, format_tsv, CommandResultItem
 import azure.cli.core.util as util
 
 
@@ -133,6 +132,19 @@ True      qwerty  0b1f6472  0b1f6472qwerty
             """Name    Val             Active    Sub
 ------  --------------  --------  --------
 qwerty  0b1f6472qwerty  True      0b1f6472
+"""))
+
+    def test_out_table_no_query_yes_jmespath_table_transformer(self):
+        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        obj = {'name': 'qwerty', 'val': '0b1f6472qwerty', 'active': True, 'sub': '0b1f6472'}
+
+        result_item = CommandResultItem(obj, table_transformer='{Name:name, Val:val, Active:active}', is_query_active=False)
+        output_producer.out(result_item)
+        # Should be table transformer order
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+            """Name    Val             Active
+------  --------------  --------
+qwerty  0b1f6472qwerty  True
 """))
 
     # TSV output tests

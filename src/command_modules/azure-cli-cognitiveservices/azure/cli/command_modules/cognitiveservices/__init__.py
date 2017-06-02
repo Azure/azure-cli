@@ -6,8 +6,8 @@ import azure.cli.command_modules.cognitiveservices._help  # pylint: disable=unus
 
 
 def load_params(_):
-    import azure.cli.command_modules.cognitiveservices._params  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.cognitiveservices._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():
-    import azure.cli.command_modules.cognitiveservices.commands  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.cognitiveservices.commands  # pylint: disable=redefined-outer-name, unused-variable

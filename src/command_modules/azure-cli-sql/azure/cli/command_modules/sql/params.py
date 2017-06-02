@@ -16,6 +16,7 @@ from azure.mgmt.sql.models.import_extension_request \
     import ImportExtensionRequest
 from azure.mgmt.sql.models.export_request import ExportRequest
 from azure.mgmt.sql.models.server import Server
+from azure.mgmt.sql.models.server_azure_ad_administrator import ServerAzureADAdministrator
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
@@ -543,6 +544,30 @@ with ParametersContext(command='sql server create') as c:
 with ParametersContext(command='sql server update') as c:
     c.argument('administrator_login_password', help='The administrator login password.')
 
+
+#####
+#           sql server aad-admin
+######
+
+
+with ParametersContext(command='sql server aad-admin create') as c:
+    c.expand('properties', ServerAzureADAdministrator)
+    c.argument('login',
+               options_list=('--user', '-u'))
+    c.argument('sid',
+               options_list=('--sid', '-s'))
+    c.argument('tenant_id',
+               options_list=('--tenant-id', '-t'))
+
+
+with ParametersContext(command='sql server aad-admin update') as c:
+    c.expand('properties', ServerAzureADAdministrator)
+    c.argument('login',
+               options_list=('--user', '-u'))
+    c.argument('sid',
+               options_list=('--sid', '-s'))
+    c.argument('tenant_id',
+               options_list=('--tenant-id', '-t'))
 
 #####
 #           sql server firewall-rule

@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long, too-many-lines
+# pylint: disable=line-too-long, too-many-lines
 
 helps['network'] = """
     type: group
@@ -68,7 +68,7 @@ helps['network application-gateway wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the application gateway is met.
 """
-#endregion
+# endregion
 
 # region Application Gateway Address Pool
 
@@ -174,7 +174,7 @@ helps['network application-gateway frontend-ip update'] = """
     type: command
     short-summary: Update a frontend IP address.
 """
-#endregion
+# endregion
 
 # region Application Gateway frontend port
 
@@ -207,7 +207,7 @@ helps['network application-gateway frontend-port update'] = """
     type: command
     short-summary: Update a frontend port.
 """
-#endregion
+# endregion
 
 # region Application Gateway HTTP listener
 
@@ -240,7 +240,7 @@ helps['network application-gateway http-listener update'] = """
     type: command
     short-summary: Update an HTTP listener.
 """
-#endregion
+# endregion
 
 # region Application Gateway HTTP settings
 
@@ -273,7 +273,7 @@ helps['network application-gateway http-settings update'] = """
     type: command
     short-summary: Update HTTP settings.
 """
-#endregion
+# endregion
 
 # region Application Gateway probe
 
@@ -315,7 +315,7 @@ helps['network application-gateway probe update'] = """
     type: command
     short-summary: Update a probe.
 """
-#endregion
+# endregion
 
 # region Application Gateway rules
 
@@ -348,7 +348,7 @@ helps['network application-gateway rule update'] = """
     type: command
     short-summary: Update a rule.
 """
-#endregion
+# endregion
 
 # region Application Gateway SSL Certs
 
@@ -380,7 +380,7 @@ helps['network application-gateway ssl-cert update'] = """
     type: command
     short-summary: Update an SSL certificate.
 """
-#endregion
+# endregion
 
 # region Application Gateway SSL Policy
 helps['network application-gateway ssl-policy'] = """
@@ -434,7 +434,7 @@ helps['network application-gateway url-path-map update'] = """
     type: command
     short-summary: Update a URL path map.
 """
-#endregion
+# endregion
 
 # region Application Gateway URL path map rules
 
@@ -452,7 +452,7 @@ helps['network application-gateway url-path-map rule delete'] = """
     type: command
     short-summary: Delete a rule for a URL path map.
 """
-#endregion
+# endregion
 
 # region Application Gateway WAF Config
 helps['network application-gateway waf-config'] = """
@@ -533,7 +533,6 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     """.format(record.upper())
 
 for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
-
     helps['network dns record-set {} remove-record'.format(record)] = """
         type: command
         short-summary: Remove {} record from its record set.
@@ -566,7 +565,6 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     """.format(record.upper())
 
 for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
-
     helps['network dns record-set {} update'.format(record)] = """
         type: command
         short-summary: Update {} record set.
@@ -597,7 +595,6 @@ helps['network dns record-set soa update'] = """
     short-summary: Update properties of the zone's SOA record.
 """
 
-
 helps['network dns record-set list'] = """
     type: command
     short-summary: List all record sets within a DNS zone.
@@ -610,7 +607,7 @@ helps['network dns record-set list'] = """
             --query "[?name=='@']"
 """
 
-#endregion
+# endregion
 
 # region DNS Zone
 helps['network dns zone'] = """
@@ -671,7 +668,7 @@ helps['network dns zone update'] = """
         - name: --if-match
           short-summary: Update only if the resource with the same ETAG exists.
 """
-#endregion
+# endregion
 
 # region Express Route
 
@@ -724,7 +721,7 @@ helps['network express-route list-service-providers'] = """
     type: command
     short-summary: List available ExpressRoute service providers.
 """
-#endregion
+# endregion
 
 # region Express Route auth
 
@@ -752,7 +749,7 @@ helps['network express-route auth show'] = """
     type: command
     short-summary: Show details of an authorization setting.
 """
-#endregion
+# endregion
 
 # region Express Route peering
 
@@ -785,7 +782,7 @@ helps['network express-route peering update'] = """
     type: command
     short-summary: Update peering settings.
 """
-#endregion
+# endregion
 
 # region Load Balancer
 
@@ -829,7 +826,7 @@ helps['network lb update'] = """
     type: command
     short-summary: Update a load balancer.
 """
-#endregion
+# endregion
 
 # region Load Balancer address pool
 
@@ -857,13 +854,13 @@ helps['network lb address-pool show'] = """
     type: command
     short-summary: Show details of a backend address pool.
 """
-#endregion
+# endregion
 
 # region Load Balancer frontend IP
 
 helps['network lb frontend-ip'] = """
     type: group
-    short-summary: Manage frontend IP addresses for a load balancer. 
+    short-summary: Manage frontend IP addresses for a load balancer.
 """
 
 helps['network lb frontend-ip create'] = """
@@ -890,13 +887,13 @@ helps['network lb frontend-ip update'] = """
     type: command
     short-summary: Update a frontend IP address.
 """
-#endregion
+# endregion
 
 # region Load Balancer inbound NAT pool
 
 helps['network lb inbound-nat-pool'] = """
     type: group
-    short-summary: Manage inbound NAT address pools for a load balancer. 
+    short-summary: Manage inbound NAT address pools for a load balancer.
 """
 
 helps['network lb inbound-nat-pool create'] = """
@@ -923,7 +920,7 @@ helps['network lb inbound-nat-pool update'] = """
     type: command
     short-summary: Update an inbound NAT address pool.
 """
-#endregion
+# endregion
 
 # region Load Balancer inbound NAT rule
 
@@ -938,14 +935,8 @@ helps['network lb inbound-nat-rule create'] = """
     examples:
         - name: Create a basic inbound NAT rule for port 80.
           text: >
-            az network lb inbound-nat-rule create
-            -g MyResourceGroup
-            --lb-name MyLb
-            -n MyNatRule
-            --protocol Tcp
-            --frontend-ip-name MyIpConfig
-            --frontend-port 80
-            --backend-port 80
+            az network lb inbound-nat-rule create -g MyResourceGroup --lb-name MyLb -n MyNatRule
+            --protocol Tcp --frontend-port 80 --backend-port 80
 """
 
 helps['network lb inbound-nat-rule delete'] = """
@@ -967,7 +958,7 @@ helps['network lb inbound-nat-rule update'] = """
     type: command
     short-summary: Update an inbound NAT rule.
 """
-#endregion
+# endregion
 
 # region Load Balancer probe
 
@@ -1010,7 +1001,7 @@ helps['network lb probe update'] = """
     type: command
     short-summary: Update a probe.
 """
-#endregion
+# endregion
 
 # region Load Balancer rule
 
@@ -1026,15 +1017,8 @@ helps['network lb rule create'] = """
         - name: Create a basic load balancing rule that assigns a front-facing IP configuration
                 and port to a backend address pool and port.
           text: >
-            az network lb rule create
-            -g MyResourceGroup
-            --lb-name MyLb
-            -n MyLbRule
-            --protocol Tcp
-            --frontend-ip-name MyIpConfig
-            --frontend-port 80
-            --backend-pool-name m_pool
-            --backend-port 80
+            az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule
+            --protocol Tcp --frontend-port 80 --backend-port 80
 """
 
 helps['network lb rule delete'] = """
@@ -1056,7 +1040,7 @@ helps['network lb rule update'] = """
     type: command
     short-summary: Update a load balancing rule.
 """
-#endregion
+# endregion
 
 # region Local Gateway
 
@@ -1087,7 +1071,7 @@ helps['network local-gateway update'] = """
     type: command
     short-summary: Update a local VPN gateway.
 """
-#endregion
+# endregion
 
 # region Network Interface (NIC)
 
@@ -1117,7 +1101,7 @@ helps['network nic create'] = """
             --vnet-name MyVnet
             --subnet MySubnet
             -n MyNic
-        - name: Create a network interface for a specified subnet on a specified virtual network which allows 
+        - name: Create a network interface for a specified subnet on a specified virtual network which allows
                 IP forwarding subject to the specified NSG.
           text: >
             az network nic create
@@ -1168,7 +1152,7 @@ helps['network nic update'] = """
             -n MyNic
             --network-security-group MyNsg
 """
-#endregion
+# endregion
 
 # region NIC ip-config
 
@@ -1218,7 +1202,7 @@ helps['network nic ip-config update'] = """
             -n MyIpConfig
             --make-primary
 """
-#endregion
+# endregion
 
 # region NIC IP config address pool
 
@@ -1236,7 +1220,7 @@ helps['network nic ip-config address-pool remove'] = """
     type: command
     short-summary: Remove a backend address pool.
 """
-#endregion
+# endregion
 
 # region NIC IP config inbound NAT rules
 
@@ -1254,7 +1238,7 @@ helps['network nic ip-config inbound-nat-rule remove'] = """
     type: command
     short-summary: Remove an inbound NAT rule.
 """
-#endregion
+# endregion
 
 # region Network Security Group (NSG)
 
@@ -1360,8 +1344,7 @@ helps['network nsg rule update'] = """
             --destination-address-prefix *
 """
 
-
-#endregion
+# endregion
 
 # region Public IP
 
@@ -1426,7 +1409,7 @@ helps['network public-ip update'] = """
     short-summary: Update a public IP address.
     examples:
         - name: Update a public IP resource with a DNS name label
-                (for example, MyLabel.westus.cloudapp.azure.com) and 
+                (for example, MyLabel.westus.cloudapp.azure.com) and
                 static allocation.
           text: >
             az network public-ip update
@@ -1435,7 +1418,7 @@ helps['network public-ip update'] = """
             --dns-name MyLabel
             --allocation-method Static
 """
-#endregion
+# endregion
 
 # region Route Table
 
@@ -1499,7 +1482,7 @@ helps['network route-table route update'] = """
     short-summary: Update a route in a route table.
 """
 
-#endregion
+# endregion
 
 # region Route Filter
 
@@ -1569,7 +1552,7 @@ helps['network route-filter rule update'] = """
     short-summary: Update a rule in a route filter.
 """
 
-#endregion
+# endregion
 
 # region Traffic Manager
 
@@ -1647,7 +1630,7 @@ helps['network traffic-manager endpoint update'] = """
     type: command
     short-summary: Update an endpoint.
 """
-#endregion
+# endregion
 
 # region Virtual Network (VNET)
 
@@ -1702,7 +1685,7 @@ helps['network vnet update'] = """
     type: command
     short-summary: Update a virtual network.
 """
-#endregion
+# endregion
 
 # region VNet Subnet
 
@@ -1745,7 +1728,7 @@ helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
 """
-#endregion
+# endregion
 
 # region Virtual Network (VNet) Peering
 
@@ -1778,7 +1761,7 @@ helps['network vnet peering update'] = """
     type: command
     short-summary: Update a peering.
 """
-#endregion
+# endregion
 
 # region VPN Connection
 
@@ -1812,7 +1795,7 @@ helps['network vpn-connection update'] = """
     short-summary: Update a VPN connection.
 """
 
-#endregion
+# endregion
 
 # region VPN Connection shared key
 
@@ -1836,7 +1819,7 @@ helps['network vpn-connection shared-key update'] = """
     short-summary: Update a VPN connection shared key.
 """
 
-#endregion
+# endregion
 
 # region VPN Connection IPSec Policy
 
@@ -1860,7 +1843,7 @@ helps['network vpn-connection ipsec-policy clear'] = """
     short-summary: Delete all IPSec policies on a VPN connection.
 """
 
-#endregion
+# endregion
 
 # region VNet Gateway
 
@@ -1912,7 +1895,7 @@ helps['network vnet-gateway wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
 """
 
-#endregion
+# endregion
 
 # region VNet Gateway Revoke Cert
 
@@ -1931,7 +1914,7 @@ helps['network vnet-gateway revoked-cert delete'] = """
     short-summary: Delete a revoked certificate.
 """
 
-#endregion
+# endregion
 
 # region VNet Gateway Root Cert
 helps['network vnet-gateway root-cert'] = """
@@ -1949,7 +1932,7 @@ helps['network vnet-gateway root-cert delete'] = """
     short-summary: Delete a root certificate.
 """
 
-#endregion
+# endregion
 
 # region Network Watcher
 helps['network watcher'] = """
@@ -2004,10 +1987,10 @@ helps['network watcher test-ip-flow'] = """
     long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
     parameters:
         - name: --local
-          short-summary: The private IPv4 address for the VM's NIC and the port of the packet in 
+          short-summary: The private IPv4 address for the VM's NIC and the port of the packet in
             X.X.X.X:PORT format. '*' can be used for port when direction is outbound.
         - name: --remote
-          short-summary: The IPv4 address and port for the remote side of the packet 
+          short-summary: The IPv4 address and port for the remote side of the packet
             X.X.X.X:PORT format. '*' can be used for port when direction is inbound.
         - name: --direction
           short-summary: Direction of the packet relative to the VM.

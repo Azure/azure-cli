@@ -421,7 +421,7 @@ helps['vm diagnostics get-default-config'] = """
           text: >
             az vm diagnostics get-default-config \\
                 | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#MyStorageAccount#g" \\
-                | sed "s#__VM_RESOURCE_ID__#MyVmResourceId#g"
+                | sed "s#__VM_OR_VMSS_RESOURCE_ID__#MyVmResourceId#g"
         - name: Get the default diagnostics on a Windows VM.
           text: >
             az vm diagnostics get-default-config --is-windows-os
@@ -442,7 +442,7 @@ helps['vm diagnostics set'] = """
 
             default_config=$(az vm diagnostics get-default-config \\
                 | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
-                | sed "s#__VM_RESOURCE_ID__#$my_vm_resource_id#g")
+                | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
             storage_sastoken=$(az storage account generate-sas \\
                 --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\

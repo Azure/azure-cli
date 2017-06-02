@@ -21,7 +21,7 @@ def _load_key(key_filename):
     try:
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
     except paramiko.PasswordRequiredException:
-        key_pass = prompt_pass('Password:')
+        key_pass = prompt_pass('Password for private key:')
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
     if pkey is None:
         raise CLIError('failed to load key: {}'.format(key_filename))
@@ -128,8 +128,8 @@ class ACSClient(object):
             t.daemon = True
             t.start()
             return
-        else:
-            return self._run_cmd(command)
+
+        return self._run_cmd(command)
 
     def _run_cmd(self, command):
         """
@@ -198,7 +198,7 @@ class ACSClient(object):
         """
         Gets a random, available local port
         """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # pylint: disable=no-member
         s.bind(('', 0))
         s.listen(1)
         port = s.getsockname()[1]

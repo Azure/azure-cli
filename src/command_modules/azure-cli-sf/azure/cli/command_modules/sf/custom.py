@@ -13,10 +13,8 @@ import sys
 try:
     from urllib.parse import urlparse, urlencode, urlunparse
 except ImportError:
-    # pylint: disable=import-error
-    from urlparse import urlparse, urlunparse
-    # pylint: disable=no-name-in-module
-    from urllib import urlencode
+    from urllib import urlencode  # pylint: disable=no-name-in-module
+    from urlparse import urlparse, urlunparse  # pylint: disable=import-error
 
 import requests
 import azure.cli.core.azlogging as azlogging
@@ -280,7 +278,7 @@ def sf_upload_app(path, show_progress=False):
             total_files_size), file=sys.stderr)
 
 
-def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
+def sf_create_app(client,  # pylint: disable=too-many-locals
                   app_name, app_type, app_version, parameters=None,
                   min_node_count=0, max_node_count=0, metrics=None,
                   timeout=60):
@@ -373,7 +371,7 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     client.create_application(app_desc, timeout)
 
 
-def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
+def sf_upgrade_app(  # pylint: disable=too-many-locals
         client, app_id, app_version, parameters, mode="UnmonitoredAuto",
         replica_set_check_timeout=None, force_restart=None,
         failure_action=None, health_check_wait_duration="0",
@@ -575,20 +573,16 @@ def sup_load_metrics(formatted_metrics):
 
 
 def sup_placement_policies(formatted_placement_policies):
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.service_placement_non_partially_place_service_policy_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.service_placement_non_partially_place_service_policy_description import (
         ServicePlacementNonPartiallyPlaceServicePolicyDescription
     )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.service_placement_prefer_primary_domain_policy_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.service_placement_prefer_primary_domain_policy_description import (
         ServicePlacementPreferPrimaryDomainPolicyDescription
     )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.service_placement_required_domain_policy_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.service_placement_required_domain_policy_description import (
         ServicePlacementRequiredDomainPolicyDescription
     )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.service_placement_require_domain_distribution_policy_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.service_placement_require_domain_distribution_policy_description import (
         ServicePlacementRequireDomainDistributionPolicyDescription
     )
 
@@ -606,32 +600,19 @@ def sup_placement_policies(formatted_placement_policies):
                               "RequireDomainDistribution"]:
                 raise CLIError("Invalid type of placement policy specified")
             p_domain_name = p.get("domain_name", None)
-            if (
-                    p_domain_name is None and
-                    p_type != "NonPartiallyPlaceService"
-            ):
-                raise CLIError(
-                    "Placement policy type requires target domain name"
-                )
+
+            if p_domain_name is None and p_type != "NonPartiallyPlaceService":
+                raise CLIError("Placement policy type requires target domain name")
             if p_type == "NonPartiallyPlaceService":
-                r.append(
-                    ServicePlacementNonPartiallyPlaceServicePolicyDescription()
-                )
+                r.append(ServicePlacementNonPartiallyPlaceServicePolicyDescription())
             elif p_type == "PreferPrimaryDomain":
-                r.append(
-                    ServicePlacementPreferPrimaryDomainPolicyDescription(p_domain_name)  # noqa: justification, no way to shorten
-                )
+                r.append(ServicePlacementPreferPrimaryDomainPolicyDescription(p_domain_name))
             elif p_type == "RequireDomain":
-                r.append(
-                    ServicePlacementRequiredDomainPolicyDescription(p_domain_name)  # noqa: justification, no way to shorten
-                )
+                r.append(ServicePlacementRequiredDomainPolicyDescription(p_domain_name))
             elif p_type == "RequireDomainDistribution":
-                r.append(
-                    ServicePlacementRequireDomainDistributionPolicyDescription(p_domain_name)  # noqa: justification, no way to shorten
-                )
+                r.append(ServicePlacementRequireDomainDistributionPolicyDescription(p_domain_name))
         return r
-    else:
-        return None
+    return None
 
 
 def sup_validate_move_cost(move_cost):
@@ -680,7 +661,7 @@ def sup_service_update_flags(
     return str(f)
 
 
-def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
+def sf_create_service(  # pylint: disable=too-many-locals
         client, app_id, name, service_type, stateful=False, stateless=False,
         singleton_scheme=False, named_scheme=False, int_scheme=False,
         named_scheme_list=None, int_scheme_low=None, int_scheme_high=None,
@@ -825,14 +806,12 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         part_schema = NamedPartitionSchemeDescription(len(named_scheme_list),
                                                       named_scheme_list)
     elif int_scheme:
-        # pylint: disable=redefined-variable-type
         part_schema = UniformInt64RangePartitionSchemeDescription(
             int_scheme_count,
             int_scheme_low,
             int_scheme_high
         )
     else:
-        # pylint: disable=redefined-variable-type
         part_schema = SingletonPartitionSchemeDescription()
     # correlation scheme
     correlation_desc = sup_correlation_scheme(correlated_service,
@@ -873,7 +852,6 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     if stateful:
         flags = sup_stateful_flags(replica_restart_wait, quorum_loss_wait,
                                    stand_by_replica_keep)
-        # pylint: disable=redefined-variable-type
         svc_desc = StatefulServiceDescription(name, service_type,
                                               part_schema,
                                               target_replica_set_size,
@@ -1016,7 +994,6 @@ def sf_update_service(client, service_id,
         if stand_by_replica_keep is not None:
             raise CLIError("Cannot specify standby replica keep duration for "
                            "stateless service")
-        # pylint: disable=redefined-variable-type
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
                                                         correlation_desc,
                                                         load_list,

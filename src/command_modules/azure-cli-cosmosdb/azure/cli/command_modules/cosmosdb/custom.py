@@ -136,13 +136,11 @@ def cli_cosmosdb_update(client,
 
 
 def cli_cosmosdb_list(client, resource_group_name=None):
-    """
-    Lists all Azure Cosmos DB database accounts within a given resource group or subscription.
-    """
+    """ Lists all Azure Cosmos DB database accounts within a given resource group or subscription. """
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-    else:
-        return client.list()
+
+    return client.list()
 
 
 ######################

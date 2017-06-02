@@ -38,7 +38,7 @@ $ python -m automation.release.packaged --version 0.2.3 -f ~/cli-components.json
 OR
 
 ```
-$ python -m automation.release.packaged --version 0.2.3 --components azure-cli=2.0.1 acs=2.0.1 appservice=0.1.1b6 batch=0.1.1b5 cloud=2.0.0 component=2.0.0 configure=2.0.1 container=0.1.1b4 core=2.0.1 documentdb=0.1.1b2 feedback=2.0.0 find=0.0.1b1 iot=0.1.1b3 keyvault=0.1.1b6 network=2.0.1 nspkg=2.0.0 profile=2.0.1 redis=0.1.1b3 resource=2.0.1 role=2.0.0 sql=0.1.1b6 storage=2.0.1 vm=2.0.1
+$ python -m automation.release.packaged --version 0.2.10 --components azure-cli=2.0.7 azure-cli-acr=2.0.5 azure-cli-acs=2.0.7 azure-cli-appservice=0.1.7 azure-cli-batch=3.0.0 azure-cli-billing=0.1.0 azure-cli-cdn=0.0.3 azure-cli-cloud=2.0.3 azure-cli-cognitiveservices=0.1.3 azure-cli-command_modules-nspkg=2.0.0 azure-cli-component=2.0.5 azure-cli-configure=2.0.7 azure-cli-consumption=0.1.0 azure-cli-core=2.0.7 azure-cli-cosmosdb=0.1.7 azure-cli-dla=0.0.7 azure-cli-dls=0.0.7 azure-cli-feedback=2.0.3 azure-cli-find=0.2.3 azure-cli-interactive=0.3.3 azure-cli-iot=0.1.6 azure-cli-keyvault=2.0.5 azure-cli-lab=0.0.5 azure-cli-monitor=0.0.5 azure-cli-network=2.0.7 azure-cli-nspkg=3.0.0 azure-cli-profile=2.0.5 azure-cli-rdbms=0.0.2 azure-cli-redis=0.2.4 azure-cli-resource=2.0.7 azure-cli-role=2.0.5 azure-cli-sf=1.0.2 azure-cli-sql=2.0.4 azure-cli-storage=2.0.7 azure-cli-vm=2.0.7
 ```
 
 2 - Upload release archive
@@ -67,7 +67,7 @@ $ shasum -a 256 azure-cli_packaged_{VERSION}.tar.gz
 3 - Build/Release for Debian, Docker, Homebrew
 ----------------------------------------------
 
-Follow the instructions in the `debian`, `docker`, `windows` and `homebrew` subdirectories to create these releases.
+Follow the instructions in the `debian`, `docker`, `windows`, `bundled` and `homebrew` subdirectories to create these releases.
 
 
 4 - Modify HISTORY.md

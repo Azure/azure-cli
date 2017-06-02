@@ -64,6 +64,15 @@ def transform_vm_create_output(result):
         return None if isinstance(result, ClientRawResponse) else result
 
 
+def transform_vm_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
 def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
@@ -96,7 +105,8 @@ cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'
 cli_command(__name__, 'vm start', mgmt_path.format(op_var, op_class, 'start'), cf_vm, no_wait_param='raw')
 cli_command(__name__, 'vm redeploy', mgmt_path.format(op_var, op_class, 'redeploy'), cf_vm, no_wait_param='raw')
 cli_command(__name__, 'vm list-ip-addresses', custom_path.format('list_ip_addresses'), table_transformer=transform_ip_addresses)
-cli_command(__name__, 'vm get-instance-view', custom_path.format('get_instance_view'))
+cli_command(__name__, 'vm get-instance-view', custom_path.format('get_instance_view'),
+            table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
 cli_command(__name__, 'vm list', custom_path.format('list_vm'), table_transformer=transform_vm_list)
 cli_command(__name__, 'vm resize', custom_path.format('resize_vm'), no_wait_param='no_wait')
 cli_command(__name__, 'vm capture', custom_path.format('capture_vm'))
@@ -183,9 +193,12 @@ cli_command(__name__, 'vm unmanaged-disk list', custom_path.format('list_unmanag
 op_var = 'virtual_machine_extensions_operations'
 op_class = 'VirtualMachineExtensionsOperations'
 cli_command(__name__, 'vm extension delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm_ext)
-cli_command(__name__, 'vm extension show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext, exception_handler=empty_on_404)
+_extension_show_transform = '{Name:name, ProvisioningState:provisioningState, Publisher:publisher, Version:typeHandlerVersion, AutoUpgradeMinorVersion:autoUpgradeMinorVersion}'
+cli_command(__name__, 'vm extension show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext, exception_handler=empty_on_404,
+            table_transformer=_extension_show_transform)
 cli_command(__name__, 'vm extension set', custom_path.format('set_extension'))
-cli_command(__name__, 'vm extension list', custom_path.format('list_extensions'))
+cli_command(__name__, 'vm extension list', custom_path.format('list_extensions'),
+            table_transformer='[].' + _extension_show_transform)
 
 # VMSS Extension
 cli_command(__name__, 'vmss extension delete', custom_path.format('delete_vmss_extension'))
@@ -217,9 +230,11 @@ cli_command(__name__, 'vm image list-skus', mgmt_path.format(op_var, op_class, '
 cli_command(__name__, 'vm image list', custom_path.format('list_vm_images'))
 
 # VM Usage
-cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage)
+cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage, transform=transform_vm_usage_list,
+            table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
 
 # VMSS
+vmss_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, Capacity:sku.capacity, Overprovision:overprovision, upgradePolicy:upgradePolicy.mode}'
 cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, no_wait_param='raw')
 cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'list_skus'), cf_vmss)
 
@@ -228,9 +243,11 @@ cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_s
 cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'))
-cli_command(__name__, 'vmss show', custom_path.format('show_vmss'), exception_handler=empty_on_404)
-cli_command(__name__, 'vmss list', custom_path.format('list_vmss'))
+cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'),
+            table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
+cli_command(__name__, 'vmss show', custom_path.format('show_vmss'), exception_handler=empty_on_404,
+            table_transformer=vmss_show_table_transform)
+cli_command(__name__, 'vmss list', custom_path.format('list_vmss'), table_transformer='[].' + vmss_show_table_transform)
 cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss start', custom_path.format('start_vmss'), no_wait_param='no_wait')

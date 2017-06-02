@@ -5,7 +5,8 @@
 import getpass
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-arguments
+# pylint: disable=too-many-locals, unused-argument, too-many-statements,
+
 def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
                   size=None, admin_username=getpass.getuser(), admin_password=None,
                   ssh_key=None, authentication_type='password',
@@ -58,9 +59,9 @@ def claim_vm(client, lab_name=None, name=None, resource_group=None):
 
     if name is not None:
         return client.claim(resource_group, lab_name, name)
-    else:
-        from ._client_factory import get_devtestlabs_lab_operation
-        return get_devtestlabs_lab_operation(None).claim_any_vm(resource_group, lab_name)
+
+    from ._client_factory import get_devtestlabs_lab_operation
+    return get_devtestlabs_lab_operation(None).claim_any_vm(resource_group, lab_name)
 
 
 # pylint: disable=too-many-locals, unused-argument

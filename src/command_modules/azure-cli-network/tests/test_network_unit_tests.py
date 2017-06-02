@@ -9,8 +9,8 @@ import mock
 
 from azure.cli.core.util import CLIError
 
-class Test_Network_Unit_Tests(unittest.TestCase):
 
+class Test_Network_Unit_Tests(unittest.TestCase):
     def test_network_get_nic_ip_config(self):
         from azure.cli.command_modules.network.custom import _get_nic_ip_config
 
@@ -27,11 +27,8 @@ class Test_Network_Unit_Tests(unittest.TestCase):
             return fake
 
         nic = mock.MagicMock()
-        nic.ip_configurations = [
-            mock_ip_config('test1', '1'),
-            mock_ip_config('test2', '2'),
-            mock_ip_config('test3', '3'),
-        ]
+        nic.ip_configurations = [mock_ip_config('test1', '1'), mock_ip_config('test2', '2'),
+                                 mock_ip_config('test3', '3')]
         # 2 - Test that if ip_configurations is not null but no match, error is thrown
         with self.assertRaises(CLIError):
             _get_nic_ip_config(nic, 'test4')

@@ -17,7 +17,7 @@ from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
 from azure.cli.core.util import CLIError
 
 
-class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-methods
+class Test_Profile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -255,7 +255,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                          extended_info['endpoints'].active_directory)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_create_account_without_subscriptions(self, mock_auth_context):
+    def test_create_account_without_subscriptions_thru_service_principal(self, mock_auth_context):
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = []
@@ -277,7 +277,42 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                                      subscription_finder=finder)
 
         # assert
-        self.assertTrue(1, len(result))
+        self.assertEqual(1, len(result))
+        self.assertEqual(result[0]['id'], self.tenant_id)
+        self.assertEqual(result[0]['state'], 'Enabled')
+        self.assertEqual(result[0]['tenantId'], self.tenant_id)
+        self.assertEqual(result[0]['name'], 'N/A(tenant level account)')
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_create_account_without_subscriptions_thru_common_tenant(self, mock_auth_context):
+        mock_auth_context.acquire_token.return_value = self.token_entry1
+        mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
+        tenant_object = mock.MagicMock()
+        tenant_object.id = "foo-bar"
+        tenant_object.tenant_id = self.tenant_id
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = []
+        mock_arm_client.tenants.list.return_value = (x for x in [tenant_object])
+
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': []}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        profile._management_resource_uri = 'https://management.core.windows.net/'
+
+        # action
+        result = profile.find_subscriptions_on_login(False,
+                                                     '1234',
+                                                     'my-secret',
+                                                     False,
+                                                     None,
+                                                     allow_no_subscriptions=True,
+                                                     subscription_finder=finder)
+
+        # assert
+        self.assertEqual(1, len(result))
         self.assertEqual(result[0]['id'], self.tenant_id)
         self.assertEqual(result[0]['state'], 'Enabled')
         self.assertEqual(result[0]['tenantId'], self.tenant_id)
@@ -817,7 +852,7 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin,
+    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
