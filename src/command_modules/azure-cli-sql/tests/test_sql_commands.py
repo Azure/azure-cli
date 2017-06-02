@@ -289,7 +289,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
-        
+
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
