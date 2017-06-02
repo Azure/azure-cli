@@ -1002,7 +1002,8 @@ def set_lb_rule(
 
 # pylint: disable=unused-argument
 def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
-               internal_dns_name_label=None, enable_ip_forwarding=False,
+               internal_dns_name_label=None, dns_servers=None,
+               internal_domain_name_suffix=None, enable_ip_forwarding=False,
                load_balancer_backend_address_pool_ids=None,
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
@@ -1013,13 +1014,14 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     NetworkInterfaceDnsSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'NetworkInterfaceDnsSettings', mod='models')
-    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding)
-    if internal_dns_name_label:
-        nic.dns_settings = NetworkInterfaceDnsSettings(
-            internal_dns_name_label=internal_dns_name_label)
+
+    dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
+                                               dns_servers=dns_servers or [])
+    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
+                           dns_settings=dns_settings)
+
     if network_security_group:
         nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
-
     ip_config_args = {
         'name': 'ipconfig1',
         'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
@@ -1039,7 +1041,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
 
 
 def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
-               internal_dns_name_label=None):
+               internal_dns_name_label=None, dns_servers=None):
     if enable_ip_forwarding is not None:
         instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
 
@@ -1052,6 +1054,10 @@ def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
         instance.dns_settings.internal_dns_name_label = None
     elif internal_dns_name_label is not None:
         instance.dns_settings.internal_dns_name_label = internal_dns_name_label
+    if dns_servers == ['']:
+        instance.dns_settings.dns_servers = None
+    elif dns_servers:
+        instance.dns_settings.dns_servers = dns_servers
 
     return instance
 
