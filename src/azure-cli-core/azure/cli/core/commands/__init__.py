@@ -170,7 +170,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     messages += '\n'
                     messages += event.status.value + ': ' + event.operation_name.value
 
-            self.progress_controller.add(message=messages)
+            # self.progress_controller.add(message=messages)
+            logger.info("Progress: {}".format(messages))
+
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
