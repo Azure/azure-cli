@@ -115,8 +115,7 @@ def _get_access_extension_upgrade_info(extensions, name):
 
     if extensions:
         extension = next((e for e in extensions if e.name == name), None)
-        # pylint: disable=no-name-in-module,import-error
-        from distutils.version import LooseVersion
+        from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
         if extension and LooseVersion(extension.type_handler_version) < LooseVersion(version):
             auto_upgrade = True
         elif extension and LooseVersion(extension.type_handler_version) > LooseVersion(version):

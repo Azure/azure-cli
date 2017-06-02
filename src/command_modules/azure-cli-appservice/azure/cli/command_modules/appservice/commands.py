@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import,line-too-long
-from azure.cli.core.commands import LongRunningOperation, cli_command
+# pylint: disable=line-too-long
+from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 
-from ._client_factory import cf_web_client, cf_plans, cf_providers
+from ._client_factory import cf_web_client, cf_plans
 
 
 def output_slots_in_table(slots):
