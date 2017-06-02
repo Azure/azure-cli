@@ -287,6 +287,36 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
+class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_aad_admin(self, resource_group, server):
+        rg = resource_group
+        sn = server
+        sid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
+        user = 'DSEngAll'
+
+        self.cmd('sql server aad-admin create -n {} -g {} -s {} -t{} -u {}'
+                 .format(sn, rg, sid, tid, user),
+                 checks=[
+                     JMESPathCheck('login', user)])
+
+        self.cmd('sql server aad-admin show -n {} -g {}'
+                 .format(sn, rg),
+                 JMESPathCheck('login', user))
+
+        self.cmd('sql server aad-admin list -n {} -g {}'
+                 .format(sn, rg),
+                 JMESPathCheck('[0].login', user))
+
+        self.cmd('sql server aad-admin delete -n {} -g {}'
+                 .format(sn, rg))
+
+        self.cmd('sql server aad-admin list -n {} -g {}'
+                 .format(sn, rg),
+                 JMESPathCheck('login', None))
+
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1')
