@@ -22,7 +22,6 @@ from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 

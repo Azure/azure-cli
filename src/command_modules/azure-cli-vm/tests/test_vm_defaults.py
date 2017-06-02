@@ -17,7 +17,6 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_v
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth)
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
