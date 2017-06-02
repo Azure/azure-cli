@@ -13,10 +13,6 @@ from ._util import (
     get_sql_elastic_pools_operations,
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations)
-from azure.cli.core.sdk.util import (
-    create_service_adapter,
-    ServiceGroup)
-
 
 custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
