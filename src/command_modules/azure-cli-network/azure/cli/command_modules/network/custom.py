@@ -7,7 +7,7 @@ from __future__ import print_function
 from collections import Counter, OrderedDict
 from msrestazure.azure_exceptions import CloudError
 
-# pylint: disable=no-self-use,too-many-arguments,no-member,too-many-lines
+# pylint: disable=no-self-use,no-member,too-many-lines
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
