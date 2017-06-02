@@ -47,7 +47,6 @@ class Telemetry(TelemetryClient):
         telthread = TelThread(self.flush)
         telthread.start()
 
-
     @_user_agrees_to_telemetry
     def start(self):
         """ starts recording stuff """
