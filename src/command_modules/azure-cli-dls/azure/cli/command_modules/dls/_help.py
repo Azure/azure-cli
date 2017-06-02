@@ -52,6 +52,11 @@ helps['dls account list'] = """
     short-summary: Lists Data Lake Store accounts in a subscription or a specific resource group.
 """
 
+helps['dls account enable-key-vault'] = """
+    type: command
+    short-summary: Attempts to enable a user managed Key Vault for encryption of the specified Data Lake Store account.
+"""
+
 helps['dls account delete'] = """
     type: command
     short-summary: Deletes the Data Lake Store account.

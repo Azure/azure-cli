@@ -71,14 +71,14 @@ class StorageResourceIdentifier(object):
             return None, None
 
         path = path.lstrip('/')
-        if len(path) == 0:
+        if not path:
             return None, None
 
         idx = find_method(path)
         if idx == -1:
             return path, None
-        else:
-            return path[:idx], path[idx + 1:]
+
+        return path[:idx], path[idx + 1:]
 
     def is_url(self):
         return self._is_url

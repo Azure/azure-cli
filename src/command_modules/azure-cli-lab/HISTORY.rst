@@ -2,7 +2,8 @@
 
 Release History
 ===============
-unreleased
+
+0.0.5 (2017-05-30)
 +++++++++++++++++++++
 
 * Adding support for claiming any vm in the lab through `az lab vm claim`

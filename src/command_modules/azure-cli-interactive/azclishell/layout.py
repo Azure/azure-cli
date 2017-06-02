@@ -22,6 +22,7 @@ from pygments.lexer import Lexer as PygLex
 
 import azclishell.configuration
 from azclishell.key_bindings import get_show_default, get_symbols
+from azclishell.progress import get_progress_message, get_done
 
 MAX_COMPLETION = 16
 DEFAULT_COMMAND = ""
@@ -62,6 +63,15 @@ class ShowSymbol(Filter):
     """ toggle showing the symbols """
     def __call__(self, *a, **kw):
         return get_symbols()
+
+
+# pylint: disable=too-few-public-methods
+class ShowProgress(Filter):
+    """ toggle showing the progress """
+    def __call__(self, *a, **kw):
+        progress = get_progress_message()
+        done = get_done()
+        return progress != '' and not done
 
 
 def get_scope():
@@ -193,6 +203,15 @@ def create_layout(lex, exam_lex, toolbar_lex):
                     )
                 ),
                 filter=ShowSymbol()
+            ),
+            ConditionalContainer(
+                Window(
+                    content=BufferControl(
+                        buffer_name='progress',
+                        lexer=lexer
+                    )
+                ),
+                filter=ShowProgress()
             ),
             Window(
                 content=BufferControl(

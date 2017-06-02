@@ -19,13 +19,17 @@ def get_sql_management_client(_):
             subscription_id=getenv('_AZURE_CLI_SQL_SUB_ID'),
             base_url=sql_rm_override,
             credentials=Authentication())  # No authentication
-    else:
-        # Normal production scenario.
-        return get_mgmt_service_client(SqlManagementClient)
+
+    # Normal production scenario.
+    return get_mgmt_service_client(SqlManagementClient)
 
 
 def get_sql_servers_operations(kwargs):
     return get_sql_management_client(kwargs).servers
+
+
+def get_sql_capabilities_operations(kwargs):
+    return get_sql_management_client(kwargs).capabilities
 
 
 def get_sql_firewall_rules_operations(kwargs):

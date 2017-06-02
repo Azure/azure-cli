@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.util import CLIError
-
+import azure.cli.core.azlogging as azlogging
 from ._factory import get_acr_service_client
 
-import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 

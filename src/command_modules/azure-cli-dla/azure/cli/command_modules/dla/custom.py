@@ -63,7 +63,7 @@ def list_adla_jobs(client,
     job_list = client.list(account_name,
                            orderby="submitTime desc",
                            top=top if top <= 300 else None,
-                           filter=filter_string if filter_string and len(filter_string) > 0 else None)
+                           filter=filter_string if filter_string else None)
     if top <= 300:
         return job_list
 

@@ -212,7 +212,7 @@ def group_title(path):
         return group
 
     group_path = path.split('.')
-    group_path = list(map(filter_group, group_path))  # pylint: disable=bad-builtin
+    group_path = list(map(filter_group, group_path))
     title = ': '.join(group_path)
     for group in group_path:
         title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
@@ -484,7 +484,7 @@ class BatchArgumentTree(object):
 
 class AzureBatchDataPlaneCommand(object):
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
-    def __init__(self, module_name, name,  # pylint:disable=too-many-arguments, too-many-statements
+    def __init__(self, module_name, name,  # pylint:disable=too-many-statements
                  operation, factory, transform_result,
                  flatten, ignore, validator, silent):
 
@@ -570,8 +570,8 @@ class AzureBatchDataPlaneCommand(object):
                 # Otherwise handle based on return type of results
                 elif isinstance(result, Paged):
                     return list(result)
-                else:
-                    return result
+
+                return result
             except BatchErrorException as ex:
                 try:
                     message = ex.error.message.value
@@ -728,13 +728,14 @@ class AzureBatchDataPlaneCommand(object):
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
 
-    def _flatten_object(self, path, param_model,  # pylint: disable=dangerous-default-value
-                        conflict_names=[]):
+    def _flatten_object(self, path, param_model, conflict_names=None):
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
         :param list conflict_name: List of argument names that conflict.
         """
+        conflict_names = conflict_names or []
+
         if self._should_flatten(path):
             validations = param_model._validation.items()  # pylint: disable=protected-access
             required_attrs = [key for key, val in validations if val.get('required')]

@@ -2,13 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer)
+                               StorageAccountPreparer, api_version_constraint)
+from azure.cli.core.profiles import ResourceType
 from .storage_test_util import StorageScenarioMixin
 
 
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
@@ -54,8 +56,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=JMESPathCheck('nameAvailable', True))
 
     def test_show_usage(self):
-        self.cmd('storage account show-usage',
-                 checks=JMESPathCheck('name.value', 'StorageAccounts'))
+        self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -80,23 +81,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_metrics_operations(self, resource_group, storage_account):
-        connection_string = self.cmd(
-            'storage account show-connection-string -g {} -n {} -otsv'
-            .format(resource_group, storage_account)).output
+    def test_metrics_operations(self, resource_group, storage_account_info):
+        self.storage_cmd('storage metrics show', storage_account_info) \
+            .assert_with_checks(JMESPathCheck('file.hour.enabled', True),
+                                JMESPathCheck('file.minute.enabled', False))
 
-        self.cmd('storage metrics show --connection-string "{}"'.format(connection_string), checks=[
-            JMESPathCheck('file.hour.enabled', True),
-            JMESPathCheck('file.minute.enabled', False),
-        ])
+        self.storage_cmd('storage metrics update --services f --hour false --retention 1 ', storage_account_info)
 
-        self.cmd('storage metrics update --services f --hour false --retention 1 '
-                 '--connection-string "{}"'.format(connection_string))
-
-        self.cmd('storage metrics show --connection-string "{}"'.format(connection_string), checks=[
-            JMESPathCheck('file.hour.enabled', False),
-            JMESPathCheck('file.minute.enabled', False),
-        ])
+        self.storage_cmd('storage metrics show', storage_account_info) \
+            .assert_with_checks(JMESPathCheck('file.hour.enabled', False),
+                                JMESPathCheck('file.minute.enabled', False))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account_1')
