@@ -10,7 +10,7 @@ from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteCon
                                    HostNameSslState, SslState, Certificate,
                                    AddressResponse, HostingEnvironmentProfile)
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.adal_authentication import AdalAuthentication
+from msrestazure.azure_active_directory import AdalAuthentication
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,

@@ -311,12 +311,17 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 
         def _retrieve_token():
+            from msrest.exceptions import TokenExpiredError
             if user_type == _USER:
-                return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                 account[_TENANT_ID], resource)
-            return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+                try:
+                    return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                     account[_TENANT_ID], resource)[2]
+                except TokenExpiredError:
+                    raise CLIError("Credentials have expired due to inactivity. Please run 'az login'")
 
-        from azure.cli.core.adal_authentication import AdalAuthentication
+            return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)[2]
+
+        from msrestazure.azure_active_directory import AdalAuthentication
         auth_object = AdalAuthentication(_retrieve_token)
 
         return (auth_object,
