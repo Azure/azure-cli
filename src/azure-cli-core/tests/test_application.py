@@ -37,7 +37,7 @@ class TestApplication(unittest.TestCase):
         def handler(**kwargs):
             kwargs['args'][0] = True
 
-        def other_handler(**kwargs):  # pylint: disable=unused-variable
+        def other_handler(**kwargs):
             self.assertEqual(kwargs['args'], 'secret sauce')
 
         app = Application()

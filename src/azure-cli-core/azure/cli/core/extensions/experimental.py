@@ -37,7 +37,7 @@ def register(event_dispatcher):
             except TypeError:
                 pass
 
-    def generate_skeleton(_, event_data):  # pylint: disable=unused-variable
+    def generate_skeleton(_, event_data):
         try:
             def switcheroo(_, event_data):
                 """We replace the handler for the command
@@ -56,13 +56,9 @@ def register(event_dispatcher):
         except ValueError:
             pass
 
-    def use_skeleton(_, event_data):
+    def use_skeleton(*_):
         try:
-            args = event_data['args']
-            skeleton_index = args.index('--use-skeleton')
-            skeleton_value = args[skeleton_index + 1]  # noqa, pylint: disable=unused-variable
-
-            def overlay_arguments(_, event_data):  # pylint: disable=unused-argument
+            def overlay_arguments(*_):
                 # TODO: overlay the arguments with the data in the skeleton file
                 # passed to us...
                 pass
