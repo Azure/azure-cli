@@ -172,7 +172,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             logger.info("Progress: {}".format(messages))
 
-
     def __call__(self, poller):
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
