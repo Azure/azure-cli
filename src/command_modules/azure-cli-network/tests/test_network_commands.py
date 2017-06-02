@@ -452,26 +452,28 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
 
 
-class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkLocalGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='local_gateway_scenario')
-        self.name = 'cli-test-loc-gateway'
-        self.resource_type = 'Microsoft.Network/localNetworkGateways'
+class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
-    def test_network_local_gateway(self):
-        self.execute()
+    @ResourceGroupPreparer(name_prefix='local_gateway_scenario')
+    def test_network_local_gateway(self, resource_group):
+        lgw1 = 'lgw1'
+        lgw2 = 'lgw2'
+        resource_type = 'Microsoft.Network/localNetworkGateways'
+        self.cmd('network local-gateway create --resource-group {} --name {} --gateway-ip-address 10.1.1.1'.format(resource_group, lgw1))
+        self.cmd('network local-gateway show --resource-group {} --name {}'.format(resource_group, lgw1), checks=[
+            JMESPathCheckV2('type', resource_type),
+            JMESPathCheckV2('resourceGroup', resource_group),
+            JMESPathCheckV2('name', lgw1)])
 
-    def body(self):
-        self.cmd('network local-gateway create --resource-group {} --name {} --gateway-ip-address 10.1.1.1'.format(self.resource_group, self.name))
-        self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=[JMESPathCheck('type(@)', 'array'), JMESPathCheck("length([?type == '{}']) == length(@)".format(self.resource_type), True), JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)])
-        self.cmd('network local-gateway show --resource-group {} --name {}'.format(self.resource_group, self.name), checks=[JMESPathCheck('type(@)', 'object'), JMESPathCheck('type', self.resource_type), JMESPathCheck('resourceGroup', self.resource_group), JMESPathCheck('name', self.name)])
-        try:
-            self.cmd('network local-gateway delete --resource-group {} --name {}'.format(self.resource_group, self.name))
-            # Expecting no results as we just deleted the only local gateway in the resource group
-            self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
-        except CLIError:
-            # TODO: Remove this once https://github.com/Azure/azure-cli/issues/2373 is fixed
-            pass
+        self.cmd('network local-gateway create --resource-group {} --name {} --gateway-ip-address 10.1.1.2 --local-address-prefixes 10.0.1.0/24'.format(resource_group, lgw2),
+                 checks=JMESPathCheckV2('localNetworkAddressSpace.addressPrefixes[0]', '10.0.1.0/24'))
+
+        self.cmd('network local-gateway list --resource-group {}'.format(resource_group),
+                 checks=JMESPathCheckV2('length(@)', 2))
+
+        self.cmd('network local-gateway delete --resource-group {} --name {}'.format(resource_group, lgw1))
+        self.cmd('network local-gateway list --resource-group {}'.format(resource_group),
+                 checks=JMESPathCheckV2('length(@)', 1))
 
 
 class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
