@@ -560,7 +560,6 @@ with ParametersContext(command='sql server aad-admin create') as c:
                options_list=('--tenant-id', '-t'))
 
 
-
 with ParametersContext(command='sql server aad-admin update') as c:
     c.expand('properties', ServerAzureADAdministrator)
     c.argument('login',
