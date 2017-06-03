@@ -24,7 +24,10 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
     StorageKeyType)
-
+from .custom import (
+    DatabaseCapabilitiesAdditionalDetails,
+    ElasticPoolCapabilitiesAdditionalDetails,
+)
 
 #####
 #           Reusable param type definitions
@@ -273,6 +276,26 @@ with ParametersContext(command='sql db list') as c:
                help='If specified, lists only the databases in this elastic pool')
 
 
+with ParametersContext(command='sql db list-editions') as c:
+    c.argument('show_details',
+               options_list=('--show-details', '-d'),
+               help='List of additional details to include in output.',
+               nargs='+',
+               **enum_choice_list(DatabaseCapabilitiesAdditionalDetails))
+
+    search_arg_group = 'Search'
+
+    # We could used **enum_choice_list here, but that will validate the inputs which means there
+    # will be no way to query for new editions/service objectives that are made available after
+    # this version of CLI is released.
+    c.argument('edition',
+               arg_group=search_arg_group,
+               help='Edition to search for. If unspecified, all editions are shown.')
+    c.argument('service_objective',
+               arg_group=search_arg_group,
+               help='Service objective to search for. If unspecified, all editions are shown.')
+
+
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
                help='The name of the new service objective. If this is a standalone db service'
@@ -497,7 +520,10 @@ with ParametersContext(command='sql elastic-pool') as c:
     c.register_alias('database_dtu_max', ('--db-dtu-max',))
     c.register_alias('database_dtu_min', ('--db-dtu-min',))
 
-    c.argument('storage_mb', options_list=('--storage',),
+# --storage was the original param name, which is consistent with the underlying REST API.
+    # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
+    # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
+    c.argument('storage_mb', options_list=('--storage', '--max-size',),
                type=SizeWithUnitConverter('MB', result_type=int),
                help='The max storage size of the elastic pool. If no unit is specified, defaults'
                ' to megabytes (MB).')
@@ -508,6 +534,27 @@ with ParametersContext(command='sql elastic-pool create') as c:
     # We have a wrapper function that determines server location so user doesn't need to specify
     # it as param.
     c.ignore('location')
+
+with ParametersContext(command='sql elastic-pool list-editions') as c:
+    # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
+    # other commands, such as `sql elastic-pool create --db-max-dtu --db-min-dtu --max-size`.
+    c.argument('show_details',
+               options_list=('--show-details', '-d'),
+               help='List of additional details to include in output.',
+               nargs='+',
+               **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails))
+
+    search_arg_group = 'Search'
+
+    # We could used **enum_choice_list here, but that will validate the inputs which means there
+    # will be no way to query for new editions that are made available after
+    # this version of CLI is released.
+    c.argument('edition',
+               arg_group=search_arg_group,
+               help='Edition to search for. If unspecified, all editions are shown.')
+    c.argument('dtu',
+               arg_group=search_arg_group,
+               help='Elastic pool DTU limit to search for. If unspecified, all DTU limits are shown.')
 
 
 with ParametersContext(command='sql elastic-pool update') as c:
