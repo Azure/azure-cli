@@ -518,8 +518,6 @@ with ParametersContext(command='sql elastic-pool') as c:
     # Recommended elastic pools will not be included in the first batch of GA commands
     # with ParametersContext(command='sql elastic-pool recommended') as c:
     #     c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
-
-
     # with ParametersContext(command='sql elastic-pool recommended db') as c:
     #     c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool',))
     #     c.register_alias('database_name', ('--name', '-n'))
