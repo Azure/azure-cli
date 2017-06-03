@@ -512,10 +512,7 @@ with ParametersContext(command='sql elastic-pool') as c:
     # consistent with other az sql commands, but the original can't be removed due to
     # compatibility.
     c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
-    c.register_alias('database_dtu_min', ('--db-dtu-min', '--db-min-dtu'))
 
-    # --storage was the original param name, which is consistent with the underlying REST API.
-    # Recommended elastic pools will not be included in the first batch of GA commands
     # with ParametersContext(command='sql elastic-pool recommended') as c:
     #     c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
     # with ParametersContext(command='sql elastic-pool recommended db') as c:
