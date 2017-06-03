@@ -535,6 +535,7 @@ with ParametersContext(command='sql elastic-pool create') as c:
     # it as param.
     c.ignore('location')
 
+
 with ParametersContext(command='sql elastic-pool list-editions') as c:
     # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
     # other commands, such as `sql elastic-pool create --db-max-dtu --db-min-dtu --max-size`.
