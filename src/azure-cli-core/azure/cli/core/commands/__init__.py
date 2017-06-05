@@ -155,6 +155,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
             activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
+
             results = []
             max_events = 50  # default max value for events in list_activity_log
             for index, item in enumerate(activity_log):
@@ -165,16 +166,16 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 results = list(results)
 
             messages = ''
-            from azure.cli.command_modules.monitor.custom import list_activity_log
-            print(json.dumps(list_activity_log(get_mgmt_service_client(MonitorClient), correlation_id)))
-            # if results:
-            #     for event in results:
-            #         messages += '\n'
-                    # messages += event
-                    # messages += event.status.value + ': ' + event.operation_name.value
-                # print(json.dumps(results, indent=2))
-            # assets name deployment log
-            # self.progress_controller.add(message=messages)
+
+            if results:
+                for event in results:
+                    messages += '\n\n'
+                    if event.properties:
+                        messages += str(event.properties.get('statusCode', '')) + ' '
+                    messages += str(event.resource_type.value)
+                    messages += '\n' + str(event.status.value) + ' ' + str(event.event_name.value) + ': '
+                    messages += str(event.submission_timestamp)
+
             logger.info("Progress: %s", messages)
 
     def __call__(self, poller):
