@@ -811,7 +811,7 @@ def view_in_browser(resource_group_name, name, slot=None, logs=False):
 
 def _open_page_in_browser(url):
     import sys
-    if sys.platform == 'darwin':
+    if sys.platform.lower() == 'darwin':
         # handle 2 things:
         # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
         #    understand the "open location" message"
