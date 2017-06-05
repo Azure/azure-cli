@@ -1074,6 +1074,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+        private_ip_address_version = private_ip_address_version or IPVersion.ipv4.value
         if private_ip_address_version == IPVersion.ipv4.value and not subnet:
             primary_config = next(x for x in nic.ip_configurations if x.primary)
             subnet = primary_config.subnet.id
