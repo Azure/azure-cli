@@ -165,11 +165,16 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 results = list(results)
 
             messages = ''
-            if results:
-                for event in results:
-                    messages += '\n'
-                    messages += event.status.value + ': ' + event.operation_name.value
-
+            from azure.cli.command_modules.monitor.custom import list_activity_log
+            print(json.dumps(list_activity_log(get_mgmt_service_client(MonitorClient), correlation_id)))
+            # if results:
+            #     for event in results:
+            #         messages += '\n'
+                    # messages += event
+                    # messages += event.status.value + ': ' + event.operation_name.value
+                # print(json.dumps(results, indent=2))
+            # assets name deployment log
+            # self.progress_controller.add(message=messages)
             logger.info("Progress: %s", messages)
 
     def __call__(self, poller):
@@ -189,8 +194,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             except:  # pylint: disable=bare-except
                 correlation_id = None
 
+            self._template_progress(correlation_id)
             try:
-                self._template_progress(correlation_id)
                 self._delay()
             except KeyboardInterrupt:
                 self.progress_controller.stop()
