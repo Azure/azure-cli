@@ -3,6 +3,10 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>
+
 2.0.7 (2017-05-30)
 ++++++++++++++++++
 * Minor fixes.
