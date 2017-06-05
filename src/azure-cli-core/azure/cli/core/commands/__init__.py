@@ -183,7 +183,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         self.progress_controller.begin()
-
+        correlation_id = None
         while not poller.done():
             self.progress_controller.add(message='Running')
             try:
@@ -193,7 +193,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
-                correlation_id = None
+                pass
 
             self._template_progress(correlation_id)
             try:
