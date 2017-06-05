@@ -29,7 +29,16 @@ def _query_account_key(account_name):
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
         rg = parse_resource_id(acc.id)['resource_group']
-        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+
+        (StorageAccountKeys, StorageAccountListKeysResult) = get_sdk(
+            ResourceType.MGMT_STORAGE,
+            'models.storage_account_keys#StorageAccountKeys',
+            'models.storage_account_list_keys_result#StorageAccountListKeysResult')
+
+        if StorageAccountKeys:
+            return scf.storage_accounts.list_keys(rg, account_name).key1
+        elif StorageAccountListKeysResult:
+            return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
     else:
         raise ValueError("Storage account '{}' not found.".format(account_name))
 
