@@ -17,7 +17,8 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
-                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
+                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
+                                   RampUpRule)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -906,6 +907,31 @@ def delete_slot(resource_group_name, webapp, slot):
     client = web_client_factory()
     # TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
+
+
+def set_traffic_routing(resource_group_name, name, distributions):
+    client = web_client_factory()
+    site = client.web_apps.get(resource_group_name, name)
+    configs = get_site_configs(resource_group_name, name)
+    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    configs.experiments.ramp_up_rules = []
+    for r in distributions:
+        slot, percentage = r.split('=')
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+                                                            reroute_percentage=float(percentage),
+                                                            name=slot))
+    _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+
+    return configs.experiments.ramp_up_rules
+
+
+def show_traffic_routing(resource_group_name, name):
+    configs = get_site_configs(resource_group_name, name)
+    return configs.experiments.ramp_up_rules
+
+
+def clear_traffic_routing(resource_group_name, name):
+    set_traffic_routing(resource_group_name, name, [])
 
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
