@@ -496,8 +496,8 @@ def delete_service_principal(identifier):
         logger.warning('Removing role assignments')
         delete_role_assignments([a['id'] for a in assignments])
 
-    if app_object_id:
-        client.applications.delete(app_object_id)  # this should auto-delete service principals
+    if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
+        client.applications.delete(app_object_id)
     else:
         client.service_principals.delete(sp.object_id)
 
