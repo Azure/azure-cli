@@ -479,9 +479,27 @@ def show_service_principal(client, identifier):
     return client.get(object_id)
 
 
-def delete_service_principal(client, identifier):
-    object_id = _resolve_service_principal(client, identifier)
-    client.delete(object_id)
+def delete_service_principal(identifier):
+    client = _graph_client_factory()
+    sp = client.service_principals.get(_resolve_service_principal(client.service_principals, identifier))
+    app_object_id = None
+
+    # see whether we need to delete the application if it is in the same tenant
+    if sp.service_principal_names:
+        result = list(client.applications.list(
+            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
+        if result:
+            app_object_id = result[0].object_id
+
+    assignments = list_role_assignments(assignee=identifier, show_all=True)
+    if assignments:
+        logger.warning('Removing role assignments')
+        delete_role_assignments([a['id'] for a in assignments])
+
+    if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
+        client.applications.delete(app_object_id)
+    else:
+        client.service_principals.delete(sp.object_id)
 
 
 def _resolve_service_principal(client, identifier):
