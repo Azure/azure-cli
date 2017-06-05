@@ -9,7 +9,7 @@ import os
 
 from .base import ScenarioTest, execute
 from .exceptions import CliTestError
-from .utilities import create_random_name
+from .utilities import create_random_name, get_active_api_profile
 from .recording_processors import RecordingProcessor
 
 
@@ -141,10 +141,9 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
 # Storage Account Preparer and its shorthand decorator
 
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self,
-                 name_prefix='clitest', sku='Standard_LRS', location='westus',
-                 parameter_name='storage_account', resource_group_parameter_name='resource_group',
-                 skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
+    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', parameter_name='storage_account',
+                 resource_group_parameter_name='resource_group', skip_delete=True,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
         self.location = location
         self.sku = sku
@@ -158,7 +157,17 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            template = 'az storage account create -n {} -g {} -l {} --sku {}'
+
+            # This is a poorly designed but necessary short-term compromise. Comparing the api profile string in if-else
+            # structure is neither elegant nor error-proof. However the alternatives are either worse or more expensive.
+            # 1. The API call can be made to relies on SDK. Pro: the argument specification can help to determine what
+            #    parameter name to use in a cleaner fashion. Con: introduce dependencies on SDK from testsdk. Further
+            #    complicates the architecture.
+            # 2. Two API profile can't be compared except using equalisation operator.
+            if get_active_api_profile() == '2017-03-09-profile-preview':
+                template = 'az storage account create -n {} -g {} -l {} --account-type {}'
+            else:
+                template = 'az storage account create -n {} -g {} -l {} --sku {}'
             execute(template.format(name, group, self.location, self.sku))
         else:
             name = self.dev_setting_name

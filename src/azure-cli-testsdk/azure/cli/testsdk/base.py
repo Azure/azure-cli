@@ -24,26 +24,10 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
                                    GeneralNameReplacer, LargeRequestBodyProcessor,
                                    LargeResponseBodyProcessor, LargeResponseBodyReplacer,
                                    DeploymentNameReplacer)
-from .utilities import create_random_name
+from .utilities import create_random_name, find_recording_dir
 from .decorators import live_only
 
 logger = logging.getLogger('azure.cli.testsdk')
-
-
-def find_recording_dir(test_file):
-    """
-    Find the directory containing the recording of given test file based on current profile.
-    """
-    from azure.cli.core._profile import get_active_cloud, init_known_clouds
-    from azure.cli.core.cloud import CloudNotRegisteredException
-    try:
-        api_profile = get_active_cloud().profile
-    except CloudNotRegisteredException:
-        init_known_clouds()
-        api_profile = get_active_cloud().profile
-
-    base_dir = os.path.join(os.path.dirname(test_file), 'recordings')
-    return os.path.join(base_dir, api_profile)
 
 
 class IntegrationTestBase(unittest.TestCase):
@@ -256,7 +240,7 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
             logger.error('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 
-        logger.info('Command "%s" => %d.', command, self.exit_code)
+        logger.info('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
 
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
