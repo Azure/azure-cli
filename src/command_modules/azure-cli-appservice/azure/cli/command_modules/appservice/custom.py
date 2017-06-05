@@ -909,18 +909,29 @@ def delete_slot(resource_group_name, webapp, slot):
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
 
 
-def production_test(resource_group_name, name, static_routings):
+def set_traffic_routing(resource_group_name, name, distributions):
     client = web_client_factory()
     site = client.web_apps.get(resource_group_name, name)
     configs = get_site_configs(resource_group_name, name)
     host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
     configs.experiments.ramp_up_rules = []
-    for r in static_routings:
+    for r in distributions:
         slot, percentage = r.split('=')
         configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
                                                             name=slot))
-    return _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+    _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+
+    return configs.experiments.ramp_up_rules
+
+
+def show_traffic_routing(resource_group_name, name):
+    configs = get_site_configs(resource_group_name, name)
+    return configs.experiments.ramp_up_rules
+
+
+def clear_traffic_routing(resource_group_name, name):
+    set_traffic_routing(resource_group_name, name, [])
 
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):

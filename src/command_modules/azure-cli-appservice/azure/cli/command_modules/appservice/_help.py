@@ -277,6 +277,31 @@ helps['webapp deployment source sync'] = """
     short-summary: Synchronize from the source repository, only needed under manual integration mode.
 """
 
+helps['webapp traffic-routing'] = """
+    type: group
+    short-summary: Manage traffic routings in production test.
+"""
+
+helps['webapp traffic-routing'] = """
+    type: group
+    short-summary: Manage traffic routings in production test.
+"""
+
+helps['webapp traffic-routing set'] = """
+    type: command
+    short-summary: Routing some percentages of traffic to deployment slots
+"""
+
+helps['webapp traffic-routing show'] = """
+    type: command
+    short-summary: Display the current distribution of traffic across slots
+"""
+
+helps['webapp traffic-routing clear'] = """
+    type: command
+    short-summary: Clear the routing rules to send 100% to production
+"""
+
 helps['appservice plan'] = """
     type: group
     short-summary: Manage App Service plans.

@@ -443,14 +443,36 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
 
-        self.cmd('webapp production-test -g {} -n {} --static-routings {}=15 {}=20'.format(self.resource_group, self.webapp, slot, slot2), checks=[
-            JMESPathCheck("experiments.rampUpRules[0].actionHostName", slot + '.azurewebsites.net'),
-            JMESPathCheck("experiments.rampUpRules[0].reroutePercentage", 15.0),
-            JMESPathCheck("experiments.rampUpRules[1].actionHostName", slot2 + '.azurewebsites.net'),
-            JMESPathCheck("experiments.rampUpRules[1].reroutePercentage", 20.0),
+        self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+
+
+class WebappSlotTrafficRouting(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_traffic_routing(self, resource_group):
+        webapp = 'clitestwebtraffic'
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, 'clitesttrafficplan')).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['id']))
+        # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        slot = 'staging'
+        # create an empty slot
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
+
+        self.cmd('webapp traffic-routing set -g {} -n {} -d {}=15'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheckV2("[0].actionHostName", slot + '.azurewebsites.net'),
+            JMESPathCheckV2("[0].reroutePercentage", 15.0)
         ])
 
-        self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+        self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheckV2("[0].actionHostName", slot + '.azurewebsites.net'),
+            JMESPathCheckV2("[0].reroutePercentage", 15.0)
+        ])
+
+        self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
+
+        self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheckV2("length(@)", 0)
+        ])
 
 
 class WebappSlotSwapScenarioTest(ScenarioTest):
