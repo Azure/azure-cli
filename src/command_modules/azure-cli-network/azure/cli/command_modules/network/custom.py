@@ -1358,11 +1358,15 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
     return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(instance, vnet_prefixes=None):
+def update_vnet(instance, vnet_prefixes=None, dns_servers=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     if vnet_prefixes:
         instance.address_space.address_prefixes = vnet_prefixes
+    if dns_servers == ['']:
+        instance.dhcp_options.dns_servers = None
+    elif dns_servers:
+        instance.dhcp_options.dns_servers = dns_servers
     return instance
 
 

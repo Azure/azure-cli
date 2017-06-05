@@ -465,12 +465,12 @@ register_cli_argument('network route-filter rule create', 'location', location_t
 # VNET
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
 register_cli_argument('network vnet', 'vnet_prefixes', nargs='+', help='Space separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
+register_cli_argument('network vnet', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP')
 
 register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.')
+register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.', validator=process_vnet_create_namespace)
 register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
 register_cli_argument('network vnet create', 'vnet_name', virtual_network_name_type, options_list=('--name', '-n'), completer=None)
-register_cli_argument('network vnet create', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP', validator=process_vnet_create_namespace)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet update', 'address_prefixes', nargs='+')

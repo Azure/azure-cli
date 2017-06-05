@@ -745,7 +745,14 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet show --resource-group {} --name {}'.format(self.resource_group, self.vnet_name), checks=[JMESPathCheck('type(@)', 'object'), JMESPathCheck('name', self.vnet_name), JMESPathCheck('resourceGroup', self.resource_group), JMESPathCheck('type', self.resource_type)])
 
         vnet_addr_prefixes = '20.0.0.0/16 10.0.0.0/16'
-        self.cmd('network vnet update --resource-group {} --name {} --address-prefixes {}'.format(self.resource_group, self.vnet_name, vnet_addr_prefixes), checks=JMESPathCheck('length(addressSpace.addressPrefixes)', 2))
+        self.cmd('network vnet update --resource-group {} --name {} --address-prefixes {} --dns-servers 1.2.3.4'.format(self.resource_group, self.vnet_name, vnet_addr_prefixes), checks=[
+            JMESPathCheck('length(addressSpace.addressPrefixes)', 2),
+            JMESPathCheck('dhcpOptions.dnsServers[0]', '1.2.3.4')
+        ])
+        self.cmd('network vnet update -g {} -n {} --dns-servers ""'.format(self.resource_group, self.vnet_name), checks=[
+            JMESPathCheck('length(addressSpace.addressPrefixes)', 2),
+            JMESPathCheck('dhcpOptions.dnsServers', [])
+        ])
 
         # test generic update
         self.cmd('network vnet update --resource-group {} --name {} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"'.format(self.resource_group, self.vnet_name), checks=JMESPathCheck('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
