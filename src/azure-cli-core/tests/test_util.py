@@ -143,42 +143,36 @@ class TestUtils(unittest.TestCase):
             'The following patterns failed: {}'.format(failed_strings))
 
     def test_hash_string(self):
-        def _run_test(length, force_lower, digits_only):
+        def _run_test(length, force_lower):
             import random
-            # build a list of variable sized lists with random strings to test
-            test_lists = []
-            for x in range(20):
-                num_y = random.randint(1, 10)
-                test_list = []
-                for y in range(num_y):
-                    test_list.append(random_string())
-                test_lists.append(test_list)
+            # test a bunch of random strings for collisions
+            test_values = []
+            for x in range(100):
+                rand_len = random.randint(50, 100)
+                test_values.append(random_string(rand_len))
 
-            # test each of the lists against eachother to verify hashing properties
+            # test each value against eachother to verify hashing properties
             equal_count = 0
-            for item1 in test_lists:
-                result1 = hash_string(item1, length, force_lower, digits_only)
+            for val1 in test_values:
+                result1 = hash_string(val1, length, force_lower)
 
-                # test against the remaining lists and against itself, but not those which have
+                # test against the remaining values and against itself, but not those which have
                 # come before...
-                test_lists2 = test_lists[test_lists.index(item1):]
-                for item2 in test_lists2:
-                    result2 = hash_string(item2, length, force_lower, digits_only)
-                    if item1 == item2:
+                test_values2 = test_values[test_values.index(val1):]
+                for val2 in test_values2:
+                    result2 = hash_string(val2, length, force_lower)
+                    if val1 == val2:
                         self.assertEqual(result1, result2)
                         equal_count += 1
                     else:
                         self.assertNotEqual(result1, result2)
-            self.assertEqual(equal_count, len(test_lists))
+            self.assertEqual(equal_count, len(test_values))
 
         # Test digest replication
-        _run_test(100, False, False)
+        _run_test(100, False)
 
         # Test force_lower
-        _run_test(16, True, False)
-
-        # Test digits_only
-        _run_test(16, False, True)
+        _run_test(16, True)
 
 
 class TestBase64ToHex(unittest.TestCase):

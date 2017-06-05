@@ -216,20 +216,16 @@ def random_string(length=16, force_lower=False, digits_only=False):
     return ''.join([choice(choice_set) for _ in range(length)])
 
 
-def hash_string(components, length=16, force_lower=False, digits_only=False):
-    """ Uses multiple components to generate a deterministic hashed string. Components are a list
-        of strings which consitute the logical composite key. """
+def hash_string(value, length=16, force_lower=False):
+    """ Generate a deterministic hashed string."""
     import hashlib
-    components = components if isinstance(components, list) else [components]
     m = hashlib.sha256()
-    for c in components:
-        try:
-            m.update(c)
-        except TypeError:
-            m.update(c.encode())
+    try:
+        m.update(value)
+    except TypeError:
+        m.update(value.encode())
     digest = m.hexdigest()
     digest = digest.lower() if force_lower else digest
-    digest = str(int(digest, 16)) if digits_only else digest
     while len(digest) < length:
         digest = digest + digest
     return digest[:length]
