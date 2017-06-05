@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unlreleased
+unreleased
 ++++++++++++++++++
 
 * Fix acs kube get-credentials ssh-key loading (
