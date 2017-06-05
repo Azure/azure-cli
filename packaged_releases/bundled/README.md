@@ -75,17 +75,22 @@ Prerequisites
  
 Installing
 ----------
+```
 curl -L https://aka.ms/InstallAzureCliBundled -o azure-cli_bundle.tar.gz
 tar -xvzf azure-cli_bundle.tar.gz
 azure-cli_bundle_*/installer
- 
+```
+
 After the install, it prints out exactly how to add az to path and set up tab completion:
+```
 -- The executable is available at '/root/bin/az'.
 -- Tip: Add the executable to your path: e.g. 'export PATH=$PATH:/root/bin'.
 -- Tip: Enable tab completion: e.g. 'source /root/lib/azure-cli/az.completion'
 -- Done.
- 
+ ```
+
 For installer help:
+```
 $ azure-cli_bundle_*/installer --help
 usage: installer [-h] [--install-dir INSTALL_DIR] [--bin-dir BIN_DIR]
                  [--overwrite-install-dir] [--override-python-version-check]
@@ -98,14 +103,21 @@ optional arguments:
                         cli)
   --bin-dir BIN_DIR, -b BIN_DIR
                         <snippet-removed> (default: /root/bin)
- 
-Running with a different python:
+```
+
+Running with a different python
+-------------------------------
 The above instructions run with your default ‘python’. You can use a different python for the installation.
+```
 <path-to-python> azure-cli_bundle_*/installer
+```
  
 Viewing all available versions
+------------------------------
 The install link above will always point to latest.
-Older versions are available here.
+
+Older versions are available here:
+
 https://azurecliprod.blob.core.windows.net/bundled?restype=container&comp=list
  
 Upgrading
@@ -114,6 +126,7 @@ Download the new bundle and run the installer again; you’ll be given the optio
  
 Uninstalling
 ------------
+```
 rm -r ~/lib/azure-cli
 rm ~/bin/az
- 
+```
