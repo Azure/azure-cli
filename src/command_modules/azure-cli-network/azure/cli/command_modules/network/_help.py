@@ -795,16 +795,15 @@ helps['network lb create'] = """
     type: command
     short-summary: Create a load balancer.
     examples:
-        - name: Create a basic load balancer.
+        - name: Create an internet-facing load balancer, with an auto-created, dynamic public IP address.
           text: >
             az network lb create -g MyResourceGroup -n MyLb
-        - name: Create a load balancer on a specific virtual network and subnet.
+        - name: Create an internet-facing load balancer. The public IP address will be created if it doesn't exist.
           text: >
-            az network lb create
-            -g MyResourceGroup
-            -n MyLb
-            --vnet-name MyVnet
-            --subnet MySubnet
+            az network lb create -g MyResourceGroup -n MyLb --public-ip-address myPublicIP
+        - name: Create an internal load balancer. The virtual network and subnet will be created if they don't exist.
+          text: >
+            az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
 """
 
 helps['network lb delete'] = """
