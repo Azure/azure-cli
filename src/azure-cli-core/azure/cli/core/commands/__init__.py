@@ -192,15 +192,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
                     if is_updated:
                         result = long_name + ' ' + json.dumps(deploy_values, indent=4)
-                        # self.progress_controller.add(message=result)
-                        print(result)
-
-            # keep track where everything is at, change the difference, include the name
-            # use the system to track the progress
-            # ask travis about deployment logs
-            # if self.deploy_dict:
-            #     self.progress_controller.add(message=json.dumps(self.deploy_dict, indent=2))
-                # logger.info("Progress: %s", json.dumps(self.deploy_dict))
+                        logger.info(result)
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
