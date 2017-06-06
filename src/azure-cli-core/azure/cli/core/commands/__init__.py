@@ -135,6 +135,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         from azure.cli.core.application import APPLICATION
         self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
+        self.deploy_dict = {}
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -165,18 +166,41 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     break
                 results = list(results)
 
-            messages = ''
-
             if results:
                 for event in results:
-                    messages += '\n\n'
-                    if event.properties:
-                        messages += str(event.properties.get('statusCode', '')) + ' '
-                    messages += str(event.resource_type.value)
-                    messages += '\n' + str(event.status.value) + ' ' + str(event.event_name.value) + ': '
-                    messages += str(event.submission_timestamp)
+                    long_name = event.resource_id.split('/')[-1]
+                    if not long_name in self.deploy_dict:
+                        self.deploy_dict[long_name] = {}
+                        is_updated = True
+                    else:
+                        is_updated = False
+                    deploy_values = self.deploy_dict[long_name]
 
-            logger.info("Progress: %s", messages)
+                    checked_values = {
+                        str(event.resource_type.value): 'type',
+                        str(event.status.value): 'status value',
+                        str(event.event_name.value): 'request',
+                    }
+                    try:
+                        checked_values[str(event.properties.get('statusCode', ''))] = 'status'
+                    except AttributeError:
+                        pass
+
+                    for value in checked_values:
+                        is_updated = is_updated and value != deploy_values.get(checked_values[value], '')
+                        deploy_values[checked_values[value]] = value
+
+                    if is_updated:
+                        result = long_name + ' ' + json.dumps(deploy_values, indent=4)
+                        # self.progress_controller.add(message=result)
+                        print(result)
+
+            # keep track where everything is at, change the difference, include the name
+            # use the system to track the progress
+            # ask travis about deployment logs
+            # if self.deploy_dict:
+            #     self.progress_controller.add(message=json.dumps(self.deploy_dict, indent=2))
+                # logger.info("Progress: %s", json.dumps(self.deploy_dict))
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
