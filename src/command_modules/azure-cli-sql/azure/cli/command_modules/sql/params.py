@@ -505,20 +505,6 @@ with ParametersContext(command='sql elastic-pool') as c:
                help='The name of the elastic pool.')
     c.argument('server_name', arg_type=server_param_type)
 
-    # --db-dtu-max and --db-dtu-min were the original param names, which is consistent with the
-    # underlying REST API.
-    # --db-max-dtu and --db-min-dtu are aliases which are consistent with the `sql elastic-pool
-    # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
-    # consistent with other az sql commands, but the original can't be removed due to
-    # compatibility.
-    c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
-
-    # with ParametersContext(command='sql elastic-pool recommended') as c:
-    #     c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
-    # with ParametersContext(command='sql elastic-pool recommended db') as c:
-    #     c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool',))
-    #     c.register_alias('database_name', ('--name', '-n'))
-
 
 with ParametersContext(command='sql elastic-pool') as c:
     c.argument('server_name', arg_type=server_param_type)
@@ -605,22 +591,16 @@ with ParametersContext(command='sql server update') as c:
 
 with ParametersContext(command='sql server aad-admin create') as c:
     c.expand('properties', ServerAzureADAdministrator)
-    c.argument('login',
-               options_list=('--user', '-u'))
-    c.argument('sid',
-               options_list=('--sid', '-s'))
-    c.argument('tenant_id',
-               options_list=('--tenant-id', '-t'))
+    c.argument('login', options_list=('--user', '-u'))
+    c.argument('sid', options_list=('--sid', '-s'))
+    c.argument('tenant_id', options_list=('--tenant-id', '-t'))
 
 
 with ParametersContext(command='sql server aad-admin update') as c:
     c.expand('properties', ServerAzureADAdministrator)
-    c.argument('login',
-               options_list=('--user', '-u'))
-    c.argument('sid',
-               options_list=('--sid', '-s'))
-    c.argument('tenant_id',
-               options_list=('--tenant-id', '-t'))
+    c.argument('login', options_list=('--user', '-u'))
+    c.argument('sid', options_list=('--sid', '-s'))
+    c.argument('tenant_id', options_list=('--tenant-id', '-t'))
 
 #####
 #           sql server firewall-rule
