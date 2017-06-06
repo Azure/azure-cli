@@ -171,9 +171,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     long_name = event.resource_id.split('/')[-1]
                     if not long_name in self.deploy_dict:
                         self.deploy_dict[long_name] = {}
-                        is_updated = True
-                    else:
-                        is_updated = False
                     deploy_values = self.deploy_dict[long_name]
 
                     checked_values = {
@@ -186,12 +183,16 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     except AttributeError:
                         pass
 
-                    for value in checked_values:
-                        is_updated = is_updated and value != deploy_values.get(checked_values[value], '')
-                        deploy_values[checked_values[value]] = value
+                    if deploy_values.get('timestamp', None) is None or \
+                            event.event_timestamp > deploy_values.get('timestamp'):
+                        for value in checked_values:
+                            deploy_values[checked_values[value]] = value
+                            deploy_values['timestamp'] = event.event_timestamp
 
-                    if is_updated:
-                        result = long_name + ' ' + json.dumps(deploy_values, indent=4)
+                        # don't want to show the timestamp
+                        json_val = deploy_values.copy()
+                        json_val.pop('timestamp', None)
+                        result = long_name + ' ' + json.dumps(json_val, indent=4)
                         logger.info(result)
 
     def __call__(self, poller):
