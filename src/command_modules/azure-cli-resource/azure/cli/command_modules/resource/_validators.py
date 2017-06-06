@@ -29,6 +29,31 @@ def validate_deployment_name(namespace):
             namespace.deployment_name = 'deployment1'
 
 
+def validate_deployment_parameters(namespace):
+
+    from azure.cli.core.util import shell_safe_json_parse
+
+    parameters = {}
+    for params in namespace.parameters or []:
+        if isinstance(params, list):
+            for item in params:
+                key, value = item.split('=', 1)
+                try:
+                    parameters[key] = shell_safe_json_parse(value)
+                except ValueError:
+                    parameters[key] = value
+        else:
+            pass
+        #params_object = shell_safe_json_parse(params)
+        #if params_object:
+        #    params_object = params_object.get('parameters', params_object)
+        #if parameters is None:
+        #    parameters = params_object
+        #else:
+        #    parameters.update(params_object)
+    namespace.parameters = parameters
+
+
 def internal_validate_lock_parameters(resource_group_name, resource_provider_namespace,
                                       parent_resource_path, resource_type, resource_name):
     if resource_group_name is None:

@@ -293,19 +293,6 @@ def _prompt_for_parameters(missing_parameters):
     return result
 
 
-def _merge_parameters(parameter_list):
-    parameters = None
-    for params in parameter_list or []:
-        params_object = shell_safe_json_parse(params)
-        if params_object:
-            params_object = params_object.get('parameters', params_object)
-        if parameters is None:
-            parameters = params_object
-        else:
-            parameters.update(params_object)
-    return parameters
-
-
 def _get_missing_parameters(parameters, template, prompt_fn):
     missing = _find_missing_parameters(parameters, template)
     if missing:
@@ -341,7 +328,6 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
     if bool(template_uri) == bool(template_file):
         raise CLIError('please provide either template file path or uri, but not both')
 
-    parameters = _merge_parameters(parameter_list)
     if parameters is None:
         parameters = {}
     template = None
