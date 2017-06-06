@@ -591,12 +591,9 @@ with ParametersContext(command='sql server update') as c:
 
 with ParametersContext(command='sql server aad-admin create') as c:
     c.expand('properties', ServerAzureADAdministrator)
-    c.argument('login',
-               options_list=('--user', '-u'))
-    c.argument('sid',
-               options_list=('--sid', '-s'))
-    c.argument('tenant_id',
-               options_list=('--tenant-id', '-t'))
+    c.argument('login', options_list=('--user', '-u'))
+    c.argument('sid', options_list=('--sid', '-s'))
+    c.argument('tenant_id', options_list=('--tenant-id', '-t'))
 
 
 with ParametersContext(command='sql server aad-admin update') as c:
