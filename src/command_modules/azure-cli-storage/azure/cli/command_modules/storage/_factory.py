@@ -103,7 +103,7 @@ def cloud_storage_account_service_factory(kwargs):
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)
-    kwargs.pop('connection_string', None)  # pylint: disable=unused-variable
+    kwargs.pop('connection_string', None)
     return CloudStorageAccount(account_name, account_key, sas_token)
 
 

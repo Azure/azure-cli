@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.6 (unreleased)
+++++++++++++++++++
+*rbac: clean up role assignments and related AAD application when delete a service principal
 
 2.0.5 (2017-05-30)
 ++++++++++++++++++

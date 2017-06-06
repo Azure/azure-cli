@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.1.8 (unreleased)
+++++++++++++++++++++
+webapp: expose "traffic-routing" commands to configure static routing
 
 0.1.7 (2017-05-30)
 ++++++++++++++++++++

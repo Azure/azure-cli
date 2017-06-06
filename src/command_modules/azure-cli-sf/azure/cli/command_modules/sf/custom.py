@@ -13,7 +13,7 @@ import sys
 try:
     from urllib.parse import urlparse, urlencode, urlunparse
 except ImportError:
-    from urllib import urlencode  # pylint: disable=no-name-in-module
+    from urllib import urlencode
     from urlparse import urlparse, urlunparse  # pylint: disable=import-error
 
 import requests

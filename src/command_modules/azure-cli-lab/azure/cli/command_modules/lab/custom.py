@@ -5,7 +5,7 @@
 import getpass
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements,
+# pylint: disable=too-many-locals, unused-argument, too-many-statements
 
 def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
                   size=None, admin_username=getpass.getuser(), admin_password=None,
