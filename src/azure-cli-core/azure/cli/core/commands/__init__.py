@@ -169,7 +169,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             if results:
                 for event in results:
                     long_name = event.resource_id.split('/')[-1]
-                    if not long_name in self.deploy_dict:
+                    if long_name not in self.deploy_dict:
                         self.deploy_dict[long_name] = {}
                     deploy_values = self.deploy_dict[long_name]
 
@@ -187,12 +187,13 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                             event.event_timestamp > deploy_values.get('timestamp'):
                         for value in checked_values:
                             deploy_values[checked_values[value]] = value
-                            deploy_values['timestamp'] = event.event_timestamp
+                        deploy_values['timestamp'] = event.event_timestamp
 
                         # don't want to show the timestamp
                         json_val = deploy_values.copy()
                         json_val.pop('timestamp', None)
                         result = long_name + ' ' + json.dumps(json_val, indent=4)
+
                         logger.info(result)
 
     def __call__(self, poller):
