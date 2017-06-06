@@ -33,12 +33,11 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens,too-many-lines
+# pylint:disable=no-member,too-many-lines
 
 
-def create_webapp(resource_group_name, name, plan, runtime=None,
-                  startup_file=None, deployment_container_image_name=None,
-                  deployment_source_url=None, deployment_source_branch='master',
+def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
+                  deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -153,18 +152,22 @@ def get_site_configs(resource_group_name, name, slot=None):
 def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
-    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': p in (slot_cfg_names.app_setting_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                              .connection_string_names or []
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
 
 def get_connection_strings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_connection_strings', slot)
     client = web_client_factory()
-    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': p in (slot_cfg_names.connection_string_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                              .connection_string_names or []
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
 
@@ -234,15 +237,14 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
-    app_settings = _generic_site_operation(resource_group_name, name,
-                                           'list_application_settings', slot)
+    app_settings = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
 
     slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
-        if setting_name in (slot_cfg_names.app_setting_names or []):
+        if slot_cfg_names.app_setting_names and setting_name in slot_cfg_names.app_setting_names:
             slot_cfg_names.app_setting_names.remove(setting_name)
             is_slot_settings = True
 
@@ -294,7 +296,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
     is_slot_settings = False
     for setting_name in setting_names:
         conn_strings.properties.pop(setting_name, None)
-        if setting_name in (slot_cfg_names.connection_string_names or []):
+        if slot_cfg_names.connection_string_names and setting_name in slot_cfg_names.connection_string_names:
             slot_cfg_names.connection_string_names.remove(setting_name)
             is_slot_settings = True
 
@@ -415,13 +417,13 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         app_settings = _generic_site_operation(resource_group_name, webapp,
                                                'list_application_settings',
                                                src_slot)
-        for a in (slot_cfg_names.app_setting_names or []):
+        for a in slot_cfg_names.app_setting_names or []:
             app_settings.properties.pop(a, None)
 
         connection_strings = _generic_site_operation(resource_group_name, webapp,
                                                      'list_connection_strings',
                                                      src_slot)
-        for a in (slot_cfg_names.connection_string_names or []):
+        for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
         _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
@@ -468,7 +470,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                 import time
                 ex = ex_handler_factory(no_throw=True)(ex)
                 # for non server errors(50x), just throw; otherwise retry 4 times
-                if i == 4 or not (re.findall(r'\(50\d\)', str(ex))):
+                if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
                     raise
                 logger.warning('retrying %s/4', i + 1)
                 time.sleep(5)   # retry in a moment
@@ -748,7 +750,7 @@ def _get_local_git_url(client, resource_group_name, name, slot=None):
 def _get_scm_url(resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
     webapp = show_webapp(resource_group_name, name, slot=slot)
-    for host in (webapp.host_name_ssl_states or []):
+    for host in webapp.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 

@@ -28,7 +28,6 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING)
 from azure.cli.command_modules.configure._utils import get_default_from_config
-import azure.cli.command_modules.configure._help  # pylint: disable=unused-import
 
 logger = azlogging.get_az_logger(__name__)
 
