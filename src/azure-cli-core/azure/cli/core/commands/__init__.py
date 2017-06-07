@@ -168,9 +168,11 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             if results:
                 for event in results:
+                    update = False
                     long_name = event.resource_id.split('/')[-1]
                     if long_name not in self.deploy_dict:
                         self.deploy_dict[long_name] = {}
+                        update = True
                     deploy_values = self.deploy_dict[long_name]
 
                     checked_values = {
@@ -186,6 +188,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     if deploy_values.get('timestamp', None) is None or \
                             event.event_timestamp > deploy_values.get('timestamp'):
                         for value in checked_values:
+                            if deploy_values.get(checked_values[value], None) != value:
+                                update = True
                             deploy_values[checked_values[value]] = value
                         deploy_values['timestamp'] = event.event_timestamp
 
@@ -194,7 +198,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         json_val.pop('timestamp', None)
                         result = long_name + ' ' + json.dumps(json_val, indent=4)
 
-                        logger.info(result)
+                        if update:
+                            logger.info(result)
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
