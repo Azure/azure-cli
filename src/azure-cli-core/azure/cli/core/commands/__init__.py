@@ -145,7 +145,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         from azure.monitor import MonitorClient
 
-        if correlation_id is not None:
+        if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
 
             formatter = "eventTimestamp ge {}"
 
