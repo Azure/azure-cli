@@ -15,7 +15,6 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneChe
                                              MOCKED_SUBSCRIPTION_ID)
 
 
-# pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
     def test_resource_group(self):
         self.execute()

@@ -313,10 +313,8 @@ def _get_missing_parameters(parameters, template, prompt_fn):
     return parameters
 
 
-def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
-                              template_file=None, template_uri=None, deployment_name=None,
-                              parameter_list=None, mode='incremental', validate_only=False,
-                              no_wait=False):
+def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None, deployment_name=None,
+                              parameter_list=None, mode='incremental', validate_only=False, no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
@@ -820,14 +818,14 @@ def delete_lock(name,
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
                                          resource_type, resource_name)
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
-                                     resource_provider_namespace, parent_resource_path,
-                                     resource_type, resource_name)
-
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
+
+    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+                                     resource_provider_namespace, parent_resource_path,
+                                     resource_type, resource_name)
 
     if resource_group_name is None:
         return lock_client.management_locks.delete_at_subscription_level(name)
@@ -847,8 +845,8 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     if resource_name is None:
         return (resource_group_name, None, None, None)
 
-    parts = resource_type.split('/')
-    if resource_provider_namespace is None:
+    parts = resource_type.split('/', 2)
+    if resource_provider_namespace is None and len(parts) == 2:
         resource_provider_namespace = parts[0]
         resource_type = parts[1]
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)

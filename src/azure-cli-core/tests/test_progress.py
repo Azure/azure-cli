@@ -19,7 +19,7 @@ class MockOutstream(progress.ProgressViewBase):
         pass
 
 
-class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-methods
+class TestProgress(unittest.TestCase):
     """ test the progress reporting """
 
     def test_progress_indicator_det_model(self):

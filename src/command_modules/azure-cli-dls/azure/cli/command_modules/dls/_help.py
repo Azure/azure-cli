@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import
 from azure.cli.core.help_files import helps
 
 # pylint: disable=line-too-long
@@ -50,6 +49,11 @@ helps['dls account show'] = """
 helps['dls account list'] = """
     type: command
     short-summary: Lists Data Lake Store accounts in a subscription or a specific resource group.
+"""
+
+helps['dls account enable-key-vault'] = """
+    type: command
+    short-summary: Attempts to enable a user managed Key Vault for encryption of the specified Data Lake Store account.
 """
 
 helps['dls account delete'] = """

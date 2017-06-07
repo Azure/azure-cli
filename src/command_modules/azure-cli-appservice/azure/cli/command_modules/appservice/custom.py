@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
 import threading
 try:
@@ -18,7 +17,8 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
-                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
+                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
+                                   RampUpRule)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -34,12 +34,11 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens
+# pylint:disable=no-member,too-many-lines
 
 
-def create_webapp(resource_group_name, name, plan, runtime=None,
-                  startup_file=None, deployment_container_image_name=None,
-                  deployment_source_url=None, deployment_source_branch='master',
+def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
+                  deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -154,18 +153,22 @@ def get_site_configs(resource_group_name, name, slot=None):
 def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
-    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': p in (slot_cfg_names.app_setting_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                              .connection_string_names or []
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
 
 def get_connection_strings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_connection_strings', slot)
     client = web_client_factory()
-    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': p in (slot_cfg_names.connection_string_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                              .connection_string_names or []
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
 
@@ -235,15 +238,14 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
-    app_settings = _generic_site_operation(resource_group_name, name,
-                                           'list_application_settings', slot)
+    app_settings = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
 
     slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
-        if setting_name in (slot_cfg_names.app_setting_names or []):
+        if slot_cfg_names.app_setting_names and setting_name in slot_cfg_names.app_setting_names:
             slot_cfg_names.app_setting_names.remove(setting_name)
             is_slot_settings = True
 
@@ -295,7 +297,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
     is_slot_settings = False
     for setting_name in setting_names:
         conn_strings.properties.pop(setting_name, None)
-        if setting_name in (slot_cfg_names.connection_string_names or []):
+        if slot_cfg_names.connection_string_names and setting_name in slot_cfg_names.connection_string_names:
             slot_cfg_names.connection_string_names.remove(setting_name)
             is_slot_settings = True
 
@@ -416,13 +418,13 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         app_settings = _generic_site_operation(resource_group_name, webapp,
                                                'list_application_settings',
                                                src_slot)
-        for a in (slot_cfg_names.app_setting_names or []):
+        for a in slot_cfg_names.app_setting_names or []:
             app_settings.properties.pop(a, None)
 
         connection_strings = _generic_site_operation(resource_group_name, webapp,
                                                      'list_connection_strings',
                                                      src_slot)
-        for a in (slot_cfg_names.connection_string_names or []):
+        for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
         _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
@@ -469,7 +471,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                 import time
                 ex = ex_handler_factory(no_throw=True)(ex)
                 # for non server errors(50x), just throw; otherwise retry 4 times
-                if i == 4 or not (re.findall(r'\(50\d\)', str(ex))):
+                if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
                     raise
                 logger.warning('retrying %s/4', i + 1)
                 time.sleep(5)   # retry in a moment
@@ -749,7 +751,7 @@ def _get_local_git_url(client, resource_group_name, name, slot=None):
 def _get_scm_url(resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
     webapp = show_webapp(resource_group_name, name, slot=slot)
-    for host in (webapp.host_name_ssl_states or []):
+    for host in webapp.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 
@@ -905,6 +907,31 @@ def delete_slot(resource_group_name, webapp, slot):
     client = web_client_factory()
     # TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
+
+
+def set_traffic_routing(resource_group_name, name, distribution):
+    client = web_client_factory()
+    site = client.web_apps.get(resource_group_name, name)
+    configs = get_site_configs(resource_group_name, name)
+    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    configs.experiments.ramp_up_rules = []
+    for r in distribution:
+        slot, percentage = r.split('=')
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+                                                            reroute_percentage=float(percentage),
+                                                            name=slot))
+    _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+
+    return configs.experiments.ramp_up_rules
+
+
+def show_traffic_routing(resource_group_name, name):
+    configs = get_site_configs(resource_group_name, name)
+    return configs.experiments.ramp_up_rules
+
+
+def clear_traffic_routing(resource_group_name, name):
+    set_traffic_routing(resource_group_name, name, [])
 
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):

@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=wrong-import-order
-
 from __future__ import print_function
 
 import collections
@@ -16,16 +14,16 @@ import sys
 import tempfile
 import traceback
 import logging
-from random import choice
-from string import digits, ascii_lowercase
-
-from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
-
 import unittest
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
+
+from random import choice
+from string import digits, ascii_lowercase
+
+from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
 
 import vcr
 import jmespath
@@ -38,6 +36,8 @@ from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile, CLOUD
 from azure.cli.core.util import CLIError
+
+from .base import find_recording_dir
 
 LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
@@ -310,7 +310,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                  skip_setup=False, skip_teardown=False):
         super(VCRTestBase, self).__init__(test_name)
         self.test_name = test_name
-        self.recording_dir = os.path.join(os.path.dirname(test_file), 'recordings')
+        self.recording_dir = find_recording_dir(test_file)
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
 

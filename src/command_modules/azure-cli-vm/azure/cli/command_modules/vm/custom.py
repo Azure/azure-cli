@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,too-many-lines
+# pylint: disable=no-self-use,too-many-lines
 from __future__ import print_function
 import getpass
 import json
@@ -115,8 +115,7 @@ def _get_access_extension_upgrade_info(extensions, name):
 
     if extensions:
         extension = next((e for e in extensions if e.name == name), None)
-        # pylint: disable=no-name-in-module,import-error
-        from distutils.version import LooseVersion
+        from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
         if extension and LooseVersion(extension.type_handler_version) < LooseVersion(version):
             auto_upgrade = True
         elif extension and LooseVersion(extension.type_handler_version) > LooseVersion(version):
@@ -292,7 +291,9 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None):
-    from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption
+    Disk, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Disk', 'CreationData',
+                                                   'DiskCreateOption', mod='models')
+
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
         option = DiskCreateOption.import_enum
@@ -343,7 +344,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     else:
         params = ManagedDiskParameters(id=disk,
                                        storage_account_type=sku)
-        data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params)
+        data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params, caching=caching)
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(vm)
@@ -402,7 +403,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     tags=None):
-    from azure.mgmt.compute.models import Snapshot, CreationData, DiskCreateOption
+    Snapshot, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Snapshot', 'CreationData',
+                                                       'DiskCreateOption', mod='models')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -474,8 +476,10 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, data_disks=None, tags=None):
-    from azure.mgmt.compute.models import (ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource,
-                                           OperatingSystemStateTypes)
+    ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = get_sdk(
+        ResourceType.MGMT_COMPUTE, 'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource',
+        'OperatingSystemStateTypes', mod='models')
+
     # pylint: disable=line-too-long
     if source_virtual_machine:
         location = location or get_resource_group_location(resource_group_name)
@@ -543,14 +547,14 @@ def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=
 
 def _get_disk_lun(data_disks):
     # start from 0, search for unused int for lun
-    if data_disks:
-        existing_luns = sorted([d.lun for d in data_disks])
-        for i in range(len(existing_luns)):  # pylint: disable=consider-using-enumerate
-            if existing_luns[i] != i:
-                return i
-        return len(existing_luns)
+    if not data_disks:
+        return 0
 
-    return 0
+    existing_luns = sorted([d.lun for d in data_disks])
+    for i, current in enumerate(existing_luns):
+        if current != i:
+            return i
+    return len(existing_luns)
 
 
 def resize_vm(resource_group_name, vm_name, size, no_wait=False):

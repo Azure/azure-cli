@@ -2,7 +2,7 @@
 
 Release History
 ===============
-2.0.4 (2017-06-07)
+2.0.6 (2017-06-07)
 ++++++++++++++++++++
 
 * Adding commands for KeyVault recovery features
@@ -10,6 +10,13 @@ Release History
 * az keyvault secret backup, restore, purge, recover, list-deleted
 * az keyvault certificate purge, recover, list-deleted
 * az keyvault key purge, recover, list-deleted
+
+2.0.5 (2017-05-30)
+++++++++++++++++++++
+
+* [Role] Service Principal KeyVault integration (#3133)
+* Update KeyVault dataplane to 0.3.2. (#3307)
+* [KeyVault] Update data plane SDK to 0.3.0 (#3251)
 
 2.0.3 (2017-05-05)
 ++++++++++++++++++++

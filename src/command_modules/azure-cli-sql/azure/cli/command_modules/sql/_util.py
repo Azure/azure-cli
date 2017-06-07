@@ -28,6 +28,10 @@ def get_sql_servers_operations(kwargs):
     return get_sql_management_client(kwargs).servers
 
 
+def get_sql_capabilities_operations(kwargs):
+    return get_sql_management_client(kwargs).capabilities
+
+
 def get_sql_firewall_rules_operations(kwargs):
     return get_sql_management_client(kwargs).firewall_rules
 

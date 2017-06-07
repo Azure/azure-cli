@@ -28,7 +28,6 @@ def _decode_str(output):
 
 
 class ComplexEncoder(json.JSONEncoder):
-
     def default(self, o):  # pylint: disable=method-hidden
         if isinstance(o, bytes) and not isinstance(o, str):
             return o.decode()
@@ -65,7 +64,11 @@ def format_table(obj):
     result = obj.result
     try:
         if obj.table_transformer and not obj.is_query_active:
-            result = obj.table_transformer(result)
+            if isinstance(obj.table_transformer, str):
+                from jmespath import compile as compile_jmes, Options
+                result = compile_jmes(obj.table_transformer).search(result, Options(OrderedDict))
+            else:
+                result = obj.table_transformer(result)
         result_list = result if isinstance(result, list) else [result]
         should_sort_keys = not obj.is_query_active and not obj.table_transformer
         to = TableOutput(should_sort_keys)

@@ -18,12 +18,11 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              NoneCheck)
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
+from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
@@ -438,7 +437,6 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, snapshot_name2, disk_name, 'Premium_LRS'))
 
         # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
-        # pylint: disable=too-many-format-args
         self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux --tags tag1=i1'.format(
             self.resource_group, image_name, snapshot_name, disk_name, data_snapshot['id'], data_disk2['id']), checks=[
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),
@@ -1153,15 +1151,17 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
     def body(self):
         disk_name = 'd1'
         disk_name2 = 'd2'
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1 --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2'.format(
             self.resource_group, self.vm_name, disk_name2))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 2),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadOnly'),
             JMESPathCheck('storageProfile.dataDisks[1].name', disk_name2),
             JMESPathCheck('storageProfile.dataDisks[1].lun', 2),
+            JMESPathCheck('storageProfile.dataDisks[1].caching', 'None')
         ])
         self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
             self.resource_group, self.vm_name, disk_name2))
@@ -1173,6 +1173,11 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 0),
+        ])
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite'.format(
+            self.resource_group, self.vm_name, disk_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite')
         ])
 
 
@@ -1521,28 +1526,35 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         ])
 
 
-class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, test_method):
-        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_none_options')
-
-    def test_vmss_create_none_options(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_vmss_create_none_options(self, resource_group):
         vmss_name = 'vmss1'
 
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
                  ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
-                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
-        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
-            JMESPathCheck('availabilitySet', None),
-            JMESPathCheck('tags', {}),
-            JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+                 .format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), [
+            JMESPathCheckV2('availabilitySet', None),
+            JMESPathCheckV2('tags', {}),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
         ])
-        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(self.resource_group, vmss_name),
-                 checks=JMESPathCheck('tags.test', 'success'))
-        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, self.resource_group), checks=NoneCheck(), allowed_exceptions='was not found')
+        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(resource_group, vmss_name),
+                 checks=JMESPathCheckV2('tags.test', 'success'))
+        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, resource_group), checks=NoneCheckV2())
+
+    @ResourceGroupPreparer()
+    def test_vmss_create_with_app_gateway(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --app-gateway apt1 --instance-count 5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
+            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
+        ])
+        # spot check it is using gateway
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('sku.capacity', 5),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
+        ])
 
 
 class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes

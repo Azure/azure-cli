@@ -3,15 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 from __future__ import print_function
 
 import datetime
 import os
 import time
 from shutil import rmtree
+from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
@@ -318,6 +317,11 @@ class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('encryptionState', 'Enabled'),
         ])
+
+        # attempt to enable the key vault when it is already enabled, which should throw
+        with self.assertRaises(CloudError):
+            self.cmd('dls account enable-key-vault -n {} -g {}'.format(adls, rg))
+
         self.cmd('dls account list -g {}'.format(rg), checks=[
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', 1),
@@ -392,6 +396,7 @@ class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', 0),
         ])
+
         # test account deletion
         self.cmd('dls account delete -g {} -n {}'.format(rg, adls))
         self.cmd('dls account list -g {}'.format(rg), checks=[
