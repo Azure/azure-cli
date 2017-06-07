@@ -5,7 +5,9 @@ Release History
 
 0.3.3 (2017-05-30)
 ++++++++++++++++++
+
 * --progress flag
+* Enhance the '?' gesture to also inject into the next command
 * Removed --debug and --verbose from completions
 
 
