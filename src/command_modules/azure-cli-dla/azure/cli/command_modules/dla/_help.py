@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
+
 helps['dla'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics accounts, jobs, and catalogs.

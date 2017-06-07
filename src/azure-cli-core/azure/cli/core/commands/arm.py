@@ -430,7 +430,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, excepti
         if not any([wait_for_created, wait_for_updated, wait_for_deleted,
                     wait_for_exists, custom_condition]):
             raise CLIError(
-                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")  # pylint: disable=line-too-long
+                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
 
         for _ in range(0, timeout, interval):
             try:

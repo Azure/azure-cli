@@ -199,7 +199,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                                               virtual_network_name, subnet)
 
     if public_ip_address_type == 'new':
-        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
@@ -760,7 +760,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
             network_id_template, virtual_network_name, subnet)
 
     if public_ip_address_type == 'new':
-        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
