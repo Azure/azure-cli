@@ -394,7 +394,7 @@ def _validate_vm_create_storage_account(namespace):
     else:
         from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -614,7 +614,7 @@ def _validate_vm_vmss_create_auth(namespace):
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        # pylint: disable=line-too-long
+
         namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
@@ -741,7 +741,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
 
 
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
-    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
     try:

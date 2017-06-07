@@ -480,7 +480,6 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
         ResourceType.MGMT_COMPUTE, 'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource',
         'OperatingSystemStateTypes', mod='models')
 
-    # pylint: disable=line-too-long
     if source_virtual_machine:
         location = location or get_resource_group_location(resource_group_name)
         image = Image(location, source_virtual_machine=SubResource(source_virtual_machine))

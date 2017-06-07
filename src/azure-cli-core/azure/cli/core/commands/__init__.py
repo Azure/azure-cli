@@ -301,7 +301,7 @@ def load_params(command):
     command_module = command_module_map.get(command, None)
     if not command_module:
         logger.debug("Unable to load commands for '%s'. No module in command module map found.",
-                     command)  # pylint: disable=line-too-long
+                     command)
         return
     module_to_load = command_module[:command_module.rfind('.')]
     import_module(module_to_load).load_params(command)
@@ -320,7 +320,7 @@ def get_command_table(module_name=None):
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
             loaded = True
         except ImportError:
-            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)  # pylint: disable=line-too-long
+            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)
         except Exception:  # pylint: disable=broad-except
             pass
     if not loaded:

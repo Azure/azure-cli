@@ -290,7 +290,7 @@ class Profile(object):
         result = [x for x in subscriptions if (
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
             subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]  # pylint: disable=line-too-long
+                _SUBSCRIPTION_NAME].lower()])]
         if len(result) != 1:
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
