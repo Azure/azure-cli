@@ -28,6 +28,7 @@ from azure.mgmt.keyvault.models import (VaultProperties,
                                         CertificatePermissions,
                                         KeyPermissions,
                                         SecretPermissions,
+                                        StoragePermissions,
                                         Sku,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
@@ -214,6 +215,7 @@ def create_keyvault(client,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
+                    enable_for_soft_delete=None,
                     no_self_perms=None,
                     tags=None):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
@@ -222,6 +224,7 @@ def create_keyvault(client,
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
+
     graph_client = GraphRbacManagementClient(
         cred,
         tenant_id,
@@ -237,9 +240,44 @@ def create_keyvault(client,
                                         KeyPermissions.update,
                                         KeyPermissions.import_enum,
                                         KeyPermissions.backup,
-                                        KeyPermissions.restore],
-                                  secrets=[SecretPermissions.all],
-                                  certificates=[CertificatePermissions.all])
+                                        KeyPermissions.restore,
+                                        KeyPermissions.recover,
+                                        KeyPermissions.purge],
+                                  secrets=[
+                                      SecretPermissions.get,
+                                      SecretPermissions.list,
+                                      SecretPermissions.set,
+                                      SecretPermissions.delete,
+                                      SecretPermissions.backup,
+                                      SecretPermissions.restore,
+                                      SecretPermissions.recover,
+                                      SecretPermissions.purge],
+                                  certificates=[
+                                      CertificatePermissions.get,
+                                      CertificatePermissions.list,
+                                      CertificatePermissions.delete,
+                                      CertificatePermissions.create,
+                                      CertificatePermissions.import_enum,
+                                      CertificatePermissions.update,
+                                      CertificatePermissions.managecontacts,
+                                      CertificatePermissions.getissuers,
+                                      CertificatePermissions.listissuers,
+                                      CertificatePermissions.setissuers,
+                                      CertificatePermissions.deleteissuers,
+                                      CertificatePermissions.manageissuers,
+                                      CertificatePermissions.recover,
+                                      CertificatePermissions.purge],
+                                  storage=[
+                                      StoragePermissions.get,
+                                      StoragePermissions.list,
+                                      StoragePermissions.delete,
+                                      StoragePermissions.set,
+                                      StoragePermissions.update,
+                                      StoragePermissions.regeneratekey,
+                                      StoragePermissions.setsas,
+                                      StoragePermissions.listsas,
+                                      StoragePermissions.getsas,
+                                      StoragePermissions.deletesas])
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:
@@ -257,7 +295,8 @@ def create_keyvault(client,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
-                                 enabled_for_template_deployment=enabled_for_template_deployment)
+                                 enabled_for_template_deployment=enabled_for_template_deployment,
+                                 enable_soft_delete=enable_for_soft_delete)
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
@@ -502,6 +541,24 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
+
+
+def backup_secret(client, vault_base_url, secret_name, file_path):
+    backup = client.backup_secret(vault_base_url, secret_name).value
+    with open(file_path, 'wb') as output:
+        output.write(backup)
+
+
+backup_secret.__doc__ = KeyVaultClient.backup_secret.__doc__
+
+
+def restore_secret(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_secret(vault_base_url, data)
+
+
+restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,

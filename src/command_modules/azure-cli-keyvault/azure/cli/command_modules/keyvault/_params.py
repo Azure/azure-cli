@@ -137,6 +137,9 @@ register_cli_argument('keyvault', 'enabled_for_disk_encryption',
 register_cli_argument('keyvault', 'enabled_for_template_deployment',
                       help='Allow Resource Manager to retrieve secrets from the vault.',
                       **three_state_flag())
+register_cli_argument('keyvault', 'enable_for_soft_delete',
+                      help='Enable vault deletion recovery for the vault, and all contained entities',
+                      **three_state_flag())
 
 register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type,
                       required=True, completer=None, validator=None)
@@ -163,6 +166,11 @@ register_cli_argument('keyvault set-policy', 'secret_permissions', metavar='PERM
 register_cli_argument('keyvault set-policy', 'certificate_permissions', metavar='PERM', nargs='*',
                       help='Space separated list. Possible values: {}'.format(
                           certificate_permission_values), arg_group='Permission')
+
+# purge arguments
+register_cli_argument('keyvault purge', 'vault_name', required=True, completer=None, validator=None)
+register_cli_argument('keyvault purge', 'location', required=True, completer=None, validator=None)
+
 
 for item in ['key', 'secret', 'certificate']:
     register_cli_argument('keyvault {}'.format(item), '{}_name'.format(item),
