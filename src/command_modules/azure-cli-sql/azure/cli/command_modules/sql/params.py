@@ -9,7 +9,7 @@ from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type)
-from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.import_extension_request \
@@ -590,7 +590,9 @@ with ParametersContext(command='sql server update') as c:
 
 
 with ParametersContext(command='sql server aad-admin create') as c:
-    c.expand('properties', ServerAzureADAdministrator)
+    c.expand('properties', ServerAzureADAdministrator, patches={
+        'tenant_id': patch_arg_make_optional,
+    })
     c.argument('login', options_list=('--user', '-u'))
     c.argument('sid', options_list=('--sid', '-s'))
     c.argument('tenant_id', options_list=('--tenant-id', '-t'))

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
+from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
@@ -643,6 +644,28 @@ def db_threat_detection_policy_update(
         instance.email_account_admins = email_account_admins
 
     return instance
+
+
+#####
+#           sql server ad-admin
+#####
+
+
+def server_ad_admin_create(
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
+
+    if not kwargs['tenant_id']:
+        profile = Profile()
+        sub = profile.get_subscription()
+        kwargs['tenant_id'] = sub['tenantId']
+
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        properties=kwargs)
 
 
 ###############################################
