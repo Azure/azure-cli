@@ -56,11 +56,12 @@ class TelThread(threading.Thread):
 class Telemetry(TelemetryClient):
     """ base telemetry sessions """
 
-    def __init__(self):
-        super(Telemetry, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(Telemetry, self).__init__(*args, **kwargs)
         self.start_time = None
         self.end_time = None
         self.telthread = TelThread(self.flush)
+        self.telthread.start()
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
