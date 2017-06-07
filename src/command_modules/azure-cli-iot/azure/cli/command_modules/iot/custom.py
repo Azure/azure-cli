@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use,too-many-arguments,no-member,line-too-long,too-few-public-methods
+# pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods
 
 from __future__ import print_function
 from os.path import exists
@@ -58,15 +58,13 @@ def _check_name_availability(client, hub_name):
 def iot_hub_get(client, hub_name, resource_group_name=None):
     if resource_group_name is None:
         return _get_iot_hub_by_name(client, hub_name)
-    else:
-        return client.get(resource_group_name, hub_name)
+    return client.get(resource_group_name, hub_name)
 
 
 def iot_hub_list(client, resource_group_name=None):
     if resource_group_name is None:
         return client.list_by_subscription()
-    else:
-        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_resource_group(resource_group_name)
 
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
@@ -218,11 +216,10 @@ def _validate_x509_parameters(x509, primary_thumbprint, secondary_thumbprint, va
 def _construct_x509_auth(device_id, primary_thumbprint, secondary_thumbprint, valid_days, output_dir):
     if any([primary_thumbprint, secondary_thumbprint]):
         return Authentication(x509_thumbprint=X509Thumbprint(primary_thumbprint, secondary_thumbprint))
-    else:
-        valid_days = valid_days if valid_days is not None else 365
-        output_dir = output_dir if output_dir is not None else '.'
-        cert_info = create_self_signed_certificate(device_id, valid_days, output_dir)
-        return Authentication(x509_thumbprint=X509Thumbprint(cert_info['thumbprint']))
+    valid_days = valid_days if valid_days is not None else 365
+    output_dir = output_dir if output_dir is not None else '.'
+    cert_info = create_self_signed_certificate(device_id, valid_days, output_dir)
+    return Authentication(x509_thumbprint=X509Thumbprint(cert_info['thumbprint']))
 
 
 def iot_device_get(client, hub_name, device_id, resource_group_name=None):
@@ -352,15 +349,13 @@ def _ensure_location(resource_group_name, location):
     if location is None:
         resource_group_client = resource_service_factory().resource_groups
         return resource_group_client.get(resource_group_name).location
-    else:
-        return location
+    return location
 
 
 def _ensure_resource_group_name(client, resource_group_name, hub_name):
     if resource_group_name is None:
         return _get_iot_hub_by_name(client, hub_name).resourcegroup
-    else:
-        return resource_group_name
+    return resource_group_name
 
 
 # Convert permission list to AccessRights from IoT SDK.

@@ -199,8 +199,7 @@ def _get_displayable_name(graph_object):
         return graph_object.user_principal_name
     elif graph_object.service_principal_names:
         return graph_object.service_principal_names[0]
-    else:
-        return ''
+    return ''
 
 
 def delete_role_assignments(ids=None, assignee=None, role=None,
@@ -435,7 +434,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if not end_date:
         end_date = start_date + relativedelta(years=1)
     elif isinstance(end_date, str):
-        end_date = dateutil.parser.parse(end_date)  # pylint: disable=redefined-variable-type
+        end_date = dateutil.parser.parse(end_date)
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -480,9 +479,27 @@ def show_service_principal(client, identifier):
     return client.get(object_id)
 
 
-def delete_service_principal(client, identifier):
-    object_id = _resolve_service_principal(client, identifier)
-    client.delete(object_id)
+def delete_service_principal(identifier):
+    client = _graph_client_factory()
+    sp = client.service_principals.get(_resolve_service_principal(client.service_principals, identifier))
+    app_object_id = None
+
+    # see whether we need to delete the application if it is in the same tenant
+    if sp.service_principal_names:
+        result = list(client.applications.list(
+            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
+        if result:
+            app_object_id = result[0].object_id
+
+    assignments = list_role_assignments(assignee=identifier, show_all=True)
+    if assignments:
+        logger.warning('Removing role assignments')
+        delete_role_assignments([a['id'] for a in assignments])
+
+    if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
+        client.applications.delete(app_object_id)
+    else:
+        client.service_principals.delete(sp.object_id)
 
 
 def _resolve_service_principal(client, identifier):
@@ -565,7 +582,6 @@ def create_service_principal_for_rbac(
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
         expanded_view=None, skip_assignment=False, keyvault=None):
-    from azure.graphrbac.models import GraphErrorException
     import time
     import pytz
 
@@ -602,7 +618,7 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    aad_application = create_application(graph_client.applications,  # pylint: disable=too-many-function-args
+    aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
                                          homepage='http://' + app_display_name,
                                          identifier_uris=[name],
@@ -689,11 +705,9 @@ def _get_keyvault_client():
 
 
 def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
-    import base64
     from os import path
     import tempfile
-    import time
-    from OpenSSL import crypto, SSL
+    from OpenSSL import crypto
     from datetime import timedelta
 
     _, cert_file = tempfile.mkstemp()
@@ -744,11 +758,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
 def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
     from azure.cli.core._profile import CLOUD
     import base64
-    from os import path
-    import tempfile
     import time
-    from OpenSSL import crypto, SSL
-    from datetime import timedelta
 
     kv_client = _get_keyvault_client()
     cert_policy = {
@@ -895,8 +905,7 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
             )
         ]
 
-    app_create_param = ApplicationUpdateParameters(password_credentials=app_creds,
-                                                   key_credentials=cert_creds)
+    app_create_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
 
     client.applications.patch(app.object_id, app_create_param)
 
@@ -920,7 +929,6 @@ def _resolve_object_id(assignee):
         result = list(client.service_principals.list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
     if not result:  # assume an object id, let us verify it
-        from azure.graphrbac.models import GetObjectsParameters
         result = _get_object_stubs(client, [assignee])
 
     # 2+ matches should never happen, so we only check 'no match' here
@@ -932,6 +940,5 @@ def _resolve_object_id(assignee):
 
 def _get_object_stubs(graph_client, assignees):
     from azure.graphrbac.models import GetObjectsParameters
-    params = GetObjectsParameters(include_directory_object_references=True,
-                                  object_ids=assignees)
+    params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
     return list(graph_client.objects.get_objects_by_object_ids(params))

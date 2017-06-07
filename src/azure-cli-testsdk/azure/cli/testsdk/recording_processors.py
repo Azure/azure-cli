@@ -72,7 +72,7 @@ class LargeRequestBodyProcessor(RecordingProcessor):
 class LargeResponseBodyProcessor(RecordingProcessor):
     control_flag = '<CTRL-REPLACE>'
 
-    def __init__(self, max_response_body=128):
+    def __init__(self, max_response_body=256):
         self._max_response_body = max_response_body
 
     def process_response(self, response):

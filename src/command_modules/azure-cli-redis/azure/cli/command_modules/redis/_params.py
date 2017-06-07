@@ -23,7 +23,6 @@ from azure.mgmt.redis.models import (
 class JsonString(dict):
     def __init__(self, value):
         super(JsonString, self).__init__()
-        import json
         if value[0] in ("'", '"') and value[-1] == value[0]:
             # Remove leading and trailing quotes for dos/cmd.exe users
             value = value[1:-1]
@@ -34,7 +33,6 @@ class JsonString(dict):
 class ScheduleEntryList(list):
     def __init__(self, value):
         super(ScheduleEntryList, self).__init__()
-        import json
         if value[0] in ("'", '"') and value[-1] == value[0]:
             # Remove leading and trailing quotes for dos/cmd.exe users
             value = value[1:-1]

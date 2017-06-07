@@ -206,10 +206,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     :return: policy dict
     :rtype: dict
     """
-    if scaffold:
-        return _scaffold_certificate_profile()
-    else:
-        return _default_certificate_profile()
+    return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
 
 
 def create_keyvault(client,
@@ -396,14 +393,11 @@ def restore_key(client, vault_base_url, file_path):
 restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
-# pylint: disable=assignment-from-no-return,unused-variable
-def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
-               expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
-               byok_file=None):
+def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
+               not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium KeyVaults. """
-    from azure.keyvault.models import \
-        (KeyAttributes, JsonWebKey)
+    from azure.keyvault.models import KeyAttributes, JsonWebKey
 
     def _to_bytes(hex_string):
         # zero pads and decodes a hex string
@@ -541,7 +535,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             message = getattr(client_exception, 'message', client_exception)
 
             try:
-                ex_message = json.loads(client_exception.response.text)
+                ex_message = json.loads(client_exception.response.text)  # pylint: disable=no-member
                 message = str(message) + ' ' + ex_message['error']['details'][0]['message']
             except:  # pylint: disable=bare-except
                 pass
@@ -641,7 +635,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
                 import base64
                 encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
                 if isinstance(encoded, bytes):
-                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                    encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
                 f.write(encoded.encode("utf-8"))
     except Exception as ex:  # pylint: disable=broad-except
@@ -668,16 +662,14 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
 
 def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
-    from azure.keyvault.models import \
-        (Contacts, KeyVaultErrorException)
+    from azure.keyvault.models import Contacts
     contacts = client.get_certificate_contacts(vault_base_url).contact_list
     remaining = Contacts([x for x in contacts if x.email_address != contact_email])
     if len(contacts) == len(remaining.contact_list):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
     if remaining.contact_list:
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
-    else:
-        return client.delete_certificate_contacts(vault_base_url)
+    return client.delete_certificate_contacts(vault_base_url)
 
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
@@ -690,9 +682,7 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.models import \
-        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
-         AdministratorDetails, KeyVaultErrorException)
+    from azure.keyvault.models import IssuerCredentials, OrganizationDetails, IssuerAttributes
     credentials = IssuerCredentials(account_id, password)
     issuer_attrs = IssuerAttributes(not disabled)
     org_details = OrganizationDetails(organization_id, admin_details=[])
@@ -710,10 +700,6 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.models import \
-        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
-         AdministratorDetails, KeyVaultErrorException)
-
     def update(obj, prop, value, nullable=False):
         set_value = value if value is not None else getattr(obj, prop, None)
         if set_value is None and not nullable:
@@ -742,8 +728,7 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
 def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    from azure.keyvault.models import \
-        (AdministratorDetails, KeyVaultErrorException)
+    from azure.keyvault.models import AdministratorDetails
 
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details

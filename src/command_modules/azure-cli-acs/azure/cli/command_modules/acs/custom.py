@@ -13,14 +13,14 @@ import uuid
 import datetime
 import platform
 import random
-import ssl
-import stat
 import string
 import subprocess
 import sys
 import threading
 import time
 import webbrowser
+import stat
+import ssl
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
@@ -32,7 +32,6 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -241,8 +240,8 @@ def acs_install_cli(resource_group, name, install_location=None, client_version=
 def _ssl_context():
     if sys.version_info < (3, 4):
         return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-    else:
-        return ssl.create_default_context()
+
+    return ssl.create_default_context()
 
 
 def _urlretrieve(url, filename):
@@ -282,13 +281,12 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
 
 
 def k8s_install_cli(client_version='latest', install_location=None):
-    """
-    Downloads the kubectl command line from Kubernetes
-    """
+    """ Downloads the kubectl command line from Kubernetes """
 
     if client_version == 'latest':
         context = _ssl_context()
-        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt', context=context).read()
+        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt',
+                          context=context).read()
         client_version = version.decode('UTF-8').strip()
 
     file_url = ''
@@ -328,11 +326,13 @@ def _build_service_principal(client, name, url, client_secret):
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         try:
-            create_service_principal(service_principal)
+            create_service_principal(service_principal, client=client)
+            break
         # TODO figure out what exception AAD throws here sometimes.
-        except:  # pylint: disable=bare-except
+        except Exception as ex:  # pylint: disable=broad-except
             sys.stdout.write('.')
             sys.stdout.flush()
+            logger.info(ex)
             time.sleep(2 + 2 * x)
     print('done')
     return service_principal
@@ -469,8 +469,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
             if not _add_role_assignment('Contributor', service_principal):
-                raise CLIError(
-                    'Could not create a service principal with the right permissions. Are you an Owner on this project?')
+                raise CLIError('Could not create a service principal with the right permissions. '
+                               'Are you an Owner on this project?')
         else:
             # --service-principal specfied, validate --client-secret was too
             if not client_secret:
@@ -541,7 +541,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     windows_profile = None
     os_type = 'Linux'
     if windows:
-        if len(admin_password) == 0:
+        if not admin_password:
             raise CLIError('--admin-password is required.')
         if len(admin_password) < 6:
             raise CLIError('--admin-password must be at least 6 characters')
@@ -574,13 +574,13 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                         "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + '-k8s-agents',
                             "osType": os_type,
@@ -632,13 +632,13 @@ def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix
                         "orchestratorType": orchestrator_type
                     },
                     "masterProfile": {
-                        "count": master_count,
+                        "count": int(master_count),
                         "dnsPrefix": dns_name_prefix + 'mgmt'
                     },
                     "agentPoolProfiles": [
                         {
                             "name": "agentpools",
-                            "count": agent_count,
+                            "count": int(agent_count),
                             "vmSize": agent_vm_size,
                             "dnsPrefix": dns_name_prefix + 'agents'
                         }
@@ -659,15 +659,15 @@ def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix
         "outputs": {
             "masterFQDN": {
                 "type": "string",
-                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)
+                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)  # pylint: disable=line-too-long
             },
             "sshMaster0": {
                 "type": "string",
-                "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)
+                "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
             },
             "agentFQDN": {
                 "type": "string",
-                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)
+                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
             }
         }
     }
@@ -722,8 +722,8 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
 
     # TODO: this only works for public cloud, need other casing for national clouds
 
-    acs_client.SecureCopy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
-                          '.kube/config', path_candidate, key_filename=ssh_key_file)
+    acs_client.secure_copy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
+                           '.kube/config', path_candidate, key_filename=ssh_key_file)
 
     # merge things
     if path_candidate != path:
@@ -911,7 +911,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if not end_date:
         end_date = start_date + relativedelta(years=1)
     elif isinstance(end_date, str):
-        end_date = dateutil.parser.parse(end_date)  # pylint: disable=redefined-variable-type
+        end_date = dateutil.parser.parse(end_date)
 
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
@@ -921,18 +921,14 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     if password:
         password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()), key_usage, key_type)]
 
     return (password_creds, key_creds)
 
 
-def create_service_principal(identifier):
-    return _create_service_principal(identifier)
-
-
-def _create_service_principal(identifier, resolve_app=True):
-    client = _graph_client_factory()
+def create_service_principal(identifier, resolve_app=True, client=None):
+    if client is None:
+        client = _graph_client_factory()
 
     if resolve_app:
         try:

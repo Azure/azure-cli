@@ -23,7 +23,7 @@ io = {}
 
 def redirect_io(func):
     def wrapper(self):
-        global io  # pylint: disable=global-statement
+        global io
         old_stdout = sys.stdout
         old_stderr = sys.stderr
         sys.stdout = sys.stderr = io = StringIO()

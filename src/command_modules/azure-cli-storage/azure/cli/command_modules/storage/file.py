@@ -12,6 +12,7 @@ import os.path
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.util import CLIError
 from azure.common import AzureException, AzureHttpError
+from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas,
@@ -47,14 +48,20 @@ def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=
         file_name = os.path.basename(source_pair[1])
 
         _make_directory_in_files_share(client, destination, dir_name)
-        client.create_file_from_path(share_name=destination,
-                                     directory_name=dir_name,
-                                     file_name=file_name,
-                                     local_file_path=source_pair[0],
-                                     content_settings=content_settings,
-                                     metadata=metadata,
-                                     max_connections=max_connections,
-                                     validate_content=validate_content)
+        create_file_args = {
+            'share_name': destination,
+            'directory_name': dir_name,
+            'file_name': file_name,
+            'local_file_path': source_pair[0],
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'max_connections': max_connections,
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            create_file_args['validate_content'] = validate_content
+
+        client.create_file_from_path(**create_file_args)
 
         return client.make_file_url(destination, dir_name, file_name)
 
@@ -90,12 +97,19 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     def _download_action(pair):
         destination_dir = os.path.join(destination, pair[0])
         mkdir_p(destination_dir)
-        client.get_file_to_path(source,
-                                directory_name=pair[0],
-                                file_name=pair[1],
-                                file_path=os.path.join(destination, *pair),
-                                validate_content=validate_content,
-                                max_connections=max_connections)
+
+        get_file_args = {
+            'share_name': source,
+            'directory_name': pair[0],
+            'file_name': pair[1],
+            'file_path': os.path.join(destination, *pair),
+            'max_connections': max_connections
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            get_file_args['validate_content'] = validate_content
+
+        client.get_file_to_path(**get_file_args)
         return client.make_file_url(source, *pair)
 
     return list(_download_action(f) for f in source_files)

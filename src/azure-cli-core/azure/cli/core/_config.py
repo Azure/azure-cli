@@ -22,10 +22,7 @@ def get_config_parser():
     import sys
 
     python_version = sys.version_info.major
-    if python_version == 3:
-        return configparser.ConfigParser()
-    else:
-        return configparser.SafeConfigParser()
+    return configparser.ConfigParser() if python_version == 3 else configparser.SafeConfigParser()
 
 
 class AzConfig(object):
@@ -63,9 +60,9 @@ class AzConfig(object):
 
     def getboolean(self, section, option, fallback=_UNSET):
         val = str(self.get(section, option, fallback))
-        if val.lower() not in AzConfig._BOOLEAN_STATES:  # pylint: disable=E1101
+        if val.lower() not in AzConfig._BOOLEAN_STATES:
             raise ValueError('Not a boolean: {}'.format(val))
-        return AzConfig._BOOLEAN_STATES[val.lower()]  # pylint: disable=E1101
+        return AzConfig._BOOLEAN_STATES[val.lower()]
 
 
 az_config = AzConfig()

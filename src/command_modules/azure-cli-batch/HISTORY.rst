@@ -3,7 +3,7 @@
 Release History
 ===============
 
-3.0.0 (2017-05-29)
+3.0.0 (2017-05-30)
 ++++++++++++++++++
 
 * Updated to Batch SDK 3.0.0 with support for low-priority VMs in pools.

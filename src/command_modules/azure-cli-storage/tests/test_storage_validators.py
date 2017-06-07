@@ -4,14 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from six import StringIO
 from argparse import Namespace
-from azure.cli.command_modules.storage._validators import (get_permission_validator,
-                                                           get_datetime_type, datetime, ipv4_range_type, resource_type_type,
-                                                           services_type, process_blob_source_uri)
+from six import StringIO
+from azure.cli.command_modules.storage._validators import (
+    get_permission_validator, get_datetime_type, datetime, ipv4_range_type, resource_type_type, services_type,
+    process_blob_source_uri, get_char_options_validator)
 from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.testsdk import api_version_constraint
 
 
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class TestStorageValidators(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
@@ -95,6 +97,23 @@ class TestStorageValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             process_blob_source_uri(Namespace(copy_source='https://example.com',
                                               source_account_name='account_name'))
+
+    def test_storage_get_char_options_validator(self):
+        with self.assertRaises(ValueError) as cm:
+            get_char_options_validator('abc', 'no_such_property')(object())
+        self.assertEqual('Missing options --no-such-property.', str(cm.exception))
+
+        ns = Namespace(services='bcd')
+        with self.assertRaises(ValueError) as cm:
+            get_char_options_validator('abc', 'services')(ns)
+        self.assertEqual('--services: only valid values are: a, b, c.', str(cm.exception))
+
+        ns = Namespace(services='ab')
+        get_char_options_validator('abc', 'services')(ns)
+
+        result = getattr(ns, 'services')
+        self.assertIs(type(result), set)
+        self.assertEqual(result, set('ab'))
 
 
 if __name__ == '__main__':

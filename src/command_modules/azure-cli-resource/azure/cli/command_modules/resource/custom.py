@@ -51,7 +51,7 @@ def list_resource_groups(tag=None):  # pylint: disable=no-self-use
         filters.append("tagname eq '{}'".format(key))
         filters.append("tagvalue eq '{}'".format(tag[key]))
 
-    filter_text = ' and '.join(filters) if len(filters) > 0 else None
+    filter_text = ' and '.join(filters) if filters else None
 
     groups = rcf.resource_groups.list(filter=filter_text)
     return list(groups)
@@ -284,7 +284,7 @@ def _prompt_for_parameters(missing_parameters):
             else:
                 value = prompt(prompt_str, help_string=description)
                 result[param_name] = value
-            if len(value) > 0:
+            if value:
                 break
     return result
 
@@ -304,7 +304,7 @@ def _merge_parameters(parameter_list):
 
 def _get_missing_parameters(parameters, template, prompt_fn):
     missing = _find_missing_parameters(parameters, template)
-    if len(missing) > 0:
+    if missing:
         prompt_parameters = prompt_fn(missing)
         for param_name in prompt_parameters:
             parameters[param_name] = {
@@ -313,10 +313,8 @@ def _get_missing_parameters(parameters, template, prompt_fn):
     return parameters
 
 
-def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
-                              template_file=None, template_uri=None, deployment_name=None,
-                              parameter_list=None, mode='incremental', validate_only=False,
-                              no_wait=False):
+def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None, deployment_name=None,
+                              parameter_list=None, mode='incremental', validate_only=False, no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
@@ -342,11 +340,8 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
 
     smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
-        return smc.deployments.validate(resource_group_name, deployment_name,
-                                        properties, raw=no_wait)
-    else:
-        return smc.deployments.create_or_update(resource_group_name, deployment_name,
-                                                properties, raw=no_wait)
+        return smc.deployments.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def export_deployment_as_template(resource_group_name, deployment_name):
@@ -572,8 +567,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
 def list_features(client, resource_provider_namespace=None):
     if resource_provider_namespace:
         return client.list(resource_provider_namespace=resource_provider_namespace)
-    else:
-        return client.list_all()
+    return client.list_all()
 
 
 def create_policy_assignment(policy, name=None, display_name=None,
@@ -824,14 +818,14 @@ def delete_lock(name,
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
                                          resource_type, resource_name)
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
-                                     resource_provider_namespace, parent_resource_path,
-                                     resource_type, resource_name)
-
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
+
+    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+                                     resource_provider_namespace, parent_resource_path,
+                                     resource_type, resource_name)
 
     if resource_group_name is None:
         return lock_client.management_locks.delete_at_subscription_level(name)
@@ -851,8 +845,8 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     if resource_name is None:
         return (resource_group_name, None, None, None)
 
-    parts = resource_type.split('/')
-    if resource_provider_namespace is None:
+    parts = resource_type.split('/', 2)
+    if resource_provider_namespace is None and len(parts) == 2:
         resource_provider_namespace = parts[0]
         resource_type = parts[1]
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
@@ -1051,27 +1045,25 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def delete(self):
         if self.resource_id:
             return self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
-        else:
-            return self.rcf.resources.delete(self.resource_group_name,
-                                             self.resource_provider_namespace,
-                                             self.parent_resource_path or '',
-                                             self.resource_type,
-                                             self.resource_name,
-                                             self.api_version)
+        return self.rcf.resources.delete(self.resource_group_name,
+                                         self.resource_provider_namespace,
+                                         self.parent_resource_path or '',
+                                         self.resource_type,
+                                         self.resource_name,
+                                         self.api_version)
 
     def update(self, parameters):
         if self.resource_id:
             return self.rcf.resources.create_or_update_by_id(self.resource_id,
                                                              self.api_version,
                                                              parameters)
-        else:
-            return self.rcf.resources.create_or_update(self.resource_group_name,
-                                                       self.resource_provider_namespace,
-                                                       self.parent_resource_path or '',
-                                                       self.resource_type,
-                                                       self.resource_name,
-                                                       self.api_version,
-                                                       parameters)
+        return self.rcf.resources.create_or_update(self.resource_group_name,
+                                                   self.resource_provider_namespace,
+                                                   self.parent_resource_path or '',
+                                                   self.resource_type,
+                                                   self.resource_name,
+                                                   self.api_version,
+                                                   parameters)
 
     def tag(self, tags):
         resource = self.get_resource()
@@ -1089,15 +1081,13 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         if self.resource_id:
             return self.rcf.resources.create_or_update_by_id(self.resource_id, self.api_version,
                                                              parameters)
-        else:
-            return self.rcf.resources.create_or_update(
-                self.resource_group_name,
-                self.resource_provider_namespace,
-                self.parent_resource_path or '',
-                self.resource_type,
-                self.resource_name,
-                self.api_version,
-                parameters)
+        return self.rcf.resources.create_or_update(self.resource_group_name,
+                                                   self.resource_provider_namespace,
+                                                   self.parent_resource_path or '',
+                                                   self.resource_type,
+                                                   self.resource_name,
+                                                   self.api_version,
+                                                   parameters)
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):

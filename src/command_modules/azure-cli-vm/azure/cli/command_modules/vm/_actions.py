@@ -27,6 +27,10 @@ def _resource_not_exists(resource_type):
     return _handle_resource_not_exists
 
 
+def _get_thread_count():
+    return 40
+
+
 def load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     all_images = []
@@ -57,7 +61,7 @@ def load_images_thru_services(publisher, offer, sku, location):
 
     publisher_num = len(publishers)
     if publisher_num > 1:
-        with ThreadPoolExecutor(max_workers=40) as executor:
+        with ThreadPoolExecutor(max_workers=_get_thread_count()) as executor:
             tasks = [executor.submit(_load_images_from_publisher, p.name) for p in publishers]
             for t in as_completed(tasks):
                 t.result()  # don't use the result but expose exceptions from the threads
@@ -95,8 +99,7 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
 
 def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    # pylint: disable=no-name-in-module,import-error
-    from distutils.version import LooseVersion
+    from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
     all_images = []
     client = _compute_client_factory()
     if location is None:
@@ -133,7 +136,7 @@ def load_extension_images_thru_services(publisher, name, version, location, show
 
     publisher_num = len(publishers)
     if publisher_num > 1:
-        with ThreadPoolExecutor(max_workers=40) as executor:
+        with ThreadPoolExecutor(max_workers=_get_thread_count()) as executor:
             tasks = [executor.submit(_load_extension_images_from_publisher,
                                      p.name) for p in publishers]
             for t in as_completed(tasks):

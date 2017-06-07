@@ -7,8 +7,8 @@ import azure.cli.command_modules.acr._help  # pylint: disable=unused-import
 
 
 def load_params(_):
-    import azure.cli.command_modules.acr._params  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.acr._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():
-    import azure.cli.command_modules.acr.commands  # pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.acr.commands  # pylint: disable=redefined-outer-name, unused-variable

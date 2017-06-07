@@ -67,7 +67,7 @@ def _parse_action_removals(actions):
 def create_metric_rule(client, resource_group_name, rule_name, target, condition,
                        description=None, disabled=False, location=None, tags=None,
                        email_service_owners=False, actions=None):
-    from azure.mgmt.monitor.models import AlertRuleResource, RuleEmailAction, RuleWebhookAction
+    from azure.mgmt.monitor.models import AlertRuleResource, RuleEmailAction
     condition.data_source.resource_uri = target
     custom_emails, webhooks, _ = _parse_actions(actions)
     actions = [RuleEmailAction(email_service_owners, custom_emails)] + (webhooks or [])

@@ -21,9 +21,6 @@ class WinProxy(Proxy):
     INTERNET_PER_CONN_PROXY_BYPASS = 3
     INTERNET_PER_CONN_FLAGS = 1
 
-    def __init__(self):
-        super(WinProxy, self).__init__()
-
     def set_http_proxy(self, host, port):
         """
         Sets the HTTP proxy on Windows

@@ -26,7 +26,7 @@ extension_info = {
 }
 
 
-def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,too-many-locals, too-many-statements
+def enable(resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
            aad_client_id,
            disk_encryption_keyvault,
            aad_client_secret=None, aad_client_cert_thumbprint=None,
@@ -193,9 +193,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
         'SequenceVersion': sequence_version,
     }
 
-    from azure.mgmt.compute.models import (VirtualMachineExtension, DiskEncryptionSettings,
-                                           KeyVaultSecretReference, KeyVaultKeyReference,
-                                           SubResource)
+    from azure.mgmt.compute.models import VirtualMachineExtension, DiskEncryptionSettings
 
     ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],

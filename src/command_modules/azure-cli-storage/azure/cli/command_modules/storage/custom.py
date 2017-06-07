@@ -3,50 +3,38 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,line-too-long
+# pylint: disable=no-self-use
 
 from __future__ import print_function
-from sys import stderr
 
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
-from azure.cli.command_modules.storage._factory import \
-    (storage_client_factory, generic_data_service_factory)
+from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.core.application import APPLICATION
 
-Logging, Metrics, CorsRule, \
-    AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
-                                            'Logging',
-                                            'Metrics',
-                                            'CorsRule',
-                                            'AccessPolicy',
-                                            'RetentionPolicy',
-                                            mod='models')
+Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
+                                                                    'Logging',
+                                                                    'Metrics',
+                                                                    'CorsRule',
+                                                                    'AccessPolicy',
+                                                                    'RetentionPolicy',
+                                                                    mod='models')
 
-
-BlockBlobService, BaseBlobService, \
-    FileService, FileProperties, \
-    DirectoryProperties, TableService, \
-    QueueService = get_sdk(ResourceType.DATA_STORAGE,
-                           'blob#BlockBlobService',
-                           'blob.baseblobservice#BaseBlobService',
-                           'file#FileService',
-                           'file.models#FileProperties',
-                           'file.models#DirectoryProperties',
-                           'table#TableService',
-                           'queue#QueueService')
+BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, TableService, QueueService = \
+    get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService', 'blob.baseblobservice#BaseBlobService',
+            'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties', 'table#TableService',
+            'queue#QueueService')
 
 
 def _update_progress(current, total):
+    HOOK = APPLICATION.get_progress_controller(True)
+
     if total:
-        message = 'Percent complete: %'
-        percent_done = current * 100 / total
-        message += '{: >5.1f}'.format(percent_done)
-        print('\b' * len(message) + message, end='', file=stderr)
-        stderr.flush()
-        if current == total:
-            print('', file=stderr)
+        HOOK.add(message='Alive', value=current, total_val=total)
+        if total == current:
+            HOOK.end()
 
 
 # CUSTOM METHODS
@@ -118,8 +106,8 @@ def list_share_files(client, share_name, directory_name=None, timeout=None,
                                                   timeout=timeout)
     if exclude_dir:
         return list(f for f in generator if isinstance(f.properties, FileProperties))
-    else:
-        return generator
+
+    return generator
 
 
 @transfer_doc(FileService.list_directories_and_files)
@@ -164,10 +152,14 @@ def show_storage_account_connection_string(
         endpoint_suffix,
         account_name,
         keys[0] if key_name == 'primary' else keys[1])  # pylint: disable=no-member
-    connection_string = '{}{}'.format(connection_string, ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
-    connection_string = '{}{}'.format(connection_string, ';FileEndpoint={}'.format(file_endpoint) if file_endpoint else '')
-    connection_string = '{}{}'.format(connection_string, ';QueueEndpoint={}'.format(queue_endpoint) if queue_endpoint else '')
-    connection_string = '{}{}'.format(connection_string, ';TableEndpoint={}'.format(table_endpoint) if table_endpoint else '')
+    connection_string = '{}{}'.format(connection_string,
+                                      ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
+    connection_string = '{}{}'.format(connection_string,
+                                      ';FileEndpoint={}'.format(file_endpoint) if file_endpoint else '')
+    connection_string = '{}{}'.format(connection_string,
+                                      ';QueueEndpoint={}'.format(queue_endpoint) if queue_endpoint else '')
+    connection_string = '{}{}'.format(connection_string,
+                                      ';TableEndpoint={}'.format(table_endpoint) if table_endpoint else '')
     return {'connectionString': connection_string}
 
 
@@ -178,6 +170,7 @@ def upload_blob(  # pylint: disable=too-many-locals
         max_connections=2, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
     '''Upload a blob to a container.'''
+
     def upload_append_blob():
         if not client.exists(container_name, blob_name):
             client.create_blob(
@@ -190,15 +183,21 @@ def upload_blob(  # pylint: disable=too-many-locals
                 if_match=if_match,
                 if_none_match=if_none_match,
                 timeout=timeout)
-        return client.append_blob_from_path(
-            container_name=container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=_update_progress,
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            timeout=timeout)
+
+        append_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'maxsize_condition': maxsize_condition,
+            'lease_id': lease_id,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            append_blob_args['validate_content'] = validate_content
+
+        return client.append_blob_from_path(**append_blob_args)
 
     def upload_block_blob():
         import os
@@ -208,22 +207,26 @@ def upload_blob(  # pylint: disable=too-many-locals
             client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
             client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
 
-        return client.create_blob_from_path(
-            container_name=container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=_update_progress,
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            max_connections=max_connections,
-            lease_id=lease_id,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            timeout=timeout
-        )
+        create_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'max_connections': max_connections,
+            'lease_id': lease_id,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            create_blob_args['validate_content'] = validate_content
+
+        return client.create_blob_from_path(**create_blob_args)
 
     type_func = {
         'append': upload_append_blob,
@@ -330,161 +333,42 @@ def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=No
         raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
 
 
-class ServiceProperties(object):
-
-    def __init__(self, name, service):
-
-        self.name = name
-        self.service = service
-        self.client = None
-
-    def init_client(self, account_name=None, account_key=None, connection_string=None,
-                    sas_token=None):
-        if not self.client:
-            self.client = generic_data_service_factory(
-                self.service, account_name, account_key, connection_string, sas_token)
-
-    def get_service_properties(self):
-        if not self.client:
-            raise CLIError('Must call init_client before attempting get_service_properties!')
-        return getattr(self.client, 'get_{}_service_properties'.format(self.name))
-
-    def set_service_properties(self):
-        if not self.client:
-            raise CLIError('Must call init_client before attempting set_service_properties!')
-        return getattr(self.client, 'set_{}_service_properties'.format(self.name))
-
-    def get_logging(self, account_name=None, account_key=None, connection_string=None,
-                    sas_token=None, timeout=None):
-        self.init_client(account_name, account_key, connection_string, sas_token)
-        return self.get_service_properties()(timeout=timeout).__dict__['logging']
-
-    def set_logging(self, read, write, delete, retention, account_name=None, account_key=None,
-                    connection_string=None, sas_token=None, timeout=None):
-        self.init_client(account_name, account_key, connection_string, sas_token)
-        retention_policy = RetentionPolicy(
-            enabled=retention != 0,
-            days=retention
-        )
-        logging = Logging(delete, read, write, retention_policy)
-        return self.set_service_properties()(logging=logging, timeout=timeout)
-
-    def get_cors(self, account_name=None, account_key=None, connection_string=None,
-                 sas_token=None, timeout=None):
-        self.init_client(account_name, account_key, connection_string, sas_token)
-        return self.get_service_properties()(timeout=timeout).__dict__['cors']
-
-    def add_cors(self, origins, methods, max_age, exposed_headers=None, allowed_headers=None,
-                 account_name=None, account_key=None, connection_string=None, sas_token=None,
-                 timeout=None):
-        cors = self.get_cors(account_name, account_key, connection_string, sas_token, timeout)
-        new_rule = CorsRule(origins, methods, max_age, exposed_headers, allowed_headers)
-        cors.append(new_rule)
-        return self.set_service_properties()(cors=cors, timeout=timeout)
-
-    def clear_cors(self, account_name=None, account_key=None, connection_string=None,
-                   sas_token=None, timeout=None):
-        self.init_client(account_name, account_key, connection_string, sas_token)
-        return self.set_service_properties()(cors=[], timeout=timeout)
-
-    def get_metrics(self, interval, account_name=None, account_key=None, connection_string=None,
-                    sas_token=None, timeout=None):
-        self.init_client(account_name, account_key, connection_string, sas_token)
-        props = self.get_service_properties()(timeout=timeout)
-        metrics = {}
-        if interval == 'both':
-            metrics['hour'] = props.__dict__['hour_metrics']
-            metrics['minute'] = props.__dict__['minute_metrics']
-        else:
-            metrics[interval] = props.__dict__['{}_metrics'.format(interval)]
-        return metrics
-
-    def set_metrics(self, retention, hour, minute, api=None, account_name=None, account_key=None,
-                    connection_string=None, sas_token=None, timeout=None):
-        self.init_client(account_name, account_key, connection_string, sas_token)
-        retention_policy = RetentionPolicy(
-            enabled=retention != 0,
-            days=retention
-        )
-        hour_metrics = Metrics(hour, api, retention_policy) if hour is not None else None
-        minute_metrics = Metrics(minute, api, retention_policy) if minute is not None else None
-        return self.set_service_properties()(
-            hour_metrics=hour_metrics, minute_metrics=minute_metrics, timeout=timeout)
-
-
-SERVICES = {
-    'b': ServiceProperties('blob', BaseBlobService),
-    'f': ServiceProperties('file', FileService),
-    'q': ServiceProperties('queue', QueueService),
-    't': ServiceProperties('table', TableService)
-}
-
-
-def list_cors(services='bfqt', account_name=None, account_key=None, connection_string=None,
-              sas_token=None, timeout=None):
+def list_cors(services, timeout=None):
     results = {}
-    for character in services:
-        properties = SERVICES[character]
-        results[properties.name] = properties.get_cors(
-            account_name, account_key, connection_string, sas_token, timeout)
+    for s in services:
+        results[s.name] = s.get_cors(timeout)
     return results
 
 
-def add_cors(services, origins, methods, max_age=0, exposed_headers=None, allowed_headers=None,
-             account_name=None, account_key=None, connection_string=None, sas_token=None,
-             timeout=None):
-    for character in services:
-        properties = SERVICES[character]
-        properties.add_cors(
-            origins, methods, max_age, exposed_headers, allowed_headers, account_name, account_key,
-            connection_string, sas_token, timeout)
-    return None
+def add_cors(services, origins, methods, max_age=0, exposed_headers=None, allowed_headers=None, timeout=None):
+    for s in services:
+        s.add_cors(origins, methods, max_age, exposed_headers, allowed_headers, timeout)
 
 
-def clear_cors(services, account_name=None, account_key=None, connection_string=None,
-               sas_token=None, timeout=None):
-    for character in services:
-        properties = SERVICES[character]
-        properties.clear_cors(
-            account_name, account_key, connection_string, sas_token, timeout)
-    return None
+def clear_cors(services, timeout=None):
+    for s in services:
+        s.clear_cors(timeout)
 
 
-def set_logging(services, log, retention, account_name=None, account_key=None,
-                connection_string=None, sas_token=None, timeout=None):
-    for character in services:
-        properties = SERVICES[character]
-        properties.set_logging(
-            'r' in log, 'w' in log, 'd' in log, retention, account_name, account_key,
-            connection_string, sas_token, timeout)
-    return None
+def set_logging(services, log, retention, timeout=None):
+    for s in services:
+        s.set_logging('r' in log, 'w' in log, 'd' in log, retention, timeout)
 
 
-def set_metrics(services, retention, hour=None, minute=None, api=None, account_name=None,
-                account_key=None, connection_string=None, sas_token=None, timeout=None):
-    for character in services:
-        properties = SERVICES[character]
-        properties.set_metrics(
-            retention, hour, minute, api, account_name, account_key, connection_string,
-            sas_token, timeout)
-    return None
-
-
-def get_logging(services='bqt', account_name=None, account_key=None, connection_string=None,
-                sas_token=None, timeout=None):
+def get_logging(services, timeout=None):
     results = {}
-    for character in services:
-        properties = SERVICES[character]
-        results[properties.name] = properties.get_logging(
-            account_name, account_key, connection_string, sas_token, timeout)
+    for s in services:
+        results[s.name] = s.get_logging(timeout)
     return results
 
 
-def get_metrics(services='bfqt', interval='both', account_name=None, account_key=None,
-                connection_string=None, sas_token=None, timeout=None):
+def set_metrics(services, retention, hour=None, minute=None, api=None, timeout=None):
+    for s in services:
+        s.set_metrics(retention, hour, minute, api, timeout)
+
+
+def get_metrics(services='bfqt', interval='both', timeout=None):
     results = {}
-    for character in services:
-        properties = SERVICES[character]
-        results[properties.name] = properties.get_metrics(
-            interval, account_name, account_key, connection_string, sas_token, timeout)
+    for s in services:
+        results[s.name] = s.get_metrics(interval, timeout)
     return results

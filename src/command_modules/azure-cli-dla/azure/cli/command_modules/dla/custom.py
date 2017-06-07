@@ -63,7 +63,7 @@ def list_adla_jobs(client,
     job_list = client.list(account_name,
                            orderby="submitTime desc",
                            top=top if top <= 300 else None,
-                           filter=filter_string if filter_string and len(filter_string) > 0 else None)
+                           filter=filter_string if filter_string else None)
     if top <= 300:
         return job_list
 
@@ -271,15 +271,14 @@ def submit_adla_job(client,
     return client.create(account_name, job_id, submit_params)
 
 
-# pylint: disable=superfluous-parens
 def wait_adla_job(client,
                   account_name,
                   job_id,
                   wait_interval_sec=5,
                   max_wait_time_sec=-1):
     if wait_interval_sec < 1:
-        # pylint: disable=line-too-long
-        raise CLIError('wait times must be greater than 0 when polling jobs. Value specified: {}'.format(wait_interval_sec))
+        raise CLIError('wait times must be greater than 0 when polling jobs. Value specified: {}'
+                       .format(wait_interval_sec))
 
     job = client.get(account_name, job_id)
     time_waited_sec = 0

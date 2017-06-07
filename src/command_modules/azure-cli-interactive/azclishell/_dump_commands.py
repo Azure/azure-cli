@@ -14,6 +14,7 @@ import yaml
 from azure.cli.core.application import APPLICATION, Configuration
 from azure.cli.core.commands import _update_command_definitions, BLACKLISTED_MODS
 from azure.cli.core.help_files import helps
+from azure.cli.core.commands.arm import add_id_parameters
 
 import azclishell.configuration as config
 
@@ -48,6 +49,7 @@ def dump_command_table():
     command_file = config.CONFIGURATION.get_help_files()
 
     install_modules()
+    add_id_parameters(CMD_TABLE)
 
     data = {}
     for cmd in CMD_TABLE:
@@ -123,8 +125,7 @@ def dump_command_table():
 
 
 class Exporter(json.JSONEncoder):
-
-    def default(self, o):  # pylint: disable=method-hidden
+    def default(self, o):
         try:
             return super(Exporter, self).default(o)
         except TypeError:

@@ -11,7 +11,6 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import prompt, NoTTYException
 import azure.cli.core.azlogging as azlogging
 
-import azure.cli.command_modules.feedback._help  # pylint: disable=unused-import
 
 logger = azlogging.get_az_logger(__name__)
 

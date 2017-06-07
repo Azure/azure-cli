@@ -5,7 +5,7 @@
 :: This re-builds partial WiX files for use in cloning the repo after install.
 :: heat.exe from the WiX toolset is used for this.
 ::
-set CLI_VERSION=0.2.9
+set CLI_VERSION=0.2.10
 
 set PYTHON_VERSION=3.6.1
 
