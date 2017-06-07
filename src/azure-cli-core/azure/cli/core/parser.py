@@ -73,8 +73,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
             # parsers we add to the "choices" section of the subparser.
             subparser.choices[command_verb] = command_verb
 
-            # inject command_module designer's help formatter -- default is
-            # HelpFormatter
+            # inject command_module designer's help formatter -- default is HelpFormatter
             fc = metadata.formatter_class or argparse.HelpFormatter
 
             command_parser = subparser.add_parser(command_verb,
@@ -133,8 +132,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 # with ensuring that a subparser for cmd exists, then for subcmd1,
                 # subcmd2 and so on), we know we can always back up one step and
                 # add a subparser if one doesn't exist
-                grandparent_subparser = self.subparsers[
-                    tuple(path[0:length - 1])]
+                grandparent_subparser = self.subparsers[tuple(path[:length - 1])]
                 new_parser = grandparent_subparser.add_parser(path[length - 1])
 
                 # Due to http://bugs.python.org/issue9253, we have to give the subparser
@@ -157,8 +155,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 # module name
                 pass
             except Exception as e:  # pylint: disable=broad-except
-                logger.debug(
-                    'Unable to handle module not installed: %s', str(e))
+                logger.debug('Unable to handle module not installed: %s', str(e))
 
     def validation_error(self, message):
         telemetry.set_user_fault('validation error')
