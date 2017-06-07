@@ -599,10 +599,13 @@ with ParametersContext(command='sql server aad-admin create') as c:
 
 
 with ParametersContext(command='sql server aad-admin update') as c:
-    c.expand('properties', ServerAzureADAdministrator)
-    c.argument('login', options_list=('--user', '-u'))
-    c.argument('sid', options_list=('--sid', '-s'))
-    c.argument('tenant_id', options_list=('--tenant-id', '-t'))
+    c.argument('login', options_list=('--user', '-u'),
+               help='The server administrator login value.')
+    c.argument('sid', options_list=('--sid', '-s'),
+               help='The server administrator Sid (Secure ID).')
+    c.argument('tenant_id', options_list=('--tenant-id', '-t'),
+               help='The server Active Directory Administrator tenant id.')
+
 
 #####
 #           sql server firewall-rule

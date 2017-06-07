@@ -302,7 +302,9 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         self.cmd('sql server aad-admin create -n {} -g {} -s {} -t{} -u {}'
                  .format(sn, rg, sid, tid, user),
-                 checks=[JMESPathCheck('login', user)])
+                 checks=[JMESPathCheck('login', user),
+                         JMESPathCheck('sid', sid),
+                         JMESPathCheck('tenantId', tid)])
 
         self.cmd('sql server aad-admin show -n {} -g {}'
                  .format(sn, rg),
@@ -311,6 +313,15 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.cmd('sql server aad-admin list -n {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('[0].login', user)])
+
+        user2 = 'something'
+        sid = '132421421341234'
+
+        self.cmd('sql server aad-admin update -n {} -g {} -u {} -i {}'
+                 .format(sn, rg, user2, sid),
+                 checks=[JMESPathCheck('[0].login', user2),
+                         JMESPathCheck('[0].sid', sid),
+                         JMESPathCheck('[0].tenantId', tid)])
 
         self.cmd('sql server aad-admin delete -n {} -g {}'
                  .format(sn, rg))

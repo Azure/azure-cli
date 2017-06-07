@@ -176,4 +176,6 @@ with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations, a
         c.command('show', 'get')
         c.command('list', 'list')
         c.command('delete', 'delete')
-        c.generic_update_command('update', 'get', 'create_or_update')
+        c.generic_update_command('update', 'get', 'create_or_update',
+                                 custom_func_name='server_ad_admin_update',
+                                 setter_arg_name='properties')
