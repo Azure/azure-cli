@@ -49,6 +49,12 @@ helps['account show'] = """
     long-summary: If no subscription is specified, shows the current subscription.
 """
 
+helps['account refresh'] = """
+    type: command
+    short-summary: Refresh the subscriptions under your account.
+    long-summary: Checks azure for any new subscriptions in your account.
+"""
+
 helps['account set'] = """
     type: command
     short-summary: Set a subscription as the current subscription.

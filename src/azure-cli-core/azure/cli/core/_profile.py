@@ -105,6 +105,25 @@ class Profile(object):
         self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
+    def refresh_subscriptions(self):
+        # Currently requires a default subscription selected
+        existingSubscriptions = self.load_cached_subscriptions()
+        tenants = {}
+        bearer = self.get_raw_token()
+        self._creds_cache.flush_to_disk()
+        for sub in existingSubscriptions:
+            athctx = _authentication_context_factory(sub['tenantId'], self._creds_cache.adal_token_cache)
+            tenants.setdefault(sub['tenantId'], dict()).update({
+                'userId': sub['user']['name'],
+                "token": bearer[0][1],
+                "finder": SubscriptionFinder(athctx, self._creds_cache.adal_token_cache)})
+
+        for tenant in tenants:
+            subs = tenants[tenant]['finder'].find_from_tenant_oauth_token(tenant, tenants[tenant]['token'])
+            # Update this to support service principals
+            consolidated = self._normalize_properties(tenants[tenant]['userId'], subs, False)
+            self._set_subscriptions(consolidated)
+
     def find_subscriptions_on_login(self,
                                     interactive,
                                     username,
@@ -398,6 +417,13 @@ class SubscriptionFinder(object):
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
+
+    def find_from_tenant_oauth_token(self, tenant, token):
+        if tenant is None:
+            logger.warning("Missing Tenant information")
+        if token is None:
+            logger.warning("Missing token information")
+        return self._find_using_specific_tenant(tenant, token)
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)

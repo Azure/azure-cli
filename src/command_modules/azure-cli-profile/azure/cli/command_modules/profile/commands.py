@@ -28,6 +28,7 @@ _custom_module = 'azure.cli.command_modules.profile.custom#'
 
 cli_command(__name__, 'account list', _custom_module + 'list_subscriptions',
             table_transformer=transform_account_list)
+cli_command(__name__, 'account refresh', _custom_module + 'refresh_subscriptions')
 cli_command(__name__, 'account set', _custom_module + 'set_active_subscription')
 cli_command(__name__, 'account show', _custom_module + 'show_subscription')
 cli_command(__name__, 'account clear', _custom_module + 'account_clear')
