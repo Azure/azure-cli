@@ -94,7 +94,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                     except KeyError:
                         # group not found so create
                         group_name = '{} Arguments'.format(arg.arg_group)
-                        group = command_parser.add_argument_group(arg.arg_group, group_name)
+                        group = command_parser.add_argument_group(
+                            arg.arg_group, group_name)
                         argument_groups[arg.arg_group] = group
                     param = group.add_argument(
                         *arg.options_list, **arg.options)
@@ -131,11 +132,12 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 # with ensuring that a subparser for cmd exists, then for subcmd1,
                 # subcmd2 and so on), we know we can always back up one step and
                 # add a subparser if one doesn't exist
-                grandparent_subparser = self.subparsers[tuple(path[0:length - 1])]
+                grandparent_subparser = self.subparsers[tuple(path[:length - 1])]
                 new_parser = grandparent_subparser.add_parser(path[length - 1])
 
                 # Due to http://bugs.python.org/issue9253, we have to give the subparser
-                # a destination and set it to required in order to get a meaningful error
+                # a destination and set it to required in order to get a
+                # meaningful error
                 parent_subparser = new_parser.add_subparsers(dest='subcommand')
                 parent_subparser.required = True
                 self.subparsers[tuple(path[0:length])] = parent_subparser
@@ -149,7 +151,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                             err_msg).group(1)
                 handle_module_not_installed(possible_module)
             except AttributeError:
-                # regular expression pattern match failed so unable to retrieve module name
+                # regular expression pattern match failed so unable to retrieve
+                # module name
                 pass
             except Exception as e:  # pylint: disable=broad-except
                 logger.debug('Unable to handle module not installed: %s', str(e))

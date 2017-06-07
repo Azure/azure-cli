@@ -631,14 +631,13 @@ class Shell(object):
                 else:
                     b_flag, c_flag, outside, cmd = self._special_cases(text, cmd, outside)
 
+                    if not self.default_command:
+                        self.history.append(text)
                     if b_flag:
                         break
                     if c_flag:
                         self.set_prompt()
                         continue
-
-                    if not self.default_command:
-                        self.history.append(text)
 
                     self.set_prompt()
 
