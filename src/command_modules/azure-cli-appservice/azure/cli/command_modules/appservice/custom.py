@@ -909,13 +909,13 @@ def delete_slot(resource_group_name, webapp, slot):
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
 
 
-def set_traffic_routing(resource_group_name, name, distributions):
+def set_traffic_routing(resource_group_name, name, distribution):
     client = web_client_factory()
     site = client.web_apps.get(resource_group_name, name)
     configs = get_site_configs(resource_group_name, name)
     host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
     configs.experiments.ramp_up_rules = []
-    for r in distributions:
+    for r in distribution:
         slot, percentage = r.split('=')
         configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
