@@ -585,18 +585,18 @@ with ParametersContext(command='sql server update') as c:
 
 
 #####
-#           sql server aad-admin
+#           sql server ad-admin
 ######
 
 
-with ParametersContext(command='sql server aad-admin create') as c:
+with ParametersContext(command='sql server ad-admin create') as c:
     c.expand('properties', ServerAzureADAdministrator)
-    c.argument('login', options_list=('--user', '-u'))
-    c.argument('sid', options_list=('--sid', '-s'))
+    c.argument('login', options_list=('--user', '-u'), help='New server administrator name for active directory')
+    c.argument('sid', options_list=('--sid', '-i'))
     c.argument('tenant_id', options_list=('--tenant-id', '-t'))
 
 
-with ParametersContext(command='sql server aad-admin update') as c:
+with ParametersContext(command='sql server ad-admin update') as c:
     c.expand('properties', ServerAzureADAdministrator)
     c.argument('login', options_list=('--user', '-u'))
     c.argument('sid', options_list=('--sid', '-s'))

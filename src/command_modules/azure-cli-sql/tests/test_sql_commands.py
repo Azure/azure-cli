@@ -300,22 +300,22 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
         user = 'DSEngAll'
 
-        self.cmd('sql server aad-admin create -n {} -g {} -s {} -t{} -u {}'
+        self.cmd('sql server ad-admin create -n {} -g {} -s {} -t{} -u {}'
                  .format(sn, rg, sid, tid, user),
                  checks=[JMESPathCheck('login', user)])
 
-        self.cmd('sql server aad-admin show -n {} -g {}'
+        self.cmd('sql server ad-admin show -n {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('login', user)])
 
-        self.cmd('sql server aad-admin list -n {} -g {}'
+        self.cmd('sql server ad-admin list -n {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('[0].login', user)])
 
-        self.cmd('sql server aad-admin delete -n {} -g {}'
+        self.cmd('sql server ad-admin delete -n {} -g {}'
                  .format(sn, rg))
 
-        self.cmd('sql server aad-admin list -n {} -g {}'
+        self.cmd('sql server ad-admin list -n {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('login', None)])
 
