@@ -483,7 +483,7 @@ def server_ad_admin_update(
 
     return instance
 
-    
+
 #####
 #           sql db audit-policy & threat-policy
 #####
