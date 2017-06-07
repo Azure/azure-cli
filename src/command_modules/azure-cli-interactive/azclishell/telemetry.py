@@ -17,6 +17,7 @@ from azure.cli.core.telemetry import _user_agrees_to_telemetry
 from azclishell.util import parse_quotes
 
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
+VALUE_UNTIL_FLUSH = 10
 
 
 def my_context(tel_client):
@@ -27,13 +28,39 @@ def my_context(tel_client):
     tel_client.context.instrumentation_key = INSTRUMENTATION_KEY
 
 
+class TelThread(threading.Thread):
+    """ telemetry thread for exiting """
+    def __init__(self, threadfunc):
+        threading.Thread.__init__(self)
+        self.threadfunc = threadfunc
+        self.counter = 0
+
+    def force_run(self):
+        """ pushes the function out without a check """
+        try:
+            self.threadfunc()
+        except KeyboardInterrupt:
+            pass
+
+    def run(self):
+        try:
+            if self.counter >= VALUE_UNTIL_FLUSH:
+                self.threadfunc()
+                self.counter = 0
+            else:
+                self.counter += 1
+        except KeyboardInterrupt:
+            pass
+
+
 class Telemetry(TelemetryClient):
     """ base telemetry sessions """
 
-    start_time = None
-    end_time = None
-    telthread = TelThread(self.flush)
-
+    def __init__(self):
+        super(Telemetry, self).__init__()
+        self.start_time = None
+        self.end_time = None
+        self.telthread = TelThread(self.flush)
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
@@ -58,21 +85,7 @@ class Telemetry(TelemetryClient):
         self.end_time = str(datetime.datetime.now())
         self.track_event('Run', {'StartTime': str(self.start_time),
                                  'EndTime': str(self.end_time)})
-        telthread = TelThread(self.flush)
-        telthread.start()
-
-
-class TelThread(threading.Thread):
-    """ telemetry thread for exiting """
-    def __init__(self, threadfunc):
-        threading.Thread.__init__(self)
-        self.threadfunc = threadfunc
-
-    def run(self):
-        try:
-            self.threadfunc()
-        except KeyboardInterrupt:
-            pass
+        self.telthread.force_run()
 
 
 def scrub(text):
