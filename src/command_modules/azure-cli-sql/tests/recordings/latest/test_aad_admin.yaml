@@ -20,15 +20,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 03 Jun 2017 00:07:50 GMT']
+      date: ['Wed, 07 Jun 2017 22:33:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"location": "westus", "properties": {"administratorLogin": "admin123",
-      "administratorLoginPassword": "SecretPassword123"}}'
+    body: '{"properties": {"administratorLogin": "admin123", "administratorLoginPassword":
+      "SecretPassword123"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -49,7 +49,7 @@ interactions:
       content-length: ['696']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:08:30 GMT']
+      date: ['Wed, 07 Jun 2017 22:33:53 GMT']
       preference-applied: [return-content]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -57,13 +57,12 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"properties": {"sid": "5e90ef3b-9b42-4777-819b-25c36961ea4d", "administratorType":
-      "ActiveDirectory", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "login":
-      "DSEngAll"}}'
+    body: '{"properties": {"sid": "5e90ef3b-9b42-4777-819b-25c36961ea4d", "login":
+      "DSEngAll", "administratorType": "ActiveDirectory", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin create]
+      CommandName: [sql server ad-admin create]
       Connection: [keep-alive]
       Content-Length: ['176']
       Content-Type: [application/json; charset=utf-8]
@@ -73,34 +72,34 @@ interactions:
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administrators/activedirectory?api-version=2014-04-01
   response:
-    body: {string: '{"operation":"CreateActiveDirectoryAdministrator","operationId":"6b855fb8-9cb5-4662-8dad-b9eafcc329b1","percentComplete":0,"startTime":"\/Date(1496448512433)\/"}'}
+    body: {string: '{"operation":"CreateActiveDirectoryAdministrator","operationId":"1938f137-1af3-4e73-93eb-a54360b253b1","percentComplete":0,"startTime":"\/Date(1496874834493)\/"}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['161']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:08:32 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/6b855fb8-9cb5-4662-8dad-b9eafcc329b1?api-version=2014-04-01-Preview']
+      date: ['Wed, 07 Jun 2017 22:33:55 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/1938f137-1af3-4e73-93eb-a54360b253b1?api-version=2014-04-01-Preview']
       preference-applied: [return-content]
       retry-after: ['30']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin create]
+      CommandName: [sql server ad-admin create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
           msrest_azure/0.4.8 sqlmanagementclient/0.5.3 Azure-SDK-For-Python AZURECLI/2.0.7+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/6b855fb8-9cb5-4662-8dad-b9eafcc329b1?api-version=2014-04-01-Preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/1938f137-1af3-4e73-93eb-a54360b253b1?api-version=2014-04-01-Preview
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/servers/administrators","location":"West
         US","kind":null,"properties":{"administratorType":"ActiveDirectory","login":"DSEngAll","sid":"5e90ef3b-9b42-4777-819b-25c36961ea4d","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'}
@@ -109,7 +108,7 @@ interactions:
       content-length: ['564']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:09:03 GMT']
+      date: ['Wed, 07 Jun 2017 22:34:24 GMT']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -119,7 +118,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin show]
+      CommandName: [sql server ad-admin show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
@@ -135,7 +134,7 @@ interactions:
       content-length: ['573']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:09:04 GMT']
+      date: ['Wed, 07 Jun 2017 22:34:26 GMT']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -147,7 +146,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin list]
+      CommandName: [sql server ad-admin list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
@@ -163,7 +162,7 @@ interactions:
       content-length: ['585']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:09:06 GMT']
+      date: ['Wed, 07 Jun 2017 22:34:27 GMT']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -175,24 +174,54 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin delete]
+      CommandName: [sql server ad-admin update]
       Connection: [keep-alive]
-      Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
           msrest_azure/0.4.8 sqlmanagementclient/0.5.3 Azure-SDK-For-Python AZURECLI/2.0.7+dev]
       accept-language: [en-US]
-    method: DELETE
+    method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administrators/activedirectory?api-version=2014-04-01
   response:
-    body: {string: '{"operation":"DropActiveDirectoryAdministrator","operationId":"901d7801-1f55-4b39-bfcc-8f15e172a770","percentComplete":0,"startTime":"\/Date(1496448547833)\/"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/providers/Microsoft.Sql/administrators/activedirectory","name":"activedirectory","type":"Microsoft.Sql/servers/administrators","location":"West
+        US","kind":null,"properties":{"administratorType":"ActiveDirectory","login":"DSEngAll","sid":"5e90ef3b-9b42-4777-819b-25c36961ea4d","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'}
     headers:
       cache-control: ['no-store, no-cache']
-      content-length: ['159']
-      content-type: [application/xml; charset=utf-8]
-      dataserviceversion: [1.0;]
-      date: ['Sat, 03 Jun 2017 00:09:06 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/901d7801-1f55-4b39-bfcc-8f15e172a770?api-version=2014-04-01-Preview']
+      content-length: ['573']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 07 Jun 2017 22:34:28 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"sid": "5e90ef3b-9b42-4777-819b-25c36961ea4d", "login":
+      "TestUser", "administratorType": "ActiveDirectory", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server ad-admin update]
+      Connection: [keep-alive]
+      Content-Length: ['176']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
+          msrest_azure/0.4.8 sqlmanagementclient/0.5.3 Azure-SDK-For-Python AZURECLI/2.0.7+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administrators/activedirectory?api-version=2014-04-01
+  response:
+    body: {string: '{"operation":"UpdateActiveDirectoryAdministrator","operationId":"fcecaf3a-0dc0-4553-a5f4-59ef86f28f54","percentComplete":0,"startTime":"\/Date(1496874869663)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['161']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 07 Jun 2017 22:34:29 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/fcecaf3a-0dc0-4553-a5f4-59ef86f28f54?api-version=2014-04-01-Preview']
+      preference-applied: [return-content]
       retry-after: ['30']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -204,21 +233,78 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin delete]
+      CommandName: [sql server ad-admin update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
           msrest_azure/0.4.8 sqlmanagementclient/0.5.3 Azure-SDK-For-Python AZURECLI/2.0.7+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/901d7801-1f55-4b39-bfcc-8f15e172a770?api-version=2014-04-01-Preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/fcecaf3a-0dc0-4553-a5f4-59ef86f28f54?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/ActiveDirectory","name":"ActiveDirectory","type":"Microsoft.Sql/servers/administrators","location":"West
+        US","kind":null,"properties":{"administratorType":"ActiveDirectory","login":"TestUser","sid":"5e90ef3b-9b42-4777-819b-25c36961ea4d","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['564']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 07 Jun 2017 22:35:00 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server ad-admin delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
+          msrest_azure/0.4.8 sqlmanagementclient/0.5.3 Azure-SDK-For-Python AZURECLI/2.0.7+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administrators/activedirectory?api-version=2014-04-01
+  response:
+    body: {string: '{"operation":"DropActiveDirectoryAdministrator","operationId":"47b8b668-7530-4716-b2a1-0534f302b6b3","percentComplete":0,"startTime":"\/Date(1496874903620)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['159']
+      content-type: [application/xml; charset=utf-8]
+      dataserviceversion: [1.0;]
+      date: ['Wed, 07 Jun 2017 22:35:02 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/47b8b668-7530-4716-b2a1-0534f302b6b3?api-version=2014-04-01-Preview']
+      retry-after: ['30']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server ad-admin delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
+          msrest_azure/0.4.8 sqlmanagementclient/0.5.3 Azure-SDK-For-Python AZURECLI/2.0.7+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/administratorOperationResults/47b8b668-7530-4716-b2a1-0534f302b6b3?api-version=2014-04-01-Preview
   response:
     body: {string: ''}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['0']
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:09:38 GMT']
+      date: ['Wed, 07 Jun 2017 22:35:33 GMT']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -228,7 +314,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [sql server aad-admin list]
+      CommandName: [sql server ad-admin list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
@@ -243,7 +329,7 @@ interactions:
       content-length: ['12']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Sat, 03 Jun 2017 00:09:38 GMT']
+      date: ['Wed, 07 Jun 2017 22:35:34 GMT']
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -270,9 +356,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 03 Jun 2017 00:09:40 GMT']
+      date: ['Wed, 07 Jun 2017 22:35:34 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdBNzMzUUpOS0RNR0pXUVdJMlNGQzdKMjQzVEk0V1BWT0MzUnxBNUE5OUQ3QzM2RUY3ODMyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdET0syT0tLT1RLVUlPSDM2Sk5ZRjIyTk9KSUtQQUNJNUpaRXw5OUY4RUE2NjI1NkYzM0VCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       retry-after: ['15']
       strict-transport-security: [max-age=31536000; includeSubDomains]

@@ -300,9 +300,11 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
         user = 'DSEngAll'
 
-        self.cmd('sql server ad-admin create -n {} -g {} -s {} -t{} -u {}'
+        self.cmd('sql server ad-admin create -n {} -g {} -i {} -t{} -u {}'
                  .format(sn, rg, sid, tid, user),
-                 checks=[JMESPathCheck('login', user)])
+                 checks=[JMESPathCheck('login', user),
+                         JMESPathCheck('sid', sid),
+                         JMESPathCheck('tenantId', tid)])
 
         self.cmd('sql server ad-admin show -n {} -g {}'
                  .format(sn, rg),
@@ -311,6 +313,13 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.cmd('sql server ad-admin list -n {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('[0].login', user)])
+
+        user2 = 'TestUser'
+
+        self.cmd('sql server ad-admin update -n {} -g {} -u {} -i {}'
+                 .format(sn, rg, user2, sid),
+                 checks=[JMESPathCheck('login', user2),
+                         JMESPathCheck('tenantId', tid)])
 
         self.cmd('sql server ad-admin delete -n {} -g {}'
                  .format(sn, rg))
