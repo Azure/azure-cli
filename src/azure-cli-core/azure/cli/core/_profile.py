@@ -106,23 +106,37 @@ class Profile(object):
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
     def refresh_subscriptions(self):
-        # Currently requires a default subscription selected
-        existingSubscriptions = self.load_cached_subscriptions()
-        tenants = {}
-        bearer = self.get_raw_token()
-        self._creds_cache.flush_to_disk()
-        for sub in existingSubscriptions:
-            athctx = _authentication_context_factory(sub['tenantId'], self._creds_cache.adal_token_cache)
-            tenants.setdefault(sub['tenantId'], dict()).update({
-                'userId': sub['user']['name'],
-                "token": bearer[0][1],
-                "finder": SubscriptionFinder(athctx, self._creds_cache.adal_token_cache)})
-
+        from azure.cli.core.adal_authentication import AdalAuthentication
+        from azure.mgmt.resource import SubscriptionClient
+        # If no subscription is currently set CLI will throw error asking user to set a subscription or login
+        subClient = SubscriptionClient(self.get_login_credentials()[0])
+        # Figure out all tenants in the account, we will use this to look for all subscriptions
+        tenants = [x.tenant_id for x in subClient.tenants.list()]
+        # Existing logged in credential
+        tokenRetriever = subClient.config.credentials.token
+        clients = {}
         for tenant in tenants:
-            subs = tenants[tenant]['finder'].find_from_tenant_oauth_token(tenant, tenants[tenant]['token'])
-            # Update this to support service principals
-            consolidated = self._normalize_properties(tenants[tenant]['userId'], subs, False)
-            self._set_subscriptions(consolidated)
+            # Attempt to pull a cred cache for each tenant
+            # if none exists auto-generates a new oauth token for this tenant
+            self.auth_ctx_factory(tenant, self._creds_cache.adal_token_cache)
+            self._creds_cache.load_adal_token_cache()
+            token = self._creds_cache.retrieve_token_for_user(tokenRetriever[2]['userId'],
+                                                              tenant,
+                                                              CLOUD.endpoints.management)
+            self._creds_cache.flush_to_disk()
+            clients.update({tenant: SubscriptionClient(AdalAuthentication(token))})
+        liveSubscriptions = []
+        for tenant in clients:
+            subscriptions = []
+            credentials = clients[tenant].config.credentials.token
+            for subscription in clients[tenant].subscriptions.list():
+                setattr(subscription, 'tenant_id', tenant)
+                subscriptions.append(subscription)
+            liveSubscriptions.append(self._normalize_properties(credentials[2]['userId'],
+                                                                subscriptions,
+                                                                False))
+        final = [item for sublist in liveSubscriptions for item in sublist]
+        self._set_subscriptions(final)
 
     def find_subscriptions_on_login(self,
                                     interactive,
@@ -336,7 +350,9 @@ class Profile(object):
             return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
 
         from azure.cli.core.adal_authentication import AdalAuthentication
-        auth_object = AdalAuthentication(_retrieve_token)
+        # Don't pass method as it's not actually needed.
+        # Instead pass the result allowing better usage of the AdalAuthentication Module
+        auth_object = AdalAuthentication(_retrieve_token())
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
@@ -417,13 +433,6 @@ class SubscriptionFinder(object):
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
-
-    def find_from_tenant_oauth_token(self, tenant, token):
-        if tenant is None:
-            logger.warning("Missing Tenant information")
-        if token is None:
-            logger.warning("Missing token information")
-        return self._find_using_specific_tenant(tenant, token)
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
