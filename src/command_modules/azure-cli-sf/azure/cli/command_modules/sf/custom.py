@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
-# pylint: disable=too-many-locals
 
 from __future__ import print_function
 
@@ -31,9 +30,8 @@ az_config = AzConfig()
 logger = azlogging.get_az_logger(__name__)
 
 
-def sf_create_compose_application(
-        client, compose_file, application_id, repo_user=None, encrypted=False,
-        repo_pass=None, timeout=60):
+def sf_create_compose_application(client, compose_file, application_id, repo_user=None, encrypted=False,
+                                  repo_pass=None, timeout=60):
     # We need to read from a file which makes this a custom command
     # Encrypted param to indicate a password will be prompted
     """
@@ -56,12 +54,8 @@ def sf_create_compose_application(
     from azure.cli.core.util import read_file_content
     from azure.cli.core.prompting import prompt_pass
     # pylint: disable=line-too-long
-    from azure.servicefabric.models.create_compose_application_description import (  # noqa: justification, no way to shorten
-        CreateComposeApplicationDescription
-    )
-    from azure.servicefabric.models.repository_credential import (
-        RepositoryCredential
-    )
+    from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
+    from azure.servicefabric.models.repository_credential import RepositoryCredential
 
     if (any([encrypted, repo_pass]) and
             not all([encrypted, repo_pass, repo_user])):
@@ -88,11 +82,10 @@ def sf_create_compose_application(
 
 
 def sf_select_verify(endpoint, cert, key, pem, ca, no_verify):
-    if not endpoint.startswith("http:"):
+    if not (endpoint.lower().startswith("http") or endpoint.lower().startswith("https")):
         raise CLIError("Endpoint must be HTTP or HTTPS")
 
-    usage = ("Valid syntax : --endpoint [ [ --key --cert | --pem ] "
-             "[ --ca | --no-verify ] ]")
+    usage = "Valid syntax : --endpoint [ [ --key --cert | --pem ] [ --ca | --no-verify ] ]"
 
     if ca and not (pem or all([key, cert])):
         raise CLIError(usage)
@@ -160,7 +153,7 @@ def sf_select(endpoint, cert=None,
     set_global_config_value("servicefabric", "endpoint", endpoint)
 
 
-def sf_upload_app(path, show_progress=False):
+def sf_upload_app(path, show_progress=False): # pylint: disable=too-many-locals
     """
     Copies a Service Fabric application package to the image store.
 
@@ -274,9 +267,7 @@ def parse_app_params(formatted_params):
 
 
 def parse_app_metrics(formatted_metrics):
-    from azure.servicefabric.models.application_metric_description import (
-        ApplicationMetricDescription
-    )
+    from azure.servicefabric.models.application_metric_description import ApplicationMetricDescription
 
     if formatted_metrics is None:
         return None
@@ -290,8 +281,7 @@ def parse_app_metrics(formatted_metrics):
         metric_max_cap = metric.get("maximum_capacity", None)
         metric_reserve_cap = metric.get("reservation_capacity", None)
         metric_total_cap = metric.get("total_application_capacity", None)
-        metric_desc = ApplicationMetricDescription(metric_name, metric_max_cap, metric_reserve_cap,
-                                                   metric_total_cap)
+        metric_desc = ApplicationMetricDescription(metric_name, metric_max_cap, metric_reserve_cap, metric_total_cap)
         res.append(metric_desc)
     return res
 
@@ -330,9 +320,8 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     capacities for each node that the application exists on.
     """
     from azure.servicefabric.models.application_description import ApplicationDescription
-    from azure.servicefabric.models.application_capacity_description import (
-        ApplicationCapacityDescription
-    )
+    from azure.servicefabric.models.application_capacity_description import ApplicationCapacityDescription
+
 
     if (any([min_node_count, max_node_count]) and
             not all([min_node_count, max_node_count])):
@@ -370,10 +359,7 @@ def parse_default_service_health_policy(policy):
 
 
 def parse_service_health_policy_map(formatted_policy):
-    from azure.servicefabric.models.service_type_health_policy_map_item import (
-        ServiceTypeHealthPolicyMapItem
-    )
-    from azure.servicefabric.models.service_type_health_policy import ServiceTypeHealthPolicy
+    from azure.servicefabric.models.service_type_health_policy_map_item import ServiceTypeHealthPolicyMapItem
 
     if formatted_policy is None:
         return None
@@ -507,9 +493,7 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
 
 
 def sup_correlation_scheme(correlated_service, correlation):
-    from azure.servicefabric.models.service_correlation_description import (
-        ServiceCorrelationDescription
-    )
+    from azure.servicefabric.models.service_correlation_description import ServiceCorrelationDescription
 
     if (any([correlated_service, correlation]) and
             not all([correlated_service, correlation])):
@@ -522,9 +506,7 @@ def sup_correlation_scheme(correlated_service, correlation):
 
 
 def sup_load_metrics(formatted_metrics):
-    from azure.servicefabric.models.service_load_metric_description import (
-        ServiceLoadMetricDescription
-    )
+    from azure.servicefabric.models.service_load_metric_description import ServiceLoadMetricDescription
 
     r = None
     if formatted_metrics:
@@ -630,6 +612,7 @@ def sup_service_update_flags(
         f += 256
     if move_cost is not None:
         f += 512
+    # Oddity to avoid int comparison
     return str(f)
 
 
@@ -652,15 +635,9 @@ def validate_service_create_params(stateful, stateless, singleton_scheme, int_sc
 
 def parse_partition_policy(named_scheme, named_scheme_list, int_scheme, int_scheme_low,
                            int_scheme_high, int_scheme_count, singleton_scheme):
-    from azure.servicefabric.models.named_partition_scheme_description import (
-        NamedPartitionSchemeDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.singleton_partition_scheme_description import (  # noqa: justification, no way to shorten
-        SingletonPartitionSchemeDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.named_partition_scheme_description import NamedPartitionSchemeDescription
+    from azure.servicefabric.models.singleton_partition_scheme_description import SingletonPartitionSchemeDescription
+    from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (
         UniformInt64RangePartitionSchemeDescription
     )
 
@@ -673,12 +650,11 @@ def parse_partition_policy(named_scheme, named_scheme_list, int_scheme, int_sche
     if named_scheme:
         return NamedPartitionSchemeDescription(len(named_scheme_list), named_scheme_list)
     elif int_scheme:
-        return UniformInt64RangePartitionSchemeDescription(int_scheme_count, int_scheme_low,
-                                                           int_scheme_high)
+        return UniformInt64RangePartitionSchemeDescription(int_scheme_count, int_scheme_low, int_scheme_high)
     elif singleton_scheme:
         return SingletonPartitionSchemeDescription()
-    else:
-        return None
+
+    return None
 
 
 def validate_activation_mode(activation_mode):
@@ -806,8 +782,7 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
                                             int_scheme_low, int_scheme_high, int_scheme_count,
                                             singleton_scheme)
 
-    correlation_desc = sup_correlation_scheme(correlated_service,
-                                              correlation)
+    correlation_desc = sup_correlation_scheme(correlated_service, correlation)
 
     load_list = sup_load_metrics(load_metrics)
 
@@ -939,14 +914,8 @@ def sf_update_service(client, service_id,
     which StandBy replicas will be maintained before being removed. This
     applies to stateful services only.
     """
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.stateful_service_update_description import (  # noqa: justification, no way to shorten
-        StatefulServiceUpdateDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.stateless_service_update_description import (  # noqa: justification, no way to shorten
-        StatelessServiceUpdateDescription
-    )
+    from azure.servicefabric.models.stateful_service_update_description import StatefulServiceUpdateDescription
+    from azure.servicefabric.models.stateless_service_update_description import StatelessServiceUpdateDescription
 
     validate_update_service_params(stateless, stateful, target_replica_set_size,
                                    min_replica_set_size, replica_restart_wait, quorum_loss_wait,
@@ -977,7 +946,6 @@ def sf_update_service(client, service_id,
                                                        stand_by_replica_keep)
 
     if stateless:
-        # pylint: disable=redefined-variable-type
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
                                                         correlation_desc,
                                                         load_list,
@@ -989,10 +957,7 @@ def sf_update_service(client, service_id,
 
 
 def parse_app_health_map(formatted_map):
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.application_type_health_policy_map_item import (  # noqa: justification, no way to shorten
-        ApplicationTypeHealthPolicyMapItem
-    )
+    from azure.servicefabric.models.application_type_health_policy_map_item import ApplicationTypeHealthPolicyMapItem
 
     if not formatted_map:
         return None
@@ -1486,7 +1451,7 @@ def parse_package_sharing_policies(formatted_policies):
         if policy_name is None:
             raise CLIError("Could not find name of sharing policy element")
         policy_scope = p.get("scope", None)
-        if policy_scope not in ["None", "All", "Code", "Config", "Data"]:
+        if policy_scope not in [None, "All", "Code", "Config", "Data"]:
             raise CLIError("Invalid policy scope specified")
         list_psps.append(PackageSharingPolicyInfo(policy_name, policy_scope))
     return list_psps
@@ -1517,8 +1482,7 @@ def sf_service_package_upload(client, node_name,
     is to be shared. The scope can either 'None', 'All', 'Code', 'Config' or
     'Data'.
     """
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.deploy_service_package_to_node_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.deploy_service_package_to_node_description import (
         DeployServicePackageToNodeDescription
     )
 

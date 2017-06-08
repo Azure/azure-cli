@@ -22,8 +22,7 @@ class SfConfigParser(object):
         using_ca = self.az_config.get("servicefabric", "use_ca", fallback="False")
         if using_ca == "True":
             return self.az_config.get("servicefabric", "ca_path", fallback=None)
-        else:
-            return None
+        return None
 
     def connection_endpoint(self):
         return self.az_config.get("servicefabric", "endpoint", fallback=None)
