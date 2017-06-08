@@ -13,7 +13,7 @@ from azure.cli.core.commands.client_factory import configure_common_settings
 def cf_sf_client(_):
     sf_config = SfConfigParser()
     endpoint = sf_config.connection_endpoint()
-    if endpoint is None:
+    if not endpoint:
         raise CLIError("Connection endpoint not specified, run 'az sf cluster select' first.")
 
     cert = sf_config.cert_info()
