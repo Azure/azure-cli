@@ -10,7 +10,7 @@ from six import StringIO
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.resource._validators import (
-    validate_deployment_name,
+    _validate_deployment_name,
     validate_lock_parameters,
 )
 
@@ -120,14 +120,14 @@ class Test_resource_validators(unittest.TestCase):
         namespace.template_uri = 'https://templates/template123.json?foo=bar'
         namespace.template_file = None
         namespace.deployment_name = None
-        validate_deployment_name(namespace)
+        _validate_deployment_name(namespace)
         self.assertEqual('template123', namespace.deployment_name)
 
         namespace = mock.MagicMock()
         namespace.template_file = __file__
         namespace.template_uri = None
         namespace.deployment_name = None
-        validate_deployment_name(namespace)
+        _validate_deployment_name(namespace)
 
         file_base_name = os.path.basename(__file__)
         file_base_name = file_base_name[:str.find(file_base_name, '.')]
@@ -138,7 +138,7 @@ class Test_resource_validators(unittest.TestCase):
         namespace.template_file = '{"foo":"bar"}'
         namespace.template_uri = None
         namespace.deployment_name = None
-        validate_deployment_name(namespace)
+        _validate_deployment_name(namespace)
         self.assertEqual('deployment1', namespace.deployment_name)
 
 

@@ -29,31 +29,32 @@ def _validate_deployment_name(namespace):
             namespace.deployment_name = 'deployment1'
 
 
-def _validate_deployment_parameters(namespace):
+def validate_deployment_parameters(namespace):
 
     from azure.cli.core.util import shell_safe_json_parse, get_file_json
 
     def _try_parse_json_object(value):
         try:
-            return shell_safe_json_parse(value)['parameters']
+            parsed = shell_safe_json_parse(value)
+            return parsed.get('parameters', parsed)
         except CLIError:
             return None
 
     def _try_load_file_object(value):
         if os.path.isfile(value):
-            return get_file_json(value, throw_on_empty=False)['parameters']
-        else:
-            return None
+            parsed = get_file_json(value, throw_on_empty=False)
+            return parsed.get('parameters', parsed)
+        return None
 
     def _try_parse_key_value_object(parameters, value):
         try:
-            key, value = item.split('=', 1)
+            key, value = value.split('=', 1)
         except ValueError:
             return False
 
         try:
             parameters[key] = {'value': shell_safe_json_parse(value)}
-        except ValueError:
+        except (ValueError, CLIError):
             parameters[key] = {'value': value}
 
         return True
@@ -72,10 +73,9 @@ def _validate_deployment_parameters(namespace):
 
 def process_deployment_create_namespace(namespace):
     if (namespace.template_uri and namespace.template_file) or \
-        (not namespace.template_uri and not namespace.template_file):
-            raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
+            (not namespace.template_uri and not namespace.template_file):
+        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
     _validate_deployment_name(namespace)
-    _validate_deployment_parameters(namespace)
 
 
 def internal_validate_lock_parameters(resource_group_name, resource_provider_namespace,
