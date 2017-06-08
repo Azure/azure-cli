@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.8 (unreleased)
+^^^^^^^^^^^^^^^^^^
+* Improve concurrent handling of clouds.config file.
+
 2.0.7 (2017-05-30)
 ^^^^^^^^^^^^^^^^^^
 * Command paths are no longer case sensitive.
