@@ -31,7 +31,7 @@ def _validate_deployment_name(namespace):
 
 def _validate_deployment_parameters(namespace):
 
-    from azure.cli.core.util import shell_safe_json_parse
+    from azure.cli.core.util import shell_safe_json_parse, get_file_json
 
     def _try_parse_json_object(value):
         try:
@@ -40,7 +40,10 @@ def _validate_deployment_parameters(namespace):
             return None
 
     def _try_load_file_object(value):
-        return None
+        if os.path.isfile(value):
+            return get_file_json(value, throw_on_empty=False)['parameters']
+        else:
+            return None
 
     def _try_parse_key_value_object(parameters, value):
         try:
@@ -49,9 +52,9 @@ def _validate_deployment_parameters(namespace):
             return False
 
         try:
-            parameters[key] = shell_safe_json_parse(value)
+            parameters[key] = {'value': shell_safe_json_parse(value)}
         except ValueError:
-            parameters[key] = value
+            parameters[key] = {'value': value}
 
         return True
 
