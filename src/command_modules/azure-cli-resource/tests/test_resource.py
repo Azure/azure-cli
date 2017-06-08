@@ -15,7 +15,6 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneChe
                                              MOCKED_SUBSCRIPTION_ID)
 
 
-# pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
     def test_resource_group(self):
         self.execute()
@@ -395,8 +394,7 @@ class DeploymentThruUriTest(ResourceGroupVCRTestBase):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/' \
-                       'command_modules/azure-cli-resource/azure/cli/command_modules/resource/' \
-                       'tests/simple_deploy.json'
+                       'command_modules/azure-cli-resource/tests/simple_deploy.json'
         parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
                                                                                           '\\\\')
         deployment_name = 'simple_deploy'  # auto-gen'd by command

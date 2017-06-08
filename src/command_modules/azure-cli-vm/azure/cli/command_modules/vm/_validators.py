@@ -12,7 +12,7 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
-from azure.cli.core.util import CLIError, random_string
+from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
@@ -22,8 +22,12 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def validate_nsg_name(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
+                        namespace='Microsoft.Compute', type='virtualMachines',
+                        subscription=get_subscription_id())
     namespace.network_security_group_name = namespace.network_security_group_name \
-        or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
+        or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
 def _get_resource_group_from_vault_name(vault_name):
@@ -390,7 +394,7 @@ def _validate_vm_create_storage_account(namespace):
     else:
         from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -610,7 +614,7 @@ def _validate_vm_vmss_create_auth(namespace):
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        # pylint: disable=line-too-long
+
         namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
@@ -737,7 +741,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
 
 
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
-    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
     try:

@@ -5,6 +5,10 @@ Release History
 ++++++++++++++++++
 * Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
 
+unreleased 
+++++++++++++++++++
+* VM/VMSS: fixed an issue with name generation that resulted in the create commands not being idempotent.
+
 2.0.7 (2017-05-09)
 ++++++++++++++++++
 * diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension

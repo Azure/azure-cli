@@ -3,6 +3,12 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* `local-gateway create`: fix bug where --local-address-prefixes was ignored.
+
+
 2.0.7 (2017-05-30)
 ++++++++++++++++++
 

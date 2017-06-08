@@ -17,9 +17,7 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_v
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth)
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
 
@@ -192,6 +190,9 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
 
 
 class TestVMCreateDefaultStorageAccount(unittest.TestCase):
+    def __init__(self, methodName):
+        super(TestVMCreateDefaultStorageAccount, self).__init__(methodName)
+        self.ns = None
 
     def _set_ns(self, rg, location=None, tier='Standard'):
         ns = argparse.Namespace()
@@ -200,13 +201,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         ns.storage_sku = tier
         ns.storage_account = None
         ns.storage_account_type = None
-        self.ns = ns  # pylint: disable=attribute-defined-outside-init
-
-    def setUp(self):
-        self.ns = None
-
-    def tearDown(self):
-        pass
+        self.ns = ns
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_storage_account(self):

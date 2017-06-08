@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
@@ -80,8 +80,7 @@ cli_command(__name__, 'ad app update', 'azure.cli.command_modules.role.custom#up
 cli_command(__name__, 'ad sp create',
             'azure.cli.command_modules.role.custom#create_service_principal')
 cli_command(__name__, 'ad sp delete',
-            'azure.cli.command_modules.role.custom#delete_service_principal',
-            get_graph_client_service_principals)
+            'azure.cli.command_modules.role.custom#delete_service_principal')
 cli_command(__name__, 'ad sp list', 'azure.cli.command_modules.role.custom#list_sps',
             get_graph_client_service_principals)
 cli_command(__name__, 'ad sp show', 'azure.cli.command_modules.role.custom#show_service_principal',

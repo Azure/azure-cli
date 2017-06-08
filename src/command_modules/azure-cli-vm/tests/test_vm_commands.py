@@ -22,9 +22,7 @@ from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
@@ -748,6 +746,17 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
+
+        # test for idempotency--no need to reverify, just ensure the command doesn't fail
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            vm_name=self.vm_names[0],
+            image=self.vm_image,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location
+        ))
 
 
 class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -1799,6 +1808,17 @@ class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', nic_name),
             JMESPathCheck('resourceGroup', self.resource_group),
         ])
+
+
+class VMSSCreateIdempotentTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_idempotent')
+    def test_vmss_create_idempotent(self, resource_group):
+        vmss_name = 'vmss1'
+
+        # run the command twice with the same parameters and verify it does not fail
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 # endregion
 

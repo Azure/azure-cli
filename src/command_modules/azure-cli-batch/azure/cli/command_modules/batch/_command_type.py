@@ -484,7 +484,7 @@ class BatchArgumentTree(object):
 
 class AzureBatchDataPlaneCommand(object):
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
-    def __init__(self, module_name, name,  # pylint:disable=too-many-arguments, too-many-statements
+    def __init__(self, module_name, name,  # pylint:disable=too-many-statements
                  operation, factory, transform_result,
                  flatten, ignore, validator, silent):
 
