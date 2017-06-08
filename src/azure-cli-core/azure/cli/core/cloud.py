@@ -243,8 +243,6 @@ def init_known_clouds(force=False):
 
 
 def get_clouds():
-    # ensure the known clouds are always in cloud config
-    init_known_clouds()
     clouds = []
     # load the config again as it may have changed
     config = get_config_parser()
