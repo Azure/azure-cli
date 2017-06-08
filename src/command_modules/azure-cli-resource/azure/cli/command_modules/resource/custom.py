@@ -324,12 +324,7 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
                                                  'DeploymentProperties',
                                                  'TemplateLink',
                                                  mod='models')
-
-    if bool(template_uri) == bool(template_file):
-        raise CLIError('please provide either template file path or uri, but not both')
-
-    if parameters is None:
-        parameters = {}
+    parameters = parameters or {}
     template = None
     template_link = None
     template_obj = None
