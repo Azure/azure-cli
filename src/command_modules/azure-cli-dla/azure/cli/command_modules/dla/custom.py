@@ -151,7 +151,7 @@ def create_adla_catalog_credential(client,
         try:
             credential_user_password = prompt_pass('Password:', confirm=True)
         except NoTTYException:
-            # pylint: disable=line-too-long
+
             raise CLIError('Please specify both --user-name and --password in non-interactive mode.')
 
     create_params = DataLakeAnalyticsCatalogCredentialCreateParameters(credential_user_password,
@@ -172,14 +172,14 @@ def update_adla_catalog_credential(client,
         try:
             credential_user_password = prompt_pass('Current Password:', confirm=True)
         except NoTTYException:
-            # pylint: disable=line-too-long
+
             raise CLIError('Please specify --user-name --password and --new-password in non-interactive mode.')
 
     if not new_credential_user_password:
         try:
             new_credential_user_password = prompt_pass('New Password:', confirm=True)
         except NoTTYException:
-            # pylint: disable=line-too-long
+
             raise CLIError('Please specify --user-name --password and --new-password in non-interactive mode.')
 
     update_params = DataLakeAnalyticsCatalogCredentialUpdateParameters(credential_user_password,

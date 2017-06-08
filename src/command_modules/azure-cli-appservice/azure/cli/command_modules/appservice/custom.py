@@ -536,7 +536,7 @@ def _linux_sku_check(sku):
     tier = _get_sku_name(sku)
     if tier in ['BASIC', 'STANDARD']:
         return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'  # pylint: disable=line-too-long
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
     raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
 
 
@@ -810,8 +810,17 @@ def view_in_browser(resource_group_name, name, slot=None, logs=False):
 
 
 def _open_page_in_browser(url):
-    import webbrowser
-    webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    import sys
+    if sys.platform.lower() == 'darwin':
+        # handle 2 things:
+        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
+        #    understand the "open location" message"
+        # b. Python 2.x can't sniff out the default browser
+        import subprocess
+        subprocess.Popen(['open', url])
+    else:
+        import webbrowser
+        webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
 
 
 # TODO: expose new blob suport
@@ -1196,7 +1205,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
     client = web_client_factory()
     if consumption_plan_location:
         locations = list_consumption_locations()
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)  # pylint: disable=line-too-long
+        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
@@ -1282,7 +1291,7 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 
     endpoint_suffix = CLOUD.suffixes.storage_endpoint
-    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(   # pylint: disable=line-too-long
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
         "https",
         endpoint_suffix,
         storage_account,

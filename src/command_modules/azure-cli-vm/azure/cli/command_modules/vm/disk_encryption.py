@@ -275,7 +275,7 @@ def show(resource_group_name, vm_name):
         if extension_result.provisioning_state == 'Succeeded':
             volume_type = extension_result.settings.get('VolumeType', None)
             about_data_disk = not volume_type or volume_type.lower() != 'os'
-            if about_data_disk and extension_result.settings.get('EncryptionOperation', None) == 'EnableEncryption':  # pylint: disable=line-too-long
+            if about_data_disk and extension_result.settings.get('EncryptionOperation', None) == 'EnableEncryption':
                 encryption_status['dataDisk'] = _STATUS_ENCRYPTED
 
     return encryption_status
@@ -353,6 +353,6 @@ def _check_encrypt_is_supported(image_reference, volume_type):
             return (True, None)
 
     sku_list = ['{} {}'.format(a['offer'], a['sku']) for a in supported]
-    # pylint: disable=line-too-long
+
     message = "Encryption might fail as current VM uses a distro not in the known list, which are '{}'".format(sku_list)
     return (False, message)
