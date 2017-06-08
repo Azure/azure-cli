@@ -196,14 +196,14 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         # don't want to show the timestamp
                         json_val = deploy_values.copy()
                         json_val.pop('timestamp', None)
-                        result = long_name + ' ' + json.dumps(json_val, indent=4)
+                        result = deploy_values['status value'] + ': ' + long_name
 
                         if update:
                             logger.info(result)
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
-        logger.info("Starting long running operation '%s'", self.start_msg)
+        logger.info("Starting long running operation")
         correlation_message = ''
         self.progress_controller.begin()
         correlation_id = None
@@ -248,8 +248,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             setattr(cli_error, 'response', getattr(client_exception, 'response', None))
             raise cli_error
 
-        logger.info("Long running operation '%s' completed with result %s",
-                    self.start_msg, result)
+        logger.info("Long running operation completed")
         self.progress_controller.end()
         return result
 
