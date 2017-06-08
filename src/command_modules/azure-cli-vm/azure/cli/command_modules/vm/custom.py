@@ -1522,7 +1522,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               nsg_type=None, public_ip_type=None, nic_type=None, validate=False, custom_data=None, secrets=None,
               plan_name=None, plan_product=None, plan_publisher=None, license_type=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import random_string
+    from azure.cli.core.util import random_string, hash_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, build_vm_resource,
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
@@ -1534,9 +1534,13 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         subscription=get_subscription_id(), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
+    vm_id = resource_id(
+        subscription=get_subscription_id(), resource_group=resource_group_name,
+        namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+
     # determine final defaults and calculated values
     tags = tags or {}
-    os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
+    os_disk_name = os_disk_name or 'osdisk_{}'.format(hash_string(vm_id, length=10))
     storage_container_name = storage_container_name or 'vhds'
 
     # Build up the ARM template
@@ -1545,7 +1549,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
     vm_dependencies = []
     if storage_account_type == 'new':
         storage_account = storage_account or 'vhdstorage{}'.format(
-            random_string(14, force_lower=True))
+            hash_string(vm_id, length=14, force_lower=True))
         vm_dependencies.append('Microsoft.Storage/storageAccounts/{}'.format(storage_account))
         master_template.add_resource(build_storage_account_resource(storage_account, location,
                                                                     tags, storage_sku))
@@ -1689,7 +1693,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 single_placement_group=None, custom_data=None, secrets=None,
                 plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import random_string
+    from azure.cli.core.util import random_string, hash_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, StorageProfile, build_vmss_resource,
                                                                 build_vnet_resource, build_public_ip_resource,
                                                                 build_load_balancer_resource,
@@ -1703,13 +1707,19 @@ def create_vmss(vmss_name, resource_group_name, image,
         subscription=get_subscription_id(), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
+    vmss_id = resource_id(
+        subscription=get_subscription_id(), resource_group=resource_group_name,
+        namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss_name)
+
     scrubbed_name = vmss_name.replace('-', '').lower()[:5]
     naming_prefix = '{}{}'.format(scrubbed_name,
-                                  random_string(9 - len(scrubbed_name), force_lower=True))
+                                  hash_string(vmss_id,
+                                              length=(9 - len(scrubbed_name)),
+                                              force_lower=True))
 
     # determine final defaults and calculated values
     tags = tags or {}
-    os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
+    os_disk_name = os_disk_name or 'osdisk_{}'.format(hash_string(vmss_id, length=10))
     storage_container_name = storage_container_name or 'vhds'
     os_caching = os_caching or CachingTypes.read_write.value
 
