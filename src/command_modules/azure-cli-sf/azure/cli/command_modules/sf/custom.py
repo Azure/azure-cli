@@ -30,9 +30,8 @@ az_config = AzConfig()
 logger = azlogging.get_az_logger(__name__)
 
 
-def sf_create_compose_application(
-        client, compose_file, application_id, repo_user=None, encrypted=False,
-        repo_pass=None, timeout=60):
+def sf_create_compose_application(client, compose_file, application_id, repo_user=None, encrypted=False,
+                                  repo_pass=None, timeout=60):
     # We need to read from a file which makes this a custom command
     # Encrypted param to indicate a password will be prompted
     """
@@ -55,12 +54,8 @@ def sf_create_compose_application(
     from azure.cli.core.util import read_file_content
     from azure.cli.core.prompting import prompt_pass
     # pylint: disable=line-too-long
-    from azure.servicefabric.models.create_compose_application_description import (  # noqa: justification, no way to shorten
-        CreateComposeApplicationDescription
-    )
-    from azure.servicefabric.models.repository_credential import (
-        RepositoryCredential
-    )
+    from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
+    from azure.servicefabric.models.repository_credential import RepositoryCredential
 
     if (any([encrypted, repo_pass]) and
             not all([encrypted, repo_pass, repo_user])):
@@ -84,6 +79,28 @@ def sf_create_compose_application(
                                                 repo_cred)
 
     client.create_compose_application(model, timeout)
+
+
+def sf_select_verify(endpoint, cert, key, pem, ca, no_verify):
+    if not (endpoint.lower().startswith("http") or endpoint.lower().startswith("https")):
+        raise CLIError("Endpoint must be HTTP or HTTPS")
+
+    usage = "Valid syntax : --endpoint [ [ --key --cert | --pem ] [ --ca | --no-verify ] ]"
+
+    if ca and not (pem or all([key, cert])):
+        raise CLIError(usage)
+
+    if no_verify and not (pem or all([key, cert])):
+        raise CLIError(usage)
+
+    if no_verify and ca:
+        raise CLIError(usage)
+
+    if any([cert, key]) and not all([cert, key]):
+        raise CLIError(usage)
+
+    if pem and any([cert, key]):
+        raise CLIError(usage)
 
 
 def sf_select(endpoint, cert=None,
@@ -110,23 +127,7 @@ def sf_select(endpoint, cert=None,
     """
     from azure.cli.core._config import set_global_config_value
 
-    usage = ("Valid syntax : --endpoint [ [ --key --cert | --pem ] "
-             "[ --ca | --no-verify ] ]")
-
-    if ca and not (pem or all([key, cert])):
-        raise CLIError(usage)
-
-    if no_verify and not (pem or all([key, cert])):
-        raise CLIError(usage)
-
-    if no_verify and ca:
-        raise CLIError(usage)
-
-    if any([cert, key]) and not all([cert, key]):
-        raise CLIError(usage)
-
-    if pem and any([cert, key]):
-        raise CLIError(usage)
+    sf_select_verify(endpoint, cert, key, pem, ca, no_verify)
 
     if pem:
         set_global_config_value("servicefabric", "pem_path", pem)
@@ -139,7 +140,10 @@ def sf_select(endpoint, cert=None,
         set_global_config_value("servicefabric", "security", "none")
 
     if ca:
+        set_global_config_value("servicefabric", "use_ca", "True")
         set_global_config_value("servicefabric", "ca_path", ca)
+    else:
+        set_global_config_value("servicefabric", "use_ca", "False")
 
     if no_verify:
         set_global_config_value("servicefabric", "no_verify", "True")
@@ -149,44 +153,9 @@ def sf_select(endpoint, cert=None,
     set_global_config_value("servicefabric", "endpoint", endpoint)
 
 
-def sf_get_verify_setting():
-    az_config.config_parser.read(CONFIG_PATH)
-    no_verify = az_config.get("servicefabric", "no_verify", fallback="False")
-    return no_verify == "True"
-
-
-def sf_get_ca_cert_info():
-    az_config.config_parser.read(CONFIG_PATH)
-    ca_cert = az_config.get("servicefabric", "ca_path", fallback=None)
-    return ca_cert
-
-
-def sf_get_connection_endpoint():
-    az_config.config_parser.read(CONFIG_PATH)
-    return az_config.get("servicefabric", "endpoint", fallback=None)
-
-
-def sf_get_cert_info():
-    az_config.config_parser.read(CONFIG_PATH)
-    security_type = str(az_config.get("servicefabric",
-                                      "security", fallback=""))
-    if security_type == "pem":
-        pem_path = az_config.get("servicefabric", "pem_path", fallback=None)
-        return pem_path
-    elif security_type == "cert":
-        cert_path = az_config.get("servicefabric", "cert_path", fallback=None)
-        key_path = az_config.get("servicefabric", "key_path", fallback=None)
-        return cert_path, key_path
-    elif security_type == "none":
-        return None
-    else:
-        raise CLIError("Cluster security type not set")
-
-
-def sf_upload_app(path, show_progress=False):
+def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
     """
     Copies a Service Fabric application package to the image store.
-
 
     The cmdlet copies a Service Fabric application package to the image store.
     After copying the application package, use the sf application provision
@@ -198,13 +167,17 @@ def sf_upload_app(path, show_progress=False):
     :param str path: The path to your local application package
     :param bool show_progress: Show file upload progress
     """
+    from azure.cli.command_modules.sf.config import SfConfigParser
+
     abspath = os.path.abspath(path)
     basename = os.path.basename(abspath)
-    endpoint = sf_get_connection_endpoint()
-    cert = sf_get_cert_info()
+
+    sf_config = SfConfigParser()
+    endpoint = sf_config.connection_endpoint()
+    cert = sf_config.cert_info()
     ca_cert = False
     if cert is not None:
-        ca_cert = sf_get_ca_cert_info()
+        ca_cert = sf_config.ca_cert_info()
     total_files_count = 0
     current_files_count = 0
     total_files_size = 0
@@ -278,7 +251,41 @@ def sf_upload_app(path, show_progress=False):
             total_files_size), file=sys.stderr)
 
 
-def sf_create_app(client,  # pylint: disable=too-many-locals
+def parse_app_params(formatted_params):
+    from azure.servicefabric.models.application_parameter import ApplicationParameter
+
+    if formatted_params is None:
+        return None
+
+    res = []
+    for k in formatted_params:
+        p = ApplicationParameter(k, formatted_params[k])
+        res.append(p)
+
+    return res
+
+
+def parse_app_metrics(formatted_metrics):
+    from azure.servicefabric.models.application_metric_description import ApplicationMetricDescription
+
+    if formatted_metrics is None:
+        return None
+
+    res = []
+    for metric in formatted_metrics:
+        metric_name = metric.get("name", None)
+        if not metric_name:
+            raise CLIError("Could not find required application metric name")
+
+        metric_max_cap = metric.get("maximum_capacity", None)
+        metric_reserve_cap = metric.get("reservation_capacity", None)
+        metric_total_cap = metric.get("total_application_capacity", None)
+        metric_desc = ApplicationMetricDescription(metric_name, metric_max_cap, metric_reserve_cap, metric_total_cap)
+        res.append(metric_desc)
+    return res
+
+
+def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
                   app_name, app_type, app_version, parameters=None,
                   min_node_count=0, max_node_count=0, metrics=None,
                   timeout=60):
@@ -311,18 +318,8 @@ def sf_create_app(client,  # pylint: disable=too-many-locals
     descriptions. A metric is defined as a name, associated with a set of
     capacities for each node that the application exists on.
     """
-    from azure.servicefabric.models.application_description import (
-        ApplicationDescription
-    )
-    from azure.servicefabric.models.application_parameter import (
-        ApplicationParameter
-    )
-    from azure.servicefabric.models.application_capacity_description import (
-        ApplicationCapacityDescription
-    )
-    from azure.servicefabric.models.application_metric_description import (
-        ApplicationMetricDescription
-    )
+    from azure.servicefabric.models.application_description import ApplicationDescription
+    from azure.servicefabric.models.application_capacity_description import ApplicationCapacityDescription
 
     if (any([min_node_count, max_node_count]) and
             not all([min_node_count, max_node_count])):
@@ -333,33 +330,9 @@ def sf_create_app(client,  # pylint: disable=too-many-locals
         raise CLIError("The minimum node reserve capacity count cannot "
                        "be greater than the maximum node count")
 
-    app_params = None
-    if parameters is not None:
-        app_params = []
-        for k in parameters:
-            # Create an application parameter for every of these
-            p = ApplicationParameter(k, parameters[k])
-            app_params.append(p)
+    app_params = parse_app_params(parameters)
 
-    # For simplicity, we assume user pass in valid key names in the list, or
-    # ignore the input
-    app_metrics = None
-    if metrics is not None:
-        app_metrics = []
-        for k in metrics:
-            metric = metrics[k]
-            metric_name = metric.get("name", None)
-            if metric_name is None:
-                raise CLIError("Could not decode required application metric "
-                               "name")
-            metric_max_cap = metric.get("maximum_capacity", None)
-            metric_reserve_cap = metric.get("reservation_capacity", None)
-            metric_total_cap = metric.get("total_application_capacity", None)
-            metric_desc = ApplicationMetricDescription(metric_name,
-                                                       metric_max_cap,
-                                                       metric_reserve_cap,
-                                                       metric_total_cap)
-            app_metrics.append(metric_desc)
+    app_metrics = parse_app_metrics(metrics)
 
     app_cap_desc = ApplicationCapacityDescription(min_node_count,
                                                   max_node_count,
@@ -371,7 +344,40 @@ def sf_create_app(client,  # pylint: disable=too-many-locals
     client.create_application(app_desc, timeout)
 
 
-def sf_upgrade_app(  # pylint: disable=too-many-locals
+def parse_default_service_health_policy(policy):
+    from azure.servicefabric.models.service_type_health_policy import ServiceTypeHealthPolicy
+
+    if policy is None:
+        return None
+
+    uphp = policy.get("max_percent_unhealthy_partitions_per_service", 0)
+    rhp = policy.get("max_percent_unhealthy_replicas_per_partition", 0)
+    ushp = policy.get("max_percent_unhealthy_services", 0)
+    return ServiceTypeHealthPolicy(uphp, rhp, ushp)
+
+
+def parse_service_health_policy_map(formatted_policy):
+    from azure.servicefabric.models.service_type_health_policy_map_item import ServiceTypeHealthPolicyMapItem
+
+    if formatted_policy is None:
+        return None
+
+    map_shp = []
+    for st_desc in formatted_policy:
+        st_name = st_desc.get("Key", None)
+        if st_name is None:
+            raise CLIError("Could not find service type name in service health policy map")
+        st_policy = st_desc.get("Value", None)
+        if st_policy is None:
+            raise CLIError("Could not find service type policy in service health policy map")
+        p = parse_default_service_health_policy(st_policy)
+        std_list_item = ServiceTypeHealthPolicyMapItem(st_name, p)
+
+        map_shp.append(std_list_item)
+    return map_shp
+
+
+def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
         client, app_id, app_version, parameters, mode="UnmonitoredAuto",
         replica_set_check_timeout=None, force_restart=None,
         failure_action=None, health_check_wait_duration="0",
@@ -447,21 +453,11 @@ def sf_upgrade_app(  # pylint: disable=too-many-locals
     from azure.servicefabric.models.application_upgrade_description import (
         ApplicationUpgradeDescription
     )
-    from azure.servicefabric.models.application_parameter import (
-        ApplicationParameter
-    )
     from azure.servicefabric.models.monitoring_policy_description import (
         MonitoringPolicyDescription
     )
     from azure.servicefabric.models.application_health_policy import (
         ApplicationHealthPolicy
-    )
-    from azure.servicefabric.models.service_type_health_policy import (
-        ServiceTypeHealthPolicy
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.service_type_health_policy_map_item import (  # noqa: justification, no way to shorten
-        ServiceTypeHealthPolicyMapItem
     )
 
     monitoring_policy = MonitoringPolicyDescription(
@@ -471,53 +467,13 @@ def sf_upgrade_app(  # pylint: disable=too-many-locals
     )
 
     # Must always have empty list
-    app_params = []
-    if parameters:
-        for k in parameters:
-            # Create an application parameter for every of these
-            p = ApplicationParameter(k, parameters[k])
-            app_params.append(p)
+    app_params = parse_app_params(parameters)
+    if app_params is None:
+        app_params = []
 
-    def_shp = None
-    if default_service_health_policy:
-        # Extract properties from dict using previously defined names
-        shp = default_service_health_policy.get(
-            "max_percent_unhealthy_partitions_per_service", 0
-        )
-        rhp = default_service_health_policy.get(
-            "max_percent_unhealthy_replicas_per_partition", 0
-        )
-        ushp = default_service_health_policy.get(
-            "max_percent_unhealthy_services", 0
-        )
-        def_shp = ServiceTypeHealthPolicy(shp, rhp, ushp)
+    def_shp = parse_default_service_health_policy(default_service_health_policy)
 
-    map_shp = None
-    if service_health_policy:
-        map_shp = []
-        for st_desc in service_health_policy:
-            st_name = st_desc.get("Key", None)
-            if st_name is None:
-                raise CLIError("Could not find service type name in service "
-                               "health policy map")
-            st_policy = st_desc.get("Value", None)
-            if st_policy is None:
-                raise CLIError("Could not find service type policy in service "
-                               "health policy map")
-            st_shp = st_policy.get(
-                "max_percent_unhealthy_partitions_per_service", 0
-            )
-            st_rhp = st_policy.get(
-                "max_percent_unhealthy_replicas_per_partition", 0
-            )
-            st_ushp = st_policy.get(
-                "max_percent_unhealthy_services", 0
-            )
-
-            std_policy = ServiceTypeHealthPolicy(st_shp, st_rhp, st_ushp)
-            std_list_item = ServiceTypeHealthPolicyMapItem(st_name, std_policy)
-
-            map_shp.append(std_list_item)
+    map_shp = parse_service_health_policy_map(service_health_policy)
 
     app_health_policy = ApplicationHealthPolicy(warning_as_error,
                                                 max_unhealthy_apps, def_shp,
@@ -535,9 +491,7 @@ def sf_upgrade_app(  # pylint: disable=too-many-locals
 
 
 def sup_correlation_scheme(correlated_service, correlation):
-    from azure.servicefabric.models.service_correlation_description import (
-        ServiceCorrelationDescription
-    )
+    from azure.servicefabric.models.service_correlation_description import ServiceCorrelationDescription
 
     if (any([correlated_service, correlation]) and
             not all([correlated_service, correlation])):
@@ -550,9 +504,7 @@ def sup_correlation_scheme(correlated_service, correlation):
 
 
 def sup_load_metrics(formatted_metrics):
-    from azure.servicefabric.models.service_load_metric_description import (
-        ServiceLoadMetricDescription
-    )
+    from azure.servicefabric.models.service_load_metric_description import ServiceLoadMetricDescription
 
     r = None
     if formatted_metrics:
@@ -658,10 +610,57 @@ def sup_service_update_flags(
         f += 256
     if move_cost is not None:
         f += 512
+    # Oddity to avoid int comparison
     return str(f)
 
 
-def sf_create_service(  # pylint: disable=too-many-locals
+def validate_service_create_params(stateful, stateless, singleton_scheme, int_scheme,
+                                   named_scheme, instance_count, target_rep_set_size,
+                                   min_rep_set_size):
+    if sum([stateful, stateless]) != 1:
+        raise CLIError("Specify either stateful or stateless for the service type")
+    if sum([singleton_scheme, named_scheme, int_scheme]) != 1:
+        raise CLIError("Specify exactly one partition scheme")
+    if stateful and instance_count is not None:
+        raise CLIError("Cannot specify instance count for stateful services")
+    if stateless and instance_count is None:
+        raise CLIError("Must specify instance count for stateless services")
+    if stateful and not all([target_rep_set_size, min_rep_set_size]):
+        raise CLIError("Must specify minimum and replica set size for stateful services")
+    if stateless and any([target_rep_set_size, min_rep_set_size]):
+        raise CLIError("Cannot specify replica set sizes for statless services")
+
+
+def parse_partition_policy(named_scheme, named_scheme_list, int_scheme, int_scheme_low,
+                           int_scheme_high, int_scheme_count, singleton_scheme):
+    from azure.servicefabric.models.named_partition_scheme_description import NamedPartitionSchemeDescription
+    from azure.servicefabric.models.singleton_partition_scheme_description import SingletonPartitionSchemeDescription
+    from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (
+        UniformInt64RangePartitionSchemeDescription
+    )
+
+    if named_scheme and not named_scheme_list:
+        raise CLIError("When specifying named partition scheme, must include list of names")
+    if int_scheme and not all([int_scheme_low, int_scheme_high, int_scheme_count]):
+        raise CLIError("Must specify the full integer range and partition count when using an "
+                       "uniform integer partition scheme")
+
+    if named_scheme:
+        return NamedPartitionSchemeDescription(len(named_scheme_list), named_scheme_list)
+    elif int_scheme:
+        return UniformInt64RangePartitionSchemeDescription(int_scheme_count, int_scheme_low, int_scheme_high)
+    elif singleton_scheme:
+        return SingletonPartitionSchemeDescription()
+
+    return None
+
+
+def validate_activation_mode(activation_mode):
+    if activation_mode not in [None, "SharedProcess", "ExclusiveProcess"]:
+        raise CLIError("Invalid activate mode specified")
+
+
+def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         client, app_id, name, service_type, stateful=False, stateless=False,
         singleton_scheme=False, named_scheme=False, int_scheme=False,
         named_scheme_list=None, int_scheme_low=None, int_scheme_high=None,
@@ -772,68 +771,28 @@ def sf_create_service(  # pylint: disable=too-many-locals
     from azure.servicefabric.models.stateful_service_description import (
         StatefulServiceDescription
     )
-    from azure.servicefabric.models.named_partition_scheme_description import (
-        NamedPartitionSchemeDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.singleton_partition_scheme_description import (  # noqa: justification, no way to shorten
-        SingletonPartitionSchemeDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (  # noqa: justification, no way to shorten
-        UniformInt64RangePartitionSchemeDescription
-    )
 
-    # Validate and parse input
+    validate_service_create_params(stateful, stateless, singleton_scheme, int_scheme,
+                                   named_scheme, instance_count, target_replica_set_size,
+                                   min_replica_set_size)
 
-    # stateful or stateless
-    if sum([stateful, stateless]) != 1:
-        raise CLIError("Specify either stateful or stateless for the "
-                       "service type")
-    # partition scheme
-    if stateful and sum([singleton_scheme, named_scheme, int_scheme]) != 1:
-        raise CLIError("Specify exactly one partition scheme")
-    if named_scheme and not named_scheme_list:
-        raise CLIError("When specifying named partition scheme, must include "
-                       "list of names")
-    if (int_scheme and
-            not all([int_scheme_low, int_scheme_high, int_scheme_count])):
-        raise CLIError("Must specify the full integer range and partition "
-                       "count when using an uniform integer partition scheme")
-    if stateless and any([int_scheme, named_scheme]):
-        raise CLIError("Stateless services cannot be partitioned")
-    if named_scheme:
-        part_schema = NamedPartitionSchemeDescription(len(named_scheme_list),
-                                                      named_scheme_list)
-    elif int_scheme:
-        part_schema = UniformInt64RangePartitionSchemeDescription(
-            int_scheme_count,
-            int_scheme_low,
-            int_scheme_high
-        )
-    else:
-        part_schema = SingletonPartitionSchemeDescription()
-    # correlation scheme
-    correlation_desc = sup_correlation_scheme(correlated_service,
-                                              correlation)
-    # load metrics
+    partition_desc = parse_partition_policy(named_scheme, named_scheme_list, int_scheme,
+                                            int_scheme_low, int_scheme_high, int_scheme_count,
+                                            singleton_scheme)
+
+    correlation_desc = sup_correlation_scheme(correlated_service, correlation)
+
     load_list = sup_load_metrics(load_metrics)
-    # service placement policies
-    place_policy = sup_placement_policies(placement_policy_list)
-    # default move cost
-    sup_validate_move_cost(move_cost)
-    # activation mode
-    if activation_mode not in [None, "SharedProcess", "ExclusiveProcess"]:
-        raise CLIError("Invalid activate mode specified")
 
-    # Stateless service
-    if stateful and instance_count is not None:
-        raise CLIError("Cannot specify instance count for stateful services")
-    if stateless and instance_count is not None:
-        raise CLIError("Must specify instance count for stateless services")
+    place_policy = sup_placement_policies(placement_policy_list)
+
+    sup_validate_move_cost(move_cost)
+
+    validate_activation_mode(activation_mode)
+
     if stateless:
         svc_desc = StatelessServiceDescription(name, service_type,
-                                               part_schema, instance_count,
+                                               partition_desc, instance_count,
                                                "fabric:/" + app_id,
                                                None, constraints,
                                                correlation_desc, load_list,
@@ -842,18 +801,11 @@ def sf_create_service(  # pylint: disable=too-many-locals
                                                activation_mode,
                                                dns_name)
 
-    # Stateful service
-    if stateful and not all([target_replica_set_size, min_replica_set_size]):
-        raise CLIError("Must specify minimum and replica set size for "
-                       "stateful services")
-    if stateless and any([target_replica_set_size, min_replica_set_size]):
-        raise CLIError("Cannot specify replica set sizes for statless "
-                       "services")
     if stateful:
         flags = sup_stateful_flags(replica_restart_wait, quorum_loss_wait,
                                    stand_by_replica_keep)
         svc_desc = StatefulServiceDescription(name, service_type,
-                                              part_schema,
+                                              partition_desc,
                                               target_replica_set_size,
                                               min_replica_set_size,
                                               not no_persisted_state,
@@ -868,6 +820,28 @@ def sf_create_service(  # pylint: disable=too-many-locals
                                               stand_by_replica_keep)
 
     client.create_service(app_id, svc_desc, timeout)
+
+
+def validate_update_service_params(stateless, stateful, target_rep_set_size, min_rep_set_size,
+                                   rep_restart_wait, quorum_loss_wait, stand_by_replica_keep,
+                                   instance_count):
+    if sum([stateless, stateful]) != 1:
+        raise CLIError("Must specify either stateful or stateless, not both")
+
+    if stateless:
+        if target_rep_set_size is not None:
+            raise CLIError("Cannot specify target replica set size for stateless service")
+        if min_rep_set_size is not None:
+            raise CLIError("Cannot specify minimum replica set size for stateless service")
+        if rep_restart_wait is not None:
+            raise CLIError("Cannot specify replica restart wait duration for stateless service")
+        if quorum_loss_wait is not None:
+            raise CLIError("Cannot specify quorum loss wait duration for stateless service")
+        if stand_by_replica_keep is not None:
+            raise CLIError("Cannot specify standby replica keep duration for stateless service")
+    if stateful:
+        if instance_count is not None:
+            raise CLIError("Cannot specify an instance count for a stateful service")
 
 
 def sf_update_service(client, service_id,
@@ -938,18 +912,12 @@ def sf_update_service(client, service_id,
     which StandBy replicas will be maintained before being removed. This
     applies to stateful services only.
     """
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.stateful_service_update_description import (  # noqa: justification, no way to shorten
-        StatefulServiceUpdateDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.stateless_service_update_description import (  # noqa: justification, no way to shorten
-        StatelessServiceUpdateDescription
-    )
+    from azure.servicefabric.models.stateful_service_update_description import StatefulServiceUpdateDescription
+    from azure.servicefabric.models.stateless_service_update_description import StatelessServiceUpdateDescription
 
-    # validate parameters
-    if sum([stateless, stateful]) != 1:
-        raise CLIError("Must specify either stateful or stateless, not both")
+    validate_update_service_params(stateless, stateful, target_replica_set_size,
+                                   min_replica_set_size, replica_restart_wait, quorum_loss_wait,
+                                   stand_by_replica_keep, instance_count)
 
     correlation_desc = sup_correlation_scheme(correlated_service, correlation)
     load_list = sup_load_metrics(load_metrics)
@@ -965,9 +933,6 @@ def sf_update_service(client, service_id,
 
     update_desc = None
     if stateful:
-        if instance_count is not None:
-            raise CLIError("Cannot specify an instance count for a "
-                           "stateful service")
         update_desc = StatefulServiceUpdateDescription(flags, constraints,
                                                        correlation_desc,
                                                        load_list, place_policy,
@@ -979,21 +944,6 @@ def sf_update_service(client, service_id,
                                                        stand_by_replica_keep)
 
     if stateless:
-        if target_replica_set_size is not None:
-            raise CLIError("Cannot specify target replica set size for "
-                           "stateless service")
-        if min_replica_set_size is not None:
-            raise CLIError("Cannot specify minimum replica set size for "
-                           "stateless service")
-        if replica_restart_wait is not None:
-            raise CLIError("Cannot specify replica restart wait duration for "
-                           "stateless service")
-        if quorum_loss_wait is not None:
-            raise CLIError("Cannot specify quorum loss wait duration for "
-                           "stateless service")
-        if stand_by_replica_keep is not None:
-            raise CLIError("Cannot specify standby replica keep duration for "
-                           "stateless service")
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
                                                         correlation_desc,
                                                         load_list,
@@ -1002,6 +952,25 @@ def sf_update_service(client, service_id,
                                                         instance_count)
 
     client.update_service(service_id, update_desc, timeout)
+
+
+def parse_app_health_map(formatted_map):
+    from azure.servicefabric.models.application_type_health_policy_map_item import ApplicationTypeHealthPolicyMapItem
+
+    if not formatted_map:
+        return None
+
+    health_map = []
+    for m in formatted_map:
+        name = m.get("key", None)
+        percent_unhealthy = m.get("value", None)
+        if name is None:
+            raise CLIError("Cannot find application type health policy map name")
+        if percent_unhealthy is None:
+            raise CLIError("Cannot find application type health policy map unhealthy percent")
+        r = ApplicationTypeHealthPolicyMapItem(name, percent_unhealthy)
+        health_map.append(r)
+    return health_map
 
 
 def sf_start_chaos(
@@ -1052,32 +1021,10 @@ def sf_start_chaos(
     integer that represents the MaxPercentUnhealthyApplications percentage
     used to evaluate the applications of the specified application type.
     """
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.application_type_health_policy_map_item import (  # noqa: justification, no way to shorten
-        ApplicationTypeHealthPolicyMapItem
-    )
     from azure.servicefabric.models.chaos_parameters import ChaosParameters
-    from azure.servicefabric.models.cluster_health_policy import (
-        ClusterHealthPolicy
-    )
+    from azure.servicefabric.models.cluster_health_policy import ClusterHealthPolicy
 
-    health_map = None
-    if app_type_health_policy_map:
-        health_map = []
-        for m in app_type_health_policy_map:
-            name = m.get("key", None)
-            percent_unhealthy = m.get("value", None)
-            if name is None:
-                raise CLIError(
-                    "Cannot find application type health policy map name"
-                )
-            if percent_unhealthy is None:
-                raise CLIError(
-                    "Cannot find application type health policy map unhealthy "
-                    "percent"
-                )
-            r = ApplicationTypeHealthPolicyMapItem(name, percent_unhealthy)
-            health_map.append(r)
+    health_map = parse_app_health_map(app_type_health_policy_map)
 
     health_policy = ClusterHealthPolicy(warning_as_error,
                                         max_percent_unhealthy_nodes,
@@ -1490,6 +1437,24 @@ def sf_report_node_health(client, node_name,
     client.report_node_health(node_name, info, timeout)
 
 
+def parse_package_sharing_policies(formatted_policies):
+    from azure.servicefabric.models.package_sharing_policy_info import PackageSharingPolicyInfo
+
+    if not formatted_policies:
+        return None
+
+    list_psps = []
+    for p in formatted_policies:
+        policy_name = p.get("name", None)
+        if policy_name is None:
+            raise CLIError("Could not find name of sharing policy element")
+        policy_scope = p.get("scope", None)
+        if policy_scope not in [None, "All", "Code", "Config", "Data"]:
+            raise CLIError("Invalid policy scope specified")
+        list_psps.append(PackageSharingPolicyInfo(policy_name, policy_scope))
+    return list_psps
+
+
 def sf_service_package_upload(client, node_name,
                               service_manifest_name,
                               app_type_name, app_type_version,
@@ -1515,26 +1480,11 @@ def sf_service_package_upload(client, node_name,
     is to be shared. The scope can either 'None', 'All', 'Code', 'Config' or
     'Data'.
     """
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.deploy_service_package_to_node_description import (  # noqa: justification, no way to shorten
+    from azure.servicefabric.models.deploy_service_package_to_node_description import (
         DeployServicePackageToNodeDescription
     )
-    from azure.servicefabric.models.package_sharing_policy_info import (
-        PackageSharingPolicyInfo
-    )
 
-    list_psps = None
-    if share_policy:
-        list_psps = []
-        for p in share_policy:
-            policy_name = p.get("name", None)
-            if policy_name is None:
-                raise CLIError("Could not find name of sharing policy element")
-            policy_scope = p.get("scope", None)
-            if policy_scope not in ["None", "All", "Code", "Config", "Data"]:
-                raise CLIError("Invalid policy scope specified")
-            list_psps.append(PackageSharingPolicyInfo(policy_name,
-                                                      policy_scope))
+    list_psps = parse_package_sharing_policies(share_policy)
 
     desc = DeployServicePackageToNodeDescription(service_manifest_name,
                                                  app_type_name,

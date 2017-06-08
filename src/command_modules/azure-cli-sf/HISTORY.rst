@@ -17,4 +17,11 @@ Release History
 ++++++++++++++++++
 
 * Initial release of Service Fabric module. This corresponds to 5.6 Service
-Sabric product release.
+Fabric product release.
+
+Unreleased
+++++++++++
+
+* Fixing certain commands that were previously reporting syntax errors even though
+the combination of arguments was valid.
+* Adding tests for custom commands including recordings for some commands.
