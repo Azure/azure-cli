@@ -17,7 +17,6 @@ from azure.cli.core.telemetry import _user_agrees_to_telemetry
 from azclishell.util import parse_quotes
 
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
-VALUE_UNTIL_FLUSH = 10
 
 
 def my_context(tel_client):
@@ -30,10 +29,11 @@ def my_context(tel_client):
 
 class TelThread(threading.Thread):
     """ telemetry thread for exiting """
-    def __init__(self, threadfunc):
+    def __init__(self, threadfunc, max_items=10):
         threading.Thread.__init__(self)
         self.threadfunc = threadfunc
         self.counter = 0
+        self.max_items_until_flush = max_items
 
     def force_run(self):
         """ pushes the function out without a check """
@@ -44,7 +44,7 @@ class TelThread(threading.Thread):
 
     def run(self):
         try:
-            if self.counter >= VALUE_UNTIL_FLUSH:
+            if self.counter >= self.max_items_until_flush:
                 self.threadfunc()
                 self.counter = 0
             else:
