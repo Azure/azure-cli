@@ -5,6 +5,7 @@
 
 import unittest
 import azure.cli.command_modules.sf.custom as sf_c
+from azure.cli.core.util import CLIError
 
 
 class SfNodeTests(unittest.TestCase):
@@ -14,10 +15,18 @@ class SfNodeTests(unittest.TestCase):
     def empty_package_sharing_policies_returns_none_test(self):
         self.assertIs(sf_c.parse_package_sharing_policies([]), None)
 
-    def single_package_sharing_policy_returns_single_test(self):
-        from azure.servicefabric.models.package_sharing_policy_info import PackageSharingPolicyInfo
-
-        res = sf_c.parse_package_sharing_policies([{"name": "derp_a", "scope": "None"}])
+    def empty_scope_package_sharing_policy_returns_none_scope_test(self):
+        res = sf_c.parse_package_sharing_policies([{"name": "derp_a"}])
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0].shared_package_name, "derp_a")
-        self.assertEqual(res[0].package_sharing_scope, "None")
+        self.assertEqual(res[0].package_sharing_scope, None)
+
+    def invalid_scope_package_sharing_policy_raises_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.parse_package_sharing_policies([{"name": "derp_a", "scope": "InIn"}])
+
+    def single_scope_package_sharing_policy_returns_single_policy_test(self):
+        res = sf_c.parse_package_sharing_policies([{"name": "derp_a", "scope": "All"}])
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].shared_package_name, "derp_a")
+        self.assertEqual(res[0].package_sharing_scope, "All")

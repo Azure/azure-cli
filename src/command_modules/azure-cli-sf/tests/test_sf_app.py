@@ -31,9 +31,7 @@ class SfAppTests(unittest.TestCase):
         self.assertEqual(sf_c.parse_app_metrics(None), None)
 
     def parse_metrics_returns_metrics_desc_test(self):
-        from azure.servicefabric.models.application_metric_description import (
-            ApplicationMetricDescription
-        )
+        from azure.servicefabric.models.application_metric_description import ApplicationMetricDescription
 
         res = sf_c.parse_app_metrics([{"name": "derp", "maximum_capacity": 3}])
         self.assertEqual(len(res), 1)

@@ -13,9 +13,9 @@ logger = azlogging.get_az_logger(__name__)
 
 # Should be fixed unless recordings are being recreated for new versions of Service Fabric
 test_endpoint = "http://eddertester.westus2.cloudapp.azure.com:19080"
-test_node_name = "_basic_0"
+test_node_name = "_Derp_0"
 test_partition_id = "00000000-0000-0000-0000-000000000001"
-test_replica_id = "131397086129396088"
+test_replica_id = "131413730902833907"
 
 
 # pylint: disable=too-many-public-methods

@@ -55,8 +55,7 @@ class SfServiceTests(unittest.TestCase):
         self.assertIs(sf_c.sup_placement_policies([]), None)
 
     def single_valid_placement_policy_returns_single_policy_test(self):
-        # pylint: disable=line-too-long
-        from azure.servicefabric.models.service_placement_prefer_primary_domain_policy_description import (  # noqa: justification, no way to shorten
+        from azure.servicefabric.models.service_placement_prefer_primary_domain_policy_description import (
             ServicePlacementPreferPrimaryDomainPolicyDescription
         )
 

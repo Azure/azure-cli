@@ -153,10 +153,9 @@ def sf_select(endpoint, cert=None,
     set_global_config_value("servicefabric", "endpoint", endpoint)
 
 
-def sf_upload_app(path, show_progress=False): # pylint: disable=too-many-locals
+def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
     """
     Copies a Service Fabric application package to the image store.
-
 
     The cmdlet copies a Service Fabric application package to the image store.
     After copying the application package, use the sf application provision
@@ -321,7 +320,6 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     """
     from azure.servicefabric.models.application_description import ApplicationDescription
     from azure.servicefabric.models.application_capacity_description import ApplicationCapacityDescription
-
 
     if (any([min_node_count, max_node_count]) and
             not all([min_node_count, max_node_count])):
