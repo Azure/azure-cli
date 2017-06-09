@@ -7,6 +7,8 @@ unreleased
 ++++++++++++++++++
 
 * `local-gateway create`: fix bug where --local-address-prefixes was ignored.
+* `nic update/create`: Add support for --dns-servers.
+* `vnet update`: Add support for --dns-servers.
 
 
 2.0.7 (2017-05-30)

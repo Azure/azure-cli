@@ -508,21 +508,58 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
         address_pool_ids = ' '.join(self.cmd('network lb address-pool list -g {} --lb-name {} --query "[].id"'.format(rg, lb)))
 
         # create with minimum parameters
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'), JMESPathCheck('NewNIC.provisioningState', 'Succeeded')])
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
+        ])
         # exercise optional parameters
-        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'), JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAddress', private_ip), JMESPathCheck('NewNIC.enableIpForwarding', True), JMESPathCheck('NewNIC.provisioningState', 'Succeeded'), JMESPathCheck('NewNIC.dnsSettings.internalDnsNameLabel', 'test')])
+        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+            JMESPathCheck('NewNIC.enableIpForwarding', True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded'),
+            JMESPathCheck('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+            JMESPathCheck('length(NewNIC.dnsSettings.dnsServers)', 1)])
         # exercise creating with NSG
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'), JMESPathCheck('NewNIC.enableIpForwarding', False), JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True), JMESPathCheck('NewNIC.provisioningState', 'Succeeded')])
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.enableIpForwarding', False),
+            JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
+        ])
         # exercise creating with NSG and Public IP
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'), JMESPathCheck('NewNIC.enableIpForwarding', False), JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True), JMESPathCheck('NewNIC.provisioningState', 'Succeeded')])
-        self.cmd('network nic list', checks=[JMESPathCheck('type(@)', 'array'), JMESPathCheck("length([?contains(id, 'networkInterfaces')]) == length(@)", True)])
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.enableIpForwarding', False),
+            JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
+        ])
+        self.cmd('network nic list', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?contains(id, 'networkInterfaces')]) == length(@)", True)
+        ])
         self.cmd('network nic list --resource-group {}'.format(rg), checks=[
-
-            JMESPathCheck('type(@)', 'array'), JMESPathCheck("length([?type == '{}']) == length(@)".format(rt), True), JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)])
-        self.cmd('network nic show --resource-group {} --name {}'.format(rg, nic), checks=[JMESPathCheck('type(@)', 'object'), JMESPathCheck('type', rt), JMESPathCheck('resourceGroup', rg), JMESPathCheck('name', nic)])
-        self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --network-security-group {}'.format(rg, nic, alt_nsg), checks=[JMESPathCheck('enableIpForwarding', True), JMESPathCheck('dnsSettings.internalDnsNameLabel', 'noodle'), JMESPathCheck("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True), ])
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?type == '{}']) == length(@)".format(rt), True),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ])
+        self.cmd('network nic show --resource-group {} --name {}'.format(rg, nic), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type', rt),
+            JMESPathCheck('resourceGroup', rg),
+            JMESPathCheck('name', nic)
+        ])
+        self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
+            JMESPathCheck('enableIpForwarding', True),
+            JMESPathCheck('dnsSettings.internalDnsNameLabel', 'noodle'),
+            JMESPathCheck('length(dnsSettings.dnsServers)', 0),
+            JMESPathCheck("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
+        ])
         # test generic update
-        self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[JMESPathCheck('enableIpForwarding', False), JMESPathCheck('dnsSettings.internalDnsNameLabel', 'doodle')])
+        self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[
+            JMESPathCheck('enableIpForwarding', False),
+            JMESPathCheck('dnsSettings.internalDnsNameLabel', 'doodle')
+        ])
 
         self.cmd('network nic delete --resource-group {} --name {}'.format(rg, nic))
         self.cmd('network nic list -g {}'.format(rg), checks=NoneCheck())
@@ -708,7 +745,14 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet show --resource-group {} --name {}'.format(self.resource_group, self.vnet_name), checks=[JMESPathCheck('type(@)', 'object'), JMESPathCheck('name', self.vnet_name), JMESPathCheck('resourceGroup', self.resource_group), JMESPathCheck('type', self.resource_type)])
 
         vnet_addr_prefixes = '20.0.0.0/16 10.0.0.0/16'
-        self.cmd('network vnet update --resource-group {} --name {} --address-prefixes {}'.format(self.resource_group, self.vnet_name, vnet_addr_prefixes), checks=JMESPathCheck('length(addressSpace.addressPrefixes)', 2))
+        self.cmd('network vnet update --resource-group {} --name {} --address-prefixes {} --dns-servers 1.2.3.4'.format(self.resource_group, self.vnet_name, vnet_addr_prefixes), checks=[
+            JMESPathCheck('length(addressSpace.addressPrefixes)', 2),
+            JMESPathCheck('dhcpOptions.dnsServers[0]', '1.2.3.4')
+        ])
+        self.cmd('network vnet update -g {} -n {} --dns-servers ""'.format(self.resource_group, self.vnet_name), checks=[
+            JMESPathCheck('length(addressSpace.addressPrefixes)', 2),
+            JMESPathCheck('dhcpOptions.dnsServers', [])
+        ])
 
         # test generic update
         self.cmd('network vnet update --resource-group {} --name {} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"'.format(self.resource_group, self.vnet_name), checks=JMESPathCheck('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
