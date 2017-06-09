@@ -415,8 +415,13 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
 
         # rebuild a new vm
-        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux'.format(resource_group, os_disk, data_disk),
-                 checks=[JMESPathCheckV2('powerState', 'VM running')])
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
+            JMESPathCheckV2('powerState', 'VM running'),
+        ])
+        self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
+            JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
+            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3)
+        ])
 
     @ResourceGroupPreparer()
     def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
