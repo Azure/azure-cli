@@ -679,8 +679,8 @@ def _validate_admin_password(password, os_type):
     max_length = 72 if is_linux else 123
     min_length = 12
     if len(password) not in range(min_length, max_length + 1):
-        raise CLIError('The pssword length must be between {} and {}'.format(min_length,
-                                                                             max_length))
+        raise CLIError('The password length must be between {} and {}'.format(min_length,
+                                                                              max_length))
     contains_lower = re.findall('[a-z]+', password)
     contains_upper = re.findall('[A-Z]+', password)
     contains_digit = re.findall('[0-9]+', password)
