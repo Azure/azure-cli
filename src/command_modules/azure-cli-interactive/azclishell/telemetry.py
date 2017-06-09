@@ -64,17 +64,23 @@ class Telemetry(TelemetryClient):
         self.telthread = TelThread(self.flush)
         self.telthread.start()
 
+    def track_event(self, name, value=None, force=False):
+        """ tracks the telemetry events and pushes them out """
+        super(Telemetry, self).track_event(name, value)
+        if force:
+            self.telthread.flush()
+        else:
+            self.telthread.add_telemetry_event()
+
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
         self.track_event('az/interactive/gesture', {gesture: scrub(cmd)})
-        self.telthread.add_telemetry_event()
 
     @_user_agrees_to_telemetry
     def track_key(self, key):
         """ tracks the special key bindings """
         self.track_event('az/interactive/key/{}'.format(key))
-        self.telthread.add_telemetry_event()
 
     @_user_agrees_to_telemetry
     def start(self):
@@ -86,8 +92,7 @@ class Telemetry(TelemetryClient):
         """ concludings recording stuff """
         self.end_time = str(datetime.datetime.now())
         self.track_event('Run', {'StartTime': str(self.start_time),
-                                 'EndTime': str(self.end_time)})
-        self.telthread.flush()
+                                 'EndTime': str(self.end_time)}, force=True)
 
 
 def scrub(text):
