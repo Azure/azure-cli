@@ -109,7 +109,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
         and '[!seq]'.
     """
-    source_blobs = collect_blobs(client, source_container_name, pattern)
+    source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
         logger = get_az_logger(__name__)
