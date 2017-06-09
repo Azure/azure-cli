@@ -197,7 +197,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         json_val = deploy_values.copy()
                         json_val.pop('timestamp', None)
                         result = deploy_values['status value'] + ': ' + long_name
-                        result += ' {' + deploy_values['type'] + '}'
+                        result += ' (' + deploy_values['type'] + ')'
 
                         if update:
                             logger.info(result)
