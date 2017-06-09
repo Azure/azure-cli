@@ -6,10 +6,11 @@
 import unittest
 
 from azure.cli.command_modules.resource.custom import (
-    _merge_parameters,
     _get_missing_parameters,
     _extract_lock_params
 )
+
+from azure.cli.command_modules.resource._validators import validate_deployment_parameters
 
 
 class TestCustom(unittest.TestCase):
@@ -158,29 +159,32 @@ class TestCustom(unittest.TestCase):
 
         self.assertDictEqual(out_params, expected)
 
-    def test_resource_merge_parameters(self):
+    def test_deployment_parameters(self):
         tests = [
             {
                 "parameter_list": [],
-                "expected": None,
+                "expected": {},
             },
             {
-                "parameter_list": ['{"foo": "bar"}'],
+                "parameter_list": [['{"foo": "bar"}']],
                 "expected": {"foo": "bar"},
             },
             {
-                "parameter_list": ['{"foo": "bar"}', '{"baz": "blat"}'],
+                "parameter_list": [['{"foo": "bar"}', '{"baz": "blat"}']],
                 "expected": {"foo": "bar", "baz": "blat"},
             },
             {
-                "parameter_list": ['{"foo": "bar"}', '{"foo": "baz"}'],
+                "parameter_list": [['{"foo": "bar"}', '{"foo": "baz"}']],
                 "expected": {"foo": "baz"},
             },
         ]
 
         for test in tests:
-            output = _merge_parameters(test['parameter_list'])
-            self.assertEqual(output, test['expected'])
+            from argparse import Namespace
+            namespace = Namespace()
+            namespace.parameters = test['parameter_list']
+            validate_deployment_parameters(namespace)
+            self.assertEqual(namespace.parameters, test['expected'])
 
 
 if __name__ == '__main__':

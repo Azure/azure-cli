@@ -15,7 +15,7 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 enum_choice_list, no_wait_type, file_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import validate_deployment_name, validate_lock_parameters
+from ._validators import process_deployment_create_namespace, validate_lock_parameters, validate_deployment_parameters
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -72,15 +72,19 @@ register_cli_argument('policy assignment', 'policy', help='policy name or fully 
 register_cli_argument('group', 'tag', tag_type)
 register_cli_argument('group', 'tags', tags_type)
 register_cli_argument('group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
+
 register_cli_argument('group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
-register_cli_argument('group deployment', 'parameters', action='append', completer=FilesCompleter(), help="provide deployment parameter values, either json string, or use `@<file path>` to load from a file. Can be repeated. If a the same parameter is present in multiple arguments, the last value wins.")
 register_cli_argument('group deployment', 'template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
 register_cli_argument('group deployment', 'template_uri', help='a uri to a remote template file')
 register_cli_argument('group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))
+
 register_cli_argument('group deployment create', 'deployment_name', options_list=('--name', '-n'), required=False,
-                      validator=validate_deployment_name, help='The deployment name. Default to template file base name')
+                      validator=process_deployment_create_namespace, help='The deployment name. Default to template file base name')
+register_cli_argument('group deployment', 'parameters', action='append', nargs='+', completer=FilesCompleter(), validator=validate_deployment_parameters)
+
 register_cli_argument('group deployment operation show', 'operation_ids', nargs='+', help='A list of operation ids to show')
+
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), help='name of the new resource group', completer=None)
