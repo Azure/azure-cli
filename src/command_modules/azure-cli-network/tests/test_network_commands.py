@@ -1122,21 +1122,60 @@ class NetworkWatcherScenarioTest(ScenarioTest):
 
         self.cmd('network watcher test-connectivity -g {} --source-resource {} --dest-address www.microsoft.com --dest-port 80'.format(resource_group, vm))
 
-        # TODO: Re-enable once issue #3385 is resolved
-        # capture = 'capture1'
-        # location = 'westus'
-        # self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
-        # self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
-        # self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
-        # self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
-        # self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
-        # self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
-        # self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
-
         nsg = '{}NSG'.format(vm)
         self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))
         self.cmd('network watcher flow-log configure -g {} --nsg {} --retention 0'.format(resource_group, nsg))
         self.cmd('network watcher flow-log show -g {} --nsg {}'.format(resource_group, nsg))
+
+
+class NetworkWatcherPacketCaptureScenarioTest(ScenarioTest):
+    import mock
+
+    def _mock_thread_count():
+        return 1
+
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    def test_network_watcher_packet_capture(self, resource_group, storage_account):
+        self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
+
+        vm = 'vm1'
+        # create VM with NetworkWatcher extension
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
+        self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
+
+        capture = 'capture1'
+        location = 'westcentralus'
+        self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
+        self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+
+
+class NetworkWatcherTroubleshootingScenarioTest(ScenarioTest):
+    import mock
+
+    def _mock_thread_count():
+        return 1
+
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_troubleshooting', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    def test_network_watcher_packet_capture(self, resource_group, storage_account):
+        self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
+
+        # set up resource to troubleshoot
+        self.cmd('storage container create -n troubleshooting --account-name {}'.format(storage_account))
+        storage_path = 'lalala'
+        self.cmd('network vnet create -g {} -n vnet1 --subnet-name GatewaySubnet'.format(resource_group))
+        self.cmd('network public-ip create -g {} -n vgw1-pip'.format(resource_group))
+        self.cmd('network vnet-gateway create -g {} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip'.format(resource_group))
+
+        self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway --storage-account {} --storage-path {}'.format(storage_account, storage_path))
 
 
 if __name__ == '__main__':
