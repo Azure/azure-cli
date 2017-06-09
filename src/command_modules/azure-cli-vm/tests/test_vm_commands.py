@@ -392,6 +392,33 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ResourceGroupVCRTestBase):
         ])
 
 
+class VMAttachDataDisks(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
+        # the testing below follow a real custom's workflow requiring the support of attaching data disk
+
+        # creating a vm 
+        self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1'.format(resource_group)).get_output_in_json()
+        origin_os_disk_name = result['storageProfile']['osDisk']['name']
+        origin_data_disk_name = result['storageProfile']['dataDisks'][0]['name']
+
+        # snapshot the os and data disks
+        os_snapshot = 'oSnapshot'
+        os_disk = 'sDisk'
+        data_snapshot = 'dSnapshot'
+        data_disk = 'dDisk'
+        self.cmd('snapshot create -g {} -n {} --source {}'.format(resource_group, os_snapshot, origin_os_disk_name))
+        self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, os_disk, os_snapshot))
+        self.cmd('snapshot create -g {} -n {} --source {}'.format(resource_group, data_snapshot, origin_data_disk_name))
+        self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
+
+        # rebuild a new vm
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux'.format(resource_group, os_disk, data_disk),
+                 checks=[JMESPathCheckV2('powerState', 'VM running')])
+
+
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
