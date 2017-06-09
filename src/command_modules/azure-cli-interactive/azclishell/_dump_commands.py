@@ -23,19 +23,17 @@ CMD_TABLE = APPLICATION.configuration.get_command_table()
 
 
 def install_modules():
+    installed_command_modules = []
     for cmd in CMD_TABLE:
         try:
             CMD_TABLE[cmd].load_arguments()
         except (ImportError, ValueError):
             pass
-        installed_command_modules = []
         mods_ns_pkg = import_module('azure.cli.command_modules')
     for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__):
-        try:
-            if modname not in BLACKLISTED_MODS:
-                installed_command_modules.append(modname)
-        except ImportError:
-            pass
+        if modname not in BLACKLISTED_MODS:
+            installed_command_modules.append(modname)
+
     for mod in installed_command_modules:
         try:
             mod = import_module('azure.cli.command_modules.' + mod)
@@ -87,7 +85,7 @@ def dump_command_table():
             com_descrip['parameters'] = param_descrip
             data[cmd] = com_descrip
         except (ImportError, ValueError):
-            continue
+            pass
 
     for cmd in helps:
         diction_help = yaml.load(helps[cmd])
