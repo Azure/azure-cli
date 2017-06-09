@@ -160,14 +160,15 @@ class Application(object):
 
         # Rudimentary parsing to get the command
         nouns = []
-        for i in range(len(argv)):  # pylint: disable=consider-using-enumerate
+        for i, current in enumerate(argv):
             try:
-                if argv[i][0] == '-':
+                if current[0] == '-':
                     break
             except IndexError:
                 pass
-            argv[i] = argv[i].lower()
+            argv[i] = current.lower()
             nouns.append(argv[i])
+
         command = ' '.join(nouns)
 
         if argv[-1] in ('--help', '-h') or command in command_table:
@@ -264,7 +265,7 @@ class Application(object):
                                   type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
-                                  help='Increase logging verbosity. Use --debug for full debug logs.')  # pylint: disable=line-too-long
+                                  help='Increase logging verbosity. Use --debug for full debug logs.')
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
 

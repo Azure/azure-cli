@@ -6,6 +6,7 @@
 import tempfile
 import unittest
 import mock
+import multiprocessing
 
 from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
@@ -23,6 +24,11 @@ from azure.cli.core.cloud import (Cloud,
 from azure.cli.core._config import get_config_parser
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import CLIError
+
+
+def _helper_get_clouds(_):
+    """ Helper method for multiprocessing.Pool.map func that uses throwaway arg """
+    get_clouds()
 
 
 class TestCloud(unittest.TestCase):
@@ -173,19 +179,31 @@ class TestCloud(unittest.TestCase):
 
     def test_init_known_clouds_force_concurrent(self):
         ''' Support multiple concurrent calls to clouds init method '''
-        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
-                config_file:
-            from multiprocessing import Pool
-
-            pool_size = 20
-            p = Pool(pool_size)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
+            pool_size = 100
+            p = multiprocessing.Pool(pool_size)
             p.map(init_known_clouds, [True] * pool_size)
-
+            p.close()
+            p.join()
             # Check we can read the file with no exceptions
             config = get_config_parser()
             config.read(config_file)
-
             # Check that we can get all the known clouds without any exceptions
+            for kc in KNOWN_CLOUDS:
+                get_cloud(kc.name)
+
+    def test_get_clouds_concurrent(self):
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
+            init_known_clouds()
+
+            pool_size = 100
+            p = multiprocessing.Pool(pool_size)
+            p.map(_helper_get_clouds, range(pool_size))
+            p.close()
+            p.join()
+            # Check we can read the file with no exceptions
+            config = get_config_parser()
+            config.read(config_file)
             for kc in KNOWN_CLOUDS:
                 get_cloud(kc.name)
 

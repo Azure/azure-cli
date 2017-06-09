@@ -31,9 +31,10 @@ from ._validators import \
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
      get_content_setting_validator, validate_encryption, validate_accept,
      validate_key, storage_account_key_options,
-     process_file_download_namespace, process_logging_update_namespace,
+     process_file_download_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
-     get_source_file_or_blob_service_client, process_blob_source_uri)
+     get_source_file_or_blob_service_client, process_blob_source_uri,
+     get_char_options_validator)
 
 
 DeleteSnapshot, BlockBlobService, \
@@ -586,29 +587,70 @@ register_cli_argument('storage account generate-sas', 'start', help='Specifies t
 register_cli_argument('storage account generate-sas', 'account_name', account_name_type, options_list=('--account-name',), help='Storage account name. Must be used in conjunction with either storage account key or a SAS token. Environment Variable: AZURE_STORAGE_ACCOUNT')
 register_cli_argument('storage account generate-sas', 'sas_token', ignore_type)
 
-register_cli_argument('storage logging show', 'services', help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')
 
-register_cli_argument('storage logging update', 'services', help='The storage service(s) for which to update logging info: (b)lob (q)ueue (t)able. Can be combined.', validator=process_logging_update_namespace)
-register_cli_argument('storage logging update', 'log', help='The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.')
-register_cli_argument('storage logging update', 'retention', type=int, help='Number of days for which to retain logs. 0 to disable.')
+#######################################
+# storage cors commands parameters
+#######################################
 
-register_cli_argument('storage metrics show', 'services', help='The storage services from which to retrieve metrics info: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
-register_cli_argument('storage metrics show', 'interval', help='Filter the set of metrics to retrieve by time interval.', **enum_choice_list(['hour', 'minute', 'both']))
+with CommandContext('storage cors') as c:
+    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'))
 
-register_cli_argument('storage metrics update', 'services', help='The storage service(s) for which to update metrics info: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
-register_cli_argument('storage metrics update', 'hour', help='Update the hourly metrics.', validator=process_metric_update_namespace, **enum_choice_list(['true', 'false']))
-register_cli_argument('storage metrics update', 'minute', help='Update the by-minute metrics.', **enum_choice_list(['true', 'false']))
-register_cli_argument('storage metrics update', 'api', help='Specify whether to include API in metrics. Applies to both hour and minute metrics if both are specified. Must be specified if hour or minute metrics are enabled and being updated.', **enum_choice_list(['true', 'false']))
-register_cli_argument('storage metrics update', 'retention', type=int, help='Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute metrics if both are specified.')
 
-register_cli_argument('storage cors', 'max_age', type=int, help='The number of seconds the client/browser should cache a preflight response.', default="0")
-register_cli_argument('storage cors', 'origins', nargs='+', help='List of origin domains that will be allowed via CORS, or "*" to allow all domains.')
-register_cli_argument('storage cors', 'methods', nargs='+', help='List of HTTP methods allowed to be executed by the origin.', **enum_choice_list(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
-register_cli_argument('storage cors', 'allowed_headers', nargs='+', help='List of response headers allowed to be part of the cross-origin request.')
-register_cli_argument('storage cors', 'exposed_headers', nargs='+', help='List of response headers to expose to CORS clients.')
+with CommandContext('storage cors list') as c:
+    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft', required=False)
 
-register_cli_argument('storage cors add', 'services', help='The storage service(s) for which to add the CORS rule: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
 
-register_cli_argument('storage cors clear', 'services', help='The storage service(s) for which to clear CORS rules: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
+with CommandContext('storage cors add') as c:
+    c.reg_arg('max_age')
+    c.reg_arg('origins', nargs='+')
+    c.reg_arg('methods', nargs='+', **enum_choice_list(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
+    c.reg_arg('allowed_headers', nargs='+')
+    c.reg_arg('exposed_headers', nargs='+')
 
-register_cli_argument('storage cors list', 'services', help='The storage service(s) for which to list the CORS rules: (b)lob (f)ile (q)ueue (t)able. Can be combined.')
+
+#######################################
+# storage logging commands parameters
+#######################################
+
+with CommandContext('storage logging show') as c:
+    c.reg_arg('services', validator=get_char_options_validator('bqt', 'services'), required=False, default='bqt',
+              help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')
+
+
+with CommandContext('storage logging update') as c:
+    c.reg_arg('services', validator=get_char_options_validator('bqt', 'services'),
+              help='The storage service(s) for which to update logging info: (b)lob (q)ueue (t)able. Can be combined.')
+    c.reg_arg('log', validator=get_char_options_validator('rwd', 'log'),
+              help='The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.')
+    c.reg_arg('retention', type=int, help='Number of days for which to retain logs. 0 to disable.')
+
+
+#######################################
+# storage metrics commands parameters
+#######################################
+
+with CommandContext('storage metrics show') as c:
+    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'), required=False, default='bfqt',
+              help='The storage services from which to retrieve metrics info: (b)lob (f)ile (q)ueue (t)able. '
+                   'Can be combined.')
+    c.reg_arg('interval',
+              help='Filter the set of metrics to retrieve by time interval.',
+              **enum_choice_list(['hour', 'minute', 'both']))
+
+
+with CommandContext('storage metrics update') as c:
+    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'),
+              help='The storage service(s) for which to update metrics info: (b)lob (f)ile (q)ueue (t)able. '
+                   'Can be combined.')
+    c.reg_arg('hour',
+              help='Update the hourly metrics.',
+              validator=process_metric_update_namespace, **enum_choice_list(['true', 'false']))
+    c.reg_arg('minute',
+              help='Update the by-minute metrics.', **enum_choice_list(['true', 'false']))
+    c.reg_arg('api',
+              help='Specify whether to include API in metrics. Applies to both hour and minute metrics if both are '
+                   'specified. Must be specified if hour or minute metrics are enabled and being updated.',
+              **enum_choice_list(['true', 'false']))
+    c.reg_arg('retention',
+              type=int, help='Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute'
+                             ' metrics if both are specified.')

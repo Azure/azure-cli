@@ -24,7 +24,7 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
                                    GeneralNameReplacer, LargeRequestBodyProcessor,
                                    LargeResponseBodyProcessor, LargeResponseBodyReplacer,
                                    DeploymentNameReplacer)
-from .utilities import create_random_name
+from .utilities import create_random_name, find_recording_dir
 from .decorators import live_only
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -111,7 +111,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
         self.replay_processors = [LargeResponseBodyReplacer(), DeploymentNameReplacer()]
 
         test_file_path = inspect.getfile(self.__class__)
-        recordings_dir = os.path.join(os.path.dirname(test_file_path), 'recordings')
+        recordings_dir = find_recording_dir(test_file_path)
         live_test = os.environ.get(ENV_LIVE_TEST, None) == 'True'
 
         self.vcr = vcr.VCR(
@@ -240,7 +240,7 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
             logger.error('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 
-        logger.info('Command "%s" => %d.', command, self.exit_code)
+        logger.info('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
 
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'

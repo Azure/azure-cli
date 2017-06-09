@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
 
 helps['taskhelp'] = """
     type: group

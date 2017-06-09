@@ -72,7 +72,7 @@ def cli_redis_update(instance, sku=None, vm_size=None):
 
 
 def wrong_vmsize_argument_exception_handler(ex):
-    # pylint:disable=line-too-long
+
     from msrest.exceptions import ClientException
     if isinstance(ex, ClientException):
         if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid"

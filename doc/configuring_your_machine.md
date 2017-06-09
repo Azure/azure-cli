@@ -72,7 +72,7 @@ The repo has a launch.json file that will launch the version of Python that is f
 
   #### OSX/Ubuntu (bash):
   ```Shell
-  source <clone root>/env/scripts/activate
+  . <clone root>/env/bin/activate
   ```
 
   #### Windows:

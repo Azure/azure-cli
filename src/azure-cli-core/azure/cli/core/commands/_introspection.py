@@ -8,50 +8,54 @@ import re
 
 
 def extract_full_summary_from_signature(operation):
-    """ Extract the summary from the doccomments of the command. """
+    """ Extract the summary from the docstring of the command. """
     lines = inspect.getdoc(operation)
     regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
     summary = ''
     if lines:
         match = re.search(regex, lines)
-        if match:
-            summary = lines[:match.regs[0][0]]
-        else:
-            summary = lines
+        summary = lines[:match.regs[0][0]] if match else lines
+
     summary = summary.replace('\n', ' ').replace('\r', '')
     return summary
 
 
 def _option_descriptions(operation):
-    """ Extract parameter help from doccomments of the command. """
-    option_descs = {}
+    """ Extract parameter help from docstring of the command. """
     lines = inspect.getdoc(operation)
-    param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
-    if lines:  # pylint: disable=too-many-nested-blocks
-        lines = lines.splitlines()
-        index = 0
-        while index < len(lines):
-            l = lines[index]
-            regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
-            match = re.search(regex, l)
-            if match:
-                # 'arg name' portion might have type info, we don't need it
-                arg_name = str.split(match.group(2))[-1]
-                arg_desc = match.group(3).strip()
-                # look for more descriptions on subsequent lines
-                index += 1
-                while index < len(lines):
-                    temp = lines[index].strip()
-                    if any(temp.startswith(x) for x in param_breaks):
-                        break
-                    else:
-                        if temp:
-                            arg_desc += (' ' + temp)
-                        index += 1
 
-                option_descs[arg_name] = arg_desc
+    if not lines:
+        return {}
+
+    param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
+    option_descs = {}
+
+    lines = lines.splitlines()
+    index = 0
+    while index < len(lines):
+        l = lines[index]
+        regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
+        match = re.search(regex, l)
+        if not match:
+            index += 1
+            continue
+
+        # 'arg name' portion might have type info, we don't need it
+        arg_name = str.split(match.group(2))[-1]
+        arg_desc = match.group(3).strip()
+        # look for more descriptions on subsequent lines
+        index += 1
+        while index < len(lines):
+            temp = lines[index].strip()
+            if any(temp.startswith(x) for x in param_breaks):
+                break
             else:
+                if temp:
+                    arg_desc += (' ' + temp)
                 index += 1
+
+        option_descs[arg_name] = arg_desc
+
     return option_descs
 
 
@@ -104,7 +108,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
         if arg_name == no_wait_param:
             if not isinstance(default, bool):
                 raise ValueError("The type of '{}' must be boolean to enable no_wait".format(
-                    no_wait_param))  # pylint: disable=line-too-long
+                    no_wait_param))
             found_no_wait_param = True
             options_list = ['--no-wait']
             help_str = 'do not wait for the long running operation to finish'

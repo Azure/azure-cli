@@ -120,7 +120,6 @@ class AzCompleter(Completer):
         self.output_options = commands.output_options if global_params else []
         self.global_param_descriptions = commands.global_param_descriptions if global_params else []
 
-        AzCliCommandParser.error = error_pass  # mutes the parsing
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
@@ -197,7 +196,7 @@ class AzCompleter(Completer):
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
-        try:  # pylint: disable=too-many-nested-blocks
+        try:
             is_param, started_param, prefix, param = dynamic_param_logic(text)
 
             # command table specific name

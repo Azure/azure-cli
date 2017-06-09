@@ -2,13 +2,14 @@
 
 Release History
 ===============
-2.0.5 (unreleased)
+2.0.6 (unreleased)
+++++++++++++++++++
+*rbac: clean up role assignments and related AAD application when delete a service principal
+
+2.0.5 (2017-05-30)
 ++++++++++++++++++
 * ad: for 'app create' command, mention time format in the arg descriptions for --start-date/--end-date
 * output deprecating information on using '--expanded-view'
-
-unreleased
-++++++++++++++++++
 * Add Key Vault integration to the create-for-rbac and reset-credentials commands.
 
 

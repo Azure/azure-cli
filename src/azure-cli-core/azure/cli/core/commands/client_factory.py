@@ -33,8 +33,10 @@ def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_v
     return client
 
 
-def get_subscription_service_client(client_type):
-    return _get_mgmt_service_client(client_type, False)
+def get_subscription_service_client():
+    return _get_mgmt_service_client(get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS),
+                                    subscription_bound=False,
+                                    api_version=get_api_version(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS))
 
 
 def configure_common_settings(client):

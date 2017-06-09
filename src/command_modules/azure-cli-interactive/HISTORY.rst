@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.3.2 (unreleased)
+0.3.3 (2017-05-30)
 ++++++++++++++++++
 
 * --progress flag

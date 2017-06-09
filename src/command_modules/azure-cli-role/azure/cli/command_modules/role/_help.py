@@ -5,8 +5,6 @@
 
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-# pylint: disable=line-too-long
-
 
 helps['ad sp create-for-rbac'] = """
     type: command
@@ -86,7 +84,10 @@ helps['ad sp reset-credentials'] = """
           short-summary: >
             Number of years for which the credentials will be valid. Default: 1 year
 """
-
+helps['ad sp delete'] = """
+    type: group
+    short-summary: delete the service principal and its role assignments.
+"""
 helps['role'] = """
     type: group
     short-summary: Use role assignments to manage access to your Azure resources.
@@ -109,6 +110,7 @@ helps['role assignment delete'] = """
 helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
+    long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use --all.
 """
 helps['role definition'] = """
     type: group

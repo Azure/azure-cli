@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from azure.cli.core.help_files import helps
 
 # pylint: disable=line-too-long, too-many-lines
 helps['managedapp'] = """
@@ -281,6 +281,12 @@ helps['group deployment'] = """
 helps['group deployment create'] = """
     type: command
     short-summary: Start a deployment.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a parameters file, raw JSON (which can be loaded using `@<file path>` syntax, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax (example: --parameters params.json --parameters location=westus)
     examples:
         - name: Create a deployment from a remote template file.
           text: >
@@ -288,6 +294,9 @@ helps['group deployment create'] = """
         - name: Create a deployment from a local template file and use parameter values in a string.
           text: >
             az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+        - name: Create a deployment from a local template, use a parameter file and selectively override parameters.
+          text: >
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters params.json --parameters MyValue=This MyArray=@array.json
 """
 helps['group deployment export'] = """
     type: command
@@ -296,6 +305,12 @@ helps['group deployment export'] = """
 helps['group deployment validate'] = """
     type: command
     short-summary: Validate whether the specified template is syntactically correct and will be accepted by Azure Resource Manager.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a parameters file, raw JSON (which can be loaded using `@<file path>` syntax, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax (example: --parameters params.json --parameters location=westus)
 """
 helps['group deployment wait'] = """
     type: command

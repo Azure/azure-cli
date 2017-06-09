@@ -1,8 +1,16 @@
 .. :changelog:
 Release History
 ===============
-unreleased
-----------
+2.0.8 (unreleased)
+++++++++++++++++++
+* Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
+
+unreleased 
+++++++++++++++++++
+* VM/VMSS: fixed an issue with name generation that resulted in the create commands not being idempotent.
+
+2.0.7 (2017-05-09)
+++++++++++++++++++
 * diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
 * disk: support cross subscription blob import
 * disk: add --no-wait flag to disk create, update, and delete.
@@ -17,6 +25,7 @@ unreleased
 * vm/vmss diagnostics: provide protected settings samples, handle extension major version upgrade, etc.
 * disk/snapshot/image: expose '--tags' in the create command
 * vmss: provides default for '--app-gateway-subnet-address-prefix' when creating a new vnet
+* vm: support configuring disk caching on attaching a managed disk
 
 2.0.6 (2017-05-09)
 ++++++++++++++++++

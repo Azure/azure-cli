@@ -121,13 +121,8 @@ def _download_log_files(
             urlretrieve(f.url, f.name)
 
 
-def _list_log_files_with_filter(  # pylint: disable=too-many-arguments
-        client,
-        resource_group_name,
-        server_name,
-        filename_contains=None,
-        file_last_written=None,
-        max_file_size=None):
+def _list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
+                                file_last_written=None, max_file_size=None):
     """List all the log files of a given server.
 
     :param resource_group_name: The name of the resource group that
