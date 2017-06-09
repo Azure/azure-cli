@@ -243,7 +243,7 @@ class AzCompleter(Completer):
                                 pass  # other completion method used
 
         # if the user isn't logged in
-        except (CLIError, AttributeError, ValueError, ValidationError):  # service client throws
+        except Exception:  # pylint: disable=broad-except
             pass
 
     def gen_cmd_completions(self, text):
