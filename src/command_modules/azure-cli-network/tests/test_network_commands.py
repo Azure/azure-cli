@@ -975,17 +975,6 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):  # pylint: disabl
         self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, self.gateway2_name))
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg), checks=JMESPathCheck('routingWeight', 25))
 
-        # TODO: Re-enable test once issue #3385 is fixed.
-        # test network watcher troubleshooting commands
-        # storage_account = 'clitestnwstorage2'
-        # container_name = 'troubleshooting-results'
-        # self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
-        # self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
-        # storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
-        # self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
-        # self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
-        # self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
-
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -1165,17 +1154,19 @@ class NetworkWatcherTroubleshootingScenarioTest(ScenarioTest):
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_troubleshooting', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
-    def test_network_watcher_packet_capture(self, resource_group, storage_account):
+    def test_network_watcher_troubleshooting(self, resource_group, storage_account):
         self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
 
         # set up resource to troubleshoot
         self.cmd('storage container create -n troubleshooting --account-name {}'.format(storage_account))
-        storage_path = 'lalala'
+        sa = self.cmd('storage account show -g {} -n {}'.format(resource_group, storage_account)).get_output_in_json()
+        storage_path = sa['primaryEndpoints']['blob'] + 'troubleshooting'
         self.cmd('network vnet create -g {} -n vnet1 --subnet-name GatewaySubnet'.format(resource_group))
         self.cmd('network public-ip create -g {} -n vgw1-pip'.format(resource_group))
         self.cmd('network vnet-gateway create -g {} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip'.format(resource_group))
 
-        self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway --storage-account {} --storage-path {}'.format(storage_account, storage_path))
+        self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {} --storage-account {} --storage-path {}'.format(resource_group, storage_account, storage_path))
+        self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {}'.format(resource_group))
 
 
 if __name__ == '__main__':
