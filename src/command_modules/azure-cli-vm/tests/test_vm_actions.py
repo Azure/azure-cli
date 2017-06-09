@@ -117,7 +117,7 @@ class TestActions(unittest.TestCase):
 
     def test_validate_admin_password_linux(self):
         # pylint: disable=line-too-long
-        err_length = 'The pssword length must be between 12 and 72'
+        err_length = 'The password length must be between 12 and 72'
         err_variety = 'Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character'
 
         self._verify_password_with_ex('te', 'linux', err_length)
@@ -129,7 +129,7 @@ class TestActions(unittest.TestCase):
 
     def test_validate_admin_password_windows(self):
         # pylint: disable=line-too-long
-        err_length = 'The pssword length must be between 12 and 123'
+        err_length = 'The password length must be between 12 and 123'
         err_variety = 'Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character'
 
         self._verify_password_with_ex('P1', 'windows', err_length)
