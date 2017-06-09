@@ -15,8 +15,6 @@ from azclishell.layout import get_scope
 from azclishell.util import parse_quotes
 
 from azure.cli.core.parser import AzCliCommandParser
-from azure.cli.core.util import CLIError
-from msrest.exceptions import ValidationError
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
