@@ -372,8 +372,8 @@ helps[boot_diagnostics_log] = """
     examples:
 {0}
 {1}
-""".format(name_group_example.format('Disable boot diagnostics', boot_diagnostics_log),
-           vm_ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
+""".format(name_group_example.format('Get boot diagnostics log', boot_diagnostics_log),
+           vm_ids_example.format('Get boot diagnostics log by VM Ids', boot_diagnostics_log))
 
 helps['acs'] = """
     type: group

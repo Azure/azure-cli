@@ -1515,11 +1515,12 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None, os_caching=None,
               data_caching=None, storage_container_name=None, storage_sku=None, use_unmanaged_disk=False,
-              attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None, vnet_name=None,
-              vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
-              os_publisher=None, os_offer=None, os_sku=None, os_version=None, storage_account_type=None, vnet_type=None,
-              nsg_type=None, public_ip_type=None, nic_type=None, validate=False, custom_data=None, secrets=None,
-              plan_name=None, plan_product=None, plan_publisher=None, license_type=None):
+              attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
+              vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
+              storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
+              storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
+              validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
+              license_type=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, build_vm_resource,
@@ -1631,7 +1632,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets,
+        os_vhd_uri, attach_os_disk, attach_data_disks, data_disk_sizes_gb, image_data_disks, custom_data, secrets,
         license_type)
     vm_resource['dependsOn'] = vm_dependencies
 

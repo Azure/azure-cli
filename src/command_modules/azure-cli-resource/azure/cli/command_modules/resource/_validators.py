@@ -14,7 +14,7 @@ except ImportError:
 from azure.cli.core.util import CLIError
 
 
-def validate_deployment_name(namespace):
+def _validate_deployment_name(namespace):
     # If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
         template_filename = None
@@ -27,6 +27,55 @@ def validate_deployment_name(namespace):
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
             namespace.deployment_name = 'deployment1'
+
+
+def validate_deployment_parameters(namespace):
+
+    from azure.cli.core.util import shell_safe_json_parse, get_file_json
+
+    def _try_parse_json_object(value):
+        try:
+            parsed = shell_safe_json_parse(value)
+            return parsed.get('parameters', parsed)
+        except CLIError:
+            return None
+
+    def _try_load_file_object(value):
+        if os.path.isfile(value):
+            parsed = get_file_json(value, throw_on_empty=False)
+            return parsed.get('parameters', parsed)
+        return None
+
+    def _try_parse_key_value_object(parameters, value):
+        try:
+            key, value = value.split('=', 1)
+        except ValueError:
+            return False
+
+        try:
+            parameters[key] = {'value': shell_safe_json_parse(value)}
+        except (ValueError, CLIError):
+            parameters[key] = {'value': value}
+
+        return True
+
+    parameters = {}
+    for params in namespace.parameters or []:
+        for item in params:
+            if not _try_parse_key_value_object(parameters, item):
+                param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+                if not param_obj:
+                    raise CLIError('Unable to parse parameter: {}'.format(item))
+                parameters.update(param_obj)
+
+    namespace.parameters = parameters
+
+
+def process_deployment_create_namespace(namespace):
+    if (namespace.template_uri and namespace.template_file) or \
+            (not namespace.template_uri and not namespace.template_file):
+        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
+    _validate_deployment_name(namespace)
 
 
 def internal_validate_lock_parameters(resource_group_name, resource_provider_namespace,
