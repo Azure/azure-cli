@@ -122,6 +122,9 @@ class IndeterminateStandardOut(ProgressViewBase):
         msg = args.get('message', 'In Progress')
         self.spinner.step(label=msg)
 
+    def clear(self):
+        self.out.write('\n')
+
     def flush(self):
         self.out.flush()
 
