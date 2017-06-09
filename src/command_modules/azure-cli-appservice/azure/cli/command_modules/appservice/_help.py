@@ -172,6 +172,18 @@ helps['webapp log config'] = """
     short-summary: Configure web app logs.
 """
 
+helps['webapp log download'] = """
+    type: command
+    short-summary: Download historical logs as a zip file
+    long-summary: Might not work with Linux webs
+"""
+
+helps['webapp log tail'] = """
+    type: command
+    short-summary: Start live tracing
+    long-summary: Might not work with Linux webs
+"""
+
 helps['webapp deployment'] = """
     type: group
     short-summary: Manage web application deployments.

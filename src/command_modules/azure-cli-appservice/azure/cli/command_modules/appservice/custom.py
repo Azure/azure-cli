@@ -961,9 +961,6 @@ def get_streaming_log(resource_group_name, name, provider=None, slot=None):
 
 
 def download_historical_logs(resource_group_name, name, log_file=None, slot=None):
-    '''
-    Download historical logs as a zip file
-    '''
     scm_url = _get_scm_url(resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
     import requests
