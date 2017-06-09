@@ -35,14 +35,15 @@ class TelThread(threading.Thread):
         self.counter = 0
         self.max_items_until_flush = max_items
 
-    def force_run(self):
+    def flush(self):
         """ pushes the function out without a check """
         try:
             self.threadfunc()
         except KeyboardInterrupt:
             pass
 
-    def run(self):
+    def add_telemetry_event(self):
+        """ adds a telemetry event the pipeline """
         try:
             if self.counter >= self.max_items_until_flush:
                 self.threadfunc()
@@ -67,13 +68,13 @@ class Telemetry(TelemetryClient):
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
         self.track_event('az/interactive/gesture', {gesture: scrub(cmd)})
-        self.telthread.run()
+        self.telthread.add_telemetry_event()
 
     @_user_agrees_to_telemetry
     def track_key(self, key):
         """ tracks the special key bindings """
         self.track_event('az/interactive/key/{}'.format(key))
-        self.telthread.run()
+        self.telthread.add_telemetry_event()
 
     @_user_agrees_to_telemetry
     def start(self):
@@ -86,7 +87,7 @@ class Telemetry(TelemetryClient):
         self.end_time = str(datetime.datetime.now())
         self.track_event('Run', {'StartTime': str(self.start_time),
                                  'EndTime': str(self.end_time)})
-        self.telthread.force_run()
+        self.telthread.flush()
 
 
 def scrub(text):
