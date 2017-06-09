@@ -396,7 +396,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
-        # the testing below follow a real custom's workflow requiring the support of attaching data disk
+        # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
 
         # creating a vm
         self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2'.format(resource_group))
@@ -404,7 +404,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
         origin_os_disk_name = result['storageProfile']['osDisk']['name']
         origin_data_disk_name = result['storageProfile']['dataDisks'][0]['name']
 
-        # snapshot the os and data disks
+        # snapshot the os & data disks
         os_snapshot = 'oSnapshot'
         os_disk = 'sDisk'
         data_snapshot = 'dSnapshot'
@@ -427,7 +427,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
         os_disk_vhd = result['storageProfile']['osDisk']['vhd']['uri']
         data_disk_vhd = result['storageProfile']['dataDisks'][0]['vhd']['uri']
 
-        # delete the vm so the vhd can be used to create a new vm through attaching
+        # delete the vm to end vhd's leases so they can be used to create a new vm through attaching
         self.cmd('vm deallocate -g {} -n vm1'.format(resource_group))
         self.cmd('vm delete -g {} -n vm1 -y'.format(resource_group))
 

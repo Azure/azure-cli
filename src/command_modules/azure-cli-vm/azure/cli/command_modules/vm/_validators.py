@@ -376,7 +376,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.attach_os_disk = _get_resource_id(
             namespace.attach_os_disk, namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
-    if namespace.attach_data_disks:
+    if getattr(namespace, 'attach_data_disks', None):
         if not namespace.use_unmanaged_disk:
             namespace.attach_data_disks = [_get_resource_id(d, namespace.resource_group_name, 'disks',
                                                             'Microsoft.Compute') for d in namespace.attach_data_disks]

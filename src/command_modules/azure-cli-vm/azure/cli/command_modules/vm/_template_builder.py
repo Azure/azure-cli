@@ -413,7 +413,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
             })
             lun = lun + 1
 
-    if attach_data_disks:  # only managed disks, no asks yet for unmanaged disks
+    if attach_data_disks:
         from azure.cli.core.commands.arm import is_valid_resource_id
         for d in attach_data_disks:
             disk_entry = {
