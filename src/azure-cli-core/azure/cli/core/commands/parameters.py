@@ -20,8 +20,7 @@ logger = azlogging.get_az_logger(__name__)
 
 def get_subscription_locations():
     from azure.cli.core.commands.client_factory import get_subscription_service_client
-    from azure.mgmt.resource import SubscriptionClient
-    subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
+    subscription_client, subscription_id = get_subscription_service_client()
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 
