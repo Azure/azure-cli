@@ -425,6 +425,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 disk_entry['managedDisk'] = {'id': d}
             else:
                 disk_entry['vhd'] = {'uri': d}
+                disk_entry['name'] = d.split('/')[-1].split('.')[0]
             profile['dataDisks'].append(disk_entry)
             lun += 1
 
