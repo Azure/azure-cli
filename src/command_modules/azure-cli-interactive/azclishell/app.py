@@ -60,7 +60,6 @@ SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
 START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
-ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
 
 def handle_cd(cmd):
