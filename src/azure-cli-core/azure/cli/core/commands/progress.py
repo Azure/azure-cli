@@ -123,7 +123,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         self.spinner.step(label=msg)
 
     def clear(self):
-        self.out.write('\n')
+        self.spinner.clear()
 
     def flush(self):
         self.out.flush()

@@ -16,6 +16,8 @@ def patch_progress_controller(unit_test):
     _mock_in_unit_test(
         unit_test, 'azure.cli.core.commands.progress.ProgressHook.add', _mock_pass)
     _mock_in_unit_test(
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.end', _mock_pass)
+    _mock_in_unit_test(
         unit_test, 'azure.cli.command_modules.storage.custom._update_progress', _mock_pass)
     _mock_in_unit_test(
         unit_test, 'azure.cli.core.commands.LongRunningOperation._template_progress', _mock_pass)
