@@ -461,7 +461,7 @@ class Shell(object):
             elif text[0] == '--version' or text[0] == '-v':
                 try:
                     continue_flag = True
-                    show_version_info_exit(sys.stdout)
+                    show_version_info_exit(self.output)
                 except SystemExit:
                     pass
             elif "|" in text or ">" in text:  # anything I don't parse, send off
