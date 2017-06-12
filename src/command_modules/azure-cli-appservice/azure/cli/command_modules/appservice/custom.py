@@ -344,6 +344,7 @@ def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
 
 
+# TODO: remove this when #3660(service tracking issue) is resolved
 def _mask_creds_related_appsettings(settings):
     for x in [x1 for x1 in settings if x1 in APPSETTINGS_TO_MASK]:
         settings[x] = None
