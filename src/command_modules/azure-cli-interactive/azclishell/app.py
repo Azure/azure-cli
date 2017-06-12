@@ -566,7 +566,6 @@ class Shell(object):
 
             self.app.initialize(Configuration())
             result = self.app.execute(args)
-            self.app.initialize(Configuration())
 
             if '--progress' in args:
                 args.remove('--progress')
