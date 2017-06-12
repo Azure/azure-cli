@@ -46,7 +46,7 @@ from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
-import azure.cli.core.telemetry as telemetry
+import azure.cli.core.telemetry as cli_telemetry
 from azure.cli.core.util import (show_version_info_exit, handle_exception)
 from azure.cli.core.util import CLIError
 
@@ -567,7 +567,6 @@ class Shell(object):
 
             config = Configuration()
             self.app.initialize(config)
-            self.app.session['headers'] = {'x-ms-client-request-id': str(uuid.uuid1())}
             result = self.app.execute(args)
             self.app.initialize(Configuration())
 
@@ -652,7 +651,7 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
-                        telemetry.conclude()
+                        cli_telemetry.conclude()  # because I catch the sys exit, I have to push out
 
             except KeyboardInterrupt:  # CTRL C
                 self.set_prompt()

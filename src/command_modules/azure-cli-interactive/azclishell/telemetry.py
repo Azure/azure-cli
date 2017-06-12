@@ -3,9 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import datetime
 import threading
+import subprocess
+import sys
+import os
+import json
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
@@ -50,21 +53,22 @@ class Telemetry(TelemetryClient):
         self.context.user.id = Profile().get_installation_id()
         self.context.instrumentation_key = INSTRUMENTATION_KEY
 
-    def track_event(self, name, properties=None, measurements=None):
+    def _track_event(self, name, properties=None, measurements=None):
         """ tracks the telemetry events and pushes them out """
         super(Telemetry, self).track_event(name, properties, measurements)
         thread = TelThread(self.flush)
+        thread.daemon = True
         thread.start()
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
-        self.track_event('az/interactive/gesture', {gesture: scrub(cmd)})
+        self._track_event('az/interactive/gesture', {gesture: scrub(cmd)})
 
     @_user_agrees_to_telemetry
     def track_key(self, key):
         """ tracks the special key bindings """
-        self.track_event('az/interactive/key/{}'.format(key))
+        self._track_event('az/interactive/key/{}'.format(key))
 
     @_user_agrees_to_telemetry
     def start(self):
@@ -75,8 +79,11 @@ class Telemetry(TelemetryClient):
     def conclude(self):
         """ concludings recording stuff """
         self.end_time = str(datetime.datetime.now())
-        self.track_event('Run', {'StartTime': str(self.start_time),
-                                 'EndTime': str(self.end_time)}, force=True)
+        run = json.dumps({'StartTime': str(self.start_time), 'EndTime': str(self.end_time)})
+        subprocess.Popen([
+            sys.executable,
+            os.path.realpath(__file__),
+            run])
 
 
 def scrub(text):
@@ -96,3 +103,9 @@ def scrub(text):
 
 
 TC = Telemetry(INSTRUMENTATION_KEY)
+
+
+if __name__ == '__main__':
+    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
+    TC.track_event('Run', json.loads(sys.argv[1]))
+    TC.flush()
