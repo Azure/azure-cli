@@ -164,7 +164,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                     results.append(item)
                 else:
                     break
-                results = list(results)
 
             if results:
                 for event in results:
