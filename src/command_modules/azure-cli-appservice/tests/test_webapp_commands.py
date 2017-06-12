@@ -326,10 +326,13 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
             JMESPathCheck('appCommandLine', 'process.json')
         ])
-        self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
+        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
             self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'))
+        self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
+
         result = self.cmd('webapp config container show -g {} -n {} '.format(self.resource_group, webapp))
         self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
+        self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
         self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         self.cmd('webapp config container delete -g {} -n {}'.format(self.resource_group, webapp))

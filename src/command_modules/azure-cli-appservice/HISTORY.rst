@@ -7,6 +7,7 @@ Release History
 webapp: expose "traffic-routing" commands to configure static routing
 webapp: launch default web browser w/o errors in osx 
 webapp: improve the help of "az webapp log tail/download"
+BC: webapp: mask docker registry passwords from 'appsettings/container' commands' output
 
 0.1.7 (2017-05-30)
 ++++++++++++++++++++
