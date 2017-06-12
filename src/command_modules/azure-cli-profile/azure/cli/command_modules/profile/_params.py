@@ -28,4 +28,4 @@ register_cli_argument('logout', 'username', help='account user, if missing, logo
 
 register_cli_argument('account', 'subscription', options_list=('--subscription', '-s'), help='Name or ID of subscription.', completer=get_subscription_id_list)
 register_cli_argument('account list', 'all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
-register_cli_argument('account show', 'expanded_view', action='store_true', help=argparse.SUPPRESS)
+register_cli_argument('account show', 'expanded_view', action='store_true', help=argparse.SUPPRESS)  # supress because this is being deprecated
