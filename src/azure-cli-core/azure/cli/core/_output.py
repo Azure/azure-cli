@@ -28,7 +28,6 @@ def _decode_str(output):
 
 
 class ComplexEncoder(json.JSONEncoder):
-
     def default(self, o):  # pylint: disable=method-hidden
         if isinstance(o, bytes) and not isinstance(o, str):
             return o.decode()

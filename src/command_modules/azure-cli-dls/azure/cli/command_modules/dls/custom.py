@@ -241,7 +241,6 @@ def move_adls_item(account_name,
     client.mv(source_path, destination_path)
 
 
-# pylint: disable=superfluous-parens
 def set_adls_item_expiry(account_name,
                          path,
                          expiration_time):
@@ -258,7 +257,6 @@ def set_adls_item_expiry(account_name,
     client.set_expiry(path, ExpiryOptionType.absolute.value, expiration_time)
 
 
-# pylint: disable=superfluous-parens
 def remove_adls_item_expiry(account_name,
                             path):
     client = cf_dls_filesystem(account_name)

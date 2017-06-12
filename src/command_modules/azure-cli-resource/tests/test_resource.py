@@ -7,7 +7,7 @@ import os
 import time
 import unittest
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck as JCheck)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck as JCheck, create_random_name)
 # AZURE CLI RESOURCE TEST DEFINITIONS
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
                                              BooleanCheck,
@@ -15,7 +15,6 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneChe
                                              MOCKED_SUBSCRIPTION_ID)
 
 
-# pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
     def test_resource_group(self):
         self.execute()
@@ -321,20 +320,24 @@ class DeploymentTest(ResourceGroupVCRTestBase):
 
     def body(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
-                                                                                          '\\\\')
+        template_file = os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
+        object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
         deployment_name = 'azure-cli-deployment'
 
-        self.cmd('group deployment validate -g {} --template-file {} --parameters @{}'.format(
-            self.resource_group, template_file, parameters_file), checks=[
-            JMESPathCheck('properties.provisioningState', 'Accepted')
+        subnet_id = self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(self.resource_group))['newVNet']['subnets'][0]['id']
+
+        self.cmd('group deployment validate -g {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
+            self.resource_group, template_file, parameters_file, subnet_id, object_file), checks=[
+            JMESPathCheck('properties.provisioningState', 'Succeeded')
         ])
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{}'.format(
-            self.resource_group, deployment_name, template_file, parameters_file), checks=[
+
+        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
+            self.resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file), checks=[
             JMESPathCheck('properties.provisioningState', 'Succeeded'),
             JMESPathCheck('resourceGroup', self.resource_group),
         ])
+
         self.cmd('group deployment list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('[0].name', deployment_name),
             JMESPathCheck('[0].resourceGroup', self.resource_group)
@@ -395,8 +398,7 @@ class DeploymentThruUriTest(ResourceGroupVCRTestBase):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/' \
-                       'command_modules/azure-cli-resource/azure/cli/command_modules/resource/' \
-                       'tests/simple_deploy.json'
+                       'command_modules/azure-cli-resource/tests/simple_deploy.json'
         parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
                                                                                           '\\\\')
         deployment_name = 'simple_deploy'  # auto-gen'd by command
@@ -657,20 +659,22 @@ class ManagedAppScenarioTest(ScenarioTest):
 
 
 class CrossRGDeploymentScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    def test_crossrgdeployment(self, resource_group):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_alt', parameter_name='resource_group_cross')
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_deploy')
+    def test_crossrg_deployment(self, resource_group, resource_group_cross):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'crossrg_deploy_parameters.json').replace('\\',
-                                                                                           '\\\\')
         deployment_name = 'azure-cli-crossrgdeployment'
+        storage_account_1 = create_random_name(prefix='crossrg')
+        storage_account_2 = create_random_name(prefix='crossrg')
 
-        self.cmd('group deployment validate -g {} --template-file {} --parameters @{}'.format(
-            resource_group, template_file, parameters_file), checks=[
+        self.cmd('group deployment validate -g {} --template-file {} --parameters CrossRG={} StorageAccountName1={} StorageAccountName2={}'.format(
+            resource_group, template_file, resource_group_cross, storage_account_1, storage_account_2), checks=[
             JCheck('properties.provisioningState', 'Succeeded')
         ])
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{}'.format(
-            resource_group, deployment_name, template_file, parameters_file), checks=[
+        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters CrossRG={}'.format(
+            resource_group, deployment_name, template_file, resource_group_cross), checks=[
             JCheck('properties.provisioningState', 'Succeeded'),
             JCheck('resourceGroup', resource_group),
         ])
@@ -678,19 +682,14 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
             JCheck('[0].name', deployment_name),
             JCheck('[0].resourceGroup', resource_group)
         ])
-        self.cmd('group deployment show -g {} -n {}'.format(resource_group, deployment_name),
-                 checks=[
-                     JCheck('name', deployment_name),
-                     JCheck('resourceGroup', resource_group)
-                 ])
-        self.cmd('group deployment operation list -g {} -n {}'.format(resource_group,
-                                                                      deployment_name), checks=[
+        self.cmd('group deployment show -g {} -n {}'.format(resource_group, deployment_name), checks=[
+            JCheck('name', deployment_name),
+            JCheck('resourceGroup', resource_group)
+        ])
+        self.cmd('group deployment operation list -g {} -n {}'.format(resource_group, deployment_name), checks=[
             JCheck('length([])', 3),
             JCheck('[0].resourceGroup', resource_group)
         ])
-
-    def tear_down(self):
-        self.cmd('group delete --name {} --no-wait --yes'.format('crossrg5'))
 
 
 if __name__ == '__main__':

@@ -151,7 +151,7 @@ def create_adla_catalog_credential(client,
         try:
             credential_user_password = prompt_pass('Password:', confirm=True)
         except NoTTYException:
-            # pylint: disable=line-too-long
+
             raise CLIError('Please specify both --user-name and --password in non-interactive mode.')
 
     create_params = DataLakeAnalyticsCatalogCredentialCreateParameters(credential_user_password,
@@ -172,14 +172,14 @@ def update_adla_catalog_credential(client,
         try:
             credential_user_password = prompt_pass('Current Password:', confirm=True)
         except NoTTYException:
-            # pylint: disable=line-too-long
+
             raise CLIError('Please specify --user-name --password and --new-password in non-interactive mode.')
 
     if not new_credential_user_password:
         try:
             new_credential_user_password = prompt_pass('New Password:', confirm=True)
         except NoTTYException:
-            # pylint: disable=line-too-long
+
             raise CLIError('Please specify --user-name --password and --new-password in non-interactive mode.')
 
     update_params = DataLakeAnalyticsCatalogCredentialUpdateParameters(credential_user_password,
@@ -271,15 +271,14 @@ def submit_adla_job(client,
     return client.create(account_name, job_id, submit_params)
 
 
-# pylint: disable=superfluous-parens
 def wait_adla_job(client,
                   account_name,
                   job_id,
                   wait_interval_sec=5,
                   max_wait_time_sec=-1):
     if wait_interval_sec < 1:
-        # pylint: disable=line-too-long
-        raise CLIError('wait times must be greater than 0 when polling jobs. Value specified: {}'.format(wait_interval_sec))
+        raise CLIError('wait times must be greater than 0 when polling jobs. Value specified: {}'
+                       .format(wait_interval_sec))
 
     job = client.get(account_name, job_id)
     time_waited_sec = 0

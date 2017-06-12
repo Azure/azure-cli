@@ -300,7 +300,7 @@ def _object_id_args_helper(object_id, spn, upn):
             resource=CLOUD.endpoints.active_directory_graph_resource_id)
         graph_client = GraphRbacManagementClient(cred,
                                                  tenant_id,
-                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)  # pylint: disable=line-too-long
+                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -522,7 +522,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
         if check.status != 'inProgress':
             logger.info(
                 "Long running operation 'keyvault certificate create' finished with result %s.",
-                check)  # pylint: disable=line-too-long
+                check)
             return check
         try:
             time.sleep(10)

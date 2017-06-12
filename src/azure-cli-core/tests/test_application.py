@@ -8,28 +8,42 @@ import unittest
 import os
 import tempfile
 
-from six import StringIO
-
 from azure.cli.core.application import Application, Configuration, IterateAction
 from azure.cli.core.commands import CliCommand
 from azure.cli.core.util import CLIError
 
 
 class TestApplication(unittest.TestCase):
+    def test_client_request_id_is_not_assigned_when_application_is_created(self):
+        app = Application()
+        self.assertNotIn('x-ms-client-request-id', app.session['headers'])
 
-    @classmethod
-    def setUpClass(cls):
-        pass
+    def test_client_request_id_is_refreshed_correctly(self):
+        app = Application()
+        app.refresh_request_id()
+        self.assertIn('x-ms-client-request-id', app.session['headers'])
 
-    @classmethod
-    def tearDownClass(cls):
-        pass
+        old_id = app.session['headers']['x-ms-client-request-id']
 
-    def setUp(self):
-        self.io = StringIO()
+        app.refresh_request_id()
+        self.assertIn('x-ms-client-request-id', app.session['headers'])
+        self.assertNotEquals(old_id, app.session['headers']['x-ms-client-request-id'])
 
-    def tearDown(self):
-        self.io.close()
+    def test_client_request_id_is_refreshed_after_execution(self):
+        def _handler(args):
+            return True
+
+        config = Configuration()
+        config.get_command_table = lambda *_: {'test': CliCommand('test', _handler)}
+        app = Application(config)
+
+        app.execute(['test'])
+        self.assertIn('x-ms-client-request-id', app.session['headers'])
+        old_id = app.session['headers']['x-ms-client-request-id']
+
+        app.execute(['test'])
+        self.assertIn('x-ms-client-request-id', app.session['headers'])
+        self.assertNotEquals(old_id, app.session['headers']['x-ms-client-request-id'])
 
     def test_application_register_and_call_handlers(self):
         handler_called = [False]
@@ -37,7 +51,7 @@ class TestApplication(unittest.TestCase):
         def handler(**kwargs):
             kwargs['args'][0] = True
 
-        def other_handler(**kwargs):  # pylint: disable=unused-variable
+        def other_handler(**kwargs):
             self.assertEqual(kwargs['args'], 'secret sauce')
 
         app = Application()

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+* Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>
+* Add support for specifying deployment parameters using KEY=VALUE syntax.
+
 2.0.7 (2017-05-30)
 ++++++++++++++++++
 * Minor fixes.

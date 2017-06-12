@@ -23,16 +23,17 @@ CMD_TABLE = APPLICATION.configuration.get_command_table()
 
 
 def install_modules():
+    installed_command_modules = []
     for cmd in CMD_TABLE:
-        CMD_TABLE[cmd].load_arguments()
-
-    try:
+        try:
+            CMD_TABLE[cmd].load_arguments()
+        except (ImportError, ValueError):
+            pass
         mods_ns_pkg = import_module('azure.cli.command_modules')
-        installed_command_modules = [modname for _, modname, _ in
-                                     pkgutil.iter_modules(mods_ns_pkg.__path__)
-                                     if modname not in BLACKLISTED_MODS]
-    except ImportError:
-        pass
+    for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__):
+        if modname not in BLACKLISTED_MODS:
+            installed_command_modules.append(modname)
+
     for mod in installed_command_modules:
         try:
             mod = import_module('azure.cli.command_modules.' + mod)
@@ -55,33 +56,36 @@ def dump_command_table():
     for cmd in CMD_TABLE:
         com_descrip = {}
         param_descrip = {}
-        command_description = CMD_TABLE[cmd].description
-        if callable(command_description):
-            command_description = command_description()
-        com_descrip['help'] = command_description
-        com_descrip['examples'] = ""
+        try:
+            command_description = CMD_TABLE[cmd].description
+            if callable(command_description):
+                command_description = command_description()
+            com_descrip['help'] = command_description
+            com_descrip['examples'] = ""
 
-        for key in CMD_TABLE[cmd].arguments:
-            required = ""
-            help_desc = ""
-            if CMD_TABLE[cmd].arguments[key].type.settings.get('required'):
-                required = "[REQUIRED]"
-            if CMD_TABLE[cmd].arguments[key].type.settings.get('help'):
-                help_desc = CMD_TABLE[cmd].arguments[key].type.settings.get('help')
+            for key in CMD_TABLE[cmd].arguments:
+                required = ""
+                help_desc = ""
+                if CMD_TABLE[cmd].arguments[key].type.settings.get('required'):
+                    required = "[REQUIRED]"
+                if CMD_TABLE[cmd].arguments[key].type.settings.get('help'):
+                    help_desc = CMD_TABLE[cmd].arguments[key].type.settings.get('help')
 
-            name_options = []
-            for name in CMD_TABLE[cmd].arguments[key].options_list:
-                name_options.append(name)
+                name_options = []
+                for name in CMD_TABLE[cmd].arguments[key].options_list:
+                    name_options.append(name)
 
-            options = {
-                'name': name_options,
-                'required': required,
-                'help': help_desc
-            }
-            param_descrip[CMD_TABLE[cmd].arguments[key].options_list[0]] = options
+                options = {
+                    'name': name_options,
+                    'required': required,
+                    'help': help_desc
+                }
+                param_descrip[CMD_TABLE[cmd].arguments[key].options_list[0]] = options
 
-        com_descrip['parameters'] = param_descrip
-        data[cmd] = com_descrip
+            com_descrip['parameters'] = param_descrip
+            data[cmd] = com_descrip
+        except (ImportError, ValueError):
+            pass
 
     for cmd in helps:
         diction_help = yaml.load(helps[cmd])
@@ -125,8 +129,7 @@ def dump_command_table():
 
 
 class Exporter(json.JSONEncoder):
-
-    def default(self, o):  # pylint: disable=method-hidden
+    def default(self, o):
         try:
             return super(Exporter, self).default(o)
         except TypeError:

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-# pylint: disable=unused-import
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,

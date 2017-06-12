@@ -64,7 +64,7 @@ def get_document_client_factory(kwargs):
     except Exception as ex:
         if isinstance(ex, CLIError):
             raise ex
-        # pylint:disable=line-too-long
+
         raise CLIError(
             'Failed to instantiate an Azure Cosmos DB client using the provided credential ' + str(
                 ex))

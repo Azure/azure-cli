@@ -4,6 +4,8 @@ Release History
 2.0.8 (unreleased)
 ++++++++++++++++++
 * Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
+* Support attaching existing data disks on vm create
+* VM/VMSS: fixed an issue with name generation that resulted in the create commands not being idempotent.
 
 2.0.7 (2017-05-09)
 ++++++++++++++++++

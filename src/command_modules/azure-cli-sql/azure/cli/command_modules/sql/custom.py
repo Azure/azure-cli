@@ -581,7 +581,6 @@ def db_audit_policy_update(
 
     # Apply state
     if state:
-        # pylint: disable=unsubscriptable-object
         instance.state = BlobAuditingPolicyState[state.lower()]
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
 
@@ -618,7 +617,6 @@ def db_threat_detection_policy_update(
 
     # Apply state
     if state:
-        # pylint: disable=unsubscriptable-object
         instance.state = SecurityAlertPolicyState[state.lower()]
     enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
 

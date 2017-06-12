@@ -722,8 +722,8 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
 
     # TODO: this only works for public cloud, need other casing for national clouds
 
-    acs_client.SecureCopy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
-                          '.kube/config', path_candidate, key_filename=ssh_key_file)
+    acs_client.secure_copy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
+                           '.kube/config', path_candidate, key_filename=ssh_key_file)
 
     # merge things
     if path_candidate != path:

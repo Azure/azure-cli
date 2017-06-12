@@ -5,7 +5,7 @@
 import getpass
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements,
+# pylint: disable=too-many-locals, unused-argument, too-many-statements
 
 def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
                   size=None, admin_username=getpass.getuser(), admin_password=None,
@@ -98,7 +98,7 @@ def _export_parameters(arm_template):
             for parameter_value_file_info in arm_template.parameters_value_files_info:
                 if isinstance(parameter_value_file_info.parameters_value_info, dict):
                     for k in parameter_value_file_info.parameters_value_info:
-                        default_values[k] = parameter_value_file_info.parameters_value_info[k].get('value', "")  # pylint: disable=line-too-long
+                        default_values[k] = parameter_value_file_info.parameters_value_info[k].get('value', "")
 
         if isinstance(arm_template.contents['parameters'], dict):
             for k in arm_template.contents['parameters']:
