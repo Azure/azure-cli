@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import argparse
 from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import \
@@ -627,7 +626,7 @@ register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config
 register_cli_argument('network traffic-manager profile create', 'status', help='Create an enabled or disabled profile.', **enum_choice_list(['Enabled', 'Disabled']))
 
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
-register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
+register_cli_argument('network traffic-manager profile check-dns', 'type', ignore_type, default='Microsoft.Network/trafficManagerProfiles')
 
 # Traffic manager endpoints
 endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
