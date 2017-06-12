@@ -10,7 +10,6 @@ import math
 import os
 import subprocess
 import sys
-import uuid
 import datetime
 import threading
 
@@ -35,7 +34,7 @@ from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import get_progress_message, progress_view
-from azclishell.telemetry import TC as telemetry
+from azclishell.telemetry import SHELL_TELEMETRY as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -565,8 +564,7 @@ class Shell(object):
             CONFIG.load(os.path.join(azure_folder, 'az.json'))
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-            config = Configuration()
-            self.app.initialize(config)
+            self.app.initialize(Configuration())
             result = self.app.execute(args)
             self.app.initialize(Configuration())
 

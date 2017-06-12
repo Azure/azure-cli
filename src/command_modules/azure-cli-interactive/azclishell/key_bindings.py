@@ -11,7 +11,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 
 import azclishell.configuration
-from azclishell.telemetry import TC as shell_telemetry
+from azclishell.telemetry import SHELL_TELEMETRY as shell_telemetry
 
 
 manager = KeyBindingManager(

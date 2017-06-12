@@ -16,7 +16,7 @@ from applicationinsights.exceptions import enable
 from azclishell import __version__
 
 from azure.cli.core._profile import Profile
-from azure.cli.core.telemetry import _user_agrees_to_telemetry
+from azure.cli.core.telemetry import _user_agrees_to_telemetry, TelemetrySession
 from azclishell.util import parse_quotes
 
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
@@ -39,15 +39,12 @@ class TelThread(threading.Thread):
 class Telemetry(TelemetryClient):
     """ base telemetry sessions """
 
-    def __init__(self, *args, **kwargs):
-        super(Telemetry, self).__init__(*args, **kwargs)
+    def __init__(self, instrumentation_key, telemetry_channel=None):
+        super(Telemetry, self).__init__(instrumentation_key, telemetry_channel)
         self.start_time = None
         self.end_time = None
-        enable(args[0])  # is the Instrument Key
-        self.add_context()
-
-    def add_context(self):
-        """ context for the application """
+        enable(instrumentation_key)
+        # adding context
         self.context.application.id = 'Azure CLI Shell'
         self.context.application.ver = __version__
         self.context.user.id = Profile().get_installation_id()
@@ -55,7 +52,7 @@ class Telemetry(TelemetryClient):
 
     def _track_event(self, name, properties=None, measurements=None):
         """ tracks the telemetry events and pushes them out """
-        super(Telemetry, self).track_event(name, properties, measurements)
+        self.track_event(name, properties, measurements)
         thread = TelThread(self.flush)
         thread.daemon = True
         thread.start()
@@ -79,11 +76,14 @@ class Telemetry(TelemetryClient):
     def conclude(self):
         """ concludings recording stuff """
         self.end_time = str(datetime.datetime.now())
-        run = json.dumps({'StartTime': str(self.start_time), 'EndTime': str(self.end_time)})
+        properties = {}
+        TelemetrySession.set_custom_properties(properties, 'StartTime', str(self.start_time))
+        TelemetrySession.set_custom_properties(properties, 'EndTime', str(self.end_time))
+
         subprocess.Popen([
             sys.executable,
             os.path.realpath(__file__),
-            run])
+            json.dumps(properties)])
 
 
 def scrub(text):
@@ -102,10 +102,10 @@ def scrub(text):
     return ' '.join(values)
 
 
-TC = Telemetry(INSTRUMENTATION_KEY)
+SHELL_TELEMETRY = Telemetry(INSTRUMENTATION_KEY)
 
 
 if __name__ == '__main__':
     # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
-    TC.track_event('Run', json.loads(sys.argv[1]))
-    TC.flush()
+    SHELL_TELEMETRY.track_event('az/interactive/run', json.loads(sys.argv[1]))
+    SHELL_TELEMETRY.flush()
