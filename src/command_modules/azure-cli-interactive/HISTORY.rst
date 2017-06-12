@@ -3,10 +3,14 @@
 Release History
 ===============
 
+0.3.3 (unreleased)
+++++++++++++++++++
+* Progress for Template Deployment
+
+
 0.3.3 (2017-05-30)
 ++++++++++++++++++
 * --progress flag
-* Progress for Template Deployment
 * Removed --debug and --verbose from completions
 
 
