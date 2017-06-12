@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import os
+import time
+
+import requests
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
@@ -123,9 +126,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
 
-        import time
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-        import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
@@ -136,7 +137,6 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = 'plan-quick-linux'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
-        import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
@@ -364,16 +364,6 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('branch', 'master')
         ])
 
-        '''
-        import time
-        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-
-        import requests
-        r = requests.get('http://{}.azurewebsites.net'.format(webapp))
-        #verify the web page
-        self.assertTrue('Hello world' in str(r.content))
-        '''
-
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('isMercurial', False),
@@ -399,7 +389,6 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         slot2 = 'dev'
-        test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
         test_php_version = '5.6'
 
         # create a few app-settings to test they can be cloned
@@ -408,10 +397,6 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
             JMESPathCheck('name', slot)
-        ])
-        self.cmd('webapp deployment source config -g {} -n {} --repo-url {} --branch {} -s {} --manual-integration'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
-            JMESPathCheck('repoUrl', test_git_repo),
-            JMESPathCheck('branch', slot)
         ])
 
         # swap with prod and verify the git branch also switched
@@ -447,6 +432,32 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         ])
 
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+
+
+class WebAppSlotSourceControlTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_slot_git_integration(self, resource_group):
+        plan = 'webapp-slot-git-plan'
+        webapp = 'web-slot-git2'
+        slot = 'staging'
+        # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
+
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|4.5"'.format(resource_group, webapp, plan_result['id'], test_git_repo))
+
+        # create an empty slot and configure its git repo
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
+        self.cmd('webapp deployment source config -g {} -n {} --repo-url {} --branch {} -s {} --manual-integration'.format(resource_group, webapp, test_git_repo, slot, slot))
+
+        time.sleep(10)
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
+        self.assertFalse('Staging slot:' in r.text)
+
+        time.sleep(10)
+        r2 = requests.get('http://{}-{}.azurewebsites.net'.format(webapp, slot), timeout=240)
+        self.assertTrue('Staging slot:' in r2.text)
 
 
 class WebappSlotTrafficRouting(ScenarioTest):
