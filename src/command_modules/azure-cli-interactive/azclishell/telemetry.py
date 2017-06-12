@@ -26,7 +26,7 @@ class TelThread(threading.Thread):
         self.threadfunc = threadfunc
 
     def run(self):
-        """ pushes the function out without a check """
+        """ pushes the function out """
         try:
             self.threadfunc()
         except KeyboardInterrupt:
@@ -50,9 +50,9 @@ class Telemetry(TelemetryClient):
         self.context.user.id = Profile().get_installation_id()
         self.context.instrumentation_key = INSTRUMENTATION_KEY
 
-    def track_event(self, name, value=None, force=False):
+    def track_event(self, name, properties=None, measurements=None):
         """ tracks the telemetry events and pushes them out """
-        super(Telemetry, self).track_event(name, value)
+        super(Telemetry, self).track_event(name, properties, measurements)
         thread = TelThread(self.flush)
         thread.start()
 
