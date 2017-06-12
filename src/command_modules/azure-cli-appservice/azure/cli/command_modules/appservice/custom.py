@@ -157,7 +157,7 @@ def get_app_settings(resource_group_name, name, slot=None):
                               .connection_string_names or []
     result = [{'name': p,
                'value': result.properties[p],
-               'slotSetting': p in slot_constr_names} for p in result.properties]
+               'slotSetting': p in slot_constr_names} for p in _mask_creds_related_appsettings(result.properties)]
     return result
 
 
@@ -234,7 +234,7 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         slot_cfg_names.app_setting_names += new_slot_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _mask_creds_related_appsettings(result.properties)
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
@@ -251,8 +251,9 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _generic_site_operation(resource_group_name, name, 'update_application_settings',
-                                   slot, app_settings)
+    return _mask_creds_related_appsettings(_generic_site_operation(resource_group_name, name,
+                                                                   'update_application_settings',
+                                                                   slot, app_settings).properties)
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
@@ -309,6 +310,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
                               'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
+APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
 def update_container_settings(resource_group_name, name, docker_registry_server_url=None,
@@ -326,7 +328,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
     update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
-    return _filter_for_container_settings(settings)
+    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
 
 
 def delete_container_settings(resource_group_name, name, slot=None):
@@ -335,11 +337,18 @@ def delete_container_settings(resource_group_name, name, slot=None):
 
 def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
-    return _filter_for_container_settings(settings)
+    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
 
 
 def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
+
+
+# TODO: remove this when #3660(service tracking issue) is resolved
+def _mask_creds_related_appsettings(settings):
+    for x in [x1 for x1 in settings if x1 in APPSETTINGS_TO_MASK]:
+        settings[x] = None
+    return settings
 
 
 def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
