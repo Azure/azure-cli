@@ -791,7 +791,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
 
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None):
+        backend_port=None, frontend_ip_name=None, floating_ip="false", idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
@@ -800,7 +800,7 @@ def create_lb_inbound_nat_rule(
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
     new_rule = InboundNatRule(
         name=item_name, protocol=protocol,
-        frontend_port=frontend_port, backend_port=backend_port,
+        frontend_port=frontend_port, backend_port=backend_port or frontend_port,
         frontend_ip_configuration=frontend_ip,
         enable_floating_ip=floating_ip == 'true',
         idle_timeout_in_minutes=idle_timeout)
@@ -1004,7 +1004,7 @@ def set_lb_probe(instance, parent, item_name, protocol=None, port=None,  # pylin
 
 def create_lb_rule(
         resource_group_name, load_balancer_name, item_name,
-        protocol, frontend_port, backend_port, frontend_ip_name=None,
+        protocol, frontend_port, backend_port=None, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
         floating_ip='false', idle_timeout=None):
     ncf = _network_client_factory()
@@ -1019,7 +1019,7 @@ def create_lb_rule(
         name=item_name,
         protocol=protocol,
         frontend_port=frontend_port,
-        backend_port=backend_port,
+        backend_port=backend_port or frontend_port,
         frontend_ip_configuration=_get_property(lb.frontend_ip_configurations,
                                                 frontend_ip_name),
         backend_address_pool=_get_property(lb.backend_address_pools,

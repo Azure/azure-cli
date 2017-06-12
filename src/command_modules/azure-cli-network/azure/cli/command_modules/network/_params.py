@@ -239,8 +239,10 @@ register_cli_argument('network application-gateway http-listener create', 'front
 register_cli_argument('network application-gateway rule create', 'address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
 register_cli_argument('network application-gateway rule create', 'http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
 register_cli_argument('network application-gateway rule create', 'http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
+
 register_cli_argument('network lb rule create', 'backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
 register_cli_argument('network lb rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
 register_cli_argument('network lb inbound-nat-rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
 register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
@@ -531,6 +533,8 @@ register_cli_argument('network lb create', 'vnet_name', virtual_network_name_typ
 register_cli_argument('network lb create', 'vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
 register_cli_argument('network lb create', 'vnet_type', ignore_type)
 
+register_cli_argument('network lb inbound-nat-rule create', 'backend_port', help='Port number. Defaults to the frontend port.')
+
 for item in ['create', 'update']:
     register_cli_argument('network lb frontend-ip {}'.format(item), 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=process_lb_frontend_ip_namespace)
     register_cli_argument('network lb frontend-ip {}'.format(item), 'subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
@@ -545,6 +549,9 @@ register_cli_argument('network lb probe', 'protocol', help='The protocol to prob
 register_cli_argument('network lb probe', 'threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
 
 register_cli_argument('network lb rule', 'load_distribution', help='Affinity rule settings.', **enum_choice_list(LoadDistribution))
+register_cli_argument('network lb rule', 'probe_name', help='The health probe used to determine which VMs can receive load balanced traffic.')
+
+register_cli_argument('network lb rule create', 'backend_port', help='Port number. Defaults to the frontend port.')
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
