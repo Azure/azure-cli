@@ -19,6 +19,8 @@ mgmt_path = 'azure.mgmt.keyvault.operations.vaults_operations#{}'
 
 cli_command(__name__, 'keyvault create', custom_path.format('create_keyvault'),
             keyvault_client_vaults_factory)
+cli_command(__name__, 'keyvault recover', custom_path.format('recover_keyvault'),
+            keyvault_client_vaults_factory)
 cli_command(__name__, 'keyvault list', custom_path.format('list_keyvault'),
             keyvault_client_vaults_factory)
 cli_command(__name__, 'keyvault show', mgmt_path.format('VaultsOperations.get'),
@@ -54,6 +56,8 @@ cli_keyvault_data_plane_command('keyvault key set-attributes',
                                 data_client_path.format('KeyVaultClient.update_key'))
 cli_keyvault_data_plane_command('keyvault key show',
                                 data_client_path.format('KeyVaultClient.get_key'))
+cli_keyvault_data_plane_command('keyvault key show-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_key'))
 cli_keyvault_data_plane_command('keyvault key delete',
                                 data_client_path.format('KeyVaultClient.delete_key'))
 cli_keyvault_data_plane_command('keyvault key purge',
@@ -76,6 +80,8 @@ cli_keyvault_data_plane_command('keyvault secret set-attributes',
                                 data_client_path.format('KeyVaultClient.update_secret'))
 cli_keyvault_data_plane_command('keyvault secret show',
                                 data_client_path.format('KeyVaultClient.get_secret'))
+cli_keyvault_data_plane_command('keyvault secret show-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_secret'))
 cli_keyvault_data_plane_command('keyvault secret delete',
                                 data_client_path.format('KeyVaultClient.delete_secret'))
 cli_keyvault_data_plane_command('keyvault secret purge',
@@ -96,6 +102,8 @@ cli_keyvault_data_plane_command('keyvault certificate list-deleted',
                                 data_client_path.format('KeyVaultClient.get_deleted_certificates'))
 cli_keyvault_data_plane_command('keyvault certificate show',
                                 data_client_path.format('KeyVaultClient.get_certificate'))
+cli_keyvault_data_plane_command('keyvault certificate show-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate delete',
                                 data_client_path.format('KeyVaultClient.delete_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate purge',

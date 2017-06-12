@@ -210,12 +210,40 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
 
 
+def recover_keyvault(client, vault_name, resource_group_name, location):
+    """
+    Recover a previously deleted keyvault for which soft delete was enabled
+    :param client: 
+    :param vault_name: The name of the vault to recover
+    :param resource_group_name: The original resource group of the vault to recover
+    :param location: The original location of the vault to recover
+    :return: The properties of the recovered key vault
+    """
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, CreateMode, SkuName, Sku
+    from azure.cli.core._profile import Profile, CLOUD
+    profile = Profile()
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=CLOUD.endpoints.active_directory_graph_resource_id)
+
+    params = VaultCreateOrUpdateParameters(location,
+                                           properties={
+                                                          'tenant_id': tenant_id,
+                                                          'sku': Sku(name=SkuName.standard.value),
+                                                          'create_mode': CreateMode.recover.value
+                                                      }
+                                           )
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                               vault_name=vault_name,
+                               parameters=params)
+
+
 def create_keyvault(client,
                     resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
-                    enable_for_soft_delete=None,
+                    enable_soft_delete=None,
                     no_self_perms=None,
                     tags=None):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
@@ -241,8 +269,7 @@ def create_keyvault(client,
                                         KeyPermissions.import_enum,
                                         KeyPermissions.backup,
                                         KeyPermissions.restore,
-                                        KeyPermissions.recover,
-                                        KeyPermissions.purge],
+                                        KeyPermissions.recover],
                                   secrets=[
                                       SecretPermissions.get,
                                       SecretPermissions.list,
@@ -250,8 +277,7 @@ def create_keyvault(client,
                                       SecretPermissions.delete,
                                       SecretPermissions.backup,
                                       SecretPermissions.restore,
-                                      SecretPermissions.recover,
-                                      SecretPermissions.purge],
+                                      SecretPermissions.recover],
                                   certificates=[
                                       CertificatePermissions.get,
                                       CertificatePermissions.list,
@@ -265,8 +291,7 @@ def create_keyvault(client,
                                       CertificatePermissions.setissuers,
                                       CertificatePermissions.deleteissuers,
                                       CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover,
-                                      CertificatePermissions.purge],
+                                      CertificatePermissions.recover],
                                   storage=[
                                       StoragePermissions.get,
                                       StoragePermissions.list,
@@ -296,7 +321,7 @@ def create_keyvault(client,
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
-                                 enable_soft_delete=enable_for_soft_delete)
+                                 enable_soft_delete=enable_soft_delete)
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
