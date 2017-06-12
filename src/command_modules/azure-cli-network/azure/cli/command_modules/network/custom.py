@@ -914,27 +914,49 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     return _get_property(poller.result().backend_address_pools, item_name)
 
 
-def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application_gateway_name, 
-                            address_pool_name, vm):
-    
-    # 1 Retrieve load balancer address pool
+def _get_backend_address_pool(resource_group_name, address_pool_name, load_balancer_name=None,
+                              application_gateway_name=None):
+
+    if (load_balancer_name and application_gateway_name) or (not load_balancer_name and not application_gateway_name):
+        raise ValueError('Must supply only one: load_balancer_name or application_gateway_name')
+
     ncf = _network_client_factory()
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    balancer = None
+    _type = None
+    if load_balancer_name:
+        balancer = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+        _type = 'load balancer'
+    else:
+        balancer = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+        _type = 'application gateway'
 
     address_pool = None
     if address_pool_name:
-        address_pool = next((x for x in lb.backend_address_pools if x.name == address_pool_name), None)
+        address_pool = next((x for x in balancer.backend_address_pools if x.name == address_pool_name), None)
         if not address_pool:
-            raise CLIError("Address pool '{}' not found on load balancer '{}'.".format(
-                address_pool_name, load_balancer_name))
-    elif len(lb.backend_address_pools) == 1:
-        address_pool = lb.backend_address_pools[0]
-    elif len(lb.backend_address_pools) > 1:
-        raise CLIError("Multiple address pools found on load balancer '{}'. "
-                       "Specify --address-pool-name NAME".format(load_balancer_name))
+            raise CLIError("Address pool '{}' not found on {} '{}'.".format(
+                address_pool_name, _type, balancer.name))
+    elif len(balancer.backend_address_pools) == 1:
+        address_pool = balancer.backend_address_pools[0]
+    elif len(balancer.backend_address_pools) > 1:
+        raise CLIError("Multiple address pools found on {} '{}'. "
+                       "Specify --address-pool-name NAME".format(_type, balancer.name))
     else:
-        raise CLIError("No backend address pools found for load balancer '{}'. "
-                       "Create one and try again.".format(load_balancer_name))
+        raise CLIError("No backend address pools found for {} '{}'. "
+                       "Create one and try again.".format(_type, balancer.name))
+
+    return address_pool
+
+
+def _add_to_nic_configuration(nic, item, item_type, ip_config_name=None):
+    
+
+
+def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application_gateway_name, 
+                            address_pool_name):
+    
+    address_pool = _get_backend_address_pool(resource_group_name, address_pool_name, load_balancer_name,
+                                             application_gateway_name)
 
     # 2 Associate the address pool with the NIC IP configurations
     from azure.cli.core.profiles import ResourceType
@@ -943,8 +965,7 @@ def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application
 
     for item in vm:
         vm_params = parse_resource_id(item)
-        vm_obj = ccf.virtual_machines.get(vm_params.get('resource_group', resource_group_name),
-                                            vm_params['name'])
+        vm_obj = ccf.virtual_machines.get(vm_params.get('resource_group', resource_group_name), vm_params['name'])
         nic_id = None
         if len(vm_obj.network_profile.network_interfaces) == 1:
             nic_id = vm_obj.network_profile.network_interfaces[0].id
@@ -954,10 +975,13 @@ def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application
             raise CLIError("No primary NIC found for VM '{}'.".format(vm_obj.name))
 
         nic_params = parse_resource_id(nic_id)
+        ncf = _network_client_factory()
         nic = ncf.network_interfaces.get(nic_params['resource_group'], nic_params['name'])
         if len(nic.ip_configurations) == 1:
             config = nic.ip_configurations[0]
-            _upsert(config, 'load_balancer_backend_address_pools', address_pool, 'id')
+            resource_type = 'load_balancer_backend_address_pools' if load_balancer_name else \
+                'application_gateway_backend_address_pool'
+            _upsert(config, resource_type, address_pool, 'id')
             try:
                 config_params = parse_resource_id(config.id)
                 ncf.network_interfaces.create_or_update(
