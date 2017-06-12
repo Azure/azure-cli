@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++
+
+* Fix #3592: convert generator to a list in download batch command dry run mode
+
 2.0.7 (2017-05-30)
 ++++++++++++++++++
 

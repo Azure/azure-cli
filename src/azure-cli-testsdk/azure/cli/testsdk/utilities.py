@@ -40,13 +40,8 @@ def get_sha1_hash(file_path):
 
 def find_recording_dir(test_file):
     """ Find the directory containing the recording of given test file based on current profile. """
-    from azure.cli.core._profile import get_active_cloud, init_known_clouds
-    from azure.cli.core.cloud import CloudNotRegisteredException
-    try:
-        api_profile = get_active_cloud().profile
-    except CloudNotRegisteredException:
-        init_known_clouds()
-        api_profile = get_active_cloud().profile
+    from azure.cli.core._profile import get_active_cloud
+    api_profile = get_active_cloud().profile
 
     base_dir = os.path.join(os.path.dirname(test_file), 'recordings')
     return os.path.join(base_dir, api_profile)

@@ -254,7 +254,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
+        attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
         custom_data=None, secrets=None, license_type=None):
 
     def _build_os_profile():
@@ -360,7 +360,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
         profile = storage_profiles[storage_profile.name]
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                                 data_caching, storage_sku)
+                                 data_caching, storage_sku, attach_data_disks=attach_data_disks)
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -392,9 +392,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
 
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                      data_caching, storage_sku):
+                      data_caching, storage_sku, attach_data_disks=None):
+    lun = 0
+    profile['dataDisks'] = []
     if data_disk_sizes_gb is not None:
-        profile['dataDisks'] = []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
@@ -411,6 +412,23 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
+
+    if attach_data_disks:
+        from azure.cli.core.commands.arm import is_valid_resource_id
+        for d in attach_data_disks:
+            disk_entry = {
+                'lun': lun,
+                'createOption': 'attach',
+                'caching': data_caching,
+            }
+            if is_valid_resource_id(d):
+                disk_entry['managedDisk'] = {'id': d}
+            else:
+                disk_entry['vhd'] = {'uri': d}
+                disk_entry['name'] = d.split('/')[-1].split('.')[0]
+            profile['dataDisks'].append(disk_entry)
+            lun += 1
+
     return profile
 
 

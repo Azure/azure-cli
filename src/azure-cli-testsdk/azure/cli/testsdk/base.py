@@ -269,7 +269,6 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
         return self.json_value
 
     def _in_process_execute(self, command):
-        # from azure.cli import  as cli_main
         from azure.cli.main import main as cli_main
         from six import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException

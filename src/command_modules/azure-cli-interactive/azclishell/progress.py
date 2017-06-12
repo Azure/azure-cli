@@ -33,6 +33,7 @@ class ShellProgressView(ProgressViewBase):
             PROGRESS_BAR = self._format_value(message, percent)
             if int(percent) == 1:
                 PROGRESS_BAR = None
+
         PROGRESS = message
 
     def _format_value(self, msg, percent=0.0):
@@ -70,7 +71,12 @@ def progress_view(shell):
     _, col = get_window_dim()
     col = int(col)
     progress = get_progress_message()
-    buffer_size = col - len(progress) - 4
+    if '\n' in progress:
+        prog_list = progress.split('\n')
+        prog_val = len(prog_list[-1])
+    else:
+        prog_val = len(progress)
+    buffer_size = col - prog_val - 4
 
     if PROGRESS_BAR:
         doc = u'{}:{}'.format(progress, PROGRESS_BAR)
@@ -86,6 +92,10 @@ def progress_view(shell):
                 len_beat = len(HEART_BEAT)
                 if len_beat > buffer_size:
                     HEART_BEAT = HEART_BEAT[len_beat - buffer_size:]
+
+                while len(HEART_BEAT) < buffer_size:
+                    beat = HEART_BEAT_VALUES[_get_heart_frequency()]
+                    HEART_BEAT += beat
 
             else:
                 shell.spin_val = 0
