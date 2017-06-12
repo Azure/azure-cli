@@ -135,7 +135,7 @@ register_cli_argument('webapp log config', 'level', help='logging level', **enum
 server_log_switch_options = ['off', 'storage', 'filesystem']
 register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
 
-register_cli_argument('webapp log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
+register_cli_argument('webapp log tail', 'provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
 register_cli_argument('webapp log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 for scope in ['appsettings', 'connection-string']:
