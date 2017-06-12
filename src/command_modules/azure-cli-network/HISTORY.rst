@@ -6,6 +6,14 @@ Release History
 unreleased
 ++++++++++++++++++
 
+* `local-gateway create`: fix bug where --local-address-prefixes was ignored.
+* `nic update/create`: Add support for --dns-servers.
+* `vnet update`: Add support for --dns-servers.
+
+
+2.0.7 (2017-05-30)
+++++++++++++++++++
+
 * `express-route peering create`: fix bug when creating a peering without route filtering.
 * `express-route update`: fix bug where --provider and --bandwidth arguments did not work.
 * `network watcher show-topology`: Fix bug with location defaulting logic.

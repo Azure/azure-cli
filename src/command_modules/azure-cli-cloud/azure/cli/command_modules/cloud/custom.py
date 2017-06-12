@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument,too-many-arguments
+# pylint: disable=unused-argument
 from azure.cli.core.util import CLIError, to_snake_case
 
 from azure.cli.core.cloud import (Cloud,

@@ -68,6 +68,8 @@ property_map = {
     'probes': 'probe',
     'url_path_maps': 'url-path-map',
 }
+
+
 def _make_singular(value):
     try:
         if value.endswith('ies'):
@@ -77,6 +79,7 @@ def _make_singular(value):
         return value
     except AttributeError:
         return value
+
 
 for subresource, alias in property_map.items():
     cli_command(__name__, 'network application-gateway {} list'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(list_network_resource_property('application_gateways', subresource)))

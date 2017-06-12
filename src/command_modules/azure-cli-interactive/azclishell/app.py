@@ -438,12 +438,6 @@ class Shell(object):
         elif text.strip() == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
-        if '--version' in text:
-            try:
-                continue_flag = True
-                show_version_info_exit(self.output)
-            except SystemExit:
-                pass
         if text:
             if text[0] == SELECT_SYMBOL['outside']:
                 cmd = text[1:]
@@ -459,12 +453,17 @@ class Shell(object):
                 print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
-
             elif any(arg.startswith(SELECT_SYMBOL['query']) for arg in args_no_quotes) and \
                     self.last and self.last.result:
                 continue_flag = self.handle_jmespath_query(args_no_quotes, continue_flag)
-                telemetry.track_ssg('query', text)
+                telemetry.track_ssg('query', '')
 
+            elif text[0] == '--version' or text[0] == '-v':
+                try:
+                    continue_flag = True
+                    show_version_info_exit(sys.stdout)
+                except SystemExit:
+                    pass
             elif "|" in text or ">" in text:  # anything I don't parse, send off
                 outside = True
                 cmd = "az " + cmd

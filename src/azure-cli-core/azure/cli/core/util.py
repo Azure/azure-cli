@@ -214,3 +214,18 @@ def random_string(length=16, force_lower=False, digits_only=False):
     if not digits_only:
         choice_set += ascii_lowercase if force_lower else ascii_letters
     return ''.join([choice(choice_set) for _ in range(length)])
+
+
+def hash_string(value, length=16, force_lower=False):
+    """ Generate a deterministic hashed string."""
+    import hashlib
+    m = hashlib.sha256()
+    try:
+        m.update(value)
+    except TypeError:
+        m.update(value.encode())
+    digest = m.hexdigest()
+    digest = digest.lower() if force_lower else digest
+    while len(digest) < length:
+        digest = digest + digest
+    return digest[:length]

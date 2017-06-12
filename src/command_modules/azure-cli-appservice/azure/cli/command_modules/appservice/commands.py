@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import,line-too-long
-from azure.cli.core.commands import LongRunningOperation, cli_command
+# pylint: disable=line-too-long
+from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 
-from ._client_factory import cf_web_client, cf_plans, cf_providers
+from ._client_factory import cf_web_client, cf_plans
 
 
 def output_slots_in_table(slots):
@@ -63,6 +63,9 @@ cli_command(__name__, 'webapp delete', custom_path + 'delete_webapp')
 cli_command(__name__, 'webapp stop', custom_path + 'stop_webapp')
 cli_command(__name__, 'webapp start', custom_path + 'start_webapp')
 cli_command(__name__, 'webapp restart', custom_path + 'restart_webapp')
+cli_command(__name__, 'webapp traffic-routing set', custom_path + 'set_traffic_routing')
+cli_command(__name__, 'webapp traffic-routing show', custom_path + 'show_traffic_routing')
+cli_command(__name__, 'webapp traffic-routing clear', custom_path + 'clear_traffic_routing')
 
 cli_command(__name__, 'webapp config set', custom_path + 'update_site_configs')
 cli_command(__name__, 'webapp config show', custom_path + 'get_site_configs', exception_handler=empty_on_404)

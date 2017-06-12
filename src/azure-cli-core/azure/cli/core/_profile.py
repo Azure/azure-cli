@@ -290,7 +290,7 @@ class Profile(object):
         result = [x for x in subscriptions if (
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
             subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]  # pylint: disable=line-too-long
+                _SUBSCRIPTION_NAME].lower()])]
         if len(result) != 1:
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
@@ -384,17 +384,20 @@ class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
 
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
-        from azure.mgmt.resource import SubscriptionClient
-        from azure.cli.core._debug import change_ssl_cert_verification
 
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
         self.user_id = None  # will figure out after log user in
 
-        def create_arm_client_factory(config):
+        def create_arm_client_factory(credentials):
             if arm_client_factory:
-                return arm_client_factory(config)
-            return change_ssl_cert_verification(SubscriptionClient(config, base_url=CLOUD.endpoints.resource_manager))
+                return arm_client_factory(credentials)
+            from azure.cli.core.profiles._shared import get_client_class
+            from azure.cli.core.profiles import get_api_version, ResourceType
+            from azure.cli.core._debug import change_ssl_cert_verification
+            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            api_version = get_api_version(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            return change_ssl_cert_verification(client_type(credentials, api_version=api_version))
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []

@@ -100,7 +100,7 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
-        self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint  # pylint: disable=line-too-long
+        self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -243,8 +243,6 @@ def init_known_clouds(force=False):
 
 
 def get_clouds():
-    # ensure the known clouds are always in cloud config
-    init_known_clouds()
     clouds = []
     # load the config again as it may have changed
     config = get_config_parser()
@@ -316,7 +314,7 @@ def _set_active_subscription(cloud_name):
                                          _STATE, _SUBSCRIPTION_NAME)
     profile = Profile()
     subscription_to_use = get_cloud_subscription(cloud_name) or \
-                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa # pylint: disable=line-too-long
+                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
                                 if s[_STATE] == 'Enabled'),
                                None)
     if subscription_to_use:

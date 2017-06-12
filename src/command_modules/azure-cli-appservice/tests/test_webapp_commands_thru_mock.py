@@ -29,13 +29,9 @@ from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
 
 
 class Test_Webapp_Mocked(unittest.TestCase):
-
     def setUp(self):
-        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer',
-                                                                          'secretToken')),
-                                              '123455678')
+        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')
 
-    # pylint: disable=no-self-argument,no-self-use,protected-access,no-member
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
         self.client._client = mock.MagicMock()

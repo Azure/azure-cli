@@ -22,9 +22,7 @@ from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
@@ -394,6 +392,55 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ResourceGroupVCRTestBase):
         ])
 
 
+class VMAttachDisksOnCreate(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
+        # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
+
+        # creating a vm
+        self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1'.format(resource_group)).get_output_in_json()
+        origin_os_disk_name = result['storageProfile']['osDisk']['name']
+        origin_data_disk_name = result['storageProfile']['dataDisks'][0]['name']
+
+        # snapshot the os & data disks
+        os_snapshot = 'oSnapshot'
+        os_disk = 'sDisk'
+        data_snapshot = 'dSnapshot'
+        data_disk = 'dDisk'
+        self.cmd('snapshot create -g {} -n {} --source {}'.format(resource_group, os_snapshot, origin_os_disk_name))
+        self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, os_disk, os_snapshot))
+        self.cmd('snapshot create -g {} -n {} --source {}'.format(resource_group, data_snapshot, origin_data_disk_name))
+        self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
+
+        # rebuild a new vm
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
+            JMESPathCheckV2('powerState', 'VM running'),
+        ])
+        self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
+            JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
+            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3)
+        ])
+
+    @ResourceGroupPreparer()
+    def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
+        # creating a vm
+        self.cmd('vm create -g {} -n vm1 --use-unmanaged-disk --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password'.format(resource_group))
+        self.cmd('vm unmanaged-disk attach -g {} --vm-name vm1 --new --size-gb 2'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1'.format(resource_group)).get_output_in_json()
+        os_disk_vhd = result['storageProfile']['osDisk']['vhd']['uri']
+        data_disk_vhd = result['storageProfile']['dataDisks'][0]['vhd']['uri']
+
+        # delete the vm to end vhd's leases so they can be used to create a new vm through attaching
+        self.cmd('vm deallocate -g {} -n vm1'.format(resource_group))
+        self.cmd('vm delete -g {} -n vm1 -y'.format(resource_group))
+
+        # rebuild a new vm
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux --use-unmanaged-disk'.format(
+            resource_group, os_disk_vhd, data_disk_vhd), checks=[JMESPathCheckV2('powerState', 'VM running')])
+
+
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -439,7 +486,6 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, snapshot_name2, disk_name, 'Premium_LRS'))
 
         # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
-        # pylint: disable=too-many-format-args
         self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux --tags tag1=i1'.format(
             self.resource_group, image_name, snapshot_name, disk_name, data_snapshot['id'], data_disk2['id']), checks=[
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),
@@ -749,6 +795,17 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
+
+        # test for idempotency--no need to reverify, just ensure the command doesn't fail
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            vm_name=self.vm_names[0],
+            image=self.vm_image,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location
+        ))
 
 
 class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -1154,15 +1211,17 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
     def body(self):
         disk_name = 'd1'
         disk_name2 = 'd2'
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1 --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2'.format(
             self.resource_group, self.vm_name, disk_name2))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 2),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadOnly'),
             JMESPathCheck('storageProfile.dataDisks[1].name', disk_name2),
             JMESPathCheck('storageProfile.dataDisks[1].lun', 2),
+            JMESPathCheck('storageProfile.dataDisks[1].caching', 'None')
         ])
         self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
             self.resource_group, self.vm_name, disk_name2))
@@ -1174,6 +1233,11 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 0),
+        ])
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite'.format(
+            self.resource_group, self.vm_name, disk_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite')
         ])
 
 
@@ -1793,6 +1857,17 @@ class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', nic_name),
             JMESPathCheck('resourceGroup', self.resource_group),
         ])
+
+
+class VMSSCreateIdempotentTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_idempotent')
+    def test_vmss_create_idempotent(self, resource_group):
+        vmss_name = 'vmss1'
+
+        # run the command twice with the same parameters and verify it does not fail
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 # endregion
 

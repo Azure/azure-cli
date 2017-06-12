@@ -6,13 +6,19 @@
 import os
 import tempfile
 import shutil
+
+from azure.cli.testsdk import get_active_api_profile
 from azure.cli.testsdk.preparers import AbstractPreparer
 
 
 class StorageScenarioMixin(object):
     def get_account_key(self, group, name):
-        return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
-                        .format(name, group)).output
+        if get_active_api_profile() == '2017-03-09-profile-preview':
+            template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
+        else:
+            template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
+
+        return self.cmd(template.format(name, group)).output
 
     def get_account_info(self, group, name):
         """Returns the storage account name and key in a tuple"""

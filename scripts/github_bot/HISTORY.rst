@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.2 (2017-05-31)
+++++++++++++++++++
+
+* Add link to docs.microsoft.com release notes.
+
 0.1.1 (2017-03-13)
 ++++++++++++++++++
 
