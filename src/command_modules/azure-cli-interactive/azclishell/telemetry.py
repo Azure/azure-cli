@@ -19,37 +19,16 @@ from azclishell.util import parse_quotes
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
 
 
-def my_context(tel_client):
-    """ context for the application """
-    tel_client.context.application.id = 'Azure CLI Shell'
-    tel_client.context.application.ver = __version__
-    tel_client.context.user.id = Profile().get_installation_id()
-    tel_client.context.instrumentation_key = INSTRUMENTATION_KEY
-
-
 class TelThread(threading.Thread):
     """ telemetry thread for exiting """
-    def __init__(self, threadfunc, max_items=10):
+    def __init__(self, threadfunc):
         threading.Thread.__init__(self)
         self.threadfunc = threadfunc
-        self.counter = 0
-        self.max_items_until_flush = max_items
 
-    def flush(self):
+    def run(self):
         """ pushes the function out without a check """
         try:
             self.threadfunc()
-        except KeyboardInterrupt:
-            pass
-
-    def add_telemetry_event(self):
-        """ adds a telemetry event the pipeline """
-        try:
-            if self.counter >= self.max_items_until_flush:
-                self.threadfunc()
-                self.counter = 0
-            else:
-                self.counter += 1
         except KeyboardInterrupt:
             pass
 
@@ -61,16 +40,21 @@ class Telemetry(TelemetryClient):
         super(Telemetry, self).__init__(*args, **kwargs)
         self.start_time = None
         self.end_time = None
-        self.telthread = TelThread(self.flush)
-        self.telthread.start()
+        enable(args[0])  # is the Instrument Key
+        self.add_context()
+
+    def add_context(self):
+        """ context for the application """
+        self.context.application.id = 'Azure CLI Shell'
+        self.context.application.ver = __version__
+        self.context.user.id = Profile().get_installation_id()
+        self.context.instrumentation_key = INSTRUMENTATION_KEY
 
     def track_event(self, name, value=None, force=False):
         """ tracks the telemetry events and pushes them out """
         super(Telemetry, self).track_event(name, value)
-        if force:
-            self.telthread.flush()
-        else:
-            self.telthread.add_telemetry_event()
+        thread = TelThread(self.flush)
+        thread.start()
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
@@ -112,5 +96,3 @@ def scrub(text):
 
 
 TC = Telemetry(INSTRUMENTATION_KEY)
-enable(INSTRUMENTATION_KEY)
-my_context(TC)
