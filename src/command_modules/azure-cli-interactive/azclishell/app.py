@@ -565,7 +565,6 @@ class Shell(object):
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
             self.app.initialize(Configuration())
-            result = self.app.execute(args)
 
             if '--progress' in args:
                 args.remove('--progress')
