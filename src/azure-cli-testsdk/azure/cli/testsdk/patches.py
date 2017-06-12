@@ -8,21 +8,19 @@ from .const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 
 def patch_progress_controller(unit_test):
-    def _handle_progress_update(*args):  # pylint: disable=unused-argument
-        pass
-
-    def _handle_progress_add(*args, **kwargs):  # pylint: disable=unused-argument
-        pass
-
-    def _mock_update_progress(*args, **kwargs):  # pylint: disable=unused-argument
+    def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
         pass
 
     _mock_in_unit_test(
-        unit_test, 'azure.cli.core.commands.progress.ProgressHook.update', _handle_progress_update)
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.update', _mock_pass)
     _mock_in_unit_test(
-        unit_test, 'azure.cli.core.commands.progress.ProgressHook.add', _handle_progress_add)
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.add', _mock_pass)
     _mock_in_unit_test(
-        unit_test, 'azure.cli.command_modules.storage.custom._update_progress', _mock_update_progress)
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.end', _mock_pass)
+    _mock_in_unit_test(
+        unit_test, 'azure.cli.command_modules.storage.custom._update_progress', _mock_pass)
+    _mock_in_unit_test(
+        unit_test, 'azure.cli.core.commands.LongRunningOperation._template_progress', _mock_pass)
 
 
 def patch_main_exception_handler(unit_test):
