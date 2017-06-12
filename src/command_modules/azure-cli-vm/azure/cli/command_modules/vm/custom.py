@@ -208,8 +208,8 @@ def list_vm_images(image_location=None, publisher_name=None, offer=None, sku=Non
 
     if load_thru_services:
         if not publisher_name and not offer and not sku:
-            logger.warning("You are retrieving all the images from server which could take more than a mintue. "
-                           " To shorten the wait, provide '--publisher', '--offer' or '--sku'. Partial name search "
+            logger.warning("You are retrieving all the images from server which could take more than a minute. "
+                           "To shorten the wait, provide '--publisher', '--offer' or '--sku'. Partial name search "
                            "is supported.")
         all_images = load_images_thru_services(publisher_name, offer, sku, image_location)
     else:

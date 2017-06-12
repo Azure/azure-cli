@@ -9,10 +9,6 @@ Release History
 ^^^^^^^^^^^^^^^^^^
 * Remove useless line-too-long suppression
 * vm: support attaching data disks on vm create (#3644)
-
-2.0.8 (unreleased)
-++++++++++++++++++
->>>>>>> vm: fix the error of 'Too many open files' when do 'vm image list --all'
 * Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
 * Fix all bad-continuation pylint disables
 * support configuring disk caching on attaching a managed disk (#3513)
