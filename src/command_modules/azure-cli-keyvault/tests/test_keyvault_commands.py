@@ -51,6 +51,7 @@ def _create_keyvault(test,
             else:
                 raise ex
 
+
 class DateTimeParseTest(unittest.TestCase):
     def test_parse_asn1_date(self):
         expected = datetime(year=2017,
@@ -588,7 +589,7 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
 class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(KeyVaultSoftDeleteScenarioTest, self).__init__(__file__, test_method,
-                                                      resource_group='cli-test-kv-sd')
+                                                             resource_group='cli-test-kv-sd')
         self.keyvault_name = 'cli-kv-test-softdelete'
         self.location = 'westus'
 
@@ -616,9 +617,8 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
         self.cmd(cmdstr)
 
         # create, delete, restore, and purge a secret
-        secret = self.cmd(
-            'keyvault secret set --vault-name {} -n secret1 --value ABC123'.format(kv),
-            checks=JMESPathCheck('value', 'ABC123'))
+        self.cmd('keyvault secret set --vault-name {} -n secret1 --value ABC123'.format(kv),
+                          checks=JMESPathCheck('value', 'ABC123'))
         self._delete_entity('secret', 'secret1')
         self._recover_entity('secret', 'secret1')
         self._delete_entity('secret', 'secret1')
@@ -626,7 +626,7 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
 
         # create, delete, restore, and purge a key
         self.cmd('keyvault key create --vault-name {} -n key1 -p software'.format(kv),
-                       checks=JMESPathCheck('attributes.enabled', True))
+                 checks=JMESPathCheck('attributes.enabled', True))
         self._delete_entity('key', 'key1')
         self._recover_entity('key', 'key1')
         self._delete_entity('key', 'key1')
@@ -635,9 +635,9 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
         # create, delete, restore, and purge a certificate
         pem_plain_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
         pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
-        self.cmd(
-            'keyvault certificate import --vault-name {} -n cert1 --file "{}" -p @"{}"'.format(
-                kv, pem_plain_file, pem_policy_path))
+        self.cmd('keyvault certificate import --vault-name {} -n cert1 --file "{}" -p @"{}"'.format(kv,
+                                                                                                    pem_plain_file,
+                                                                                                    pem_policy_path))
         self._delete_entity('certificate', 'cert1')
         self.cmd('keyvault certificate purge --vault-name {} -n cert1'.format(kv))
 
