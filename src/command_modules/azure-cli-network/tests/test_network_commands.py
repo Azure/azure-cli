@@ -341,27 +341,27 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
         # Test frontend IP configuration for internet-facing LB
         self.cmd('network lb frontend-ip create -g {} --lb-name lb1 -n ipconfig1 --public-ip-address publicip2'.format(rg))
         self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg),
-            checks=JMESPathCheckV2('length(@)', 2))
+                 checks=JMESPathCheckV2('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3'.format(rg))
         self.cmd('network lb frontend-ip show -g {} --lb-name lb1 -n ipconfig1'.format(rg),
-            checks=JMESPathCheckV2("publicIpAddress.contains(id, 'publicip3')", True))
+                 checks=JMESPathCheckV2("publicIpAddress.contains(id, 'publicip3')", True))
 
         # test generic update
         subscription_id = MOCKED_SUBSCRIPTION_ID if not self.in_recording else get_subscription_id()
-        ip2_id = resource_id(subscription=subscription_id, resource_group=self.resource_group, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
+        ip2_id = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
         self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{}"'.format(rg, ip2_id),
-            checks=JMESPathCheckV2("publicIpAddress.contains(id, 'publicip2')", True))
+                 checks=JMESPathCheckV2("publicIpAddress.contains(id, 'publicip2')", True))
         self.cmd('network lb frontend-ip delete -g {} --lb-name lb1 -n ipconfig1'.format(rg))
         self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg),
-            checks=JMESPathCheckV2('length(@)', 1))
+                 checks=JMESPathCheckV2('length(@)', 1))
 
         # Test frontend IP configuration for internal LB
         self.cmd('network lb frontend-ip create -g {} --lb-name lb2 -n ipconfig2 --vnet-name vnet1 --subnet subnet1 --private-ip-address 10.0.0.99'.format(rg))
         self.cmd('network lb frontend-ip list -g {} --lb-name lb2'.format(rg),
-            checks=JMESPathCheckV2('length(@)', 2))
+                 checks=JMESPathCheckV2('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100'.format(rg))
         self.cmd('network lb frontend-ip show -g {} --lb-name lb2 -n ipconfig2'.format(rg),
-            checks=JMESPathCheckV2("subnet.contains(id, 'subnet2')", True))
+                 checks=JMESPathCheckV2("subnet.contains(id, 'subnet2')", True))
 
 
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
@@ -1021,7 +1021,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):  # pylint: disable=too-many-i
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, gateway1_name)
         self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, gateway2_name))
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
-            checks=JMESPathCheckV2('routingWeight', 25))
+                 checks=JMESPathCheckV2('routingWeight', 25))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
@@ -1138,12 +1138,25 @@ class NetworkWatcherScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
     def test_network_watcher(self, resource_group, storage_account):
+
+        location = 'westcentralus'
+        vm = 'vm1'
+        nsg = '{}NSG'.format(vm)
+        capture = 'capture1'
+
         self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
 
-        vm = 'vm1'
+        # set up resource to troubleshoot
+        self.cmd('storage container create -n troubleshooting --account-name {}'.format(storage_account))
+        sa = self.cmd('storage account show -g {} -n {}'.format(resource_group, storage_account)).get_output_in_json()
+        storage_path = sa['primaryEndpoints']['blob'] + 'troubleshooting'
+        self.cmd('network vnet create -g {} -n vnet1 --subnet-name GatewaySubnet'.format(resource_group))
+        self.cmd('network public-ip create -g {} -n vgw1-pip'.format(resource_group))
+        self.cmd('network vnet-gateway create -g {} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip --no-wait'.format(resource_group))
+
         # create VM with NetworkWatcher extension
         self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
@@ -1159,31 +1172,11 @@ class NetworkWatcherScenarioTest(ScenarioTest):
 
         self.cmd('network watcher test-connectivity -g {} --source-resource {} --dest-address www.microsoft.com --dest-port 80'.format(resource_group, vm))
 
-        nsg = '{}NSG'.format(vm)
         self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))
         self.cmd('network watcher flow-log configure -g {} --nsg {} --retention 0'.format(resource_group, nsg))
         self.cmd('network watcher flow-log show -g {} --nsg {}'.format(resource_group, nsg))
 
-
-class NetworkWatcherPacketCaptureScenarioTest(ScenarioTest):
-    import mock
-
-    def _mock_thread_count():
-        return 1
-
-    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
-    def test_network_watcher_packet_capture(self, resource_group, storage_account):
-        self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
-
-        vm = 'vm1'
-        # create VM with NetworkWatcher extension
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
-        self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
-
-        capture = 'capture1'
-        location = 'westcentralus'
+        # test packet capture
         self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
         self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
         self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
@@ -1192,27 +1185,8 @@ class NetworkWatcherPacketCaptureScenarioTest(ScenarioTest):
         self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
         self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
 
-
-class NetworkWatcherTroubleshootingScenarioTest(ScenarioTest):
-    import mock
-
-    def _mock_thread_count():
-        return 1
-
-    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_troubleshooting', location='westcentralus')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
-    def test_network_watcher_troubleshooting(self, resource_group, storage_account):
-        self.cmd('network watcher configure -g {} --locations westus westus2 westcentralus --enabled'.format(resource_group))
-
-        # set up resource to troubleshoot
-        self.cmd('storage container create -n troubleshooting --account-name {}'.format(storage_account))
-        sa = self.cmd('storage account show -g {} -n {}'.format(resource_group, storage_account)).get_output_in_json()
-        storage_path = sa['primaryEndpoints']['blob'] + 'troubleshooting'
-        self.cmd('network vnet create -g {} -n vnet1 --subnet-name GatewaySubnet'.format(resource_group))
-        self.cmd('network public-ip create -g {} -n vgw1-pip'.format(resource_group))
-        self.cmd('network vnet-gateway create -g {} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip'.format(resource_group))
-
+        # test troubleshooting
+        self.cmd('network vnet-gateway wait -g {} -n vgw1 --created'.format(resource_group))
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {} --storage-account {} --storage-path {}'.format(resource_group, storage_account, storage_path))
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {}'.format(resource_group))
 
