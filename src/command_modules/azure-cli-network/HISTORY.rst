@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.8 (2017-06-13)
 ^^^^^^^^^^^^^^^^^^
-* Remove useless line-too-long suppression
+* Remove useless line-too-long suppression.
 * `nic update/create`: Add support for --dns-servers.
 * Fix all bad-continuation pylint disables
 * Remove dead code and updates for ignore_tye (#3659)
