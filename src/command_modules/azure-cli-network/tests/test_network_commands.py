@@ -321,17 +321,11 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb list --resource-group {}'.format(self.resource_group), checks=JMESPathCheck('length(@)', 3))
 
 
-class NetworkLoadBalancerIpConfigScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkLoadBalancerIpConfigScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer_ip_config')
+class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
 
-    def test_network_load_balancer_ip_config(self):
-        self.execute()
-
-    def set_up(self):
-        super(NetworkLoadBalancerIpConfigScenarioTest, self).set_up()
-
-        rg = self.resource_group
+    @ResourceGroupPreparer(name_prefix='cli_test_load_balancer_ip_config')
+    def test_network_load_balancer_ip_config(self, resource_group):
+        rg = resource_group
 
         for i in range(1, 4):  # create 3 public IPs to use for the test
             self.cmd('network public-ip create -g {} -n publicip{}'.format(rg, i))
@@ -344,27 +338,30 @@ class NetworkLoadBalancerIpConfigScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet subnet create -g {} --vnet-name vnet1 -n subnet2 --address-prefix 10.0.1.0/24'.format(rg))
         self.cmd('network lb create -g {} -n lb2 --subnet subnet1 --vnet-name vnet1'.format(rg))
 
-    def body(self):
-        rg = self.resource_group
-
         # Test frontend IP configuration for internet-facing LB
         self.cmd('network lb frontend-ip create -g {} --lb-name lb1 -n ipconfig1 --public-ip-address publicip2'.format(rg))
-        self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg),
+            checks=JMESPathCheckV2('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3'.format(rg))
-        self.cmd('network lb frontend-ip show -g {} --lb-name lb1 -n ipconfig1'.format(rg), checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip3')", True))
+        self.cmd('network lb frontend-ip show -g {} --lb-name lb1 -n ipconfig1'.format(rg),
+            checks=JMESPathCheckV2("publicIpAddress.contains(id, 'publicip3')", True))
 
         # test generic update
-        subscription_id = MOCKED_SUBSCRIPTION_ID if self.playback else get_subscription_id()
+        subscription_id = MOCKED_SUBSCRIPTION_ID if not self.in_recording else get_subscription_id()
         ip2_id = resource_id(subscription=subscription_id, resource_group=self.resource_group, namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
-        self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{}"'.format(rg, ip2_id), checks=JMESPathCheck("publicIpAddress.contains(id, 'publicip2')", True))
+        self.cmd('network lb frontend-ip update -g {} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{}"'.format(rg, ip2_id),
+            checks=JMESPathCheckV2("publicIpAddress.contains(id, 'publicip2')", True))
         self.cmd('network lb frontend-ip delete -g {} --lb-name lb1 -n ipconfig1'.format(rg))
-        self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg), checks=JMESPathCheck('length(@)', 1))
+        self.cmd('network lb frontend-ip list -g {} --lb-name lb1'.format(rg),
+            checks=JMESPathCheckV2('length(@)', 1))
 
         # Test frontend IP configuration for internal LB
         self.cmd('network lb frontend-ip create -g {} --lb-name lb2 -n ipconfig2 --vnet-name vnet1 --subnet subnet1 --private-ip-address 10.0.0.99'.format(rg))
-        self.cmd('network lb frontend-ip list -g {} --lb-name lb2'.format(rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb frontend-ip list -g {} --lb-name lb2'.format(rg),
+            checks=JMESPathCheckV2('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {} --lb-name lb2 -n ipconfig2 --subnet subnet2 --vnet-name vnet1 --private-ip-address 10.0.1.100'.format(rg))
-        self.cmd('network lb frontend-ip show -g {} --lb-name lb2 -n ipconfig2'.format(rg), checks=JMESPathCheck("subnet.contains(id, 'subnet2')", True))
+        self.cmd('network lb frontend-ip show -g {} --lb-name lb2 -n ipconfig2'.format(rg),
+            checks=JMESPathCheckV2("subnet.contains(id, 'subnet2')", True))
 
 
 class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
@@ -962,58 +959,69 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase):  # pyli
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
 
 
-class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+class NetworkVpnGatewayScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, test_method):
-        super(NetworkVpnGatewayScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vpn_gateway')
-        self.vnet1_name = 'myvnet1'
-        self.vnet2_name = 'myvnet2'
-        self.vnet3_name = 'myvnet3'
-        self.gateway1_name = 'gateway1'
-        self.gateway2_name = 'gateway2'
-        self.gateway3_name = 'gateway3'
-        self.ip1_name = 'pubip1'
-        self.ip2_name = 'pubip2'
-        self.ip3_name = 'pubip3'
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
+    def test_network_vpn_gateway(self, resource_group):
+        vnet1_name = 'myvnet1'
+        vnet2_name = 'myvnet2'
+        vnet3_name = 'myvnet3'
+        gateway1_name = 'gateway1'
+        gateway2_name = 'gateway2'
+        gateway3_name = 'gateway3'
+        ip1_name = 'pubip1'
+        ip2_name = 'pubip2'
+        ip3_name = 'pubip3'
+        rg = resource_group
 
-    def test_network_vpn_gateway(self):
-        self.execute()
+        self.cmd('network public-ip create -n {} -g {}'.format(ip1_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip2_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip3_name, rg))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24'.format(rg, vnet1_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16'.format(rg, vnet2_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16'.format(rg, vnet3_name))
 
-    def set_up(self):
-        super(NetworkVpnGatewayScenarioTest, self).set_up()
-        rg = self.resource_group
-        self.cmd('network public-ip create -n {} -g {}'.format(self.ip1_name, rg))
-        self.cmd('network public-ip create -n {} -g {}'.format(self.ip2_name, rg))
-        self.cmd('network public-ip create -n {} -g {}'.format(self.ip3_name, rg))
-        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24'.format(rg, self.vnet1_name))
-        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16'.format(rg, self.vnet2_name))
-        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16'.format(rg, self.vnet3_name))
+        subscription_id = MOCKED_SUBSCRIPTION_ID if not self.in_recording \
+            else self.cmd('account list --query "[?isDefault].id"').get_output_in_json()[0]
 
-    def body(self):
-        rg = self.resource_group
+        vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, vnet1_name)
+        vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, vnet2_name)
 
-        subscription_id = MOCKED_SUBSCRIPTION_ID if self.playback \
-            else self.cmd('account list --query "[?isDefault].id" -o tsv')
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, gateway1_name, vnet1_id, ip1_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, gateway2_name, vnet2_id, ip2_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50'.format(rg, gateway3_name, vnet3_name, ip3_name))
 
-        vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet1_name)
-        vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, self.vnet2_name)
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway2_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway3_name))
 
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, self.gateway1_name, vnet1_id, self.ip1_name))
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, self.gateway2_name, vnet2_id, self.ip2_name))
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50'.format(rg, self.gateway3_name, self.vnet3_name, self.ip3_name))
-
-        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway1_name))
-        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway2_name))
-        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, self.gateway3_name))
-
-        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, self.gateway1_name), checks=[JMESPathCheck('gatewayType', 'Vpn'), JMESPathCheck('sku.capacity', 2), JMESPathCheck('sku.name', 'Basic'), JMESPathCheck('vpnType', 'RouteBased'), JMESPathCheck('enableBgp', False)])
-        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, self.gateway2_name), checks=[JMESPathCheck('gatewayType', 'Vpn'), JMESPathCheck('sku.capacity', 2), JMESPathCheck('sku.name', 'Basic'), JMESPathCheck('vpnType', 'RouteBased'), JMESPathCheck('enableBgp', False)])
-        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, self.gateway3_name), checks=[JMESPathCheck('sku.name', 'Standard'), JMESPathCheck('enableBgp', True), JMESPathCheck('bgpSettings.asn', 12345), JMESPathCheck('bgpSettings.bgpPeeringAddress', '10.2.250.250'), JMESPathCheck('bgpSettings.peerWeight', 50)])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway1_name), checks=[
+            JMESPathCheckV2('gatewayType', 'Vpn'),
+            JMESPathCheckV2('sku.capacity', 2),
+            JMESPathCheckV2('sku.name', 'Basic'),
+            JMESPathCheckV2('vpnType', 'RouteBased'),
+            JMESPathCheckV2('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway2_name), checks=[
+            JMESPathCheckV2('gatewayType', 'Vpn'),
+            JMESPathCheckV2('sku.capacity', 2),
+            JMESPathCheckV2('sku.name', 'Basic'),
+            JMESPathCheckV2('vpnType', 'RouteBased'),
+            JMESPathCheckV2('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway3_name), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('enableBgp', True),
+            JMESPathCheckV2('bgpSettings.asn', 12345),
+            JMESPathCheckV2('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            JMESPathCheckV2('bgpSettings.peerWeight', 50)
+        ])
 
         conn12 = 'conn1to2'
-        gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
-        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, self.gateway2_name))
-        self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg), checks=JMESPathCheck('routingWeight', 25))
+        gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, gateway1_name)
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, gateway2_name))
+        self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
+            checks=JMESPathCheckV2('routingWeight', 25))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
