@@ -213,32 +213,29 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
 def recover_keyvault(client, vault_name, resource_group_name, location):
     """
     Recover a previously deleted keyvault for which soft delete was enabled
-    :param client: 
+    :param client:
     :param vault_name: The name of the vault to recover
     :param resource_group_name: The original resource group of the vault to recover
     :param location: The original location of the vault to recover
     :return: The properties of the recovered key vault
     """
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, CreateMode, SkuName, Sku
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, CreateMode
     from azure.cli.core._profile import Profile, CLOUD
     profile = Profile()
-    cred, _, tenant_id = profile.get_login_credentials(
+    _, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
 
     params = VaultCreateOrUpdateParameters(location,
-                                           properties={
-                                                          'tenant_id': tenant_id,
-                                                          'sku': Sku(name=SkuName.standard.value),
-                                                          'create_mode': CreateMode.recover.value
-                                                      }
-                                           )
+                                           properties={'tenant_id': tenant_id,
+                                                       'sku': Sku(name=SkuName.standard.value),
+                                                       'create_mode': CreateMode.recover.value})
 
     return client.create_or_update(resource_group_name=resource_group_name,
-                               vault_name=vault_name,
-                               parameters=params)
+                                   vault_name=vault_name,
+                                   parameters=params)
 
 
-def create_keyvault(client,
+def create_keyvault(client,  # pylint: disable=too-many-locals
                     resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
