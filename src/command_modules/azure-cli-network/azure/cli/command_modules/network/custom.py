@@ -913,6 +913,7 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
 
+# TODO: REMOVE ###########################################################################
 
 def _get_backend_address_pool(resource_group_name, address_pool_name, load_balancer_name=None,
                               application_gateway_name=None):
@@ -948,78 +949,92 @@ def _get_backend_address_pool(resource_group_name, address_pool_name, load_balan
     return address_pool
 
 
-def _add_to_nic_configuration(resource_group_name, nic_name, item, item_property_name, ip_config_name=None):
-    """ Adds an address pool or NAT rule to a NIC IP configuration and updates the NIC resource """
+def _expand_availability_set(resource, resource_type, resource_group_name):
+    """ Converts an availability set reference into a list of VM IDs for later processing """
 
-    ncf = _network_client_factory()
-    nic = ncf.network_interfaces.get(resource_group_name, nic_name)
-
-    # attempt to retrieve specified IP configurations or existing one if there is only one
-    config = next((x for x in nic.ip_configurations if x.name == ip_config_name), None)
-    if not config:
-        if len(nic.ip_configurations) == 1:
-            config = nic.ip_configurations[0]
-        elif len(nic.ip_configurations) > 1:
-            raise CLIError("Multiple IP configurations found for NIC '{}'.".format(nic_name))
-        else:
-            raise CLIError("No IP configurations found for NIC '{}'!".format(nic_name))
-
-    _upsert(config, item_property_name, item, 'id')
-    config_params = parse_resource_id(config.id)
-    # update the NIC resource
-    ncf.network_interfaces.create_or_update(
-        config_params['resource_group'], config_params['name'], nic).result()
+    if resource_type != 'availabilitySets':
+        return (resource, resource_type)
+    else:
+        from azure.cli.core.profiles import ResourceType
+        as_params = parse_resource_id(resource[0])
+        avail_set = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).availability_sets.get(
+            as_params.get('resource_group', resource_group_name), as_params['name'])
+        vm_ids = [x.id for x in avail_set.virtual_machines]
+        return (vm_ids, 'virtualMachines')
 
 
-def _add_to_nic_collection(resource_group_name, resource, resource_type, item_to_add, collection_property_name):
+def _get_ip_config(resource_group_name, resource_name, resource_type, ip_config_name):
+    """ Retrieves an IP configuration for the VM or VMSS and returns both the configuration object and parent that
+        must be updated to apply the change (either a NIC or a VMSS). """
 
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.commands.arm import make_snake_case
     ccf = get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
-    for item in resource:
-        params = parse_resource_id(item)
-        obj = ccf.getattr(make_snake_case(resource_type)).get(params.get('resource_group', resource_group_name), params['name'])
-        nic_id = None
-        if len(obj.network_profile.network_interfaces) == 1:
-            nic_id = vm_obj.network_profile.network_interfaces[0].id
-        else:
-            nic_id = next((x.id for x in vm_obj.network_profile.network_interfaces if x.primary), None)
-        if not nic_id:
-            raise CLIError("No primary NIC found for VM '{}'.".format(vm_obj.name))
+    ip_configurations = None
+    parent = None
+    params = parse_resource_id(resource_name)
+    if resource_type == 'virtualMachines':
+        vm = ccf.virtual_machines.get(params.get('resource_group', resource_group_name), params['name'])
+        nic_id = vm.network_profile.network_interfaces[0].id  # TODO: Enhance to allow more goodness!
 
-        nic_params = parse_resource_id(nic_id)
         ncf = _network_client_factory()
+        nic_params = parse_resource_id(nic_id)
         nic = ncf.network_interfaces.get(nic_params['resource_group'], nic_params['name'])
-        if len(nic.ip_configurations) == 1:
-            config = nic.ip_configurations[0]
-            resource_type = 'load_balancer_backend_address_pools' if load_balancer_name else \
-                'application_gateway_backend_address_pool'
-            _upsert(config, resource_type, address_pool, 'id')
-            try:
-                config_params = parse_resource_id(config.id)
-                ncf.network_interfaces.create_or_update(
-                    config_params['resource_group'], config_params['name'], nic).result()
-            except Exception as ex:
-                logger.error(ex)
-        elif len(nic.ip_configurations) > 1:
-            logger.warning('Multiple IP configurations found on primary NIC. Skipping...')
+        ip_configurations = nic.ip_configurations
+        parent = nic
+    elif resource_type =='virtualMachineScaleSets':
+        vmss = ccf.virtual_machine_scale_sets.get(params.get('resource_group', resource_group_name), params['name'])
+        # TODO: Enhance to allow more goodness!
+        ip_configurations = \
+            vmss.virtual_machine_profile.network_profile.network_interface_configurations[0].ip_configurations
+        parent = vmss
+    else:
+        raise CLIError("Unsupported resource type for _get_ip_config: '{}'".format(resource_type))
+
+    # attempt to retrieve specified IP configurations or existing one if there is only one
+    config = next((x for x in ip_configurations if x.name == ip_config_name), None)
+    if not config:
+        if len(ip_configurations) == 1:
+            config = ip_configurations[0]
+        elif len(ip_configurations) > 1:
+            raise CLIError("Multiple IP configurations found for {} '{}'.".format(resource_type, resource_name))
         else:
-            raise CLIError("No IP configurations found for NIC '{}'!".format(nic.name))
+            raise CLIError("No IP configurations found for {} '{}'!".format(resource_type, resource_name))
+
+    return (parent, config)
 
 
 def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource, resource_type='virtualMachines',
-                              item_name=None):
-    address_pool = _get_backend_address_pool(resource_group_name, item_name,
-                                             load_balancer_name=load_balancer_name)
-    return _add_to_nic_collection(resource_group_name, resource, resource_type, address_pool, 'load_balancer_backend_address_pools')
+                              item_name=None, ip_config_name=None):
+    address_pool = _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
+    resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
+    for item in resource:
+        parent_obj, ip_config = _get_ip_config(resource_group_name, item, resource_type, ip_config_name)
+        parent_params = parse_resource_id(parent_obj.id)
+
+        if resource_type == 'virtualMachines':
+            _upsert(ip_config, 'load_balancer_backend_address_pools', address_pool, 'id')
+            _network_client_factory().network_interfaces.create_or_update(
+                parent_params['resource_group'], parent_params['name'], parent_obj).result()
+        elif resource_type == 'virtualMachineScaleSets':
+            ComputeSubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
+            address_pool = ComputeSubResource(address_pool.id)
+            _upsert(ip_config, 'load_balancer_backend_address_pools', address_pool, 'id')
+            get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets.create_or_update(
+                parent_params['resource_group'], parent_params['name'], parent_obj).result()
+        else:
+            raise CLIError("Resource type '{}' not supported".format(resource_type))
+
 
 def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, resource, resource_type='virtualMachines', 
                               item_name=None):
     address_pool = _get_backend_address_pool(resource_group_name, item_name,
                                              application_gateway_name=application_gateway_name)
-    return _add_to_nic_collection(resource_group_name, resource, resource_type, address_pool, 'application_gateway_backend_address_pools')
+    resource, resource_type = _expand_availability_set(resource, resource_type)
+    # TODO: Copy from LB command
+
+# TODO: REMOVE ###########################################################################
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
