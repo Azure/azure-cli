@@ -948,8 +948,27 @@ def _get_backend_address_pool(resource_group_name, address_pool_name, load_balan
     return address_pool
 
 
-def _add_to_nic_configuration(nic, item, item_type, ip_config_name=None):
-    
+def _add_to_nic_configuration(resource_group_name, nic_name, item, item_property_name, ip_config_name=None):
+    """ Adds an address pool or NAT rule to a NIC IP configuration and updates the NIC resource """
+
+    ncf = _network_client_factory()
+    nic = ncf.network_interfaces.get(resource_group_name, nic_name)
+
+    # attempt to retrieve specified IP configurations or existing one if there is only one
+    config = next((x for x in nic.ip_configurations if x.name == ip_config_name), None)
+    if not config:
+        if len(nic.ip_configurations) == 1:
+            config = nic.ip_configurations[0]
+        elif len(nic.ip_configurations) > 1:
+            raise CLIError("Multiple IP configurations found for NIC '{}'.".format(nic_name))
+        else:
+            raise CLIError("No IP configurations found for NIC '{}'!".format(nic_name))
+
+    _upsert(config, item_property_name, item, 'id')
+    config_params = parse_resource_id(config.id)
+    # update the NIC resource
+    ncf.network_interfaces.create_or_update(
+        config_params['resource_group'], config_params['name'], nic).result()
 
 
 def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application_gateway_name, 
@@ -994,12 +1013,15 @@ def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application
             raise CLIError("No IP configurations found for NIC '{}'!".format(nic.name))
 
 
-def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, vm, item_name=None):
+def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource, resource_type='virtualMachines',
+                              item_name=None):
+
     return _add_vm_to_address_pool(resource_group_name, load_balancer_name, None,
                                    item_name, vm)
 
-def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, vm, 
+def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, resource, resource_type='virtualMachines', 
                               item_name=None):
+
     return _add_vm_to_address_pool(resource_group_name, None, application_gateway_name,
                                    item_name, vm)
 

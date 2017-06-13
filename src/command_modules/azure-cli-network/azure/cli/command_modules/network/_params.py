@@ -36,6 +36,7 @@ from azure.cli.command_modules.network._validators import \
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type, validate_route_filter,
+     validate_add_vm_resources,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
@@ -516,8 +517,6 @@ register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(Tran
 for item in ['backend_pool_name', 'backend_address_pool_name']:
     register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
-register_cli_argument('network lb address-pool add-vm', 'vm', nargs='+')
-
 register_cli_argument('network lb create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_lb_create_namespace)
 register_cli_argument('network lb create', 'public_ip_address_allocation', **enum_choice_list(IPAllocationMethod))
 register_cli_argument('network lb create', 'public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
@@ -759,3 +758,9 @@ register_cli_argument('network watcher show-next-hop', 'dest_ip', help='Destinat
 register_cli_argument('network watcher troubleshooting', 'resource_type', options_list=['--resource-type', '-t'], id_part='resource_type', **enum_choice_list(['vnetGateway', 'vpnConnection']))
 register_cli_argument('network watcher troubleshooting start', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_start_namespace)
 register_cli_argument('network watcher troubleshooting show', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_show_namespace)
+
+# Add VM parameter registrations
+add_vm_types = ['virtualMachines', 'availabilitySets', 'virtualMachineScaleSets']
+for item in ['lb', 'application-gateway']:
+    register_cli_argument('network {} address-pool add-vm'.format(item), 'resource', nargs='+', validator=validate_add_vm_resources)
+    register_cli_argument('network {} address-pool add-vm'.format(item), 'resource_type', **enum_choice_list(add_vm_types))
