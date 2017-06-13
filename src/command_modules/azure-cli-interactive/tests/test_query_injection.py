@@ -47,7 +47,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_just_query(self):
         """ tests flushing just the query """
-        args = ['??x']
+        args = ['?x']
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args, False)
         self.assertTrue(flag)
@@ -55,7 +55,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_string_replacement(self):
         """ tests that the query replaces the values in the command """
-        args = 'vm show -g "??group" -n "??name"'
+        args = 'vm show -g "?group" -n "?name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -70,7 +70,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_list_replacement(self):
         """ tests that the query replaces the values in the command """
-        args = 'vm show -g "??[].group" -n "??[].name"'
+        args = 'vm show -g "?[].group" -n "?[].name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -102,15 +102,15 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {'x': 'result'}
         # pylint: disable=protected-access
         b_flag, c_flag, out, cmd = self.shell._special_cases(
-            "this is 'url??what' negative", "this is 'url??what' negative", False)
+            "this is 'url?what' negative", "this is 'url?what' negative", False)
         self.assertFalse(b_flag)
         self.assertFalse(c_flag)
         self.assertFalse(out)
-        self.assertEqual(cmd, "this is 'url??what' negative")
+        self.assertEqual(cmd, "this is 'url?what' negative")
 
     def test_errors(self):
         """ tests invalid query """
-        args = 'vm show -g "??[].group" -n "??[].name"'
+        args = 'vm show -g "?[].group" -n "?[].name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -132,7 +132,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_singleton(self):
         """ tests a singleton example """
-        args = 'vm show -g "??group" -n "??name"'
+        args = 'vm show -g "?group" -n "?name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -149,7 +149,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_spaces(self):
         """ tests quotes with spaces """
-        args = 'vm show -g "??[?group == \'mygroup\'].name"'
+        args = 'vm show -g "?[?group == \'mygroup\'].name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:

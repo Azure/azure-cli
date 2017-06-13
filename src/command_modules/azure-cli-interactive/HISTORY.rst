@@ -6,8 +6,7 @@ Release History
 0.3.3 (unreleased)
 +++++++++++++++++
 
-* Change '?' gesture to '??' 
-* Enhance the '??' gesture to also inject into the next command
+* Enhance the '?' gesture to also inject into the next command
 * Progress for Template Deployment
 
 
