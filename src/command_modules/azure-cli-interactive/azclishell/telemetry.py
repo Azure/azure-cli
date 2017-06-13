@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import datetime
-import threading
+import thread
 import subprocess
 import sys
 import os
@@ -16,24 +16,16 @@ from applicationinsights.exceptions import enable
 from azclishell import __version__
 
 from azure.cli.core._profile import Profile
-from azure.cli.core.telemetry import _user_agrees_to_telemetry, TelemetrySession
+from azure.cli.core.telemetry import _user_agrees_to_telemetry
 from azclishell.util import parse_quotes
 
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
 
 
-class TelThread(threading.Thread):
-    """ telemetry thread for exiting """
-    def __init__(self, threadfunc):
-        threading.Thread.__init__(self)
-        self.threadfunc = threadfunc
-
-    def run(self):
-        """ pushes the function out """
-        try:
-            self.threadfunc()
-        except KeyboardInterrupt:
-            pass
+def set_custom_properties(prop, name, value):
+    actual_value = value() if hasattr(value, '__call__') else value
+    if actual_value:
+        prop['az/interactive/' + name] = actual_value
 
 
 class Telemetry(TelemetryClient):
@@ -53,9 +45,7 @@ class Telemetry(TelemetryClient):
     def _track_event(self, name, properties=None, measurements=None):
         """ tracks the telemetry events and pushes them out """
         self.track_event(name, properties, measurements)
-        thread = TelThread(self.flush)
-        thread.daemon = True
-        thread.start()
+        thread.start_new_thread(self.flush, ())
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
@@ -72,13 +62,14 @@ class Telemetry(TelemetryClient):
         """ starts recording stuff """
         self.start_time = str(datetime.datetime.now())
 
+
     @_user_agrees_to_telemetry
     def conclude(self):
         """ concludings recording stuff """
         self.end_time = str(datetime.datetime.now())
         properties = {}
-        TelemetrySession.set_custom_properties(properties, 'StartTime', str(self.start_time))
-        TelemetrySession.set_custom_properties(properties, 'EndTime', str(self.end_time))
+        set_custom_properties(properties, 'starttime', str(self.start_time))
+        set_custom_properties(properties, 'endtime', str(self.end_time))
 
         subprocess.Popen([
             sys.executable,
