@@ -108,7 +108,7 @@ class Shell(object):
 
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdin, output_custom=None,
+                 app=None, input_custom=sys.stdin, output_custom=sys.stdout,
                  user_feedback=False):
         self.styles = styles
         if styles:
