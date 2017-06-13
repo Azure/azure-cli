@@ -618,7 +618,7 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
 
         # create, delete, restore, and purge a secret
         self.cmd('keyvault secret set --vault-name {} -n secret1 --value ABC123'.format(kv),
-                          checks=JMESPathCheck('value', 'ABC123'))
+                 checks=JMESPathCheck('value', 'ABC123'))
         self._delete_entity('secret', 'secret1')
         self._recover_entity('secret', 'secret1')
         self._delete_entity('secret', 'secret1')
@@ -643,7 +643,6 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('keyvault delete -n {}'.format(kv))
         self.cmd('keyvault purge -n {} -l {}'.format(kv, self.location))
-
 
     def _delete_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
         # delete the specified entity
