@@ -62,7 +62,6 @@ class Telemetry(TelemetryClient):
         """ starts recording stuff """
         self.start_time = str(datetime.datetime.now())
 
-
     @_user_agrees_to_telemetry
     def conclude(self):
         """ concludings recording stuff """
