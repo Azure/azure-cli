@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import datetime
-import thread
 import subprocess
 import sys
 import os
 import json
+from six.moves._thread import start_new_thread
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
@@ -45,7 +45,7 @@ class Telemetry(TelemetryClient):
     def _track_event(self, name, properties=None, measurements=None):
         """ tracks the telemetry events and pushes them out """
         self.track_event(name, properties, measurements)
-        thread.start_new_thread(self.flush, ())
+        start_new_thread(self.flush, ())
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
