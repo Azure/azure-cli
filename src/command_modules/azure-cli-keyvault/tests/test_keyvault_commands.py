@@ -597,7 +597,7 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         vault = _create_keyvault(self, self.keyvault_name, self.resource_group, self.location,
-                                 additional_args='--enable-for-soft-delete true')
+                                 additional_args='--enable-soft-delete true')
         kv = self.keyvault_name
 
         # add all purge permissions to default the access policy
