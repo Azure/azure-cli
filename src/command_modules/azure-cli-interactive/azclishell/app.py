@@ -106,7 +106,7 @@ def space_toolbar(settings_items, cols, empty_space):
 def validate_contains_query(args, symbol):
     """ validates that the query symbol is used as a shell specific gesture """
     for arg in args:
-        group = re.search(r'\-.*\=\?.*', arg)
+        group = re.search(r'\-.*\=\%s.*' % symbol, arg)
         if arg.startswith(symbol) or group is not None:
             return True
     return False
@@ -501,6 +501,13 @@ class Shell(object):
                     queries.append(query)
                     results.append(jmespath.search(query, input_dict))
                     injected_command.append(SELECT_SYMBOL['query'])
+                elif re.search(r'\-.*\=\%s.*' % SELECT_SYMBOL['query'], arg) is not None:
+                    parition = arg.partition(SELECT_SYMBOL['query'])
+                    base = parition[0]
+                    query = parition[2]
+                    queries.append(query)
+                    results.append(jmespath.search(query, input_dict))
+                    injected_command.append(base + SELECT_SYMBOL['query'])
                 else:
                     injected_command.append(arg)
 

@@ -170,6 +170,28 @@ class QueryInjection(unittest.TestCase):
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g fred')
 
+    def test_spaces_with_equal(self):
+        """ tests quotes with spaces """
+        args = 'vm show -g="?[?group == \'myg roup\'].name"'
+        args = parse_quotes(args)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
+        self.shell.last.result = [
+            {
+                'group': 'myg roup',
+                'name': 'fred'
+            },
+            {
+                'group': 'mygroup3',
+                'name': 'myname3'
+            }
+        ]
+
+        self.shell.handle_jmespath_query(args_no_quotes, False)
+        results = self.stream.getvalue().split('\n')
+        self.assertEqual(results[0], u'vm show -g=fred')
+
     def test_validation(self):
         """ tests line validation that the command is an injection """
         args = 'foo bar --foo=?bar'
