@@ -118,7 +118,7 @@ class Shell(object):
 
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdin, output_custom=sys.stdout,
+                 app=None, input_custom=sys.stdin, output_custom=None,
                  user_feedback=False):
         self.styles = styles
         if styles:
@@ -529,8 +529,11 @@ class Shell(object):
 
                         for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
                             if counter < len(results) and res_counter < len(results[counter]):
-                                base = base.replace(
-                                    SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                                try:
+                                    base = base.replace(
+                                        SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                                except TypeError:  # because of bad input
+                                    pass
                             else:  # if there aren't an even number of results, skip it
                                 skip = True
                         if not skip:
