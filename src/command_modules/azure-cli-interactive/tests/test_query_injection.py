@@ -26,12 +26,13 @@ class QueryInjection(unittest.TestCase):
     """ tests using the query gesture for the interactive mode """
     def __init__(self, *args, **kwargs):
         super(QueryInjection, self).__init__(*args, **kwargs)
-        from azclishell.app import Shell
+        from azclishell.app import Shell, validate_contains_query
 
         self.stream = six.StringIO()
         self.shell = Shell(output_custom=self.stream)
         self.shell.cli_execute = self._mock_execute
         self.shell.last = MockValues()
+        self.validation_func = validate_contains_query
 
     def _mock_execute(self, cmd):
         self.stream.write(cmd)
@@ -168,6 +169,29 @@ class QueryInjection(unittest.TestCase):
         self.shell.handle_jmespath_query(args_no_quotes, False)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g fred')
+
+    def test_validation(self):
+        """ tests line validation that the command is an injection """
+        args = 'foo bar --foo=?bar'
+        self.assertTrue(self.validation_func(args.split(), '?'))
+
+        args = 'foo bar --is fun -g ?bar '
+        self.assertTrue(self.validation_func(args.split(), '?'))
+
+        args = 'foo bar --is fun -g bar '
+        self.assertFalse(self.validation_func(args.split(), '?'))
+
+        args = 'foo bar --isfun=bar '
+        self.assertFalse(self.validation_func(args.split(), '?'))
+
+        args = 'foo bar --is ?[?group == \'word\'].name '
+        self.assertTrue(self.validation_func(parse_quotes(args), '?'))
+
+        args = 'foo bar --query [?group == \'word\'].name '
+        self.assertFalse(self.validation_func(parse_quotes(args), '?'))
+
+        args = 'foo bar --query=[?group == \'w or =?d\'].name '
+        self.assertFalse(self.validation_func(parse_quotes(args), '?'))
 
 
 if __name__ == '__main__':

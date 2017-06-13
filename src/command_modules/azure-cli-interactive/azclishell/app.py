@@ -5,12 +5,13 @@
 
 from __future__ import unicode_literals, print_function
 
+import datetime
 import json
 import math
 import os
+import re
 import subprocess
 import sys
-import datetime
 import threading
 
 import jmespath
@@ -32,7 +33,7 @@ from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
-from azclishell.progress import get_progress_message, progress_view
+from azclishell.progress import progress_view
 from azclishell.telemetry import TC as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
@@ -100,6 +101,15 @@ def space_toolbar(settings_items, cols, empty_space):
 
     empty_space = empty_space[len(NOTIFICATIONS) + len(settings) + 1:]
     return settings, empty_space
+
+
+def validate_contains_query(args, symbol):
+    """ validates that the query symbol is used as a shell specific gesture """
+    for arg in args:
+        group = re.search(r'\-.*\=\?.*', arg)
+        if arg.startswith(symbol) or group is not None:
+            return True
+    return False
 
 
 # pylint: disable=too-many-instance-attributes
@@ -453,8 +463,7 @@ class Shell(object):
                 print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
-            elif any(arg.startswith(SELECT_SYMBOL['query']) for arg in args_no_quotes) and \
-                    self.last and self.last.result:
+            elif validate_contains_query(args_no_quotes, SELECT_SYMBOL['query']) and self.last and self.last.result:
                 continue_flag = self.handle_jmespath_query(args_no_quotes, continue_flag)
                 telemetry.track_ssg('query', '')
 
