@@ -71,11 +71,6 @@ def validate_add_vm_resources(namespace):
     if resource_type in ['virtualMachineScaleSets', 'availabilitySets'] and len(namespace.resource) != 1:
         raise CLIError("When adding a resource of type '{}' specify only a single resource".format(resource_type))
 
-    for item in namespace.resource:
-        # TODO: convert names to IDs
-        if not is_valid_resource_id(item):
-            pass
-
 
 def validate_address_pool_id_list(namespace):
     _generate_lb_id_list_from_names_or_ids(

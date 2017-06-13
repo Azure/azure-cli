@@ -971,22 +971,18 @@ def _add_to_nic_configuration(resource_group_name, nic_name, item, item_property
         config_params['resource_group'], config_params['name'], nic).result()
 
 
-def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application_gateway_name, 
-                            address_pool_name):
-    
-    address_pool = _get_backend_address_pool(resource_group_name, address_pool_name, load_balancer_name,
-                                             application_gateway_name)
+def _add_to_nic_collection(resource_group_name, resource, resource_type, item_to_add, collection_property_name):
 
-    # 2 Associate the address pool with the NIC IP configurations
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.commands.arm import make_snake_case
     ccf = get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
-    for item in vm:
-        vm_params = parse_resource_id(item)
-        vm_obj = ccf.virtual_machines.get(vm_params.get('resource_group', resource_group_name), vm_params['name'])
+    for item in resource:
+        params = parse_resource_id(item)
+        obj = ccf.getattr(make_snake_case(resource_type)).get(params.get('resource_group', resource_group_name), params['name'])
         nic_id = None
-        if len(vm_obj.network_profile.network_interfaces) == 1:
+        if len(obj.network_profile.network_interfaces) == 1:
             nic_id = vm_obj.network_profile.network_interfaces[0].id
         else:
             nic_id = next((x.id for x in vm_obj.network_profile.network_interfaces if x.primary), None)
@@ -1015,15 +1011,15 @@ def _add_vm_to_address_pool(resource_group_name, load_balancer_name, application
 
 def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource, resource_type='virtualMachines',
                               item_name=None):
-
-    return _add_vm_to_address_pool(resource_group_name, load_balancer_name, None,
-                                   item_name, vm)
+    address_pool = _get_backend_address_pool(resource_group_name, item_name,
+                                             load_balancer_name=load_balancer_name)
+    return _add_to_nic_collection(resource_group_name, resource, resource_type, address_pool, 'load_balancer_backend_address_pools')
 
 def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, resource, resource_type='virtualMachines', 
                               item_name=None):
-
-    return _add_vm_to_address_pool(resource_group_name, None, application_gateway_name,
-                                   item_name, vm)
+    address_pool = _get_backend_address_pool(resource_group_name, item_name,
+                                             application_gateway_name=application_gateway_name)
+    return _add_to_nic_collection(resource_group_name, resource, resource_type, address_pool, 'application_gateway_backend_address_pools')
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
