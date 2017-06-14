@@ -524,7 +524,7 @@ class Shell(object):
                     continue_flag = True
                 elif all(isinstance(result, list) for result in results):
                     if len(results) > 1:
-                        for res_counter, _ in enumerate(results):
+                        for res_counter, _ in enumerate(results[0]):
                             base = cmd_base
                             skip = False
 
