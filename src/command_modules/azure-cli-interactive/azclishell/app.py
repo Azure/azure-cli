@@ -10,6 +10,7 @@ import json
 import math
 import os
 import re
+import six
 import subprocess
 import sys
 import threading
@@ -517,7 +518,7 @@ class Shell(object):
                 continue_flag = True
             else:  # inject into cmd
                 cmd_base = ' '.join(injected_command)
-                if all(isinstance(result, (str, unicode)) for result in results):
+                if all(isinstance(result, (six.text_type, six.string_types)) for result in results):
                     for result in results:
                         cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
                     self.cli_execute(cmd_base)
