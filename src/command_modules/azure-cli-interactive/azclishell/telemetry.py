@@ -25,7 +25,7 @@ INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
 def set_custom_properties(prop, name, value):
     actual_value = value() if hasattr(value, '__call__') else value
     if actual_value:
-        prop['az/interactive/' + name] = actual_value
+        prop['Context.Default.AzureCLI.' + name] = actual_value
 
 
 class Telemetry(TelemetryClient):
