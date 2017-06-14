@@ -11,11 +11,6 @@ helps['appservice'] = """
     short-summary: Manage your App Service plans.
 """
 
-helps['appservice web'] = """
-    type: group
-    short-summary: deprecated, please use 'az webapp'.
-"""
-
 helps['webapp'] = """
     type: group
     short-summary: Manage web apps.
