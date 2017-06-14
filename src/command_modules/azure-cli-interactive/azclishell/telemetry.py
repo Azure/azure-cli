@@ -3,9 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import datetime
-import threading
+import subprocess
+import sys
+import os
+import json
+from six.moves._thread import start_new_thread
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
@@ -19,27 +22,40 @@ from azclishell.util import parse_quotes
 INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
 
 
-def my_context(tel_client):
-    """ context for the application """
-    tel_client.context.application.id = 'Azure CLI Shell'
-    tel_client.context.application.ver = __version__
-    tel_client.context.user.id = Profile().get_installation_id()
-    tel_client.context.instrumentation_key = INSTRUMENTATION_KEY
+def set_custom_properties(prop, name, value):
+    actual_value = value() if hasattr(value, '__call__') else value
+    if actual_value:
+        prop['Context.Default.AzureCLI.' + name] = actual_value
 
 
 class Telemetry(TelemetryClient):
     """ base telemetry sessions """
 
-    start_time = None
-    end_time = None
+    def __init__(self, instrumentation_key, telemetry_channel=None):
+        super(Telemetry, self).__init__(instrumentation_key, telemetry_channel)
+        self.start_time = None
+        self.end_time = None
+        enable(instrumentation_key)
+        # adding context
+        self.context.application.id = 'Azure CLI Shell'
+        self.context.application.ver = __version__
+        self.context.user.id = Profile().get_installation_id()
+        self.context.instrumentation_key = INSTRUMENTATION_KEY
 
+    def _track_event(self, name, properties=None, measurements=None):
+        """ tracks the telemetry events and pushes them out """
+        self.track_event(name, properties, measurements)
+        start_new_thread(self.flush, ())
+
+    @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
         """ track shell specific gestures """
-        self.track_event('Shell Specific Gesture', {gesture: scrub(cmd)})
+        self._track_event('az/interactive/gesture', {gesture: scrub(cmd)})
 
+    @_user_agrees_to_telemetry
     def track_key(self, key):
         """ tracks the special key bindings """
-        self.track_event('Key Press', {"key": key})
+        self._track_event('az/interactive/key/{}'.format(key))
 
     @_user_agrees_to_telemetry
     def start(self):
@@ -50,21 +66,14 @@ class Telemetry(TelemetryClient):
     def conclude(self):
         """ concludings recording stuff """
         self.end_time = str(datetime.datetime.now())
-        self.track_event('Run', {'start time': self.start_time,
-                                 'end time': self.end_time})
+        properties = {}
+        set_custom_properties(properties, 'starttime', str(self.start_time))
+        set_custom_properties(properties, 'endtime', str(self.end_time))
 
-        thread1 = TelThread(self.flush)
-        thread1.start()
-
-
-class TelThread(threading.Thread):
-    """ telemetry thread for exiting """
-    def __init__(self, threadfunc):
-        threading.Thread.__init__(self)
-        self.threadfunc = threadfunc
-
-    def run(self):
-        self.threadfunc()
+        subprocess.Popen([
+            sys.executable,
+            os.path.realpath(__file__),
+            json.dumps(properties)])
 
 
 def scrub(text):
@@ -83,6 +92,10 @@ def scrub(text):
     return ' '.join(values)
 
 
-TC = Telemetry(INSTRUMENTATION_KEY)
-enable(INSTRUMENTATION_KEY)
-my_context(TC)
+SHELL_TELEMETRY = Telemetry(INSTRUMENTATION_KEY)
+
+
+if __name__ == '__main__':
+    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
+    SHELL_TELEMETRY.track_event('az/interactive/run', json.loads(sys.argv[1]))
+    SHELL_TELEMETRY.flush()
