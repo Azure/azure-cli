@@ -959,7 +959,7 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase):  # pyli
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
 
 
-class NetworkVpnGatewayScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
     def test_network_vpn_gateway(self, resource_group):
