@@ -225,6 +225,15 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual('https://login.microsoftonline.com',
                          extended_info['endpoints'].active_directory)
 
+    @mock.patch('azure.cli.core._profile.CLOUD', autospec=True)
+    @mock.patch('azure.cli.core.profiles.get_api_version', autospec=True)
+    def test_subscription_finder_constructor(self, get_api_mock, cloud_mock):
+        get_api_mock.return_value = '2016-06-01'
+        cloud_mock.endpoints.resource_manager = 'http://foo_arm'
+        finder = SubscriptionFinder(None, None, arm_client_factory=None)
+        result = finder._arm_client_factory(mock.MagicMock())
+        self.assertEquals(result.config.base_url, 'http://foo_arm')
+
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_expanded_subscription_info_for_logged_in_service_principal(self,
                                                                             mock_auth_context):
