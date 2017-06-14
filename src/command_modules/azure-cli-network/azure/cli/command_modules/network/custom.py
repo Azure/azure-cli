@@ -913,7 +913,6 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
 
-# TODO: REMOVE ###########################################################################
 
 def _get_backend_address_pool(resource_group_name, address_pool_name, load_balancer_name=None,
                               application_gateway_name=None):
@@ -1031,10 +1030,24 @@ def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, res
                               item_name=None):
     address_pool = _get_backend_address_pool(resource_group_name, item_name,
                                              application_gateway_name=application_gateway_name)
-    resource, resource_type = _expand_availability_set(resource, resource_type)
-    # TODO: Copy from LB command
+    resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
+    for item in resource:
+        parent_obj, ip_config = _get_ip_config(resource_group_name, item, resource_type, ip_config_name)
+        parent_params = parse_resource_id(parent_obj.id)
 
-# TODO: REMOVE ###########################################################################
+        if resource_type == 'virtualMachines':
+            _upsert(ip_config, 'application_gateway_backend_address_pools', address_pool, 'id')
+            _network_client_factory().network_interfaces.create_or_update(
+                parent_params['resource_group'], parent_params['name'], parent_obj).result()
+        elif resource_type == 'virtualMachineScaleSets':
+            ComputeSubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
+            address_pool = ComputeSubResource(address_pool.id)
+            _upsert(ip_config, 'application_gateway_backend_address_pools', address_pool, 'id')
+            get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets.create_or_update(
+                parent_params['resource_group'], parent_params['name'], parent_obj).result()
+        else:
+            raise CLIError("Resource type '{}' not supported".format(resource_type))
+
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
