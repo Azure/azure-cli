@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
+^^^^^^^^^^^^^^^^^^
+* BC: webapp: remove all commands under 'az appservice web'
+
 0.1.8 (2017-06-13)
 ^^^^^^^^^^^^^^^^^^
 * Remove useless line-too-long suppression
