@@ -641,7 +641,7 @@ helps['vm image'] = """
 
 helps['vm image list'] = """
     type: command
-    short-summary: List the VM images available in the Azure Marketplace.
+    short-summary: List the VM/VMSS images available in the Azure Marketplace.
     examples:
         - name: List all available images.
           text: az vm image list --all

@@ -199,14 +199,18 @@ def list_vm_images(image_location=None, publisher_name=None, offer=None, sku=Non
                    all=False):  # pylint: disable=redefined-builtin
     '''vm image list
     :param str image_location:Image location
-    :param str publisher_name:Image publisher name
-    :param str offer:Image offer name
-    :param str sku:Image sku name
+    :param str publisher_name:Image publisher name, partial name is accepted
+    :param str offer:Image offer name, partial name is accepted
+    :param str sku:Image sku name, partial name is accepted
     :param bool all:Retrieve image list from live Azure service rather using an offline image list
     '''
     load_thru_services = all
 
     if load_thru_services:
+        if not publisher_name and not offer and not sku:
+            logger.warning("You are retrieving all the images from server which could take more than a minute. "
+                           "To shorten the wait, provide '--publisher', '--offer' or '--sku'. Partial name search "
+                           "is supported.")
         all_images = load_images_thru_services(publisher_name, offer, sku, image_location)
     else:
         logger.warning(
