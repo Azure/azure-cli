@@ -517,17 +517,13 @@ class Shell(object):
                 continue_flag = True
             else:  # inject into cmd
                 cmd_base = ' '.join(injected_command)
-                print('slkdfjsdkljf')
-                if all(isinstance(result, str) for result in results):
-                    print('su')
+                if all(isinstance(result, (str, unicode)) for result in results):
                     for result in results:
                         cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
                     self.cli_execute(cmd_base)
                     continue_flag = True
                 elif all(isinstance(result, list) for result in results):
-                    print('boo')
                     if len(results) > 1:
-                        print(results)
                         for res_counter, _ in enumerate(results):
                             base = cmd_base
                             skip = False
