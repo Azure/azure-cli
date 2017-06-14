@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.9 (2017-06-14)
 ^^^^^^^^^^^^^^^^^^
 * use arm endpoint from the current cloud to create subscription client
 
