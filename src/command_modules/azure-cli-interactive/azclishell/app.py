@@ -13,6 +13,7 @@ import sys
 import datetime
 import threading
 
+
 import jmespath
 from six.moves import configparser
 
@@ -33,7 +34,7 @@ from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import get_progress_message, progress_view
-from azclishell.telemetry import TC as telemetry
+from azclishell.telemetry import SHELL_TELEMETRY as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -44,6 +45,7 @@ from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
+import azure.cli.core.telemetry as cli_telemetry
 from azure.cli.core.util import (show_version_info_exit, handle_exception)
 from azure.cli.core.util import CLIError
 
@@ -644,6 +646,7 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
+                        cli_telemetry.conclude()  # because I catch the sys exit, I have to push out
 
             except KeyboardInterrupt:  # CTRL C
                 self.set_prompt()
