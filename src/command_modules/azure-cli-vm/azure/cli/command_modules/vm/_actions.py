@@ -28,7 +28,7 @@ def _resource_not_exists(resource_type):
 
 
 def _get_thread_count():
-    return 40
+    return 5  # don't increase too much till https://github.com/Azure/msrestazure-for-python/issues/6 is fixed
 
 
 def load_images_thru_services(publisher, offer, sku, location):

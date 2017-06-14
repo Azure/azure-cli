@@ -1,6 +1,10 @@
 .. :changelog:
 Release History
 ===============
+(unreleased)
+^^^^^^^^^^^^^^^^^^
+* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
+
 2.0.8 (2017-06-13)
 ^^^^^^^^^^^^^^^^^^
 * Remove useless line-too-long suppression
