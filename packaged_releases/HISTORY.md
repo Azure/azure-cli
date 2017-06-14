@@ -7,7 +7,7 @@ Release History
 * See the `HISTORY.rst` files in each module for a changelog.  
 
 Source download:
-https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0,8.tar.gz
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0.8.tar.gz
 c1d4f6154cdce38b1b8d14000f0215b0d8e1032bf40feabcb80fc0c48005bc2b
 
 <details>
