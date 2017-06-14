@@ -85,8 +85,44 @@ helps['ad sp reset-credentials'] = """
             Number of years for which the credentials will be valid. Default: 1 year
 """
 helps['ad sp delete'] = """
-    type: group
-    short-summary: delete the service principal and its role assignments.
+    type: command
+    short-summary: delete a service principal and its role assignments
+"""
+helps['ad sp create'] = """
+    type: command
+    short-summary: create a service principal
+"""
+helps['ad sp list'] = """
+    type: command
+    short-summary: list service principals, with optional filtering
+"""
+helps['ad sp show'] = """
+    type: command
+    short-summary: get a service principal
+"""
+helps['ad app delete'] = """
+    type: command
+    short-summary: delete an application
+"""
+helps['ad app create'] = """
+    type: command
+    short-summary: create an application
+"""
+helps['ad app list'] = """
+    type: command
+    short-summary: list applications, with optional filtering
+"""
+helps['ad app show'] = """
+    type: command
+    short-summary: get an application
+"""
+helps['ad app update'] = """
+    type: command
+    short-summary: udpate an application
+"""
+helps['ad user list'] = """
+    type: command
+    short-summary: list users, with optional filtering
 """
 helps['role'] = """
     type: group

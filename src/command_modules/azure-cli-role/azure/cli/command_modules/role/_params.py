@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import enum_choice_list
 from .custom import get_role_definition_name_completion_list
 from ._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
 
+register_cli_argument('ad app', 'app_id', help='application id')
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
 register_cli_argument('ad app', 'display_name', help='the display name of the application')
 register_cli_argument('ad app', 'homepage', help='the url where users can sign in and use your app.')
