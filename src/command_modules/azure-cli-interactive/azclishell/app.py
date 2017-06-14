@@ -517,27 +517,48 @@ class Shell(object):
                 continue_flag = True
             else:  # inject into cmd
                 cmd_base = ' '.join(injected_command)
+                print('slkdfjsdkljf')
                 if all(isinstance(result, str) for result in results):
+                    print('su')
                     for result in results:
                         cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
                     self.cli_execute(cmd_base)
                     continue_flag = True
                 elif all(isinstance(result, list) for result in results):
-                    for res_counter, _ in enumerate(results[0]):
-                        base = cmd_base
-                        skip = False
+                    print('boo')
+                    if len(results) > 1:
+                        print(results)
+                        for res_counter, _ in enumerate(results):
+                            base = cmd_base
+                            skip = False
 
-                        for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                            if counter < len(results) and res_counter < len(results[counter]):
-                                try:
-                                    base = base.replace(
-                                        SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                                except TypeError:  # because of bad input
-                                    pass
-                            else:  # if there aren't an even number of results, skip it
-                                skip = True
-                        if not skip:
-                            self.cli_execute(base)
+                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                                if counter < len(results) and res_counter < len(results[counter]):
+                                    try:
+                                        base = base.replace(
+                                            SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                                    except TypeError:  # because of bad input
+                                        pass
+                                else:  # if there aren't an even number of results, skip it
+                                    skip = True
+                            if not skip:
+                                self.cli_execute(base)
+                    else:
+                        for res_counter, _ in enumerate(results[0]):
+                            base = cmd_base
+                            skip = False
+
+                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                                if counter < len(results) and res_counter < len(results[counter]):
+                                    try:
+                                        base = base.replace(
+                                            SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                                    except TypeError:  # because of bad input
+                                        pass
+                                else:  # if there aren't an even number of results, skip it
+                                    skip = True
+                            if not skip:
+                                self.cli_execute(base)
                     continue_flag = True
 
         except (jmespath.exceptions.ParseError, CLIError):
