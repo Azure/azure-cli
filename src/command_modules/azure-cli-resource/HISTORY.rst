@@ -1,9 +1,16 @@
 .. :changelog:
 
 Release History
+
 ===============
+
+unreleased
+++++++++++++++++++
+* `group deployment create`: Fixes issue where some parameter files were no longer recognized using @<file> syntax.
+
+
 2.0.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Fix up some parsing and error messages. (#3584)
 * Fix various pylint disable rules
 * Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>

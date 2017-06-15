@@ -62,11 +62,11 @@ def validate_deployment_parameters(namespace):
     parameters = {}
     for params in namespace.parameters or []:
         for item in params:
-            if not _try_parse_key_value_object(parameters, item):
-                param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
-                if not param_obj:
-                    raise CLIError('Unable to parse parameter: {}'.format(item))
+            param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+            if param_obj:
                 parameters.update(param_obj)
+            elif not _try_parse_key_value_object(parameters, item):
+                raise CLIError('Unable to parse parameter: {}'.format(item))
 
     namespace.parameters = parameters
 

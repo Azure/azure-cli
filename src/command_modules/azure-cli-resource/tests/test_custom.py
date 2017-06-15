@@ -176,7 +176,7 @@ class TestCustom(unittest.TestCase):
             {
                 "parameter_list": [['{"foo": "bar"}', '{"foo": "baz"}']],
                 "expected": {"foo": "baz"},
-            },
+            }
         ]
 
         for test in tests:
