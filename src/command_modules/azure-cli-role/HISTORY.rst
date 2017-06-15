@@ -2,10 +2,6 @@
 
 Release History
 ===============
-(unreleased)
-^^^^^^^^^^^^^^^^^^
-* add commands help for "az ad app/sp/user"
-
 2.0.6 (2017-06-13)
 ^^^^^^^^^^^^^^^^^^
 * Remove useless line-too-long suppression
