@@ -13,6 +13,9 @@ from ._factory import get_acr_service_client
 cli_command(__name__, 'acr credential show',
             'azure.cli.command_modules.acr.credential#acr_credential_show',
             table_transformer=credential_format, exception_handler=empty_on_404)
+cli_command(__name__, 'acr credential login',
+            'azure.cli.command_modules.acr.credential#acr_credential_login',
+            exception_handler=empty_on_404)
 cli_command(__name__, 'acr credential renew',
             'azure.cli.command_modules.acr.credential#acr_credential_renew',
             table_transformer=credential_format)
