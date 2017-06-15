@@ -1027,7 +1027,7 @@ def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource,
 
 
 def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, resource, resource_type='virtualMachines', 
-                              item_name=None):
+                              item_name=None, ip_config_name=None):
     address_pool = _get_backend_address_pool(resource_group_name, item_name,
                                              application_gateway_name=application_gateway_name)
     resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
