@@ -195,7 +195,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         # don't want to show the timestamp
                         json_val = deploy_values.copy()
                         json_val.pop('timestamp', None)
-                        if deploy_values.get('status value', 'Started') != 'Started':
+                        status_val = deploy_values.get('status value', None)
+                        if status_val and status_val != 'Started':
                             result = deploy_values['status value'] + ': ' + long_name
                             result += ' (' + deploy_values.get('type', '') + ')'
 
