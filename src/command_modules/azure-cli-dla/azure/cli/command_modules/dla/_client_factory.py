@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core._profile import CLOUD
 
-
 def cf_dla_account(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
@@ -36,6 +35,7 @@ def cf_dla_catalog(_):
         DataLakeAnalyticsCatalogManagementClient,
         subscription_bound=False,
         base_url_bound=False,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id,
         adla_catalog_dns_suffix=CLOUD.suffixes.azure_datalake_analytics_catalog_and_job_endpoint).catalog
 
 
@@ -46,4 +46,5 @@ def cf_dla_job(_):
         DataLakeAnalyticsJobManagementClient,
         subscription_bound=False,
         base_url_bound=False,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id,
         adla_job_dns_suffix=CLOUD.suffixes.azure_datalake_analytics_catalog_and_job_endpoint).job

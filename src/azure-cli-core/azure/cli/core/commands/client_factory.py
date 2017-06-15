@@ -60,10 +60,10 @@ def configure_common_settings(client):
 
 
 def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                             api_version=None, base_url_bound=True, **kwargs):
+                             api_version=None, base_url_bound=True, resource=CLOUD.endpoints.active_directory_resource_id, **kwargs):
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource)
     client_kwargs = {}
     if base_url_bound:
         client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}

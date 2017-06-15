@@ -58,7 +58,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  gallery=None,
                  active_directory=None,
                  active_directory_resource_id=None,
-                 active_directory_graph_resource_id=None):
+                 active_directory_graph_resource_id=None,
+                 active_directory_data_lake_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -68,6 +69,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
+        self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -146,7 +148,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         gallery='https://gallery.azure.com/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
-        active_directory_graph_resource_id='https://graph.windows.net/'),
+        active_directory_graph_resource_id='https://graph.windows.net/',
+        active_directory_data_lake_resource_id='https://datalake.azure.net/'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
