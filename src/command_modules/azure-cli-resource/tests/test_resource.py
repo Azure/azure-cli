@@ -310,47 +310,43 @@ class ProviderOperationTest(VCRTestBase):
                  ])
 
 
-class DeploymentTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(DeploymentTest, self).__init__(__file__, test_method,
-                                             resource_group='azure-cli-deployment-test')
+class DeploymentTest(ScenarioTest):
 
-    def test_group_deployment(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment')
+    def test_group_deployment(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\')
         parameters_file = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
         object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
         deployment_name = 'azure-cli-deployment'
 
-        subnet_id = self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(self.resource_group))['newVNet']['subnets'][0]['id']
+        subnet_id = self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()['newVNet']['subnets'][0]['id']
 
         self.cmd('group deployment validate -g {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-            self.resource_group, template_file, parameters_file, subnet_id, object_file), checks=[
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
+            resource_group, template_file, parameters_file, subnet_id, object_file), checks=[
+            JCheck('properties.provisioningState', 'Succeeded')
         ])
 
         self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-            self.resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file), checks=[
-            JMESPathCheck('properties.provisioningState', 'Succeeded'),
-            JMESPathCheck('resourceGroup', self.resource_group),
+            resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file), checks=[
+            JCheck('properties.provisioningState', 'Succeeded'),
+            JCheck('resourceGroup', resource_group),
+        ])
+        self.cmd('network lb show -g {} -n test-lb'.format(resource_group), checks=[
+            JCheck('tags', {'key': 'super=value'})
         ])
 
-        self.cmd('group deployment list -g {}'.format(self.resource_group), checks=[
-            JMESPathCheck('[0].name', deployment_name),
-            JMESPathCheck('[0].resourceGroup', self.resource_group)
+        self.cmd('group deployment list -g {}'.format(resource_group), checks=[
+            JCheck('[0].name', deployment_name),
+            JCheck('[0].resourceGroup', resource_group)
         ])
-        self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
-                 checks=[
-                     JMESPathCheck('name', deployment_name),
-                     JMESPathCheck('resourceGroup', self.resource_group)
-                 ])
-        self.cmd('group deployment operation list -g {} -n {}'.format(self.resource_group,
-                                                                      deployment_name), checks=[
-            JMESPathCheck('length([])', 2),
-            JMESPathCheck('[0].resourceGroup', self.resource_group)
+        self.cmd('group deployment show -g {} -n {}'.format(resource_group, deployment_name), checks=[
+            JCheck('name', deployment_name),
+            JCheck('resourceGroup', resource_group)
+        ])
+        self.cmd('group deployment operation list -g {} -n {}'.format(resource_group, deployment_name), checks=[
+            JCheck('length([])', 2),
+            JCheck('[0].resourceGroup', resource_group)
         ])
 
 
