@@ -16,8 +16,6 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 
-from azure.cli.testsdk.utilities import create_random_name
-
 
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest'
