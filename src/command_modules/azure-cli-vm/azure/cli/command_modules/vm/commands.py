@@ -11,10 +11,10 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images)
-from azure.cli.core.commands import \
-    (DeploymentOutputLongRunningOperation, cli_command, handle_long_running_operation_exception,
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands.arm import \
+    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
      deployment_validate_table_format)
-from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType
 

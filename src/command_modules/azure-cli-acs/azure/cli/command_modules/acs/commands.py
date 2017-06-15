@@ -5,10 +5,10 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import \
-    (cli_command, handle_long_running_operation_exception, deployment_validate_table_format)
+from azure.cli.core.commands import cli_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.commands.arm import cli_generic_wait_command
+from azure.cli.core.commands.arm import \
+    (cli_generic_wait_command, handle_long_running_operation_exception, deployment_validate_table_format)
 from ._client_factory import _acs_client_factory
 
 
