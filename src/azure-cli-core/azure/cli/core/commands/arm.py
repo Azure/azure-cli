@@ -30,6 +30,65 @@ regex = re.compile(
     '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 
+def handle_long_running_operation_exception(ex):
+    import json
+    import azure.cli.core.telemetry as telemetry
+    from azure.cli.core.commands import LongRunningOperation
+
+    telemetry.set_exception(
+        ex,
+        fault_type='failed-long-running-operation',
+        summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
+    message = getattr(ex, 'message', ex)
+    error_message = 'Deployment failed.'
+
+    try:
+        correlation_id = json.loads(ex.response.content.decode())['properties']['correlationId']
+        error_message = '{} Correlation ID: {}.'.format(error_message, correlation_id)
+    except:  # pylint: disable=bare-except
+        pass
+
+    try:
+        tracking_id = re.match(r".*(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})", str(message)).group(1)
+        error_message = '{} Tracking ID: {}.'.format(error_message, tracking_id)
+    except:  # pylint: disable=bare-except
+        pass
+
+    try:
+        inner_message = json.loads(ex.response.text)['error']['details'][0]['message']
+        error_message = '{} {}'.format(error_message, inner_message)
+    except:  # pylint: disable=bare-except
+        error_message = '{} {}'.format(error_message, message)
+
+    cli_error = CLIError(error_message)
+    # capture response for downstream commands (webapp) to dig out more details
+    setattr(cli_error, 'response', getattr(ex, 'response', None))
+    raise cli_error
+
+
+def deployment_validate_table_format(result):
+    from collections import OrderedDict
+    if result.get('error', None):
+        error_result = OrderedDict()
+        error_result['result'] = result['error']['code']
+        try:
+            tracking_id = re.match(r".*(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})", str(result['error']['message'])).group(1)
+            error_result['trackingId'] = tracking_id
+        except:  # pylint: disable=bare-except
+            pass
+        try:
+            error_result['message'] = result['error']['details'][0]['message']
+        except:  # pylint: disable=bare-except
+            error_result['message'] = result['error']['message']
+        return error_result
+    elif result.get('properties', None):
+        success_result = OrderedDict()
+        success_result['result'] = result['properties']['provisioningState']
+        success_result['correlationId'] = result['properties']['correlationId']
+        return success_result
+    return result
+
+
 def resource_id(**kwargs):
     '''Create a valid resource id string from the given parts
     The method accepts the following keyword arguments:
