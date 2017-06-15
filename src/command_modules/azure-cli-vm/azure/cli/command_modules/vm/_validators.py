@@ -306,9 +306,6 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         # did not specify image XOR attach-os-disk
         raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')
 
-    auth_params = ['admin_password', 'admin_username', 'authentication_type',
-                   'generate_ssh_keys', 'ssh_dest_key_path', 'ssh_key_value']
-
     # perform parameter validation for the specific storage profile
     # start with the required/forbidden parameters for VM
     if namespace.storage_profile == StorageProfile.ManagedPirImage:
@@ -330,7 +327,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
         forbidden = ['os_disk_name', 'os_caching', 'storage_account',
-                     'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
+                     'storage_container_name', 'use_unmanaged_disk', 'storage_sku']
         _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
@@ -344,7 +341,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
         forbidden = ['os_disk_name', 'os_caching', 'data_caching', 'image', 'storage_account',
-                     'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
+                     'storage_container_name', 'data_disk_sizes_gb', 'storage_sku']
 
     else:
         raise CLIError('Unrecognized storage profile: {}'.format(namespace.storage_profile))

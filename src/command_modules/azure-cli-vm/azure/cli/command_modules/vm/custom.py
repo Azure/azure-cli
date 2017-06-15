@@ -5,6 +5,7 @@
 
 # pylint: disable=no-self-use,too-many-lines
 from __future__ import print_function
+import getpass
 import json
 import os
 import re
@@ -1513,7 +1514,7 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None, no_wait=False,
-              authentication_type=None, admin_password=None, admin_username=None, ssh_dest_key_path=None,
+              authentication_type=None, admin_password=None, admin_username=getpass.getuser(), ssh_dest_key_path=None,
               ssh_key_value=None, generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None, os_caching=None,
@@ -1676,7 +1677,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
 def create_vmss(vmss_name, resource_group_name, image,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
-                admin_username=None, admin_password=None, authentication_type=None,
+                admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
                 load_balancer=None, application_gateway=None,
