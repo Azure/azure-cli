@@ -228,24 +228,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         try:
             result = poller.result()
         except ClientException as client_exception:
-            telemetry.set_exception(
-                client_exception,
-                fault_type='failed-long-running-operation',
-                summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
-            message = getattr(client_exception, 'message', client_exception)
+            from azure.cli.core.commands.arm import handle_long_running_operation_exception
             self.progress_controller.stop()
-
-            try:
-                message = '{} {}'.format(
-                    str(message),
-                    json.loads(client_exception.response.text)['error']['details'][0]['message'])  # pylint: disable=no-member
-            except:  # pylint: disable=bare-except
-                pass
-
-            cli_error = CLIError('{}  {}'.format(message, correlation_message))
-            # capture response for downstream commands (webapp) to dig out more details
-            setattr(cli_error, 'response', getattr(client_exception, 'response', None))
-            raise cli_error
+            handle_long_running_operation_exception(client_exception)
 
         self.progress_controller.end()
         return result
