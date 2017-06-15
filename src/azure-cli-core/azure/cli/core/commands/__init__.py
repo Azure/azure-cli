@@ -197,7 +197,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         json_val.pop('timestamp', None)
                         if deploy_values.get('status value', None) != 'Started':
                             result = deploy_values['status value'] + ': ' + long_name
-                            result += ' (' + deploy_values['type'] + ')'
+                            result += ' (' + deploy_values.get('type', '') + ')'
 
                             if update:
                                 logger.info(result)
