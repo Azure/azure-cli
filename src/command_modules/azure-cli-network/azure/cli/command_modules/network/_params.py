@@ -760,7 +760,9 @@ register_cli_argument('network watcher troubleshooting start', 'resource', help=
 register_cli_argument('network watcher troubleshooting show', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_show_namespace)
 
 # Add VM parameter registrations
-add_vm_types = ['virtualMachines', 'availabilitySets', 'virtualMachineScaleSets']
+add_vm_types = ['virtualMachines', 'availabilitySets']
 for item in ['lb', 'application-gateway']:
     register_cli_argument('network {} address-pool add-vm'.format(item), 'resource', nargs='+', validator=validate_add_vm_resources)
     register_cli_argument('network {} address-pool add-vm'.format(item), 'resource_type', **enum_choice_list(add_vm_types))
+    register_cli_argument('network {} address-pool remove-vm'.format(item), 'resource', nargs='+', validator=validate_add_vm_resources)
+    register_cli_argument('network {} address-pool remove-vm'.format(item), 'resource_type', **enum_choice_list(add_vm_types))

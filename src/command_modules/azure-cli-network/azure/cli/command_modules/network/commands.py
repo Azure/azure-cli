@@ -93,8 +93,6 @@ for subresource, alias in property_map.items():
                                custom_function_op=custom_path + 'update_ag_{}'.format(_make_singular(subresource)),
                                child_collection_prop_name=subresource)
 
-cli_command(__name__, 'network application-gateway address-pool add-vm', custom_path + 'add_vm_to_ag_address_pool')
-
 cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy', no_wait_param='no_wait')
 cli_command(__name__, 'network application-gateway ssl-policy show', custom_path + 'show_ag_ssl_policy', exception_handler=empty_on_404)
 
@@ -174,6 +172,7 @@ cli_command(__name__, 'network lb inbound-nat-rule create', custom_path + 'creat
 cli_command(__name__, 'network lb inbound-nat-pool create', custom_path + 'create_lb_inbound_nat_pool')
 cli_command(__name__, 'network lb address-pool create', custom_path + 'create_lb_backend_address_pool')
 cli_command(__name__, 'network lb address-pool add-vm', custom_path + 'add_vm_to_lb_address_pool')
+cli_command(__name__, 'network lb address-pool remove-vm', custom_path + 'remove_vm_from_lb_address_pool')
 cli_command(__name__, 'network lb rule create', custom_path + 'create_lb_rule')
 cli_command(__name__, 'network lb probe create', custom_path + 'create_lb_probe')
 

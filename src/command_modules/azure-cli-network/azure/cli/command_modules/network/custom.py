@@ -953,21 +953,18 @@ def _expand_availability_set(resource, resource_type, resource_group_name):
 
     if resource_type != 'availabilitySets':
         return (resource, resource_type)
-    else:
-        from azure.cli.core.profiles import ResourceType
-        as_params = parse_resource_id(resource[0])
-        avail_set = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).availability_sets.get(
-            as_params.get('resource_group', resource_group_name), as_params['name'])
-        vm_ids = [x.id for x in avail_set.virtual_machines]
-        return (vm_ids, 'virtualMachines')
+
+    as_params = parse_resource_id(resource[0])
+    avail_set = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).availability_sets.get(
+        as_params.get('resource_group', resource_group_name), as_params['name'])
+    vm_ids = [x.id for x in avail_set.virtual_machines]
+    return (vm_ids, 'virtualMachines')
 
 
 def _get_ip_config(resource_group_name, resource_name, resource_type, ip_config_name):
     """ Retrieves an IP configuration for the VM or VMSS and returns both the configuration object and parent that
         must be updated to apply the change (either a NIC or a VMSS). """
 
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     ccf = get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
     ip_configurations = None
@@ -982,7 +979,7 @@ def _get_ip_config(resource_group_name, resource_name, resource_type, ip_config_
         nic = ncf.network_interfaces.get(nic_params['resource_group'], nic_params['name'])
         ip_configurations = nic.ip_configurations
         parent = nic
-    elif resource_type =='virtualMachineScaleSets':
+    elif resource_type == 'virtualMachineScaleSets':
         vmss = ccf.virtual_machine_scale_sets.get(params.get('resource_group', resource_group_name), params['name'])
         # TODO: Enhance to allow more goodness!
         ip_configurations = \
@@ -1009,7 +1006,9 @@ def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource,
     address_pool = _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
     resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
     for item in resource:
-        parent_obj, ip_config = _get_ip_config(resource_group_name, item, resource_type, ip_config_name)
+        item_params = parse_resource_id(item)
+        parent_obj, ip_config = _get_ip_config(item_params.get('resource_group', resource_group_name),
+                                               item_params['name'], resource_type, ip_config_name)
         parent_params = parse_resource_id(parent_obj.id)
 
         if resource_type == 'virtualMachines':
@@ -1026,25 +1025,28 @@ def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource,
             raise CLIError("Resource type '{}' not supported".format(resource_type))
 
 
-def add_vm_to_ag_address_pool(resource_group_name, application_gateway_name, resource, resource_type='virtualMachines', 
-                              item_name=None, ip_config_name=None):
-    address_pool = _get_backend_address_pool(resource_group_name, item_name,
-                                             application_gateway_name=application_gateway_name)
+def remove_vm_from_lb_address_pool(resource_group_name, load_balancer_name, resource, resource_type='virtualMachines',
+                                   item_name=None, ip_config_name=None):
+    address_pool = _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
     resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
     for item in resource:
-        parent_obj, ip_config = _get_ip_config(resource_group_name, item, resource_type, ip_config_name)
+        item_params = parse_resource_id(item)
+        parent_obj, ip_config = _get_ip_config(item_params.get('resource_group', resource_group_name),
+                                               item_params['name'], resource_type, ip_config_name)
         parent_params = parse_resource_id(parent_obj.id)
 
         if resource_type == 'virtualMachines':
-            _upsert(ip_config, 'application_gateway_backend_address_pools', address_pool, 'id')
+            ip_config.load_balancer_backend_address_pools = \
+                [x for x in ip_config.load_balancer_backend_address_pools if x.id != address_pool.id]
             _network_client_factory().network_interfaces.create_or_update(
                 parent_params['resource_group'], parent_params['name'], parent_obj).result()
-        elif resource_type == 'virtualMachineScaleSets':
-            ComputeSubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
-            address_pool = ComputeSubResource(address_pool.id)
-            _upsert(ip_config, 'application_gateway_backend_address_pools', address_pool, 'id')
-            get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets.create_or_update(
-                parent_params['resource_group'], parent_params['name'], parent_obj).result()
+        # TODO: Re-enable or remove for VMSS work
+        # elif resource_type == 'virtualMachineScaleSets':
+        #    ComputeSubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
+        #    address_pool = ComputeSubResource(address_pool.id)
+        #    _upsert(ip_config, 'load_balancer_backend_address_pools', address_pool, 'id')
+        #    get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets.create_or_update(
+        #        parent_params['resource_group'], parent_params['name'], parent_obj).result()
         else:
             raise CLIError("Resource type '{}' not supported".format(resource_type))
 
