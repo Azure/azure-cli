@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import subprocess
+
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 
@@ -25,6 +27,27 @@ def acr_credential_show(registry_name, resource_group_name=None):
         return client.list_credentials(resource_group_name, registry_name)
 
     admin_not_enabled_error(registry_name)
+
+
+def acr_credential_login(registry_name, resource_group_name=None):
+    """Returns a docker login command for the specified container registry.
+    :param str registry_name: The name of container registry
+    :param str resource_group_name: The name of resource group
+    """
+    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+    client = get_acr_service_client().registries
+
+    try:
+        subprocess.call(["docker"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except:
+        raise CLIError("Docker is not currently installed. Please install docker")
+
+    if registry.admin_user_enabled:
+        credentials = client.list_credentials(resource_group_name, registry_name)
+        subprocess.call(["docker", "login", "-u", credentials.username, "-p",
+                         credentials.passwords[0].value, registry.login_server])
+    else:
+        admin_not_enabled_error(registry_name)
 
 
 def acr_credential_renew(registry_name, password_name, resource_group_name=None):
