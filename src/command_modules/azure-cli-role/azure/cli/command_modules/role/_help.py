@@ -118,7 +118,7 @@ helps['ad app show'] = """
 """
 helps['ad app update'] = """
     type: command
-    short-summary: udpate an application
+    short-summary: update an application
 """
 helps['ad user list'] = """
     type: command
