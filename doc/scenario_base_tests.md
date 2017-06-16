@@ -230,3 +230,9 @@ so the function doesn't have to declare a parameter to accept the name.
 However it doesn't mean that the resource group is not created.
 Its name is in the keyword parameter dictionary for any other preparer to consume,
 but it is removed before the test function is actually invoked. 
+
+<!--
+Note: This document's source uses
+[semantic linefeeds](http://rhodesmill.org/brandon/2012/one-sentence-per-line/)
+to make diffs and updates clearer.
+-->
