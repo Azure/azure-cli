@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import \
 from azure.cli.command_modules.dla._validators import (validate_resource_group_name,
                                                        datetime_format)
 
-# pylint: disable=line-too-long
+
 from azure.mgmt.datalake.analytics.account.models.data_lake_analytics_account_management_client_enums \
     import (FirewallState,
             TierType,

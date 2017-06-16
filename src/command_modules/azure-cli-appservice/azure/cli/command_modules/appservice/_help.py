@@ -5,16 +5,10 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
 
 helps['appservice'] = """
     type: group
     short-summary: Manage your App Service plans.
-"""
-
-helps['appservice web'] = """
-    type: group
-    short-summary: deprecated, please use 'az webapp'.
 """
 
 helps['webapp'] = """
@@ -171,6 +165,18 @@ helps['webapp log'] = """
 helps['webapp log config'] = """
     type: command
     short-summary: Configure web app logs.
+"""
+
+helps['webapp log download'] = """
+    type: command
+    short-summary: Download historical logs as a zip file
+    long-summary: Might not work with Linux webs
+"""
+
+helps['webapp log tail'] = """
+    type: command
+    short-summary: Start live tracing
+    long-summary: Might not work with Linux webs
 """
 
 helps['webapp deployment'] = """

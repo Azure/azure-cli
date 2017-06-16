@@ -199,7 +199,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                                               virtual_network_name, subnet)
 
     if public_ip_address_type == 'new':
-        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
@@ -760,7 +760,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
             network_id_template, virtual_network_name, subnet)
 
     if public_ip_address_type == 'new':
-        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
@@ -1002,7 +1002,8 @@ def set_lb_rule(
 
 # pylint: disable=unused-argument
 def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
-               internal_dns_name_label=None, enable_ip_forwarding=False,
+               internal_dns_name_label=None, dns_servers=None,
+               internal_domain_name_suffix=None, enable_ip_forwarding=False,
                load_balancer_backend_address_pool_ids=None,
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
@@ -1013,13 +1014,14 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     NetworkInterfaceDnsSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'NetworkInterfaceDnsSettings', mod='models')
-    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding)
-    if internal_dns_name_label:
-        nic.dns_settings = NetworkInterfaceDnsSettings(
-            internal_dns_name_label=internal_dns_name_label)
+
+    dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
+                                               dns_servers=dns_servers or [])
+    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
+                           dns_settings=dns_settings)
+
     if network_security_group:
         nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
-
     ip_config_args = {
         'name': 'ipconfig1',
         'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
@@ -1039,7 +1041,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
 
 
 def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
-               internal_dns_name_label=None):
+               internal_dns_name_label=None, dns_servers=None):
     if enable_ip_forwarding is not None:
         instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
 
@@ -1052,6 +1054,10 @@ def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
         instance.dns_settings.internal_dns_name_label = None
     elif internal_dns_name_label is not None:
         instance.dns_settings.internal_dns_name_label = internal_dns_name_label
+    if dns_servers == ['']:
+        instance.dns_settings.dns_servers = None
+    elif dns_servers:
+        instance.dns_settings.dns_servers = dns_servers
 
     return instance
 
@@ -1068,6 +1074,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+        private_ip_address_version = private_ip_address_version or IPVersion.ipv4.value
         if private_ip_address_version == IPVersion.ipv4.value and not subnet:
             primary_config = next(x for x in nic.ip_configurations if x.primary)
             subnet = primary_config.subnet.id
@@ -1352,11 +1359,15 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
     return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(instance, vnet_prefixes=None):
+def update_vnet(instance, vnet_prefixes=None, dns_servers=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     if vnet_prefixes:
         instance.address_space.address_prefixes = vnet_prefixes
+    if dns_servers == ['']:
+        instance.dhcp_options.dns_servers = None
+    elif dns_servers:
+        instance.dhcp_options.dns_servers = dns_servers
     return instance
 
 

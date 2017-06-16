@@ -15,7 +15,6 @@ from azclishell.layout import get_scope
 from azclishell.util import parse_quotes
 
 from azure.cli.core.parser import AzCliCommandParser
-from azure.cli.core.util import CLIError
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
@@ -120,7 +119,6 @@ class AzCompleter(Completer):
         self.output_options = commands.output_options if global_params else []
         self.global_param_descriptions = commands.global_param_descriptions if global_params else []
 
-        AzCliCommandParser.error = error_pass  # mutes the parsing
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
@@ -242,7 +240,7 @@ class AzCompleter(Completer):
                                 pass  # other completion method used
 
         # if the user isn't logged in
-        except (CLIError, AttributeError, ValueError):  # service client throws
+        except Exception:  # pylint: disable=broad-except
             pass
 
     def gen_cmd_completions(self, text):

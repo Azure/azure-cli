@@ -23,7 +23,7 @@ helps['managedapp create'] = """
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -d "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Solutions/applianceDefinitions/myManagedAppDef"
         - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product
           text: >
-            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
+            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 helps['managedapp definition create'] = """
     type: command
@@ -281,6 +281,12 @@ helps['group deployment'] = """
 helps['group deployment create'] = """
     type: command
     short-summary: Start a deployment.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a parameters file, raw JSON (which can be loaded using `@<file path>` syntax, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax (example: --parameters params.json --parameters location=westus)
     examples:
         - name: Create a deployment from a remote template file.
           text: >
@@ -288,6 +294,9 @@ helps['group deployment create'] = """
         - name: Create a deployment from a local template file and use parameter values in a string.
           text: >
             az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+        - name: Create a deployment from a local template, use a parameter file and selectively override parameters.
+          text: >
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters params.json --parameters MyValue=This MyArray=@array.json
 """
 helps['group deployment export'] = """
     type: command
@@ -296,6 +305,12 @@ helps['group deployment export'] = """
 helps['group deployment validate'] = """
     type: command
     short-summary: Validate whether the specified template is syntactically correct and will be accepted by Azure Resource Manager.
+    parameters:
+        - name: --parameters
+          short-summary: Supply deployment parameter values.
+          long-summary: >
+            Parameters may be supplied from a parameters file, raw JSON (which can be loaded using `@<file path>` syntax, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax (example: --parameters params.json --parameters location=westus)
 """
 helps['group deployment wait'] = """
     type: command
@@ -332,4 +347,59 @@ helps['provider operation list'] = """
 helps['tag'] = """
     type: group
     short-summary: Manage resource tags.
+"""
+helps['resource link'] = """
+    type: group
+    short-summary: Manage links between resources.
+    long-summary: Linking is a feature of the Resource Manager. It enables you to declare relationships between resources even if they do not reside in the same resource group. Linking has no impact on the runtime of your resources, no impact on billing, and no impact on role-based access. It's simply a mechanism you can use to represent relationships so that tools like the tile gallery can provide a rich management experience. Your tools can inspect the links using the links API and provide custom relationship management experiences as well.
+"""
+helps['resource link create'] = """
+    type: command
+    short-summary: Create a new link between resources.
+    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    examples:
+        - name: Create a link from <link-id> to <resource-id> with
+                notes "some notes to explain this link"
+
+          text: >
+            az resource link create --link-id <link-id> --target-id <resource-id> --notes "some notes to explain this link"
+"""
+helps['resource link update'] = """
+    type: command
+    short-summary: Update link between resources.
+    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    examples:
+        - name: Update the notes for <link-id> notes "some notes to explain this link"
+          text: >
+            az resource link update --link-id <link-id> --notes "some notes to explain this link"
+"""
+helps['resource link delete'] = """
+    type: command
+    short-summary: Delete a link between resources.
+    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    examples:
+        - name: Delete link <link-id>
+          text: >
+            az resource link delete --link-id <link-id>
+"""
+helps['resource link list'] = """
+    type: command
+    short-summary: List all resource links
+    long-summary: Optionally restrict to a specific scope (e.g. /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup) or filter using a filter expression.
+    examples:
+        - name: List links, filtering with <filter-string>
+          text: >
+            az resource link list --filter <filter-string>
+        - name: List all links at /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+          text: >
+            az resource link list --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+"""
+helps['resource link show'] = """
+    type: command
+    short-summary: Show a specific link
+    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    examples:
+        - name: Show a specific link, <link-id>
+          text: >
+            az resource link show --link-id <link-id>
 """

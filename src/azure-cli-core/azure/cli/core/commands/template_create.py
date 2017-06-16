@@ -4,129 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import argparse
 import platform
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.arm import (
     is_valid_resource_id,
     parse_resource_id,
     resource_id,
-    resource_exists,
-    make_camel_case)
-
-
-def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None,
-                                 parent_option_flag=None, parent_type=None, type_field=None,
-                                 existing_id_flag_value='existingId', new_flag_value='new',
-                                 none_flag_value='none', default_value_flag='new',
-                                 base_required=True, **kwargs):
-    type_field_name = type_field or base_name + '_type'
-
-    fold_validator = _name_id_fold(base_name,
-                                   resource_type,
-                                   type_field_name,
-                                   existing_id_flag_value,
-                                   new_flag_value,
-                                   none_flag_value,
-                                   parent_name,
-                                   parent_option_flag,
-                                   parent_type,
-                                   base_required)
-    custom_validator = kwargs.pop('validator', None)
-    custom_help = kwargs.pop('help', None)
-    if custom_validator:
-        def wrapped(namespace):
-            fold_validator(namespace)
-            custom_validator(namespace)
-        validator = wrapped
-    else:
-        validator = fold_validator
-
-    if not custom_help:
-        quotes = '""' if platform.system() == 'Windows' else "''"
-        quote_text = ' Use {} for none.'.format(quotes) if none_flag_value else ''
-        parent_text = ' If name specified, must also specify {}.'.format(
-            parent_option_flag or parent_name) if parent_name else ''
-        flag_texts = {
-            new_flag_value: '  Creates new by default.{}'.format(quote_text),
-            existing_id_flag_value: '  Uses existing resource.{}{}'
-                                    .format(quote_text, parent_text),
-            none_flag_value: '  None by default.'
-        }
-        help_text = 'Name or ID of the resource.' + flag_texts[default_value_flag]
-    else:
-        help_text = custom_help
-
-    register_cli_argument(scope, base_name, validator=validator, help=help_text, **kwargs)
-    register_cli_argument(scope, type_field_name, help=argparse.SUPPRESS, default=None)
-
-
-def _name_id_fold(base_name, resource_type, type_field,
-                  existing_id_flag_value, new_flag_value, none_flag_value,
-                  parent_name=None, parent_option_flag=None, parent_type=None, base_required=True):
-    def handle_folding(namespace):
-        base_name_val = getattr(namespace, base_name)
-        type_field_val = getattr(namespace, type_field)
-        parent_name_val = getattr(namespace, parent_name) if parent_name else None
-
-        if base_name_val is None or type_field_val is not None:
-            # Either no name was specified, or the user specified the type of resource
-            # (i.e. new/existing/none)
-            pass
-        elif base_name_val in ('', '""', "''"):
-            # An empty name specified - that means that we are neither referencing an existing
-            # field, or the name is set to an empty string.  We check for all types of quotes
-            # so scripts can run cross-platform.
-            if not none_flag_value:
-                raise CLIError('Field {} cannot be none.'.format(make_camel_case(base_name)))
-            setattr(namespace, type_field, none_flag_value)
-            setattr(namespace, base_name, None)
-        else:
-            from azure.cli.core.commands.client_factory import get_subscription_id
-            has_parent = parent_name is not None and parent_type is not None
-            if is_valid_resource_id(base_name_val):
-                resource_id_parts = parse_resource_id(base_name_val)
-            elif has_parent:
-                if not parent_name_val and base_required:
-                    raise CLIError("Must specify '{}' when specifying '{}' name.".format(
-                        parent_option_flag or parent_name, base_name))
-                resource_id_parts = dict(
-                    name=parent_name_val,
-                    resource_group=namespace.resource_group_name,
-                    namespace=parent_type.split('/')[0],
-                    type=parent_type.split('/')[1],
-                    subscription=get_subscription_id(),
-                    child_name=base_name_val,
-                    child_type=resource_type)
-            else:
-                resource_id_parts = dict(
-                    name=base_name_val,
-                    resource_group=namespace.resource_group_name,
-                    namespace=resource_type.split('/')[0],
-                    type=resource_type.split('/')[1],
-                    subscription=get_subscription_id())
-
-            if resource_exists(**resource_id_parts):
-                setattr(namespace, type_field, existing_id_flag_value)
-                setattr(namespace, base_name, resource_id(**resource_id_parts))
-            elif is_valid_resource_id(base_name_val):
-                raise CLIError('ID {} does not exist. Please specify '
-                               'a name to create a new resource.'.format(
-                                   resource_id(**resource_id_parts)))
-            elif not new_flag_value:
-                raise CLIError('Referenced resource {} does not exist. Please create the required '
-                               'resource and try again.'.format(resource_id(**resource_id_parts)))
-            else:
-                setattr(namespace, type_field, new_flag_value)
-
-    return handle_folding
-
-# NEW STYLE
-
-# pylint: disable=line-too-long
+    resource_exists)
 
 
 def get_folded_parameter_help_string(
@@ -146,13 +32,14 @@ def get_folded_parameter_help_string(
         help_text = 'Name or ID of the {}. Will create resource if it does not exist.'.format(
             display_name)
     elif allow_new and allow_none and not default_none:
-        help_text = 'Name or ID of the {}, or {} for none. Uses existing resource if available or will create a new resource with defaults if omitted.'.format(
-            display_name, quotes)
+        help_text = 'Name or ID of the {}, or {} for none. Uses existing resource if available or will create a new ' \
+                    'resource with defaults if omitted.'
+        help_text = help_text.format(display_name, quotes)
     elif not allow_new and allow_none and default_none:
         help_text = 'Name or ID of an existing {}, or none by default.'.format(display_name)
     elif allow_new and allow_none and default_none:
-        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'.format(
-            display_name)
+        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'
+        help_text = help_text.format(display_name)
 
     # add parent name option string (if applicable)
     if other_required_option:

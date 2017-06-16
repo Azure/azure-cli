@@ -122,6 +122,9 @@ class IndeterminateStandardOut(ProgressViewBase):
         msg = args.get('message', 'In Progress')
         self.spinner.step(label=msg)
 
+    def clear(self):
+        self.spinner.clear()
+
     def flush(self):
         self.out.flush()
 
@@ -162,9 +165,6 @@ class DeterminateStandardOut(ProgressViewBase):
 
 def get_progress_view(determinant=False, outstream=sys.stderr):
     """ gets your view """
-    view = None
     if determinant:
-        view = DeterminateStandardOut(out=outstream)
-    else:
-        view = IndeterminateStandardOut(out=outstream)
-    return view
+        return DeterminateStandardOut(out=outstream)
+    return IndeterminateStandardOut(out=outstream)

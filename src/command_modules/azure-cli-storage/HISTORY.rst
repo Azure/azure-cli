@@ -2,6 +2,17 @@
 
 Release History
 ===============
+2.0.8 (2017-06-13)
+^^^^^^^^^^^^^^^^^^
+* Specify profile or API version in tests (#3056)
+* Fix various pylint disable rules
+* Update storage metrics, logging and cors commands (#3495)
+* Update API profile support in test
+* Move all existing recording files to latest folder
+* Fix #3362: Rephrase exception message from CORS add (#3638)
+* Remove various pylint disable statements
+* Fix #3592: convert generator to a list in download batch command dry run mode
+* Fix #3592: Blob download batch dryrun issue (#3640)
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++

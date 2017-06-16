@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
+
 helps['cdn'] = """
     type: group
     short-summary: Manage Azure Content Delivery Networks (CDN)

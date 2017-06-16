@@ -2,6 +2,31 @@
 
 Release History
 ===============
+2.0.9 (2017-06-14)
+^^^^^^^^^^^^^^^^^^
+* use arm endpoint from the current cloud to create subscription client
+
+2.0.8 (2017-06-13)
+^^^^^^^^^^^^^^^^^^
+* Remove useless line-too-long suppression
+* Fix unsubscriptable-object pylint disable rules
+* Improve concurrent handling of clouds.config file (#3636)
+* Remove dead code and updates for ignore_tye (#3659)
+* Refresh client request id for each command execution.
+* core: Create subscription clients with right SDK profile (#3635)
+* Fix various pylint disable rules
+* Progress Reporting for template deployments (#3510)
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* output: add support for picking table output fields through jmespath query  (#3581)
+* Improves the muting of parse args + appends history with gestures (#3434)
+* Create subscription clients with right SDK profile
+* Fix method-hidden pylint disable rule
+* Move all existing recording files to latest folder
+* Remove dead code from experimental module
+* Improve concurrent handling of clouds.config file.
+* Remove various pylint disable statements
+* [VM/VMSS] Fix idempotency for VM/VMSS create (#3586)
+* Remove too-many-nested-blocks (#3469) (#3469)
 
 2.0.7 (2017-05-30)
 ^^^^^^^^^^^^^^^^^^

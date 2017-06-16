@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command

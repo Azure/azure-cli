@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.common import AzureHttpError
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import get_sdk, ResourceType
 from ._factory import generic_data_service_factory
@@ -41,7 +42,15 @@ class ServiceProperties(object):
         cors = self.get_cors(timeout)
         new_rule = CorsRule(origins, methods, max_age, exposed_headers, allowed_headers)
         cors.append(new_rule)
-        return self.set_service_properties()(cors=cors, timeout=timeout)
+        try:
+            return self.set_service_properties()(cors=cors, timeout=timeout)
+        except AzureHttpError as ex:
+            # The service issue: https://msazure.visualstudio.com/DefaultCollection/One/_workitems/edit/1247479.
+            # This workaround can be removed once serivce is updated.
+            if ex.status_code == 400 and len(cors) > 5:
+                raise CLIError('Failed to add CORS rules. No more than 5 CORS rule can be added.')
+
+            raise ex
 
     def clear_cors(self, timeout=None):
         return self.set_service_properties()(cors=[], timeout=timeout)

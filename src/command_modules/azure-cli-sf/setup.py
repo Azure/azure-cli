@@ -13,8 +13,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "1.0.2+dev"
-
+VERSION = "1.0.3+dev"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -34,7 +33,8 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-servicefabric==5.6.130',
     'azure-cli-core',
-    'adal>=0.4.3'
+    'adal>=0.4.3',
+    'mock>=2.0.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

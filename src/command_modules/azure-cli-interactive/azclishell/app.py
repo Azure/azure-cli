@@ -13,6 +13,7 @@ import sys
 import datetime
 import threading
 
+
 import jmespath
 from six.moves import configparser
 
@@ -33,7 +34,7 @@ from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import get_progress_message, progress_view
-from azclishell.telemetry import TC as telemetry
+from azclishell.telemetry import SHELL_TELEMETRY as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -44,6 +45,7 @@ from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
+import azure.cli.core.telemetry as cli_telemetry
 from azure.cli.core.util import (show_version_info_exit, handle_exception)
 from azure.cli.core.util import CLIError
 
@@ -435,12 +437,6 @@ class Shell(object):
         elif text.strip() == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
-        if '--version' in text:
-            try:
-                continue_flag = True
-                show_version_info_exit(sys.stdout)
-            except SystemExit:
-                pass
         if text:
             if text[0] == SELECT_SYMBOL['outside']:
                 cmd = text[1:]
@@ -459,7 +455,12 @@ class Shell(object):
 
             elif text[0] == SELECT_SYMBOL['query']:  # query previous output
                 continue_flag = self.handle_jmespath_query(text, continue_flag)
-
+            elif text[0] == '--version' or text[0] == '-v':
+                try:
+                    continue_flag = True
+                    show_version_info_exit(sys.stdout)
+                except SystemExit:
+                    pass
             elif "|" in text or ">" in text:  # anything I don't parse, send off
                 outside = True
                 cmd = "az " + cmd
@@ -631,14 +632,13 @@ class Shell(object):
                 else:
                     b_flag, c_flag, outside, cmd = self._special_cases(text, cmd, outside)
 
+                    if not self.default_command:
+                        self.history.append(text)
                     if b_flag:
                         break
                     if c_flag:
                         self.set_prompt()
                         continue
-
-                    if not self.default_command:
-                        self.history.append(text)
 
                     self.set_prompt()
 
@@ -646,6 +646,7 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
+                        cli_telemetry.conclude()  # because I catch the sys exit, I have to push out
 
             except KeyboardInterrupt:  # CTRL C
                 self.set_prompt()

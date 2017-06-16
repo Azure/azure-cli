@@ -543,7 +543,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem transfers/sec", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -557,7 +557,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem % free space", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -571,7 +571,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem % used space", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -585,7 +585,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem used space", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -599,7 +599,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem read bytes/sec", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -613,7 +613,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem free space", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -627,7 +627,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem % free inodes", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -641,7 +641,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem bytes/sec", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -655,7 +655,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem reads/sec", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -669,7 +669,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem write bytes/sec", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -683,7 +683,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem writes/sec", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
@@ -697,7 +697,7 @@ def get_default_diag_config(is_windows):
                                 "annotation": [
                                     {
                                         "displayName": "Filesystem % used inodes", 
-                                        "local": "en-us"
+                                        "locale": "en-us"
                                     }
                                 ], 
                                 "class": "filesystem", 
