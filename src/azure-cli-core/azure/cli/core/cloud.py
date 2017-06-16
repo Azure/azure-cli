@@ -204,6 +204,9 @@ AZURE_GERMAN_CLOUD = Cloud(
 
 
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+for c in KNOWN_CLOUDS:
+    setattr(c.endpoints, 'vm_image_alias_doc',
+            'https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json')
 
 
 def _set_active_cloud(cloud_name):
