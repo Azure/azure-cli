@@ -170,8 +170,8 @@ They're replaced before the requests are recorded.
     status: {code: 201, message: Created}
 ```
 
-In short, for the name of any Azure resources used in the tests,
-always use `self.create_random_name` to generate its value.
+In short, always use `self.create_random_name` to generate
+the name of any Azure resource used in a test.
 Also, make sure the correct length is given to the method
 because different resources have different limitations on the name length.
 The method will always try to create the longest name possible
