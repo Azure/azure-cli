@@ -11,7 +11,10 @@ from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck, NoneCheck
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure.cli.core._config import az_config, CONFIG_FILE_NAME
+from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
 
+ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
+ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
 class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -45,8 +48,12 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
                          JMESPathCheck('type(properties.accessPolicies)', 'array'),
                          JMESPathCheck('length(properties.accessPolicies)', 1),
                          JMESPathCheck('properties.sku.name', 'standard')])
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions all '
-                 '--secret-permissions all'.format(resource_group, keyvault_name, object_id))
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions {} '
+                 '--secret-permissions {}'.format(resource_group,
+                                                  keyvault_name,
+                                                  object_id,
+                                                  ALL_KEY_PERMISSIONS,
+                                                  ALL_SECRET_PERMISSIONS))
 
         # test create account with default set
         self.cmd('batch account create -g {} -n {} -l {}'.format(
