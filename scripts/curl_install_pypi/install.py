@@ -166,7 +166,6 @@ def get_install_dir():
             create_dir(install_dir)
             if os.listdir(install_dir):
                 print_status("'{}' is not empty and may contain a previous installation.".format(install_dir))
-                print_status("If you'd like to update the CLI, exit this script and run 'az component update'.")
                 ans_yes = prompt_y_n('Remove this directory?', 'n')
                 if ans_yes:
                     shutil.rmtree(install_dir)

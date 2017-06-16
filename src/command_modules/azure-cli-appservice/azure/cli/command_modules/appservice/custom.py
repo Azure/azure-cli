@@ -5,7 +5,6 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
-import json
 import threading
 try:
     from urllib.parse import urlparse
@@ -15,7 +14,8 @@ import OpenSSL.crypto
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.mgmt.web.models import (Site, SiteConfig, SiteConfigResource, User, AppServicePlan,
+from azure.mgmt.storage import StorageManagementClient
+from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
@@ -43,7 +43,6 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
                   deployment_local_git=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
-
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
@@ -74,41 +73,37 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
 
         match['setter'](match, resource_group_name, name)
 
-    if deployment_local_git and deployment_source_url:
-        raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
-
-    if deployment_source_url:
-        logger.warning("Linking to git repository '%s'", deployment_source_url)
-        try:
-            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
-                                           deployment_source_branch, manual_integration=True)
-            LongRunningOperation()(poller)
-        except Exception as ex:  # pylint: disable=broad-except
-            ex = ex_handler_factory(no_throw=True)(ex)
-            logger.warning("Link to git repository failed due to error '%s'", ex)
-
-    if deployment_local_git:
-        local_git_info = enable_local_git(resource_group_name, name)
-        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
-        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+    _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
     return webapp
 
 
-def show_webapp(resource_group_name, name, slot=None):
-    webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
-    webapp = _rename_server_farm_props(webapp)
+def show_webapp(resource_group_name, name, slot=None, app_instance=None):
+    webapp = app_instance
+    if not app_instance:  # when the routine is invoked as a help method, not through commands
+        webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
+    _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(webapp, resource_group_name, name, slot)
     return webapp
 
 
 def list_webapp(resource_group_name=None):
+    return _list_app('app', resource_group_name)
+
+
+def list_function_app(resource_group_name=None):
+    return _list_app('functionapp', resource_group_name)
+
+
+def _list_app(app_type, resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
+    result = [x for x in result if x.kind == app_type]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -503,17 +498,9 @@ def enable_local_git(resource_group_name, name, slot=None):
 def sync_site_repo(resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, name, 'sync_repository', slot)
-    except CloudError as ex:
-        raise _extract_real_error(ex)
-
-
-# webapp service's error payload doesn't follow ARM's error format, so we had to sniff out
-def _extract_real_error(ex):
-    try:
-        err = json.loads(ex.response.text)
-        return CLIError(err['Message'])
-    except Exception:  # pylint: disable=broad-except
-        return ex
+    except CloudError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
+        if ex.status_code not in [200, 204]:
+            raise ex
 
 
 def list_app_service_plans(resource_group_name=None):
@@ -877,13 +864,33 @@ def list_slots(resource_group_name, webapp):
     return slots
 
 
-def swap_slot(resource_group_name, webapp, slot, target_slot=None):
+def swap_slot(resource_group_name, webapp, slot, target_slot=None, action='swap'):
     client = web_client_factory()
-    if target_slot is None:
-        return client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
-    else:
-        return client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                              slot, target_slot, True)
+    if action == 'swap':
+        if target_slot is None:
+            poller = client.web_apps.swap_slot_with_production(resource_group_name,
+                                                               webapp, slot, True)
+        else:
+            poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                    slot, target_slot, True)
+        return poller
+    elif action == 'preview':
+        if target_slot is None:
+            result = client.web_apps.apply_slot_config_to_production(resource_group_name,
+                                                                     webapp, slot, True)
+        else:
+            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
+                                                                   slot, target_slot, True)
+        return result
+    else:  # reset
+        # we will reset both source slot and target slot
+        if target_slot is None:
+            client.web_apps.reset_production_slot_config(resource_group_name, webapp)
+        else:
+            client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
+
+        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, slot)
+        return None
 
 
 def delete_slot(resource_group_name, webapp, slot):
@@ -1141,3 +1148,115 @@ class _StackRuntimeHelper(object):
             r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
                            r['displayName'] else _StackRuntimeHelper.update_site_config)
         self._stacks = result
+
+
+def create_function(resource_group_name, name, storage_account, plan=None,
+                    consumption_plan_location=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None):
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+    if bool(plan) == bool(consumption_plan_location):
+        raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+
+    functionapp_def = Site(location='')
+    client = web_client_factory()
+    if consumption_plan_location:
+        locations = list_consumption_locations()
+        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)  # pylint: disable=line-too-long
+        if location is None:
+            raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
+        functionapp_def.location = consumption_plan_location
+    else:
+        if is_valid_resource_id(plan):
+            plan = parse_resource_id(plan)['name']
+        plan_info = client.app_service_plans.get(resource_group_name, plan)
+        location = plan_info.location
+        functionapp_def.server_farm_id = plan
+        functionapp_def.location = location
+
+    con_string = _validate_and_get_connection_string(resource_group_name, storage_account)
+
+    functionapp_def.kind = 'functionapp'
+    poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
+    functionapp = LongRunningOperation()(poller)
+
+    # adding appsetting to site to make it a function
+    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
+                'WEBSITE_NODE_DEFAULT_VERSION=6.5.0', 'FUNCTIONS_EXTENSION_VERSION=~1']
+
+    if consumption_plan_location is None:
+        update_site_configs(resource_group_name, name, always_on='true')
+    else:
+        settings.append('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING=' + con_string)
+        settings.append('WEBSITE_CONTENTSHARE=' + name.lower())
+
+    update_app_settings(resource_group_name, name, settings, None)
+
+    _set_remote_or_local_git(functionapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
+
+    return functionapp
+
+
+def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url=None,
+                             deployment_source_branch='master', deployment_local_git=None):
+    if deployment_source_url:
+        logger.warning("Linking to git repository '%s'", deployment_source_url)
+        try:
+            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                           deployment_source_branch, manual_integration=True)
+            LongRunningOperation()(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            ex = ex_handler_factory(no_throw=True)(ex)
+            logger.warning("Link to git repository failed due to error '%s'", ex)
+
+    if deployment_local_git:
+        local_git_info = enable_local_git(resource_group_name, name)
+        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
+        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+
+
+def _validate_and_get_connection_string(resource_group_name, storage_account):
+    from azure.cli.core._profile import CLOUD
+    sa_resource_group = resource_group_name
+    if is_valid_resource_id(storage_account):
+        sa_resource_group = parse_resource_id(storage_account)['resource_group']
+        storage_account = parse_resource_id(storage_account)['name']
+    storage_client = get_mgmt_service_client(StorageManagementClient)
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group,
+                                                                        storage_account)
+    error_message = ''
+    endpoints = storage_properties.primary_endpoints
+    sku = storage_properties.sku.name.value
+    allowed_storage_types = ['Standard_GRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS']
+
+    for e in ['blob', 'queue', 'table']:
+        if not getattr(endpoints, e, None):
+            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e, storage_account)   # pylint: disable=line-too-long
+    if sku not in allowed_storage_types:
+        error_message += 'Storage type {} is not allowed'.format(sku)
+
+    if error_message:
+        raise CLIError(error_message)
+
+    obj = storage_client.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
+    try:
+        keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+    except AttributeError:
+        # Older API versions have a slightly different structure
+        keys = [obj.key1, obj.key2]  # pylint: disable=no-member
+
+    endpoint_suffix = CLOUD.suffixes.storage_endpoint
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(   # pylint: disable=line-too-long
+        "https",
+        endpoint_suffix,
+        storage_account,
+        keys[0])  # pylint: disable=no-member
+
+    return connection_string
+
+
+def list_consumption_locations():
+    client = web_client_factory()
+    regions = client.list_geo_regions(sku='Dynamic')
+    return [{'name': x.name.lower().replace(" ", "")} for x in regions]

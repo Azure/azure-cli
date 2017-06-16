@@ -7,8 +7,8 @@ import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
-                                                     JMESPathCheck, NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
+                                             JMESPathCheck, NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -111,7 +111,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
-        self.cmd('webapp config appsettings show -g {} -n {}'.format(resource_group, webapp_name, checks=[
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
             JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheckV2('[0].value', '6.1.0'),
         ]))
@@ -181,7 +181,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         ])
 
         # show
-        result = self.cmd('webapp config appsettings show -g {} -n {}'.format(self.resource_group, self.webapp_name))
+        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
         s2 = next((x for x in result if x['name'] == 's2'))
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
@@ -190,7 +190,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
 
         # delete
         self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config appsettings show -g {} -n {}'.format(self.resource_group, self.webapp_name))
+        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
         self.assertEqual(set([x['name'] for x in result]), set(['s3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
         # hostnames
@@ -201,7 +201,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 3),
             JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
             JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
@@ -210,7 +210,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck("[?name=='c3']|[0].slotSetting", True),
         ])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].slotSetting', False),
             JMESPathCheck('[0].name', 'c2')
@@ -413,13 +413,13 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         # time.sleep(30)  # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
         # r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
         # self.assertTrue('Staging' in str(r.content))
-        result = self.cmd('webapp config appsettings show -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
+        result = self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
 
         # create a new slot by cloning from prod slot
         self.cmd('webapp config set -g {} -n {} --node-version {}'.format(self.resource_group, self.webapp, test_node_version))
         self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
-        self.cmd('webapp config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
+        self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("length([])", 1),
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION')
         ])
@@ -431,14 +431,14 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
 
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
-        result = self.cmd('webapp config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        result = self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1', 's4']))
-        result = self.cmd('webapp config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['c2']))
 
-        result = self.cmd('webapp config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        result = self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's3']))
-        result = self.cmd('webapp config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['c1']))
 
         self.cmd('webapp deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
@@ -447,6 +447,43 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+
+
+class WebappSlotSwapScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_webapp_slot_swap(self, resource_group, resource_group_location):
+        plan = 'slot-swap-plan2'
+        webapp = 'slot-swap-web2'
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['id']))
+        # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        slot = 'staging'
+
+        self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=prod'.format(resource_group, webapp))
+
+        # create an empty slot
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
+
+        self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=slot --slot {}'.format(resource_group, webapp, slot))
+
+        # swap with preview
+        self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action preview'.format(resource_group, webapp, slot))
+        self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheckV2("[?name=='s1']|[0].value", 'prod')
+        ])
+
+        # complete the swap
+        self.cmd('webapp deployment slot swap -g {} -n {} -s {}'.format(resource_group, webapp, slot))
+        self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheckV2("[?name=='s1']|[0].value", 'slot')
+        ])
+
+        # reset
+        self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action reset'.format(resource_group, webapp, slot))
+        self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
+            JMESPathCheckV2("[?name=='s1']|[0]", None)
+        ])
 
 
 class WebappSSLCertTest(ResourceGroupVCRTestBase):
@@ -597,6 +634,55 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite --debug'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
+
+
+class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
+
+    def test_functionapp_asp_e2e(self):
+        self.execute()
+
+    def body(self):
+        functionapp_name = 'functionapp-e2e3'
+        plan = 'functionapp-e2e-plan'
+        storage = 'functionappplanstorage'
+        self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(self.resource_group))
+
+        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, self.resource_group))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, functionapp_name, plan, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
+
+
+class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithConsumptionPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-c-e2e')
+
+    def test_functionapp_consumption_e2e(self):
+        self.execute()
+
+    def body(self):
+        functionapp_name = 'functionappconsumption'
+        location = 'westus'
+        storage = 'functionaconstorage'
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, self.resource_group, location))
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'.format(self.resource_group, functionapp_name, location, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
 
 
 if __name__ == '__main__':

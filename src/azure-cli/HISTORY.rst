@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.5 (2017-05-05)
+^^^^^^^^^^^^^^^^^^
+
+* Include Data Lake Analytics and Data Lake Store modules.
+* Include Cognitive Services module.
+* Include Service Fabric module.
+* Include Interactive module.
+* Remove Container module
+
 2.0.4 (2017-04-28)
 ^^^^^^^^^^^^^^^^^^
 

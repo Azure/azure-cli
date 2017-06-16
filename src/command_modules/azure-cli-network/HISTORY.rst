@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.5 (2017-05-05)
+++++++++++++++++++
+
+* Add `network watcher test-connectivity` command.
+* Add support for `--filters` parameter for `network watcher packet-capture create`.
+
 2.0.4 (2017-04-28)
 ++++++++++++++++++
 

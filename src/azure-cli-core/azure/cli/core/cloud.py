@@ -50,7 +50,7 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  management=None,
                  resource_manager=None,
                  sql_management=None,
@@ -89,7 +89,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
 
 class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  storage_endpoint=None,
                  keyvault_dns=None,
                  sql_server_hostname=None,
@@ -113,7 +113,6 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 class Cloud(object):  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
-    # pylint: disable=too-many-arguments
     def __init__(self,
                  name,
                  endpoints=None,
@@ -230,18 +229,18 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def _init_known_clouds():
+def init_known_clouds(force=False):
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     stored_cloud_names = config.sections()
     for c in KNOWN_CLOUDS:
-        if c.name not in stored_cloud_names:
-            _save_cloud(c)
+        if force or c.name not in stored_cloud_names:
+            _save_cloud(c, overwrite=force)
 
 
 def get_clouds():
     # ensure the known clouds are always in cloud config
-    _init_known_clouds()
+    init_known_clouds()
     clouds = []
     # load the config again as it may have changed
     config = get_config_parser()

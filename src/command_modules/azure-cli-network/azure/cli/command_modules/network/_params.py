@@ -32,6 +32,7 @@ from azure.cli.command_modules.network._validators import \
      process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
      process_ag_ssl_policy_set_namespace, process_route_table_create_namespace,
      process_nw_topology_namespace, process_nw_packet_capture_create_namespace,
+     process_nw_test_connectivity_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
@@ -41,6 +42,7 @@ from azure.cli.command_modules.network._validators import \
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.util import get_json_object
 
 ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
 ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
@@ -678,10 +680,17 @@ for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view', 'packe
     register_cli_argument('network watcher {}'.format(item), 'resource_group_name', help='Name of the resource group the target VM is in. Do not use when supplying VM ID.')
     register_cli_argument('network watcher {}'.format(item), 'nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
 
+register_cli_argument('network watcher test-connectivity', 'source_resource', validator=process_nw_test_connectivity_namespace)
+register_cli_argument('network watcher test-connectivity', 'source_port', type=int)
+register_cli_argument('network watcher test-connectivity', 'dest_resource', arg_group='Destination')
+register_cli_argument('network watcher test-connectivity', 'dest_address', arg_group='Destination')
+register_cli_argument('network watcher test-connectivity', 'dest_port', type=int, arg_group='Destination')
+
 register_cli_argument('network watcher packet-capture', 'capture_name', name_arg_type, help='Name of the packet capture session.')
 register_cli_argument('network watcher packet-capture', 'storage_account', arg_group='Storage')
 register_cli_argument('network watcher packet-capture', 'storage_path', arg_group='Storage')
 register_cli_argument('network watcher packet-capture', 'file_path', arg_group='Storage')
+register_cli_argument('network watcher packet-capture', 'filters', type=get_json_object)
 
 register_cli_argument('network watcher flow-log', 'enabled', validator=process_nw_flow_log_set_namespace, **three_state_flag())
 

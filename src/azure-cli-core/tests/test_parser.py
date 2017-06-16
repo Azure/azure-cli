@@ -32,10 +32,10 @@ class TestParser(unittest.TestCase):
         parser = AzCliCommandParser()
         parser.load_command_table(cmd_table)
         args = parser.parse_args('command the-name'.split())
-        self.assertIs(args.func, test_handler1)
+        self.assertIs(args.func, command)
 
         args = parser.parse_args('sub-command the-second-name'.split())
-        self.assertIs(args.func, test_handler2)
+        self.assertIs(args.func, command2)
 
         AzCliCommandParser.error = VerifyError(self,)
         parser.parse_args('sub-command'.split())
@@ -53,7 +53,7 @@ class TestParser(unittest.TestCase):
         parser.load_command_table(cmd_table)
 
         args = parser.parse_args('test command --req yep'.split())
-        self.assertIs(args.func, test_handler)
+        self.assertIs(args.func, command)
 
         AzCliCommandParser.error = VerifyError(self)
         parser.parse_args('test command'.split())
@@ -71,7 +71,7 @@ class TestParser(unittest.TestCase):
         parser.load_command_table(cmd_table)
 
         args = parser.parse_args('test command --req yep nope'.split())
-        self.assertIs(args.func, test_handler)
+        self.assertIs(args.func, command)
 
         AzCliCommandParser.error = VerifyError(self)
         parser.parse_args('test command -req yep'.split())

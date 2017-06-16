@@ -5,7 +5,7 @@
 
 import os
 
-from azure.cli.core.test_utils.vcr_test_base import VCRTestBase
+from azure.cli.testsdk.vcr_test_base import VCRTestBase
 
 
 class BatchDataPlaneTestBase(VCRTestBase):

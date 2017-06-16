@@ -131,13 +131,14 @@ def enum_default(resource_type, enum_name, enum_val_name):
         return None
 
 
-def three_state_flag(positive_label='true', negative_label='false'):
+def three_state_flag(positive_label='true', negative_label='false', invert=False):
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
     positive/negative values without introducing breaking changes. Flag-like behavior always
-    implies the affirmative.
+    implies the affirmative unless invert=True then invert the logic.
     - positive_label: label for the positive value (ex: 'enabled')
     - negative_label: label for the negative value (ex: 'disabled')
+    - invert: invert the boolean logic for the flag
     """
     choices = [positive_label, negative_label]
 
@@ -145,7 +146,13 @@ def three_state_flag(positive_label='true', negative_label='false'):
     class ThreeStateAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
-            values = values or positive_label
+            if invert:
+                if values:
+                    values = positive_label if values == negative_label else negative_label
+                else:
+                    values = values or negative_label
+            else:
+                values = values or positive_label
             setattr(namespace, self.dest, values == positive_label)
 
     params = {

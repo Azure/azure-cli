@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long,too-many-statements
 
-from azure.cli.core.test_utils.vcr_test_base import \
+from azure.cli.testsdk.vcr_test_base import \
     ResourceGroupVCRTestBase, JMESPathCheck, JMESPathPatternCheck, NoneCheck
 
 

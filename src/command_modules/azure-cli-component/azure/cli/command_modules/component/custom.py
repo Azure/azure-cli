@@ -93,6 +93,7 @@ def _run_pip(pip, pip_exec_args):
     log_stream = StringIO()
     log_handler = logging.StreamHandler(log_stream)
     log_handler.setFormatter(logging.Formatter('%(name)s : %(message)s'))
+    pip.logger.handlers = []
     pip.logger.addHandler(log_handler)
     # Don't propagate to root logger as we catch the pip logs in our own log stream
     pip.logger.propagate = False
@@ -139,6 +140,9 @@ def _install_or_update(package_list, link, private, pre):
                               package_index_trusted_host] if package_index_trusted_host else []
     pip_args = ['install'] + options + package_list + pkg_index_options
     _run_pip(pip, pip_args)
+    # Fix to make sure that we have empty __init__.py files for the azure site-packages folder.
+    nspkg_pip_args = ['install'] + options + ['--force-reinstall', 'azure-nspkg', 'azure-mgmt-nspkg'] + pkg_index_options  # pylint: disable=line-too-long
+    _run_pip(pip, nspkg_pip_args)
 
 
 def _verify_additional_components(components, private, allow_third_party):

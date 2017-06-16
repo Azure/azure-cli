@@ -48,7 +48,6 @@ def log_pprint_template(template):
     logger.info('==== END TEMPLATE ====')
 
 
-# pylint: disable=too-many-arguments
 def check_existence(value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags

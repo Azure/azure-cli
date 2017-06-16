@@ -10,15 +10,15 @@ For example:
 
 First copy the build scripts onto the build machine.
 ```
-$ > debian_build.sh; editor debian_build.sh
-$ > debian_dir_creator.sh; editor debian_dir_creator.sh
-$ chmod +x debian_build.sh debian_dir_creator.sh
+$ > ~/debian_build.sh; editor ~/debian_build.sh
+$ > ~/debian_dir_creator.sh; editor ~/debian_dir_creator.sh
+$ chmod +x ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 
 Then execute it with the appropriate environment variable values.
 ```
-$ export CLI_VERSION=0.2.6 \
-    && export CLI_DOWNLOAD_SHA256=d2a6abae2a64a0262a9ab97170cb280a67656f3f82837dbb8b42c0f9737f0049 \
+$ export CLI_VERSION=0.2.7 \
+    && export CLI_DOWNLOAD_SHA256=66882e5ca6ae78aa4d99bc3440ceaf42e969df43374b0c223f66f79b69329bb8 \
     && ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 

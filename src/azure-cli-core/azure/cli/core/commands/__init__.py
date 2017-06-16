@@ -14,6 +14,8 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+
+import six
 from six import string_types, reraise
 
 import azure.cli.core.azlogging as azlogging
@@ -35,7 +37,7 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context']
+BLACKLISTED_MODS = ['context', 'container', 'shell']
 
 
 class VersionConstraint(object):
@@ -215,7 +217,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
-                 formatter_class=None):
+                 formatter_class=None, deprecate_info=None):
         self.name = name
         self.handler = handler
         self.help = None
@@ -226,6 +228,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
         self.formatter_class = formatter_class
+        self.deprecate_info = deprecate_info
 
     @staticmethod
     def _should_load_description():
@@ -247,8 +250,12 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         arg.type.update(other=argtype)
 
     def _resolve_default_value_from_cfg_file(self, arg, overrides):
+        if not hasattr(arg.type, 'required_tooling'):
+            required = arg.type.settings.get('required', False)
+            setattr(arg.type, 'required_tooling', required)
         if 'configured_default' in overrides.settings:
             def_config = overrides.settings.pop('configured_default', None)
+            setattr(arg.type, 'default_name_tooling', def_config)
             # same blunt mechanism like we handled id-parts, for create command, no name default
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
@@ -260,7 +267,15 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
                 overrides.settings['required'] = False
 
     def execute(self, **kwargs):
-        return self.handler(**kwargs)
+        return self(**kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self.deprecate_info is not None:
+            text = 'This command is deprecating and will be removed in future releases.'
+            if self.deprecate_info:
+                text += " Use '{}' instead.".format(self.deprecate_info)
+            logger.warning(text)
+        return self.handler(*args, **kwargs)
 
 
 command_table = CommandTable()
@@ -348,12 +363,13 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None):
+                formatter_class=None, deprecate_info=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param, confirmation=confirmation,
                                          exception_handler=exception_handler,
-                                         formatter_class=formatter_class)
+                                         formatter_class=formatter_class,
+                                         deprecate_info=deprecate_info)
 
 
 def get_op_handler(operation):
@@ -361,6 +377,8 @@ def get_op_handler(operation):
     # Patch the unversioned sdk path to include the appropriate API version for the
     # resource type in question.
     from azure.cli.core._profile import CLOUD
+    import types
+
     for rt in ResourceType:
         if operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
@@ -370,7 +388,10 @@ def get_op_handler(operation):
         op = import_module(mod_to_import)
         for part in attr_path.split('.'):
             op = getattr(op, part)
-        return op
+        if isinstance(op, types.FunctionType):
+            return op
+        else:
+            return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -409,7 +430,7 @@ def _is_poller(obj):
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None):
+                   formatter_class=None, deprecate_info=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -482,7 +503,7 @@ def create_command(module_name, name, operation,
 
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader,
-                     formatter_class=formatter_class)
+                     formatter_class=formatter_class, deprecate_info=deprecate_info)
     if confirmation:
         cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
                          action='store_true',

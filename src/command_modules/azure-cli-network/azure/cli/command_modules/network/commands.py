@@ -237,6 +237,7 @@ cli_command(__name__, 'network watcher configure', custom_path + 'configure_netw
 cli_command(__name__, 'network watcher list', nw_path + 'list_all', cf_network_watcher)
 
 cli_command(__name__, 'network watcher test-ip-flow', custom_path + 'check_nw_ip_flow', cf_network_watcher)
+cli_command(__name__, 'network watcher test-connectivity', custom_path + 'check_nw_connectivity', cf_network_watcher)
 cli_command(__name__, 'network watcher show-next-hop', custom_path + 'show_nw_next_hop', cf_network_watcher)
 cli_command(__name__, 'network watcher show-security-group-view', custom_path + 'show_nw_security_view', cf_network_watcher)
 cli_command(__name__, 'network watcher show-topology', nw_path + 'get_topology', cf_network_watcher)

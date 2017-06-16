@@ -98,6 +98,7 @@ class Application(object):
     FILTER_RESULT = 'Application.FilterResults'
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
+    COMMAND_PARSER_PARSING = 'CommandParser.Parsing'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
     COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
     COMMAND_TABLE_PARAMS_LOADED = 'CommandTableParams.Loaded'
@@ -170,6 +171,7 @@ class Application(object):
         if self.session['completer_active']:
             enable_autocomplete(self.parser)
 
+        self.raise_event(self.COMMAND_PARSER_PARSING, argv=argv)
         args = self.parser.parse_args(argv)
 
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)

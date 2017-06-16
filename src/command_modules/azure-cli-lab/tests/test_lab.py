@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.core.test_utils.vcr_test_base import (
+from azure.cli.testsdk.vcr_test_base import (
     ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))

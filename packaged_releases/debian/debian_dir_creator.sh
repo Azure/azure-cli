@@ -22,10 +22,17 @@ if [ -z "$2" ]
     exit 1
 fi
 
+if [ -z "$3" ]
+  then
+    echo "No argument supplied for source directory."
+    exit 1
+fi
+
 TAB=$'\t'
 
 debian_dir=$1
 completion_script=$2
+source_dir=$3
 mkdir $debian_dir/source
 
 echo '1.0' > $debian_dir/source/format
@@ -36,7 +43,7 @@ azure-cli (${CLI_VERSION}-1) unstable; urgency=low
 
   * Debian package release.
 
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 01 Jan 2017 00:00:00 -0700
+ -- Azure Python CLI Team <azpycli@microsoft.com>  $(date -R)
 
 EOM
 
@@ -45,13 +52,13 @@ Source: azure-cli
 Section: python
 Priority: extra
 Maintainer: Azure Python CLI Team <azpycli@microsoft.com>
-Build-Depends: debhelper (>= 9), python, dh-virtualenv (>= 0.8), libssl-dev, libffi-dev, python-dev
+Build-Depends: debhelper (>= 9), libssl-dev, libffi-dev, python3-dev
 Standards-Version: 3.9.5
 Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
 Architecture: all
-Depends: \${python:Depends}, \${misc:Depends}
+Depends: \${misc:Depends}
 Description: Azure CLI 2.0 - Preview
  A great cloud needs great tools; we're excited to introduce Azure CLI 2.0 - Preview,
  our next generation multi-platform command line experience for Azure.
@@ -84,22 +91,16 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 EOM
 
 cat > $debian_dir/rules << EOM
-export DH_VIRTUALENV_INSTALL_ROOT=/opt/
 #!/usr/bin/make -f
 
 %:
-${TAB}dh \$@ --with python-virtualenv
+${TAB}dh \$@ --sourcedirectory $source_dir
 
-override_dh_virtualenv:
-${TAB}dh_virtualenv --sourcedirectory src/azure-cli-nspkg --install-suffix az
-${TAB}dh_virtualenv --sourcedirectory src/azure-cli-command_modules-nspkg --install-suffix az
-${TAB}dh_virtualenv --sourcedirectory src/azure-cli-core --install-suffix az
-${TAB}for d in src/command_modules/azure-cli-*/; do dh_virtualenv --sourcedirectory \$d --install-suffix az; done;
-${TAB}dh_virtualenv --sourcedirectory src/azure-cli --install-suffix az
-${TAB}echo -n > debian/azure-cli/opt/az/lib/*/site-packages/azure/__init__.py
-${TAB}echo -n > debian/azure-cli/opt/az/lib/*/site-packages/azure/mgmt/__init__.py
+override_dh_install:
+${TAB}mkdir -p debian/azure-cli/opt/az
+${TAB}cp -a python_env/* debian/azure-cli/opt/az
 ${TAB}mkdir -p debian/azure-cli/usr/bin/
-${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python -m azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
+${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python3 -m azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
@@ -108,3 +109,6 @@ override_dh_strip:
 ${TAB}dh_strip --exclude=_cffi_backend
 
 EOM
+
+# debian/rules should be executable
+chmod 0755 $debian_dir/rules

@@ -641,7 +641,7 @@ class TestBatchLoader(unittest.TestCase):
         args = list(self.command_pool._load_transformed_arguments(handler))
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -649,7 +649,7 @@ class TestBatchLoader(unittest.TestCase):
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -666,7 +666,7 @@ class TestBatchLoader(unittest.TestCase):
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -681,5 +681,5 @@ class TestBatchLoader(unittest.TestCase):
         kwargs = {a: None for a, _ in args}
         kwargs['json_file'] = json_file
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
-            result = self.command_pool.cmd.execute(kwargs=kwargs)
+            result = self.command_pool.cmd(kwargs=kwargs)
             self.assertEqual(result, "Pool Created")

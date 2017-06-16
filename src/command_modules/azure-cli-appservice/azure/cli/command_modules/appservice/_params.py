@@ -11,9 +11,10 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
                                                 CliArgumentType, ignore_type, enum_choice_list)
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType
 from ._client_factory import web_client_factory
+from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
-def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
+def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
     m = getattr(client.web_apps,
@@ -41,7 +42,16 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pyli
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
                                **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
+webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('--name', '-n'), metavar='NAME',
+                                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
+                                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 
+# use this hidden arg to give a command the right instance, that functionapp commands
+# work on function app and webapp ones work on web app
+register_cli_argument('webapp', 'app_instance', ignore_type)
+register_cli_argument('functionapp', 'app_instance', ignore_type)
+# function app doesn't have slot support
+register_cli_argument('functionapp', 'slot', ignore_type)
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
@@ -66,13 +76,10 @@ register_cli_argument('webapp', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('webapp create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
-register_cli_argument('webapp create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
-register_cli_argument('webapp create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
-register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help='canonicalized web runtime in the format of Framework|Version. For example, PHP|5.6')  # TODO ADD completer
+register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. PHP|5.6. Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
 
 register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -80,8 +87,32 @@ register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), co
 
 register_cli_argument('webapp browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 
-register_cli_argument('webapp deployment user', 'user_name', help='user name')
-register_cli_argument('webapp deployment user', 'password', help='password, will prompt if not specified')
+for scope in ['webapp', 'functionapp']:
+    register_cli_argument(scope + ' config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
+    register_cli_argument(scope + ' config ssl upload', 'certificate_password', help='The ssl cert password')
+    register_cli_argument(scope + ' config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
+    register_cli_argument(scope + ' config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
+    register_cli_argument(scope + ' config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
+    register_cli_argument(scope + ' config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
+    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+    register_cli_argument(scope + ' deployment user', 'user_name', help='user name')
+    register_cli_argument(scope + ' deployment user', 'password', help='password, will prompt if not specified')
+    register_cli_argument(scope + ' deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
+    register_cli_argument(scope + ' deployment source', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
+    register_cli_argument(scope + ' deployment source', 'branch', help='the branch name of the repository')
+    register_cli_argument(scope + ' deployment source', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
+    register_cli_argument(scope + ' deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
+    register_cli_argument(scope + ' deployment source', 'cd_account', arg_group='VSTS CD Provider', help='name of the Team Services account to create/use for continuous delivery')
+    register_cli_argument(scope + ' deployment source', 'cd_account_must_exist', arg_group='VSTS CD Provider', help='specifies that the account must already exist. If not specified, the account will be created if it does not already exist (existing accounts are updated)', action='store_true')
+    register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
+    register_cli_argument(scope + ' deployment source', 'git_token', help='git access token required for auto sync')
+    register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
+    register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
+    register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
+
+register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
+                      completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
+register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 
 register_cli_argument('webapp deployment slot', 'slot', help='the name of the slot')
 register_cli_argument('webapp deployment slot', 'webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -90,6 +121,8 @@ register_cli_argument('webapp deployment slot', 'auto_swap_slot', help='target s
 register_cli_argument('webapp deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('webapp deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('webapp deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
+register_cli_argument('webapp deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 
 
 two_states_switch = ['true', 'false']
@@ -111,10 +144,6 @@ for scope in ['appsettings', 'connection-string']:
 register_cli_argument('webapp config connection-string', 'connection_string_type',
                       options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
 
-register_cli_argument('webapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
-register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
-register_cli_argument('webapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
-
 register_cli_argument('webapp config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
 register_cli_argument('webapp config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')
 register_cli_argument('webapp config container', 'docker_registry_server_user', options_list=('--docker-registry-server-user', '-u'), help='the container registry server username')
@@ -135,15 +164,6 @@ register_cli_argument('webapp config set', 'java_container', help="The java cont
 register_cli_argument('webapp config set', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('webapp config set', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
-register_cli_argument('webapp config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
-register_cli_argument('webapp config ssl upload', 'certificate_password', help='The ssl cert password')
-register_cli_argument('webapp config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
-register_cli_argument('webapp config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
-
-register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
-                      completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-register_cli_argument('webapp config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
-
 register_cli_argument('webapp config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('webapp config backup', 'webapp_name', help='The name of the webapp')
 register_cli_argument('webapp config backup', 'db_name', help='Name of the database in the backup', arg_group='Database')
@@ -161,15 +181,6 @@ register_cli_argument('webapp config backup restore', 'target_name', help='The n
 register_cli_argument('webapp config backup restore', 'overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
 register_cli_argument('webapp config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
-register_cli_argument('webapp deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
-register_cli_argument('webapp deployment source', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
-register_cli_argument('webapp deployment source', 'branch', help='the branch name of the repository')
-register_cli_argument('webapp deployment source', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
-register_cli_argument('webapp deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
-register_cli_argument('webapp deployment source', 'cd_account', arg_group='VSTS CD Provider', help='name of the Team Services account to create/use for continuous delivery')
-register_cli_argument('webapp deployment source', 'cd_account_must_exist', arg_group='VSTS CD Provider', help='specifies that the account must already exist. If not specified, the account will be created if it does not already exist (existing accounts are updated)', action='store_true')
-register_cli_argument('webapp deployment source', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
-register_cli_argument('webapp deployment source', 'git_token', help='git access token required for auto sync')
 # end of new ones
 
 # start of old ones #
@@ -202,7 +213,8 @@ register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
-
+register_cli_argument('appservice web deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 register_cli_argument('appservice web log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
@@ -273,3 +285,24 @@ register_cli_argument('appservice web source-control', 'cd_account_must_exist', 
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 # end of olds ones #
+
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+register_cli_argument('functionapp config hostname', 'webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                      help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('functionapp create', 'new_app_name', options_list=('--name', '-n'), help='name of the new function app')
+register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
+                      help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+
+# For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
+register_cli_argument('appservice web show', 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
+register_cli_argument('webapp show', 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
+register_cli_argument('functionapp show', 'name', arg_type=name_arg_type, validator=validate_existing_function_app)
+
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help="name of the function")
+register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                      help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('functionapp create', 'consumption_plan_location', options_list=('--consumption-plan-location', '-c'),
+                      help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
+register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
+                      help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
