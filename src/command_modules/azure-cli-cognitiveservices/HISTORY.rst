@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.2 (2017-05-09)
+------------------
+* Minor fixes.
+
 0.1.1 (2017-05-05)
 ------------------
 * Minor fix - Use new style module packaging.

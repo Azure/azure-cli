@@ -11,7 +11,7 @@ from azure.cli.core import __version__ as core_version
 logger = azlogging.get_az_logger(__name__)
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
-No credentials specified to access DocumentDB service. Please provide any of the following:
+No credentials specified to access Cosmos DB service. Please provide any of the following:
     (1) resource group name and account name
     (2) account name and key
     (3) url-connection and key
@@ -68,7 +68,7 @@ def get_document_client_factory(kwargs):
             raise ex
         # pylint:disable=line-too-long
         raise CLIError(
-            'Failed to instantiate an Azure DocumentDB client using the provided credential ' + str(
+            'Failed to instantiate an Azure Cosmos DB client using the provided credential ' + str(
                 ex))
     _add_headers(client)
     return client

@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.6 (2017-05-09)
 ++++++++++++++++++
 * Change ARM api-version default to latest, update ARM SDK (#3256)
 
