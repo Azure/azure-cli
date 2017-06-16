@@ -9,7 +9,7 @@ from azure.cli.core._profile import CLOUD
 from azure.cli.core.profiles import get_sdk, ResourceType
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
-No credentials specifed to access storage service. Please provide any of the following:
+No credentials specified to access storage service. Please provide any of the following:
     (1) account name and key (--account-name and --account-key options or
         set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
     (2) connection string (--connection-string option or
