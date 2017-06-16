@@ -447,6 +447,51 @@ class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
 
 
+class NetworkLoadBalancerAddVmScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_add_vm')
+    def test_network_lb_add_vm(self, resource_group):
+
+        lb_name = 'lb1'
+        vm_name = 'vm1'
+
+        # set up resources
+        self.cmd('network lb create -g {} -n {} --no-wait'.format(resource_group, lb_name))
+
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password'.format(resource_group, vm_name))
+
+        # test default scenario
+        self.cmd('network lb address-pool add-vm -g {} --lb-name {} --resource {}'.format(resource_group, lb_name, vm_name))
+        self.cmd('network lb address-pool remove-vm -g {} --lb-name {} --resource {}'.format(resource_group, lb_name, vm_name))
+
+
+class NetworkLoadBalancerAddAvailabilitySetScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_add_avail_set')
+    def test_network_lb_add_avail_set(self, resource_group):
+
+        lb_name = 'lb1'
+        as_name = 'as1'
+        as_vm1 = 'vm2a'
+        as_vm2 = 'vm2b'
+        vnet = 'vnet1'
+        subnet = 'subnet1'
+
+        # set up resources
+        self.cmd('network lb create -g {} -n {} --no-wait'.format(resource_group, lb_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(resource_group, vnet, subnet))
+
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, as_name))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password --availability-set {} --vnet-name {} --subnet {} --no-wait'.format(resource_group, as_vm1, as_name, vnet, subnet))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password --availability-set {} --vnet-name {} --subnet {} --no-wait'.format(resource_group, as_vm2, as_name, vnet, subnet))
+        self.cmd('vm wait -g {} -n {} --created'.format(resource_group, as_vm1))
+        self.cmd('vm wait -g {} -n {} --created'.format(resource_group, as_vm2))
+
+        # test availability set scenario
+        self.cmd('network lb address-pool add-vm -g {} --lb-name {} --resource {} --resource-type availabilitySets'.format(resource_group, lb_name, as_name))
+        self.cmd('network lb address-pool remove-vm -g {} --lb-name {} --resource {} --resource-type availabilitySets'.format(resource_group, lb_name, as_name))
+
+
 class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='local_gateway_scenario')

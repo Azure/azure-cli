@@ -961,6 +961,17 @@ def _expand_availability_set(resource, resource_type, resource_group_name):
     return (vm_ids, 'virtualMachines')
 
 
+def _get_primary_nic(vm):
+    ncf = _network_client_factory()
+    nic_id = next((x.id for x in vm.network_profile.network_interfaces if x.primary), None)
+    if not nic_id and len(vm.network_profile.network_interfaces) == 1:
+        nic_id = vm.network_profile.network_interfaces[0].id
+    else:
+        raise ValueError("VM '{}' does not have a primary NIC.".format(vm.name))
+    nic_params = parse_resource_id(nic_id)
+    return ncf.network_interfaces.get(nic_params['resource_group'], nic_params['name'])
+
+
 def _get_ip_config(resource_group_name, resource_name, resource_type, ip_config_name):
     """ Retrieves an IP configuration for the VM or VMSS and returns both the configuration object and parent that
         must be updated to apply the change (either a NIC or a VMSS). """
@@ -972,19 +983,9 @@ def _get_ip_config(resource_group_name, resource_name, resource_type, ip_config_
     params = parse_resource_id(resource_name)
     if resource_type == 'virtualMachines':
         vm = ccf.virtual_machines.get(params.get('resource_group', resource_group_name), params['name'])
-        nic_id = vm.network_profile.network_interfaces[0].id  # TODO: Enhance to allow more goodness!
-
-        ncf = _network_client_factory()
-        nic_params = parse_resource_id(nic_id)
-        nic = ncf.network_interfaces.get(nic_params['resource_group'], nic_params['name'])
+        nic = _get_primary_nic(vm)
         ip_configurations = nic.ip_configurations
         parent = nic
-    elif resource_type == 'virtualMachineScaleSets':
-        vmss = ccf.virtual_machine_scale_sets.get(params.get('resource_group', resource_group_name), params['name'])
-        # TODO: Enhance to allow more goodness!
-        ip_configurations = \
-            vmss.virtual_machine_profile.network_profile.network_interface_configurations[0].ip_configurations
-        parent = vmss
     else:
         raise CLIError("Unsupported resource type for _get_ip_config: '{}'".format(resource_type))
 
@@ -1001,54 +1002,64 @@ def _get_ip_config(resource_group_name, resource_name, resource_type, ip_config_
     return (parent, config)
 
 
+def _update_nic(nic, perform_async=True):
+    nic_params = parse_resource_id(nic.id)
+    while True:
+        try:
+            _network_client_factory().network_interfaces.create_or_update(
+                nic_params['resource_group'], nic_params['name'], nic, raw=perform_async)
+            break
+        except CloudError as ex:
+            if 'retryable error' in ex.message:
+                import time
+                time.sleep(1)
+            else:
+                raise ex
+
+
 def add_vm_to_lb_address_pool(resource_group_name, load_balancer_name, resource, resource_type='virtualMachines',
                               item_name=None, ip_config_name=None):
     address_pool = _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
     resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
+    nics_to_update = []
     for item in resource:
         item_params = parse_resource_id(item)
-        parent_obj, ip_config = _get_ip_config(item_params.get('resource_group', resource_group_name),
-                                               item_params['name'], resource_type, ip_config_name)
-        parent_params = parse_resource_id(parent_obj.id)
-
+        nic, ip_config = _get_ip_config(item_params.get('resource_group', resource_group_name),
+                                        item_params['name'], resource_type, ip_config_name)
         if resource_type == 'virtualMachines':
             _upsert(ip_config, 'load_balancer_backend_address_pools', address_pool, 'id')
-            _network_client_factory().network_interfaces.create_or_update(
-                parent_params['resource_group'], parent_params['name'], parent_obj).result()
-        elif resource_type == 'virtualMachineScaleSets':
-            ComputeSubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
-            address_pool = ComputeSubResource(address_pool.id)
-            _upsert(ip_config, 'load_balancer_backend_address_pools', address_pool, 'id')
-            get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets.create_or_update(
-                parent_params['resource_group'], parent_params['name'], parent_obj).result()
+            nics_to_update.append(nic)
         else:
             raise CLIError("Resource type '{}' not supported".format(resource_type))
+    # update NICs asynchronously
+    for nic in nics_to_update:
+        _update_nic(nic)
+    return _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
 
 
 def remove_vm_from_lb_address_pool(resource_group_name, load_balancer_name, resource, resource_type='virtualMachines',
-                                   item_name=None, ip_config_name=None):
+                                   item_name=None):
     address_pool = _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
     resource, resource_type = _expand_availability_set(resource, resource_type, resource_group_name)
+
+    ccf = get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
+    nics_to_update = []
     for item in resource:
-        item_params = parse_resource_id(item)
-        parent_obj, ip_config = _get_ip_config(item_params.get('resource_group', resource_group_name),
-                                               item_params['name'], resource_type, ip_config_name)
-        parent_params = parse_resource_id(parent_obj.id)
+        params = parse_resource_id(item)
+        vm = ccf.virtual_machines.get(params.get('resource_group', resource_group_name), params['name'])
+        nic = _get_primary_nic(vm)
 
         if resource_type == 'virtualMachines':
-            ip_config.load_balancer_backend_address_pools = \
-                [x for x in ip_config.load_balancer_backend_address_pools if x.id != address_pool.id]
-            _network_client_factory().network_interfaces.create_or_update(
-                parent_params['resource_group'], parent_params['name'], parent_obj).result()
-        # TODO: Re-enable or remove for VMSS work
-        # elif resource_type == 'virtualMachineScaleSets':
-        #    ComputeSubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'SubResource', mod='models')
-        #    address_pool = ComputeSubResource(address_pool.id)
-        #    _upsert(ip_config, 'load_balancer_backend_address_pools', address_pool, 'id')
-        #    get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets.create_or_update(
-        #        parent_params['resource_group'], parent_params['name'], parent_obj).result()
+            for ip_config in nic.ip_configurations:
+                ip_config.load_balancer_backend_address_pools = \
+                    [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != address_pool.id]
+            nics_to_update.append(nic)
         else:
             raise CLIError("Resource type '{}' not supported".format(resource_type))
+    # update NICs asynchronously
+    for nic in nics_to_update:
+        _update_nic(nic)
+    return _get_backend_address_pool(resource_group_name, item_name, load_balancer_name=load_balancer_name)
 
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
