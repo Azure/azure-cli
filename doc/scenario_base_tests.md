@@ -14,10 +14,10 @@ class StorageAccountTests(ScenarioTest):
     def test_list_storage_account(self):
         self.cmd('az storage account list')
 ```
-Note:
+Notes:
 
 1. When the test is run and no recording file is available,
-the test will be run under live mode.
+the test will be run in live mode.
 A recording file will be created at `recording/<test_method_name>.yaml`.
 2. Wrap the command in the `self.cmd` method.
 It will assert that the exit code of the command is zero.
@@ -32,11 +32,11 @@ class StorageAccountTests(ScenarioTest):
         accounts_list = self.cmd('az storage account list').get_output_in_json()
         assert len(accounts_list) > 0
 ```
-Note:
+Notes:
 
 1. The return value of `self.cmd` is an instance of the class `ExecutionResult`.
 It has the exit code and stdout as its properties.
-2. `get_output_in_json` deserializes the output to a JSON object
+2. `get_output_in_json` deserializes the output to a JSON object.
 
 Tip: Don't make any rigid assertions based on assumptions
 which may not stand in a live test environment.
@@ -51,15 +51,16 @@ class StorageAccountTests(ScenarioTest):
         self.cmd('az account list-locations',
         checks=[JMESPathCheck("[?name=='westus'].displayName | [0]", 'West US')])
 ```
-Note: 
+Notes: 
 
-1. What is JMESPath? [JMESPath is a query language for JSON](http://jmespath.org/)
-2. If a command is return value in JSON,
-multiple JMESPath based check can be added to the checks list to validate the result.
+1. What is JMESPath?
+[JMESPath is a query language for JSON](http://jmespath.org/).
+2. If a command returns JSON,
+multiple JMESPath based checks can be added to the checks list to validate the result.
 3. In addition to the `JMESPatchCheck`,
-there are other checks list `NoneCheck` which validate the output is `None`.
+there are other checks like `NoneCheck` which validate the output is `None`.
 The check mechanism is extensible.
-Any callable accept `ExecutionResult` can act as a check.
+Any callable accepting a single `ExecutionResult` argument can act as a check.
 
 
 ### Sample 4. Prepare a resource group for a test
@@ -74,14 +75,14 @@ class StorageAccountTests(ScenarioTest):
             JMESPathCheck('properties.provisioningState', 'Succeeded')
         ])
 ```
-Note:
+Notes:
 
-1. The preparers are executed in before each test in the test class when `setUp` is executed.
-The resource will be cleaned up after testing.
-2. The resource group name is injected to the test method as a parameter.
-By default 'ResourceGroupPreparer' set the value to 'resource_group' parameter.
+1. The preparers are executed before each test in the test class when `setUp` is executed.
+Any resources created in this way will be cleaned up after testing.
+2. The resource group name is injected into the test method as a parameter.
+By default `ResourceGroupPreparer` passes the value as the `resource_group` parameter.
 The target parameter can be customized (see following samples).
-3. The resource group will be deleted in async for performance reason.
+3. The resource group will be deleted asynchronously for performance reason.
 
 
 ### Sample 5. Get more from ResourceGroupPreparer
@@ -95,14 +96,14 @@ class StorageAccountTests(ScenarioTest):
             JMESPathCheck('properties.provisioningState', 'Succeeded')
         ])
 ```
-Note:
+Notes:
 
 1. In addition to the name,
 the location of the resource group can be also injected into the test method.
 2. Both parameters' names can be customized.
 3. The test method parameter accepting the location value is optional.
 The test harness will inspect the method signature
-and decide if the value will be added to the keyworded arguments.
+and decide if the value will be added to the keyword arguments.
 
 
 ### Sample 6. Random name and name mapping
@@ -122,22 +123,22 @@ class StorageAccountTests(ScenarioTest):
 ```
 Note:
 
-One of the most important features of `ScenarioTest` is names managements.
+One of the most important features of `ScenarioTest` is name management.
 For the tests to be able to run in a live environment and avoid name collision
 a strong name randomization is required.
-On the other hand, for the tests to be recorded and replay,
+On the other hand, for the tests to be recorded and replayed,
 the naming mechanism must be repeatable during playback mode.
-The `self.create_randome_name` assist the test to achieve the goal.
+The `self.create_random_name` method helps the test achieve both goals.
 
 The method will create a random name during recording,
 and when it is called during playback,
 it returns a name (internally it is called moniker)
 based on the sequence of the name request.
 The order won't change once the test is written.
-Peak into the recording file, you find no random name.
-For example, note the names like 'clitest.rg000001',
+Peek into the recording file, and you will find no random name.
+For example, note names like 'clitest.rg000001' in the below example:
 they aren't the names of the resources which are actually created in Azure.
-They're placed before the requests are persisted.
+They're replaced before the requests are recorded.
 
 ``` Yaml
 - request:
@@ -169,10 +170,10 @@ They're placed before the requests are persisted.
     status: {code: 201, message: Created}
 ```
 
-In short, for the names of any Azure resources used in the tests,
-always use the `self.create_random_name` to generate its value.
-Also make sure the correct length is given to the method
-because different resource have different limitation of the name length.
+In short, for the name of any Azure resources used in the tests,
+always use `self.create_random_name` to generate its value.
+Also, make sure the correct length is given to the method
+because different resources have different limitations on the name length.
 The method will always try to create the longest name possible
 to fully randomize the name. 
 
@@ -191,17 +192,20 @@ class StorageAccountTests(ScenarioTest):
 ```
 Note:
 
-1. Like `ResourceGroupPreparer` you can use `StorageAccountPreparer`
+1. Like `ResourceGroupPreparer`, you can use `StorageAccountPreparer`
 to prepare a disposable storage account for the test.
-The account is deleted along with the resource group.
-2. To create a storage account a resource group is required.
-Therefore `ResourceGroupPrepare` is needed to place above the `StorageAccountPreparer`.
-The preparers designed to be executed from top to bottom.
-(The core implementaiton of preparer is in the[AbstractPreparer](https://github.com/Azure/azure-cli/blob/master/src/azure-cli-testsdk/azure/cli/testsdk/preparers.py#L25))
-3. The preparers communicate among them
+The account is deleted along with the resource group during test teardown.
+2. Creation of a storage account requires a resource group.
+Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`,
+since preparers are designed to be executed from top to bottom.
+(The core preparer implementation is in the
+[AbstractPreparer](https://github.com/Azure/azure-python-devtools/blob/master/src/azure_devtools/scenario_tests/preparers.py)
+class in the [azure-devtools](https://pypi.python.org/pypi/azure-devtools) package.)
+3. The preparers communicate among themselves
 by adding values to the `kwargs` of the decorated methods.
-Therefore the `StorageAccountPreparer` uses the resource group created in preceding `ResourceGroupPreparer`.
-4. The `StorageAccountPreparer` can be further customized:
+Therefore the `StorageAccountPreparer` uses the resource group created in the preceding `ResourceGroupPreparer`.
+4. The `StorageAccountPreparer` can be further customized
+to modify the parameters of the created storage account:
 ``` Python
 @StorageAccountPreparer(sku='Standard_LRS', location='southcentralus', parameter_name='storage')
 ```
