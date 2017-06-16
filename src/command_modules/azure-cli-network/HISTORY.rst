@@ -6,7 +6,7 @@ Release History
 unreleased
 ++++++++++++++++++
 * `nic create/update`: Add support for `--accelerated-networking`.
-* `nic create`: Remove non-functional `--internal-dns-name-suffix` argument.
+* BC `nic create`: Remove non-functional `--internal-dns-name-suffix` argument.
 
 2.0.8 (2017-06-13)
 ++++++++++++++++++

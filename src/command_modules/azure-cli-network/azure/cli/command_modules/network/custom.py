@@ -1042,7 +1042,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
 def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
                internal_dns_name_label=None, dns_servers=None, enable_accelerated_networking=None):
     if enable_ip_forwarding is not None:
-        instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
+        instance.enable_ip_forwarding = enable_ip_forwarding
 
     if network_security_group == '':
         instance.network_security_group = None
