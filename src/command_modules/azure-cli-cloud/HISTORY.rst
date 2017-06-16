@@ -2,10 +2,10 @@
 
 Release History
 ===============
-
 2.0.5 (unreleased)
 ++++++++++++++++++
 * Provide an option for 'az cloud set' to select the profile while selecting current cloud
+* Expose 'endpoint_vm_image_alias_doc'
 
 2.0.4 (2017-06-13)
 ++++++++++++++++++

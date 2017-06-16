@@ -8,6 +8,7 @@ import unittest
 import mock
 
 import azure.cli.core.application as application
+from azure.cli.core.util import CLIError
 
 
 class TestVMImage(unittest.TestCase):
@@ -41,6 +42,17 @@ class TestVMImage(unittest.TestCase):
         self.assertEqual(parts[1], ubuntu_image['offer'])
         self.assertEqual(parts[2], ubuntu_image['sku'])
         self.assertEqual(parts[3], ubuntu_image['version'])
+
+    @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
+    def test_when_alias_doc_is_missing(self, mock_get_active_cloud):
+        from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+        mock_cloud = mock.MagicMock()
+        mock_cloud.endpoints.vm_image_alias_doc = ''
+        mock_get_active_cloud.return_value = mock_cloud
+        # assert
+        with self.assertRaises(CLIError) as context:
+            load_images_from_aliases_doc()
+        self.assertTrue("'endpoint_vm_image_alias_doc' isn't configured" in str(context.exception))
 
 
 if __name__ == '__main__':
