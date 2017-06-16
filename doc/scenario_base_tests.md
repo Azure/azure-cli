@@ -6,6 +6,16 @@ It is the preferred base class for all VCR based test cases from now on.
 The `ScenarioTest` class is designed to be a better and easier test harness
 for authoring scenario based VCR tests.
 
+Pull request [#3621](https://github.com/Azure/azure-cli/pull/3621)
+extracted code useful for other Azure test settings to its own package
+called [azure-devtools](https://github.com/Azure/azure-python-devtools).
+The test harness in [azure-cli-testsdk](src/azure-cli-testsdk)
+provides a compatibility layer between that common code
+and CLI-specific tests,
+adding functionality such as executing CLI commands
+and checking JSON output.
+
+
 ### Sample 1. Basic fixture
 ```Python
 from azure.cli.testsdk import ScenarioTest
