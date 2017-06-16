@@ -1,9 +1,10 @@
 # How to write ScenarioTest based VCR test
 
-The `ScenarioTest` class is introduced in pull request [#2393](https://github.com/Azure/azure-cli/pull/2393).
-It is the preferred base class for and VCR based test cases from now on.
+The `ScenarioTest` class was introduced in pull request
+[#2393](https://github.com/Azure/azure-cli/pull/2393).
+It is the preferred base class for all VCR based test cases from now on.
 The `ScenarioTest` class is designed to be a better and easier test harness
-for authoring scenario based VCR test.
+for authoring scenario based VCR tests.
 
 ### Sample 1. Basic fixture
 ```Python
