@@ -13,6 +13,7 @@ from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure.cli.core._config import az_config, CONFIG_FILE_NAME
 from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
 
+# Key Vault permissions
 ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
 ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
