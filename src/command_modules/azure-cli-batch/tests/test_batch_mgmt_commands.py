@@ -16,6 +16,7 @@ from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
 ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
 ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
+
 class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
