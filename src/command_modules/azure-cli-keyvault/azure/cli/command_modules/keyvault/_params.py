@@ -167,10 +167,6 @@ register_cli_argument('keyvault set-policy', 'certificate_permissions', metavar=
                       help='Space separated list. Possible values: {}'.format(
                           certificate_permission_values), arg_group='Permission')
 
-# purge arguments
-register_cli_argument('keyvault purge', 'vault_name', required=True, completer=None, validator=None)
-register_cli_argument('keyvault purge', 'location', required=True, completer=None, validator=None)
-
 
 for item in ['key', 'secret', 'certificate']:
     register_cli_argument('keyvault {}'.format(item), '{}_name'.format(item),
