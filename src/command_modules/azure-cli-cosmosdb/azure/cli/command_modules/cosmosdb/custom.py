@@ -219,6 +219,7 @@ def cli_cosmosdb_collection_delete(client, database_id, collection_id):
 
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
+                                    defaultTtl=None,
                                     indexing_policy=None):
     changed = False
 
@@ -227,6 +228,10 @@ def _populate_collection_definition(collection,
             collection['partitionKey'] = {}
         collection['partitionKey'] = {'paths': [partition_key_path]}
         changed = True
+
+    if defaultTtl:
+        changed = True
+        collection['defaultTtl'] = defaultTtl
 
     if indexing_policy:
         changed = True
@@ -239,6 +244,7 @@ def cli_cosmosdb_collection_create(client,
                                    collection_id,
                                    throughput=None,
                                    partition_key_path=None,
+                                   defaultTtl=None,
                                    indexing_policy=DEFAULT_INDEXING_POLICY):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
@@ -249,6 +255,7 @@ def cli_cosmosdb_collection_create(client,
 
     _populate_collection_definition(collection,
                                     partition_key_path,
+                                    defaultTtl,
                                     indexing_policy)
 
     created_collection = client.CreateCollection(_get_database_link(database_id), collection,
@@ -270,6 +277,7 @@ def cli_cosmosdb_collection_update(client,
                                    database_id,
                                    collection_id,
                                    throughput=None,
+                                   defaultTtl=None,
                                    indexing_policy=None):
     """Updates an Azure Cosmos DB collection """
     logger.debug('reading collection')
@@ -278,6 +286,7 @@ def cli_cosmosdb_collection_update(client,
 
     if (_populate_collection_definition(collection,
                                         None,
+                                        defaultTtl,
                                         indexing_policy)):
         logger.debug('replacing collection')
         result['collection'] = client.ReplaceCollection(
