@@ -38,6 +38,12 @@ helps['keyvault update'] = """
     short-summary: Update the properties of a key vault.
 """
 
+helps['keyvault recover'] = """
+    type: command
+    short-summary: Recover a key vault.
+    long-summary: Recovers a previously deleted key vault for which soft delete was enabled.
+"""
+
 helps['keyvault key'] = """
     type: group
     short-summary: Manage keys.
