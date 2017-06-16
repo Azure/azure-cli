@@ -217,8 +217,9 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
                 url = urlunparse(url_parsed)
 
                 def file_chunk(target_file, rel_path, print_progress):
-                    chunk = target_file.read(100000)
-                    if chunk != b'':
+                    chunk = True
+                    while chunk:
+                        chunk = target_file.read(100000)
                         print_progress(len(chunk), rel_path)
                         yield chunk
 
