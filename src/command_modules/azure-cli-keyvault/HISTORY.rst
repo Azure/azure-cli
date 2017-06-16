@@ -2,12 +2,22 @@
 
 Release History
 ===============
+Unreleased
+++++++++++++++++++++
+
+* Adding commands for KeyVault recovery features
+* az keyvault purge, recover, list-deleted
+* az keyvault secret backup, restore, purge, recover, list-deleted
+* az keyvault certificate purge, recover, list-deleted
+* az keyvault key purge, recover, list-deleted
+
 2.0.6 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * Remove various pylint disable statements
 * Move all existing recording files to latest folder
 * Fix various pylint disable rules
+
 
 2.0.5 (2017-05-30)
 ++++++++++++++++++++
