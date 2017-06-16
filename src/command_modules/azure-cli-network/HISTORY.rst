@@ -2,8 +2,14 @@
 
 Release History
 ===============
+
+unreleased
+++++++++++++++++++
+* `nic create/update`: Add support for `--accelerated-networking`.
+* `nic create`: Remove non-functional `--internal-dns-name-suffix` argument.
+
 2.0.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression.
 * `nic update/create`: Add support for --dns-servers.
 * Fix all bad-continuation pylint disables

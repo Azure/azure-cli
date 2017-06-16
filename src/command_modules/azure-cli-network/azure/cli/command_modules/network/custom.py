@@ -1002,13 +1002,12 @@ def set_lb_rule(
 
 # pylint: disable=unused-argument
 def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
-               internal_dns_name_label=None, dns_servers=None,
-               internal_domain_name_suffix=None, enable_ip_forwarding=False,
+               internal_dns_name_label=None, dns_servers=None, enable_ip_forwarding=False,
                load_balancer_backend_address_pool_ids=None,
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
-               public_ip_address=None, virtual_network_name=None):
+               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
     NetworkInterfaceDnsSettings = get_sdk(
@@ -1018,7 +1017,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
                                                dns_servers=dns_servers or [])
     nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
-                           dns_settings=dns_settings)
+                           dns_settings=dns_settings, enable_accelerated_networking=enable_accelerated_networking)
 
     if network_security_group:
         nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
@@ -1041,7 +1040,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
 
 
 def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
-               internal_dns_name_label=None, dns_servers=None):
+               internal_dns_name_label=None, dns_servers=None, enable_accelerated_networking=None):
     if enable_ip_forwarding is not None:
         instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
 
@@ -1058,6 +1057,9 @@ def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
         instance.dns_settings.dns_servers = None
     elif dns_servers:
         instance.dns_settings.dns_servers = dns_servers
+
+    if enable_accelerated_networking is not None:
+        instance.enable_accelerated_networking = enable_accelerated_networking
 
     return instance
 
