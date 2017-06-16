@@ -210,7 +210,7 @@ to modify the parameters of the created storage account:
 @StorageAccountPreparer(sku='Standard_LRS', location='southcentralus', parameter_name='storage')
 ```
 
-### Sampel 8. Prepare multiple storage accounts for tests
+### Sample 8. Prepare multiple storage accounts for tests
 ``` Python
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer()
