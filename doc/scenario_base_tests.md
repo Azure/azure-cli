@@ -146,7 +146,7 @@ it returns a name (internally it is called moniker)
 based on the sequence of the name request.
 The order won't change once the test is written.
 Peek into the recording file, and you will find no random name.
-For example, note names like 'clitest.rg000001' in the below example:
+For example, note names like 'clitest.rg000001' in the sample recording below:
 they aren't the names of the resources which are actually created in Azure.
 They're replaced before the requests are recorded.
 
