@@ -1,4 +1,4 @@
-# How to write ScenarioTest based VCR test
+# How to write ScenarioTest based VCR tests
 
 The `ScenarioTest` class was introduced in pull request
 [#2393](https://github.com/Azure/azure-cli/pull/2393).
@@ -178,7 +178,7 @@ The method will always try to create the longest name possible
 to fully randomize the name. 
 
 
-### Sample 7. Prepare storage account for tests
+### Sample 7. Prepare a storage account for tests
 ``` Python
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
@@ -224,9 +224,9 @@ class StorageAccountTests(ScenarioTest):
 ```
 Note:
 
-1. Two storage accounts name should be assigned to different function parameters.
-2. The resource group name is not required in test
+1. Two storage account names will be assigned to different function parameters.
+2. The resource group name is not needed for the test
 so the function doesn't have to declare a parameter to accept the name.
 However it doesn't mean that the resource group is not created.
-Its name is in the keyworded parameter dictionary for all the preparer to consume.
-It is removed before the test function is actually invoked. 
+Its name is in the keyword parameter dictionary for any other preparer to consume,
+but it is removed before the test function is actually invoked. 
