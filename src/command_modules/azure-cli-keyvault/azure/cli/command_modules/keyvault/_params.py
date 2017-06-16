@@ -137,7 +137,7 @@ register_cli_argument('keyvault', 'enabled_for_disk_encryption',
 register_cli_argument('keyvault', 'enabled_for_template_deployment',
                       help='Allow Resource Manager to retrieve secrets from the vault.',
                       **three_state_flag())
-register_cli_argument('keyvault', 'enable_for_soft_delete',
+register_cli_argument('keyvault', 'enable_soft_delete',
                       help='Enable vault deletion recovery for the vault, and all contained entities',
                       **three_state_flag())
 
