@@ -2,7 +2,7 @@
 
 Release History
 ===============
-2.0.7 (2017-06-16)
+Unreleased
 ++++++++++++++++++++
 
 * Adding commands for KeyVault recovery features

@@ -212,6 +212,17 @@ class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
         if os.path.isfile(key_file):
             os.remove(key_file)
 
+        # import PEM
+        key_enc_file = os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem')
+        key_enc_password = 'password'
+        key_plain_file = os.path.join(TEST_DIR, 'mydomain.test.pem')
+        self.cmd(
+            'keyvault key import --vault-name {} -n import-key-plain --pem-file "{}" -p software'.format(
+                kv, key_plain_file))
+        self.cmd(
+            'keyvault key import --vault-name {} -n import-key-encrypted --pem-file "{}" --pem-password {} -p hsm'.format(
+                kv, key_enc_file, key_enc_password))
+
 
 class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
