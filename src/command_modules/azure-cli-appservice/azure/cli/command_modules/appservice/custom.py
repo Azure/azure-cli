@@ -464,6 +464,11 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
             sc = SourceControl(location, name='GitHub', token=git_token)
             client.update_source_control('GitHub', sc)
 
+        # service doesn't support update for being a less likely scenario, but no error is emitted.
+        # we work around it by deleting the existing binding.
+        if show_source_control(resource_group_name, name, slot).repo_url:
+            delete_source_control(resource_group_name, name, slot)
+
         source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                            is_manual_integration=manual_integration,
                                            is_mercurial=(repository_type != 'git'))
