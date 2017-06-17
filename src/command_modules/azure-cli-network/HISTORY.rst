@@ -3,6 +3,43 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+* `nic create/update`: Add support for `--accelerated-networking`.
+* BC `nic create`: Remove non-functional `--internal-dns-name-suffix` argument.
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression.
+* `nic update/create`: Add support for --dns-servers.
+* Fix all bad-continuation pylint disables
+* Remove dead code and updates for ignore_tye (#3659)
+* [Network] Fix local gateway create (#3596)
+* Fix various pylint disable rules
+* [Network] Re-enable Network Watcher tests (#3646)
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* [Network] Convert NIC test to ScenarioTest base (#3661)
+* `local-gateway create`: fix bug where --local-address-prefixes was ignored.
+* Fix method-hidden pylint disable rule
+* Move all existing recording files to latest folder
+* [Network] Add support for --dns-servers to NIC create/update and VNET update. (#3613)
+* Fix network module PEP8 violations (#3569)
+* Remove too-many-nested-blocks (#3469) (#3469)
+* `vnet update`: Add support for --dns-servers.
+
+2.0.7 (2017-05-30)
+++++++++++++++++++
+
+* `express-route peering create`: fix bug when creating a peering without route filtering.
+* `express-route update`: fix bug where --provider and --bandwidth arguments did not work.
+* `network watcher show-topology`: Fix bug with location defaulting logic.
+* `network list-usages`: improve output for TSV and table format.
+* `application-gateway http-listener create`: Default frontend IP if only one exists.
+* `application-gateway rule create`: Default address pool, HTTP settings, and HTTP listener if
+   only one exists.
+* `lb rule create`: Default frontend IP and backend pool if only one exists.
+* `lb inbound-nat-rule create`: Default frontend IP if only one exists.
+
 2.0.6 (2017-05-09)
 ++++++++++++++++++
 

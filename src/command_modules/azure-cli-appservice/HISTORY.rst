@@ -2,6 +2,28 @@
 
 Release History
 ===============
+(unreleased)
+^^^^^^^^^^^^^^^^^^
+* BC: webapp: remove all commands under 'az appservice web'
+
+0.1.8 (2017-06-13)
+^^^^^^^^^^^^^^^^^^
+* Remove useless line-too-long suppression
+* webapp: mask docker registry passwords from 'webapp appsettings/container' commands' output (#3656)
+* fix typos in arg name (#3626)
+* Fix various pylint disable rules
+* Fix all superflusous-parens pylint disable rules
+* webapp: ensure default browser is used on osx and w/o error on launching (#3623)
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* webapp: improve the help of 'az webapp log tail/download' (#3624)
+* Move all existing recording files to latest folder
+* webapp: expose traffic-routing command to configure static routing (#3566)
+* Remove various pylint disable statements
+
+0.1.7 (2017-05-30)
+++++++++++++++++++++
+* webapp: add reliability fixes in configuring source control (#3245)
+* BC: az webapp config update: Remove unsupported --node-version argument for Windows webapps. Instead use "az webapp config appsettings set" with the WEBSITE_NODE_DEFAULT_VERSION key.
 
 0.1.6 (2017-05-09)
 ++++++++++++++++++++

@@ -2,11 +2,29 @@
 
 Release History
 ===============
-
-2.0.4 (2017-05-09)
+Unreleased
 ++++++++++++++++++++
 
-* Minor fixes.
+* Adding commands for KeyVault recovery features
+* az keyvault purge, recover, list-deleted
+* az keyvault secret backup, restore, purge, recover, list-deleted
+* az keyvault certificate purge, recover, list-deleted
+* az keyvault key purge, recover, list-deleted
+
+2.0.6 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression
+* Remove various pylint disable statements
+* Move all existing recording files to latest folder
+* Fix various pylint disable rules
+
+
+2.0.5 (2017-05-30)
+++++++++++++++++++++
+
+* [Role] Service Principal KeyVault integration (#3133)
+* Update KeyVault dataplane to 0.3.2. (#3307)
+* [KeyVault] Update data plane SDK to 0.3.0 (#3251)
 
 2.0.3 (2017-05-05)
 ++++++++++++++++++++

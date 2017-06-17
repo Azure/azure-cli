@@ -12,21 +12,21 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 
 def create_service_adapter(service_model, service_class=None):
     def _service_adapter(method_name):
-        if service_class is not None:
-            return '{}#{}.{}'.format(service_model, service_class, method_name)
-        else:
-            return '{}#{}'.format(service_model, method_name)
+        return '{}#{}.{}'.format(service_model, service_class, method_name) if service_class else \
+            '{}#{}'.format(service_model, method_name)
 
     return _service_adapter
 
 
 # pylint: disable=too-few-public-methods
 class ServiceGroup(object):
-    def __init__(self, scope, client_factory, service_adapter=None, custom_path=None):
+    def __init__(self, scope, client_factory, service_adapter=None, custom_path=None,
+                 exception_handler=None):
         self._scope = scope
         self._factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
         self._custom_path = custom_path
+        self._exception_handler = exception_handler
 
     def __enter__(self):
         return self
@@ -34,18 +34,21 @@ class ServiceGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def group(self, group_name):
+    def group(self, group_name, exception_handler=None):
         return CommandGroup(self._scope, group_name, self._factory, self._service_adapter,
-                            self._custom_path)
+                            self._custom_path,
+                            exception_handler=exception_handler or self._exception_handler)
 
 
 class CommandGroup(object):
-    def __init__(self, scope, group_name, client_factory, service_adapter=None, custom_path=None):
+    def __init__(self, scope, group_name, client_factory, service_adapter=None, custom_path=None,
+                 exception_handler=None):
         self._scope = scope
         self._group_name = group_name
         self._client_factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
         self._custom_path = custom_path
+        self._exception_handler = exception_handler
 
     def __enter__(self):
         return self
@@ -53,21 +56,44 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None):
+    def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None,
+                exception_handler=None):
+        """
+        Register a CLI command
+        :param name: Name of the command as it will be called on the command line
+        :type name: str
+        :param method_name: Name of the method the command maps to on the service adapter
+        :type method_name: str
+        :param transform: Transform function for transforming the output of the command
+        :type transform: function
+        :param table_transformer: Transform function to be applied to table output to create a
+        better output format for tables.
+        :type table_transformer: function
+        :param confirmation: Prompt prior to the action being executed. This is useful if the action
+        would cause a loss of data.
+        :type confirmation: bool
+        :param exception_handler: Exception handler for handling non-standard exceptions
+        :type exception_handler: function
+        :return: None
+        :rtype: None
+        """
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
                     client_factory=self._client_factory,
                     transform=transform,
                     table_transformer=table_transformer,
-                    confirmation=confirmation)
+                    confirmation=confirmation,
+                    exception_handler=exception_handler or self._exception_handler)
 
-    def custom_command(self, name, custom_func_name, confirmation=None):
+    def custom_command(self, name, custom_func_name, confirmation=None,
+                       exception_handler=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._custom_path.format(custom_func_name),
                     client_factory=self._client_factory,
-                    confirmation=confirmation)
+                    confirmation=confirmation,
+                    exception_handler=exception_handler or self._exception_handler)
 
     def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
                                setter_arg_name='parameters'):

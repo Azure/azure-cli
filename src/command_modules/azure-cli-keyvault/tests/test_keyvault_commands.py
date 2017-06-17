@@ -23,17 +23,18 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 def _create_keyvault(test,
-                     vault_name, resource_group, location, retry_wait=30, max_retries=10):
+                     vault_name, resource_group, location, retry_wait=30, max_retries=10, additional_args=None):
+
     # need premium KeyVault to store keys in HSM
-    test.cmd('keyvault create -g {} -n {} -l {} --sku premium'.format(resource_group, vault_name,
-                                                                      location))
+    vault = test.cmd('keyvault create -g {} -n {} -l {} --sku premium {}'.format(resource_group, vault_name,
+                                                                                 location, additional_args or ''))
 
     retries = 0
     while True:
         try:
             # if you can connect to the keyvault, proceed with test
             test.cmd('keyvault key list --vault-name {}'.format(vault_name))
-            return
+            return vault
         except CLIError as ex:
             # because it can take time for the DNS registration to propagate, periodically retry
             # until we can connect to the keyvault. During the wait, you should try to manually
@@ -211,7 +212,7 @@ class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
         if os.path.isfile(key_file):
             os.remove(key_file)
 
-        # import PEM and BYOK keys
+        # import PEM
         key_enc_file = os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem')
         key_enc_password = 'password'
         key_plain_file = os.path.join(TEST_DIR, 'mydomain.test.pem')
@@ -221,11 +222,6 @@ class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
         self.cmd(
             'keyvault key import --vault-name {} -n import-key-encrypted --pem-file "{}" --pem-password {} -p hsm'.format(
                 kv, key_enc_file, key_enc_password))
-
-        byok_key_file = os.path.join(TEST_DIR, 'TestBYOK-NA.byok')
-        self.cmd(
-            'keyvault key import --vault-name {} -n import-key-byok --byok-file "{}"'.format(kv,
-                                                                                             byok_key_file))
 
 
 class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
@@ -304,6 +300,20 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('id', second_kid),
                 JMESPathCheck('attributes.enabled', False)
             ])
+
+        # backup and then delete secret
+        bak_file = 'backup.secret'
+        self.cmd('keyvault secret backup --vault-name {} -n secret1 --file {}'.format(kv, bak_file))
+        self.cmd('keyvault secret delete --vault-name {} -n secret1'.format(kv))
+        self.cmd('keyvault secret list --vault-name {}'.format(kv),
+                 checks=NoneCheck())
+
+        # restore key from backup
+        self.cmd('keyvault secret restore --vault-name {} --file {}'.format(kv, bak_file))
+        self.cmd('keyvault secret list-versions --vault-name {} -n secret1'.format(kv),
+                 checks=JMESPathCheck('length(@)', 2))
+        if os.path.isfile(bak_file):
+            os.remove(bak_file)
 
         # delete secret
         self.cmd('keyvault secret delete --vault-name {} -n secret1'.format(kv))
@@ -488,7 +498,24 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
             if os.path.exists(dest_string):
                 os.remove(dest_string)
 
+    def _test_keyvault_certificate_get_default_policy(self):
+        result = self.cmd('keyvault certificate get-default-policy')
+        self.assertEqual(result['keyProperties']['keyType'], 'RSA')
+        self.assertEqual(result['issuerParameters']['name'], 'Self')
+        self.assertEqual(result['secretProperties']['contentType'], 'application/x-pkcs12')
+        subject = 'CN=CLIGetDefaultPolicy'
+        self.assertEqual(result['x509CertificateProperties']['subject'], subject)
+
+        result = self.cmd('keyvault certificate get-default-policy --scaffold')
+        self.assertIn('RSA or RSA-HSM', result['keyProperties']['keyType'])
+        self.assertIn('Self', result['issuerParameters']['name'])
+        self.assertIn('application/x-pkcs12', result['secretProperties']['contentType'])
+        self.assertIn('Contoso', result['x509CertificateProperties']['subject'])
+
     def body(self):
+
+        self._test_keyvault_certificate_get_default_policy()
+
         _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
 
         kv = self.keyvault_name
@@ -568,6 +595,93 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
         self.cmd(
             'keyvault certificate import --vault-name {} -n pfx-cert --file "{}" -p @"{}"'.format(
                 kv, pfx_plain_file, pfx_policy_path))
+
+
+class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(KeyVaultSoftDeleteScenarioTest, self).__init__(__file__, test_method,
+                                                             resource_group='cli-test-kv-sd')
+        self.keyvault_name = 'cli-kv-test-softdelete'
+        self.location = 'westus'
+
+    def test_keyvault_softdelete(self):
+        self.execute()
+
+    def body(self):
+        vault = _create_keyvault(self, self.keyvault_name, self.resource_group, self.location,
+                                 additional_args='--enable-soft-delete true')
+        kv = self.keyvault_name
+
+        # add all purge permissions to default the access policy
+        default_policy = vault['properties']['accessPolicies'][0]
+        certPerms = default_policy['permissions']['certificates']
+        keyPerms = default_policy['permissions']['keys']
+        secretPerms = default_policy['permissions']['secrets']
+
+        for p in [certPerms, keyPerms, secretPerms]:
+            p.append('purge')
+
+        cmdstr = 'keyvault set-policy -n {} --object-id {} --key-permissions {} --secret-permissions {} --certificate-permissions {}'.format(
+            kv, default_policy['objectId'], ' '.join(keyPerms), ' '.join(secretPerms), ' '.join(certPerms))
+        print(cmdstr)
+
+        self.cmd(cmdstr)
+
+        # create, delete, restore, and purge a secret
+        self.cmd('keyvault secret set --vault-name {} -n secret1 --value ABC123'.format(kv),
+                 checks=JMESPathCheck('value', 'ABC123'))
+        self._delete_entity('secret', 'secret1')
+        self._recover_entity('secret', 'secret1')
+        self._delete_entity('secret', 'secret1')
+        self.cmd('keyvault secret purge --vault-name {} -n secret1'.format(kv))
+
+        # create, delete, restore, and purge a key
+        self.cmd('keyvault key create --vault-name {} -n key1 -p software'.format(kv),
+                 checks=JMESPathCheck('attributes.enabled', True))
+        self._delete_entity('key', 'key1')
+        self._recover_entity('key', 'key1')
+        self._delete_entity('key', 'key1')
+        self.cmd('keyvault key purge --vault-name {} -n key1'.format(kv))
+
+        # create, delete, restore, and purge a certificate
+        pem_plain_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
+        pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
+        self.cmd('keyvault certificate import --vault-name {} -n cert1 --file "{}" -p @"{}"'.format(kv,
+                                                                                                    pem_plain_file,
+                                                                                                    pem_policy_path))
+        self._delete_entity('certificate', 'cert1')
+        self.cmd('keyvault certificate purge --vault-name {} -n cert1'.format(kv))
+
+        self.cmd('keyvault delete -n {}'.format(kv))
+        self.cmd('keyvault purge -n {} -l {}'.format(kv, self.location))
+
+    def _delete_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
+        # delete the specified entity
+        self.cmd('keyvault {} delete --vault-name {} -n {}'.format(entity_type, self.keyvault_name, entity_name))
+
+        retry_count = 0
+        # while getting the deleted entities returns a zero entities
+        while not self.cmd('keyvault {} list-deleted --vault-name {}'.format(entity_type, self.keyvault_name)) \
+                and retry_count < max_retries:
+            retry_count += 1
+            time.sleep(retry_wait)
+
+        if retry_count >= max_retries:
+            self.assertFail('{} {} not deleted'.format(entity_type, entity_name))
+
+    def _recover_entity(self, entity_type, entity_name, retry_wait=3, max_retries=10):
+        # delete the specified entity
+        self.cmd('keyvault {} recover --vault-name {} -n {}'.format(entity_type, self.keyvault_name, entity_name))
+
+        retry_count = 0
+        # while getting the deleted entities returns a zero entities
+        while not self.cmd('keyvault {} list --vault-name {}'.format(entity_type, self.keyvault_name)) \
+                and retry_count < max_retries:
+            retry_count += 1
+            time.sleep(retry_wait)
+
+        if retry_count >= max_retries:
+            self.assertFail('{} {} not restored'.format(entity_type, entity_name))
 
 
 if __name__ == '__main__':

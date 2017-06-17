@@ -35,14 +35,12 @@ def _get_url_connection(url_collection, account_name):
         return url_collection
     elif account_name:
         return 'https://{}.documents.azure.com:443'.format(account_name)
-    else:
-        return None
+
+    return None
 
 
 def get_document_client_factory(kwargs):
     from pydocumentdb import document_client
-    from azure.cli.core.commands.client_factory import get_data_service_client
-    from azure.cli.core._profile import CLOUD
     service_type = document_client.DocumentClient
 
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
@@ -66,7 +64,7 @@ def get_document_client_factory(kwargs):
     except Exception as ex:
         if isinstance(ex, CLIError):
             raise ex
-        # pylint:disable=line-too-long
+
         raise CLIError(
             'Failed to instantiate an Azure Cosmos DB client using the provided credential ' + str(
                 ex))

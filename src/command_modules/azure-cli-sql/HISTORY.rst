@@ -1,7 +1,19 @@
 .. :changelog:
 
 Release History
-===============
+
+2.0.5 (2017-06-13)
+^^^^^^^^^^^^^^^^^^
+* Remove useless line-too-long suppression
+* Fix unsubscriptable-object pylint disable rules
+* Add sql show-capabilities command (#3444)
+* Move all existing recording files to latest folder
+* Added az sql db list-editions and az sql elastic-pool list-editions commands.
+
+2.0.4 (2017-05-30)
+++++++++++++++++++
+
+* Minor fixes.
 
 2.0.3 (2017-05-09)
 ++++++++++++++++++

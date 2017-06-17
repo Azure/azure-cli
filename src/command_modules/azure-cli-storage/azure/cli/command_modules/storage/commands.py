@@ -9,7 +9,7 @@ from azure.cli.command_modules.storage._command_type import cli_storage_data_pla
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, blob_data_service_factory, file_data_service_factory,
      table_data_service_factory, queue_data_service_factory, cloud_storage_account_service_factory,
-     page_blob_service_factory)
+     page_blob_service_factory, multi_service_properties_factory)
 from azure.cli.command_modules.storage._format import \
     (transform_container_list, transform_container_show,
      transform_blob_output,
@@ -221,15 +221,20 @@ cli_storage_data_plane_command('storage message delete', queue_path + 'delete_me
 cli_storage_data_plane_command('storage message clear', queue_path + 'clear_messages', factory)
 cli_storage_data_plane_command('storage message update', queue_path + 'update_message', factory)
 
+
 # cors commands
-cli_storage_data_plane_command('storage cors list', custom_path + 'list_cors', None, transform=transform_cors_list_output)
-cli_storage_data_plane_command('storage cors add', custom_path + 'add_cors', None)
-cli_storage_data_plane_command('storage cors clear', custom_path + 'clear_cors', None)
+
+cli_storage_data_plane_command('storage cors add', custom_path + 'add_cors', multi_service_properties_factory)
+cli_storage_data_plane_command('storage cors clear', custom_path + 'clear_cors', multi_service_properties_factory)
+cli_storage_data_plane_command('storage cors list', custom_path + 'list_cors', multi_service_properties_factory,
+                               transform=transform_cors_list_output)
 
 # logging commands
-cli_storage_data_plane_command('storage logging show', custom_path + 'get_logging', None, table_transformer=transform_logging_list_output, exception_handler=_dont_fail_not_exist)
-cli_storage_data_plane_command('storage logging update', custom_path + 'set_logging', None)
+cli_storage_data_plane_command('storage logging update', custom_path + 'set_logging', multi_service_properties_factory)
+cli_storage_data_plane_command('storage logging show', custom_path + 'get_logging', multi_service_properties_factory,
+                               table_transformer=transform_logging_list_output, exception_handler=_dont_fail_not_exist)
 
-# metrics commands
-cli_storage_data_plane_command('storage metrics show', custom_path + 'get_metrics', None, table_transformer=transform_metrics_list_output, exception_handler=_dont_fail_not_exist)
-cli_storage_data_plane_command('storage metrics update', custom_path + 'set_metrics', None)
+# # metrics commands
+cli_storage_data_plane_command('storage metrics update', custom_path + 'set_metrics', multi_service_properties_factory)
+cli_storage_data_plane_command('storage metrics show', custom_path + 'get_metrics', multi_service_properties_factory,
+                               table_transformer=transform_metrics_list_output, exception_handler=_dont_fail_not_exist)

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 helps['login'] = """
@@ -58,4 +58,9 @@ helps['account show'] = """
     type: command
     short-summary: Show the details of a subscription.
     long-summary: If the subscription isn't specified, shows the details of the default subscription.
+"""
+
+helps['account get-access-token'] = """
+    type: command
+    long-summary: provides the token for trusted utils to access your Azure subscriptions. The token will be valid for at least 5 minutes with the maximum at 60 minutes. If the subscription argument isn't specified, the current account is used.
 """

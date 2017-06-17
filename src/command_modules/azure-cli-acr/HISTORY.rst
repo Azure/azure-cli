@@ -2,6 +2,15 @@
 
 Release History
 ===============
+2.0.6 (2017-06-13)
+^^^^^^^^^^^^^^^^^^
+* Remove useless line-too-long suppression
+* Move all existing recording files to latest folder
+
+2.0.5 (2017-05-30)
+^^^^^^^^^^^^^^^^^^
+
+* Minor fixes.
 
 2.0.4 (2017-05-09)
 ^^^^^^^^^^^^^^^^^^

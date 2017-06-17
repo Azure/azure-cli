@@ -12,18 +12,22 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
-from azure.cli.core.util import CLIError, random_string
-from ._client_factory import _compute_client_factory
+from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
+from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
 
 def validate_nsg_name(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
+                        namespace='Microsoft.Compute', type='virtualMachines',
+                        subscription=get_subscription_id())
     namespace.network_security_group_name = namespace.network_security_group_name \
-        or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
+        or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
 def _get_resource_group_from_vault_name(vault_name):
@@ -46,13 +50,9 @@ def _get_resource_id(val, resource_group, resource_type, resource_namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
-    else:
-        return resource_id(
-            name=val,
-            resource_group=resource_group,
-            namespace=resource_namespace,
-            type=resource_type,
-            subscription=get_subscription_id())
+
+    return resource_id(name=val, resource_group=resource_group, namespace=resource_namespace, type=resource_type,
+                       subscription=get_subscription_id())
 
 
 def _get_nic_id(val, resource_group):
@@ -162,7 +162,7 @@ def _parse_image_argument(namespace):
                                                                  namespace.os_sku,
                                                                  top=1,
                                                                  orderby='name desc')
-            if len(top_one) == 0:
+            if not top_one:
                 raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
 
             image_version = top_one[0].name
@@ -274,7 +274,7 @@ def _validate_managed_disk_sku(sku):
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
 
-# pylint: disable=too-many-branches, too-many-statements, redefined-variable-type
+# pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
 
     # use minimal parameters to resolve the expected storage profile
@@ -376,6 +376,11 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.attach_os_disk = _get_resource_id(
             namespace.attach_os_disk, namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
+    if getattr(namespace, 'attach_data_disks', None):
+        if not namespace.use_unmanaged_disk:
+            namespace.attach_data_disks = [_get_resource_id(d, namespace.resource_group_name, 'disks',
+                                                            'Microsoft.Compute') for d in namespace.attach_data_disks]
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
@@ -394,7 +399,7 @@ def _validate_vm_create_storage_account(namespace):
     else:
         from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -429,7 +434,7 @@ def _validate_vm_create_availability_set(namespace):
             name=name)
 
 
-def _validate_vm_create_vnet(namespace, for_scale_set=False):
+def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
 
     vnet = namespace.vnet_name
     subnet = namespace.subnet
@@ -437,11 +442,9 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
     location = namespace.location
     nics = getattr(namespace, 'nics', None)
 
-    if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
+    if not vnet and not subnet and not nics:
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.cli.core.profiles import ResourceType
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
+        client = get_network_client().virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
@@ -449,15 +452,15 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
             # 1 - find a suitable existing vnet/subnet
             result = None
             if not for_scale_set:
-                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'),
-                              None)
+                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'), None)
             else:
-                for s in vnet_match.subnets:
-                    if s.name.lower() != 'gatewaysubnet':
-                        subnet_mask = s.address_prefix.split('/')[-1]
-                        if _subnet_capacity_check(subnet_mask, namespace.instance_count):
-                            result = s
-                            break
+                def _check_subnet(s):
+                    if s.name.lower() == 'gatewaysubnet':
+                        return False
+                    subnet_mask = s.address_prefix.split('/')[-1]
+                    return _subnet_capacity_check(subnet_mask, namespace.instance_count)
+
+                result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
             if not result:
                 continue
             namespace.subnet = result.name
@@ -504,8 +507,39 @@ def _validate_vmss_create_subnet(namespace):
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
         if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
-            raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
-                           'application gateway.')
+            namespace.app_gateway_subnet_address_prefix = _get_next_subnet_addr_suffix(
+                namespace.vnet_address_prefix, namespace.subnet_address_prefix, 24)
+
+
+def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
+    def _convert_to_int(address, bit_mask_len):
+        a, b, c, d = [int(x) for x in address.split('.')]
+        result = '{0:08b}{1:08b}{2:08b}{3:08b}'.format(a, b, c, d)
+        return int(result[:-bit_mask_len], 2)
+
+    error_msg = "usage error: --subnet-address-prefix value should be a subrange of --vnet-address-prefix's"
+    # extract vnet information needed to verify the defaults we are coming out
+    vnet_ip_address, mask = vnet_cidr.split('/')
+    vnet_bit_mask_len = 32 - int(mask)
+    vnet_int = _convert_to_int(vnet_ip_address, vnet_bit_mask_len)
+
+    subnet_ip_address, mask = subnet_cidr.split('/')
+    subnet_bit_mask_len = 32 - int(mask)
+
+    if vnet_bit_mask_len <= subnet_bit_mask_len:
+        raise CLIError(error_msg)
+
+    candidate_int = _convert_to_int(subnet_ip_address, subnet_bit_mask_len) + 1
+    if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:  # overflows?
+        candidate_int = candidate_int - 2  # try the other way around
+        if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:
+            raise CLIError(error_msg)
+
+    # format back to the cidr
+    candaidate_str = '{0:32b}'.format(candidate_int << subnet_bit_mask_len)
+    return '{0}.{1}.{2}.{3}/{4}'.format(int(candaidate_str[0:8], 2), int(candaidate_str[8:16], 2),
+                                        int(candaidate_str[16:24], 2), int(candaidate_str[24:32], 2),
+                                        new_mask)
 
 
 def _validate_vm_create_nsg(namespace):
@@ -573,7 +607,7 @@ def _validate_vm_create_nics(namespace):
     namespace.public_ip_type = None
 
 
-def _validate_vm_create_auth(namespace):
+def _validate_vm_vmss_create_auth(namespace):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -585,7 +619,7 @@ def _validate_vm_create_auth(namespace):
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        # pylint: disable=line-too-long
+
         namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
@@ -650,8 +684,8 @@ def _validate_admin_password(password, os_type):
     max_length = 72 if is_linux else 123
     min_length = 12
     if len(password) not in range(min_length, max_length + 1):
-        raise CLIError('The pssword length must be between {} and {}'.format(min_length,
-                                                                             max_length))
+        raise CLIError('The password length must be between {} and {}'.format(min_length,
+                                                                              max_length))
     contains_lower = re.findall('[a-z]+', password)
     contains_upper = re.findall('[A-Z]+', password)
     contains_digit = re.findall('[0-9]+', password)
@@ -683,8 +717,7 @@ def validate_ssh_key(namespace):
             content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
-                           "permanent storage like Azure Cloud Shell without an attached "
-                           "file share, back up your keys to a safe location",
+                           "permanent storage, back up your keys to a safe location.",
                            private_key_filepath, public_key_filepath)
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
@@ -713,7 +746,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
 
 
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
-    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
     try:
@@ -741,18 +774,20 @@ def process_vm_create_namespace(namespace):
         _validate_vm_create_storage_account(namespace)
 
     _validate_vm_create_availability_set(namespace)
-    _validate_vm_create_vnet(namespace)
+    _validate_vm_vmss_create_vnet(namespace)
     _validate_vm_create_nsg(namespace)
     _validate_vm_create_public_ip(namespace)
     _validate_vm_create_nics(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
-
+    if namespace.license_type and namespace.os_type.lower() != 'windows':
+        raise CLIError('usage error: --license-type is only applicable on Windows VM')
 
 # endregion
 
 # region VMSS Create Validators
+
 
 def _get_vmss_create_instance_threshold():
     return 100
@@ -795,10 +830,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            if check_existence(namespace.application_gateway, namespace.resource_group_name,
-                               'Microsoft.Network', 'applicationGateways'):
+            client = get_network_client().application_gateways
+            try:
+                client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
-            else:
+            except CloudError:
                 namespace.app_gateway_type = 'new'
         elif namespace.application_gateway == '':
             namespace.app_gateway_type = None
@@ -807,7 +843,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
         # AppGateway frontend
         required = []
-        if namespace.app_gateway_type == 'new':
+        if namespace.app_gateway_type == 'new' and namespace.vnet_type != 'new':
             required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
@@ -834,14 +870,20 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             namespace.load_balancer_type = 'new'
 
 
+def get_network_client():
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
+
+
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
+    _validate_vm_vmss_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer_or_app_gateway(namespace)
-    _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace)
 
 # endregion
 
@@ -855,10 +897,13 @@ def validate_vm_disk(namespace):
 
 def process_disk_or_snapshot_create_namespace(namespace):
     if namespace.source:
+        usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+            if not namespace.source_blob_uri and namespace.source_storage_account_id:
+                raise CLIError(usage_error)
         except CloudError:
-            raise CLIError("Incorrect '--source' usage: --source VHD_BLOB_URI | SNAPSHOT | DISK")
+            raise CLIError(usage_error)
 
 
 def process_image_create_namespace(namespace):

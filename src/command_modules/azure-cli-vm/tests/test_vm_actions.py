@@ -15,7 +15,10 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _figure_out_storage_source,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
-                                                      _parse_image_argument)
+                                                      _parse_image_argument,
+                                                      process_disk_or_snapshot_create_namespace,
+                                                      _validate_vmss_create_subnet,
+                                                      _get_next_subnet_addr_suffix)
 
 
 class TestActions(unittest.TestCase):
@@ -69,6 +72,19 @@ class TestActions(unittest.TestCase):
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
 
+    def test_source_storage_account_err_case(self):
+        np = mock.MagicMock()
+        np.source_storage_account_id = '/subscriptions/123/resourceGroups/ygsrc/providers/Microsoft.Storage/storageAccounts/s123'
+        np.source = '/subscriptions/123/resourceGroups/yugangw/providers/Microsoft.Compute/disks/d2'
+
+        # action (should throw)
+        with self.assertRaises(CLIError):
+            process_disk_or_snapshot_create_namespace(np)
+
+        # with blob uri, should be fine
+        np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
+        process_disk_or_snapshot_create_namespace(np)
+
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long
         err_invalid_char = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -101,7 +117,7 @@ class TestActions(unittest.TestCase):
 
     def test_validate_admin_password_linux(self):
         # pylint: disable=line-too-long
-        err_length = 'The pssword length must be between 12 and 72'
+        err_length = 'The password length must be between 12 and 72'
         err_variety = 'Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character'
 
         self._verify_password_with_ex('te', 'linux', err_length)
@@ -113,7 +129,7 @@ class TestActions(unittest.TestCase):
 
     def test_validate_admin_password_windows(self):
         # pylint: disable=line-too-long
-        err_length = 'The pssword length must be between 12 and 123'
+        err_length = 'The password length must be between 12 and 123'
         err_variety = 'Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character'
 
         self._verify_password_with_ex('P1', 'windows', err_length)
@@ -154,3 +170,40 @@ class TestActions(unittest.TestCase):
         self.assertEqual('plan1', np.plan_name)
         self.assertEqual('product1', np.plan_product)
         self.assertEqual('publisher1', np.plan_publisher)
+
+    def test_get_next_subnet_addr_suffix(self):
+        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
+        self.assertEqual(result, '10.0.1.0/24')
+
+        # for 254~510 instances VMSS
+        result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/23', 24)
+        self.assertEqual(result, '10.0.2.0/24')
+
+        # +1 overflows, so we go with -1
+        result = _get_next_subnet_addr_suffix('12.0.0.0/16', '12.0.255.0/24', 24)
+        self.assertEqual(result, '12.0.254.0/24')
+
+        # handle carry bits to the next section
+        result = _get_next_subnet_addr_suffix('12.0.0.0/15', '12.0.255.0/24', 24)
+        self.assertEqual(result, '12.1.0.0/24')
+
+        # error cases
+        with self.assertRaises(CLIError):
+            _get_next_subnet_addr_suffix('12.0.0.0/16', '12.0.255.0/15', 24)
+
+        with self.assertRaises(CLIError):
+            _get_next_subnet_addr_suffix('12.0.0.0/16', '12.1.0.0/16', 24)
+
+        with self.assertRaises(CLIError):
+            _get_next_subnet_addr_suffix('12.0.0.0/22', '12.0.0.0/22', 24)
+
+        # verify end to end
+        np_mock = mock.MagicMock()
+        np_mock.vnet_type = 'new'
+        np_mock.vnet_address_prefix = '10.0.0.0/16'
+        np_mock.subnet_address_prefix = None
+        np_mock.instance_count = 1000
+        np_mock.app_gateway_type = 'new'
+        np_mock.app_gateway_subnet_address_prefix = None
+        _validate_vmss_create_subnet(np_mock)
+        self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.4.0/24')

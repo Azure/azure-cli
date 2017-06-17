@@ -10,13 +10,13 @@ from azure.common import AzureException
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.azlogging import get_az_logger
+from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p)
-
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -109,7 +109,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
         and '[!seq]'.
     """
-    source_blobs = collect_blobs(client, source_container_name, pattern)
+    source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
         logger = get_az_logger(__name__)
@@ -121,9 +121,8 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         for b in source_blobs or []:
             logger.warning('  - %s', b)
         return []
-    else:
-        return list(_download_blob(client, source_container_name, destination, blob) for blob in
-                    source_blobs)
+
+    return list(_download_blob(client, source_container_name, destination, blob) for blob in source_blobs)
 
 
 def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
@@ -173,32 +172,43 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
                 if_none_match=if_none_match,
                 timeout=timeout)
 
-        return client.append_blob_from_path(
-            container_name=destination_container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=lambda c, t: None,
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            timeout=timeout)
+        append_blob_args = {
+            'container_name': destination_container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': lambda c, t: None,
+            'maxsize_condition': maxsize_condition,
+            'lease_id': lease_id,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            append_blob_args['validate_content'] = validate_content
+
+        return client.append_blob_from_path(**append_blob_args)
 
     def _upload_blob(file_path, blob_name):
-        return client.create_blob_from_path(
-            container_name=destination_container_name,
-            blob_name=blob_name,
-            file_path=file_path,
-            progress_callback=lambda c, t: None,
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            max_connections=max_connections,
-            lease_id=lease_id,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            timeout=timeout)
+
+        create_blob_args = {
+            'container_name': destination_container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': lambda c, t: None,
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'max_connections': max_connections,
+            'lease_id': lease_id,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            create_blob_args['validate_content'] = validate_content
+
+        return client.create_blob_from_path(**create_blob_args)
 
     upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
 

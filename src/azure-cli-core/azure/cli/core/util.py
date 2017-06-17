@@ -32,14 +32,14 @@ class CLIError(Exception):
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
-    if isinstance(ex, CLIError) or isinstance(ex, CloudError):
+    if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
         return 1
-    else:
-        logger.exception(ex)
-        return 1
+
+    logger.exception(ex)
+    return 1
 
 
 def empty_on_404(ex):
@@ -93,6 +93,7 @@ def show_version_info_exit(out_file):
 
 def get_json_object(json_string):
     """ Loads a JSON string as an object and converts all keys to snake case """
+
     def _convert_to_snake_case(item):
         if isinstance(item, dict):
             new_item = {}
@@ -101,8 +102,8 @@ def get_json_object(json_string):
             return new_item
         if isinstance(item, list):
             return [_convert_to_snake_case(x) for x in item]
-        else:
-            return item
+        return item
+
     return _convert_to_snake_case(shell_safe_json_parse(json_string))
 
 
@@ -166,8 +167,7 @@ def todict(obj):  # pylint: disable=too-many-return-statements
         return dict([(to_camel_case(k), todict(v))
                      for k, v in obj.__dict__.items()
                      if not callable(v) and not k.startswith('_')])
-    else:
-        return obj
+    return obj
 
 
 KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
@@ -190,10 +190,7 @@ def b64encode(s):
     :rtype: str
     """
     encoded = base64.b64encode(six.b(s))
-    if encoded is str:
-        return encoded
-    else:
-        return encoded.decode('latin-1')
+    return encoded if encoded is str else encoded.decode('latin-1')
 
 
 def b64_to_hex(s):
@@ -217,3 +214,18 @@ def random_string(length=16, force_lower=False, digits_only=False):
     if not digits_only:
         choice_set += ascii_lowercase if force_lower else ascii_letters
     return ''.join([choice(choice_set) for _ in range(length)])
+
+
+def hash_string(value, length=16, force_lower=False):
+    """ Generate a deterministic hashed string."""
+    import hashlib
+    m = hashlib.sha256()
+    try:
+        m.update(value)
+    except TypeError:
+        m.update(value.encode())
+    digest = m.hexdigest()
+    digest = digest.lower() if force_lower else digest
+    while len(digest) < length:
+        digest = digest + digest
+    return digest[:length]

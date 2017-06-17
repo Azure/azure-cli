@@ -15,6 +15,7 @@ import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
+import azure.cli.core.commands.progress as progress
 
 import azure.cli.core.telemetry as telemetry
 
@@ -35,7 +36,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
-        result = commands.get_command_table(argv[0] if argv else None)
+        result = commands.get_command_table(argv[0].lower() if argv else None)
 
         if argv is None:
             return result
@@ -73,7 +74,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         command_so_far = ""
         try:
             for part in parts:
-                best_match = best_match[part]
+                best_match = best_match[part.lower()]
                 command_so_far = ' '.join((command_so_far, part))
                 if isinstance(best_match, CliCommand):
                     break
@@ -106,9 +107,7 @@ class Application(object):
     def __init__(self, configuration=None):
         self._event_handlers = defaultdict(lambda: [])
         self.session = {
-            'headers': {
-                'x-ms-client-request-id': str(uuid.uuid1())
-            },
+            'headers': {},  # the x-ms-client-request-id is generated before a command is to execute
             'command': 'unknown',
             'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
             'query_active': False
@@ -127,18 +126,25 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.configuration = configuration
+        self.progress_controller = progress.ProgressHook()
+
+    def get_progress_controller(self, det=False):
+        self.progress_controller.init_progress(progress.get_progress_view(det))
+        return self.progress_controller
 
     def initialize(self, configuration):
         self.configuration = configuration
 
     def execute(self, unexpanded_argv):  # pylint: disable=too-many-statements
+        self.refresh_request_id()
+
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table(argv)
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
-        if len(argv) == 0:
+        if not argv:
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
@@ -154,13 +160,15 @@ class Application(object):
 
         # Rudimentary parsing to get the command
         nouns = []
-        for noun in argv:
+        for i, current in enumerate(argv):
             try:
-                if noun[0] == '-':
+                if current[0] == '-':
                     break
             except IndexError:
                 pass
-            nouns.append(noun)
+            argv[i] = current.lower()
+            nouns.append(argv[i])
+
         command = ' '.join(nouns)
 
         if argv[-1] in ('--help', '-h') or command in command_table:
@@ -247,6 +255,14 @@ class Application(object):
         self._event_handlers[name].remove(handler)
         logger.debug("Removed application event handler '%s' at %s", name, handler)
 
+    def refresh_request_id(self):
+        """Assign a new randome GUID as x-ms-client-request-id
+
+        The method must be invoked before each command execution in order to ensure unique client side request ID is
+        generated.
+        """
+        self.session['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
+
     @staticmethod
     def _register_builtin_arguments(**kwargs):
         global_group = kwargs['global_group']
@@ -257,7 +273,7 @@ class Application(object):
                                   type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
-                                  help='Increase logging verbosity. Use --debug for full debug logs.')  # pylint: disable=line-too-long
+                                  help='Increase logging verbosity. Use --debug for full debug logs.')
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
 
@@ -272,8 +288,9 @@ class Application(object):
             return arg
         elif ix == 0:
             return Application._load_file(poss_file)
-        else:  # if @ not at the start it can't be a file
-            return arg
+
+        # if @ not at the start it can't be a file
+        return arg
 
     @staticmethod
     def _expand_file_prefix(arg):

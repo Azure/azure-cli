@@ -23,14 +23,12 @@ def cf_dla_account_storage(_):
     return get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).storage_accounts
 
 
-# pylint: disable=line-too-long
 def cf_dla_account_adls(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).data_lake_store_accounts
 
 
-# pylint: disable=line-too-long
 def cf_dla_catalog(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.catalog import DataLakeAnalyticsCatalogManagementClient

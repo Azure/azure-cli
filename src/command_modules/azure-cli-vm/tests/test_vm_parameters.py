@@ -4,6 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 from azure.cli.core.application import APPLICATION, Configuration
 
@@ -19,6 +23,40 @@ def mock_echo_args(command_name, parameters):
         return parsed_namespace
     finally:
         command_table[command_name].handler = prefunc
+
+
+class TestVMValidators(unittest.TestCase):
+
+    def _mock_get_subscription_id():
+        return '00000000-0000-0000-0000-000000000000'
+
+    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', _mock_get_subscription_id)
+    def test_vm_nics(self):
+
+        from argparse import Namespace
+        from azure.cli.command_modules.vm._validators import _validate_vm_create_nics
+
+        for i in range(0, 100):
+            ns = Namespace()
+            ns.resource_group_name = 'rg'
+            ns.nics = ['nic1', 'nic2']
+            _validate_vm_create_nics(ns)
+
+            nic1_expected = {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkInterfaces/nic1",
+                "properties": {
+                    "primary": True
+                }
+            }
+
+            nic2_expected = {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkInterfaces/nic2",
+                "properties": {
+                    "primary": False
+                }
+            }
+            self.assertEqual(ns.nics[0], nic1_expected)
+            self.assertEqual(ns.nics[1], nic2_expected)
 
 
 class Test_ArgumentParser(unittest.TestCase):

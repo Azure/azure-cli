@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
 
 from prompt_toolkit.completion import Completer, Completion
 
@@ -14,9 +15,14 @@ from azclishell.layout import get_scope
 from azclishell.util import parse_quotes
 
 from azure.cli.core.parser import AzCliCommandParser
-from azure.cli.core.util import CLIError
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
+
+BLACKLISTED_COMPLETIONS = ['interactive']
+
+
+def error_pass(_, message):  # pylint: disable=unused-argument
+    return
 
 
 def dynamic_param_logic(text):
@@ -75,14 +81,18 @@ def sort_completions(gen):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 
-    return sorted(list(gen), key=_get_weight)
+    completions = []
+    for comp in gen:
+        if comp.text not in BLACKLISTED_COMPLETIONS:
+            completions.append(comp)
+    return sorted(completions, key=_get_weight)
 
 
 # pylint: disable=too-many-instance-attributes
 class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
-    def __init__(self, commands, global_params=True):
+    def __init__(self, commands, global_params=True, outstream=sys.stderr):
         # dictionary of command to descriptions
         self.command_description = commands.descrip
         # from a command to a list of parameters
@@ -116,7 +126,7 @@ class AzCompleter(Completer):
         from azclishell._dump_commands import CMD_TABLE
         self.cmdtab = CMD_TABLE
         self.parser.load_command_table(CMD_TABLE)
-        self.argsfinder = ArgsFinder(self.parser)
+        self.argsfinder = ArgsFinder(self.parser, outstream)
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
@@ -171,10 +181,21 @@ class AzCompleter(Completer):
                     if name == param:
                         return arg
 
+    def mute_parse_args(self, text):
+        """ mutes the parser error when parsing, the puts it back """
+        error = AzCliCommandParser.error
+        AzCliCommandParser.error = error_pass
+
+        parse_args = self.argsfinder.get_parsed_args(
+            parse_quotes(text, quotes=False, string=False))
+
+        AzCliCommandParser.error = error
+        return parse_args
+
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
-        try:  # pylint: disable=too-many-nested-blocks
+        try:
             is_param, started_param, prefix, param = dynamic_param_logic(text)
 
             # command table specific name
@@ -186,8 +207,7 @@ class AzCompleter(Completer):
                 for comp in self.gen_enum_completions(arg_name, text, started_param, prefix):
                     yield comp
 
-                parse_args = self.argsfinder.get_parsed_args(
-                    parse_quotes(text, quotes=False, string=False))
+                parse_args = self.mute_parse_args(text)
 
                 # there are 3 formats for completers the cli uses
                 # this try catches which format it is
@@ -199,7 +219,6 @@ class AzCompleter(Completer):
                             for comp in gen_dyn_completion(
                                     comp, started_param, prefix, text):
                                 yield comp
-
                     except TypeError:
                         try:
                             for comp in self.cmdtab[self.curr_command].\
@@ -221,7 +240,7 @@ class AzCompleter(Completer):
                                 pass  # other completion method used
 
         # if the user isn't logged in
-        except (CLIError, AttributeError, ValueError):  # service client throws
+        except Exception:  # pylint: disable=broad-except
             pass
 
     def gen_cmd_completions(self, text):
