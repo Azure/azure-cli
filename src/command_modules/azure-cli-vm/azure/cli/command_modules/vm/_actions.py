@@ -72,13 +72,13 @@ def load_images_thru_services(publisher, offer, sku, location):
 
 
 def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
-    from azure.cli.core.cloud import get_active_cloud
+    from azure.cli.core.cloud import get_active_cloud, CloudEndpointNotSetException
     CLOUD = get_active_cloud()
-    target_url = getattr(CLOUD.endpoints, 'vm_image_alias_doc', None)
-    if not target_url:
+    try:
+        target_url = CLOUD.endpoints.vm_image_alias_doc
+    except CloudEndpointNotSetException:
         raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
                        "it or use '--all' to retrieve images from server")
-    target_url = CLOUD.endpoints.vm_image_alias_doc
     txt = urlopen(target_url).read()
     dic = json.loads(txt.decode())
     try:

@@ -58,7 +58,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  gallery=None,
                  active_directory=None,
                  active_directory_resource_id=None,
-                 active_directory_graph_resource_id=None):
+                 active_directory_graph_resource_id=None,
+                 vm_image_alias_doc=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -68,6 +69,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
+        self.vm_image_alias_doc = vm_image_alias_doc
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -146,7 +148,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         gallery='https://gallery.azure.com/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
-        active_directory_graph_resource_id='https://graph.windows.net/'),
+        active_directory_graph_resource_id='https://graph.windows.net/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -164,7 +167,8 @@ AZURE_CHINA_CLOUD = Cloud(
         gallery='https://gallery.chinacloudapi.cn/',
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
-        active_directory_graph_resource_id='https://graph.chinacloudapi.cn/'),
+        active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -180,7 +184,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         gallery='https://gallery.usgovcloudapi.net/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
-        active_directory_graph_resource_id='https://graph.windows.net/'),
+        active_directory_graph_resource_id='https://graph.windows.net/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
@@ -196,7 +201,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         gallery='https://gallery.cloudapi.de/',
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',
-        active_directory_graph_resource_id='https://graph.cloudapi.de/'),
+        active_directory_graph_resource_id='https://graph.cloudapi.de/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
@@ -204,10 +210,6 @@ AZURE_GERMAN_CLOUD = Cloud(
 
 
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
-for kc in KNOWN_CLOUDS:
-    # pylint: disable=line-too-long
-    setattr(kc.endpoints, 'vm_image_alias_doc',
-            'https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json')
 
 
 def _set_active_cloud(cloud_name):

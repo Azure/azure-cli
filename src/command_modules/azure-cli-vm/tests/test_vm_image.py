@@ -9,6 +9,7 @@ import mock
 
 import azure.cli.core.application as application
 from azure.cli.core.util import CLIError
+from azure.cli.core.cloud import CloudEndpointNotSetException
 
 
 class TestVMImage(unittest.TestCase):
@@ -46,13 +47,13 @@ class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
     def test_when_alias_doc_is_missing(self, mock_get_active_cloud):
         from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+        p = mock.PropertyMock(side_effect=CloudEndpointNotSetException)
         mock_cloud = mock.MagicMock()
-        mock_cloud.endpoints.vm_image_alias_doc = ''
+        type(mock_cloud.endpoints).vm_image_alias_doc = p
         mock_get_active_cloud.return_value = mock_cloud
         # assert
-        with self.assertRaises(CLIError) as context:
+        with self.assertRaises(CLIError):
             load_images_from_aliases_doc()
-        self.assertTrue("'endpoint_vm_image_alias_doc' isn't configured" in str(context.exception))
 
 
 if __name__ == '__main__':
