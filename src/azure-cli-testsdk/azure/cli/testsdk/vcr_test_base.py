@@ -28,6 +28,8 @@ from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-
 import vcr
 import jmespath
 
+from azure_devtools.scenario_tests.const import ENV_LIVE_TEST
+
 # TODO Should not depend on azure.cli.main package here.
 # Will be ok if this test file is not part of azure.cli.core.utils
 from azure.cli.main import main as cli_main
@@ -39,7 +41,6 @@ from azure.cli.core.util import CLIError
 
 from .base import find_recording_dir
 
-LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
@@ -319,7 +320,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
 
-        if os.environ.get(LIVE_TEST_CONTROL_ENV, None) == 'True':
+        if os.environ.get(ENV_LIVE_TEST, None) == 'True':
             self.run_live = True
         else:
             self.run_live = run_live
