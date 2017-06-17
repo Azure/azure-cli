@@ -20,11 +20,12 @@ from azure_devtools.scenario_tests import (
     create_random_name,
 )
 
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
+
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller)
 from .exceptions import CliExecutionError
-from .const import ENV_SKIP_ASSERT, MOCKED_SUBSCRIPTION_ID
 from .utilities import find_recording_dir
 
 logger = logging.getLogger('azure.cli.testsdk')
