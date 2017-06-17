@@ -49,18 +49,18 @@ Release History
 ^^^^^^^^^^^^^^^^^^
 * Fix bytes returned from hex fingerprint -o tsv (#3053)
 * Enhanced Key Vault Certificate Download and AAD SP Integration (#3003)
-* Add Python location to ‘az —version’ (#2986)
+* Add Python location to az —version (#2986)
 * login: support login when there are no subscriptions (#2929)
 
 2.0.3 (2017-04-17)
 ^^^^^^^^^^^^^^^^^^
-*core: fix a failure when login using a service principal twice (#2800)
-*core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
-*core: Allow configured defaults to apply on optional args(#2703)
-*core: Improved performance
-*core: Support for multiple API versions
-*core: Custom CA Certs - Support setting REQUESTS_CA_BUNDLE environment variable
-*core: Cloud configuration - use 'resource manager' endpoint if 'management' endpoint not set
+* core: fix a failure when login using a service principal twice (#2800)
+* core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
+* core: Allow configured defaults to apply on optional args(#2703)
+* core: Improved performance
+* core: Support for multiple API versions
+* core: Custom CA Certs - Support setting REQUESTS_CA_BUNDLE environment variable
+* core: Cloud configuration - use 'resource manager' endpoint if 'management' endpoint not set
 
 2.0.2 (2017-04-03)
 ^^^^^^^^^^^^^^^^^^

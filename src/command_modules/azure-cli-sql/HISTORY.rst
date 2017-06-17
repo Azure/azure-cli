@@ -3,7 +3,7 @@
 Release History
 
 2.0.5 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * Fix unsubscriptable-object pylint disable rules
 * Add sql show-capabilities command (#3444)

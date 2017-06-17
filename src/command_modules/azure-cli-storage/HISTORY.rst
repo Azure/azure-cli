@@ -3,7 +3,7 @@
 Release History
 ===============
 2.0.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Specify profile or API version in tests (#3056)
 * Fix various pylint disable rules
 * Update storage metrics, logging and cors commands (#3495)

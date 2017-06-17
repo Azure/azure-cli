@@ -1,13 +1,14 @@
 .. :changelog:
+
 Release History
 ===============
 (unreleased)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
 * diagnostics: Fix a typo in default Linux Diagnostic extension config
 
 2.0.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * vm: support attaching data disks on vm create (#3644)
 * Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
