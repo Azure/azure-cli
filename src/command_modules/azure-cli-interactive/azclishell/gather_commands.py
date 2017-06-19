@@ -146,8 +146,10 @@ class GatherCommands(object):
                         if not param_double:
                             param_double = par
                         else:
-                            self.same_param_doubles[par] = param_double
-                            self.same_param_doubles[param_double] = par
+                            double = {}
+                            double[par] = param_double
+                            double[param_double] = par
+                            self.same_param_doubles[command] = double
 
                         self.param_descript[command + " " + par] =  \
                             add_random_new_lines(

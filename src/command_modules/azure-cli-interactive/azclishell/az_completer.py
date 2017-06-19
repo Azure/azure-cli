@@ -106,7 +106,7 @@ class AzCompleter(Completer):
         self.param_description = commands.param_descript
         # a dictionary of command to examples of how to use it
         self.command_examples = commands.command_example
-        # a dictionary of which parameters mean the same thing
+        # a dictionary command to which parameters mean the same thing
         self.same_param_doubles = commands.same_param_doubles or {}
 
         self._is_command = True
@@ -128,13 +128,16 @@ class AzCompleter(Completer):
         self.parser.load_command_table(CMD_TABLE)
         self.argsfinder = ArgsFinder(self.parser, outstream)
 
+        import json
+        print(json.dumps(self.same_param_doubles, indent=4))
+
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
         return param.lower().startswith(words.lower()) and param.lower() != words.lower() and\
             param not in text_before_cursor.split() and not \
             text_before_cursor[-1].isspace() and\
-            (not (double and param in self.same_param_doubles) or
-             self.same_param_doubles[param] not in text_before_cursor.split())
+            (not (double and param in self.same_param_doubles.get(self.curr_command, {})) or
+             self.same_param_doubles[self.curr_command][param] not in text_before_cursor.split())
 
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor
