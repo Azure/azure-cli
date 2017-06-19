@@ -14,12 +14,15 @@ Release History
 * Remove too-many-nested-blocks (#3469) (#3469)
 
 0.3.3 (unreleased)
-++++++++++++++++++
++++++++++++++++++
+
+* Enhance the '?' gesture to also inject into the next command
 * Progress for Template Deployment
 
 
 0.3.3 (2017-05-30)
 ++++++++++++++++++
+
 * --progress flag
 * Removed --debug and --verbose from completions
 
