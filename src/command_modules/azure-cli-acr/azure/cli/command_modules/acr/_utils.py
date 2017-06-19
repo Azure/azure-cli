@@ -279,8 +279,7 @@ def random_storage_account_name(registry_name):
     while True:
         time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
         storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
-        if client.check_name_availability(
-                storage_account_name).name_available:  # pylint: disable=no-member
+        if client.check_name_availability(storage_account_name).name_available:  # pylint: disable=no-member
             return storage_account_name
 
 
