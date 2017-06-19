@@ -32,13 +32,26 @@ def show_cloud(cloud_name=None):
         raise CLIError(e)
 
 
-def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
+def _build_cloud(cloud_name, cloud_config=None, cloud_metadata=None, cloud_args=None):
+    c = Cloud(cloud_name)
+    if cloud_metadata:
+        import requests
+        try:
+            response = requests.get(cloud_metadata)
+            if response.status_code == 200:
+                metadata = response.json()
+                print(metadata)
+            else:
+                raise CLIError('Server returned status code {} for {}'.format(response.status_code, cloud_metadata))
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+            raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
+        except ValueError as err:
+            raise CLIError('Response body does not contain valid json. Error detail: {}'.format(str(err)))
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         for key in cloud_config:
             cloud_config[to_snake_case(key)] = cloud_config.pop(key)
         cloud_args = cloud_config
-    c = Cloud(cloud_name)
     c.profile = cloud_args.get('profile', None)
     for arg in cloud_args:
         if arg.startswith('endpoint_') and cloud_args[arg] is not None:
@@ -50,6 +63,7 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
 
 def register_cloud(cloud_name,
                    cloud_config=None,
+                   cloud_metadata=None,
                    profile=None,
                    endpoint_management=None,
                    endpoint_resource_manager=None,
@@ -65,7 +79,7 @@ def register_cloud(cloud_name,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
-    c = _build_cloud(cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cloud_name, cloud_config=cloud_config, cloud_metadata=cloud_metadata,
                      cloud_args=locals())
     try:
         add_cloud(c)
@@ -75,6 +89,7 @@ def register_cloud(cloud_name,
 
 def modify_cloud(cloud_name=None,
                  cloud_config=None,
+                 cloud_metadata=None,
                  profile=None,
                  endpoint_management=None,
                  endpoint_resource_manager=None,
@@ -92,7 +107,7 @@ def modify_cloud(cloud_name=None,
                  suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     if not cloud_name:
         cloud_name = get_active_cloud_name()
-    c = _build_cloud(cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cloud_name, cloud_config=cloud_config, cloud_metadata=cloud_metadata,
                      cloud_args=locals())
     try:
         update_cloud(c)
