@@ -464,10 +464,10 @@ def create_resource(properties,
 
 def show_resource(resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                  resource_name=None, resource_id=None, api_version=None):
+                  resource_name=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
+                         None, api_version)
     return res.get_resource()
 
 

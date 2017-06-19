@@ -27,7 +27,7 @@ regex = re.compile(
     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
     '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
     '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-    '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+    '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 
 def handle_long_running_operation_exception(ex):
@@ -89,25 +89,40 @@ def deployment_validate_table_format(result):
     return result
 
 
+def _build_parent_string(kwargs):
+    parent = ''
+    return parent
+
+
 def resource_id(**kwargs):
     '''Create a valid resource id string from the given parts
     The method accepts the following keyword arguments:
-        - subscription      Subscription id
-        - resource_group    Name of resource group
-        - namespace         Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type              Type of the resource (i.e. virtualMachines)
-        - name              Name of the resource (or parent if child_name is also specified)
-        - child_type        Type of the child resource
-        - child_name        Name of the child resource
-        - grandchild_type   Type of the grandchild resource
-        - grandchild_name   Name of the grandchild resource
+        - subscription          Subscription id
+        - resource_group        Name of resource group
+        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type                  Type of the resource (i.e. virtualMachines)
+        - name                  Name of the resource (or parent if child_name is also specified)
+        - child_namespace       Namespace for the child resoure (optional)
+        - child_type            Type of the child resource
+        - child_name            Name of the child resource
+        - grandchild_namespace  Namespace for the grandchild resource (optional)
+        - grandchild_type       Type of the grandchild resource
+        - grandchild_name       Name of the grandchild resource
     '''
     rid = '/subscriptions/{subscription}'.format(**kwargs)
     try:
         rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
         rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
         rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
+        try:
+            rid = '/'.join((rid, 'providers/{child_namespace}'.format(**kwargs)))
+        except KeyError:
+            pass
         rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
+        try:
+            rid = '/'.join((rid, 'providers/{grandchild_namespace}'.format(**kwargs)))
+        except KeyError:
+            pass
         rid = '/'.join((rid, '{grandchild_type}/{grandchild_name}'.format(**kwargs)))
     except KeyError:
         pass
@@ -116,20 +131,24 @@ def resource_id(**kwargs):
 
 def parse_resource_id(rid):
     '''Build a dictionary with the following key/value pairs (if found)
-
-        - subscription      Subscription id
-        - resource_group    Name of resource group
-        - namespace         Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type              Type of the resource (i.e. virtualMachines)
-        - name              Name of the resource (or parent if child_name is also specified)
-        - child_type        Type of the child resource
-        - child_name        Name of the child resource
-        - grandchild_type   Type of the grandchild resource
-        - grandchild_name   Name of the grandchild resource
+        - subscription          Subscription id
+        - resource_group        Name of resource group
+        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type                  Type of the resource (i.e. virtualMachines)
+        - name                  Name of the resource (or parent if child_name is also specified)
+        - child_namespace       Namespace for the child resoure (optional)
+        - child_type            Type of the child resource
+        - child_name            Name of the child resource
+        - grandchild_namespace  Namespace for the grandchild resource (optional)
+        - grandchild_type       Type of the grandchild resource
+        - grandchild_name       Name of the grandchild resource
+        - parent                Computed helper of everything between the namespace and right-most
+                                resource type and name.
     '''
     m = regex.match(rid)
     if m:
         result = m.groupdict()
+        result['parent'] = _build_parent_string(result)
     else:
         result = dict(name=rid)
 
