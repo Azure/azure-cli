@@ -32,7 +32,7 @@ def show_cloud(cloud_name=None):
         raise CLIError(e)
 
 
-def _build_cloud(cloud_name, cloud_config=None, cloud_metadata=None, cloud_args=None):
+def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
     c = Cloud(cloud_name)
     if cloud_metadata:
         import requests
@@ -63,7 +63,6 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_metadata=None, cloud_args=
 
 def register_cloud(cloud_name,
                    cloud_config=None,
-                   cloud_metadata=None,
                    profile=None,
                    endpoint_management=None,
                    endpoint_resource_manager=None,
@@ -79,7 +78,7 @@ def register_cloud(cloud_name,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
-    c = _build_cloud(cloud_name, cloud_config=cloud_config, cloud_metadata=cloud_metadata,
+    c = _build_cloud(cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
         add_cloud(c)
@@ -89,7 +88,6 @@ def register_cloud(cloud_name,
 
 def modify_cloud(cloud_name=None,
                  cloud_config=None,
-                 cloud_metadata=None,
                  profile=None,
                  endpoint_management=None,
                  endpoint_resource_manager=None,
@@ -107,7 +105,7 @@ def modify_cloud(cloud_name=None,
                  suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     if not cloud_name:
         cloud_name = get_active_cloud_name()
-    c = _build_cloud(cloud_name, cloud_config=cloud_config, cloud_metadata=cloud_metadata,
+    c = _build_cloud(cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
         update_cloud(c)

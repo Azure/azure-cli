@@ -46,10 +46,6 @@ register_cli_argument('cloud', 'cloud_config', options_list=('--cloud-config',),
                       help='JSON encoded cloud configuration. Use @{file} to load from a file.',
                       type=shell_safe_json_parse)
 
-register_cli_argument('cloud', 'cloud_metadata', options_list=('--cloud-metadata',),
-                      help='A metadata endpoint that will be used to populate the cloud endpoints. '
-                      'Endpoints defined in cloud-config or command arguments will override those in cloud-metadata.')
-
 register_cli_argument('cloud', 'endpoint_management',
                       help='The management service endpoint')
 register_cli_argument('cloud', 'endpoint_resource_manager',
