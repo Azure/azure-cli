@@ -3,7 +3,7 @@
 Release History
 ===============
 2.0.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * fix acs kube get-credentials ssh-key loading (#3612)
 * Change a message so as not to confuse MacOS users. (#3568)

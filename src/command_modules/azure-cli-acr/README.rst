@@ -2,7 +2,7 @@ Microsoft Azure CLI 'acr' Command Module
 ========================================
 
 Commands to manage Azure container registries
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Group
@@ -21,7 +21,7 @@ Commands to manage Azure container registries
         update    : Updates a container registry.
 
 Create a container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++
 ::
 
     Command
@@ -45,7 +45,7 @@ Create a container registry
             az acr create -n MyRegistry -g MyResourceGroup --sku Basic
 
 Delete a container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++
 ::
 
     Command
@@ -61,7 +61,7 @@ Delete a container registry
             az acr delete -n MyRegistry
 
 List container registries
-^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++
 ::
 
     Command
@@ -79,7 +79,7 @@ List container registries
             az acr list -g MyResourceGroup -o table
 
 Get a container registry
-^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++
 ::
 
     Command
@@ -95,7 +95,7 @@ Get a container registry
             az acr show -n MyRegistry --query loginServer
 
 Update a container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++
 ::
 
     Command
@@ -132,7 +132,7 @@ Update a container registry
             az acr update -n MyRegistry --admin-enabled true
 
 Get login credentials for a container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -154,7 +154,7 @@ Get login credentials for a container registry
             az acr credential show -n MyRegistry --query passwords[0].value
 
 Regenerate login credentials for a container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -173,7 +173,7 @@ Regenerate login credentials for a container registry
             az acr credential renew -n MyRegistry --password-name password2
 
 List repositories in a given container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -190,7 +190,7 @@ List repositories in a given container registry
             az acr repository list -n MyRegistry
 
 Show tags of a given repository in a given container registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command

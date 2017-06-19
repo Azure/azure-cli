@@ -3,7 +3,7 @@
 Release History
 ===============
 2.0.6 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * Move all existing recording files to latest folder
 * Remove various pylint disable statements
