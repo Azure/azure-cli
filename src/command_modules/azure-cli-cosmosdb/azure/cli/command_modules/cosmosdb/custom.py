@@ -219,7 +219,7 @@ def _populate_collection_definition(collection,
                                     partition_key_path=None,
                                     default_ttl=None,
                                     indexing_policy=None):
-    if not any(not arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
+    if not any(arg is not None for arg in [partition_key_path, default_ttl, indexing_policy]):
         return False
 
     if not partition_key_path is None:
