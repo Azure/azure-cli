@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.5 (unreleased)
+++++++++++++++++++
+* Provide an option to select the profile while selecting default cloud
+
 2.0.4 (2017-06-13)
 ++++++++++++++++++
 * Remove useless line-too-long suppression
