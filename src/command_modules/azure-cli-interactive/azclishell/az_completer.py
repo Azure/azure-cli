@@ -128,9 +128,6 @@ class AzCompleter(Completer):
         self.parser.load_command_table(CMD_TABLE)
         self.argsfinder = ArgsFinder(self.parser, outstream)
 
-        import json
-        print(json.dumps(self.same_param_doubles, indent=4))
-
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
         return param.lower().startswith(words.lower()) and param.lower() != words.lower() and\

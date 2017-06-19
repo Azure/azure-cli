@@ -100,8 +100,7 @@ class CompletionTest(unittest.TestCase):
             "create --funtimes": "There is no work life balance, it's just your life"
         }
         same_param_doubles = {
-            "-f": "--funtimes",
-            "--funtimes": '-f'
+            "create": {"-f": "--funtimes", "--funtimes": '-f'}
         }
         command_description = {
             "create": '',
@@ -137,8 +136,7 @@ class CompletionTest(unittest.TestCase):
             "create --funtimes": "There is no work life balance, it's just your life"
         }
         same_param_doubles = {
-            "-f": "--funtimes",
-            "--funtimes": '-f'
+            "create": {"-f": "--funtimes", "--funtimes": '-f'}
         }
         command_description = {
             "create": '',
