@@ -222,15 +222,15 @@ def _populate_collection_definition(collection,
     if not any(arg is not None for arg in [partition_key_path, default_ttl, indexing_policy]):
         return False
 
-    if not partition_key_path is None:
+    if partition_key_path is not None:
         if 'partitionKey' not in collection:
             collection['partitionKey'] = {}
         collection['partitionKey'] = {'paths': [partition_key_path]}
 
-    if not default_ttl is None:
+    if default_ttl is not None:
         collection['defaultTtl'] = default_ttl
 
-    if not indexing_policy is None:
+    if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy
 
     return True
