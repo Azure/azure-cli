@@ -465,11 +465,16 @@ class NetworkLoadBalancerAddVmScenario(ScenarioTest):
         self.cmd('network lb address-pool remove-vm -g {} --lb-name {} --resource {}'.format(resource_group, lb_name, vm_name))
 
 
-class NetworkLoadBalancerAddAvailabilitySetScenario(ScenarioTest):
+class NetworkLoadBalancerAddAvailabilitySetScenario(ResourceGroupVCRTestBase):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_lb_add_avail_set')
-    def test_network_lb_add_avail_set(self, resource_group):
+    def __init__(self, test_method):
+        super(NetworkLoadBalancerAddAvailabilitySetScenario, self).__init__(__file__, test_method, resource_group='cli_test_lb_add_avail_set')
 
+    def test_network_lb_add_avail_set(self):
+        self.execute()
+
+    def body(self):
+        resource_group = self.resource_group
         lb_name = 'lb1'
         as_name = 'as1'
         as_vm1 = 'vm2a'
@@ -478,14 +483,12 @@ class NetworkLoadBalancerAddAvailabilitySetScenario(ScenarioTest):
         subnet = 'subnet1'
 
         # set up resources
-        self.cmd('network lb create -g {} -n {} --no-wait'.format(resource_group, lb_name))
+        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
         self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(resource_group, vnet, subnet))
 
         self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, as_name))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password --availability-set {} --vnet-name {} --subnet {} --no-wait'.format(resource_group, as_vm1, as_name, vnet, subnet))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password --availability-set {} --vnet-name {} --subnet {} --no-wait'.format(resource_group, as_vm2, as_name, vnet, subnet))
-        self.cmd('vm wait -g {} -n {} --created'.format(resource_group, as_vm1))
-        self.cmd('vm wait -g {} -n {} --created'.format(resource_group, as_vm2))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password --availability-set {} --vnet-name {} --subnet {}'.format(resource_group, as_vm1, as_name, vnet, subnet))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password PassPass11!! --authentication-type password --availability-set {} --vnet-name {} --subnet {}'.format(resource_group, as_vm2, as_name, vnet, subnet))
 
         # test availability set scenario
         self.cmd('network lb address-pool add-vm -g {} --lb-name {} --resource {} --resource-type availabilitySets'.format(resource_group, lb_name, as_name))
