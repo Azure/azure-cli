@@ -28,7 +28,7 @@ def _resource_not_exists(resource_type):
 
 
 def _get_thread_count():
-    return 40
+    return 5  # don't increase too much till https://github.com/Azure/msrestazure-for-python/issues/6 is fixed
 
 
 def load_images_thru_services(publisher, offer, sku, location):
@@ -99,8 +99,7 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
 
 def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    # pylint: disable=no-name-in-module,import-error
-    from distutils.version import LooseVersion
+    from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
     all_images = []
     client = _compute_client_factory()
     if location is None:

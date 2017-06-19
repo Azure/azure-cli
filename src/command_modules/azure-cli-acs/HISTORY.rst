@@ -2,8 +2,19 @@
 
 Release History
 ===============
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression
+* fix acs kube get-credentials ssh-key loading (#3612)
+* Change a message so as not to confuse MacOS users. (#3568)
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* Fix acs style
+* Expand service principal testing somewhat. (#3114)
+* Move all existing recording files to latest folder
+* rbac: clean up role assignments and related AAD application when delete a service principal (#3610)
+* Fix acs kube get-credentials ssh-key loading (
 
-Unreleased
+2.0.7 (2017-05-30)
 ++++++++++++++++++
 
 * convert master and agent count to integer

@@ -2,8 +2,12 @@
 
 Release History
 ===============
+0.0.6 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression.
+* Move all existing recording files to latest folder.
 
-unreleased
+0.0.5 (2017-05-30)
 +++++++++++++++++++++
 
 * Include autoscale template file to fix `az monitor autoscale-settings get-parameters-template` command (#3349)

@@ -10,8 +10,8 @@ from azure.cli.command_modules.network.zone_file import parse_zone_file
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-class TestDnsZoneImport(unittest.TestCase):
 
+class TestDnsZoneImport(unittest.TestCase):
     def _check_soa(self, zone, zone_name, ttl, serial_number, refresh, retry, expire, min_ttl):
         record = zone[zone_name]['soa']
         self.assertEqual(record['ttl'], ttl)
@@ -286,7 +286,6 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_cname(zone, 'test-cname.subzone.' + zn, 3600, 'r1.subzone.' + zn)
         self._check_cname(zone, 'record.' + zn, 3600, 'bar.foo.com.')
         self._check_a(zone, 'test.' + zn, [(3600, '7.8.9.0')])
-
 
     def test_zone_import_errors(self):
         from azure.cli.core.util import CLIError

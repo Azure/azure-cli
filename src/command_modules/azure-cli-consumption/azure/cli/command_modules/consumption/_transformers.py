@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 
 def transform_usage_output(result):
     result.usage_start = result.usage_start.strftime("%Y-%m-%dT%H:%M:%SZ")

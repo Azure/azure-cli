@@ -10,9 +10,26 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_firewall_rules_operations,
     get_sql_databases_operations,
-    get_sql_elastic_pools_operations)
+    get_sql_elastic_pools_operations,
+    get_sql_capabilities_operations)
 
 custom_path = 'azure.cli.command_modules.sql.custom#{}'
+
+###############################################
+#                sql capabilities             #
+###############################################
+
+capabilities_operations = create_service_adapter(
+    'azure.mgmt.sql.operations.capabilities_operations',
+    'CapabilitiesOperations')
+
+with ServiceGroup(__name__, get_sql_capabilities_operations, capabilities_operations, custom_path) as s:
+    with s.group('sql db') as c:
+        c.custom_command('list-editions', 'db_list_capabilities')
+
+    with s.group('sql elastic-pool') as c:
+        c.custom_command('list-editions', 'elastic_pool_list_capabilities')
+
 
 ###############################################
 #                sql db                       #

@@ -11,7 +11,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 
 import azclishell.configuration
-from azclishell.telemetry import TC as telemetry
+from azclishell.telemetry import SHELL_TELEMETRY as shell_telemetry
 
 
 manager = KeyBindingManager(
@@ -45,7 +45,7 @@ class _ExampleFilter(Filter):
 @registry.add_binding(Keys.ControlD, eager=True)
 def exit_(event):
     """ exits the program when Control D is pressed """
-    telemetry.track_key('ControlD')
+    shell_telemetry.track_key('ControlD')
     event.cli.set_return_value(None)
 
 
@@ -59,7 +59,7 @@ def enter_(event):
 def pan_up(event):
     """ Pans the example pan up"""
     global _SECTION
-    telemetry.track_key('ControlY')
+    shell_telemetry.track_key('ControlY')
 
     if _SECTION > 1:
         _SECTION -= 1
@@ -69,7 +69,7 @@ def pan_up(event):
 def pan_down(event):
     """ Pans the example pan down"""
     global _SECTION
-    telemetry.track_key('ControlN')
+    shell_telemetry.track_key('ControlN')
 
     if _SECTION < 10:
         _SECTION += 1
@@ -79,7 +79,7 @@ def pan_down(event):
 def config_settings(event):
     """ opens the configuration """
     global PROMPTING
-    telemetry.track_key('F1')
+    shell_telemetry.track_key('F1')
 
     PROMPTING = True
     config = azclishell.configuration.CONFIGURATION
@@ -104,7 +104,7 @@ def config_settings(event):
 def toggle_default(event):
     """ shows the defaults"""
     global SHOW_DEFAULT
-    telemetry.track_key('F2')
+    shell_telemetry.track_key('F2')
 
     SHOW_DEFAULT = not SHOW_DEFAULT
 
@@ -113,7 +113,7 @@ def toggle_default(event):
 def toggle_symbols(event):
     """ shows the symbol bindings"""
     global SYMBOLS
-    telemetry.track_key('F3')
+    shell_telemetry.track_key('F3')
 
     SYMBOLS = not SYMBOLS
 

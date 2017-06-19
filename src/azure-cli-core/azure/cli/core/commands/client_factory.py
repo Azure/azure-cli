@@ -33,8 +33,10 @@ def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_v
     return client
 
 
-def get_subscription_service_client(client_type):
-    return _get_mgmt_service_client(client_type, False)
+def get_subscription_service_client():
+    return _get_mgmt_service_client(get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS),
+                                    subscription_bound=False,
+                                    api_version=get_api_version(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS))
 
 
 def configure_common_settings(client):
@@ -47,16 +49,14 @@ def configure_common_settings(client):
         pass
 
     for header, value in APPLICATION.session['headers'].items():
-        # We are working with the autorest team to expose the add_header
-        # functionality of the generated client to avoid having to access
-        # private members
+        # We are working with the autorest team to expose the add_header functionality of the generated client to avoid
+        # having to access private members
         client._client.add_header(header, value)  # pylint: disable=protected-access
 
     command_name_suffix = ';completer-request' if APPLICATION.session['completer_active'] else ''
     client._client.add_header('CommandName',  # pylint: disable=protected-access
                               "{}{}".format(APPLICATION.session['command'], command_name_suffix))
-    client.config.generate_client_request_id = \
-        'x-ms-client-request-id' not in APPLICATION.session['headers']
+    client.config.generate_client_request_id = 'x-ms-client-request-id' not in APPLICATION.session['headers']
 
 
 def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,

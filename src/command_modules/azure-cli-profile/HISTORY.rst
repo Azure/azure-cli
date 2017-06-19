@@ -2,8 +2,13 @@
 
 Release History
 ===============
+2.0.6 (2017-06-13)
 ++++++++++++++++++
-2.0.5 (unreleased)
+* Remove useless line-too-long suppression.
+* Remove dead code and updates for ignore_tye (#3659).
+
+2.0.5 (2017-05-30)
+++++++++++++++++++
 * Output deprecating information on using '--expanded-view'
 * Add get-access-token command to provide raw AAD token
 * Support login with a user account with no associated subscriptions

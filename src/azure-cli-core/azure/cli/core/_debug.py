@@ -24,7 +24,7 @@ def change_ssl_cert_verification(client):
     elif REQUESTS_CA_BUNDLE in os.environ:
         ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
         if not os.path.isfile(ca_bundle_file):
-            raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')  # pylint: disable=line-too-long
+            raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
         logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
         client.config.connection.verify = ca_bundle_file
     return client

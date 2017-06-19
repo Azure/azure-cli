@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.0.5 (unreleased)
+++++++++++++++++++
+* Provide an option for 'az cloud set' to select the profile while selecting current cloud
+
+2.0.4 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression
+* Eliminating too-many-arguments pylint disable rule (#3583)
+
+2.0.3 (2017-05-30)
+++++++++++++++++++
+* Minor fixes.
+
 2.0.2 (2017-04-28)
 ++++++++++++++++++
 * New packaging system.

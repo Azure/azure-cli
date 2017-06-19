@@ -5,8 +5,6 @@
 
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-# pylint: disable=line-too-long
-
 
 helps['ad sp create-for-rbac'] = """
     type: command
@@ -86,7 +84,46 @@ helps['ad sp reset-credentials'] = """
           short-summary: >
             Number of years for which the credentials will be valid. Default: 1 year
 """
-
+helps['ad sp delete'] = """
+    type: command
+    short-summary: delete a service principal and its role assignments
+"""
+helps['ad sp create'] = """
+    type: command
+    short-summary: create a service principal
+"""
+helps['ad sp list'] = """
+    type: command
+    short-summary: list service principals, with optional filtering
+"""
+helps['ad sp show'] = """
+    type: command
+    short-summary: get a service principal
+"""
+helps['ad app delete'] = """
+    type: command
+    short-summary: delete an application
+"""
+helps['ad app create'] = """
+    type: command
+    short-summary: create an application
+"""
+helps['ad app list'] = """
+    type: command
+    short-summary: list applications, with optional filtering
+"""
+helps['ad app show'] = """
+    type: command
+    short-summary: get an application
+"""
+helps['ad app update'] = """
+    type: command
+    short-summary: update an application
+"""
+helps['ad user list'] = """
+    type: command
+    short-summary: list users, with optional filtering
+"""
 helps['role'] = """
     type: group
     short-summary: Use role assignments to manage access to your Azure resources.
@@ -109,6 +146,7 @@ helps['role assignment delete'] = """
 helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
+    long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use --all.
 """
 helps['role definition'] = """
     type: group

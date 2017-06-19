@@ -304,7 +304,7 @@ helps['vm user delete'] = """
         Delete a user account from a VM without logging into it.
     examples:
         - name: Delete a user account.
-          text: az vm user delete -u username -n MyVm -r MyResourceGroup
+          text: az vm user delete -u username -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Delete User by VM Ids', 'az vm user delete -u username'))
 
@@ -315,7 +315,7 @@ helps['vm user reset-ssh'] = """
         The extension will restart the SSH server, open the SSH port on your VM, and reset the SSH configuration to default values. The user account (name, password, or SSH keys) are not changed.
     examples:
         - name: Reset the SSH configuration.
-          text: az vm user reset-ssh -n MyVm -r MyResourceGroup
+          text: az vm user reset-ssh -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Reset SSH by VM Ids', 'vm user reset-ssh'))
 
@@ -326,7 +326,7 @@ helps['vm user update'] = """
         - name: Update a Windows user account.
           text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
         - name: Update a Linux user account.
-          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -r MyResourceGroup
+          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Set Linux User by VM Ids', 'vm user update -u username '
                                  '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
@@ -372,8 +372,8 @@ helps[boot_diagnostics_log] = """
     examples:
 {0}
 {1}
-""".format(name_group_example.format('Disable boot diagnostics', boot_diagnostics_log),
-           vm_ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
+""".format(name_group_example.format('Get boot diagnostics log', boot_diagnostics_log),
+           vm_ids_example.format('Get boot diagnostics log by VM Ids', boot_diagnostics_log))
 
 helps['acs'] = """
     type: group
@@ -641,7 +641,7 @@ helps['vm image'] = """
 
 helps['vm image list'] = """
     type: command
-    short-summary: List the VM images available in the Azure Marketplace.
+    short-summary: List the VM/VMSS images available in the Azure Marketplace.
     examples:
         - name: List all available images.
           text: az vm image list --all

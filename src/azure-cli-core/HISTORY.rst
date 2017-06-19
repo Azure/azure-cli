@@ -2,43 +2,68 @@
 
 Release History
 ===============
-
-unreleased
+2.0.9 (2017-06-14)
 ^^^^^^^^^^^^^^^^^^
+* use arm endpoint from the current cloud to create subscription client
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression
+* Fix unsubscriptable-object pylint disable rules
+* Improve concurrent handling of clouds.config file (#3636)
+* Remove dead code and updates for ignore_tye (#3659)
+* Refresh client request id for each command execution.
+* core: Create subscription clients with right SDK profile (#3635)
+* Fix various pylint disable rules
+* Progress Reporting for template deployments (#3510)
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* output: add support for picking table output fields through jmespath query  (#3581)
+* Improves the muting of parse args + appends history with gestures (#3434)
+* Create subscription clients with right SDK profile
+* Fix method-hidden pylint disable rule
+* Move all existing recording files to latest folder
+* Remove dead code from experimental module
+* Improve concurrent handling of clouds.config file.
+* Remove various pylint disable statements
+* [VM/VMSS] Fix idempotency for VM/VMSS create (#3586)
+* Remove too-many-nested-blocks (#3469) (#3469)
+
+2.0.7 (2017-05-30)
+++++++++++++++++++
 * Command paths are no longer case sensitive.
 * Certain boolean-type parameters are no longer case sensitive.
 * Support login to ADFS on prem server like Azure Stack
 * Fix concurrent writes to clouds.config (#3255)
 
 2.0.6 (2017-05-09)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * RP Auto-Reg: capture missing subscription registration error on LRO (#3268)
 
 2.0.5 (2017-05-05)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * core: capture exceptions caused by unregistered provider and auto-register it   
 * login: avoid the bad exception when the user account has no subscription and no tenants
 * perf: persist adal token cache in memory till process exits (#2603)
 
 2.0.4 (2017-04-28)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Fix bytes returned from hex fingerprint -o tsv (#3053)
 * Enhanced Key Vault Certificate Download and AAD SP Integration (#3003)
-* Add Python location to ‘az —version’ (#2986)
+* Add Python location to az —version (#2986)
 * login: support login when there are no subscriptions (#2929)
 
 2.0.3 (2017-04-17)
-^^^^^^^^^^^^^^^^^^
-*core: fix a failure when login using a service principal twice (#2800)
-*core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
-*core: Allow configured defaults to apply on optional args(#2703)
-*core: Improved performance
-*core: Support for multiple API versions
-*core: Custom CA Certs - Support setting REQUESTS_CA_BUNDLE environment variable
-*core: Cloud configuration - use 'resource manager' endpoint if 'management' endpoint not set
+++++++++++++++++++
+* core: fix a failure when login using a service principal twice (#2800)
+* core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
+* core: Allow configured defaults to apply on optional args(#2703)
+* core: Improved performance
+* core: Support for multiple API versions
+* core: Custom CA Certs - Support setting REQUESTS_CA_BUNDLE environment variable
+* core: Cloud configuration - use 'resource manager' endpoint if 'management' endpoint not set
 
 2.0.2 (2017-04-03)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Avoid loading azure.storage simply to getting an internal string to be used in exceptional cases when trying to instantiate a storage data plane client. (#2673)
 * [KeyVault] KeyVault create fix (#2648)
 * Azure DevTest Lab command module in CLI (#2631)
@@ -59,7 +84,7 @@ unreleased
 * Fix issue with "single tuple" options_list (#2495)
 
 2.0.1 (2017-03-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 
 * Support setting default values for common arguments like default resource group, default web, default vm
 * Fix resource_id parsing to accept 'resourcegroups'
@@ -68,20 +93,20 @@ unreleased
 * Support login to specific tenant
 
 2.0.0 (2017-02-27)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 
 * GA release
 
 
 0.1.2rc2 (2017-02-22)
-^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++^^^
 
 * Telemetry: Generate unique event ID for each exception.
 * Show privacy statement on first invocation of ‘az’ command.
 
 
 0.1.2rc1 (2017-02-17)
-^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++^^^
 
 * Show commands return empty string with exit code 0 for 404 responses
 * Fix: Ensure known clouds are always in cloud config
@@ -91,7 +116,7 @@ unreleased
 
 
 0.1.1b3 (2017-01-30)
-^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++^^
 
 * Support Python 3.6.
 * Support prompt for confirmations.
@@ -106,14 +131,14 @@ unreleased
 
 
 0.1.1b2 (2017-01-19)
-^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++^^
 
 * Fix argcomplete 'default_completer' error after release of argcomplete 1.8.0.
 * [Telemetry] Update instrumentation key for telemetry and use new DataModel.
 
 
 0.1.1b1 (2017-01-17)
-^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++^^
 
 * Improve @file handling logic.
 * Telemetry code improvements and readability changes.
@@ -122,6 +147,6 @@ unreleased
 
 
 0.1.0b11 (2016-12-12)
-^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++^^^
 
 * Preview release.

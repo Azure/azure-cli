@@ -2,10 +2,20 @@
 
 Release History
 ===============
-unreleased
+0.0.8 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression
+* Fix all bad-continuation pylint disables
+* Fix various pylint disable rules
+* Fix all superflusous-parens pylint disable rules
+* Fix method-hidden pylint disable rule
+* Move all existing recording files to latest folder
+
+0.0.7 (2017-05-30)
 ++++++++++++++++++
 
 * Update underlying Data Lake Store filesystem SDK version, addressing a performance issue.
+* Update to add a new command: `az dls enable-key-vault`. This command attempts to enable a user provided Key Vault for use encrypting the data in a Data Lake Store account.
 
 0.0.6 (2017-05-09)
 ++++++++++++++++++

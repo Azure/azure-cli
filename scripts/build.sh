@@ -11,7 +11,7 @@ scripts_root=$(cd $(dirname $0); pwd)
 
 export PYTHONPATH=$PATHONPATH:./src
 
-python -m azure.cli -h --debug
+python -m azure.cli --debug
 
 # Ensure tokens are erased from VCR recordings
 python -m automation.tests.check_vcr_recordings
@@ -37,5 +37,6 @@ if [[ "$CI" == "true" ]]; then
 fi
 
 python -m automation.tests.verify_doc_source_map
+python -m automation.tests.verify_readme_history
 
 python $scripts_root/license/verify.py

@@ -5,9 +5,10 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core.commands import \
-    (DeploymentOutputLongRunningOperation, cli_command)
+from azure.cli.core.commands.arm import \
+    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
+     deployment_validate_table_format)
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -40,7 +41,7 @@ custom_path = 'azure.cli.command_modules.network.custom#'
 
 # Application gateways
 ag_path = 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.'
-cli_command(__name__, 'network application-gateway create', custom_path + 'create_application_gateway', transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'), no_wait_param='no_wait')
+cli_command(__name__, 'network application-gateway create', custom_path + 'create_application_gateway', transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'), no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'network application-gateway delete', ag_path + 'delete', cf_application_gateways, no_wait_param='raw')
 cli_command(__name__, 'network application-gateway show', ag_path + 'get', cf_application_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network application-gateway list', custom_path + 'list_application_gateways')
@@ -68,6 +69,8 @@ property_map = {
     'probes': 'probe',
     'url_path_maps': 'url-path-map',
 }
+
+
 def _make_singular(value):
     try:
         if value.endswith('ies'):
@@ -77,6 +80,7 @@ def _make_singular(value):
         return value
     except AttributeError:
         return value
+
 
 for subresource, alias in property_map.items():
     cli_command(__name__, 'network application-gateway {} list'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(list_network_resource_property('application_gateways', subresource)))
@@ -143,7 +147,7 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
 
 # LoadBalancersOperations
 lb_path = 'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.'
-cli_command(__name__, 'network lb create', custom_path + 'create_load_balancer', transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait')
+cli_command(__name__, 'network lb create', custom_path + 'create_load_balancer', transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'network lb delete', lb_path + 'delete', cf_load_balancers)
 cli_command(__name__, 'network lb show', lb_path + 'get', cf_load_balancers, exception_handler=empty_on_404)
 cli_command(__name__, 'network lb list', custom_path + 'list_lbs')
@@ -362,7 +366,7 @@ cli_command(__name__, 'network list-usages', usage_path + 'list', cf_usages, tra
 
 # VirtualNetworkGatewayConnectionsOperations
 vpn_conn_path = 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.'
-cli_command(__name__, 'network vpn-connection create', custom_path + 'create_vpn_connection', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_create_output)
+cli_command(__name__, 'network vpn-connection create', custom_path + 'create_vpn_connection', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_create_output, exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'network vpn-connection delete', vpn_conn_path + 'delete', cf_virtual_network_gateway_connections)
 cli_command(__name__, 'network vpn-connection show', vpn_conn_path + 'get', cf_virtual_network_gateway_connections, exception_handler=empty_on_404, transform=transform_vpn_connection)
 cli_command(__name__, 'network vpn-connection list', vpn_conn_path + 'list', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_list)

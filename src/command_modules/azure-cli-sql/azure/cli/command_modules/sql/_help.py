@@ -5,7 +5,6 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
 
 helps['sql'] = """
     type: group
@@ -30,6 +29,19 @@ helps['sql db delete'] = """
 helps['sql db list'] = """
     type: command
     short-summary: Lists all databases and data warehouses in a server, or all databases in an elastic pool.
+    """
+helps['sql db list-editions'] = """
+    type: command
+    short-summary: Shows database editions that are available for your subscription.
+    long-summary: Also includes available service objectives and storage limits. In order to reduce
+                  verbosity, settings to intentionally reduce storage limits are hidden by default.
+    examples:
+        - name: Show all database editions in a location.
+          text: az sql db list-editions -l westus
+        - name: Show all available database service objectives for Standard edition.
+          text: az sql db list-editions -l westus --edition Standard
+        - name: Show available max database sizes for P1 service objective
+          text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
 helps['sql db show'] = """
     type: command
@@ -187,6 +199,23 @@ helps['sql elastic-pool create'] = """
     type: command
     short-summary: Creates an elastic pool.
     """
+helps['sql elastic-pool list-editions'] = """
+    type: command
+    short-summary: Shows elastic pool editions that are available for your subscription.
+    long-summary: Also includes available pool DTU settings, storage limits, and per database
+                  settings. In order to reduce verbosity, additional storage limits and per
+                  database settings are hidden by default.
+    examples:
+        - name: Show all elastic pool editions and pool DTU limits in a location.
+          text: az sql elastic-pool list-editions -l westus
+        - name: Show all pool DTU limits for Standard edition.
+          text: az sql elastic-pool list-editions -l westus --edition Standard
+        - name: Show available max sizes for elastic pools with 100 DTUs
+          text: az sql elastic-pool list-editions -l westus --dtu 100 --show-details max-size
+        - name: Show available per database settings for Standard 100 DTU elastic pools
+          text: az sql elastic-pool list-editions -l westus --edition Standard --dtu 100
+                --show-details db-min-dtu db-max-dtu db-max-size
+    """
 helps['sql elastic-pool update'] = """
     type: command
     short-summary: Updates an elastic pool.
@@ -233,7 +262,7 @@ helps['sql server firewall-rule update'] = """
     """
 helps['sql server firewall-rule show'] = """
     type: command
-    short-summary: Shows the details of a firewall rule.
+    short-summary: Shows the detail of a firewall rule.
     """
 helps['sql server firewall-rule list'] = """
     type: command

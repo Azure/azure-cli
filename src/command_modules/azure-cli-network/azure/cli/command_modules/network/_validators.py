@@ -374,7 +374,7 @@ def process_ag_url_path_map_create_namespace(namespace):  # pylint: disable=unus
             namespace, 'backendAddressPools', namespace.default_address_pool)
 
     if namespace.default_http_settings and not is_valid_resource_id(
-            namespace.default_http_settings):  # pylint: disable=line-too-long
+            namespace.default_http_settings):
         namespace.default_http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
 
@@ -503,9 +503,7 @@ def process_tm_endpoint_create_namespace(namespace):
 
     routing_type = profile.traffic_routing_method  # pylint: disable=no-member
     endpoint_type = namespace.endpoint_type
-    all_options = \
-        ['target_resource_id', 'target', 'min_child_endpoints', 'priority', 'weight', \
-         'endpoint_location']
+    all_options = ['target_resource_id', 'target', 'min_child_endpoints', 'priority', 'weight', 'endpoint_location']
     props_to_options = {
         'target_resource_id': '--target-resource-id',
         'target': '--target',
@@ -531,28 +529,26 @@ def process_tm_endpoint_create_namespace(namespace):
     if endpoint_type.lower() == 'nestedendpoints':
         required_options.append('min_child_endpoints')
 
-    if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and \
-                    routing_type.lower() == 'performance':
+    if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and routing_type.lower() == 'performance':
         required_options.append('endpoint_location')
 
     if routing_type.lower() == 'geographic':
         required_options.append('geo_mapping')
 
     # ensure required options are provided
-    missing_options = [props_to_options[x] for x in required_options \
-                       if getattr(namespace, x, None) is None]
-    extra_options = [props_to_options[x] for x in all_options if getattr(namespace, x, None) \
-                     is not None and x not in required_options]
+    missing_options = [props_to_options[x] for x in required_options if getattr(namespace, x, None) is None]
+    extra_options = [props_to_options[x] for x in all_options if
+                     getattr(namespace, x, None) is not None and x not in required_options]
 
     if missing_options or extra_options:
         error_message = "Incorrect options for profile routing method '{}' and endpoint type '{}'.".format(routing_type,
                                                                                                            endpoint_type)  # pylint: disable=line-too-long
         if missing_options:
             error_message = '{}\nSupply the following: {}'.format(error_message, ', '.join(
-                missing_options))  # pylint: disable=line-too-long
+                missing_options))
         if extra_options:
             error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(
-                extra_options))  # pylint: disable=line-too-long
+                extra_options))
         raise CLIError(error_message)
 
 
@@ -697,11 +693,9 @@ def process_nw_test_connectivity_namespace(namespace):
 
     compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.source_resource)['name']
-    rg = namespace.resource_group_name or \
-         parse_resource_id(namespace.source_resource).get('resource_group', None)
+    rg = namespace.resource_group_name or parse_resource_id(namespace.source_resource).get('resource_group', None)
     if not rg:
-        raise CLIError('usage error: --source-resource ID | '
-                       '--source-resource NAME --resource-group NAME')
+        raise CLIError('usage error: --source-resource ID | --source-resource NAME --resource-group NAME')
     vm = compute_client.get(rg, vm_name)
     namespace.location = vm.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(namespace)

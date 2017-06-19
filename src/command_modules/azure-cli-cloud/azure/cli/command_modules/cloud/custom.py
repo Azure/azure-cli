@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-argument,too-many-arguments
+# pylint: disable=unused-argument
 from azure.cli.core.util import CLIError, to_snake_case
 
 from azure.cli.core.cloud import (Cloud,
@@ -105,9 +105,11 @@ def unregister_cloud(cloud_name):
         raise CLIError(e)
 
 
-def set_cloud(cloud_name):
+def set_cloud(cloud_name, profile=None):
     try:
         switch_active_cloud(cloud_name)
+        if profile:
+            modify_cloud(cloud_name=cloud_name, profile=profile)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 

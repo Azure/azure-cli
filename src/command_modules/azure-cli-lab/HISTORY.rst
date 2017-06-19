@@ -2,7 +2,14 @@
 
 Release History
 ===============
-unreleased
+0.0.6 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression
+* Move all existing recording files to latest folder
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* Fix various pylint disable rules
+
+0.0.5 (2017-05-30)
 +++++++++++++++++++++
 
 * Adding support for claiming any vm in the lab through `az lab vm claim`

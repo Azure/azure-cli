@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use,too-many-arguments,no-member,line-too-long,too-few-public-methods
+# pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods
 
 from __future__ import print_function
 from os.path import exists
