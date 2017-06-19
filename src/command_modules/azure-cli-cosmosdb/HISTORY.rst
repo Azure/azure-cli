@@ -2,8 +2,14 @@
 
 Release History
 ===============
-0.1.8 (2017-06-13)
+
+unreleased
 ^^^^^^^^^^^^^^^^^^
+
+* Added Support for Collection Default TTL.
+
+0.1.8 (2017-06-13)
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * Move all existing recording files to latest folder
 * Fix various pylint disable rules
@@ -11,12 +17,6 @@ Release History
 0.1.7 (2017-05-30)
 ++++++++++++++++++
 * Minor fixes.
-
-0.1.6+dev
-++++++++++++++++++
-
-* Added Support for Collection Default TTL.
-* pyproj files updated to include cosmosdb files.
 
 0.1.6 (2017-05-09)
 ++++++++++++++++++
