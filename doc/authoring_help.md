@@ -117,6 +117,8 @@ You can see an example of this by switching profiles and running `az storage acc
 
 ---
 
+Below is some documentation on taking advantage of this in your YAML help files.
+
 In your YAML files, the same `short-summary` and `long-summary` is used for all profiles.
 
 For the command parameters section, any parameters not used by a profile will be ignored and not displayed.
