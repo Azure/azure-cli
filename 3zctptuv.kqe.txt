@@ -1,0 +1,755 @@
+﻿Merge remote-tracking branch 'Azure/master'
+
+# Conflicts:
+#	azure-cli.pyproj
+#	azure-cli2017.pyproj
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please remove the file
+#	.git/MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	modified:   .gitignore
+#	modified:   Dockerfile
+#	modified:   Jenkinsfile
+#	modified:   README.md
+#	modified:   appveyor.yml
+#	modified:   azure-cli.pyproj
+#	modified:   azure-cli2017.pyproj
+#	modified:   doc/configuring_your_machine.md
+#	modified:   doc/recording_vcr_tests.md
+#	modified:   doc/sphinx/azhelpgen/doc_source_map.json
+#	new file:   nose.cfg
+#	modified:   packaged_releases/HISTORY.md
+#	modified:   packaged_releases/README.md
+#	new file:   packaged_releases/bundled/README.md
+#	new file:   packaged_releases/bundled/build-bundle.py
+#	new file:   packaged_releases/bundled/installer
+#	modified:   packaged_releases/debian/README.md
+#	modified:   packaged_releases/docker/Dockerfile
+#	new file:   packaged_releases/pip_requirements/0.2.9_python27.txt
+#	new file:   packaged_releases/pip_requirements/0.2.9_python35.txt
+#	modified:   packaged_releases/windows/Product.wxs
+#	modified:   packaged_releases/windows/resources/CLI_LICENSE.rtf
+#	modified:   packaged_releases/windows/scripts/prepareBuild.cmd
+#	modified:   requirements.txt
+#	new file:   scripts/automation/release/notes.py
+#	new file:   scripts/automation/style/pylint_disable_check.py
+#	modified:   scripts/automation/style/run.py
+#	modified:   scripts/automation/tests/nose_helper.py
+#	modified:   scripts/automation/tests/verify_dependencies.py
+#	new file:   scripts/automation/tests/verify_doc_source_map.py
+#	modified:   scripts/build.sh
+#	modified:   scripts/curl_install_pypi/install
+#	modified:   scripts/curl_install_pypi/install.py
+#	modified:   scripts/dev_setup.py
+#	modified:   scripts/github_bot/HISTORY.rst
+#	modified:   scripts/github_bot/api/app.py
+#	modified:   scripts/setup.py
+#	modified:   src/azure-cli-core/HISTORY.rst
+#	modified:   src/azure-cli-core/azure/cli/core/__init__.py
+#	modified:   src/azure-cli-core/azure/cli/core/_config.py
+#	modified:   src/azure-cli-core/azure/cli/core/_debug.py
+#	modified:   src/azure-cli-core/azure/cli/core/_environment.py
+#	modified:   src/azure-cli-core/azure/cli/core/_help.py
+#	modified:   src/azure-cli-core/azure/cli/core/_output.py
+#	modified:   src/azure-cli-core/azure/cli/core/_profile.py
+#	modified:   src/azure-cli-core/azure/cli/core/_session.py
+#	modified:   src/azure-cli-core/azure/cli/core/adal_authentication.py
+#	modified:   src/azure-cli-core/azure/cli/core/application.py
+#	modified:   src/azure-cli-core/azure/cli/core/azlogging.py
+#	modified:   src/azure-cli-core/azure/cli/core/cloud.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/__init__.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/_introspection.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/arm.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/client_factory.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/parameters.py
+#	new file:   src/azure-cli-core/azure/cli/core/commands/progress.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/template_create.py
+#	modified:   src/azure-cli-core/azure/cli/core/commands/validators.py
+#	modified:   src/azure-cli-core/azure/cli/core/decorators.py
+#	modified:   src/azure-cli-core/azure/cli/core/extensions/experimental.py
+#	modified:   src/azure-cli-core/azure/cli/core/extensions/query.py
+#	modified:   src/azure-cli-core/azure/cli/core/help_files.py
+#	modified:   src/azure-cli-core/azure/cli/core/parser.py
+#	modified:   src/azure-cli-core/azure/cli/core/prompting.py
+#	modified:   src/azure-cli-core/azure/cli/core/sdk/util.py
+#	modified:   src/azure-cli-core/azure/cli/core/telemetry.py
+#	modified:   src/azure-cli-core/azure/cli/core/telemetry_upload.py
+#	modified:   src/azure-cli-core/azure/cli/core/util.py
+#	modified:   src/azure-cli-core/setup.py
+#	renamed:    src/azure-cli-core/tests/recordings/test_rp_auto_register.yaml -> src/azure-cli-core/tests/recordings/latest/test_rp_auto_register.yaml
+#	modified:   src/azure-cli-core/tests/test_application.py
+#	modified:   src/azure-cli-core/tests/test_cloud.py
+#	modified:   src/azure-cli-core/tests/test_command_registration.py
+#	modified:   src/azure-cli-core/tests/test_generic_update.py
+#	modified:   src/azure-cli-core/tests/test_help.py
+#	modified:   src/azure-cli-core/tests/test_output.py
+#	modified:   src/azure-cli-core/tests/test_profile.py
+#	new file:   src/azure-cli-core/tests/test_progress.py
+#	modified:   src/azure-cli-core/tests/test_rp_auto_reg.py
+#	modified:   src/azure-cli-core/tests/test_util.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/__init__.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/base.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/checkers.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/decorators.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/patches.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/preparers.py
+#	deleted:    src/azure-cli-testsdk/azure/cli/testsdk/recording_processors.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/utilities.py
+#	modified:   src/azure-cli-testsdk/azure/cli/testsdk/vcr_test_base.py
+#	modified:   src/azure-cli/HISTORY.rst
+#	modified:   src/azure-cli/azure/cli/__init__.py
+#	modified:   src/azure-cli/azure/cli/main.py
+#	modified:   src/azure-cli/setup.py
+#	modified:   src/command_modules/azure-cli-acr/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-acr/azure/cli/command_modules/acr/__init__.py
+#	modified:   src/command_modules/azure-cli-acr/azure/cli/command_modules/acr/_help.py
+#	modified:   src/command_modules/azure-cli-acr/azure/cli/command_modules/acr/_utils.py
+#	modified:   src/command_modules/azure-cli-acr/azure/cli/command_modules/acr/_validators.py
+#	modified:   src/command_modules/azure-cli-acr/azure/cli/command_modules/acr/credential.py
+#	modified:   src/command_modules/azure-cli-acr/azure/cli/command_modules/acr/custom.py
+#	modified:   src/command_modules/azure-cli-acr/setup.py
+#	renamed:    src/command_modules/azure-cli-acr/tests/recordings/test_acr_create_with_existing_storage.yaml -> src/command_modules/azure-cli-acr/tests/recordings/latest/test_acr_create_with_existing_storage.yaml
+#	renamed:    src/command_modules/azure-cli-acr/tests/recordings/test_acr_create_with_new_storage.yaml -> src/command_modules/azure-cli-acr/tests/recordings/latest/test_acr_create_with_new_storage.yaml
+#	renamed:    src/command_modules/azure-cli-acr/tests/recordings/test_check_name_availability.yaml -> src/command_modules/azure-cli-acr/tests/recordings/latest/test_check_name_availability.yaml
+#	modified:   src/command_modules/azure-cli-acs/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/__init__.py
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/_actions.py
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/acs_client.py
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/commands.py
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/custom.py
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/proxy.py
+#	modified:   src/command_modules/azure-cli-acs/azure/cli/command_modules/acs/win_proxy.py
+#	modified:   src/command_modules/azure-cli-acs/setup.py
+#	renamed:    src/command_modules/azure-cli-acs/tests/recordings/test_acs_create_default_service.yaml -> src/command_modules/azure-cli-acs/tests/recordings/latest/test_acs_create_default_service.yaml
+#	new file:   src/command_modules/azure-cli-acs/tests/recordings/latest/test_acs_create_kubernetes.yaml
+#	deleted:    src/command_modules/azure-cli-acs/tests/recordings/test_acs_create_kubernetes.yaml
+#	modified:   src/command_modules/azure-cli-acs/tests/test_service_principals.py
+#	modified:   src/command_modules/azure-cli-appservice/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-appservice/azure/cli/command_modules/appservice/__init__.py
+#	modified:   src/command_modules/azure-cli-appservice/azure/cli/command_modules/appservice/_client_factory.py
+#	modified:   src/command_modules/azure-cli-appservice/azure/cli/command_modules/appservice/_help.py
+#	modified:   src/command_modules/azure-cli-appservice/azure/cli/command_modules/appservice/_params.py
+#	modified:   src/command_modules/azure-cli-appservice/azure/cli/command_modules/appservice/commands.py
+#	modified:   src/command_modules/azure-cli-appservice/azure/cli/command_modules/appservice/custom.py
+#	modified:   src/command_modules/azure-cli-appservice/setup.py
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_appservice_error_polish.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_appservice_error_polish.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_functionapp_asp_e2e.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_functionapp_consumption_e2e.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_linux_webapp.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_linux_webapp.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_linux_webapp_quick_create.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_traffic_routing.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_backup_config.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_backup_config.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_backup_restore.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_backup_restore.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_config.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_config.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_e2e.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_e2e.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_git.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_git.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_scale.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_scale.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_simple_create.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_simple_create.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_slot.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_slot_swap.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_slot_swap.yaml
+#	renamed:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_ssl.yaml -> src/command_modules/azure-cli-appservice/tests/recordings/latest/test_webapp_ssl.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_win_webapp_quick_create.yaml
+#	new file:   src/command_modules/azure-cli-appservice/tests/recordings/latest/test_win_webapp_quick_create_cd.yaml
+#	deleted:    src/command_modules/azure-cli-appservice/tests/recordings/test_functionapp_asp_e2e.yaml
+#	deleted:    src/command_modules/azure-cli-appservice/tests/recordings/test_functionapp_consumption_e2e.yaml
+#	deleted:    src/command_modules/azure-cli-appservice/tests/recordings/test_functionapp_e2e.yaml
+#	deleted:    src/command_modules/azure-cli-appservice/tests/recordings/test_linux_webapp_quick_create.yaml
+#	deleted:    src/command_modules/azure-cli-appservice/tests/recordings/test_webapp_slot.yaml
+#	deleted:    src/command_modules/azure-cli-appservice/tests/recordings/test_win_webapp_quick_create.yaml
+#	modified:   src/command_modules/azure-cli-appservice/tests/test_webapp_commands.py
+#	modified:   src/command_modules/azure-cli-appservice/tests/test_webapp_commands_thru_mock.py
+#	deleted:    src/command_modules/azure-cli-appservice/tests/test_webapp_old_commands.py
+#	modified:   src/command_modules/azure-cli-batch/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-batch/azure/cli/command_modules/batch/__init__.py
+#	modified:   src/command_modules/azure-cli-batch/azure/cli/command_modules/batch/_command_type.py
+#	modified:   src/command_modules/azure-cli-batch/azure/cli/command_modules/batch/_help.py
+#	modified:   src/command_modules/azure-cli-batch/azure/cli/command_modules/batch/_validators.py
+#	modified:   src/command_modules/azure-cli-batch/azure/cli/command_modules/batch/commands.py
+#	modified:   src/command_modules/azure-cli-batch/azure/cli/command_modules/batch/custom.py
+#	modified:   src/command_modules/azure-cli-batch/setup.py
+#	new file:   src/command_modules/azure-cli-batch/tests/batch_preparers.py
+#	new file:   src/command_modules/azure-cli-batch/tests/generate_full_cli_help.bat
+#	new file:   src/command_modules/azure-cli-batch/tests/generate_short_cli_help.bat
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/batch_help_full.txt
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/batch_short_help.txt
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_account_cmd.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_application_cmd.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_certificate_cmd.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_job_list_cmd.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_jobs_and_tasks.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_pool_cmd.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_pools_and_nodes.yaml
+#	new file:   src/command_modules/azure-cli-batch/tests/recordings/latest/test_batch_task_create_cmd.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_account_mgmt.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_application_mgmt.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_certificate_cmd.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_job_list_cmd.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_jobs.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_pool_cmd.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_pools.yaml
+#	deleted:    src/command_modules/azure-cli-batch/tests/recordings/test_batch_task_create_cmd.yaml
+#	modified:   src/command_modules/azure-cli-batch/tests/test_batch_commands.py
+#	deleted:    src/command_modules/azure-cli-batch/tests/test_batch_data_plane_command_base.py
+#	modified:   src/command_modules/azure-cli-batch/tests/test_batch_data_plane_commands.py
+#	deleted:    src/command_modules/azure-cli-batch/tests/test_batch_job_commands.py
+#	modified:   src/command_modules/azure-cli-batch/tests/test_batch_mgmt_commands.py
+#	deleted:    src/command_modules/azure-cli-batch/tests/test_batch_pool_commands.py
+#	new file:   src/command_modules/azure-cli-billing/HISTORY.rst
+#	new file:   src/command_modules/azure-cli-billing/MANIFEST.in
+#	new file:   src/command_modules/azure-cli-billing/README.rst
+#	new file:   src/command_modules/azure-cli-billing/azure/__init__.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/__init__.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/__init__.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/__init__.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/_client_factory.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/_exception_handler.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/_help.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/_params.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/_transformers.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/commands.py
+#	new file:   src/command_modules/azure-cli-billing/azure/cli/command_modules/billing/custom.py
+#	new file:   src/command_modules/azure-cli-billing/azure_bdist_wheel.py
+#	new file:   src/command_modules/azure-cli-billing/setup.cfg
+#	new file:   src/command_modules/azure-cli-billing/setup.py
+#	new file:   src/command_modules/azure-cli-billing/tests/__init__.py
+#	new file:   src/command_modules/azure-cli-billing/tests/recordings/latest/test_get_latest_invoice.yaml
+#	new file:   src/command_modules/azure-cli-billing/tests/recordings/latest/test_list_billing_periods.yaml
+#	new file:   src/command_modules/azure-cli-billing/tests/recordings/latest/test_list_invoices_no_url.yaml
+#	new file:   src/command_modules/azure-cli-billing/tests/recordings/latest/test_list_invoices_with_url.yaml
+#	new file:   src/command_modules/azure-cli-billing/tests/test_billing_commands.py
+#	modified:   src/command_modules/azure-cli-cdn/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-cdn/azure/cli/command_modules/cdn/__init__.py
+#	modified:   src/command_modules/azure-cli-cdn/azure/cli/command_modules/cdn/_help.py
+#	modified:   src/command_modules/azure-cli-cdn/azure/cli/command_modules/cdn/_params.py
+#	modified:   src/command_modules/azure-cli-cdn/azure/cli/command_modules/cdn/commands.py
+#	modified:   src/command_modules/azure-cli-cdn/setup.py
+#	renamed:    src/command_modules/azure-cli-cdn/tests/recordings/test_custom_domain_list.yaml -> src/command_modules/azure-cli-cdn/tests/recordings/latest/test_custom_domain_list.yaml
+#	renamed:    src/command_modules/azure-cli-cdn/tests/recordings/test_edge_node_crud.yaml -> src/command_modules/azure-cli-cdn/tests/recordings/latest/test_edge_node_crud.yaml
+#	new file:   src/command_modules/azure-cli-cdn/tests/recordings/latest/test_endpoint_crud.yaml
+#	renamed:    src/command_modules/azure-cli-cdn/tests/recordings/test_endpoint_load_and_purge.yaml -> src/command_modules/azure-cli-cdn/tests/recordings/latest/test_endpoint_load_and_purge.yaml
+#	renamed:    src/command_modules/azure-cli-cdn/tests/recordings/test_endpoint_start_and_stop.yaml -> src/command_modules/azure-cli-cdn/tests/recordings/latest/test_endpoint_start_and_stop.yaml
+#	renamed:    src/command_modules/azure-cli-cdn/tests/recordings/test_origin_list_and_show.yaml -> src/command_modules/azure-cli-cdn/tests/recordings/latest/test_origin_list_and_show.yaml
+#	renamed:    src/command_modules/azure-cli-cdn/tests/recordings/test_profile_crud.yaml -> src/command_modules/azure-cli-cdn/tests/recordings/latest/test_profile_crud.yaml
+#	deleted:    src/command_modules/azure-cli-cdn/tests/recordings/test_endpoint_crud.yaml
+#	modified:   src/command_modules/azure-cli-cdn/tests/test_endpoint_scenarios.py
+#	modified:   src/command_modules/azure-cli-cloud/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-cloud/azure/cli/command_modules/cloud/__init__.py
+#	modified:   src/command_modules/azure-cli-cloud/azure/cli/command_modules/cloud/_help.py
+#	modified:   src/command_modules/azure-cli-cloud/azure/cli/command_modules/cloud/_params.py
+#	modified:   src/command_modules/azure-cli-cloud/azure/cli/command_modules/cloud/custom.py
+#	modified:   src/command_modules/azure-cli-cloud/setup.py
+#	modified:   src/command_modules/azure-cli-cognitiveservices/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-cognitiveservices/azure/cli/command_modules/cognitiveservices/__init__.py
+#	modified:   src/command_modules/azure-cli-cognitiveservices/azure/cli/command_modules/cognitiveservices/custom.py
+#	modified:   src/command_modules/azure-cli-cognitiveservices/setup.py
+#	renamed:    src/command_modules/azure-cli-cognitiveservices/tests/recordings/test_cognitiveservices_crud.yaml -> src/command_modules/azure-cli-cognitiveservices/tests/recordings/latest/test_cognitiveservices_crud.yaml
+#	modified:   src/command_modules/azure-cli-component/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-component/azure/cli/command_modules/component/__init__.py
+#	modified:   src/command_modules/azure-cli-component/setup.py
+#	modified:   src/command_modules/azure-cli-configure/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-configure/azure/cli/command_modules/configure/__init__.py
+#	modified:   src/command_modules/azure-cli-configure/azure/cli/command_modules/configure/_help.py
+#	modified:   src/command_modules/azure-cli-configure/azure/cli/command_modules/configure/custom.py
+#	modified:   src/command_modules/azure-cli-configure/setup.py
+#	new file:   src/command_modules/azure-cli-consumption/HISTORY.rst
+#	new file:   src/command_modules/azure-cli-consumption/MANIFEST.in
+#	new file:   src/command_modules/azure-cli-consumption/README.rst
+#	new file:   src/command_modules/azure-cli-consumption/azure/__init__.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/__init__.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/__init__.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/__init__.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/_client_factory.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/_exception_handler.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/_help.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/_params.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/_transformers.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/_validators.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/commands.py
+#	new file:   src/command_modules/azure-cli-consumption/azure/cli/command_modules/consumption/custom.py
+#	new file:   src/command_modules/azure-cli-consumption/azure_bdist_wheel.py
+#	new file:   src/command_modules/azure-cli-consumption/setup.cfg
+#	new file:   src/command_modules/azure-cli-consumption/setup.py
+#	new file:   src/command_modules/azure-cli-consumption/tests/__init__.py
+#	new file:   src/command_modules/azure-cli-consumption/tests/recordings/latest/test_list_usages_billing_period.yaml
+#	new file:   src/command_modules/azure-cli-consumption/tests/recordings/latest/test_list_usages_billing_period_expand.yaml
+#	new file:   src/command_modules/azure-cli-consumption/tests/recordings/latest/test_list_usages_invoice.yaml
+#	new file:   src/command_modules/azure-cli-consumption/tests/recordings/latest/test_list_usages_subscription.yaml
+#	new file:   src/command_modules/azure-cli-consumption/tests/test_consumption_commands.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-cosmosdb/azure/cli/command_modules/cosmosdb/__init__.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/azure/cli/command_modules/cosmosdb/_client_factory.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/azure/cli/command_modules/cosmosdb/_exception_handler.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/azure/cli/command_modules/cosmosdb/_help.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/azure/cli/command_modules/cosmosdb/_params.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/azure/cli/command_modules/cosmosdb/custom.py
+#	modified:   src/command_modules/azure-cli-cosmosdb/setup.py
+#	renamed:    src/command_modules/azure-cli-cosmosdb/tests/recordings/test_create_database_account.yaml -> src/command_modules/azure-cli-cosmosdb/tests/recordings/latest/test_create_database_account.yaml
+#	modified:   src/command_modules/azure-cli-dla/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-dla/azure/cli/command_modules/dla/__init__.py
+#	modified:   src/command_modules/azure-cli-dla/azure/cli/command_modules/dla/_client_factory.py
+#	modified:   src/command_modules/azure-cli-dla/azure/cli/command_modules/dla/_help.py
+#	modified:   src/command_modules/azure-cli-dla/azure/cli/command_modules/dla/_params.py
+#	modified:   src/command_modules/azure-cli-dla/azure/cli/command_modules/dla/custom.py
+#	modified:   src/command_modules/azure-cli-dla/setup.py
+#	renamed:    src/command_modules/azure-cli-dla/tests/recordings/test_dla_account_mgmt.yaml -> src/command_modules/azure-cli-dla/tests/recordings/latest/test_dla_account_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-dla/tests/recordings/test_dla_catalog_mgmt.yaml -> src/command_modules/azure-cli-dla/tests/recordings/latest/test_dla_catalog_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-dla/tests/recordings/test_dla_job_mgmt.yaml -> src/command_modules/azure-cli-dla/tests/recordings/latest/test_dla_job_mgmt.yaml
+#	modified:   src/command_modules/azure-cli-dla/tests/test_dla_commands.py
+#	modified:   src/command_modules/azure-cli-dls/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-dls/azure/cli/command_modules/dls/__init__.py
+#	modified:   src/command_modules/azure-cli-dls/azure/cli/command_modules/dls/_help.py
+#	modified:   src/command_modules/azure-cli-dls/azure/cli/command_modules/dls/commands.py
+#	modified:   src/command_modules/azure-cli-dls/azure/cli/command_modules/dls/custom.py
+#	modified:   src/command_modules/azure-cli-dls/setup.py
+#	new file:   src/command_modules/azure-cli-dls/tests/recordings/latest/test_dls_account_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-dls/tests/recordings/test_dls_file_access_mgmt.yaml -> src/command_modules/azure-cli-dls/tests/recordings/latest/test_dls_file_access_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-dls/tests/recordings/test_dls_file_mgmt.yaml -> src/command_modules/azure-cli-dls/tests/recordings/latest/test_dls_file_mgmt.yaml
+#	deleted:    src/command_modules/azure-cli-dls/tests/recordings/test_dls_account_mgmt.yaml
+#	modified:   src/command_modules/azure-cli-dls/tests/test_dls_commands.py
+#	modified:   src/command_modules/azure-cli-feedback/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-feedback/azure/cli/command_modules/feedback/__init__.py
+#	modified:   src/command_modules/azure-cli-feedback/azure/cli/command_modules/feedback/custom.py
+#	modified:   src/command_modules/azure-cli-feedback/setup.py
+#	modified:   src/command_modules/azure-cli-find/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-find/azure/cli/command_modules/find/__init__.py
+#	modified:   src/command_modules/azure-cli-find/azure/cli/command_modules/find/_params.py
+#	modified:   src/command_modules/azure-cli-find/setup.py
+#	modified:   src/command_modules/azure-cli-interactive/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-interactive/README.md
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/__init__.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/__main__.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/_dump_commands.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/app.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/argfinder.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/az_completer.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/configuration.py
+#	new file:   src/command_modules/azure-cli-interactive/azclishell/frequency_heuristic.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/gather_commands.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/key_bindings.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/layout.py
+#	new file:   src/command_modules/azure-cli-interactive/azclishell/progress.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/telemetry.py
+#	modified:   src/command_modules/azure-cli-interactive/azclishell/util.py
+#	modified:   src/command_modules/azure-cli-interactive/azure/cli/command_modules/interactive/__init__.py
+#	modified:   src/command_modules/azure-cli-interactive/setup.py
+#	modified:   src/command_modules/azure-cli-interactive/tests/test_completion.py
+#	new file:   src/command_modules/azure-cli-interactive/tests/test_feedback.py
+#	new file:   src/command_modules/azure-cli-interactive/tests/test_shell_progress.py
+#	new file:   src/command_modules/azure-cli-interactive/tests/test_telemetry.py
+#	modified:   src/command_modules/azure-cli-iot/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-iot/azure/cli/command_modules/iot/__init__.py
+#	modified:   src/command_modules/azure-cli-iot/azure/cli/command_modules/iot/commands.py
+#	modified:   src/command_modules/azure-cli-iot/azure/cli/command_modules/iot/custom.py
+#	modified:   src/command_modules/azure-cli-iot/azure/cli/command_modules/iot/sas_token_auth.py
+#	modified:   src/command_modules/azure-cli-iot/setup.py
+#	renamed:    src/command_modules/azure-cli-iot/tests/recordings/test_iot_hub.yaml -> src/command_modules/azure-cli-iot/tests/recordings/latest/test_iot_hub.yaml
+#	modified:   src/command_modules/azure-cli-keyvault/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/__init__.py
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/_command_type.py
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/_help.py
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/_params.py
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/_validators.py
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/commands.py
+#	modified:   src/command_modules/azure-cli-keyvault/azure/cli/command_modules/keyvault/custom.py
+#	modified:   src/command_modules/azure-cli-keyvault/setup.py
+#	new file:   src/command_modules/azure-cli-keyvault/tests/recordings/latest/test_keyvault_certificate.yaml
+#	new file:   src/command_modules/azure-cli-keyvault/tests/recordings/latest/test_keyvault_key.yaml
+#	new file:   src/command_modules/azure-cli-keyvault/tests/recordings/latest/test_keyvault_mgmt.yaml
+#	new file:   src/command_modules/azure-cli-keyvault/tests/recordings/latest/test_keyvault_secret.yaml
+#	new file:   src/command_modules/azure-cli-keyvault/tests/recordings/latest/test_keyvault_softdelete.yaml
+#	deleted:    src/command_modules/azure-cli-keyvault/tests/recordings/test_keyvault_certificate.yaml
+#	deleted:    src/command_modules/azure-cli-keyvault/tests/recordings/test_keyvault_key.yaml
+#	deleted:    src/command_modules/azure-cli-keyvault/tests/recordings/test_keyvault_mgmt.yaml
+#	deleted:    src/command_modules/azure-cli-keyvault/tests/recordings/test_keyvault_secret.yaml
+#	modified:   src/command_modules/azure-cli-keyvault/tests/test_keyvault_commands.py
+#	modified:   src/command_modules/azure-cli-lab/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/__init__.py
+#	new file:   src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/_help.py
+#	modified:   src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/commands.py
+#	modified:   src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/custom.py
+#	deleted:    src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/help.py
+#	modified:   src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/params.py
+#	modified:   src/command_modules/azure-cli-lab/azure/cli/command_modules/lab/validators.py
+#	modified:   src/command_modules/azure-cli-lab/setup.py
+#	renamed:    src/command_modules/azure-cli-lab/tests/recordings/test_lab_environment_mgmt.yaml -> src/command_modules/azure-cli-lab/tests/recordings/latest/test_lab_environment_mgmt.yaml
+#	new file:   src/command_modules/azure-cli-lab/tests/recordings/latest/test_lab_gallery_vm_mgmt.yaml
+#	deleted:    src/command_modules/azure-cli-lab/tests/recordings/test_lab_gallery_vm_mgmt.yaml
+#	modified:   src/command_modules/azure-cli-lab/tests/test_lab.py
+#	modified:   src/command_modules/azure-cli-monitor/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/__init__.py
+#	modified:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/_client_factory.py
+#	new file:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/_exception_handler.py
+#	new file:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/_help.py
+#	new file:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/actions.py
+#	modified:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/commands.py
+#	modified:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/custom.py
+#	deleted:    src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/help.py
+#	modified:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/params.py
+#	deleted:    src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/tests/test_custom.py
+#	modified:   src/command_modules/azure-cli-monitor/azure/cli/command_modules/monitor/validators.py
+#	modified:   src/command_modules/azure-cli-monitor/setup.py
+#	new file:   src/command_modules/azure-cli-monitor/tests/recordings/latest/test_monitor.yaml
+#	new file:   src/command_modules/azure-cli-monitor/tests/test_custom.py
+#	new file:   src/command_modules/azure-cli-monitor/tests/test_monitor.py
+#	modified:   src/command_modules/azure-cli-network/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/__init__.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_client_factory.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_format.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_help.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_params.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_template_builder.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_util.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/_validators.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/commands.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/custom.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/zone_file/__init__.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/zone_file/configs.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/zone_file/exceptions.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/zone_file/make_zone_file.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/zone_file/parse_zone_file.py
+#	modified:   src/command_modules/azure-cli-network/azure/cli/command_modules/network/zone_file/record_processors.py
+#	modified:   src/command_modules/azure-cli-network/setup.py
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_multi_id_show.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_multi_id_show.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_active_active_cross_premise_connection.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_active_active_cross_premise_connection.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_active_active_vnet_vnet_connection.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_active_active_vnet_vnet_connection.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_no_wait.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_no_wait.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_waf.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_waf.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_waf_config.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_waf_config.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_with_defaults.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_with_defaults.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_with_existing_subnet.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_with_existing_subnet.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_with_private_ip.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_with_private_ip.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_app_gateway_with_public_ip.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_app_gateway_with_public_ip.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_dns.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_dns.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_dns_zone_import_export.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_dns_zone_import_export.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_express_route.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_load_balancer.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_load_balancer.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_load_balancer_ip_config.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_load_balancer_subresources.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_load_balancer_subresources.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_local_gateway.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_nic.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_nic_convenience_commands.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_nic_subresources.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_nic_subresources.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_nsg.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_nsg.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_public_ip.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_public_ip.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_route_table_operation.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_route_table_operation.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_subnet_set.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_subnet_set.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_traffic_manager.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_traffic_manager.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_usage_list.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_usage_list.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_vnet.yaml
+#	renamed:    src/command_modules/azure-cli-network/tests/recordings/test_network_vnet_peering.yaml -> src/command_modules/azure-cli-network/tests/recordings/latest/test_network_vnet_peering.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_vpn_gateway.yaml
+#	new file:   src/command_modules/azure-cli-network/tests/recordings/latest/test_network_watcher.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_express_route.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_load_balancer_ip_config.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_local_gateway.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_nic.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_nic_convenience_commands.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_vnet.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_vpn_gateway.yaml
+#	deleted:    src/command_modules/azure-cli-network/tests/recordings/test_network_watcher.yaml
+#	modified:   src/command_modules/azure-cli-network/tests/test_dns_zone_import.py
+#	modified:   src/command_modules/azure-cli-network/tests/test_network_commands.py
+#	modified:   src/command_modules/azure-cli-network/tests/test_network_unit_tests.py
+#	modified:   src/command_modules/azure-cli-profile/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/__init__.py
+#	modified:   src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/_help.py
+#	modified:   src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/_params.py
+#	modified:   src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/commands.py
+#	modified:   src/command_modules/azure-cli-profile/azure/cli/command_modules/profile/custom.py
+#	modified:   src/command_modules/azure-cli-profile/setup.py
+#	modified:   src/command_modules/azure-cli-rdbms/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-rdbms/azure/cli/command_modules/rdbms/__init__.py
+#	new file:   src/command_modules/azure-cli-rdbms/azure/cli/command_modules/rdbms/_help.py
+#	modified:   src/command_modules/azure-cli-rdbms/azure/cli/command_modules/rdbms/_util.py
+#	modified:   src/command_modules/azure-cli-rdbms/azure/cli/command_modules/rdbms/commands.py
+#	modified:   src/command_modules/azure-cli-rdbms/azure/cli/command_modules/rdbms/custom.py
+#	deleted:    src/command_modules/azure-cli-rdbms/azure/cli/command_modules/rdbms/help.py
+#	modified:   src/command_modules/azure-cli-rdbms/setup.py
+#	new file:   src/command_modules/azure-cli-rdbms/tests/__init__.py
+#	new file:   src/command_modules/azure-cli-rdbms/tests/recordings/latest/test_mysql_proxy_resources_mgmt.yaml
+#	new file:   src/command_modules/azure-cli-rdbms/tests/recordings/latest/test_mysql_server_mgmt.yaml
+#	new file:   src/command_modules/azure-cli-rdbms/tests/recordings/latest/test_postgres_proxy_resources_mgmt.yaml
+#	new file:   src/command_modules/azure-cli-rdbms/tests/recordings/latest/test_postgres_server_mgmt.yaml
+#	new file:   src/command_modules/azure-cli-rdbms/tests/test_rdbms_commands.py
+#	modified:   src/command_modules/azure-cli-redis/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-redis/azure/cli/command_modules/redis/__init__.py
+#	modified:   src/command_modules/azure-cli-redis/azure/cli/command_modules/redis/_help.py
+#	modified:   src/command_modules/azure-cli-redis/azure/cli/command_modules/redis/_params.py
+#	modified:   src/command_modules/azure-cli-redis/azure/cli/command_modules/redis/custom.py
+#	modified:   src/command_modules/azure-cli-redis/setup.py
+#	renamed:    src/command_modules/azure-cli-redis/tests/recordings/test_create_redis_cache.yaml -> src/command_modules/azure-cli-redis/tests/recordings/latest/test_create_redis_cache.yaml
+#	modified:   src/command_modules/azure-cli-resource/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/__init__.py
+#	modified:   src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/_help.py
+#	modified:   src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/_params.py
+#	modified:   src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/_validators.py
+#	modified:   src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/commands.py
+#	modified:   src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/custom.py
+#	modified:   src/command_modules/azure-cli-resource/setup.py
+#	deleted:    src/command_modules/azure-cli-resource/tests/crossrg_deploy_parameters.json
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_crossrg_deployment.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_feature_list.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_feature_list.yaml
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_group_deployment.yaml
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_group_deployment_no_wait.yaml
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_group_deployment_thru_uri.yaml
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_list_locks.yaml
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_lock_create_list_delete.yaml
+#	new file:   src/command_modules/azure-cli-resource/tests/recordings/latest/test_lock_create_list_delete_resource_group.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_managedapp.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_managedapp.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_managedappdef.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_managedappdef.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_provider_operation.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_provider_operation.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_provider_registration.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_provider_registration.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_create.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_create.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_group.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_group.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_group_no_wait.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_group_no_wait.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_id_scenario.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_id_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_move.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_move.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_policy.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_policy.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_resource_scenario.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_resource_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-resource/tests/recordings/test_tag_scenario.yaml -> src/command_modules/azure-cli-resource/tests/recordings/latest/test_tag_scenario.yaml
+#	deleted:    src/command_modules/azure-cli-resource/tests/recordings/test_crossrgdeployment.yaml
+#	deleted:    src/command_modules/azure-cli-resource/tests/recordings/test_group_deployment.yaml
+#	deleted:    src/command_modules/azure-cli-resource/tests/recordings/test_group_deployment_no_wait.yaml
+#	deleted:    src/command_modules/azure-cli-resource/tests/recordings/test_group_deployment_thru_uri.yaml
+#	modified:   src/command_modules/azure-cli-resource/tests/simple_deploy_parameters.json
+#	new file:   src/command_modules/azure-cli-resource/tests/test-object.json
+#	new file:   src/command_modules/azure-cli-resource/tests/test-params.json
+#	new file:   src/command_modules/azure-cli-resource/tests/test-template.json
+#	modified:   src/command_modules/azure-cli-resource/tests/test_custom.py
+#	new file:   src/command_modules/azure-cli-resource/tests/test_locks.py
+#	modified:   src/command_modules/azure-cli-resource/tests/test_resource.py
+#	modified:   src/command_modules/azure-cli-resource/tests/test_resource_validators.py
+#	modified:   src/command_modules/azure-cli-role/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-role/azure/cli/command_modules/role/__init__.py
+#	modified:   src/command_modules/azure-cli-role/azure/cli/command_modules/role/_help.py
+#	modified:   src/command_modules/azure-cli-role/azure/cli/command_modules/role/_params.py
+#	modified:   src/command_modules/azure-cli-role/azure/cli/command_modules/role/_validators.py
+#	modified:   src/command_modules/azure-cli-role/azure/cli/command_modules/role/commands.py
+#	modified:   src/command_modules/azure-cli-role/azure/cli/command_modules/role/custom.py
+#	modified:   src/command_modules/azure-cli-role/setup.py
+#	renamed:    src/command_modules/azure-cli-role/tests/recordings/test_application_set_scenario.yaml -> src/command_modules/azure-cli-role/tests/recordings/latest/test_application_set_scenario.yaml
+#	new file:   src/command_modules/azure-cli-role/tests/recordings/latest/test_create_for_rbac_with_cert.yaml
+#	new file:   src/command_modules/azure-cli-role/tests/recordings/latest/test_create_for_rbac_with_secret.yaml
+#	renamed:    src/command_modules/azure-cli-role/tests/recordings/test_graph_group_scenario.yaml -> src/command_modules/azure-cli-role/tests/recordings/latest/test_graph_group_scenario.yaml
+#	new file:   src/command_modules/azure-cli-role/tests/recordings/latest/test_revoke_sp_for_rbac.yaml
+#	renamed:    src/command_modules/azure-cli-role/tests/recordings/test_role_assignment_scenario.yaml -> src/command_modules/azure-cli-role/tests/recordings/latest/test_role_assignment_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-role/tests/recordings/test_role_create_scenario.yaml -> src/command_modules/azure-cli-role/tests/recordings/latest/test_role_create_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-role/tests/recordings/test_sp_create_scenario.yaml -> src/command_modules/azure-cli-role/tests/recordings/latest/test_sp_create_scenario.yaml
+#	deleted:    src/command_modules/azure-cli-role/tests/recordings/test_create_for_rbac_with_cert.yaml
+#	deleted:    src/command_modules/azure-cli-role/tests/recordings/test_create_for_rbac_with_secret.yaml
+#	modified:   src/command_modules/azure-cli-role/tests/test_graph.py
+#	modified:   src/command_modules/azure-cli-role/tests/test_role.py
+#	modified:   src/command_modules/azure-cli-sf/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/__init__.py
+#	modified:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/_factory.py
+#	modified:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/_help.py
+#	modified:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/_params.py
+#	modified:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/commands.py
+#	new file:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/config.py
+#	modified:   src/command_modules/azure-cli-sf/azure/cli/command_modules/sf/custom.py
+#	modified:   src/command_modules/azure-cli-sf/setup.py
+#	new file:   src/command_modules/azure-cli-sf/tests/__init__.py
+#	deleted:    src/command_modules/azure-cli-sf/tests/manual_scenario_sf_commands.py
+#	deleted:    src/command_modules/azure-cli-sf/tests/manual_sf_commands.py
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/app_health_returns_aggregated_and_name_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/app_list_returns_items_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/app_type_returns_none_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/cluster_code_version_returns_not_empty_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/cluster_config_version_returns_not_empty_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/cluster_health_returns_aggregated_states_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/cluster_manifest_returns_non_empty_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/compose_list_returns_empty_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/node_list_returns_non_empty_ids_and_names_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/node_system_service_package_list_returns_non_empty_list_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/node_system_service_replica_list_returns_non_empty_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/node_system_type_list_returns_non_empty_list_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/partition_name_system_service_returns_correct_name_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/replica_health_system_service_returns_aggregated_state_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/service_application_name_returns_correct_system_name_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/service_description_returns_correct_kind_and_name_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/service_health_returns_system_services_aggregated_state_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/service_list_returns_system_services_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/system_partition_health_returns_aggregated_state_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/recordings/latest/system_partition_info_returns_service_kind_test.yaml
+#	new file:   src/command_modules/azure-cli-sf/tests/test_sf_app.py
+#	new file:   src/command_modules/azure-cli-sf/tests/test_sf_node.py
+#	new file:   src/command_modules/azure-cli-sf/tests/test_sf_scenarios.py
+#	new file:   src/command_modules/azure-cli-sf/tests/test_sf_select.py
+#	new file:   src/command_modules/azure-cli-sf/tests/test_sf_service.py
+#	modified:   src/command_modules/azure-cli-sql/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/__init__.py
+#	new file:   src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/_help.py
+#	modified:   src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/_util.py
+#	modified:   src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/commands.py
+#	modified:   src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/custom.py
+#	deleted:    src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/help.py
+#	modified:   src/command_modules/azure-cli-sql/azure/cli/command_modules/sql/params.py
+#	modified:   src/command_modules/azure-cli-sql/setup.py
+#	new file:   src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_capabilities.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_db_copy.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_db_copy.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_db_import_export_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_db_import_export_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_db_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_db_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_db_replica_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_db_replica_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_db_restore.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_db_restore.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_db_security_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_db_security_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_dw_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_dw_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_elastic_pools_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_elastic_pools_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_firewall_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_firewall_mgmt.yaml
+#	renamed:    src/command_modules/azure-cli-sql/tests/recordings/test_sql_server_mgmt.yaml -> src/command_modules/azure-cli-sql/tests/recordings/latest/test_sql_server_mgmt.yaml
+#	modified:   src/command_modules/azure-cli-sql/tests/test_sql_commands.py
+#	modified:   src/command_modules/azure-cli-storage/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/__init__.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/_factory.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/_format.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/_help.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/_params.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/_validators.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/blob.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/commands.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/custom.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/file.py
+#	new file:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/services_wrapper.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/storage_url_helpers.py
+#	modified:   src/command_modules/azure-cli-storage/azure/cli/command_modules/storage/util.py
+#	modified:   src/command_modules/azure-cli-storage/setup.py
+#	new file:   src/command_modules/azure-cli-storage/tests/recordings/2017-03-09-profile-preview/test_storage_file_copy_scenario.yaml
+#	new file:   src/command_modules/azure-cli-storage/tests/recordings/2017-03-09-profile-preview/test_storage_file_main_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_create_account_sas.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_create_account_sas.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_create_storage_account.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_create_storage_account.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_list_locations.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_list_locations.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_list_storage_accounts.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_list_storage_accounts.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_logging_operations.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_logging_operations.yaml
+#	new file:   src/command_modules/azure-cli-storage/tests/recordings/latest/test_metrics_operations.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_renew_account_key.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_renew_account_key.yaml
+#	new file:   src/command_modules/azure-cli-storage/tests/recordings/latest/test_show_usage.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_container_operations.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_container_operations.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_incremental_copy.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_incremental_copy.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_lease_operations.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_lease_operations.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_metadata_operations.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_metadata_operations.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_snapshot_operations.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_snapshot_operations.yaml
+#	new file:   src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_upload_midsize_file.yaml
+#	new file:   src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_blob_upload_small_file.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_container_acl_scenarios.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_container_acl_scenarios.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_cors_scenario.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_cors_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_file_copy_scenario.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_file_copy_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_file_main_scenario.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_file_main_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_queue_general_scenario.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_queue_general_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_queue_stats.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_queue_stats.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_share_acl_scenarios.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_share_acl_scenarios.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_table_main_scenario.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_table_main_scenario.yaml
+#	renamed:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_table_stats.yaml -> src/command_modules/azure-cli-storage/tests/recordings/latest/test_storage_table_stats.yaml
+#	deleted:    src/command_modules/azure-cli-storage/tests/recordings/test_metrics_operations.yaml
+#	deleted:    src/command_modules/azure-cli-storage/tests/recordings/test_show_usage.yaml
+#	deleted:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_upload_midsize_file.yaml
+#	deleted:    src/command_modules/azure-cli-storage/tests/recordings/test_storage_blob_upload_small_file.yaml
+#	modified:   src/command_modules/azure-cli-storage/tests/storage_test_util.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_account_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_acl_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_blob_live_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_blob_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_cors_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_queue_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_table_scenarios.py
+#	modified:   src/command_modules/azure-cli-storage/tests/test_storage_validators.py
+#	modified:   src/command_modules/azure-cli-taskhelp/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-taskhelp/azure/cli/command_modules/taskhelp/__init__.py
+#	modified:   src/command_modules/azure-cli-taskhelp/azure/cli/command_modules/taskhelp/_help.py
+#	modified:   src/command_modules/azure-cli-taskhelp/azure/cli/command_modules/taskhelp/commands.py
+#	modified:   src/command_modules/azure-cli-taskhelp/setup.py
+#	modified:   src/command_modules/azure-cli-vm/HISTORY.rst
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/__init__.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_actions.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_client_factory.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_help.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_params.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_template_builder.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_validators.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/_vm_diagnostics_templates.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/commands.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/custom.py
+#	modified:   src/command_modules/azure-cli-vm/azure/cli/command_modules/vm/disk_encryption.py
+#	modified:   src/command_modules/azure-cli-vm/setup.py
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_custom_image.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_diagnostics_extension_install.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_managed_disk.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_availset.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_availset.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_boot_diagnostics.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_boot_diagnostics.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_by_attach_os_and_data_disks.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_by_attach_unmanaged_os_and_data_disks.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_custom_data.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_custom_data.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_custom_ip.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_custom_ip.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_existing_ids_options.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_existing_ids_options.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_existing_options.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_existing_options.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_from_unmanaged_disk.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_from_unmanaged_disk.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_linux_secrets.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_multi_nics.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_multi_nics.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_no_wait.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_no_wait.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_none_options.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_none_options.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_state_modifications.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_state_modifications.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_ubuntu.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_windows_secrets.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_with_specialized_unmanaged_disk.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_create_with_specialized_unmanaged_disk.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_data_unmanaged_disk.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_data_unmanaged_disk.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_disk_attach_detach.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_extension.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_extension_image_search.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_extension_image_search.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_generalize.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_generalize.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_image_list_by_alias.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_image_list_by_alias.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_image_list_offers.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_image_list_offers.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_image_list_publishers.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_image_list_publishers.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_image_list_skus.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_image_list_skus.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_image_show.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_image_show.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_images_list_thru_services.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_images_list_thru_services.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_machine_extension_image.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_machine_extension_image.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_open_port.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_show_list_sizes_list_ip_addresses.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_show_list_sizes_list_ip_addresses.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_size_list.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_size_list.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_usage.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vm_usage.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_and_modify.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_and_modify.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_custom_data.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_custom_data.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_existing_ids_options.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_existing_ids_options.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_existing_options.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_existing_options.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_idempotent.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_linux_secrets.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_none_options.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_options.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_options.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_create_with_app_gateway.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_extension.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_extension.yaml
+#	renamed:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_nics.yaml -> src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_nics.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_vmss_vms.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/latest/test_windows_vm_license_type.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_diagnostics_extension_install.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_managed_disk.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_linux_secrets.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_ubuntu.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_create_windows_secrets.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_disk_attach_detach.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_extension.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vm_open_port.yaml
+#	new file:   src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_idempotent.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_linux_secrets.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_create_none_options.yaml
+#	deleted:    src/command_modules/azure-cli-vm/tests/recordings/test_vmss_vms.yaml
+#	modified:   src/command_modules/azure-cli-vm/tests/sample-public.json
+#	modified:   src/command_modules/azure-cli-vm/tests/test_custom_vm_commands.py
+#	modified:   src/command_modules/azure-cli-vm/tests/test_vm_actions.py
+#	modified:   src/command_modules/azure-cli-vm/tests/test_vm_commands.py
+#	modified:   src/command_modules/azure-cli-vm/tests/test_vm_defaults.py
+#	modified:   src/command_modules/azure-cli-vm/tests/test_vm_parameters.py
+#
+# Untracked files:
+#	ubuntu-py2-env/
+#	ubuntu-py3-env/
+#
+

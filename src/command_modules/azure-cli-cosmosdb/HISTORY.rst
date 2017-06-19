@@ -4,7 +4,7 @@ Release History
 ===============
 
 unreleased
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 
 * Added Support for Collection Default TTL.
 
