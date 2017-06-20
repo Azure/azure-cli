@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import shutil
+import os
+import tempfile
 from mock import patch
 from azure.cli.testsdk import (
     ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck
@@ -53,6 +56,12 @@ class ServiceFabricScenarioTests(ScenarioTest):
 
         self.cmd("az sf application type", checks=[NoneCheck()])
 
+    def valid_application_upload_path_returns_absolute_path_test(self):
+        import azure.cli.command_modules.sf.custom as sf_c
+        temp_dir_path = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(temp_dir_path, ignore_errors=True))
+        self.assertTrue(os.path.isabs(sf_c.validate_app_path(temp_dir_path)))
+
     @patch("azure.cli.command_modules.sf.config.SfConfigParser")
     def single_folder_large_file_upload_test(self, mock_config_parser):
         instance = mock_config_parser.return_value
@@ -61,7 +70,16 @@ class ServiceFabricScenarioTests(ScenarioTest):
         instance.connection_endpoint.return_value = test_endpoint
         instance.cert_info.return_value = False
 
-        self.cmd("az sf application upload --path {0}".format("derp"), checks=[NoneCheck()])
+        # Specifically need a large temporary file in a temporary directory
+        temp_app_dir = tempfile.mkdtemp()
+        fd, file_path = tempfile.mkstemp(dir=temp_app_dir)
+        os.close(fd)
+        with open(file_path, mode='r+b') as f:
+            chunk = bytearray([0] * 1024)
+            for _ in range(1024):
+                f.write(chunk)
+
+        self.cmd("az sf application upload --path {0} --show-progress".format(temp_app_dir), checks=[NoneCheck()])
 
     # Cluster tests
 
