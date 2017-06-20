@@ -5,12 +5,13 @@
 from __future__ import print_function
 import pkgutil
 
-import argparse
 import os
 import sys
+import sets
 import json
-import yaml
 from importlib import import_module
+
+import yaml
 
 from azure.cli.core.application import APPLICATION, Application
 from azure.cli.core.application import Configuration
@@ -42,30 +43,30 @@ def dump_no_help(modules):
     with open(WHITE_DATA_FILE, 'r') as white:
         white_data = json.load(white)
 
-    white_list_commands = white_data.get('commands', [])
-    white_list_subgroups = white_data.get('subgroups', [])
+    white_list_commands = sets.Set(white_data.get('commands', []))
+    white_list_subgroups = sets.Set(white_data.get('subgroups', []))
     white_list_parameters = white_data.get('parameters', {})
 
-    command_list = []
-    subgroups_list = []
+    command_list = sets.Set()
+    subgroups_list = sets.Set()
     parameters = {}
     for cmd in cmd_table:
         if not cmd_table[cmd].description and cmd not in helps and cmd not in white_list_commands:
-            command_list.append(cmd)
+            command_list.add(cmd)
             exit_val = 1
         group_name = " ".join(cmd.split()[:-1])
         if group_name not in helps:
             if group_name not in subgroups_list and group_name not in white_list_subgroups:
                 exit_val = 1
-                subgroups_list.append(group_name)
+                subgroups_list.add(group_name)
 
-        param_list = []
+        param_list = sets.Set()
         for key in cmd_table[cmd].arguments:
             name = cmd_table[cmd].arguments[key].name
             if not cmd_table[cmd].arguments[key].type.settings.get('help') and \
                     name not in white_list_parameters.get(cmd, []):
                 exit_val = 1
-                param_list.append(name)
+                param_list.add(name)
         if param_list:
             parameters[cmd] = param_list
 
