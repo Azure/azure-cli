@@ -28,17 +28,19 @@ resource_parent_type = CliArgumentType(required=False, options_list=('--parent',
                                        help="The parent path (Ex: 'resA/myA/resB/myB')")
 _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 register_cli_argument('resource', 'no_wait', no_wait_type)
-register_cli_argument('resource', 'resource_name', resource_name_type, id_part='name')
-register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
 register_cli_argument('resource', 'resource_id', ignore_type)
-register_cli_argument('resource', 'resource_provider_namespace', resource_namespace_type, id_part='namespace')
-register_cli_argument('resource', 'resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list, id_part='type')
-register_cli_argument('resource', 'parent_resource_path', resource_parent_type, id_part='parent')
+register_cli_argument('resource', 'resource_name', resource_name_type, id_part='resource_name')
+register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
+register_cli_argument('resource', 'resource_provider_namespace', resource_namespace_type, id_part='resource_namespace')
+register_cli_argument('resource', 'resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list, id_part='resource_type')
+register_cli_argument('resource', 'parent_resource_path', resource_parent_type, id_part='resource_parent')
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
+
+register_cli_argument('resource create', 'resource_id', options_list=['--id'], help='Resource ID.', action=None)
 register_cli_argument('resource create', 'properties', options_list=('--properties', '-p'),
                       help='a JSON-formatted string containing resource properties')
 register_cli_argument('resource create', 'is_full_object', action='store_true',

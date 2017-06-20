@@ -89,11 +89,27 @@ def deployment_validate_table_format(result):
     return result
 
 
-def _build_parent_string(kwargs):
+def _populate_alternate_kwargs(kwargs):
+    """ Translates the parsed arguments into a format used by generic ARM commands
+    such as the resource and lock commands. """
     parent = ''
     has_child = all(kwargs[x] is not None for x in ['child_name', 'child_type'])
     has_grandchild = all(kwargs[x] is not None for x in ['grandchild_name', 'grandchild_type'])
-    return parent
+    resource_namespace = kwargs['namespace']
+    resource_type = kwargs['grandchild_type'] or kwargs['child_type'] or kwargs['type']
+    resource_name = kwargs['grandchild_name'] or kwargs['child_name'] or kwargs['name']
+    if has_grandchild:
+        parent = '{type}/{name}/providers/{child_namespace}/{child_type}/{child_name}/providers/{grandchild_namespace}'.format(**kwargs)  # pylint: disable=line-too-long
+    elif has_child:
+        parent = '{type}/{name}/providers/{child_namespace}'.format(**kwargs)
+    parent = parent.replace('providers/None', '')
+    parent = '{}/'.format(parent) if parent and not parent.endswith('/') else parent
+
+    kwargs['resource_parent'] = parent
+    kwargs['resource_namespace'] = resource_namespace
+    kwargs['resource_type'] = resource_type
+    kwargs['resource_name'] = resource_name
+    return kwargs
 
 
 def resource_id(**kwargs):
@@ -136,21 +152,23 @@ def parse_resource_id(rid):
         - subscription          Subscription id
         - resource_group        Name of resource group
         - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                  Type of the resource (i.e. virtualMachines)
-        - name                  Name of the resource (or parent if child_name is also specified)
+        - type                  Type of the root resource (i.e. virtualMachines)
+        - name                  Name of the root resource
         - child_namespace       Namespace for the child resoure (optional)
         - child_type            Type of the child resource
         - child_name            Name of the child resource
         - grandchild_namespace  Namespace for the grandchild resource (optional)
         - grandchild_type       Type of the grandchild resource
         - grandchild_name       Name of the grandchild resource
-        - parent                Computed helper of everything between the namespace and right-most
-                                resource type and name.
+        - resource_parent       Computed parent in the following pattern: providers/{namespace}/{parent}/{type}/{name}
+        - resource_namespace    Same as namespace. Note that this may be different than the target resource's namespace.
+        - resource_type         Type of the target resource (not the parent)
+        - resource_name         Name of the target resource (not the parent)
     '''
     m = regex.match(rid)
     if m:
         result = m.groupdict()
-        result['parent'] = _build_parent_string(result)
+        result = _populate_alternate_kwargs(result)
     else:
         result = dict(name=rid)
 
@@ -223,7 +241,8 @@ def add_id_parameters(command_table):
         return SplitAction
 
     def command_loaded_handler(command):
-        if 'name' not in [arg.id_part for arg in command.arguments.values() if arg.id_part]:
+        id_parts = [arg.id_part for arg in command.arguments.values() if arg.id_part]
+        if 'name' not in id_parts and 'resource_name' not in id_parts:
             # Only commands with a resource name are candidates for an id parameter
             return
         if command.name.split()[-1] == 'create':
