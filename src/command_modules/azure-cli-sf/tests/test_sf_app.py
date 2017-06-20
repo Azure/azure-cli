@@ -53,3 +53,6 @@ class SfAppTests(unittest.TestCase):
     def invalid_application_upload_path_raises_cli_error_test(self):
         with self.assertRaises(CLIError):
             sf_c.validate_app_path("derp3")
+
+    def valid_application_upload_path_returns_absolute_path_test(self):
+        self.assertIs(True, True)

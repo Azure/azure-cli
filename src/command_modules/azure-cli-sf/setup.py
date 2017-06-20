@@ -34,7 +34,8 @@ DEPENDENCIES = [
     'azure-servicefabric==5.6.130',
     'azure-cli-core',
     'adal>=0.4.3',
-    'mock>=2.0.0'
+    'mock>=2.0.0',
+    'azure-devtools>=0.4.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
