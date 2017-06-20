@@ -76,7 +76,7 @@ class ServiceFabricScenarioTests(ScenarioTest):
         os.close(fd)
         with open(file_path, mode='r+b') as f:
             chunk = bytearray([0] * 1024)
-            for _ in range(1024):
+            for _ in range(5000):
                 f.write(chunk)
 
         self.cmd("az sf application upload --path {0} --show-progress".format(temp_app_dir), checks=[NoneCheck()])
