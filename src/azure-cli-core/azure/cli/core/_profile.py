@@ -225,6 +225,21 @@ class Profile(object):
         new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
         default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
+        from azure.cli.core.profiles._shared import get_client_class
+        from azure.cli.core.profiles import get_api_version, ResourceType
+        from azure.cli.core._debug import change_ssl_cert_verification
+        client_type = get_client_class(ResourceType.MGMT_RESOURCE_RESOURCES)
+        api_version = get_api_version(ResourceType.MGMT_RESOURCE_RESOURCES)
+        cred, subscription_id, _ = self.get_login_credentials(subscription_id=default_sub_id)
+        client = change_ssl_cert_verification(client_type(cred, api_version=api_version,
+                                                        subscription_id=subscription_id,
+                                                        base_url=CLOUD.endpoints.resource_manager))
+        p = list(client.providers.list(expand='metadata'))
+        for a_provider in p:
+            if a_provider.namespace.endswith('.Storage'):
+                for rt in a_provider.resource_types:
+                    print(rt.properties)
+        # print(list(list(client.providers.list(expand=True))[0].resource_types))
         set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
