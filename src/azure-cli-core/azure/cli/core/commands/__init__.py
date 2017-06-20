@@ -210,7 +210,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         correlation_id = None
 
         az_logger = azlogging.get_az_logger()
-        is_verbose = any(handler.level == logs.INFO for handler in az_logger.handlers)
+        is_verbose = any(handler.level <= logs.INFO for handler in az_logger.handlers)
 
         while not poller.done():
             self.progress_controller.add(message='Running')
