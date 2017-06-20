@@ -190,12 +190,12 @@ def acr_update_set(client,
     """
     registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
 
-    if parameters.storage_account is not None and registry.sku.name != SkuTier.basic.value:  # pylint: disable=no-member
+    if parameters.storage_account and registry.sku.name != SkuTier.basic.value:  # pylint: disable=no-member
         parameters.storage_account = None
         logger.warning("'%s' SKU are managed registries. " +
                        "The specified storage account will be ignored.", registry.sku.name)  # pylint: disable=no-member
 
-    if parameters.storage_account is not None and isinstance(parameters.storage_account, dict):
+    if parameters.storage_account and isinstance(parameters.storage_account, dict):
         if 'name' not in parameters.storage_account:
             raise CLIError(
                 "Storage account name is required to update " +
@@ -216,18 +216,17 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
     """
     try:
         call(["docker", "ps"], stdout=PIPE, stderr=PIPE)
-    except Exception as e:
+    except:
         raise CLIError("Please verify whether docker is installed and running properly")
 
     login_server = get_registry_login_server_by_name(registry_name, resource_group_name)
 
     # 1. if username was specified, verify that password was also specified
-    if username:
-        if not password:
-            try:
-                password = prompt_pass(msg='Password: ')
-            except NoTTYException:
-                raise CLIError('Please specify both username and password in non-interactive mode.')
+    if username and not password:
+        try:
+            password = prompt_pass(msg='Password: ')
+        except NoTTYException:
+            raise CLIError('Please specify both username and password in non-interactive mode.')
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
     if not password:

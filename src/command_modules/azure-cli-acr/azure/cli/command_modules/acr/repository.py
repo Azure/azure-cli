@@ -96,7 +96,7 @@ def _obtain_data_from_registry(login_server,
 
                 if response.status_code == 200:
                     result = response.json()[resultIndex]
-                    if result is not None:
+                    if result:
                         resultList += response.json()[resultIndex]
                     if 'link' in response.headers and response.headers['link']:
                         linkHeader = response.headers['link']

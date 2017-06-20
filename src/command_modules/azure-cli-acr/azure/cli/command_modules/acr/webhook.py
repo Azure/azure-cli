@@ -19,8 +19,7 @@ from ._utils import (
 WEBHOOKS_NOT_SUPPORTED = 'Webhooks are not supported for registries in Basic SKU.'
 
 
-def acr_webhook_list(registry_name,
-                     resource_group_name=None):
+def acr_webhook_list(registry_name, resource_group_name=None):
     """Lists all the webhooks for the specified container registry."
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group

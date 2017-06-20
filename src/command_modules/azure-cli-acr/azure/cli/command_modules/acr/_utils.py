@@ -56,7 +56,7 @@ def get_resource_group_name_by_registry_name(registry_name,
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
-    if resource_group_name is None:
+    if not resource_group_name:
         arm_resource = _arm_get_resource_by_name(registry_name, ACR_RESOURCE_TYPE)
         resource_group_name = get_resource_group_name_by_resource_id(arm_resource.id)
     return resource_group_name
@@ -76,7 +76,7 @@ def get_resource_group_name_by_storage_account_name(storage_account_name,
     :param str storage_account_name: The name of storage account
     :param str resource_group_name: The name of resource group
     """
-    if resource_group_name is None:
+    if not resource_group_name:
         arm_resource = _arm_get_resource_by_name(storage_account_name, STORAGE_RESOURCE_TYPE)
         resource_group_name = get_resource_group_name_by_resource_id(arm_resource.id)
     return resource_group_name
@@ -291,9 +291,9 @@ def registry_sku_validation(registry_name, resource_group_name=None, message=Non
     arm_resource = _arm_get_resource_by_name(registry_name, ACR_RESOURCE_TYPE)
 
     if arm_resource.sku.tier == SkuTier.basic.value:
-        raise CLIError(message if message else "This operation is not supported for registries in Basic SKU.")
+        raise CLIError(message or "This operation is not supported for registries in Basic SKU.")
 
-    if resource_group_name is None:
+    if not resource_group_name:
         resource_group_name = get_resource_group_name_by_resource_id(arm_resource.id)
 
     return arm_resource, resource_group_name
