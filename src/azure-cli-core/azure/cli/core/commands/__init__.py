@@ -15,6 +15,7 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+import logging as logs
 
 import six
 from six import string_types, reraise
@@ -146,7 +147,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from azure.monitor import MonitorClient
 
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
-
             formatter = "eventTimestamp ge {}"
 
             end_time = datetime.datetime.utcnow()
@@ -208,6 +208,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         correlation_message = ''
         self.progress_controller.begin()
         correlation_id = None
+
+        base = azlogging.get_az_logger()
+        is_verbose = any(han.level == logs.INFO for han in base.handlers)
+
         while not poller.done():
             self.progress_controller.add(message='Running')
             try:
@@ -218,7 +222,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
-            self._template_progress(correlation_id)
+            if is_verbose:
+                self._template_progress(correlation_id)
             try:
                 self._delay()
             except KeyboardInterrupt:

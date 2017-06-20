@@ -19,7 +19,6 @@ logger = azlogging.get_az_logger(__name__)
 def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
     azlogging.configure_logging(args)
     logger.debug('Command arguments %s', args)
-
     if args and (args[0] == '--version' or args[0] == '-v'):
         show_version_info_exit(file)
 
