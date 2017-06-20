@@ -91,6 +91,8 @@ def deployment_validate_table_format(result):
 
 def _build_parent_string(kwargs):
     parent = ''
+    has_child = all(kwargs[x] is not None for x in ['child_name', 'child_type'])
+    has_grandchild = all(kwargs[x] is not None for x in ['grandchild_name', 'grandchild_type'])
     return parent
 
 
