@@ -130,12 +130,15 @@ class AzCompleter(Completer):
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
-        result = param.lower().startswith(words.lower()) and param.lower() != words.lower()
-        result = result and param not in text_before_cursor.split() and not text_before_cursor[-1].isspace()
+        position = param.lower().startswith(words.lower()) and not text_before_cursor[-1].isspace()
+        canceling_positions = param.lower() != words.lower() and param not in text_before_cursor.split()
 
+        check_doubles = True
+        # check doubles
         if double and param in self.same_param_doubles.get(self.curr_command, {}):
-            return result and self.same_param_doubles[self.curr_command][param] not in text_before_cursor.split()
-        return result
+            check_doubles = self.same_param_doubles[self.curr_command][param] not in text_before_cursor.split()
+
+        return position and canceling_positions and check_doubles
 
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor
