@@ -8,7 +8,7 @@ from azure.cli.core.help_files import helps
 
 helps['acr'] = """
     type: group
-    short-summary: Manage Azure container registries.
+    short-summary: Manage Azure Container Registries.
     """
 
 helps['acr credential'] = """
