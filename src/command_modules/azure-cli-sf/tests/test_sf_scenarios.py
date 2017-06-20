@@ -78,9 +78,8 @@ class ServiceFabricScenarioTests(ScenarioTest):
         self.test_resources_count += 1
         file_moniker = '{}{:06}'.format("tempfile", self.test_resources_count)
 
-        if self.in_recording:
-            self.name_replacer.register_name_pair(os.path.basename(temp_app_dir), dir_moniker)
-            self.name_replacer.register_name_pair(os.path.basename(file_path), file_moniker)
+        self.name_replacer.register_name_pair(os.path.basename(temp_app_dir), dir_moniker)
+        self.name_replacer.register_name_pair(os.path.basename(file_path), file_moniker)
 
         self.addCleanup(lambda: shutil.rmtree(temp_app_dir, ignore_errors=True))
 
