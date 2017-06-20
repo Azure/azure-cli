@@ -12,12 +12,8 @@ unreleased
 2.0.8 (2017-06-13)
 ++++++++++++++++++
 * Fix up some parsing and error messages. (#3584)
-* Fix various pylint disable rules
 * Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>
 * Add parameter checking for template link templates (#3629)
-* Eliminating too-many-arguments pylint disable rule (#3583)
-* Fix method-hidden pylint disable rule
-* Move all existing recording files to latest folder
 * Add support for specifying deployment parameters using KEY=VALUE syntax.
 * Add a bunch of help text. (#3582)
 * [ARM] Add KEY=VALUE syntax for deployment create (#3637)

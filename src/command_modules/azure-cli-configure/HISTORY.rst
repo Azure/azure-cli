@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.8 (2017-06-13)
 ++++++++++++++++++
-* Fix various pylint disable rules
+* Minor fixes.
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++
