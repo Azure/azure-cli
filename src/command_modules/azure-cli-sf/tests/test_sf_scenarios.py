@@ -72,7 +72,18 @@ class ServiceFabricScenarioTests(ScenarioTest):
 
         # Specifically need a large temporary file in a temporary directory
         temp_app_dir = tempfile.mkdtemp()
+        self.test_resources_count += 1
+        dir_moniker = '{}{:06}'.format("tempdir", self.test_resources_count)
         fd, file_path = tempfile.mkstemp(dir=temp_app_dir)
+        self.test_resources_count += 1
+        file_moniker = '{}{:06}'.format("tempfile", self.test_resources_count)
+
+        if self.in_recording:
+            self.name_replacer.register_name_pair(os.path.basename(temp_app_dir), dir_moniker)
+            self.name_replacer.register_name_pair(os.path.basename(file_path), file_moniker)
+
+        self.addCleanup(lambda: shutil.rmtree(temp_app_dir, ignore_errors=True))
+
         os.close(fd)
         with open(file_path, mode='r+b') as f:
             chunk = bytearray([0] * 1024)
