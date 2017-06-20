@@ -24,6 +24,7 @@ helps['cloud show'] = """
 helps['cloud register'] = """
             type: command
             short-summary: Register a cloud.
+            long-summary: When registering a cloud, specify only the resource manager endpoint for the autodetection of other endpoints.
 """
 
 helps['cloud unregister'] = """
