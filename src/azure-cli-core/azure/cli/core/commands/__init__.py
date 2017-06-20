@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import datetime
 import json
+import logging as logs
 import pkgutil
 import re
 import sys
@@ -15,7 +16,6 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
-import logging as logs
 
 import six
 from six import string_types, reraise
