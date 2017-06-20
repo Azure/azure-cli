@@ -76,8 +76,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('administratorLoginPassword', admin_passwords[0])])
+                     JMESPathCheck('administratorLogin', user)])
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 1)])
@@ -88,8 +87,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('administratorLoginPassword', admin_passwords[1])])
+                     JMESPathCheck('administratorLogin', user)])
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -98,8 +96,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server2),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('administratorLoginPassword', admin_passwords[0])])
+                     JMESPathCheck('administratorLogin', user)])
 
         # test list sql server should be 2
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 2)])
