@@ -45,10 +45,14 @@ def _populate_from_metadata_endpoint(cloud, arm_endpoint):
         response = requests.get(metadata_endpoint)
         if response.status_code == 200:
             metadata = response.json()
-            setattr(cloud.endpoints, 'gallery', metadata.get('galleryEndpoint'))
-            setattr(cloud.endpoints, 'active_directory_graph_resource_id', metadata.get('graphEndpoint'))
-            setattr(cloud.endpoints, 'active_directory', metadata['authentication'].get('loginEndpoint'))
-            setattr(cloud.endpoints, 'active_directory_resource_id', metadata['authentication']['audiences'][0])
+            if not cloud.endpoints.has_endpoint_set('gallery'):
+                setattr(cloud.endpoints, 'gallery', metadata.get('galleryEndpoint'))
+            if not cloud.endpoints.has_endpoint_set('active_directory_graph_resource_id'):
+                setattr(cloud.endpoints, 'active_directory_graph_resource_id', metadata.get('graphEndpoint'))
+            if not cloud.endpoints.has_endpoint_set('active_directory'):
+                setattr(cloud.endpoints, 'active_directory', metadata['authentication'].get('loginEndpoint'))
+            if not cloud.endpoints.has_endpoint_set('active_directory_resource_id'):
+                setattr(cloud.endpoints, 'active_directory_resource_id', metadata['authentication']['audiences'][0])
         else:
             raise CLIError('Server returned status code {} for {}'.format(response.status_code, metadata_endpoint))
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
