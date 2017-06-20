@@ -56,7 +56,7 @@ def dump_no_help(modules):
             exit_val = 1
         group_name = " ".join(cmd.split()[:-1])
         if group_name not in helps:
-            if group_name not in subgroups_list and group_name not in white_list_subgroups:
+            if group_name not in subgroups_list and group_name not in white_list_subgroups and group_name:
                 exit_val = 1
                 subgroups_list.add(group_name)
 
@@ -91,6 +91,12 @@ def dump_no_help(modules):
     return exit_val, data
 
 
+def set_default(obj):
+    """ change sets to lists for json """
+    if isinstance(obj, set):
+        return list(obj)
+
+
 if __name__ == '__main__':
     try:
         mods_ns_pkg = import_module('azure.cli.command_modules')
@@ -103,6 +109,6 @@ if __name__ == '__main__':
 
     if any(len(failed_commands[key]) > 0 for key in failed_commands) or result != 0:
         print('==== FAILED COMMANDS ====')
-        print(json.dumps(failed_commands, sort_keys=True, indent=2))
+        print(json.dumps(failed_commands, default=set_default, indent=2))
 
-    sys.exit(0)  # not enforce it now
+    sys.exit(0)  # enforce it
