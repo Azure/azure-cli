@@ -21,8 +21,6 @@ test_replica_id = "131413730902833907"
 # pylint: disable=too-many-public-methods
 class ServiceFabricScenarioTests(ScenarioTest):
 
-    # Application tests
-
     @patch("azure.cli.command_modules.sf._factory.SfConfigParser")
     def app_health_returns_aggregated_and_name_test(self, mock_config_parser):
         instance = mock_config_parser.return_value
@@ -54,6 +52,16 @@ class ServiceFabricScenarioTests(ScenarioTest):
         instance.cert_info.return_value = False
 
         self.cmd("az sf application type", checks=[NoneCheck()])
+
+    @patch("azure.cli.command_modules.sf.config.SfConfigParser")
+    def single_folder_large_file_upload_test(self, mock_config_parser):
+        instance = mock_config_parser.return_value
+        instance.no_verify_setting.return_value = False
+        instance.ca_cert_info.return_value = False
+        instance.connection_endpoint.return_value = test_endpoint
+        instance.cert_info.return_value = False
+
+        self.cmd("az sf application upload --path {0}".format("derp"), checks=[NoneCheck()])
 
     # Cluster tests
 
