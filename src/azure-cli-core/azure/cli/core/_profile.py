@@ -225,12 +225,6 @@ class Profile(object):
         new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
         default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
-        p = list(client.providers.list(expand='metadata'))
-        for a_provider in p:
-            if a_provider.namespace.endswith('.Storage'):
-                for rt in a_provider.resource_types:
-                    print(rt.properties)
-        # print(list(list(client.providers.list(expand=True))[0].resource_types))
         set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
