@@ -34,7 +34,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-datalake-store==0.1.5',
+    'azure-mgmt-datalake-store==0.1.6',
     'azure-datalake-store==0.0.11',
     'azure-cli-core',
 ]

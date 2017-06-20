@@ -10,7 +10,10 @@ from azure.cli.command_modules.dla._client_factory import (cf_dla_account,
                                                            cf_dla_account_adls,
                                                            cf_dla_account_storage,
                                                            cf_dla_job,
-                                                           cf_dla_catalog)
+                                                           cf_dla_catalog,
+                                                           cf_dla_job_pipeline,
+                                                           cf_dla_job_recurrence,
+                                                           cf_dla_account_compute_policy)
 adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{}'
 adla_custom_format_path = 'azure.cli.command_modules.dla.custom#{}'
 
@@ -22,7 +25,6 @@ cli_command(__name__, 'dla account show', adla_format_path.format('account', 'ac
 cli_command(__name__, 'dla account delete', adla_format_path.format('account', 'account_operations', 'AccountOperations', 'delete'), cf_dla_account)
 
 # account fire wall operations
-# TODO: implement
 cli_command(__name__, 'dla account firewall create', adla_custom_format_path.format('add_adla_firewall_rule'), cf_dla_account_firewall)
 cli_command(__name__, 'dla account firewall update', adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations', 'update'), cf_dla_account_firewall)
 cli_command(__name__, 'dla account firewall list', adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations', 'list_by_account'), cf_dla_account_firewall)
@@ -31,17 +33,22 @@ cli_command(__name__, 'dla account firewall delete', adla_format_path.format('ac
 
 # job operations
 # todo: update to allow for inclusion of statistics/debug data in show
-# todo: add a polling command for jobs
 cli_command(__name__, 'dla job submit', adla_custom_format_path.format('submit_adla_job'), cf_dla_job)
 cli_command(__name__, 'dla job wait', adla_custom_format_path.format('wait_adla_job'), cf_dla_job)
 cli_command(__name__, 'dla job show', adla_format_path.format('job', 'job_operations', 'JobOperations', 'get'), cf_dla_job)
 cli_command(__name__, 'dla job cancel', adla_format_path.format('job', 'job_operations', 'JobOperations', 'cancel'), cf_dla_job)
 cli_command(__name__, 'dla job list', adla_custom_format_path.format('list_adla_jobs'), cf_dla_job)
 
+# job relationship operations
+cli_command(__name__, 'dla job pipeline show', adla_format_path.format('job', 'pipeline_operations', 'PipelineOperations', 'get'), cf_dla_job_pipeline)
+cli_command(__name__, 'dla job pipeline list', adla_format_path.format('job', 'pipeline_operations', 'PipelineOperations', 'list'), cf_dla_job_pipeline)
+cli_command(__name__, 'dla job recurrence show', adla_format_path.format('job', 'recurrence_operations', 'RecurrenceOperations', 'get'), cf_dla_job_recurrence)
+cli_command(__name__, 'dla job recurrence list', adla_format_path.format('job', 'recurrence_operations', 'RecurrenceOperations', 'list'), cf_dla_job_recurrence)
+
 # account data source operations
 cli_command(__name__, 'dla account blob-storage show', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'get'), cf_dla_account_storage)
-cli_command(__name__, 'dla account blob-storage add', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'add'), cf_dla_account_storage)
-cli_command(__name__, 'dla account blob-storage update', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'update'), cf_dla_account_storage)
+cli_command(__name__, 'dla account blob-storage add', adla_custom_format_path.format('add_adla_blob_storage'), cf_dla_account_storage)
+cli_command(__name__, 'dla account blob-storage update', adla_custom_format_path.format('update_adla_blob_storage'), cf_dla_account_storage)
 cli_command(__name__, 'dla account blob-storage delete', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'delete'), cf_dla_account_storage)
 cli_command(__name__, 'dla account blob-storage list', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'list_by_account'), cf_dla_account_storage)
 
@@ -105,3 +112,10 @@ cli_command(__name__, 'dla catalog view list', adla_custom_format_path.format('l
 # get packages
 cli_command(__name__, 'dla catalog package show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_package'), cf_dla_catalog)
 cli_command(__name__, 'dla catalog package list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_packages'), cf_dla_catalog)
+
+# compute policy
+cli_command(__name__, 'dla account compute-policy create', adla_custom_format_path.format('create_adla_compute_policy'), cf_dla_account_compute_policy)
+cli_command(__name__, 'dla account compute-policy update', adla_custom_format_path.format('update_adla_compute_policy'), cf_dla_account_compute_policy)
+cli_command(__name__, 'dla account compute-policy list', adla_format_path.format('account', 'compute_policies_operations', 'ComputePoliciesOperations', 'list_by_account'), cf_dla_account_compute_policy)
+cli_command(__name__, 'dla account compute-policy show', adla_format_path.format('account', 'compute_policies_operations', 'ComputePoliciesOperations', 'get'), cf_dla_account_compute_policy)
+cli_command(__name__, 'dla account compute-policy delete', adla_format_path.format('account', 'compute_policies_operations', 'ComputePoliciesOperations', 'delete'), cf_dla_account_compute_policy)

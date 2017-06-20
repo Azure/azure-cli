@@ -63,10 +63,10 @@ vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                                  api_version=None, base_url_bound=None, **kwargs):
+                                  api_version=None, base_url_bound=None, resource=CLOUD.endpoints.active_directory_resource_id, **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource)
     client_kwargs = {}
 
     if base_url_bound:

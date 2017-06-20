@@ -12,7 +12,7 @@ except ImportError:
     import mock
 
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
-
+from azure.cli.core.util import CLIError
 
 def _mock_get_uuid_str():
     return '00000000-0000-0000-0000-000000000000'
@@ -250,6 +250,14 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         adla = self.adla_name
         loc = self.location
+        # job relation ship variables
+        pipeline_id = '3f9a237a-325e-4ec8-9e10-60222a71354d'
+        pipeline_name = 'py_pipeline_name'
+        pipeline_uri = 'https://begoldsm.contoso.com/jobs'
+        recurrence_id = '58cab1f7-fe29-46ce-89ab-628a1e09c5bf'
+        recurrence_name = 'py_recurrence_name'
+        run_id = 'a3f300fc-4496-40ad-b76d-7696e3723b77'
+
         # create ADLS accounts
         self.cmd('dls account create -g {} -n {} -l {} --disable-encryption'.format(self.resource_group, self.adls_name, loc))
         self.cmd('dls account show -g {} -n {}'.format(self.resource_group, self.adls_name), checks=[
@@ -265,7 +273,7 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
 
-        # submit job
+        # submit job - should work with no relationship params
         result = self.cmd('dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;"'.format(adla), checks=[
             JMESPathCheck('name', 'clijobtest'),
         ])
@@ -278,8 +286,27 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', 'clijobtest'),
             JMESPathCheck('result', 'Cancelled'),
         ])
-        # re-submit job
-        result = self.cmd('dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;"'.format(adla), checks=[
+
+        # job relationship. Attempt to submit a job with invalid job relationship param combos
+        with self.assertRaises(CLIError):
+            self.cmd('dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {}'.format(adla, recurrence_name))
+    
+        with self.assertRaises(CLIError):
+            self.cmd('dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {} --recurrence-id {} --pipeline-name {}'.format(adla,
+                                                                                                                                                                                                 recurrence_name,
+                                                                                                                                                                                                 recurrence_id,
+                                                                                                                                                                                                 pipeline_name))
+
+        # re-submit job with a fully populated relationship
+        result = self.cmd(
+            'dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {} --recurrence-id {} --pipeline-name {} --pipeline-id {} --pipeline-uri {} --run-id {}'.format(adla,
+                                                                                                                                                                                                                                       recurrence_name,
+                                                                                                                                                                                                                                       recurrence_id,
+                                                                                                                                                                                                                                       pipeline_name,
+                                                                                                                                                                                                                                       pipeline_id,
+                                                                                                                                                                                                                                       pipeline_uri,
+                                                                                                                                                                                                                                       run_id), 
+            checks=[
             JMESPathCheck('name', 'clijobtest'),
         ])
 
@@ -288,6 +315,12 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
         result = self.cmd('dla job wait -n {} --job-id {}'.format(adla, job_id), checks=[
             JMESPathCheck('name', 'clijobtest'),
             JMESPathCheck('result', 'Succeeded'),
+            JMESPathCheck('related.recurrenceId', recurrence_id),
+            JMESPathCheck('related.recurrenceName', recurrence_name),
+            JMESPathCheck('related.pipelineId', pipeline_id),
+            JMESPathCheck('related.pipelineName', pipeline_name),
+            JMESPathCheck('related.pipelineUri', pipeline_uri),
+            JMESPathCheck('related.runId', run_id),
         ])
 
         # list all jobs
@@ -296,6 +329,28 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('length(@)', 2)
         ])
 
+        # get and list job relationships (recurrence and pipeline)
+        result = self.cmd('dla job recurrence list -n {}'.format(adla))
+        assert isinstance(result, list)
+        assert len(result) >= 1
+
+        result = self.cmd('dla job recurrence show -n {} --recurrence-id {}'.format(adla, recurrence_id), checks=[
+            JMESPathCheck('recurrenceId', recurrence_id),
+            JMESPathCheck('recurrenceName', recurrence_name),
+        ])
+
+        result = self.cmd('dla job pipeline list -n {}'.format(adla))
+        assert isinstance(result, list)
+        assert len(result) >= 1
+
+        result = self.cmd('dla job pipeline show -n {} --pipeline-id {}'.format(adla, pipeline_id), checks=[
+            JMESPathCheck('pipelineId', pipeline_id),
+            JMESPathCheck('pipelineName', pipeline_name),
+            JMESPathCheck('pipelineUri', pipeline_uri),
+        ])
+
+        assert isinstance(result['runs'], list)
+        assert len(result['runs']) >= 1
 
 class DataLakeAnalyticsAccountScenarioTest(ResourceGroupVCRTestBase):
 
@@ -322,6 +377,13 @@ class DataLakeAnalyticsAccountScenarioTest(ResourceGroupVCRTestBase):
         adls2 = self.adls_names[1]
         adla = self.adla_name
         loc = self.location
+        
+        # compute policy variables
+        user_policy_name = 'pycliuserpolicy'
+        user_object_id = '8ce05900-7a9e-4895-b3f0-0fbcee507803'
+        group_policy_name = 'pycligrouppolicy'
+        group_object_id = '0583cfd7-60f5-43f0-9597-68b85591fc69'
+
         result = self.cmd('storage account keys list -g {} -n {}'.format(self.resource_group, self.wasb_name))
         wasb_key = result[0]['value']
         # test create keyvault with default access policy set
@@ -402,6 +464,60 @@ class DataLakeAnalyticsAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', 0),
         ])
+
+        # test compute policy
+        # assert that it throws if I don't specify either of the policy types
+        with self.assertRaises(CLIError):
+            self.cmd('dla account compute-policy create -g {} -n {} --compute-policy-name {} --object-id {} --object-type User'.format(rg, adla, user_policy_name, user_object_id))
+
+        self.cmd('dla account compute-policy create -g {} -n {} --compute-policy-name {} --object-id {} --object-type User --max-dop-per-job 2'.format(rg, adla, user_policy_name, user_object_id), checks=[
+            JMESPathCheck('name', user_policy_name),
+            JMESPathCheck('objectId', user_object_id),
+            JMESPathCheck('objectType', 'User'),
+            JMESPathCheck('maxDegreeOfParallelismPerJob', 2),
+        ])
+
+        # get the policy
+        self.cmd('dla account compute-policy show -g {} -n {} --compute-policy-name {}'.format(rg, adla, user_policy_name), checks=[
+            JMESPathCheck('name', user_policy_name),
+            JMESPathCheck('objectId', user_object_id),
+            JMESPathCheck('objectType', 'User'),
+            JMESPathCheck('maxDegreeOfParallelismPerJob', 2),
+            JMESPathCheck('minPriorityPerJob', None),
+        ])
+
+        # add the group policy
+        self.cmd('dla account compute-policy create -g {} -n {} --compute-policy-name {} --object-id {} --object-type Group --max-dop-per-job 2'.format(rg, adla, group_policy_name, group_object_id), checks=[
+            JMESPathCheck('name', group_policy_name),
+            JMESPathCheck('objectId', group_object_id),
+            JMESPathCheck('objectType', 'Group'),
+            JMESPathCheck('maxDegreeOfParallelismPerJob', 2),
+        ])
+
+        # update the user policy
+        self.cmd('dla account compute-policy update -g {} -n {} --compute-policy-name {} --min-priority-per-job 2'.format(rg, adla, user_policy_name), checks=[
+            JMESPathCheck('name', user_policy_name),
+            JMESPathCheck('objectId', user_object_id),
+            JMESPathCheck('objectType', 'User'),
+            JMESPathCheck('maxDegreeOfParallelismPerJob', 2),
+            JMESPathCheck('minPriorityPerJob', 2),
+        ])
+
+        # list the policies
+        self.cmd('dla account compute-policy list -g {} -n {}'.format(rg, adla), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 2),
+        ])
+
+        # delete the user policy
+        self.cmd('dla account compute-policy delete -g {} -n {} --compute-policy-name {}'.format(rg, adla, user_policy_name))
+
+        # list again and verify there is one less policy
+        self.cmd('dla account compute-policy list -g {} -n {}'.format(rg, adla), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 1),
+        ])
+
         # test account deletion
         self.cmd('dla account delete -g {} -n {}'.format(rg, adla))
         self.cmd('dla account list -g {}'.format(rg), checks=[
