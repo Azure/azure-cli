@@ -2,8 +2,14 @@
 
 Release History
 ===============
+
+unreleased
+++++++++++++++++++
+
+* Added Support for Collection Default TTL.
+
 0.1.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * Move all existing recording files to latest folder
 * Fix various pylint disable rules
@@ -14,6 +20,7 @@ Release History
 
 0.1.6 (2017-05-09)
 ++++++++++++++++++
+
 * Rename documentdb module to cosmosdb.
 
 0.1.5 (2017-05-05)

@@ -35,5 +35,6 @@ if [[ "$CI" == "true" ]]; then
 fi
 
 python -m automation.tests.verify_doc_source_map
+python -m automation.tests.verify_readme_history
 
 python $scripts_root/license/verify.py

@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure_devtools.scenario_tests import mock_in_unit_test
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 from .exceptions import CliExecutionError
-from .const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 
 def patch_progress_controller(unit_test):

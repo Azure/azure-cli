@@ -217,19 +217,23 @@ def cli_cosmosdb_collection_delete(client, database_id, collection_id):
 
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
+                                    default_ttl=None,
                                     indexing_policy=None):
-    changed = False
+    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
+        return False
 
-    if partition_key_path:
+    if partition_key_path is not None:
         if 'partitionKey' not in collection:
             collection['partitionKey'] = {}
         collection['partitionKey'] = {'paths': [partition_key_path]}
-        changed = True
 
-    if indexing_policy:
-        changed = True
+    if default_ttl is not None:
+        collection['defaultTtl'] = default_ttl
+
+    if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy
-    return changed
+
+    return True
 
 
 def cli_cosmosdb_collection_create(client,
@@ -237,6 +241,7 @@ def cli_cosmosdb_collection_create(client,
                                    collection_id,
                                    throughput=None,
                                    partition_key_path=None,
+                                   default_ttl=None,
                                    indexing_policy=DEFAULT_INDEXING_POLICY):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
@@ -247,6 +252,7 @@ def cli_cosmosdb_collection_create(client,
 
     _populate_collection_definition(collection,
                                     partition_key_path,
+                                    default_ttl,
                                     indexing_policy)
 
     created_collection = client.CreateCollection(_get_database_link(database_id), collection,
@@ -268,6 +274,7 @@ def cli_cosmosdb_collection_update(client,
                                    database_id,
                                    collection_id,
                                    throughput=None,
+                                   default_ttl=None,
                                    indexing_policy=None):
     """Updates an Azure Cosmos DB collection """
     logger.debug('reading collection')
@@ -276,6 +283,7 @@ def cli_cosmosdb_collection_update(client,
 
     if (_populate_collection_definition(collection,
                                         None,
+                                        default_ttl,
                                         indexing_policy)):
         logger.debug('replacing collection')
         result['collection'] = client.ReplaceCollection(

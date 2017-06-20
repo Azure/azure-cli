@@ -3,11 +3,11 @@
 Release History
 ===============
 (unreleased)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * BC: webapp: remove all commands under 'az appservice web'
 
 0.1.8 (2017-06-13)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * Remove useless line-too-long suppression
 * webapp: mask docker registry passwords from 'webapp appsettings/container' commands' output (#3656)
 * fix typos in arg name (#3626)
