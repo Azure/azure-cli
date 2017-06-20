@@ -102,6 +102,6 @@ if __name__ == '__main__':
 
     if any(len(failed_commands[key]) > 0 for key in failed_commands) or result != 0:
         print('==== FAILED COMMANDS ====')
-        print(json.dumps(failed_commands, sort_keys=True, indent=4))
+        print(json.dumps(failed_commands, sort_keys=True, indent=2))
 
     sys.exit(0)  # not enforce it now
