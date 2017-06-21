@@ -3,6 +3,10 @@
 Release History
 ===============
 
+Unreleased
+++++++++++
+* Fixes an issue with large files in applications being truncated on upload (#3666)
+
 1.0.3 (2017-06-13)
 ++++++++++++++++++
 * Remove useless line-too-long suppression
