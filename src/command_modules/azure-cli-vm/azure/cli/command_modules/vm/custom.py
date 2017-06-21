@@ -473,8 +473,7 @@ def list_images(resource_group_name=None):
     return client.images.list()
 
 
-def create_image(resource_group_name, name, source, os_type=None,  # pylint: disable=too-many-locals
-                 location=None, data_disk_sources=None,  # pylint: disable=unused-argument
+def create_image(resource_group_name, name, source, os_type=None, data_disk_sources=None, location=None,  # pylint: disable=too-many-locals,unused-argument
                  # below are generated internally from 'source' and 'data_disk_sources'
                  source_virtual_machine=None,
                  os_blob_uri=None, data_blob_uris=None,
