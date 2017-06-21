@@ -41,7 +41,7 @@ def _get_token(server, resource, scope):  # pylint: disable=unused-argument
 def get_keyvault_name_completion_list(resource_name):
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = KeyVaultClient(
-            KeyVaultAuthentication(_get_token))  # pylint: disable=redefined-variable-type
+            KeyVaultAuthentication(_get_token))
         func_name = 'get_{}s'.format(resource_name)
         vault = parsed_args.vault_base_url
         items = []
@@ -56,7 +56,7 @@ def get_keyvault_name_completion_list(resource_name):
 def get_keyvault_version_completion_list(resource_name):
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = KeyVaultClient(
-            KeyVaultAuthentication(_get_token))  # pylint: disable=redefined-variable-type
+            KeyVaultAuthentication(_get_token))
         func_name = 'get_{}_versions'.format(resource_name)
         vault = parsed_args.vault_base_url
         name = getattr(parsed_args, '{}_name'.format(resource_name))
@@ -137,6 +137,9 @@ register_cli_argument('keyvault', 'enabled_for_disk_encryption',
 register_cli_argument('keyvault', 'enabled_for_template_deployment',
                       help='Allow Resource Manager to retrieve secrets from the vault.',
                       **three_state_flag())
+register_cli_argument('keyvault', 'enable_soft_delete',
+                      help='Enable vault deletion recovery for the vault, and all contained entities',
+                      **three_state_flag())
 
 register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type,
                       required=True, completer=None, validator=None)
@@ -163,6 +166,7 @@ register_cli_argument('keyvault set-policy', 'secret_permissions', metavar='PERM
 register_cli_argument('keyvault set-policy', 'certificate_permissions', metavar='PERM', nargs='*',
                       help='Space separated list. Possible values: {}'.format(
                           certificate_permission_values), arg_group='Permission')
+
 
 for item in ['key', 'secret', 'certificate']:
     register_cli_argument('keyvault {}'.format(item), '{}_name'.format(item),

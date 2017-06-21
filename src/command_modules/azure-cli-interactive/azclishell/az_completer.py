@@ -15,7 +15,6 @@ from azclishell.layout import get_scope
 from azclishell.util import parse_quotes
 
 from azure.cli.core.parser import AzCliCommandParser
-from azure.cli.core.util import CLIError
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
@@ -195,8 +194,8 @@ class AzCompleter(Completer):
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
-
         try:  # pylint: disable=too-many-nested-blocks
+
             is_param, started_param, prefix, param = dynamic_param_logic(text)
 
             # command table specific name
@@ -241,7 +240,7 @@ class AzCompleter(Completer):
                                 pass  # other completion method used
 
         # if the user isn't logged in
-        except (CLIError, AttributeError, ValueError):  # service client throws
+        except Exception:  # pylint: disable=broad-except
             pass
 
     def gen_cmd_completions(self, text):

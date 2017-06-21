@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import argparse
 from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import \
@@ -44,23 +43,33 @@ from azure.cli.command_modules.network.custom import list_traffic_manager_endpoi
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 from azure.cli.core.util import get_json_object
 
-ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
-ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
-ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol, \
-ExpressRouteCircuitSkuFamily, \
-ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution, \
-ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, \
-SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, \
-IPAllocationMethod, RouteNextHopType, Direction, Protocol, IPVersion = \
-    get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySkuName',
-            'ApplicationGatewayCookieBasedAffinity', 'ApplicationGatewayFirewallMode',
-            'ApplicationGatewayProtocol', 'ApplicationGatewayRequestRoutingRuleType',
-            'ApplicationGatewaySslProtocol', 'ExpressRouteCircuitSkuFamily',
-            'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitPeeringType', 'IPVersion',
-            'LoadDistribution', 'ProbeProtocol', 'TransportProtocol', 'SecurityRuleAccess',
-            'SecurityRuleProtocol', 'SecurityRuleDirection', 'VirtualNetworkGatewayType',
-            'VirtualNetworkGatewaySkuName', 'VpnType', 'IPAllocationMethod', 'RouteNextHopType',
-            'Direction', 'Protocol', 'IPVersion', mod='models')
+(ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, ApplicationGatewayFirewallMode,
+ ApplicationGatewayProtocol, ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol,
+ ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
+ ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection,
+ VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, IPAllocationMethod, RouteNextHopType, Direction,
+ Protocol, IPVersion) = get_sdk(ResourceType.MGMT_NETWORK,
+                                'ApplicationGatewaySkuName',
+                                'ApplicationGatewayCookieBasedAffinity',
+                                'ApplicationGatewayFirewallMode',
+                                'ApplicationGatewayProtocol',
+                                'ApplicationGatewayRequestRoutingRuleType',
+                                'ApplicationGatewaySslProtocol',
+                                'ExpressRouteCircuitSkuFamily',
+                                'ExpressRouteCircuitSkuTier',
+                                'ExpressRouteCircuitPeeringType',
+                                'IPVersion',
+                                'LoadDistribution', 'ProbeProtocol',
+                                'TransportProtocol',
+                                'SecurityRuleAccess',
+                                'SecurityRuleProtocol',
+                                'SecurityRuleDirection',
+                                'VirtualNetworkGatewayType',
+                                'VirtualNetworkGatewaySkuName',
+                                'VpnType', 'IPAllocationMethod',
+                                'RouteNextHopType',
+                                'Direction', 'Protocol', 'IPVersion',
+                                mod='models')
 
 # CHOICE LISTS
 
@@ -70,8 +79,9 @@ device_path_values = ['primary', 'secondary']
 
 # COMPLETERS
 
+
 def get_subnet_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         if parsed_args.resource_group_name and parsed_args.virtual_network_name:
             rg = parsed_args.resource_group_name
@@ -79,8 +89,9 @@ def get_subnet_completion_list():
             return [r.name for r in client.subnets.list(resource_group_name=rg, virtual_network_name=vnet)]
     return completer
 
+
 def get_lb_subresource_completion_list(prop):
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         try:
             lb_name = parsed_args.load_balancer_name
@@ -93,7 +104,7 @@ def get_lb_subresource_completion_list(prop):
 
 
 def get_ag_subresource_completion_list(prop):
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         try:
             ag_name = parsed_args.application_gateway_name
@@ -104,8 +115,9 @@ def get_ag_subresource_completion_list(prop):
             return [r.name for r in getattr(ag, prop)]
     return completer
 
+
 def get_ag_url_map_rule_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _network_client_factory()
         try:
             ag_name = parsed_args.application_gateway_name
@@ -113,16 +125,18 @@ def get_ag_url_map_rule_completion_list():
             ag_name = parsed_args.resource_name
         if parsed_args.resource_group_name and ag_name:
             ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
-            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None) # pylint: disable=no-member
+            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None)  # pylint: disable=no-member
             return [r.name for r in url_map.path_rules]
     return completer
 
+
 def get_tm_endpoint_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         return list_traffic_manager_endpoints(parsed_args.resource_group_name, parsed_args.profile_name) \
             if parsed_args.resource_group_name and parsed_args.profile_name \
             else []
     return completer
+
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -218,6 +232,16 @@ register_cli_argument('network application-gateway http-listener', 'frontend_por
 register_cli_argument('network application-gateway http-listener', 'ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
 register_cli_argument('network application-gateway http-listener', 'protocol', ignore_type)
 register_cli_argument('network application-gateway http-listener', 'host_name', help='Host name to use for multisite gateways.')
+
+# Add help text to clarify the "default if one" policy.
+default_existing = 'If only one exists, omit to use as default.'
+register_cli_argument('network application-gateway http-listener create', 'frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+register_cli_argument('network application-gateway rule create', 'address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
+register_cli_argument('network application-gateway rule create', 'http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
+register_cli_argument('network application-gateway rule create', 'http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
+register_cli_argument('network lb rule create', 'backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
+register_cli_argument('network lb rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+register_cli_argument('network lb inbound-nat-rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
 register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
 register_cli_argument('network application-gateway http-settings', 'timeout', help='Request timeout in seconds.')
@@ -317,15 +341,17 @@ for item in ['local-gateway', 'vnet-gateway']:
 
 # NIC
 
-register_cli_argument('network nic', 'network_interface_name', nic_type, options_list=('--name', '-n'))
-register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',), help='The internal DNS name label.')
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01') as c:
+    IPVersion = get_sdk(ResourceType.MGMT_NETWORK, 'IPVersion', mod='models')
+    c.register_cli_argument('network nic create', 'private_ip_address_version', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
+    c.register_cli_argument('network nic', 'enable_accelerated_networking', options_list=['--accelerated-networking'], help='Enable accelerated networking.', **three_state_flag())
 
-register_cli_argument('network nic create', 'enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', action='store_true')
+register_cli_argument('network nic', 'network_interface_name', nic_type, options_list=('--name', '-n'))
+register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',), help='The internal DNS name label.', arg_group='DNS')
+register_cli_argument('network nic', 'dns_servers', help='Space separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
+register_cli_argument('network nic', 'enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', **three_state_flag())
+
 register_cli_argument('network nic create', 'network_interface_name', nic_type, options_list=('--name', '-n'), id_part=None, validator=process_nic_create_namespace)
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    register_cli_argument('network nic create', 'private_ip_address_version', help='The private IP address version to use.', default=IPVersion.ipv4.value)
-else:
-    register_cli_argument('network nic create', 'private_ip_address_version', ignore_type)
 
 public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
 register_cli_argument('network nic create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -336,8 +362,8 @@ register_cli_argument('network nic create', 'network_security_group', help=nsg_h
 subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
 register_cli_argument('network nic create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
 
-register_cli_argument('network nic update', 'enable_ip_forwarding', options_list=('--ip-forwarding',), **enum_choice_list(['true', 'false']))
 register_cli_argument('network nic update', 'network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
+register_cli_argument('network nic update', 'dns_servers', help='Space separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
 
 for item in ['create', 'ip-config update', 'ip-config create']:
     register_extra_cli_argument('network nic {}'.format(item), 'load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
@@ -438,12 +464,12 @@ register_cli_argument('network route-filter rule create', 'location', location_t
 # VNET
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
 register_cli_argument('network vnet', 'vnet_prefixes', nargs='+', help='Space separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
+register_cli_argument('network vnet', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP')
 
 register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.')
+register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.', validator=process_vnet_create_namespace)
 register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
 register_cli_argument('network vnet create', 'vnet_name', virtual_network_name_type, options_list=('--name', '-n'), completer=None)
-register_cli_argument('network vnet create', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP', validator=process_vnet_create_namespace)
 
 register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
@@ -600,7 +626,7 @@ register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config
 register_cli_argument('network traffic-manager profile create', 'status', help='Create an enabled or disabled profile.', **enum_choice_list(['Enabled', 'Disabled']))
 
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
-register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
+register_cli_argument('network traffic-manager profile check-dns', 'type', ignore_type, default='Microsoft.Network/trafficManagerProfiles')
 
 # Traffic manager endpoints
 endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']

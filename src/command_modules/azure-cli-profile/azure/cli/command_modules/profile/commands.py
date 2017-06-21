@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
@@ -32,3 +32,4 @@ cli_command(__name__, 'account set', _custom_module + 'set_active_subscription')
 cli_command(__name__, 'account show', _custom_module + 'show_subscription')
 cli_command(__name__, 'account clear', _custom_module + 'account_clear')
 cli_command(__name__, 'account list-locations', _custom_module + 'list_locations')
+cli_command(__name__, 'account get-access-token', _custom_module + 'get_access_token')

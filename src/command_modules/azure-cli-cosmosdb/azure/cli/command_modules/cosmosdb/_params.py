@@ -4,25 +4,21 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-# pylint: disable=unused-import
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     enum_choice_list,
     name_type,
-    ignore_type,
-    file_type)
+    ignore_type)
 
 from azure.cli.core.util import shell_safe_json_parse
 
-from ._client_factory import get_document_client_factory
-import azure.cli.core.commands.arm
 from azure.mgmt.documentdb.models.document_db_enums import KeyKind
 from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
 from azure.mgmt.documentdb.models.location import Location
-from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
+from azure.cli.core.commands import register_cli_argument, CliArgumentType
 
 
 def validate_failover_policies(ns):
@@ -94,3 +90,5 @@ register_cli_argument('cosmosdb collection', 'indexing_policy',
                       options_list=('--indexing-policy'),
                       help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)',
                       type=shell_safe_json_parse, completer=FilesCompleter())
+
+register_cli_argument('cosmosdb collection', 'default_ttl', help='Default TTL', type=int)

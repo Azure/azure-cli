@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint:disable=line-too-long
 
 from collections import OrderedDict
+
 
 def transform_dns_record_set_output(result):
     from azure.mgmt.dns.models import RecordSetPaged
@@ -14,6 +14,7 @@ def transform_dns_record_set_output(result):
         for prop in [x for x in dir(item) if 'record' in x]:
             if not getattr(item, prop):
                 delattr(item, prop)
+
     if isinstance(result, RecordSetPaged):
         result = list(result)
         for item in result:
@@ -40,6 +41,7 @@ def transform_dns_record_set_table_output(result):
             table_row['Metadata'] = ' '
         table_output.append(table_row)
     return table_output
+
 
 def transform_dns_zone_table_output(result):
     is_list = isinstance(result, list)
@@ -84,7 +86,6 @@ def transform_vpn_connection_list(result):
 
 
 def transform_vpn_connection(result):
-
     if result:
         properties_to_strip = \
             ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
@@ -94,8 +95,8 @@ def transform_vpn_connection(result):
                 delattr(result, prop)
             else:
                 null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-                for prop in null_props:
-                    delattr(prop_val, prop)
+                for null_prop in null_props:
+                    delattr(prop_val, null_prop)
     return result
 
 
@@ -110,9 +111,9 @@ def transform_vpn_connection_create_output(result):
     elif isinstance(result, ClientRawResponse):
         # returns a raw response if --no-wait used
         return
-    else:
-        # returns a plain response (not a poller) if --validate used
-        return result
+
+    # returns a plain response (not a poller) if --validate used
+    return result
 
 
 def transform_vnet_create_output(result):
@@ -138,6 +139,7 @@ def transform_nsg_create_output(result):
 def transform_vnet_gateway_create_output(result):
     return {'vnetGateway': result.result()}
 
+
 def transform_geographic_hierachy_table_output(result):
     transformed = []
 
@@ -149,8 +151,10 @@ def transform_geographic_hierachy_table_output(result):
             item_obj['name'] = item['name']
             transformed.append(item_obj)
             _extract_values(item['regions'])
+
     _extract_values(result['geographicHierarchy'])
     return transformed
+
 
 def transform_service_community_table_output(result):
     transformed = []
@@ -185,4 +189,23 @@ def transform_waf_rule_sets_table_output(result):
                 item_obj['ruleGroup'] = rule_group_name
                 transformed.append(item_obj)
     return transformed
-    
+
+
+def transform_network_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
+def transform_network_usage_table(result):
+    transformed = []
+    for item in result:
+        transformed.append(OrderedDict([
+            ('Name', item['localName']),
+            ('CurrentValue', item['currentValue']),
+            ('Limit', item['limit'])
+        ]))
+    return transformed

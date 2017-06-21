@@ -28,6 +28,7 @@ from azure.mgmt.keyvault.models import (VaultProperties,
                                         CertificatePermissions,
                                         KeyPermissions,
                                         SecretPermissions,
+                                        StoragePermissions,
                                         Sku,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
@@ -206,17 +207,32 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     :return: policy dict
     :rtype: dict
     """
-    if scaffold:
-        return _scaffold_certificate_profile()
-    else:
-        return _default_certificate_profile()
+    return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
 
 
-def create_keyvault(client,
+def recover_keyvault(client, vault_name, resource_group_name, location):
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, CreateMode
+    from azure.cli.core._profile import Profile, CLOUD
+    profile = Profile()
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=CLOUD.endpoints.active_directory_graph_resource_id)
+
+    params = VaultCreateOrUpdateParameters(location,
+                                           properties={'tenant_id': tenant_id,
+                                                       'sku': Sku(name=SkuName.standard.value),
+                                                       'create_mode': CreateMode.recover.value})
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=params)
+
+
+def create_keyvault(client,  # pylint: disable=too-many-locals
                     resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
+                    enable_soft_delete=None,
                     no_self_perms=None,
                     tags=None):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
@@ -225,6 +241,7 @@ def create_keyvault(client,
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
+
     graph_client = GraphRbacManagementClient(
         cred,
         tenant_id,
@@ -240,9 +257,41 @@ def create_keyvault(client,
                                         KeyPermissions.update,
                                         KeyPermissions.import_enum,
                                         KeyPermissions.backup,
-                                        KeyPermissions.restore],
-                                  secrets=[SecretPermissions.all],
-                                  certificates=[CertificatePermissions.all])
+                                        KeyPermissions.restore,
+                                        KeyPermissions.recover],
+                                  secrets=[
+                                      SecretPermissions.get,
+                                      SecretPermissions.list,
+                                      SecretPermissions.set,
+                                      SecretPermissions.delete,
+                                      SecretPermissions.backup,
+                                      SecretPermissions.restore,
+                                      SecretPermissions.recover],
+                                  certificates=[
+                                      CertificatePermissions.get,
+                                      CertificatePermissions.list,
+                                      CertificatePermissions.delete,
+                                      CertificatePermissions.create,
+                                      CertificatePermissions.import_enum,
+                                      CertificatePermissions.update,
+                                      CertificatePermissions.managecontacts,
+                                      CertificatePermissions.getissuers,
+                                      CertificatePermissions.listissuers,
+                                      CertificatePermissions.setissuers,
+                                      CertificatePermissions.deleteissuers,
+                                      CertificatePermissions.manageissuers,
+                                      CertificatePermissions.recover],
+                                  storage=[
+                                      StoragePermissions.get,
+                                      StoragePermissions.list,
+                                      StoragePermissions.delete,
+                                      StoragePermissions.set,
+                                      StoragePermissions.update,
+                                      StoragePermissions.regeneratekey,
+                                      StoragePermissions.setsas,
+                                      StoragePermissions.listsas,
+                                      StoragePermissions.getsas,
+                                      StoragePermissions.deletesas])
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:
@@ -260,7 +309,8 @@ def create_keyvault(client,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
-                                 enabled_for_template_deployment=enabled_for_template_deployment)
+                                 enabled_for_template_deployment=enabled_for_template_deployment,
+                                 enable_soft_delete=enable_soft_delete)
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
@@ -303,7 +353,7 @@ def _object_id_args_helper(object_id, spn, upn):
             resource=CLOUD.endpoints.active_directory_graph_resource_id)
         graph_client = GraphRbacManagementClient(cred,
                                                  tenant_id,
-                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)  # pylint: disable=line-too-long
+                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -396,14 +446,11 @@ def restore_key(client, vault_base_url, file_path):
 restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
-# pylint: disable=assignment-from-no-return,unused-variable
-def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
-               expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
-               byok_file=None):
+def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
+               not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium KeyVaults. """
-    from azure.keyvault.models import \
-        (KeyAttributes, JsonWebKey)
+    from azure.keyvault.models import KeyAttributes, JsonWebKey
 
     def _to_bytes(hex_string):
         # zero pads and decodes a hex string
@@ -507,6 +554,24 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
         raise ex
 
 
+def backup_secret(client, vault_base_url, secret_name, file_path):
+    backup = client.backup_secret(vault_base_url, secret_name).value
+    with open(file_path, 'wb') as output:
+        output.write(backup)
+
+
+backup_secret.__doc__ = KeyVaultClient.backup_secret.__doc__
+
+
+def restore_secret(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_secret(vault_base_url, data)
+
+
+restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
+
+
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
     cert_attrs = CertificateAttributes(not disabled)
@@ -528,7 +593,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
         if check.status != 'inProgress':
             logger.info(
                 "Long running operation 'keyvault certificate create' finished with result %s.",
-                check)  # pylint: disable=line-too-long
+                check)
             return check
         try:
             time.sleep(10)
@@ -541,7 +606,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             message = getattr(client_exception, 'message', client_exception)
 
             try:
-                ex_message = json.loads(client_exception.response.text)
+                ex_message = json.loads(client_exception.response.text)  # pylint: disable=no-member
                 message = str(message) + ' ' + ex_message['error']['details'][0]['message']
             except:  # pylint: disable=bare-except
                 pass
@@ -641,7 +706,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
                 import base64
                 encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
                 if isinstance(encoded, bytes):
-                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                    encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
                 f.write(encoded.encode("utf-8"))
     except Exception as ex:  # pylint: disable=broad-except
@@ -668,16 +733,14 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
 
 def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
-    from azure.keyvault.models import \
-        (Contacts, KeyVaultErrorException)
+    from azure.keyvault.models import Contacts
     contacts = client.get_certificate_contacts(vault_base_url).contact_list
     remaining = Contacts([x for x in contacts if x.email_address != contact_email])
     if len(contacts) == len(remaining.contact_list):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
     if remaining.contact_list:
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
-    else:
-        return client.delete_certificate_contacts(vault_base_url)
+    return client.delete_certificate_contacts(vault_base_url)
 
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
@@ -690,9 +753,7 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.models import \
-        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
-         AdministratorDetails, KeyVaultErrorException)
+    from azure.keyvault.models import IssuerCredentials, OrganizationDetails, IssuerAttributes
     credentials = IssuerCredentials(account_id, password)
     issuer_attrs = IssuerAttributes(not disabled)
     org_details = OrganizationDetails(organization_id, admin_details=[])
@@ -710,10 +771,6 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.models import \
-        (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
-         AdministratorDetails, KeyVaultErrorException)
-
     def update(obj, prop, value, nullable=False):
         set_value = value if value is not None else getattr(obj, prop, None)
         if set_value is None and not nullable:
@@ -742,8 +799,7 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
 def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    from azure.keyvault.models import \
-        (AdministratorDetails, KeyVaultErrorException)
+    from azure.keyvault.models import AdministratorDetails
 
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details

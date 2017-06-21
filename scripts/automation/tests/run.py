@@ -9,7 +9,6 @@ import sys
 
 from automation.utilities.path import filter_user_selected_modules_with_tests
 from automation.tests.nose_helper import get_nose_runner
-from automation.utilities.display import print_records
 from automation.utilities.path import get_test_results_dir
 
 
@@ -22,7 +21,7 @@ def run_tests(modules, parallel, run_live):
 
     # set environment variable
     if run_live:
-        os.environ['AZURE_CLI_TEST_RUN_LIVE'] = 'True'
+        os.environ['AZURE_TEST_RUN_LIVE'] = 'True'
 
     # get test runner
     run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True,

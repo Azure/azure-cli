@@ -7,7 +7,41 @@ from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse
 from azure.cli.core.util import CLIError
 
 
-# pylint: disable=line-too-long
+def get_target_resource_validator(dest, required):
+    def _validator(namespace):
+        name_or_id = getattr(namespace, dest)
+        rg = namespace.resource_group_name
+        res_ns = namespace.namespace
+        parent = namespace.parent
+        res_type = namespace.resource_type
+
+        usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
+                               '--{0}-namespace NAMESPACE [--{0}-parent PARENT] '
+                               '[--{0}-type TYPE]'.format(dest))
+        if not name_or_id and required:
+            raise usage_error
+        elif name_or_id:
+            if is_valid_resource_id(name_or_id) and any((res_ns, parent, res_type)):
+                raise usage_error
+            elif not is_valid_resource_id(name_or_id):
+                from azure.cli.core.commands.client_factory import get_subscription_id
+                if res_type and '/' in res_type:
+                    res_ns = res_ns or res_type.rsplit('/', 1)[0]
+                    res_type = res_type.rsplit('/', 1)[1]
+                if not all((rg, res_ns, res_type, name_or_id)):
+                    raise usage_error
+
+                setattr(namespace, dest,
+                        '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
+                            get_subscription_id(), rg, res_ns, parent + '/' if parent else '',
+                            res_type, name_or_id))
+
+        del namespace.namespace
+        del namespace.parent
+        del namespace.resource_type
+    return _validator
+
+
 def validate_diagnostic_settings(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     resource_group_error = "--resource-group is required when name is provided for "\

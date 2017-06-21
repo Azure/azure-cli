@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
 import threading
 try:
@@ -18,7 +17,8 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
-                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
+                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
+                                   RampUpRule)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -34,12 +34,11 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens
+# pylint:disable=no-member,too-many-lines
 
 
-def create_webapp(resource_group_name, name, plan, runtime=None,
-                  startup_file=None, deployment_container_image_name=None,
-                  deployment_source_url=None, deployment_source_branch='master',
+def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
+                  deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -119,9 +118,9 @@ def list_runtimes(linux=False):
                        'check out https://aka.ms/linux-stacks')
         return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9',
                 'php|5.6', 'php|7.0', 'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
-    else:
-        runtime_helper = _StackRuntimeHelper(client)
-        return [s['displayName'] for s in runtime_helper.stacks]
+
+    runtime_helper = _StackRuntimeHelper(client)
+    return [s['displayName'] for s in runtime_helper.stacks]
 
 
 def _rename_server_farm_props(webapp):
@@ -154,18 +153,22 @@ def get_site_configs(resource_group_name, name, slot=None):
 def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
-    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': p in (slot_cfg_names.app_setting_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                              .connection_string_names or []
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_constr_names} for p in _mask_creds_related_appsettings(result.properties)]
     return result
 
 
 def get_connection_strings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_connection_strings', slot)
     client = web_client_factory()
-    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': p in (slot_cfg_names.connection_string_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                              .connection_string_names or []
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
 
@@ -185,7 +188,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
 # in the method
 def update_site_configs(resource_group_name, name, slot=None,
                         linux_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
-                        node_version=None, net_framework_version=None,  # pylint: disable=unused-argument
+                        net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
@@ -231,26 +234,26 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         slot_cfg_names.app_setting_names += new_slot_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _mask_creds_related_appsettings(result.properties)
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
-    app_settings = _generic_site_operation(resource_group_name, name,
-                                           'list_application_settings', slot)
+    app_settings = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
 
     slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
-        if setting_name in (slot_cfg_names.app_setting_names or []):
+        if slot_cfg_names.app_setting_names and setting_name in slot_cfg_names.app_setting_names:
             slot_cfg_names.app_setting_names.remove(setting_name)
             is_slot_settings = True
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _generic_site_operation(resource_group_name, name, 'update_application_settings',
-                                   slot, app_settings)
+    return _mask_creds_related_appsettings(_generic_site_operation(resource_group_name, name,
+                                                                   'update_application_settings',
+                                                                   slot, app_settings).properties)
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
@@ -295,7 +298,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
     is_slot_settings = False
     for setting_name in setting_names:
         conn_strings.properties.pop(setting_name, None)
-        if setting_name in (slot_cfg_names.connection_string_names or []):
+        if slot_cfg_names.connection_string_names and setting_name in slot_cfg_names.connection_string_names:
             slot_cfg_names.connection_string_names.remove(setting_name)
             is_slot_settings = True
 
@@ -307,6 +310,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
                               'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
+APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
 def update_container_settings(resource_group_name, name, docker_registry_server_url=None,
@@ -324,7 +328,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
     update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
-    return _filter_for_container_settings(settings)
+    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
 
 
 def delete_container_settings(resource_group_name, name, slot=None):
@@ -333,11 +337,18 @@ def delete_container_settings(resource_group_name, name, slot=None):
 
 def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
-    return _filter_for_container_settings(settings)
+    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
 
 
 def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
+
+
+# TODO: remove this when #3660(service tracking issue) is resolved
+def _mask_creds_related_appsettings(settings):
+    for x in [x1 for x1 in settings if x1 in APPSETTINGS_TO_MASK]:
+        settings[x] = None
+    return settings
 
 
 def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
@@ -346,20 +357,18 @@ def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
                               site_name=webapp.name)
     if slot is None:
-        return client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp.name, hostname, binding)
-    else:
-        return client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp.name, hostname, binding, slot)
+        return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
+
+    return client.web_apps.create_or_update_host_name_binding_slot(resource_group_name, webapp.name, hostname, binding,
+                                                                   slot)
 
 
 def delete_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
         return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, hostname)
-    else:
-        return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             webapp_name, slot, hostname)
+
+    return client.web_apps.delete_host_name_binding_slot(resource_group_name, webapp_name, slot, hostname)
 
 
 def list_hostnames(resource_group_name, webapp_name, slot=None):
@@ -380,9 +389,8 @@ def get_external_ip(resource_group_name, webapp_name):
         if address.internal_ip_address:
             ip_address = address.internal_ip_address
         else:
-            vip = next((s for s in webapp_name.host_name_ssl_states
-                        if s.ssl_state == SslState.ip_based_enabled), None)
-            ip_address = (vip and vip.virtual_ip) or address.service_ip_address
+            vip = next((s for s in webapp_name.host_name_ssl_states if s.ssl_state == SslState.ip_based_enabled), None)
+            ip_address = vip.virtual_ip if vip else address.service_ip_address
     else:
         ip_address = _resolve_hostname_through_dns(webapp_name.default_host_name)
 
@@ -419,13 +427,13 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         app_settings = _generic_site_operation(resource_group_name, webapp,
                                                'list_application_settings',
                                                src_slot)
-        for a in (slot_cfg_names.app_setting_names or []):
+        for a in slot_cfg_names.app_setting_names or []:
             app_settings.properties.pop(a, None)
 
         connection_strings = _generic_site_operation(resource_group_name, webapp,
                                                      'list_connection_strings',
                                                      src_slot)
-        for a in (slot_cfg_names.connection_string_names or []):
+        for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
         _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
@@ -472,7 +480,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                 import time
                 ex = ex_handler_factory(no_throw=True)(ex)
                 # for non server errors(50x), just throw; otherwise retry 4 times
-                if i == 4 or not (re.findall(r'\(50\d\)', str(ex))):
+                if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
                     raise
                 logger.warning('retrying %s/4', i + 1)
                 time.sleep(5)   # retry in a moment
@@ -537,7 +545,7 @@ def _linux_sku_check(sku):
     tier = _get_sku_name(sku)
     if tier in ['BASIC', 'STANDARD']:
         return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'  # pylint: disable=line-too-long
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
     raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
 
 
@@ -598,8 +606,8 @@ def create_backup(resource_group_name, webapp_name, storage_account_url,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
         return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
-    else:
-        return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
+
+    return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 
 def update_backup_schedule(resource_group_name, webapp_name, storage_account_url=None,
@@ -653,11 +661,9 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
     backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name,
-                                                                backup_request, slot)
-    else:
-        return client.web_apps.update_backup_configuration(resource_group_name, webapp_name,
-                                                           backup_request)
+        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name, backup_request, slot)
+
+    return client.web_apps.update_backup_configuration(resource_group_name, webapp_name, backup_request)
 
 
 def restore_backup(resource_group_name, webapp_name, storage_account_url, backup_name,
@@ -675,8 +681,8 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
         return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request, slot)
-    else:
-        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+
+    return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
 
 
 def _create_db_setting(db_name, db_type, db_connection_string):
@@ -691,7 +697,6 @@ def _parse_frequency(frequency):
     if unit_part == 'd':
         frequency_unit = FrequencyUnit.day
     elif unit_part == 'h':
-        # pylint: disable=redefined-variable-type
         frequency_unit = FrequencyUnit.hour
     else:
         raise CLIError('Frequency must end with d or h for "day" or "hour"')
@@ -713,8 +718,7 @@ def _normalize_sku(sku):
         return 'F1'
     elif sku == 'SHARED':
         return 'D1'
-    else:
-        return sku
+    return sku
 
 
 def _get_sku_name(tier):
@@ -756,7 +760,7 @@ def _get_local_git_url(client, resource_group_name, name, slot=None):
 def _get_scm_url(resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
     webapp = show_webapp(resource_group_name, name, slot=slot)
-    for host in (webapp.host_name_ssl_states or []):
+    for host in webapp.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 
@@ -783,7 +787,6 @@ def set_deployment_user(user_name, password=None):
 
 
 def list_publish_profiles(resource_group_name, name, slot=None):
-    from azure.mgmt.web.models import PublishingProfileFormat
     import xmltodict
 
     content = _generic_site_operation(resource_group_name, name,
@@ -816,8 +819,17 @@ def view_in_browser(resource_group_name, name, slot=None, logs=False):
 
 
 def _open_page_in_browser(url):
-    import webbrowser
-    webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    import sys
+    if sys.platform.lower() == 'darwin':
+        # handle 2 things:
+        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
+        #    understand the "open location" message"
+        # b. Python 2.x can't sniff out the default browser
+        import subprocess
+        subprocess.Popen(['open', url])
+    else:
+        import webbrowser
+        webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
 
 
 # TODO: expose new blob suport
@@ -915,6 +927,31 @@ def delete_slot(resource_group_name, webapp, slot):
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
 
 
+def set_traffic_routing(resource_group_name, name, distribution):
+    client = web_client_factory()
+    site = client.web_apps.get(resource_group_name, name)
+    configs = get_site_configs(resource_group_name, name)
+    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    configs.experiments.ramp_up_rules = []
+    for r in distribution:
+        slot, percentage = r.split('=')
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+                                                            reroute_percentage=float(percentage),
+                                                            name=slot))
+    _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+
+    return configs.experiments.ramp_up_rules
+
+
+def show_traffic_routing(resource_group_name, name):
+    configs = get_site_configs(resource_group_name, name)
+    return configs.experiments.ramp_up_rules
+
+
+def clear_traffic_routing(resource_group_name, name):
+    set_traffic_routing(resource_group_name, name, [])
+
+
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     scm_url = _get_scm_url(resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
@@ -933,9 +970,6 @@ def get_streaming_log(resource_group_name, name, provider=None, slot=None):
 
 
 def download_historical_logs(resource_group_name, name, log_file=None, slot=None):
-    '''
-    Download historical logs as a zip file
-    '''
     scm_url = _get_scm_url(resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
     import requests
@@ -1049,15 +1083,15 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
                 return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
                                                    webapp_cert.host_names[0], ssl_type,
                                                    certificate_thumbprint, slot)
-            else:
-                query_result = list_hostnames(resource_group_name, name, slot)
-                hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-                to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
-                for h in to_update:
-                    _update_host_name_ssl_state(resource_group_name, name, webapp.location,
-                                                h, ssl_type, certificate_thumbprint, slot)
 
-                return show_webapp(resource_group_name, name, slot)
+            query_result = list_hostnames(resource_group_name, name, slot)
+            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+            to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+            for h in to_update:
+                _update_host_name_ssl_state(resource_group_name, name, webapp.location,
+                                            h, ssl_type, certificate_thumbprint, slot)
+
+            return show_webapp(resource_group_name, name, slot)
 
     raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
@@ -1177,7 +1211,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
     client = web_client_factory()
     if consumption_plan_location:
         locations = list_consumption_locations()
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)  # pylint: disable=line-too-long
+        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
@@ -1263,7 +1297,7 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 
     endpoint_suffix = CLOUD.suffixes.storage_endpoint
-    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(   # pylint: disable=line-too-long
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
         "https",
         endpoint_suffix,
         storage_account,

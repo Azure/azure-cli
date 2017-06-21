@@ -5,7 +5,9 @@
 
 from __future__ import print_function
 
+import datetime
 import json
+import logging as logs
 import pkgutil
 import re
 import sys
@@ -21,7 +23,6 @@ from six import string_types, reraise
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
-from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
@@ -32,8 +33,9 @@ from ._introspection import (extract_args_from_signature,
 
 logger = azlogging.get_az_logger(__name__)
 
+# 1 hour in milliseconds
+DEFAULT_QUERY_TIME_RANGE = 3600000
 
-# pylint: disable=too-many-arguments,too-few-public-methods
 
 CONFIRM_PARAM_NAME = 'yes'
 
@@ -69,7 +71,7 @@ class VersionConstraint(object):
             cli_command(*args, **kwargs)
 
 
-class CliArgumentType(object):
+class CliArgumentType(object):  # pylint: disable=too-few-public-methods
     REMOVE = '---REMOVE---'
 
     def __init__(self, overrides=None, **kwargs):
@@ -87,7 +89,7 @@ class CliArgumentType(object):
         self.settings.update(**kwargs)
 
 
-class CliCommandArgument(object):
+class CliCommandArgument(object):  # pylint: disable=too-few-public-methods
     _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
@@ -126,56 +128,120 @@ class CliCommandArgument(object):
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='',
+                 poller_done_interval_ms=1000.0, progress_controller=None):
+
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
+        from azure.cli.core.application import APPLICATION
+        self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
+        self.deploy_dict = {}
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
+    def _generate_template_progress(self, correlation_id):  # pylint: disable=no-self-use
+        """ gets the progress for template deployments """
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        from azure.monitor import MonitorClient
+
+        if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
+            formatter = "eventTimestamp ge {}"
+
+            end_time = datetime.datetime.utcnow()
+            start_time = end_time - datetime.timedelta(seconds=DEFAULT_QUERY_TIME_RANGE)
+            odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+            odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
+
+            activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
+
+            results = []
+            max_events = 50  # default max value for events in list_activity_log
+            for index, item in enumerate(activity_log):
+                if index < max_events:
+                    results.append(item)
+                else:
+                    break
+
+            if results:
+                for event in results:
+                    update = False
+                    long_name = event.resource_id.split('/')[-1]
+                    if long_name not in self.deploy_dict:
+                        self.deploy_dict[long_name] = {}
+                        update = True
+                    deploy_values = self.deploy_dict[long_name]
+
+                    checked_values = {
+                        str(event.resource_type.value): 'type',
+                        str(event.status.value): 'status value',
+                        str(event.event_name.value): 'request',
+                    }
+                    try:
+                        checked_values[str(event.properties.get('statusCode', ''))] = 'status'
+                    except AttributeError:
+                        pass
+
+                    if deploy_values.get('timestamp', None) is None or \
+                            event.event_timestamp > deploy_values.get('timestamp'):
+                        for value in checked_values:
+                            if deploy_values.get(checked_values[value], None) != value:
+                                update = True
+                            deploy_values[checked_values[value]] = value
+                        deploy_values['timestamp'] = event.event_timestamp
+
+                        # don't want to show the timestamp
+                        json_val = deploy_values.copy()
+                        json_val.pop('timestamp', None)
+                        status_val = deploy_values.get('status value', None)
+                        if status_val and status_val != 'Started':
+                            result = deploy_values['status value'] + ': ' + long_name
+                            result += ' (' + deploy_values.get('type', '') + ')'
+
+                            if update:
+                                logger.info(result)
+
     def __call__(self, poller):
         from msrest.exceptions import ClientException
-        logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
+        self.progress_controller.begin()
+        correlation_id = None
+
+        az_logger = azlogging.get_az_logger()
+        is_verbose = any(handler.level <= logs.INFO for handler in az_logger.handlers)
+
         while not poller.done():
+            self.progress_controller.add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
-                    poller._response.__dict__['_content'])['properties']['correlationId']
+                    poller._response.__dict__['_content'].decode())['properties']['correlationId']
 
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
-
+            if is_verbose:
+                try:
+                    self._generate_template_progress(correlation_id)
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 self._delay()
             except KeyboardInterrupt:
+                self.progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
+
         try:
             result = poller.result()
         except ClientException as client_exception:
-            telemetry.set_exception(
-                client_exception,
-                fault_type='failed-long-running-operation',
-                summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
-            message = getattr(client_exception, 'message', client_exception)
+            from azure.cli.core.commands.arm import handle_long_running_operation_exception
+            self.progress_controller.stop()
+            handle_long_running_operation_exception(client_exception)
 
-            try:
-                message = '{} {}'.format(
-                    str(message),
-                    json.loads(client_exception.response.text)['error']['details'][0]['message'])
-            except:  # pylint: disable=bare-except
-                pass
-
-            cli_error = CLIError('{}  {}'.format(message, correlation_message))
-            # capture response for downstream commands (webapp) to dig out more details
-            setattr(cli_error, 'response', getattr(client_exception, 'response', None))
-            raise cli_error
-
-        logger.info("Long running operation '%s' completed with result %s",
-                    self.start_msg, result)
+        self.progress_controller.end()
         return result
 
 
@@ -193,9 +259,9 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
         elif isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return None
-        else:
-            # --validate returns a 'normal' response
-            return result
+
+        # --validate returns a 'normal' response
+        return result
 
 
 class CommandTable(dict):
@@ -232,6 +298,8 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     @staticmethod
     def _should_load_description():
+        from azure.cli.core.application import APPLICATION
+
         return not APPLICATION.session['completer_active']
 
     def load_arguments(self):
@@ -292,7 +360,7 @@ def load_params(command):
     command_module = command_module_map.get(command, None)
     if not command_module:
         logger.debug("Unable to load commands for '%s'. No module in command module map found.",
-                     command)  # pylint: disable=line-too-long
+                     command)
         return
     module_to_load = command_module[:command_module.rfind('.')]
     import_module(module_to_load).load_params(command)
@@ -311,7 +379,7 @@ def get_command_table(module_name=None):
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
             loaded = True
         except ImportError:
-            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)  # pylint: disable=line-too-long
+            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)
         except Exception:  # pylint: disable=broad-except
             pass
     if not loaded:
@@ -390,8 +458,7 @@ def get_op_handler(operation):
             op = getattr(op, part)
         if isinstance(op, types.FunctionType):
             return op
-        else:
-            return six.get_method_function(op)
+        return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -400,6 +467,12 @@ def _load_client_exception_class():
     # Since loading msrest is expensive, we avoid it until we have to
     from msrest.exceptions import ClientException
     return ClientException
+
+
+def _load_validation_error_class():
+    # Since loading msrest is expensive, we avoid it until we have to
+    from msrest.exceptions import ValidationError
+    return ValidationError
 
 
 def _load_azure_exception_class():
@@ -435,7 +508,6 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-        from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
@@ -471,6 +543,11 @@ def create_command(module_name, name, operation,
                         return
                     else:
                         reraise(*sys.exc_info())
+        except _load_validation_error_class() as validation_error:
+            fault_type = name.replace(' ', '-') + '-validation-error'
+            telemetry.set_exception(validation_error, fault_type=fault_type,
+                                    summary='SDK validation error')
+            raise CLIError(validation_error)
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,

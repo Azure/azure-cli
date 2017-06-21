@@ -8,10 +8,6 @@ from azure.cli.core.util import CLIError
 from ._factory import get_acr_service_client
 from ._utils import get_registry_by_name
 
-import azure.cli.core.azlogging as azlogging
-
-logger = azlogging.get_az_logger(__name__)
-
 
 def acr_credential_show(registry_name, resource_group_name=None):
     """Gets the login credentials for the specified container registry.

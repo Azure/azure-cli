@@ -28,11 +28,10 @@ def _decode_str(output):
 
 
 class ComplexEncoder(json.JSONEncoder):
-
-    def default(self, obj):  # pylint: disable=method-hidden
-        if isinstance(obj, bytes) and not isinstance(obj, str):
-            return obj.decode()
-        return json.JSONEncoder.default(self, obj)
+    def default(self, o):  # pylint: disable=method-hidden
+        if isinstance(o, bytes) and not isinstance(o, str):
+            return o.decode()
+        return json.JSONEncoder.default(self, o)
 
 
 def format_json(obj):
@@ -65,7 +64,11 @@ def format_table(obj):
     result = obj.result
     try:
         if obj.table_transformer and not obj.is_query_active:
-            result = obj.table_transformer(result)
+            if isinstance(obj.table_transformer, str):
+                from jmespath import compile as compile_jmes, Options
+                result = compile_jmes(obj.table_transformer).search(result, Options(OrderedDict))
+            else:
+                result = obj.table_transformer(result)
         result_list = result if isinstance(result, list) else [result]
         should_sort_keys = not obj.is_query_active and not obj.table_transformer
         to = TableOutput(should_sort_keys)
@@ -134,7 +137,7 @@ class TableOutput(object):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def _capitalize_first_char(x):
-        return x[0].upper() + x[1:] if x and len(x) > 0 else x
+        return x[0].upper() + x[1:] if x else x
 
     def _auto_table_item(self, item):
         new_entry = OrderedDict()
@@ -160,8 +163,7 @@ class TableOutput(object):  # pylint: disable=too-few-public-methods
             for item in result:
                 new_result.append(self._auto_table_item(item))
             return new_result
-        else:
-            return self._auto_table_item(result)
+        return self._auto_table_item(result)
 
     def dump(self, data):
         table_data = self._auto_table(data)
@@ -218,7 +220,7 @@ class TsvOutput(object):  # pylint: disable=too-few-public-methods
     @staticmethod
     def _dump_row(data, stream):
         separator = ''
-        if isinstance(data, dict) or isinstance(data, list):
+        if isinstance(data, (dict, list)):
             if isinstance(data, OrderedDict):
                 values = data.values()
             elif isinstance(data, dict):

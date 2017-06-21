@@ -91,6 +91,34 @@ class ApplicationSetScenarioTest(VCRTestBase):
         self.cmd('ad app list --identifier-uri {}'.format(app_id_uri), checks=NoneCheck())
 
 
+class CreateForRbacScenarioTest(ScenarioTest):
+
+    def test_revoke_sp_for_rbac(self):
+        if not self.in_recording:
+            return
+        name = 'http://azurecli-test-revoke'
+        self.cmd('ad sp create-for-rbac -n ' + name)
+
+        self.cmd('ad sp list --spn ' + name)
+
+        self.cmd('ad app list --identifier-uri ' + name)
+
+        result = self.cmd('role assignment list --assignee ' + name).get_output_in_json()
+        object_id = result[0]['properties']['principalId']
+
+        self.cmd('ad sp delete --id ' + name)
+
+        result2 = self.cmd('role assignment list --all').get_output_in_json()
+        self.assertFalse([a for a in result2 if a['id'] == object_id])
+
+        self.cmd('ad sp list --spn ' + name, checks=[
+            JMESPathCheck2('length([])', 0)
+        ])
+        self.cmd('ad app list --identifier-uri ' + name, checks=[
+            JMESPathCheck2('length([])', 0)
+        ])
+
+
 class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):

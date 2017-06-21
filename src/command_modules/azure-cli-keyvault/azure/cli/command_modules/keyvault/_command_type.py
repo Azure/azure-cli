@@ -30,10 +30,9 @@ def _encode_hex(item):
                 except TypeError:
                     item.__dict__[key] = _encode_hex(val)
         return item
-    elif isinstance(item, bytes) or isinstance(item, bytearray):
+    elif isinstance(item, (bytes, bytearray)):
         return base64.b64encode(item).decode('utf-8')
-    else:
-        return item
+    return item
 
 
 def _create_key_vault_command(module_name, name, operation, transform_result, table_transformer):
@@ -66,7 +65,7 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
             op = get_op_handler(operation)
             # since the convenience client can be inconvenient, we have to check and create the
             # correct client version
-            client = KeyVaultClient(KeyVaultAuthentication(get_token))  # pylint: disable=redefined-variable-type
+            client = KeyVaultClient(KeyVaultAuthentication(get_token))
             result = op(client, **kwargs)
 
             # apply results transform if specified

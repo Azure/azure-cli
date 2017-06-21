@@ -6,6 +6,7 @@
 import socket
 import threading
 from time import sleep
+from os.path import expanduser, join, isfile
 
 import paramiko
 import paramiko.agent
@@ -21,35 +22,45 @@ def _load_key(key_filename):
     try:
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
     except paramiko.PasswordRequiredException:
-        key_pass = prompt_pass('Password:')
+        key_pass = prompt_pass('Password for private key:')
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
     if pkey is None:
         raise CLIError('failed to load key: {}'.format(key_filename))
     return pkey
 
 
-def SecureCopy(user, host, src, dest,
-               key_filename=None,
-               allow_agent=True):
-    ssh = paramiko.SSHClient()
-    ssh.load_system_host_keys()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
+def _load_keys(key_filename=None, allow_agent=True):
     keys = []
-    pkey = None
+    default_key_path = join(expanduser("~"), '.ssh', 'id_rsa')
     if key_filename is not None:
         key = _load_key(key_filename)
         keys.append(key)
+
     if allow_agent:
         agent = paramiko.agent.Agent()
         for key in agent.get_keys():
             keys.append(key)
-    if keys:
-        pkey = keys[0]
+
+    if not keys and isfile(default_key_path):
+        key = _load_key(default_key_path)
+        keys.append(key)
+
+    if not keys:
+        raise CLIError('No keys available in ssh agent or no key in {}. '
+                       'Do you need to add keys to your ssh agent via '
+                       'ssh-add or specify a --ssh-key-file?'.format(default_key_path))
+
+    return keys
+
+
+def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
+    keys = _load_keys(key_filename, allow_agent)
+    pkey = keys[0]
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(host, username=user, pkey=pkey)
-
     scp = SCPClient(ssh.get_transport())
-
     scp.get(src, dest)
     scp.close()
 
@@ -128,8 +139,8 @@ class ACSClient(object):
             t.daemon = True
             t.start()
             return
-        else:
-            return self._run_cmd(command)
+
+        return self._run_cmd(command)
 
     def _run_cmd(self, command):
         """
@@ -198,7 +209,7 @@ class ACSClient(object):
         """
         Gets a random, available local port
         """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # pylint: disable=no-member
         s.bind(('', 0))
         s.listen(1)
         port = s.getsockname()[1]

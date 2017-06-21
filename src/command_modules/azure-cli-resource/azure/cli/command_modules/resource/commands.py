@@ -7,7 +7,9 @@
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
+from azure.cli.core.commands.arm import \
+    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
+     deployment_validate_table_format)
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
@@ -84,12 +86,12 @@ def transform_deployments_list(result):
     return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
 
-cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
+cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception)
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
 cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
 cli_command(__name__, 'group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments, exception_handler=empty_on_404)
 cli_command(__name__, 'group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
-cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template')
+cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template', table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'group deployment export', 'azure.cli.command_modules.resource.custom#export_deployment_as_template')
 
 # Resource group deployment operations commands

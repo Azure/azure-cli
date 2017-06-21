@@ -18,12 +18,11 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              NoneCheck)
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
+from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-# pylint: disable=method-hidden
 # pylint: disable=line-too-long
-# pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
@@ -95,7 +94,7 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
 
         # min params - apply to existing NIC (updates existing NSG)
-        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['id']
         nsg_name = os.path.split(nsg_id)[1]
         self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
                  checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))
@@ -287,6 +286,55 @@ class VMWindowsLicenseTest(ScenarioTest):
         ])
 
 
+class VMCustomImageTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_custom_image(self, resource_group):
+        # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made generalized vms
+        prepared_vm_unmanaged = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-um'
+        prepared_vm = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-m'
+
+        image1 = 'image1'  # for image captured from vm with unmanaged disk
+        self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image1, prepared_vm_unmanaged), checks=[
+            JMESPathCheckV2('name', image1)
+        ])
+        self.cmd('vm create -g {} -n vm1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image1), checks=[
+                JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
+        ])
+        self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage')
+        ])
+        self.cmd('vmss create -g {} -n vmss1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image1), checks=[
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
+        ])
+
+        image2 = 'image2'  # for image captured from vm with managed os disk and data disk
+        self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image2, prepared_vm), checks=[
+            JMESPathCheckV2('name', image2)
+        ])
+        self.cmd('vm create -g {} -n vm2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image2), checks=[
+                JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
+        ])
+        self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage')
+        ])
+        self.cmd('vmss create -g {} -n vmss2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
+            resource_group, image2), checks=[
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            JMESPathCheckV2("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage')
+        ])
+
+
 class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -344,6 +392,55 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ResourceGroupVCRTestBase):
         ])
 
 
+class VMAttachDisksOnCreate(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
+        # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
+
+        # creating a vm
+        self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1'.format(resource_group)).get_output_in_json()
+        origin_os_disk_name = result['storageProfile']['osDisk']['name']
+        origin_data_disk_name = result['storageProfile']['dataDisks'][0]['name']
+
+        # snapshot the os & data disks
+        os_snapshot = 'oSnapshot'
+        os_disk = 'sDisk'
+        data_snapshot = 'dSnapshot'
+        data_disk = 'dDisk'
+        self.cmd('snapshot create -g {} -n {} --source {}'.format(resource_group, os_snapshot, origin_os_disk_name))
+        self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, os_disk, os_snapshot))
+        self.cmd('snapshot create -g {} -n {} --source {}'.format(resource_group, data_snapshot, origin_data_disk_name))
+        self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
+
+        # rebuild a new vm
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
+            JMESPathCheckV2('powerState', 'VM running'),
+        ])
+        self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
+            JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
+            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3)
+        ])
+
+    @ResourceGroupPreparer()
+    def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
+        # creating a vm
+        self.cmd('vm create -g {} -n vm1 --use-unmanaged-disk --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password'.format(resource_group))
+        self.cmd('vm unmanaged-disk attach -g {} --vm-name vm1 --new --size-gb 2'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1'.format(resource_group)).get_output_in_json()
+        os_disk_vhd = result['storageProfile']['osDisk']['vhd']['uri']
+        data_disk_vhd = result['storageProfile']['dataDisks'][0]['vhd']['uri']
+
+        # delete the vm to end vhd's leases so they can be used to create a new vm through attaching
+        self.cmd('vm deallocate -g {} -n vm1'.format(resource_group))
+        self.cmd('vm delete -g {} -n vm1 -y'.format(resource_group))
+
+        # rebuild a new vm
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux --use-unmanaged-disk'.format(
+            resource_group, os_disk_vhd, data_disk_vhd), checks=[JMESPathCheckV2('powerState', 'VM running')])
+
+
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -358,9 +455,10 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
         image_name = 'i1'
 
         # create a disk and update
-        data_disk = self.cmd('disk create -g {} -n {} --size-gb {}'.format(self.resource_group, disk_name, 1), checks=[
+        data_disk = self.cmd('disk create -g {} -n {} --size-gb {} --tags tag1=d1'.format(self.resource_group, disk_name, 1), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
-            JMESPathCheck('diskSizeGb', 1)
+            JMESPathCheck('diskSizeGb', 1),
+            JMESPathCheck('tags.tag1', 'd1')
         ])
         self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Standard_LRS'), checks=[
             JMESPathCheck('accountType', 'Standard_LRS'),
@@ -371,10 +469,11 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
         data_disk2 = self.cmd('disk create -g {} -n {} --source {}'.format(self.resource_group, disk_name2, data_disk['id']))
 
         # create a snpashot
-        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {}'.format(
+        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {} --tags tag1=s1'.format(
             self.resource_group, snapshot_name, 1, 'Premium_LRS'), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
-            JMESPathCheck('diskSizeGb', 1)
+            JMESPathCheck('diskSizeGb', 1),
+            JMESPathCheck('tags.tag1', 's1')
         ])
         # update the sku
         self.cmd('snapshot update -g {} -n {} --sku {}'.format(self.resource_group, snapshot_name, 'Standard_LRS'), checks=[
@@ -387,12 +486,12 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
             self.resource_group, snapshot_name2, disk_name, 'Premium_LRS'))
 
         # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
-        # pylint: disable=too-many-format-args
-        self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux'.format(
+        self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux --tags tag1=i1'.format(
             self.resource_group, image_name, snapshot_name, disk_name, data_snapshot['id'], data_disk2['id']), checks=[
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),
             JMESPathCheck('storageProfile.osDisk.snapshot.id', os_snapshot['id']),
-            JMESPathCheck('length(storageProfile.dataDisks)', 3)
+            JMESPathCheck('length(storageProfile.dataDisks)', 3),
+            JMESPathCheck('tags.tag1', 'i1')
         ])
 
     def test_managed_disk(self):
@@ -586,6 +685,9 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
         config_file = _write_config_file(user_name)
 
         try:
+            self.cmd('vm extension list --vm-name {} --resource-group {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('length([])', 0)
+            ])
             self.cmd('vm extension set -n {} --publisher {} --version 1.2  --vm-name {} --resource-group {} --protected-settings "{}"'
                      .format(extension_name, publisher, self.vm_name, self.resource_group, config_file))
             self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[
@@ -693,6 +795,17 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
+
+        # test for idempotency--no need to reverify, just ensure the command doesn't fail
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            vm_name=self.vm_names[0],
+            image=self.vm_image,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location
+        ))
 
 
 class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -899,7 +1012,8 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         checks = [
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].publisher', "Microsoft.Azure.Diagnostics"),
-            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account)
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account),
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].typeHandlerVersion', '3.0')
         ]
 
         self.cmd("vmss diagnostics set -g {} --vmss-name {} --settings {} --protected-settings {}".format(
@@ -907,11 +1021,18 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
         self.cmd("vmss show -g {} -n {}".format(self.resource_group, self.vmss), checks=checks)
 
+        # test standalone VM, we will start with an old version
+        self.cmd('vm extension set -g {} --vm-name {} -n LinuxDiagnostic --version 2.3.9025 --publisher Microsoft.OSTCExtensions --settings {} --protected-settings {}'.format(
+            self.resource_group, self.vm, public_settings, protected_settings), checks=[
+            JMESPathCheck('typeHandlerVersion', '2.3')
+        ])
+        # see the 'diagnostics set' command upgrades to newer version
         self.cmd("vm diagnostics set -g {} --vm-name {} --settings {} --protected-settings {}".format(
             self.resource_group, self.vm, public_settings, protected_settings), checks=[
                 JMESPathCheck('name', 'LinuxDiagnostic'),
                 JMESPathCheck('publisher', 'Microsoft.Azure.Diagnostics'),
-                JMESPathCheck('settings.StorageAccount', self.storage_account)
+                JMESPathCheck('settings.StorageAccount', self.storage_account),
+                JMESPathCheck('typeHandlerVersion', '3.0')
         ])
 
         self.cmd("vm show -g {} -n {}".format(self.resource_group, self.vm), checks=[
@@ -1090,15 +1211,17 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
     def body(self):
         disk_name = 'd1'
         disk_name2 = 'd2'
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1 --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2'.format(
             self.resource_group, self.vm_name, disk_name2))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 2),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadOnly'),
             JMESPathCheck('storageProfile.dataDisks[1].name', disk_name2),
             JMESPathCheck('storageProfile.dataDisks[1].lun', 2),
+            JMESPathCheck('storageProfile.dataDisks[1].caching', 'None')
         ])
         self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
             self.resource_group, self.vm_name, disk_name2))
@@ -1110,6 +1233,11 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 0),
+        ])
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite'.format(
+            self.resource_group, self.vm_name, disk_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite')
         ])
 
 
@@ -1458,28 +1586,35 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         ])
 
 
-class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, test_method):
-        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_none_options')
-
-    def test_vmss_create_none_options(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_vmss_create_none_options(self, resource_group):
         vmss_name = 'vmss1'
 
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
                  ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
-                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
-        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
-            JMESPathCheck('availabilitySet', None),
-            JMESPathCheck('tags', {}),
-            JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+                 .format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), [
+            JMESPathCheckV2('availabilitySet', None),
+            JMESPathCheckV2('tags', {}),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
         ])
-        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(self.resource_group, vmss_name),
-                 checks=JMESPathCheck('tags.test', 'success'))
-        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, self.resource_group), checks=NoneCheck(), allowed_exceptions='was not found')
+        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(resource_group, vmss_name),
+                 checks=JMESPathCheckV2('tags.test', 'success'))
+        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, resource_group), checks=NoneCheckV2())
+
+    @ResourceGroupPreparer()
+    def test_vmss_create_with_app_gateway(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --app-gateway apt1 --instance-count 5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
+            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
+        ])
+        # spot check it is using gateway
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('sku.capacity', 5),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
+        ])
 
 
 class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -1659,6 +1794,8 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'object'),
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
+        result = self.cmd('vmss list-instance-connection-info --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+        self.assertTrue(result['instance 0'].split('.')[1], '5000')
         self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
@@ -1720,6 +1857,17 @@ class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', nic_name),
             JMESPathCheck('resourceGroup', self.resource_group),
         ])
+
+
+class VMSSCreateIdempotentTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_idempotent')
+    def test_vmss_create_idempotent(self, resource_group):
+        vmss_name = 'vmss1'
+
+        # run the command twice with the same parameters and verify it does not fail
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 # endregion
 

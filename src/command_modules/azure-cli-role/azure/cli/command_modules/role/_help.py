@@ -5,8 +5,6 @@
 
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-# pylint: disable=line-too-long
-
 
 helps['ad sp create-for-rbac'] = """
     type: command
@@ -18,12 +16,12 @@ helps['ad sp create-for-rbac'] = """
           short-summary: The password used to login. If missing, command will generate one.
         - name: --cert
           short-summary: Certificate to use for credentials in lieu of password.
-          long-summary: When using --key-vault, indicates the name of the cert to use or create.
+          long-summary: When using --keyvault, indicates the name of the cert to use or create.
             Otherwise, supply a PEM or DER formatted public certificate string. Use `@<file path>` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
-          long-summary: Use with --key-vault to create the certificate in Key Vault. Otherwise, a
+          long-summary: Use with --keyvault to create the certificate in Key Vault. Otherwise, a
             certificate will be created locally.
         - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
@@ -47,9 +45,9 @@ helps['ad sp create-for-rbac'] = """
         - name: Create using self-signed certificte
           text: az ad sp create-for-rbac --create-cert
         - name: Create self-signed certificate within KeyVault
-          text: az ad sp create-for-rbac --key-vault <vault name> --cert <name> --create-cert
+          text: az ad sp create-for-rbac --keyvault <vault name> --cert <name> --create-cert
         - name: Create using existing certificate in KeyVault
-          text: az ad sp create-for-rbac --key-vault <vault name> --cert <name>
+          text: az ad sp create-for-rbac --keyvault <vault name> --cert <name>
         - name: Login with a service principal.
           text: az login --service-principal -u <name> -p <password> --tenant <tenant>
         - name: Login with self-signed certificate
@@ -73,12 +71,12 @@ helps['ad sp reset-credentials'] = """
           short-summary: The password used to login. If missing, command will generate one.
         - name: --cert
           short-summary: Certificate to use for credentials in lieu of password.
-          long-summary: When using --key-vault, indicates the name of the cert to use or create.
+          long-summary: When using --keyvault, indicates the name of the cert to use or create.
             Otherwise, supply a PEM or DER formatted public certificate string. Use `@<file path>` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
-          long-summary: Use with --key-vault to create the certificate in Key Vault. Otherwise, a
+          long-summary: Use with --keyvault to create the certificate in Key Vault. Otherwise, a
             certificate will be created locally.
         - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
@@ -86,7 +84,46 @@ helps['ad sp reset-credentials'] = """
           short-summary: >
             Number of years for which the credentials will be valid. Default: 1 year
 """
-
+helps['ad sp delete'] = """
+    type: command
+    short-summary: delete a service principal and its role assignments
+"""
+helps['ad sp create'] = """
+    type: command
+    short-summary: create a service principal
+"""
+helps['ad sp list'] = """
+    type: command
+    short-summary: list service principals, with optional filtering
+"""
+helps['ad sp show'] = """
+    type: command
+    short-summary: get a service principal
+"""
+helps['ad app delete'] = """
+    type: command
+    short-summary: delete an application
+"""
+helps['ad app create'] = """
+    type: command
+    short-summary: create an application
+"""
+helps['ad app list'] = """
+    type: command
+    short-summary: list applications, with optional filtering
+"""
+helps['ad app show'] = """
+    type: command
+    short-summary: get an application
+"""
+helps['ad app update'] = """
+    type: command
+    short-summary: update an application
+"""
+helps['ad user list'] = """
+    type: command
+    short-summary: list users, with optional filtering
+"""
 helps['role'] = """
     type: group
     short-summary: Use role assignments to manage access to your Azure resources.
@@ -109,6 +146,7 @@ helps['role assignment delete'] = """
 helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
+    long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use --all.
 """
 helps['role definition'] = """
     type: group

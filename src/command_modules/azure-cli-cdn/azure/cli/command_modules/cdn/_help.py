@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=unused-import
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
+
 helps['cdn'] = """
     type: group
     short-summary: Manage Azure Content Delivery Networks (CDN)
@@ -128,7 +127,7 @@ helps['cdn endpoint purge'] = """
     examples:
         - name: Purge content for Javascript and CSS styles
           text: >
-            az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths \\
+            az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths \\
                 '/scripts/app.js' '/styles/*'
 """
 

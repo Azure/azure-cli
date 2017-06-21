@@ -304,7 +304,7 @@ helps['vm user delete'] = """
         Delete a user account from a VM without logging into it.
     examples:
         - name: Delete a user account.
-          text: az vm user delete -u username -n MyVm -r MyResourceGroup
+          text: az vm user delete -u username -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Delete User by VM Ids', 'az vm user delete -u username'))
 
@@ -315,7 +315,7 @@ helps['vm user reset-ssh'] = """
         The extension will restart the SSH server, open the SSH port on your VM, and reset the SSH configuration to default values. The user account (name, password, or SSH keys) are not changed.
     examples:
         - name: Reset the SSH configuration.
-          text: az vm user reset-ssh -n MyVm -r MyResourceGroup
+          text: az vm user reset-ssh -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Reset SSH by VM Ids', 'vm user reset-ssh'))
 
@@ -326,7 +326,7 @@ helps['vm user update'] = """
         - name: Update a Windows user account.
           text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
         - name: Update a Linux user account.
-          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -r MyResourceGroup
+          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Set Linux User by VM Ids', 'vm user update -u username '
                                  '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
@@ -372,8 +372,8 @@ helps[boot_diagnostics_log] = """
     examples:
 {0}
 {1}
-""".format(name_group_example.format('Disable boot diagnostics', boot_diagnostics_log),
-           vm_ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
+""".format(name_group_example.format('Get boot diagnostics log', boot_diagnostics_log),
+           vm_ids_example.format('Get boot diagnostics log by VM Ids', boot_diagnostics_log))
 
 helps['acs'] = """
     type: group
@@ -421,7 +421,7 @@ helps['vm diagnostics get-default-config'] = """
           text: >
             az vm diagnostics get-default-config \\
                 | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#MyStorageAccount#g" \\
-                | sed "s#__VM_RESOURCE_ID__#MyVmResourceId#g"
+                | sed "s#__VM_OR_VMSS_RESOURCE_ID__#MyVmResourceId#g"
         - name: Get the default diagnostics on a Windows VM.
           text: >
             az vm diagnostics get-default-config --is-windows-os
@@ -442,7 +442,7 @@ helps['vm diagnostics set'] = """
 
             default_config=$(az vm diagnostics get-default-config \\
                 | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
-                | sed "s#__VM_RESOURCE_ID__#$my_vm_resource_id#g")
+                | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
             storage_sastoken=$(az storage account generate-sas \\
                 --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
@@ -641,7 +641,7 @@ helps['vm image'] = """
 
 helps['vm image list'] = """
     type: command
-    short-summary: List the VM images available in the Azure Marketplace.
+    short-summary: List the VM/VMSS images available in the Azure Marketplace.
     examples:
         - name: List all available images.
           text: az vm image list --all
@@ -963,6 +963,12 @@ helps['disk update'] = """
     type: command
     short-summary: Update a managed disk.
 """
+
+helps['disk wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the managed disk is met.
+"""
+
 
 helps['disk grant-access'] = """
     type: command

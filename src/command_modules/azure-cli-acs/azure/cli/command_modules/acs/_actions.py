@@ -32,7 +32,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
 
 
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
-    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression #pylint: disable=line-too-long
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
     try:

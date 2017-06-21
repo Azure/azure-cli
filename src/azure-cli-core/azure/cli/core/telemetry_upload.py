@@ -54,7 +54,7 @@ def upload(data_to_save):
 
         if in_diagnostic_mode():
             sys.stdout.write('\nTrack Event: {}\nProperties: {}\nMeasurements: {}'.format(
-                name, json.dumps(properties), json.dumps(measurements)))
+                name, json.dumps(properties, indent='  '), json.dumps(measurements, indent='  ')))
 
     client.flush()
 
@@ -63,7 +63,6 @@ def upload(data_to_save):
 
 
 if __name__ == '__main__':
-    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should
-    # control.
+    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
     decorators.is_diagnostics_mode = in_diagnostic_mode
     upload(sys.argv[1])

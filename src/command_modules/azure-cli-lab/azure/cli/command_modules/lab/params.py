@@ -7,6 +7,7 @@ from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list,
                                                       validate_user_name,
                                                       validate_template_id,
+                                                      validate_claim_vm,
                                                       _validate_artifacts)
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
@@ -65,6 +66,12 @@ with ParametersContext(command='lab vm list') as c:
     c.argument('claimable', action='store_true', arg_group=filter_arg_group_name)
     c.argument('environment', arg_group=filter_arg_group_name)
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_list)
+
+
+with ParametersContext(command='lab vm claim') as c:
+    c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_claim_vm)
+    c.register_alias('name', ('--name', '-n'), id_part='child_name')
+    c.argument('lab_name', id_part='name')
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:

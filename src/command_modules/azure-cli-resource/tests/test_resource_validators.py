@@ -4,15 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
 import os.path
+import mock
 from six import StringIO
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.resource._validators import (
-    validate_deployment_name,
+    _validate_deployment_name,
     validate_lock_parameters,
 )
+
+
+class NamespaceObject:
+    pass
 
 
 class Test_resource_validators(unittest.TestCase):
@@ -59,9 +63,12 @@ class Test_resource_validators(unittest.TestCase):
             }
         ]
         for valid_namespace in valid:
+            namespace_obj = NamespaceObject()
+            for key in valid_namespace:
+                setattr(namespace_obj, key, valid_namespace[key])
             try:
                 # If unexpected invalid, this throws, so no need for asserts
-                validate_lock_parameters(valid_namespace)
+                validate_lock_parameters(namespace_obj)
             except CLIError as ex:
                 self.fail('Test {} failed. {}'.format(valid_namespace['test'], ex))
 
@@ -102,7 +109,10 @@ class Test_resource_validators(unittest.TestCase):
         ]
         for invalid_namespace in invalid:
             with self.assertRaises(CLIError):
-                validate_lock_parameters(invalid_namespace)
+                namespace_obj = NamespaceObject()
+                for key in invalid_namespace:
+                    setattr(namespace_obj, key, invalid_namespace[key])
+                validate_lock_parameters(namespace_obj)
 
     def test_generate_deployment_name_from_file(self):
         # verify auto-gen from uri
@@ -110,14 +120,14 @@ class Test_resource_validators(unittest.TestCase):
         namespace.template_uri = 'https://templates/template123.json?foo=bar'
         namespace.template_file = None
         namespace.deployment_name = None
-        validate_deployment_name(namespace)
+        _validate_deployment_name(namespace)
         self.assertEqual('template123', namespace.deployment_name)
 
         namespace = mock.MagicMock()
         namespace.template_file = __file__
         namespace.template_uri = None
         namespace.deployment_name = None
-        validate_deployment_name(namespace)
+        _validate_deployment_name(namespace)
 
         file_base_name = os.path.basename(__file__)
         file_base_name = file_base_name[:str.find(file_base_name, '.')]
@@ -128,7 +138,7 @@ class Test_resource_validators(unittest.TestCase):
         namespace.template_file = '{"foo":"bar"}'
         namespace.template_uri = None
         namespace.deployment_name = None
-        validate_deployment_name(namespace)
+        _validate_deployment_name(namespace)
         self.assertEqual('deployment1', namespace.deployment_name)
 
 

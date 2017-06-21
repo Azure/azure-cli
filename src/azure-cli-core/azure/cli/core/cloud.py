@@ -58,7 +58,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  gallery=None,
                  active_directory=None,
                  active_directory_resource_id=None,
-                 active_directory_graph_resource_id=None):
+                 active_directory_graph_resource_id=None,
+                 vm_image_alias_doc=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -68,6 +69,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
+        self.vm_image_alias_doc = vm_image_alias_doc
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -100,7 +102,7 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
-        self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint  # pylint: disable=line-too-long
+        self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -146,7 +148,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         gallery='https://gallery.azure.com/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
-        active_directory_graph_resource_id='https://graph.windows.net/'),
+        active_directory_graph_resource_id='https://graph.windows.net/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -164,7 +167,8 @@ AZURE_CHINA_CLOUD = Cloud(
         gallery='https://gallery.chinacloudapi.cn/',
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
-        active_directory_graph_resource_id='https://graph.chinacloudapi.cn/'),
+        active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -180,7 +184,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         gallery='https://gallery.usgovcloudapi.net/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
-        active_directory_graph_resource_id='https://graph.windows.net/'),
+        active_directory_graph_resource_id='https://graph.windows.net/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
@@ -196,7 +201,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         gallery='https://gallery.cloudapi.de/',
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',
-        active_directory_graph_resource_id='https://graph.cloudapi.de/'),
+        active_directory_graph_resource_id='https://graph.cloudapi.de/',
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
@@ -235,12 +241,14 @@ def init_known_clouds(force=False):
     stored_cloud_names = config.sections()
     for c in KNOWN_CLOUDS:
         if force or c.name not in stored_cloud_names:
-            _save_cloud(c, overwrite=force)
+            _config_add_cloud(config, c, overwrite=force)
+    if not os.path.isdir(GLOBAL_CONFIG_DIR):
+        os.makedirs(GLOBAL_CONFIG_DIR)
+    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
+        config.write(configfile)
 
 
 def get_clouds():
-    # ensure the known clouds are always in cloud config
-    init_known_clouds()
     clouds = []
     # load the config again as it may have changed
     config = get_config_parser()
@@ -312,7 +320,7 @@ def _set_active_subscription(cloud_name):
                                          _STATE, _SUBSCRIPTION_NAME)
     profile = Profile()
     subscription_to_use = get_cloud_subscription(cloud_name) or \
-                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa # pylint: disable=line-too-long
+                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
                                 if s[_STATE] == 'Enabled'),
                                None)
     if subscription_to_use:
@@ -340,9 +348,8 @@ def switch_active_cloud(cloud_name):
     _set_active_subscription(cloud_name)
 
 
-def _save_cloud(cloud, overwrite=False):
-    config = get_config_parser()
-    config.read(CLOUD_CONFIG_FILE)
+def _config_add_cloud(config, cloud, overwrite=False):
+    """ Add a cloud to a config object """
     try:
         config.add_section(cloud.name)
     except configparser.DuplicateSectionError:
@@ -356,6 +363,12 @@ def _save_cloud(cloud, overwrite=False):
     for k, v in cloud.suffixes.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'suffix_{}'.format(k), v)
+
+
+def _save_cloud(cloud, overwrite=False):
+    config = get_config_parser()
+    config.read(CLOUD_CONFIG_FILE)
+    _config_add_cloud(config, cloud, overwrite=overwrite)
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

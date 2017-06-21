@@ -29,8 +29,7 @@ def _user_agrees_to_telemetry(func):
     def _wrapper(*args, **kwargs):
         if not _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True):
             return
-        else:
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return _wrapper
 
@@ -151,7 +150,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'Parameters', self.parameters)
+        self.set_custom_properties(result, 'Parameters', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
 
         return result
@@ -334,8 +333,7 @@ def _get_shell_type():
         return 'ksh'
     elif 'WINDIR' in os.environ:
         return 'cmd'
-    else:
-        return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
+    return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 
 @decorators.suppress_all_exceptions(fallback_return='')

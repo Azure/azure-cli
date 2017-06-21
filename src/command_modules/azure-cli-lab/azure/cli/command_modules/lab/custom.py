@@ -5,7 +5,8 @@
 import getpass
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-arguments
+# pylint: disable=too-many-locals, unused-argument, too-many-statements
+
 def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
                   size=None, admin_username=getpass.getuser(), admin_password=None,
                   ssh_key=None, authentication_type='password',
@@ -53,6 +54,16 @@ def list_vm(client, resource_group, lab_name, order_by=None, top=None,
                        expand=expand, filter=filters, top=top, order_by=order_by)
 
 
+def claim_vm(client, lab_name=None, name=None, resource_group=None):
+    """ Command to claim a VM in the Azure DevTest Lab"""
+
+    if name is not None:
+        return client.claim(resource_group, lab_name, name)
+
+    from ._client_factory import get_devtestlabs_lab_operation
+    return get_devtestlabs_lab_operation(None).claim_any_vm(resource_group, lab_name)
+
+
 # pylint: disable=too-many-locals, unused-argument
 def create_environment(client, resource_group, lab_name, name, arm_template, parameters=None,
                        artifact_source_name=None, user_name=None, tags=None):
@@ -87,7 +98,7 @@ def _export_parameters(arm_template):
             for parameter_value_file_info in arm_template.parameters_value_files_info:
                 if isinstance(parameter_value_file_info.parameters_value_info, dict):
                     for k in parameter_value_file_info.parameters_value_info:
-                        default_values[k] = parameter_value_file_info.parameters_value_info[k].get('value', "")  # pylint: disable=line-too-long
+                        default_values[k] = parameter_value_file_info.parameters_value_info[k].get('value', "")
 
         if isinstance(arm_template.contents['parameters'], dict):
             for k in arm_template.contents['parameters']:

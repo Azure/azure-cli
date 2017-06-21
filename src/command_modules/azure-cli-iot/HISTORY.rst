@@ -2,6 +2,21 @@
 
 Release History
 ===============
+0.1.8 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
+0.1.7 (2017-06-13)
+++++++++++++++++++
+* Remove useless line-too-long suppression.
+* Move all existing recording files to latest folder.
+* Eliminating too-many-arguments pylint disable rule (#3583)
+* Fix various pylint disable rules.
+
+0.1.6 (2017-05-30)
++++++++++++++++++++++
+
+* Minor fixes.
 
 0.1.5 (2017-05-05)
 +++++++++++++++++++++

@@ -12,10 +12,8 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 
 def create_service_adapter(service_model, service_class=None):
     def _service_adapter(method_name):
-        if service_class is not None:
-            return '{}#{}.{}'.format(service_model, service_class, method_name)
-        else:
-            return '{}#{}'.format(service_model, method_name)
+        return '{}#{}.{}'.format(service_model, service_class, method_name) if service_class else \
+            '{}#{}'.format(service_model, method_name)
 
     return _service_adapter
 
