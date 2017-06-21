@@ -90,3 +90,5 @@ register_cli_argument('cosmosdb collection', 'indexing_policy',
                       options_list=('--indexing-policy'),
                       help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)',
                       type=shell_safe_json_parse, completer=FilesCompleter())
+
+register_cli_argument('cosmosdb collection', 'default_ttl', help='Default TTL', type=int)

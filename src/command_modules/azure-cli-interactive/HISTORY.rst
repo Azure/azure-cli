@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.3.4 (unreleased)
+0.3.5 (2017-06-21)
 ++++++++++++++++++
 
 * Enhance the '?' gesture to also inject into the next command
