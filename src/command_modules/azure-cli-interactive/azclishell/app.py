@@ -721,11 +721,7 @@ class Shell(object):
                 self.set_prompt()
                 continue
 
-<<<<<<< HEAD
-        print('Have a lovely day!!', file=self.input)
-=======
         print('Have a lovely day!!', file=self.output)
->>>>>>> c4050408308acc41d095f0330fb11627be726fb1
         telemetry.conclude()
 
 
