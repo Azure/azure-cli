@@ -2,8 +2,8 @@
 
 Release History
 ===============
-Unreleased
-++++++++++++++++++++
+2.0.7 (2017-06-21)
+++++++++++++++++++
 
 * Adding commands for KeyVault recovery features
 * az keyvault purge, recover, list-deleted
