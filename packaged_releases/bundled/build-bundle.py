@@ -49,6 +49,7 @@ PLATFORM_SPECIFIC_DEPENDENCIES = [
     ('cffi', '1.10.0'),
     ('SecretStorage', '2.3.1'),
     ('pywin32-ctypes', '0.0.1'),
+    ('packaging', '16.8'),
 ]
 
 def _error_exit(msg):
