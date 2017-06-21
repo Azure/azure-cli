@@ -593,8 +593,8 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/deallocated')
         self.cmd('vm resize -g {} -n {} --size {}'.format(
-            self.resource_group, self.vm_name, 'Standard_A4'),
-            checks=JMESPathCheck('hardwareProfile.vmSize', 'Standard_A4'))
+            self.resource_group, self.vm_name, ' Standard_DS2_v2'),
+            checks=JMESPathCheck('hardwareProfile.vmSize', 'Standard_DS2_v2'))
         self.cmd('vm delete --resource-group {} --name {} --yes'.format(
             self.resource_group, self.vm_name))
         # Expecting no results
