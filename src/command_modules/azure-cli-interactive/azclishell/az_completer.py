@@ -106,7 +106,7 @@ class AzCompleter(Completer):
         self.param_description = commands.param_descript
         # a dictionary of command to examples of how to use it
         self.command_examples = commands.command_example
-        # a dictionary command to which parameters mean the same thing
+        # a dictionary of commands with parameters with multiple names (e.g. {'vm create':{-n: --name}})
         self.same_param_doubles = commands.same_param_doubles or {}
 
         self._is_command = True
