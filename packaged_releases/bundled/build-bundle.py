@@ -50,6 +50,7 @@ PLATFORM_SPECIFIC_DEPENDENCIES = [
     ('SecretStorage', '2.3.1'),
     ('pywin32-ctypes', '0.0.1'),
     ('packaging', '16.8'),
+    ('pyparsing', '2.2.0'),
 ]
 
 def _error_exit(msg):
