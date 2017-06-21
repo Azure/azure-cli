@@ -128,14 +128,6 @@ def dump_command_table():
         json.dump(data, help_file)
 
 
-class Exporter(json.JSONEncoder):
-    def default(self, o):
-        try:
-            return super(Exporter, self).default(o)
-        except TypeError:
-            return str(o)
-
-
 def get_cache_dir():
     """ gets the location of the cache """
     azure_folder = config.get_config_dir()
