@@ -1,8 +1,9 @@
 .. :changelog:
 
 Release History
+===============
 
-unreleased
+2.0.6 (2017-06-21)
 ++++++++++++++++++
 * az sql server create/update command output no longer show administratorLoginPassword values.
 
