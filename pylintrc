@@ -3,7 +3,7 @@
 # locally-disabled: Warning locally suppressed using disable-msg
 # cyclic-import: because of https://github.com/PyCQA/pylint/issues/850
 # too-many-arguments: Due to the nature of the CLI many commands have large arguments set which reflect in large arguments set in corresponding methods.
-disable=missing-docstring,invalid-name,locally-disabled,fixme,cyclic-import,too-many-arguments
+disable=missing-docstring,locally-disabled,fixme,cyclic-import,too-many-arguments,invalid-name
 
 [FORMAT]
 max-line-length=120
@@ -21,3 +21,20 @@ max-branches=20
 [SIMILARITIES]
 min-similarity-lines=10
 
+[BASIC]
+# Naming hints based on PEP 8 (https://www.python.org/dev/peps/pep-0008/#naming-conventions).
+# Consider these guidelines and not hard rules. Read PEP 8 for more details.
+
+# The invalid-name checker must be **enabled** for these hints to be used.
+include-naming-hint=yes
+
+module-name-hint=lowercase (short; underscores are discouraged)
+const-name-hint=UPPER_CASE_WITH_UNDERSCORES
+class-name-hint=CapitalizedWords
+class-attribute-name-hint=lower_case_with_underscores
+attr-name-hint=lower_case_with_underscores
+method-name-hint=lower_case_with_underscores
+function-name-hint=lower_case_with_underscores
+argument-name-hint=lower_case_with_underscores
+variable-name-hint=lower_case_with_underscores
+inlinevar-name-hint=lower_case_with_underscores (short is OK)
