@@ -3,6 +3,10 @@
 Release History
 ===============
 
+1.0.4 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
 1.0.3 (2017-06-13)
 ++++++++++++++++++
 * Remove useless line-too-long suppression
