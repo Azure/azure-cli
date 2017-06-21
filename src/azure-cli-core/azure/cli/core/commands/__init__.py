@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import datetime
 import json
+import logging as logs
 import pkgutil
 import re
 import sys
@@ -140,13 +141,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
-    def _template_progress(self, correlation_id):  # pylint: disable=no-self-use
+    def _generate_template_progress(self, correlation_id):  # pylint: disable=no-self-use
         """ gets the progress for template deployments """
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         from azure.monitor import MonitorClient
 
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
-
             formatter = "eventTimestamp ge {}"
 
             end_time = datetime.datetime.utcnow()
@@ -208,6 +208,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         correlation_message = ''
         self.progress_controller.begin()
         correlation_id = None
+
+        az_logger = azlogging.get_az_logger()
+        is_verbose = any(handler.level <= logs.INFO for handler in az_logger.handlers)
+
         while not poller.done():
             self.progress_controller.add(message='Running')
             try:
@@ -218,7 +222,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
-            self._template_progress(correlation_id)
+            if is_verbose:
+                self._generate_template_progress(correlation_id)
             try:
                 self._delay()
             except KeyboardInterrupt:
