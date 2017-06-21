@@ -72,25 +72,21 @@ class ServiceFabricScenarioTests(ScenarioTest):
 
         # Specifically need a large temporary file in a temporary directory
         temp_app_dir = tempfile.mkdtemp()
-        self.test_resources_count += 1
-        dir_moniker = '{}{:06}'.format("tempdir", self.test_resources_count)
-        fd, file_path = tempfile.mkstemp(dir=temp_app_dir)
-        self.test_resources_count += 1
-        file_moniker = '{}{:06}'.format("tempfile", self.test_resources_count)
-
-        if self.in_recording:
-            self.name_replacer.register_name_pair(os.path.basename(temp_app_dir), dir_moniker)
-            self.name_replacer.register_name_pair(os.path.basename(file_path), file_moniker)
-
-        self.addCleanup(lambda: shutil.rmtree(temp_app_dir, ignore_errors=True))
-
+        dest_app_dir = os.path.join(os.path.dirname(temp_app_dir), "tempdir00")
+        os.rename(temp_app_dir, dest_app_dir)
+        fd, file_path = tempfile.mkstemp(dir=dest_app_dir)
         os.close(fd)
-        with open(file_path, mode='r+b') as f:
+        dest_file_path = os.path.join(dest_app_dir, "tempfile00")
+        os.rename(file_path, dest_file_path)
+        self.test_resources_count += 2
+        self.addCleanup(lambda: shutil.rmtree(dest_app_dir, ignore_errors=True))
+
+        with open(dest_file_path, mode='r+b') as f:
             chunk = bytearray([0] * 1024)
             for _ in range(5000):
                 f.write(chunk)
 
-        self.cmd("az sf application upload --path {0} --show-progress".format(temp_app_dir), checks=[NoneCheck()])
+        self.cmd("az sf application upload --path {0} --show-progress".format(dest_app_dir), checks=[NoneCheck()])
 
     # Cluster tests
 
