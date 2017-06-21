@@ -223,7 +223,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             except:  # pylint: disable=bare-except
                 pass
             if is_verbose:
-                self._generate_template_progress(correlation_id)
+                try:
+                    self._template_progress(correlation_id)
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.info('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 self._delay()
             except KeyboardInterrupt:
