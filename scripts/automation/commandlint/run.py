@@ -7,7 +7,6 @@ import pkgutil
 
 import os
 import sys
-import sets
 import json
 from importlib import import_module
 
@@ -19,6 +18,10 @@ from azure.cli.core.commands import load_params, _update_command_definitions
 from azure.cli.core.help_files import helps
 from azure.cli.core.commands.arm import add_id_parameters
 
+try:
+    from sets import Set as set
+except ImportError:
+    pass
 
 WHITE_DATA_FILE = os.path.join(os.path.dirname(__file__), 'allowed-error.json')
 
@@ -43,12 +46,12 @@ def dump_no_help(modules):
     with open(WHITE_DATA_FILE, 'r') as white:
         white_data = json.load(white)
 
-    white_list_commands = sets.Set(white_data.get('commands', []))
-    white_list_subgroups = sets.Set(white_data.get('subgroups', []))
+    white_list_commands = set(white_data.get('commands', []))
+    white_list_subgroups = set(white_data.get('subgroups', []))
     white_list_parameters = white_data.get('parameters', {})
 
-    command_list = sets.Set()
-    subgroups_list = sets.Set()
+    command_list = set()
+    subgroups_list = set()
     parameters = {}
     for cmd in cmd_table:
         if not cmd_table[cmd].description and cmd not in helps and cmd not in white_list_commands:
@@ -60,7 +63,7 @@ def dump_no_help(modules):
                 exit_val = 1
                 subgroups_list.add(group_name)
 
-        param_list = sets.Set()
+        param_list = set()
         for key in cmd_table[cmd].arguments:
             name = cmd_table[cmd].arguments[key].name
             if not cmd_table[cmd].arguments[key].type.settings.get('help') and \
