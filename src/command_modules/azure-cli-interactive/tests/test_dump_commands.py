@@ -32,10 +32,8 @@ class DumpCommandsTest(unittest.TestCase):
 
     def test_dump_commands(self):
         """ tests dumping the command table"""
-
         dump.dump_command_table()
         self.assertTrue(os.path.exists(os.path.join(self.path, self.command_file_name)))
-
 
 
 if __name__ == '__main__':
