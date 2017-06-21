@@ -3,7 +3,7 @@
 Release History
 ===============
 2.0.10 (2017-06-21)
-++++++++++++++++++
++++++++++++++++++++
 * Fix deployment progress exceptions
 
 2.0.9 (2017-06-14)
