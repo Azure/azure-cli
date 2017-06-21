@@ -20,7 +20,6 @@ class DumpCommandsTest(unittest.TestCase):
             'cache')
         self.command_file_name = 'help_dump.json'
 
-
     def test_install_modules(self):
         """ tests the running """
         dump.install_modules()
