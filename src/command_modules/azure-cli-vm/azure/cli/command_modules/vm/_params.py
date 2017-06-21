@@ -10,7 +10,7 @@ from azure.mgmt.compute.models import (CachingTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
 
-from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
@@ -291,8 +291,8 @@ register_cli_argument('image create', 'data_disks', ignore_type)
 register_cli_argument('image create', 'data_snapshots', ignore_type)
 
 for scope in ['disk', 'snapshot']:
-    register_extra_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
-                                help='source from the same region, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
+    register_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
+                          help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
     register_cli_argument(scope, 'source_blob_uri', ignore_type)
     register_cli_argument(scope, 'source_disk', ignore_type)
     register_cli_argument(scope, 'source_snapshot', ignore_type)
