@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
+++++++++++++++++++
+* vm: makes image create's '--source' argument mandatory, also improves the clarity of the help 
+
 2.0.9 (2017-06-21)
 ++++++++++++++++++
 * vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
