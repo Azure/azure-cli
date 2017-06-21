@@ -14,6 +14,7 @@ except ImportError:
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 from azure.cli.core.util import CLIError
 
+
 def _mock_get_uuid_str():
     return '00000000-0000-0000-0000-000000000000'
 
@@ -290,7 +291,7 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
         # job relationship. Attempt to submit a job with invalid job relationship param combos
         with self.assertRaises(CLIError):
             self.cmd('dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {}'.format(adla, recurrence_name))
-    
+
         with self.assertRaises(CLIError):
             self.cmd('dla job submit -n {} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {} --recurrence-id {} --pipeline-name {}'.format(adla,
                                                                                                                                                                                                  recurrence_name,
@@ -305,10 +306,8 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
                                                                                                                                                                                                                                        pipeline_name,
                                                                                                                                                                                                                                        pipeline_id,
                                                                                                                                                                                                                                        pipeline_uri,
-                                                                                                                                                                                                                                       run_id), 
-            checks=[
-            JMESPathCheck('name', 'clijobtest'),
-        ])
+                                                                                                                                                                                                                                       run_id),
+            checks=[JMESPathCheck('name', 'clijobtest')])
 
         # wait for the job to finish
         job_id = result['jobId']
@@ -352,6 +351,7 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
         assert isinstance(result['runs'], list)
         assert len(result['runs']) >= 1
 
+
 class DataLakeAnalyticsAccountScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -377,7 +377,7 @@ class DataLakeAnalyticsAccountScenarioTest(ResourceGroupVCRTestBase):
         adls2 = self.adls_names[1]
         adla = self.adla_name
         loc = self.location
-        
+
         # compute policy variables
         user_policy_name = 'pycliuserpolicy'
         user_object_id = '8ce05900-7a9e-4895-b3f0-0fbcee507803'

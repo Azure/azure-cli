@@ -10,10 +10,7 @@ from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccou
                                                           FirewallRule,
                                                           DataLakeAnalyticsAccount,
                                                           DataLakeStoreAccountInfo,
-                                                          ComputePolicyCreateOrUpdateParameters,
-                                                          ComputePolicy,
-                                                          AddStorageAccountParameters,
-                                                          UpdateStorageAccountParameters)
+                                                          ComputePolicyCreateOrUpdateParameters)
 
 from azure.mgmt.datalake.analytics.job.models import (JobType,
                                                       JobState,
@@ -134,6 +131,7 @@ def update_adla_account(client,
 
     return client.update(resource_group_name, account_name, update_params).result()
 
+
 # storage customizations
 def add_adla_blob_storage(client,
                           account_name,
@@ -147,6 +145,7 @@ def add_adla_blob_storage(client,
                       access_key,
                       suffix)
 
+
 def update_adla_blob_storage(client,
                              account_name,
                              storage_account_name,
@@ -158,6 +157,7 @@ def update_adla_blob_storage(client,
                          storage_account_name,
                          access_key,
                          suffix)
+
 
 # firewall customizations
 def add_adla_firewall_rule(client,
@@ -185,8 +185,8 @@ def create_adla_compute_policy(client,
     if not max_dop_per_job and not min_priority_per_job:
         raise CLIError('Please specify at least one of --max-dop-per-job and --min-priority-per-job')
 
-    create_params = ComputePolicyCreateOrUpdateParameters(object_id = object_id,
-                                                          object_type = object_type)
+    create_params = ComputePolicyCreateOrUpdateParameters(object_id=object_id,
+                                                          object_type=object_type)
 
     if max_dop_per_job:
         create_params.max_degree_of_parallelism_per_job = int(max_dop_per_job)
@@ -198,6 +198,7 @@ def create_adla_compute_policy(client,
                                    account_name,
                                    compute_policy_name,
                                    create_params)
+
 
 def update_adla_compute_policy(client,
                                account_name,
@@ -219,6 +220,7 @@ def update_adla_compute_policy(client,
                          compute_policy_name,
                          max_dop_per_job,
                          min_priority_per_job)
+
 
 # catalog customizations
 def create_adla_catalog_credential(client,
