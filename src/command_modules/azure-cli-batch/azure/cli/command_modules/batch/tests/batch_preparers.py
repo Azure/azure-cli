@@ -28,8 +28,7 @@ class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
                                                                      self.location)
             execute(cmd)
             return {self.parameter_name: name}
-        else:
-            return {self.parameter_name: self.dev_setting_value}
+        return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_value and not self.skip_delete:

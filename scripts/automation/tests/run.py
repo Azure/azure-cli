@@ -13,7 +13,7 @@ from automation.utilities.path import get_test_results_dir
 
 
 def run_tests(modules, parallel, run_live):
-    print('\n\nRun automation')
+    print('Run automation')
     print('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
 
     # create test results folder
@@ -24,20 +24,15 @@ def run_tests(modules, parallel, run_live):
         os.environ['AZURE_TEST_RUN_LIVE'] = 'True'
 
     # get test runner
-    run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True,
-                               parallel=parallel, process_timeout=3600 if run_live else 600)
+    run_nose = get_nose_runner(test_results_folder, xunit_report=False, parallel=parallel,
+                               process_timeout=3600 if run_live else 600)
 
     # run tests
-    overall_result = True
-    failed_tests = []
-    for name, _, test_path in modules:
-        print('\n\n==== Test module {} ===='.format(name))
-        result, test_result, module_failed_tests = run_nose([test_path])
-        failed_tests += module_failed_tests
-        overall_result &= result
-        print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
+    result, test_report = run_nose([p for _, _, p in modules])
 
-    return overall_result, failed_tests
+    print('==== TEST RESULT ====\n{}'.format(test_report))
+
+    return result
 
 
 if __name__ == '__main__':
@@ -48,8 +43,8 @@ if __name__ == '__main__':
                             'also be set through environment variable AZURE_CLI_TEST_MODULES. The '
                             'value should be a string of comma separated module names. The '
                             'environment variable will be overwritten by command line parameters.')
-    parse.add_argument('--non-parallel', action='store_true',
-                       help='Not to run the tests in parallel.')
+    parse.add_argument('--parallel', action='store_true',
+                       help='Run the tests in parallel. This will affect the test output file.')
     parse.add_argument('--live', action='store_true', help='Run all the tests live.')
     args = parse.parse_args()
 
@@ -62,13 +57,6 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    success, failed_tests = run_tests(selected_modules, not args.non_parallel, args.live)
-    if failed_tests or not success:
-        print('==== FAILED TESTS ====')
-        for test in failed_tests:
-            print(test)
-    else:
-        print('==== ALL TESTS PASSED! ====')
-
+    success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live)
 
     sys.exit(0 if success else 1)
