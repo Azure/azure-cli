@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.9 (2017-06-21)
 ++++++++++++++++++
 * vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
 * diagnostics: Fix a typo in default Linux Diagnostic extension config
