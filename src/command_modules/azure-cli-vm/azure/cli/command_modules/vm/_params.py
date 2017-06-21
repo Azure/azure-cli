@@ -278,9 +278,9 @@ register_cli_argument('image', 'image_name', arg_type=name_arg_type, id_part='na
 register_cli_argument('image create', 'name', arg_type=name_arg_type, help='new image name')
 
 # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
-register_extra_cli_argument('image create', 'source', validator=process_image_create_namespace,
+register_cli_argument('image create', 'source', validator=process_image_create_namespace,
                             help='OS disk source of the new image, including a virtual machine id or name, os disk blob uri, managed os disk id or name, or os snapshot id or name')
-register_extra_cli_argument('image create', 'data_disk_sources', nargs='+',
+register_cli_argument('image create', 'data_disk_sources', nargs='+',
                             help='space separated 1 or more data disk sources, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
 register_cli_argument('image create', 'source_virtual_machine', ignore_type)
 register_cli_argument('image create', 'os_blob_uri', ignore_type)
