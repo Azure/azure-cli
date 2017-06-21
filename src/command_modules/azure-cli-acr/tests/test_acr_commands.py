@@ -17,8 +17,23 @@ class AcrCommandsTests(ScenarioTest):
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
     def test_acr_create_with_new_storage(self, resource_group, resource_group_location,
                                          storage_account_for_update):
-        self._core_create_scenario(resource_group, resource_group_location,
-                                   storage_account_for_update)
+        registry_name = self.create_random_name('clireg', 50)
+
+        self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
+            registry_name,
+            resource_group,
+            resource_group_location,
+            'Basic',
+            'Microsoft.ContainerRegistry'),
+                 checks=[
+                     JMESPathCheck('name', registry_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('adminUserEnabled', False),
+                     JMESPathCheck('sku.name', 'Basic'),
+                     JMESPathCheck('sku.tier', 'Basic'),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location,
+                                     storage_account_for_update)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -26,66 +41,132 @@ class AcrCommandsTests(ScenarioTest):
     def test_acr_create_with_existing_storage(self, resource_group, resource_group_location,
                                               storage_account_for_update,
                                               storage_account_for_create):
-        self._core_create_scenario(resource_group, resource_group_location,
-                                   storage_account_for_update,
-                                   storage_account_for_create)
-
-    def _core_create_scenario(self, resource_group, location, storage_account_for_update,
-                              storage_account_for_create=None):
         registry_name = self.create_random_name('clireg', 50)
 
-        if storage_account_for_create is None:
-            self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
+        self.cmd('acr create -n {} -g {} -l {} --sku {} '
+                 '--storage-account-name {} --deployment-name {}'.format(
                      registry_name,
                      resource_group,
-                     location,
+                     resource_group_location,
                      'Basic',
+                     storage_account_for_create,
                      'Microsoft.ContainerRegistry'),
-                     checks=[
-                         JMESPathCheck('name', registry_name),
-                         JMESPathCheck('location', location),
-                         JMESPathCheck('adminUserEnabled', False),
-                         JMESPathCheck('sku.name', 'Basic'),
-                         JMESPathCheck('sku.tier', 'Basic'),
-                         JMESPathCheck('provisioningState', 'Succeeded')])
-        else:
-            self.cmd('acr create -n {} -g {} -l {} --sku {} '
-                     '--storage-account-name {} --deployment-name {}'.format(
-                         registry_name,
-                         resource_group,
-                         location,
-                         'Basic',
-                         storage_account_for_create,
-                         'Microsoft.ContainerRegistry'),
-                     checks=[
-                         JMESPathCheck('name', registry_name),
-                         JMESPathCheck('location', location),
-                         JMESPathCheck('adminUserEnabled', False),
-                         JMESPathCheck('sku.name', 'Basic'),
-                         JMESPathCheck('sku.tier', 'Basic'),
-                         JMESPathCheck('provisioningState', 'Succeeded'),
-                         JMESPathCheck('storageAccount.name', storage_account_for_create)])
+                 checks=[
+                     JMESPathCheck('name', registry_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('adminUserEnabled', False),
+                     JMESPathCheck('sku.name', 'Basic'),
+                     JMESPathCheck('sku.tier', 'Basic'),
+                     JMESPathCheck('provisioningState', 'Succeeded'),
+                     JMESPathCheck('storageAccount.name', storage_account_for_create)])
 
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location,
+                                     storage_account_for_update)
+
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 50)
+
+        self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
+            registry_name,
+            resource_group,
+            resource_group_location,
+            'Managed_Standard',
+            'Microsoft.ContainerRegistry'),
+                 checks=[
+                     JMESPathCheck('name', registry_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('adminUserEnabled', False),
+                     JMESPathCheck('sku.name', 'Managed_Standard'),
+                     JMESPathCheck('sku.tier', 'Managed'),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_acr_create_webhook(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 50)
+        webhook_name = self.create_random_name('cliregwebhook', 50)
+
+        self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
+            registry_name,
+            resource_group,
+            resource_group_location,
+            'Managed_Standard',
+            'Microsoft.ContainerRegistry'),
+                 checks=[
+                     JMESPathCheck('name', registry_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('adminUserEnabled', False),
+                     JMESPathCheck('sku.name', 'Managed_Standard'),
+                     JMESPathCheck('sku.tier', 'Managed'),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        self.cmd('acr webhook create -n {} -r {} --uri {} --actions {}'.format(
+            webhook_name,
+            registry_name,
+            'http://www.microsoft.com',
+            'push'),
+                 checks=[
+                     JMESPathCheck('name', webhook_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('status', 'enabled'),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        self.cmd('acr webhook list -r {}'.format(registry_name), checks=[
+            JMESPathCheck('[0].name', webhook_name),
+            JMESPathCheck('[0].status', 'enabled'),
+            JMESPathCheck('[0].provisioningState', 'Succeeded')])
+        self.cmd('acr webhook show -n {} -r {}'.format(webhook_name, registry_name), checks=[
+            JMESPathCheck('name', webhook_name),
+            JMESPathCheck('status', 'enabled'),
+            JMESPathCheck('provisioningState', 'Succeeded')])
+
+        # update webhook
+        self.cmd('acr webhook update -n {} -r {} --headers {} --scope {}'.format(
+            webhook_name, registry_name, 'key=value', 'hello-world'), checks=[
+                JMESPathCheck('name', webhook_name),
+                JMESPathCheck('status', 'enabled'),
+                JMESPathCheck('provisioningState', 'Succeeded'),
+                JMESPathCheck('scope', 'hello-world')])
+
+        # get webhook config
+        self.cmd('acr webhook get-config -n {} -r {}'.format(webhook_name, registry_name), checks=[
+            JMESPathCheck('serviceUri', 'http://www.microsoft.com'),
+            JMESPathCheck('customHeaders', {'key': 'value'})])
+        # ping
+        self.cmd('acr webhook ping -n {} -r {}'.format(webhook_name, registry_name), checks=[
+            JMESPathCheckExists('id')])
+        # list webhook events
+        self.cmd('acr webhook list-events -n {} -r {}'.format(webhook_name, registry_name))
+
+        # test acr delete
+        self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
+
+    def _core_registry_scenario(self, registry_name, resource_group, location,
+                                storage_account_for_update=None):
         self.cmd('acr check-name -n {}'.format(registry_name), checks=[
             JMESPathCheck('nameAvailable', False),
-            JMESPathCheck('reason', 'AlreadyExists')
-        ])
+            JMESPathCheck('reason', 'AlreadyExists')])
         self.cmd('acr list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].name', registry_name),
             JMESPathCheck('[0].location', location),
-            JMESPathCheck('[0].adminUserEnabled', False)
-        ])
+            JMESPathCheck('[0].adminUserEnabled', False)])
         self.cmd('acr show -n {} -g {}'.format(
             registry_name, resource_group), checks=[
                 JMESPathCheck('name', registry_name),
                 JMESPathCheck('location', location),
                 JMESPathCheck('adminUserEnabled', False)])
+
         # enable admin user
-        self.cmd('acr update -n {} -g {} --admin-enabled true'.format(
+        self.cmd('acr update -n {} -g {} --tags foo=bar cat --admin-enabled true'.format(
             registry_name, resource_group), checks=[
                 JMESPathCheck('name', registry_name),
                 JMESPathCheck('location', location),
-                JMESPathCheck('adminUserEnabled', True)])
+                JMESPathCheck('tags', {'cat': '', 'foo': 'bar'}),
+                JMESPathCheck('adminUserEnabled', True),
+                JMESPathCheck('provisioningState', 'Succeeded')])
+
         # test credential module
         credential = self.cmd('acr credential show -n {} -g {}'.format(
             registry_name, resource_group)).get_output_in_json()
@@ -93,6 +174,7 @@ class AcrCommandsTests(ScenarioTest):
         password = credential['passwords'][0]['value']
         password2 = credential['passwords'][1]['value']
         assert username and password and password2
+
         # renew password
         credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
             registry_name, resource_group, 'password')).get_output_in_json()
@@ -103,6 +185,7 @@ class AcrCommandsTests(ScenarioTest):
         assert username == renewed_username
         assert password != renewed_password
         assert password2 == renewed_password2
+
         # renew password2
         credential = self.cmd('acr credential renew -n {} -g {} --password-name {}'.format(
             registry_name, resource_group, 'password2')).get_output_in_json()
@@ -113,23 +196,15 @@ class AcrCommandsTests(ScenarioTest):
         assert username == renewed_username
         assert password != renewed_password
         assert password2 != renewed_password2
-        # test repository module
-        self.cmd('acr show -n {} -g {}'.format(registry_name, resource_group),
-                 checks=JMESPathCheckExists('loginServer'))
-        self.cmd('acr repository list -n {}'.format(registry_name), checks=NoneCheck())
-        # test acr update
-        self.cmd('acr update -n {} -g {} --tags foo=bar cat --admin-enabled false '
-                 '--storage-account-name {}'.format(
-                     registry_name, resource_group, storage_account_for_update),
-                 checks=[
-                     JMESPathCheck('name', registry_name),
-                     JMESPathCheck('location', location),
-                     JMESPathCheck('tags', {'cat': '', 'foo': 'bar'}),
-                     JMESPathCheck('adminUserEnabled', False),
-                     JMESPathCheck('sku.name', 'Basic'),
-                     JMESPathCheck('sku.tier', 'Basic'),
-                     JMESPathCheck('provisioningState', 'Succeeded'),
-                     JMESPathCheck('storageAccount.name', storage_account_for_update)
-                 ])
+
+        # test acr storage account update
+        if storage_account_for_update is not None:
+            self.cmd('acr update -n {} -g {} --storage-account-name {}'.format(
+                registry_name, resource_group, storage_account_for_update),
+                     checks=[
+                         JMESPathCheck('name', registry_name),
+                         JMESPathCheck('location', location),
+                         JMESPathCheck('storageAccount.name', storage_account_for_update)])
+
         # test acr delete
         self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
