@@ -20,6 +20,9 @@ helps['login'] = """
                 - name: Log in with a service principal using client certificate.
                   text: >
                     az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+                - name: Log in with subscription id and port number if in a VM with Managed Service Identity
+                  text: >
+                    az login -u 0b1f6471-1bf0-4dda-aec3-cb9272f99999@50342
             """
 
 helps['account'] = """

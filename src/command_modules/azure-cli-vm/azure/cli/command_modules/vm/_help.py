@@ -99,6 +99,9 @@ helps['vm create'] = """
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
+        - name: Create a VM with Manaegd Service Identity. The VM will have a 'Contributor' Role with access to the current resource group
+          text: >
+             az vm create -n MyVm -g MyResourceGroup --assign-identity --image centos
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -929,6 +932,24 @@ helps['vm wait'] = """
           text: az vm wait -g MyResourceGroup -n MyVm --created
 {0}
 """.format(vm_ids_example.format('Wait until VMs are deleted by Ids', 'vm wait --deleted'))
+
+helps['vm assign-identity'] = """
+    type: command
+    short-summary: Enables managed service identity on a VM
+    long-summary: required to authenticate and interact with other Azure services using bearer tokens
+    examples:
+        - name: Enable identity on a VM. It will have a role of 'Reader' to the VM's resource group
+          text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
+"""
+
+helps['vmss assign-identity'] = """
+    type: command
+    short-summary: Enables managed service identity on a VMSS
+    long-summary: required to authenticate and interact with other Azure services using bearer tokens
+    examples:
+        - name: Enable identity on a VMSS. It will have a role of 'Owner' to the VMSS's resource group.
+          text: az vmss assign-identity -g MyResourceGroup -n MyVmss --role Owner
+"""
 
 helps['disk'] = """
     type: group

@@ -2,6 +2,9 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* vm/vmss: support managed service identity
 
 unreleased
 +++++++++++++++++++
