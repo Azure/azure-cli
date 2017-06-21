@@ -423,7 +423,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
-    @mock.patch('azure.cli.core.commands.LongRunningOperation._generate_template_progress', _mock_pass)
     @mock.patch('azure.cli.core.application.Application.get_progress_controller', _mock_get_progress_controller)
     @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
