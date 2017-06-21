@@ -15,7 +15,7 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 enum_choice_list, no_wait_type, file_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import process_deployment_create_namespace, validate_lock_parameters, validate_deployment_parameters
+from ._validators import process_deployment_create_namespace, validate_lock_parameters
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -81,7 +81,7 @@ register_cli_argument('group deployment', 'mode', help='Incremental (only add re
 
 register_cli_argument('group deployment create', 'deployment_name', options_list=('--name', '-n'), required=False,
                       validator=process_deployment_create_namespace, help='The deployment name. Default to template file base name')
-register_cli_argument('group deployment', 'parameters', action='append', nargs='+', completer=FilesCompleter(), validator=validate_deployment_parameters)
+register_cli_argument('group deployment', 'parameters', action='append', nargs='+', completer=FilesCompleter())
 
 register_cli_argument('group deployment operation show', 'operation_ids', nargs='+', help='A list of operation ids to show')
 

@@ -239,6 +239,59 @@ def validate_arm_template(resource_group_name, template_file=None, template_uri=
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
 
+def _process_parameters(template_param_defs, parameter_lists):
+
+    def _try_parse_json_object(value):
+        try:
+            parsed = shell_safe_json_parse(value)
+            return parsed.get('parameters', parsed)
+        except CLIError:
+            return None
+
+    def _try_load_file_object(value):
+        if os.path.isfile(value):
+            parsed = get_file_json(value, throw_on_empty=False)
+            return parsed.get('parameters', parsed)
+        return None
+
+    def _try_parse_key_value_object(template_param_defs, parameters, value):
+        try:
+            key, value = value.split('=', 1)
+        except ValueError:
+            return False
+
+        param = template_param_defs.get(key, None)
+        if param is None:
+            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
+                           .format(key, ', '.join(sorted(template_param_defs.keys()))))
+
+        param_type = param.get('type', None)
+        if param_type in ['object', 'array']:
+            parameters[key] = {'value': shell_safe_json_parse(value)}
+        elif param_type in ['string', 'securestring']:
+            parameters[key] = {'value': value}
+        elif param_type == 'bool':
+            parameters[key] = {'value': value.lower() == 'true'}
+        elif param_type == 'int':
+            parameters[key] = {'value': int(value)}
+        else:
+            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+            parameters[key] = {'value': value}
+
+        return True
+
+    parameters = {}
+    for params in parameter_lists or []:
+        for item in params:
+            param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+            if param_obj:
+                parameters.update(param_obj)
+            elif not _try_parse_key_value_object(template_param_defs, parameters, item):
+                raise CLIError('Unable to parse parameter: {}'.format(item))
+
+    return parameters
+
+
 def _find_missing_parameters(parameters, template):
     if template is None:
         return {}
@@ -249,7 +302,7 @@ def _find_missing_parameters(parameters, template):
     missing = {}
     for parameter_name in template_parameters:
         parameter = template_parameters[parameter_name]
-        if parameter.get('defaultValue', None) is not None:
+        if 'defaultValue' in parameter:
             continue
         if parameters is not None and parameters.get(parameter_name, None) is not None:
             continue
@@ -259,8 +312,7 @@ def _find_missing_parameters(parameters, template):
 
 def _prompt_for_parameters(missing_parameters):
     result = {}
-    for param_name in missing_parameters:
-        prompt_str = 'Please provide a value for \'{}\' (? for help): '.format(param_name)
+    for param_name in sorted(missing_parameters):
         param = missing_parameters[param_name]
         param_type = param.get('type', 'string')
         description = 'Missing description'
@@ -269,6 +321,7 @@ def _prompt_for_parameters(missing_parameters):
             description = metadata.get('description', description)
         allowed_values = param.get('allowedValues', None)
 
+        prompt_str = "Please provide {} value for '{}' (? for help): ".format(param_type, param_name)
         while True:
             if allowed_values is not None:
                 ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
@@ -277,6 +330,7 @@ def _prompt_for_parameters(missing_parameters):
             elif param_type == 'securestring':
                 value = prompt_pass(prompt_str, help_string=description)
                 result[param_name] = value
+                break
             elif param_type == 'int':
                 int_value = prompt_int(prompt_str, help_string=description)
                 result[param_name] = int_value
@@ -285,10 +339,20 @@ def _prompt_for_parameters(missing_parameters):
                 value = prompt_t_f(prompt_str, help_string=description)
                 result[param_name] = value
                 break
-            else:
+            elif param_type in ['object', 'array']:
                 value = prompt(prompt_str, help_string=description)
+                if value == '':
+                    value = {} if param_type == 'object' else []
+                else:
+                    try:
+                        value = shell_safe_json_parse(value)
+                    except Exception as ex:  # pylint: disable=broad-except
+                        logger.error(ex)
+                        continue
                 result[param_name] = value
-            if value:
+                break
+            else:
+                result[param_name] = prompt(prompt_str, help_string=description)
                 break
     return result
 
@@ -324,7 +388,6 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
                                                  'DeploymentProperties',
                                                  'TemplateLink',
                                                  mod='models')
-    parameters = parameters or {}
     template = None
     template_link = None
     template_obj = None
@@ -335,6 +398,8 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
         template = get_file_json(template_file)
         template_obj = template
 
+    template_param_defs = template.get('parameters', {})
+    parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
 
     properties = DeploymentProperties(template=template, template_link=template_link,
