@@ -2,8 +2,8 @@
 
 Release History
 ===============
-unreleased
-++++++++++
+2.0.7 (2017-06-21)
+++++++++++++++++++
 * Add managed registries with Managed SKU.
 * Add webhooks for managed registries with acr webhook command module.
 * Add AAD authentication with acr login command.
