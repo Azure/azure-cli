@@ -181,7 +181,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('dls fs create -n {} --path "{}/{}" --content {}'.format(adls, folder_name, file_name, file_content))
         # get the file
         result = self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('name', '{}/{}'.format(folder_name, file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(file_content)),
         ])
@@ -192,17 +192,19 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         final_time = datetime.datetime(2030, 1, 31, 12)
         time_in_milliseconds = (final_time - epoch_time).total_seconds() * 1000
         self.cmd('dls fs set-expiry -n {} --path "{}/{}" --expiration-time {}'.format(adls, folder_name, file_name, time_in_milliseconds))
-        self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
+        new_result = self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
+            JMESPathCheck('name', '{}/{}'.format(folder_name, file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(file_content)),
-            JMESPathCheck('msExpirationTime', time_in_milliseconds),
         ])
+
+        # this value is not guaranteed to be exact, but it should be within a very small range (around 200ms)
+        assert time_in_milliseconds - 100 < new_result['msExpirationTime'] < time_in_milliseconds + 100
 
         # remove the expiration time
         self.cmd('dls fs remove-expiry -n {} --path "{}/{}"'.format(adls, folder_name, file_name))
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('name', '{}/{}'.format(folder_name, file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(file_content)),
             JMESPathCheck('msExpirationTime', result['msExpirationTime']),
@@ -214,7 +216,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('dls fs move -n {} --source-path "{}/{}" --destination-path "{}/{}"'.format(adls, folder_name, file_name, move_folder_name, file_name))
         # get the file at the new location
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('name', '{}/{}'.format(move_folder_name, file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(file_content)),
         ])
@@ -241,7 +243,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('dls fs append -n {} --path "{}/{}" --content {}'.format(adls, move_folder_name, file_name, file_content))
         # get the file
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('name', '{}/{}'.format(move_folder_name, file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(file_content) * 2),
         ])
@@ -250,14 +252,14 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('dls fs upload -n {} --destination-path "{}/{}" --source-path "{}"'.format(adls, folder_name, upload_file_name, self.local_file))
         # get the file
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, upload_file_name), checks=[
-            JMESPathCheck('pathSuffix', upload_file_name),
+            JMESPathCheck('name', '{}/{}'.format(folder_name, upload_file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(self.local_file_content)),
         ])
         # join the uploaded file to the created file
         self.cmd('dls fs join -n {} --destination-path "{}/{}" --source-paths "{}/{}","{}/{}"'.format(adls, folder_name, join_file_name, folder_name, upload_file_name, move_folder_name, file_name))
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, join_file_name), checks=[
-            JMESPathCheck('pathSuffix', join_file_name),
+            JMESPathCheck('name', '{}/{}'.format(folder_name, join_file_name)),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(self.local_file_content) + (len(file_content) * 2)),
         ])
