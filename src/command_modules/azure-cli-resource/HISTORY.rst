@@ -15,8 +15,6 @@ unreleased
 * Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>
 * Add parameter checking for template link templates (#3629)
 * Add support for specifying deployment parameters using KEY=VALUE syntax.
-* Add a bunch of help text. (#3582)
-* [ARM] Add KEY=VALUE syntax for deployment create (#3637)
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++

@@ -12,13 +12,8 @@ Release History
 * vm: support attaching data disks on vm create (#3644)
 * Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
 * support configuring disk caching on attaching a managed disk (#3513)
-* core: Create subscription clients with right SDK profile (#3635)
-* Fixed _help.py for get-boot-log (#3616)
-* output: add support for picking table output fields through jmespath query  (#3581)
 * Support attaching existing data disks on vm create
-* fix typos in error message (#3643)
 * VM/VMSS: fixed an issue with name generation that resulted in the create commands not being idempotent.
-* [VM/VMSS] Fix idempotency for VM/VMSS create (#3586)
 
 2.0.7 (2017-05-09)
 ++++++++++++++++++

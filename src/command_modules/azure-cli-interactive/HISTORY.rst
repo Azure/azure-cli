@@ -15,15 +15,12 @@ Release History
 * Allows '--version' as a parameter for interactive mode (#3645)
 * Stop Interactive Mode from Throwing errors from Validation completions (#3570)
 * Progress Reporting for template deployments (#3510)
-* Improves the muting of parse args + appends history with gestures (#3434)
-
 
 0.3.3 (2017-05-30)
 ++++++++++++++++++
 
 * --progress flag
 * Removed --debug and --verbose from completions
-
 
 0.3.2 (2017-05-18)
 ++++++++++++++++++

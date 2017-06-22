@@ -6,8 +6,6 @@ Release History
 ++++++++++++++++++
 * fix acs kube get-credentials ssh-key loading (#3612)
 * Change a message so as not to confuse MacOS users. (#3568)
-* Expand service principal testing somewhat. (#3114)
-* Move all existing recording files to latest folder
 * rbac: clean up role assignments and related AAD application when delete a service principal (#3610)
 
 2.0.7 (2017-05-30)
