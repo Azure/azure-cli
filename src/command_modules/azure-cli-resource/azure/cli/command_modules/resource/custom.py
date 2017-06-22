@@ -6,6 +6,7 @@
 # pylint: disable=too-many-lines
 
 from __future__ import print_function
+from collections import OrderedDict
 import json
 import os
 import re
@@ -26,7 +27,7 @@ from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
 from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
+from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -299,7 +300,7 @@ def _find_missing_parameters(parameters, template):
     if template_parameters is None:
         return {}
 
-    missing = {}
+    missing = OrderedDict()
     for parameter_name in template_parameters:
         parameter = template_parameters[parameter_name]
         if 'defaultValue' in parameter:
@@ -310,9 +311,13 @@ def _find_missing_parameters(parameters, template):
     return missing
 
 
-def _prompt_for_parameters(missing_parameters):
-    result = {}
-    for param_name in sorted(missing_parameters):
+def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: disable=too-many-statements
+
+    prompt_list = missing_parameters.keys() if isinstance(missing_parameters, OrderedDict) \
+        else sorted(missing_parameters)
+    result = OrderedDict()
+    no_tty = False
+    for param_name in prompt_list:
         param = missing_parameters[param_name]
         param_type = param.get('type', 'string')
         description = 'Missing description'
@@ -324,23 +329,44 @@ def _prompt_for_parameters(missing_parameters):
         prompt_str = "Please provide {} value for '{}' (? for help): ".format(param_type, param_name)
         while True:
             if allowed_values is not None:
-                ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
-                result[param_name] = allowed_values[ix]
+                try:
+                    ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
+                    result[param_name] = allowed_values[ix]
+                except NoTTYException:
+                    result[param_name] = None
+                    no_tty = True
                 break
             elif param_type == 'securestring':
-                value = prompt_pass(prompt_str, help_string=description)
+                try:
+                    value = prompt_pass(prompt_str, help_string=description)
+                except NoTTYException:
+                    value = None
+                    no_tty = True
                 result[param_name] = value
                 break
             elif param_type == 'int':
-                int_value = prompt_int(prompt_str, help_string=description)
-                result[param_name] = int_value
+                try:
+                    int_value = prompt_int(prompt_str, help_string=description)
+                    result[param_name] = int_value
+                except NoTTYException:
+                    result[param_name] = 0
+                    no_tty = True
                 break
             elif param_type == 'bool':
-                value = prompt_t_f(prompt_str, help_string=description)
-                result[param_name] = value
+                try:
+                    value = prompt_t_f(prompt_str, help_string=description)
+                    result[param_name] = value
+                except NoTTYException:
+                    result[param_name] = False
+                    no_tty = True
                 break
             elif param_type in ['object', 'array']:
-                value = prompt(prompt_str, help_string=description)
+                try:
+                    value = prompt(prompt_str, help_string=description)
+                except NoTTYException:
+                    value = ''
+                    no_tty = True
+
                 if value == '':
                     value = {} if param_type == 'object' else []
                 else:
@@ -352,8 +378,14 @@ def _prompt_for_parameters(missing_parameters):
                 result[param_name] = value
                 break
             else:
-                result[param_name] = prompt(prompt_str, help_string=description)
+                try:
+                    result[param_name] = prompt(prompt_str, help_string=description)
+                except NoTTYException:
+                    result[param_name] = None
+                    no_tty = True
                 break
+    if no_tty and fail_on_no_tty:
+        raise NoTTYException
     return result
 
 
@@ -393,9 +425,9 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
     template_obj = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'))
+        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
     else:
-        template = get_file_json(template_file)
+        template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
     template_param_defs = template.get('parameters', {})
