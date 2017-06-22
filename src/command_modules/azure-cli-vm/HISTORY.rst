@@ -6,6 +6,7 @@ Release History
 ++++++++++++++++++
 * vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
 * diagnostics: Fix a typo in default Linux Diagnostic extension config
+* vmss create: fix failure when running with --use-unmanaged-disk
 
 2.0.8 (2017-06-13)
 ++++++++++++++++++
