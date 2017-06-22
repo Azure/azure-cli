@@ -16,10 +16,13 @@ First copy the build scripts onto the build machine.
 > ~/installer; editor ~/installer
 ```
 
+Create a requirements.txt that contains the requirements for both Python 2 and 3.
+
 Then execute it with the appropriate environment variable values.
 ```
-export CLI_VERSION=0.2.10 \
-  && export CLI_DOWNLOAD_SHA256=be72ddb0983b3466e868602e68e4d3bf67379fbe080bdaa6aa321c03f9bcce48 \
+export CLI_VERSION=2.0.9 \
+  && export CLI_DOWNLOAD_SHA256=eded04dbdab0a95d73a913119994259c6d0cf0388963d951da6088509e05f1da \
+  && export CLI_REQUIREMENTS_FILE=~/Downloads/requirements.txt \
   && python ~/build-bundle.py
 ```
 

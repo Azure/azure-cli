@@ -59,6 +59,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  active_directory=None,
                  active_directory_resource_id=None,
                  active_directory_graph_resource_id=None,
+                 active_directory_data_lake_resource_id=None,
                  vm_image_alias_doc=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
@@ -69,6 +70,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
+        self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
         self.vm_image_alias_doc = vm_image_alias_doc
 
     def has_endpoint_set(self, endpoint_name):
@@ -149,6 +151,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
+        active_directory_data_lake_resource_id='https://datalake.azure.net/',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',

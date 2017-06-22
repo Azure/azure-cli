@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.0.10 (unreleased)
++++++++++++++++++++
+* Add commands for compute policy management under the `dla account compute-policy` heading
+* Add show and list commands for job pipeline and recurrence under `dla job pipeline` and `dla job recurrence` respectively
+
 
 0.0.9 (2017-06-21)
 ++++++++++++++++++
@@ -9,12 +14,7 @@ Release History
 
 0.0.8 (2017-06-13)
 ++++++++++++++++++
-* Remove useless line-too-long suppressions.
-* Fix all bad-continuation pylint disables
-* Fix various pylint disable rules
-* Fix all superflusous-parens pylint disable rules
-* Fix method-hidden pylint disable rule
-* Move all existing recording files to latest folder
+* Minor fixes.
 
 0.0.7 (2017-05-30)
 ++++++++++++++++++

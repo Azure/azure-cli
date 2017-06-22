@@ -60,6 +60,8 @@ register_cli_argument('cloud', 'endpoint_active_directory_resource_id',
                       help='The resource ID to obtain AD tokens for')
 register_cli_argument('cloud', 'endpoint_active_directory_graph_resource_id',
                       help='The Active Directory resource ID')
+register_cli_argument('cloud', 'endpoint_active_directory_data_lake_resource_id',
+                      help='The Active Directory resource ID for data lake services')
 register_cli_argument('cloud', 'endpoint_vm_image_alias_doc',
                       help='The uri of the document which caches commonly used virtual machine images')
 register_cli_argument('cloud', 'suffix_sql_server_hostname',
