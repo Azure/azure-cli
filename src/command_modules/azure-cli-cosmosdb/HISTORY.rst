@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+0.1.9 (2017-06-21)
 ++++++++++++++++++
 
 * Added Support for Collection Default TTL.
