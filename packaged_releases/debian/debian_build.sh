@@ -63,5 +63,5 @@ $debian_directory_creator $cli_debian_dir_tmp $source_dir/az.completion $source_
 cp -r $cli_debian_dir_tmp/* $source_dir/debian
 cd $source_dir
 dpkg-buildpackage -us -uc
-echo "The archive is available at $working_dir/azure-cli_${CLI_VERSION}-1_all.deb."
+echo "The archive is available at $working_dir/azure-cli_${CLI_VERSION}-1_all.deb"
 echo "Done."
