@@ -5,8 +5,6 @@ Release History
 0.0.9 (unreleased)
 ++++++++++++++++++
 * Add support for user managed key vault key rotation in `dls account update`
-* Update to latest filesystem SDK for Data Lake Store data plane operation improvements.
-* Minor fix for long running operation handling 
 
 0.0.8 (2017-06-13)
 ++++++++++++++++++
