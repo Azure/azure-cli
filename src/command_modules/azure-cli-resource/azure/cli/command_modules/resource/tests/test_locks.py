@@ -18,7 +18,7 @@ class ResourceLockTests(ScenarioTest):
         for lock_type in ['ReadOnly', 'CanNotDelete']:
             self.cmd('az lock create -n foo --lock-type {}'.format(lock_type))
             locks_list = self.cmd('az lock list').get_output_in_json()
-            assert len(locks_list) > 0
+            assert locks_list
             assert 'foo' in [l['name'] for l in locks_list]
             lock = self.cmd('az lock show -n foo').get_output_in_json()
             self.assertEqual(lock.get('name', None), 'foo')
@@ -32,7 +32,7 @@ class ResourceLockTests(ScenarioTest):
             self.cmd('az lock create -n foo -g {} --lock-type {}'.format(resource_group, lock_type))
             locks_list = self.cmd('az lock list').get_output_in_json()
             assert 'foo' in [l['name'] for l in locks_list]
-            assert len(locks_list) > 0
+            assert locks_list
             lock = self.cmd('az lock show -g {} -n foo'.format(resource_group)).get_output_in_json()
             self.assertEqual(lock.get('name', None), 'foo')
             self.assertEqual(lock.get('level', None), lock_type)

@@ -767,7 +767,7 @@ def _validate_lock_params_match_lock(
             raise CLIError(
                 'Unexpected --resource-group for lock {}, expected {}'.format(
                     name, _resource_group))
-        if _resource_namespace is None:
+        if _resource_namespace is None or _resource_namespace == 'Microsoft.Authorization':
             return
         if resource_provider_namespace != _resource_namespace:
             raise CLIError(
