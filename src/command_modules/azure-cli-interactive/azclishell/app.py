@@ -62,7 +62,7 @@ START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
-def space_examples(list_examples, rows):
+def space_examples(list_examples, rows, section_value):
     """ makes the example text """
     examples_with_index = []
 
@@ -78,18 +78,18 @@ def space_examples(list_examples, rows):
         len_of_excerpt = math.floor(float(rows) * PART_SCREEN_EXAMPLE)
 
         group = example.split('\n')
-        end = int(get_section() * len_of_excerpt)
-        begin = int((get_section() - 1) * len_of_excerpt)
+        end = int(section_value * len_of_excerpt)
+        begin = int((section_value - 1) * len_of_excerpt)
 
-        if get_section() * len_of_excerpt < num_newline:
+        if section_value * len_of_excerpt < num_newline:
             example = '\n'.join(group[begin:end]) + "\n"
         else:  # default chops top off
             example = '\n'.join(group[begin:]) + "\n"
-            while ((get_section() - 1) * len_of_excerpt) > num_newline:
+            while ((section_value - 1) * len_of_excerpt) > num_newline:
                 sub_section()
-        page_number = '\n' + str(get_section()) + "/" + str(math.ceil(num_newline / len_of_excerpt))
+        page_number = '\n' + str(section_value) + "/" + str(math.ceil(num_newline / len_of_excerpt))
 
-    return example + page_number
+    return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
 
 
 def space_toolbar(settings_items, cols, empty_space):
@@ -271,7 +271,7 @@ class Shell(object):
                         for part in example:
                             string_example += part
                     example = space_examples(
-                        self.completer.command_examples[cmdstp], rows)
+                        self.completer.command_examples[cmdstp], rows, get_section())
 
         if not any_documentation:
             self.description_docs = u''

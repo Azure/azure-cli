@@ -6,6 +6,7 @@
 import unittest
 
 from azclishell.app import space_examples, space_toolbar, validate_contains_query
+PART_SCREEN_EXAMPLE = .3
 
 
 class ShellFunctionsTest(unittest.TestCase):
@@ -15,6 +16,7 @@ class ShellFunctionsTest(unittest.TestCase):
 
     def test_space_toolbar(self):
         """ tests the toolbar spacing """
+
         pass
 
     def test_space_examples(self):
