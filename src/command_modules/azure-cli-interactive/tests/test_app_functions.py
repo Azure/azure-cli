@@ -16,10 +16,11 @@ class ShellFunctionsTest(unittest.TestCase):
 
     def test_space_examples(self):
         """ tests the examples spacing """
-        loe1 = ''
-        row1 = 0
-        section1 = 0
-        self.assertEqual(space_examples(loe1, row1, section1), '')
+        # loe1 = ''
+        # row1 = 0
+        # section1 = 0
+        # self.assertEqual(space_examples(loe1, row1, section1), '')
+        pass
 
     def test_space_toolbar(self):
         """ tests the toolbar spacing """
@@ -30,11 +31,18 @@ class ShellFunctionsTest(unittest.TestCase):
         self.assertEqual(settings, '')
         self.assertEqual(empty_space, '')
 
-        setting1 = []
-        empty_space1 = ''
+        setting1 = ['friendship', ]
+        empty_space1 = ' ' * 15
 
         settings, empty_space = space_toolbar(setting1, empty_space1)
-        self.assertEqual(settings, '')
+        self.assertEqual(settings, 'friendship')
+        self.assertTrue(len(empty_space) == 4)
+
+        setting1 = ['friendship', 'and MORE']
+        empty_space1 = ' ' * 20
+
+        settings, empty_space = space_toolbar(setting1, empty_space1)
+        self.assertEqual(settings, 'friendship  and MORE')
         self.assertEqual(empty_space, '')
 
     def test_validate_contains_query(self):
