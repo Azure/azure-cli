@@ -16,5 +16,6 @@ class ShellScenarioTest(unittest.TestCase):
         """ tests the running """
         pass
 
+
 if __name__ == '__main__':
     unittest.main()
