@@ -38,7 +38,10 @@ def get_command_modules_paths_with_tests():
 
 
 def get_core_modules_paths_with_tests():
-    return get_module_paths_with_tests(get_core_modules_paths())
+    for name, path in get_core_modules_paths():
+        for root, dirs, files in os.walk(path):
+            if os.path.basename(root) == 'tests':
+                yield name, path, root
 
 
 def get_core_modules_paths():
@@ -48,16 +51,9 @@ def get_core_modules_paths():
 
 def get_module_paths_with_tests(modules):
     for name, path in modules:
-        test_folder = os.path.join(path, 'tests')
-        if not os.path.exists(test_folder):
-            # fallback, will be obsolete eventually when all tests folder are moved to the root of
-            # it's module source folder.
-            name = name.replace(COMMAND_MODULE_PREFIX, '')
-            test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests')
-            if not os.path.exists(test_folder):
-                test_folder = None
-
-        if test_folder:
+        name = name.replace(COMMAND_MODULE_PREFIX, '')
+        test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests')
+        if os.path.exists(test_folder):
             yield name, path, test_folder
 
 
