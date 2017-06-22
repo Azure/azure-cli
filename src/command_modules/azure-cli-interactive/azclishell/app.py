@@ -92,12 +92,17 @@ def space_examples(list_examples, rows, section_value):
     return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
 
 
-def space_toolbar(settings_items, cols, empty_space):
+def space_toolbar(settings_items, empty_space):
     """ formats the toolbar """
     counter = 0
     for part in settings_items:
         counter += len(part)
-    spacing = empty_space[:int(math.floor((cols - counter) / (len(settings_items) - 1)))]
+
+    if len(settings_items) == 1:
+        spacing = ''
+    else:
+        spacing = empty_space[
+            :int(math.floor((len(empty_space) - counter) / (len(settings_items) - 1)))]
 
     settings = spacing.join(settings_items)
 
@@ -202,9 +207,7 @@ class Shell(object):
         _, cols = get_window_dim()
         cols = int(cols)
 
-        empty_space = ""
-        for _ in range(cols):
-            empty_space += " "
+        empty_space = " " * cols
 
         delta = datetime.datetime.utcnow() - START_TIME
         if self.user_feedback and delta.seconds < DISPLAY_TIME:
@@ -214,7 +217,7 @@ class Shell(object):
         else:
             toolbar = self._toolbar_info()
 
-        toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
+        toolbar, empty_space = space_toolbar(toolbar, empty_space)
         cli.buffers['bottom_toolbar'].reset(
             initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, toolbar, empty_space)))
 
