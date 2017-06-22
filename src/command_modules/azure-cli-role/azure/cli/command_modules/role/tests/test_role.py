@@ -10,17 +10,16 @@ import tempfile
 import time
 import unittest
 
-from azure.cli.testsdk import \
-    (LiveTest, ResourceGroupPreparer, KeyVaultPreparer, JMESPathCheck as JMESPathCheckV2)
+from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer,
+                               JMESPathCheck as JMESPathCheckV2)
 import azure.cli.core.azlogging as azlogging
-from azure.cli.testsdk.vcr_test_base import VCRTestBase, JMESPathCheck, \
-    ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck,
+                                             MOCKED_SUBSCRIPTION_ID)
 
 logger = azlogging.get_az_logger(__name__)
 
 
-class RbacSPSecretScenarioTest(LiveTest):
-
+class RbacSPSecretScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
     def test_create_for_rbac_with_secret(self, resource_group):
 
@@ -54,8 +53,7 @@ class RbacSPSecretScenarioTest(LiveTest):
             self.cmd('ad app delete --id {}'.format(sp_name))
 
 
-class RbacSPCertScenarioTest(LiveTest):
-
+class RbacSPCertScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
     def test_create_for_rbac_with_cert(self, resource_group):
 
@@ -76,8 +74,7 @@ class RbacSPCertScenarioTest(LiveTest):
             self.cmd('ad app delete --id {}'.format(sp_name), checks=NoneCheck())
 
 
-class RbacSPKeyVaultScenarioTest(LiveTest):
-
+class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
@@ -183,7 +180,7 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
         self.user = 'testuser1@azuresdkteam.onmicrosoft.com'
 
     def set_up(self):
-        super().set_up()
+        super(RoleAssignmentScenarioTest, self).set_up()
         self.cmd(
             'ad user create --display-name tester123 --password Test123456789 --user-principal-name {}'.format(
                 self.user), None)
@@ -192,7 +189,7 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
 
     def tear_down(self):
         self.cmd('ad user delete --upn-or-object-id {}'.format(self.user), None)
-        super().tear_down()
+        super(RoleAssignmentScenarioTest, self).tear_down()
 
     def test_role_assignment_scenario(self):
         if self.playback:

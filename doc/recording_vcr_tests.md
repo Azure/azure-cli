@@ -50,7 +50,7 @@ When recording file is missing, the test framework will execute the test in live
 export AZURE_TEST_RUN_LIVE='True'
 ```
 
-Also, you can author tests which are for live test only. Just derive the test class from [LiveTest].
+Also, you can author tests which are for live test only. Just derive the test class from [LiveScenarioTest].
 
 ### Rebase recordings
 
