@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (LiveTest, ResourceGroupPreparer, StorageAccountPreparer,
+from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
-class StorageBlobUploadLiveTests(LiveTest):
+class StorageBlobUploadLiveTests(LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_128mb_file(self, resource_group, storage_account):

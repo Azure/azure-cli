@@ -4,12 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (LiveTest, StorageAccountPreparer, ResourceGroupPreparer,
-                               JMESPathCheck)
+from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck
 from .storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 
-class StorageBatchOperationScenarios(StorageScenarioMixin, LiveTest):
+class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
