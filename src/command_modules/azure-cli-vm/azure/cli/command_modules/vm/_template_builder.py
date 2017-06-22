@@ -394,8 +394,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
-    profile['dataDisks'] = []
     if data_disk_sizes_gb is not None:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
@@ -414,6 +414,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
             lun = lun + 1
 
     if attach_data_disks:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         from azure.cli.core.commands.arm import is_valid_resource_id
         for d in attach_data_disks:
             disk_entry = {
