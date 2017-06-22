@@ -134,9 +134,13 @@ class AzCompleter(Completer):
         canceling_positions = param.lower() != words.lower() and param not in text_before_cursor.split()
 
         check_doubles = True
-        # check doubles
-        if double and param in self.same_param_doubles.get(self.curr_command, {}):
-            check_doubles = self.same_param_doubles[self.curr_command][param] not in text_before_cursor.split()
+        # checks for aliasing of parameters
+        if double and self.same_param_doubles.get(self.curr_command):
+            for double_sets in self.same_param_doubles[self.curr_command]:
+                if param in double_sets:
+                    for alias in double_sets:
+                        if alias in text_before_cursor.split() and alias != param:
+                            check_doubles = False
 
         return position and canceling_positions and check_doubles
 

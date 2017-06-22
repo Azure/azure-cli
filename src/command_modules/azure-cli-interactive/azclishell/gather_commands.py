@@ -11,6 +11,11 @@ import azclishell.configuration
 from azclishell.command_tree import CommandBranch, CommandHead
 from azclishell.util import get_window_dim
 
+try:
+    from sets import Set as set
+except ImportError:  # python 2 and 3 compatibility
+    pass
+
 CONFIGURATION = azclishell.configuration.CONFIGURATION
 
 ROWS, COLS = get_window_dim()
@@ -141,15 +146,10 @@ class GatherCommands(object):
                    '==SUPPRESS==' in data[command]['parameters'][param]['help']:
                     suppress = True
                 if data[command]['parameters'][param]['help'] and not suppress:
-                    param_double = None
+                    param_aliases = set()
+
                     for par in data[command]['parameters'][param]['name']:
-                        if not param_double:
-                            param_double = par
-                        else:
-                            double = {}
-                            double[par] = param_double
-                            double[param_double] = par
-                            self.same_param_doubles[command] = double
+                        param_aliases.add(par)
 
                         self.param_descript[command + " " + par] =  \
                             add_random_new_lines(
@@ -158,6 +158,10 @@ class GatherCommands(object):
                         if par not in self.completable_param:
                             self.completable_param.append(par)
                         all_params.append(par)
+                    if len(param_aliases) > 1:
+                        param_list = self.same_param_doubles.get(command, [])
+                        param_list.append(param_aliases)
+                        self.same_param_doubles[command] = param_list
 
             self.command_param[command] = all_params
 

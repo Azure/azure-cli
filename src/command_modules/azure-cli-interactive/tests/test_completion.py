@@ -11,6 +11,11 @@ from azclishell.az_completer import AzCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
+try:
+    from sets import Set as set
+except ImportError:
+    pass
+
 
 class _Commands():
     """ mock model for testing completer """
@@ -88,19 +93,21 @@ class CompletionTest(unittest.TestCase):
         com_tree3.add_child(com_tree2)
         com_tree3.add_child(com_tree1)
         command_param = {
-            "create": ["--funtimes", "-f", "--helloworld"],
+            "create": ["--funtimes", "-f", '--fun', "--helloworld"],
         }
         completable_param = [
             "--helloworld",
             "--funtimes",
-            "-f"
+            "-f",
+            '--fun'
         ]
         param_descript = {
             "create -f": "There is no work life balance, it's just your life",
-            "create --funtimes": "There is no work life balance, it's just your life"
+            "create --funtimes": "There is no work life balance, it's just your life",
+            "create --fun": "There is no work life balance, it's just your life"
         }
         same_param_doubles = {
-            "create": {"-f": "--funtimes", "--funtimes": '-f'}
+            "create": [set(["-f", "--funtimes", '--fun']), set(['--unhap', '-u'])]
         }
         command_description = {
             "create": '',
@@ -136,7 +143,7 @@ class CompletionTest(unittest.TestCase):
             "create --funtimes": "There is no work life balance, it's just your life"
         }
         same_param_doubles = {
-            "create": {"-f": "--funtimes", "--funtimes": '-f'}
+            "create": [set(["-f", "--funtimes", '--fun'])]
         }
         command_description = {
             "create": '',
@@ -201,6 +208,16 @@ class CompletionTest(unittest.TestCase):
             "--helloworld", -2))
 
         doc = Document(u'create -f -')
+        gen = self.completer.get_completions(doc, None)
+        with self.assertRaises(StopIteration):
+            six.next(gen)
+
+        doc = Document(u'create --fun -')
+        gen = self.completer.get_completions(doc, None)
+        with self.assertRaises(StopIteration):
+            six.next(gen)
+
+        doc = Document(u'create --funtimes -')
         gen = self.completer.get_completions(doc, None)
         with self.assertRaises(StopIteration):
             six.next(gen)
