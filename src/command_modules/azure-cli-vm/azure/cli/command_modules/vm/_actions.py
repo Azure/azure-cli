@@ -72,8 +72,13 @@ def load_images_thru_services(publisher, offer, sku, location):
 
 
 def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
-    target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
-                  'master/arm-compute/quickstart-templates/aliases.json')
+    from azure.cli.core.cloud import get_active_cloud, CloudEndpointNotSetException
+    cloud = get_active_cloud()
+    try:
+        target_url = cloud.endpoints.vm_image_alias_doc
+    except CloudEndpointNotSetException:
+        raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
+                       "it or use '--all' to retrieve images from server")
     txt = urlopen(target_url).read()
     dic = json.loads(txt.decode())
     try:

@@ -58,6 +58,7 @@ def register_cloud(cloud_name,
                    endpoint_active_directory=None,
                    endpoint_active_directory_resource_id=None,
                    endpoint_active_directory_graph_resource_id=None,
+                   endpoint_vm_image_alias_doc=None,
                    suffix_sql_server_hostname=None,
                    suffix_storage_endpoint=None,
                    suffix_keyvault_dns=None,
@@ -81,6 +82,7 @@ def modify_cloud(cloud_name=None,
                  endpoint_active_directory=None,
                  endpoint_active_directory_resource_id=None,
                  endpoint_active_directory_graph_resource_id=None,
+                 endpoint_vm_image_alias_doc=None,
                  suffix_sql_server_hostname=None,
                  suffix_storage_endpoint=None,
                  suffix_keyvault_dns=None,
@@ -105,9 +107,11 @@ def unregister_cloud(cloud_name):
         raise CLIError(e)
 
 
-def set_cloud(cloud_name):
+def set_cloud(cloud_name, profile=None):
     try:
         switch_active_cloud(cloud_name)
+        if profile:
+            modify_cloud(cloud_name=cloud_name, profile=profile)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 

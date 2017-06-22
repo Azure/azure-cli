@@ -30,6 +30,12 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(
             args4, ['word1', "quote1", 'word2', "quote is 3", 'words', 'are', 'fun'])
 
+        cmd5 = '"??[?resourceGroup == "CJ101"].name"'
+        args5 = parse_quotes(cmd5)
+        self.assertEqual(
+            args5, ['??[?resourceGroup == CJ101].name']
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

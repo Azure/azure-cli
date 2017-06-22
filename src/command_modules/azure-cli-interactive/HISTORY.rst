@@ -2,8 +2,15 @@
 
 Release History
 ===============
+0.3.5 (2017-06-21)
+++++++++++++++++++
+
+* Enhance the '?' gesture to also inject into the next command
+
+
 0.3.4 (2017-06-13)
 ++++++++++++++++++
+
 * Fixes Interactive errors with the profile 2017-03-09-profile-preview (#3587)
 * Allows '--version' as a parameter for interactive mode (#3645)
 * Stop Interactive Mode from Throwing errors from Validation completions (#3570)
@@ -13,13 +20,10 @@ Release History
 * Improves the muting of parse args + appends history with gestures (#3434)
 * Remove too-many-nested-blocks (#3469) (#3469)
 
-0.3.3 (unreleased)
-++++++++++++++++++
-* Progress for Template Deployment
-
 
 0.3.3 (2017-05-30)
 ++++++++++++++++++
+
 * --progress flag
 * Removed --debug and --verbose from completions
 

@@ -4,7 +4,7 @@ Release History
 
 ===============
 
-unreleased
+2.0.9 (2017-06-21)
 ++++++++++++++++++
 * `group deployment create`: Fixes issue where some parameter files were no longer recognized using @<file> syntax.
 

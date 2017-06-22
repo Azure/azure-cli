@@ -213,9 +213,9 @@ def list_vm_images(image_location=None, publisher_name=None, offer=None, sku=Non
                            "is supported.")
         all_images = load_images_thru_services(publisher_name, offer, sku, image_location)
     else:
+        all_images = load_images_from_aliases_doc(publisher_name, offer, sku)
         logger.warning(
             'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
-        all_images = load_images_from_aliases_doc(publisher_name, offer, sku)
 
     for i in all_images:
         i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
