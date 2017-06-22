@@ -16,10 +16,13 @@ First copy the build scripts onto the build machine.
 > ~/installer; editor ~/installer
 ```
 
+Create a requirements.txt that TODO
+
 Then execute it with the appropriate environment variable values.
 ```
 export CLI_VERSION=2.0.9 \
   && export CLI_DOWNLOAD_SHA256=eded04dbdab0a95d73a913119994259c6d0cf0388963d951da6088509e05f1da \
+  && export CLI_REQUIREMENTS_FILE=~/Downloads/requirements.txt \
   && python ~/build-bundle.py
 ```
 
