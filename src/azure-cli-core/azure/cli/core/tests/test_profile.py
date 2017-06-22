@@ -461,6 +461,27 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(tenant_id, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_login_credentials_for_data_lake_client(self, mock_get_token, mock_read_cred_file):
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [Test_Profile.token_entry1]
+        mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        consolidated = Profile._normalize_properties(self.user1, [self.subscription1],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # action
+        cred, _, tenant_id = profile.get_login_credentials(
+            resource=CLOUD.endpoints.active_directory_data_lake_resource_id)
+        _, _ = cred._token_retriever()
+        # verify
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+                                               'https://datalake.azure.net/')
+        self.assertEqual(tenant_id, self.tenant_id)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.persist_cached_creds', autospec=True)
     def test_logout(self, mock_persist_creds, mock_read_cred_file):
         # setup

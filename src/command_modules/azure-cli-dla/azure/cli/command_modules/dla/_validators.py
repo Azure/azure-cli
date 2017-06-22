@@ -45,3 +45,18 @@ def datetime_format(value):
         message = "Argument {} is not a valid ISO-8601 datetime format"
         raise ValueError(message.format(value))
     return datetime_obj
+
+
+# pylint: disable=too-many-boolean-expressions
+def process_dla_job_submit_namespace(ns):
+    if (not ns.recurrence_id and
+            (ns.pipeline_name or
+             ns.pipeline_uri or
+             ns.recurrence_id or
+             ns.recurrence_name or
+             ns.run_id)):
+        raise CLIError("--recurrence-id is required if any of the following are specified: " +
+                       "--pipeline-uri, --pipeline-name, --recurrence-id, --recurrence-name, --run-id")
+    if not ns.pipeline_id and (ns.pipeline_name or ns.pipeline_uri or ns.run_id):
+        raise CLIError("--pipeline-id and --recurrence-id are required if any of the following are specified: " +
+                       "--pipeline-uri, --pipeline-name, --run-id")

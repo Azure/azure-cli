@@ -27,7 +27,9 @@ def cf_dls_filesystem(account_name):
     from azure.datalake.store import core
     profile = Profile()
     subscription_id = None
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    cred, subscription_id, _ = profile.get_login_credentials(
+        subscription_id=subscription_id,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id)
     return core.AzureDLFileSystem(
         token=cred,
         store_name=account_name,
