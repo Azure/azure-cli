@@ -10,13 +10,12 @@ import json
 import math
 import os
 import re
-import six
 import subprocess
 import sys
 import threading
 
-
 import jmespath
+import six
 from six.moves import configparser
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory

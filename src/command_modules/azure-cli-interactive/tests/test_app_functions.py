@@ -5,16 +5,24 @@
 
 import unittest
 
-from azclishell.app import Shell
+from azclishell.app import space_examples, space_toolbar, validate_contains_query
 
 
-class ShellScenarioTest(unittest.TestCase):
+class ShellFunctionsTest(unittest.TestCase):
     """ tests whether dump commands works """
     def __init__(self, *args, **kwargs):
-        super(ShellScenarioTest, self).__init__(*args, **kwargs)
+        super(ShellFunctionsTest, self).__init__(*args, **kwargs)
 
-    def test_install_modules(self):
-        """ tests the running """
+    def test_space_toolbar(self):
+        """ tests the toolbar spacing """
+        pass
+
+    def test_space_examples(self):
+        """ tests the examples spacing """
+        pass
+
+    def test_validate_contains_query(self):
+        """ tests whether the validation function knows if there is a query """
         pass
 
 
