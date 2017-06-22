@@ -23,6 +23,7 @@ if [ "$CODE_COVERAGE" == "True" ]; then
     pip install -qqq coverage codecov
     find src -name tests | xargs nosetests --with-coverage --cover-branches --processes=-1 --process-timeout=600 --process-restartworker -v -c ./nose.cfg
 
+
     coverage combine
     codecov
 else
@@ -33,6 +34,7 @@ if [[ "$CI" == "true" ]]; then
     $scripts_root/package_verify.sh
 fi
 
+python -m automation.commandlint.run
 python -m automation.tests.verify_doc_source_map
 python -m automation.tests.verify_readme_history
 
