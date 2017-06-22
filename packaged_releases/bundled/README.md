@@ -16,7 +16,7 @@ First copy the build scripts onto the build machine.
 > ~/installer; editor ~/installer
 ```
 
-Create a requirements.txt that TODO
+Create a requirements.txt that contains the requirements for both Python 2 and 3.
 
 Then execute it with the appropriate environment variable values.
 ```
