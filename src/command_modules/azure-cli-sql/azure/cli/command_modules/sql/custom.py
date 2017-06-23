@@ -452,16 +452,16 @@ def db_update(
 #####
 
 
-def server_ad_admin_create(
+def server_ad_admin_set(
         client,
         resource_group_name,
         server_name,
         **kwargs):
 
-    if not kwargs['tenant_id']:
-        profile = Profile()
-        sub = profile.get_subscription()
-        kwargs['tenant_id'] = sub['tenantId']
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    kwargs['tenant_id'] = sub['tenantId']
 
     return client.create_or_update(
         server_name=server_name,

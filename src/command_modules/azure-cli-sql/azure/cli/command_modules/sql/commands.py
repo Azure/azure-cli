@@ -173,8 +173,7 @@ aadadmin_operations = create_service_adapter('azure.mgmt.sql.operations.server_a
 
 with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations, aadadmin_operations, custom_path) as s:
     with s.group('sql server ad-admin') as c:
-        c.custom_command('create', 'server_ad_admin_create')
-        c.command('show', 'get')
+        c.custom_command('create', 'server_ad_admin_set')
         c.command('list', 'list')
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update',

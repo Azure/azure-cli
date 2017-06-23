@@ -296,35 +296,31 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     def test_aad_admin(self, resource_group, server):
         rg = resource_group
         sn = server
-        sid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
         tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
         user = 'DSEngAll'
 
-        self.cmd('sql server ad-admin create -n {} -g {} -i {} -t{} -u {}'
-                 .format(sn, rg, sid, tid, user),
+        self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
+                 .format(sn, rg, oid, user),
                  checks=[JMESPathCheck('login', user),
-                         JMESPathCheck('sid', sid),
+                         JMESPathCheck('sid', oid),
                          JMESPathCheck('tenantId', tid)])
 
-        self.cmd('sql server ad-admin show -n {} -g {}'
-                 .format(sn, rg),
-                 checks=[JMESPathCheck('login', user)])
-
-        self.cmd('sql server ad-admin list -n {} -g {}'
+        self.cmd('sql server ad-admin list -s {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('[0].login', user)])
 
         user2 = 'TestUser'
 
-        self.cmd('sql server ad-admin update -n {} -g {} -u {} -i {}'
-                 .format(sn, rg, user2, sid),
+        self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
+                 .format(sn, rg, user2, oid),
                  checks=[JMESPathCheck('login', user2),
                          JMESPathCheck('tenantId', tid)])
 
-        self.cmd('sql server ad-admin delete -n {} -g {}'
+        self.cmd('sql server ad-admin delete -s {} -g {}'
                  .format(sn, rg))
 
-        self.cmd('sql server ad-admin list -n {} -g {}'
+        self.cmd('sql server ad-admin list -s {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('login', None)])
 

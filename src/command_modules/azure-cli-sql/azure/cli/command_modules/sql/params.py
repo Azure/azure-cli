@@ -589,22 +589,19 @@ with ParametersContext(command='sql server update') as c:
 ######
 
 
+with ParametersContext(command='sql server ad-admin') as c:
+    c.argument('server_name', options_list=('--server-name', '-s'),
+               help='The name of the SQL Server')
+    c.argument('login', options_list=('--display-name', '-u'),
+               help='Display name of the Azure AD administrator user or group.')
+    c.argument('sid', options_list=('--object-id', '-i'),
+               help='The unique ID of the Azure AD administrator ')
+    c.ignore('tenant_id')
+
+
 with ParametersContext(command='sql server ad-admin create') as c:
     c.expand('properties', ServerAzureADAdministrator, patches={
-        'tenant_id': patch_arg_make_optional,
-    })
-    c.argument('login', options_list=('--user', '-u'))
-    c.argument('sid', options_list=('--sid', '-i'))
-    c.argument('tenant_id', options_list=('--tenant-id', '-t'))
-
-
-with ParametersContext(command='sql server ad-admin update') as c:
-    c.argument('login', options_list=('--user', '-u'),
-               help='The server administrator login value.')
-    c.argument('sid', options_list=('--sid', '-i'),
-               help='The server administrator Sid (Secure ID).')
-    c.argument('tenant_id', options_list=('--tenant-id', '-t'),
-               help='The server Active Directory Administrator tenant id.')
+        'tenant_id': patch_arg_make_optional})
 
 
 #####
