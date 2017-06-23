@@ -130,7 +130,9 @@ class AzCompleter(Completer):
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
+        # validates the position of the parameter
         position = param.lower().startswith(words.lower()) and not text_before_cursor[-1].isspace()
+        # cancels parameters that are already in the in line
         canceling_positions = param.lower() != words.lower() and param not in text_before_cursor.split()
 
         check_doubles = True
