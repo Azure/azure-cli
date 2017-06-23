@@ -137,6 +137,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from azure.cli.core.application import APPLICATION
         self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
         self.deploy_dict = {}
+        self.operation_start_time = datetime.datetime.now()
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -222,7 +223,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
-            if is_verbose:
+
+            if is_verbose and datetime.datetime.now() - self.operation_start_time >= datetime.timedelta(seconds=10):
+                self.operation_start_time = datetime.datetime.now()
                 try:
                     self._generate_template_progress(correlation_id)
                 except Exception as ex:  # pylint: disable=broad-except
