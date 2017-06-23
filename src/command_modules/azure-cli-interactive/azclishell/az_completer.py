@@ -292,7 +292,7 @@ class AzCompleter(Completer):
         # this is for single char parameters
         if last_word.startswith("-") and not last_word.startswith("--"):
             self._is_command = False
-            if self.has_parameters(self.curr_command):
+            if self.curr_command in self.command_parameters:
                 for param in self.command_parameters[self.curr_command]:
                     if self.validate_completion(param, last_word, text) and\
                             not param.startswith("--"):
@@ -301,7 +301,7 @@ class AzCompleter(Completer):
         elif last_word.startswith("--"):  # for regular parameters
             self._is_command = False
 
-            if self.has_parameters(self.curr_command):  # Everything should, map to empty list
+            if self.curr_command in self.command_parameters:  # Everything should, map to empty list
                 for param in self.command_parameters[self.curr_command]:
                     if self.validate_completion(param, last_word, text):
                         yield self.yield_param_completion(param, last_word)
@@ -348,11 +348,7 @@ class AzCompleter(Completer):
 
     def is_completable(self, symbol):
         """ whether the word can be completed as a command or parameter """
-        return self.has_parameters(symbol) or symbol in self.param_description.keys()
-
-    def has_parameters(self, command):
-        """ returns whether given command is valid """
-        return command in self.command_parameters.keys()
+        return symbol in self.command_parameters or symbol in self.param_description.keys()
 
     def has_description(self, param):
         """ if a parameter has a description """
