@@ -579,7 +579,7 @@ def create_service_principal_for_rbac(
         name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
-        expanded_view=None, skip_assignment=False, keyvault=None):
+        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
     import pytz
 
@@ -666,26 +666,27 @@ def create_service_principal_for_rbac(
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    if expanded_view:
-        logger.warning("'--expanded-view' is deprecating and will be removed in a future release. "
-                       "You can get the same information using 'az cloud show'")
+    if show_auth_for_sdk:
+        import json
         from azure.cli.core._profile import Profile
         profile = Profile()
-        result = profile.get_expanded_subscription_info(scopes[0].split('/')[2] if scopes else None,
-                                                        app_id, password)
-    else:
-        result = {
-            'appId': app_id,
-            'password': password,
-            'name': name,
-            'displayName': app_display_name,
-            'tenant': graph_client.config.tenant_id
-        }
-        if cert_file:
-            logger.warning(
-                "Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument",
-                cert_file)
-            result['fileWithCertAndPrivateKey'] = cert_file
+        result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
+                                          app_id, password, cert_file)
+        print(json.dumps(result, indent=2))
+        return
+
+    result = {
+        'appId': app_id,
+        'password': password,
+        'name': name,
+        'displayName': app_display_name,
+        'tenant': graph_client.config.tenant_id
+    }
+    if cert_file:
+        logger.warning(
+            "Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument",
+            cert_file)
+        result['fileWithCertAndPrivateKey'] = cert_file
     return result
 
 
