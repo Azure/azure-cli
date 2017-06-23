@@ -343,7 +343,6 @@ class Shell(object):
 
     def set_scope(self, value):
         """ narrows the scopes the commands """
-
         set_scope(value)
         if self.default_command:
             self.default_command += ' ' + value

@@ -18,6 +18,10 @@ def mock_dimensions():
     return 25, 25
 
 
+def mock_pass(*args, **kwargs):
+    pass
+
+
 get_window_dim = mock_dimensions
 
 
@@ -27,7 +31,10 @@ class TestCompleter(Completer):
         self.completable = ['friendship', '--calls', 'ME']
         self.command_parameters = {'friendship': ['--calls']}
         self.command_description = {'friendship': 'the power within'}
-        self.command_examples = {'friendship': 'use with care'}
+        self.command_examples = {
+            'friendship': [['used'], ['with care']],
+            'guess': [['who', 'are'], ['you']]
+        }
         self.param_description = {'friendship --calls': 'call the friends'}
 
     def has_description(self, command):
@@ -49,9 +56,11 @@ class ShellScenarioTest(unittest.TestCase):
         self.in_stream = six.StringIO()
         self.out_stream = six.StringIO()
         self.shell = Shell(history=None, input_custom=self.in_stream, output_custom=self.out_stream)
+        self.shell.completer = TestCompleter()
 
     def test_generate_help_text(self):
         """ tests building the help text """
+        self.shell.completer = None
         description, example = self.shell.generate_help_text('')
         self.assertEqual(description, '')
         self.assertEqual(example, '')
@@ -63,6 +72,7 @@ class ShellScenarioTest(unittest.TestCase):
 
     def test_on_input_timeout(self):
         """ tests everything """
+        self.shell.completer = None
         self.shell.cli.current_buffer.document = Document(u'az to be or not')
         self.shell.on_input_timeout(self.shell._cli)  # pylint: disable=protected-access
         cli = self.shell._cli  # pylint: disable=protected-access
@@ -71,6 +81,40 @@ class ShellScenarioTest(unittest.TestCase):
         self.assertEqual(cli.buffers['parameter'].document.text, '')
         self.assertEqual(cli.buffers['examples'].document.text, '')
 
+    def test_handle_examples(self):
+        """ tests handling of example repl """
+        temp_function = self.shell.example_repl
+        self.shell.example_repl = mock_pass
+        text = 'guess :: h'
+        c_flag = False
+
+        self.shell.handle_example(text, c_flag)
+        self.assertEqual(self.out_stream.getvalue(), 'An Integer should follow the colon\n')
+        self.out_stream.truncate(0)
+
+        text = 'guess :: 2.8'
+        c_flag = False
+        self.shell.handle_example(text, c_flag)
+        self.assertEqual(self.out_stream.getvalue(), 'An Integer should follow the colon\n')
+        self.out_stream.truncate(0)
+
+        text = 'guess :: -3'
+        c_flag = False
+        self.shell.handle_example(text, c_flag)
+        self.assertEqual(self.out_stream.getvalue(), 'Invalid example number\n')
+        self.out_stream.truncate(0)
+
+        text = 'guess :: 3'
+        c_flag = False
+        self.shell.handle_example(text, c_flag)
+        self.assertEqual(self.out_stream.getvalue(), 'Invalid example number\n')
+        self.out_stream.truncate(0)
+
+        text = 'guess :: 1'
+        c_flag = False
+        self.shell.handle_example(text, c_flag)
+
+        self.shell.example_repl = temp_function
 
 if __name__ == '__main__':
     unittest.main()
