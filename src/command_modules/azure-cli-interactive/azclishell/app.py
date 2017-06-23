@@ -67,27 +67,28 @@ def space_examples(list_examples, rows, section_value):
     examples_with_index = []
 
     for i, _ in list(enumerate(list_examples)):
-        examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
-                                   list_examples[i][1])
+        if len(list_examples[i]) > 1:
+            examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
+                                       list_examples[i][1])
 
     example = "".join(exam for exam in examples_with_index)
     num_newline = example.count('\n')
 
     page_number = ''
-    if num_newline > rows * PART_SCREEN_EXAMPLE:
+    if num_newline > rows * PART_SCREEN_EXAMPLE and rows > PART_SCREEN_EXAMPLE * 10:
         len_of_excerpt = math.floor(float(rows) * PART_SCREEN_EXAMPLE)
 
         group = example.split('\n')
         end = int(section_value * len_of_excerpt)
         begin = int((section_value - 1) * len_of_excerpt)
 
-        if section_value * len_of_excerpt < num_newline:
+        if end < num_newline:
             example = '\n'.join(group[begin:end]) + "\n"
         else:  # default chops top off
             example = '\n'.join(group[begin:]) + "\n"
             while ((section_value - 1) * len_of_excerpt) > num_newline:
                 sub_section()
-        page_number = '\n' + str(section_value) + "/" + str(math.ceil(num_newline / len_of_excerpt))
+        page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
 
     return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
 
