@@ -180,7 +180,7 @@ class Shell(object):
         document = cli.current_buffer.document
         text = document.text
 
-        text = text.replace('az', '')
+        text = text.replace('az ', '')
         if self.default_command:
             text = self.default_command + ' ' + text
 
@@ -256,7 +256,7 @@ class Shell(object):
             if is_command:
                 command += str(word) + " "
 
-            if self.completer.is_completable(command.rstrip()):
+            if self.completer and self.completer.is_completable(command.rstrip()):
                 cmdstp = command.rstrip()
                 any_documentation = True
 
