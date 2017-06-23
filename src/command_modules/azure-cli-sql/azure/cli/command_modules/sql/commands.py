@@ -88,6 +88,7 @@ with ServiceGroup(__name__, get_sql_databases_operations, database_operations, c
         c.command('show', 'get_blob_auditing_policy')
         c.generic_update_command(
             'update', 'get_blob_auditing_policy', 'create_or_update_blob_auditing_policy',
+
             custom_func_name='db_audit_policy_update')
 
     with s.group('sql db threat-policy') as c:
@@ -118,8 +119,8 @@ recommanded_elastic_pools_ops = \
     create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
                            'RecommendedElasticPoolsOperations')
 
-# Recommended elastic pools will not be included in the first batch of GA commands# with
-# ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
+# Recommended elastic pools will not be included in the first batch of GA commands
+# with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
 #                   recommanded_elastic_pools_ops) as s:
 #    with s.group('sql elastic-pool recommended') as c:
 #        c.command('show', 'get')
