@@ -8,7 +8,7 @@ Release History
 
 Source download:
 https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0.9.tar.gz
-ea4868b31a9d0b0e0a40ba7ff18100aea92175f4d3115fe9948064cc3677fcfb
+e74150b2db2975e8b17710eb7ef270ded16e6a8c27f77929544533f6b4c33b76
 
 <details>
   <summary>List of component versions in this release (click to expand)</summary><p>
