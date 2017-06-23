@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.6 (unreleased)
+++++++++++++++++++
+* Support for registering cloud just with ARM resource manager endpoint
+
 2.0.5 (2017-06-21)
 ++++++++++++++++++
 * Provide an option for 'az cloud set' to select the profile while selecting current cloud
