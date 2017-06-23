@@ -299,6 +299,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
         tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
         user = 'DSEngAll'
+        user2 = 'TestUser'
 
         self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
                  .format(sn, rg, oid, user),
@@ -309,8 +310,6 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.cmd('sql server ad-admin list -s {} -g {}'
                  .format(sn, rg),
                  checks=[JMESPathCheck('[0].login', user)])
-
-        user2 = 'TestUser'
 
         self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
                  .format(sn, rg, user2, oid),
