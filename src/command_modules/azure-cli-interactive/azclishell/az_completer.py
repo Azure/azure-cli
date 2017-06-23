@@ -259,8 +259,8 @@ class AzCompleter(Completer):
 
     def yield_param_completion(self, param, last_word):
         """ yields a parameter """
-        return Completion(param, -len(last_word), display_meta=self.get_param_description(
-            self.curr_command + " " + str(param)).replace('\n', ''))
+        return Completion(param, -len(last_word), display_meta=self.param_description.get(
+            self.curr_command + " " + str(param), '').replace('\n', ''))
 
     def gen_cmd_and_param_completions(self, text):
         """ generates command and parameter completions """
@@ -349,13 +349,6 @@ class AzCompleter(Completer):
     def is_completable(self, symbol):
         """ whether the word can be completed as a command or parameter """
         return self.has_parameters(symbol) or symbol in self.param_description.keys()
-
-    def get_param_description(self, param):
-        """ gets a description of an empty string """
-        if param in self.param_description:
-            return self.param_description[param]
-        else:
-            return ""
 
     def has_parameters(self, command):
         """ returns whether given command is valid """

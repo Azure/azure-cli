@@ -5,11 +5,40 @@
 import six
 import unittest
 
-from azclishell.app import Shell
+from azclishell.app import Shell, space_examples
 
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
-from prompt_toolkit.enums import DEFAULT_BUFFER
+from prompt_toolkit.completion import Completer, Completion
+
+from azclishell.util import get_window_dim
+
+
+def mock_dimensions():
+    return 25, 25
+
+
+get_window_dim = mock_dimensions
+
+
+class TestCompleter(Completer):
+    def __init__(self, *args, **kwargs):
+        super(TestCompleter, self).__init__(*args, **kwargs)
+        self.completable = ['friendship', '--calls', 'ME']
+        self.command_parameters = {'friendship': ['--calls']}
+        self.command_description = {'friendship': 'the power within'}
+        self.command_examples = {'friendship': 'use with care'}
+        self.param_description = {'friendship --calls': 'call the friends'}
+
+    def has_description(self, command):
+        return command in self.param_description
+
+    def is_completable(self, command):
+        return command in self.completable
+
+    def get_completions(self, document, completion_event):  # pylint: disable=unused-argument
+        for comp in self.completable:
+            yield Completion(comp)
 
 
 class ShellScenarioTest(unittest.TestCase):
@@ -26,6 +55,11 @@ class ShellScenarioTest(unittest.TestCase):
         description, example = self.shell.generate_help_text('')
         self.assertEqual(description, '')
         self.assertEqual(example, '')
+
+        self.shell.completer = TestCompleter()
+        description, example = self.shell.generate_help_text('friendship --calls')
+        self.assertEqual(description, '--calls:\n' + 'call the friends')
+        self.assertEqual(example, space_examples('use with care', 25, 1))
 
     def test_on_input_timeout(self):
         """ tests everything """

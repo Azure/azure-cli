@@ -260,11 +260,10 @@ class Shell(object):
                 cmdstp = command.rstrip()
                 any_documentation = True
 
-                if word in self.completer.command_parameters[cmdstp] and \
-                   self.completer.has_description(cmdstp + " " + word):
+                if word in self.completer.command_parameters[cmdstp] and self.completer.has_description(
+                        cmdstp + " " + word):
                     param_descrip = word + ":\n" + \
-                        self.completer.get_param_description(
-                            cmdstp + " " + word)
+                        self.completer.param_description.get(cmdstp + " " + word, '')
 
                 self.description_docs = u'{}'.format(
                     self.completer.command_description[cmdstp])
