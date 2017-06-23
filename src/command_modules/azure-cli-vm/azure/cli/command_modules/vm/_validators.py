@@ -16,6 +16,7 @@ from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
+import azure.cli.core.keys as keys
 from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
@@ -705,7 +706,7 @@ def validate_ssh_key(namespace):
         logger.info('Use existing SSH public key file: %s', string_or_file)
         with open(string_or_file, 'r') as f:
             content = f.read()
-    elif not _is_valid_ssh_rsa_public_key(content):
+    elif not keys.is_valid_ssh_rsa_public_key(content):
         if namespace.generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
@@ -714,7 +715,7 @@ def validate_ssh_key(namespace):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
+            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
