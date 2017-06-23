@@ -41,6 +41,10 @@ cli_generic_update_command(__name__,
                            lambda: keyvault_client_factory().vaults,
                            custom_function_op=custom_path.format('update_keyvault'))
 
+cli_command(__name__, 'keyvault key parse-id', custom_path.format('parse_key_id'))
+cli_command(__name__, 'keyvault secret parse-id', custom_path.format('parse_secret_id'))
+cli_command(__name__, 'keyvault certificate parse-id', custom_path.format('parse_certificate_id'))
+
 # Data Plane Commands
 
 cli_keyvault_data_plane_command('keyvault key list',

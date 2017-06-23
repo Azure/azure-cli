@@ -156,3 +156,21 @@ helps['keyvault certificate issuer admin'] = """
     type: group
     short-summary: Manage admin information for certificate issuers.
 """
+
+helps['keyvault key parse-id'] = """
+    type: command
+    short-summary: Parse a specified key id
+    long-summary: Parses the specified key id into it's components, vault-uri, name, and version.
+"""
+
+helps['keyvault certificate parse-id'] = """
+    type: command
+    short-summary: Parse a specified secret id
+    long-summary: Parses the specified secret id into it's components, vault-uri, name, and version.
+"""
+
+helps['keyvault certificate parse-id'] = """
+    type: command
+    short-summary: Parse a specified certificate id
+    long-summary: Parses the specified certificate id into it's components, vault-uri, name, and version.
+"""
