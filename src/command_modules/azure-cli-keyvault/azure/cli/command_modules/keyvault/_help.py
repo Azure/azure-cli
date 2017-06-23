@@ -5,7 +5,6 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
 
 helps['keyvault'] = """
     type: group
@@ -37,6 +36,12 @@ helps['keyvault show'] = """
 helps['keyvault update'] = """
     type: command
     short-summary: Update the properties of a key vault.
+"""
+
+helps['keyvault recover'] = """
+    type: command
+    short-summary: Recover a key vault.
+    long-summary: Recovers a previously deleted key vault for which soft delete was enabled.
 """
 
 helps['keyvault key'] = """

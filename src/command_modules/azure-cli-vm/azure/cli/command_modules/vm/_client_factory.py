@@ -10,12 +10,6 @@ def _compute_client_factory(**_):
     return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
 
-def _subscription_client_factory(**_):
-    from azure.mgmt.resource import SubscriptionClient
-    from azure.cli.core.commands.client_factory import get_subscription_service_client
-    return get_subscription_service_client(SubscriptionClient)
-
-
 def cf_ni(_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client

@@ -1,4 +1,4 @@
-# Project AZ Help System #
+# Azure CLI Help System #
 
 Help authoring for commands is done in a number of places, all of which are contained in the Az code base.  Some help text comes from product code, but it can be overridden using a YAML-based help authoring system.  The YAML-based system is the recommended way to update command and group help text.
 
@@ -106,3 +106,54 @@ Here are the layers of Project Az help, with each layer overriding the layer bel
 ## Page titles for command groups ##
 
 Page titles for your command groups as generated from the source are simply the command syntax, "az vm", but we use friendly titles on the published pages - "Virtual machines - az vm". To do that, ee add the friendly part of the page title to [titlemapping.json](https://github.com/Azure/azure-docs-cli-python/blob/master/titleMapping.json) in the azure-docs-cli-python repo. When you add a new command group, make sure to update the mapping.
+
+## Profile specific help ##
+
+The CLI supports multiple profiles. Help can be authored to take advantage of this.  
+Commands available, arguments, descriptions and examples all change dynamically based on the profile in use.
+
+The `az cloud update --profile ...` command allows you to switch profiles.  
+You can see an example of this by switching profiles and running `az storage account create --help`.
+
+---
+
+Below is some documentation on taking advantage of this in your YAML help files.
+
+In your YAML files, the same `short-summary` and `long-summary` is used for all profiles.
+
+For the command parameters section, any parameters not used by a profile will be ignored and not displayed.
+
+For command examples, you optionally specify the profile the example is for with the `min_profile` and `max_profile` options.
+
+Here's a samply for `storage account create`:  
+The first example is only supported on the profile `latest` and above whilst the second example if only supported on `2017-03-09-profile` and below.
+
+```
+    examples:
+        - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
+          min_profile: latest
+        - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
+          max_profile: 2017-03-09-profile
+```
+
+Here is how this looks in CLI `--help`:
+
+On profile `latest`.
+```
+Examples
+    Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US
+    region with locally redundant storage.
+        az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku
+        Standard_LRS
+```
+
+On profile `2017-03-09-profile`.
+```
+Examples
+    Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US
+    region with locally redundant storage.
+        az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type
+        Standard_LRS
+```

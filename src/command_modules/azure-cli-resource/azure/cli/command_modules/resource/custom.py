@@ -9,7 +9,11 @@ from __future__ import print_function
 import json
 import os
 import re
+import ssl
+import sys
 import uuid
+
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -289,19 +293,6 @@ def _prompt_for_parameters(missing_parameters):
     return result
 
 
-def _merge_parameters(parameter_list):
-    parameters = None
-    for params in parameter_list or []:
-        params_object = shell_safe_json_parse(params)
-        if params_object:
-            params_object = params_object.get('parameters', params_object)
-        if parameters is None:
-            parameters = params_object
-        else:
-            parameters.update(params_object)
-    return parameters
-
-
 def _get_missing_parameters(parameters, template, prompt_fn):
     missing = _find_missing_parameters(parameters, template)
     if missing:
@@ -313,27 +304,38 @@ def _get_missing_parameters(parameters, template, prompt_fn):
     return parameters
 
 
-def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None, deployment_name=None,
-                              parameter_list=None, mode='incremental', validate_only=False, no_wait=False):
+def _ssl_context():
+    if sys.version_info < (3, 4):
+        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def _urlretrieve(url):
+    req = urlopen(url, context=_ssl_context())
+    return req.read()
+
+
+def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
+                              template_file=None, template_uri=None, deployment_name=None,
+                              parameters=None, mode='incremental', validate_only=False,
+                              no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
                                                  mod='models')
-
-    if bool(template_uri) == bool(template_file):
-        raise CLIError('please provide either template file path or uri, but not both')
-
-    parameters = _merge_parameters(parameter_list)
-    if parameters is None:
-        parameters = {}
+    parameters = parameters or {}
     template = None
     template_link = None
+    template_obj = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
+        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'))
     else:
         template = get_file_json(template_file)
+        template_obj = template
 
-    parameters = _get_missing_parameters(parameters, template, _prompt_for_parameters)
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)

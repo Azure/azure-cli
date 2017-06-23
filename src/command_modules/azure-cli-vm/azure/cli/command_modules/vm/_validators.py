@@ -12,18 +12,23 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
-from azure.cli.core.util import CLIError, random_string
+from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
+import azure.cli.core.keys as keys
 from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
 
 def validate_nsg_name(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
+                        namespace='Microsoft.Compute', type='virtualMachines',
+                        subscription=get_subscription_id())
     namespace.network_security_group_name = namespace.network_security_group_name \
-        or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
+        or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
 def _get_resource_group_from_vault_name(vault_name):
@@ -372,6 +377,11 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.attach_os_disk = _get_resource_id(
             namespace.attach_os_disk, namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
+    if getattr(namespace, 'attach_data_disks', None):
+        if not namespace.use_unmanaged_disk:
+            namespace.attach_data_disks = [_get_resource_id(d, namespace.resource_group_name, 'disks',
+                                                            'Microsoft.Compute') for d in namespace.attach_data_disks]
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
@@ -390,7 +400,7 @@ def _validate_vm_create_storage_account(namespace):
     else:
         from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -610,7 +620,7 @@ def _validate_vm_vmss_create_auth(namespace):
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        # pylint: disable=line-too-long
+
         namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
@@ -675,8 +685,8 @@ def _validate_admin_password(password, os_type):
     max_length = 72 if is_linux else 123
     min_length = 12
     if len(password) not in range(min_length, max_length + 1):
-        raise CLIError('The pssword length must be between {} and {}'.format(min_length,
-                                                                             max_length))
+        raise CLIError('The password length must be between {} and {}'.format(min_length,
+                                                                              max_length))
     contains_lower = re.findall('[a-z]+', password)
     contains_upper = re.findall('[A-Z]+', password)
     contains_digit = re.findall('[0-9]+', password)
@@ -696,7 +706,7 @@ def validate_ssh_key(namespace):
         logger.info('Use existing SSH public key file: %s', string_or_file)
         with open(string_or_file, 'r') as f:
             content = f.read()
-    elif not _is_valid_ssh_rsa_public_key(content):
+    elif not keys.is_valid_ssh_rsa_public_key(content):
         if namespace.generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
@@ -705,7 +715,7 @@ def validate_ssh_key(namespace):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
+            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
@@ -737,7 +747,7 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
 
 
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
-    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
     try:

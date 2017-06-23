@@ -2,6 +2,15 @@
 
 Release History
 ===============
+2.0.9 (2017-06-21)
+++++++++++++++++++
+* No changes
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* fix acs kube get-credentials ssh-key loading (#3612)
+* Change a message so as not to confuse MacOS users. (#3568)
+* rbac: clean up role assignments and related AAD application when delete a service principal (#3610)
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++

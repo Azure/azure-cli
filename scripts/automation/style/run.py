@@ -19,7 +19,7 @@ def run_pylint(modules):
 
     modules_list = ' '.join(
         [os.path.join(path, 'azure') for name, path in modules if not name.endswith('-nspkg')])
-    arguments = '{} --rcfile={} -j {} -r n -d I0013'.format(
+    arguments = '{} --rcfile={} -j {}'.format(
         modules_list,
         os.path.join(automation_path.get_repo_root(), 'pylintrc'),
         multiprocessing.cpu_count())

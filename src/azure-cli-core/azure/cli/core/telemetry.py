@@ -150,7 +150,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'Parameters', self.parameters)
+        self.set_custom_properties(result, 'Parameters', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
 
         return result

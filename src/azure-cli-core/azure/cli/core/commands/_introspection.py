@@ -108,7 +108,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
         if arg_name == no_wait_param:
             if not isinstance(default, bool):
                 raise ValueError("The type of '{}' must be boolean to enable no_wait".format(
-                    no_wait_param))  # pylint: disable=line-too-long
+                    no_wait_param))
             found_no_wait_param = True
             options_list = ['--no-wait']
             help_str = 'do not wait for the long running operation to finish'

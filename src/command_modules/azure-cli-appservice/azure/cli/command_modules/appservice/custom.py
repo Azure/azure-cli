@@ -17,7 +17,8 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
-                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
+                                   RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
+                                   RampUpRule)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -156,7 +157,7 @@ def get_app_settings(resource_group_name, name, slot=None):
                               .connection_string_names or []
     result = [{'name': p,
                'value': result.properties[p],
-               'slotSetting': p in slot_constr_names} for p in result.properties]
+               'slotSetting': p in slot_constr_names} for p in _mask_creds_related_appsettings(result.properties)]
     return result
 
 
@@ -233,7 +234,7 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         slot_cfg_names.app_setting_names += new_slot_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return result.properties
+    return _mask_creds_related_appsettings(result.properties)
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
@@ -250,8 +251,9 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _generic_site_operation(resource_group_name, name, 'update_application_settings',
-                                   slot, app_settings)
+    return _mask_creds_related_appsettings(_generic_site_operation(resource_group_name, name,
+                                                                   'update_application_settings',
+                                                                   slot, app_settings).properties)
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
@@ -308,6 +310,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
                               'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
+APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
 def update_container_settings(resource_group_name, name, docker_registry_server_url=None,
@@ -325,7 +328,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
     update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
-    return _filter_for_container_settings(settings)
+    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
 
 
 def delete_container_settings(resource_group_name, name, slot=None):
@@ -334,11 +337,18 @@ def delete_container_settings(resource_group_name, name, slot=None):
 
 def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
-    return _filter_for_container_settings(settings)
+    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
 
 
 def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
+
+
+# TODO: remove this when #3660(service tracking issue) is resolved
+def _mask_creds_related_appsettings(settings):
+    for x in [x1 for x1 in settings if x1 in APPSETTINGS_TO_MASK]:
+        settings[x] = None
+    return settings
 
 
 def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
@@ -535,7 +545,7 @@ def _linux_sku_check(sku):
     tier = _get_sku_name(sku)
     if tier in ['BASIC', 'STANDARD']:
         return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'  # pylint: disable=line-too-long
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
     raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
 
 
@@ -809,8 +819,17 @@ def view_in_browser(resource_group_name, name, slot=None, logs=False):
 
 
 def _open_page_in_browser(url):
-    import webbrowser
-    webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    import sys
+    if sys.platform.lower() == 'darwin':
+        # handle 2 things:
+        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
+        #    understand the "open location" message"
+        # b. Python 2.x can't sniff out the default browser
+        import subprocess
+        subprocess.Popen(['open', url])
+    else:
+        import webbrowser
+        webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
 
 
 # TODO: expose new blob suport
@@ -908,6 +927,31 @@ def delete_slot(resource_group_name, webapp, slot):
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
 
 
+def set_traffic_routing(resource_group_name, name, distribution):
+    client = web_client_factory()
+    site = client.web_apps.get(resource_group_name, name)
+    configs = get_site_configs(resource_group_name, name)
+    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    configs.experiments.ramp_up_rules = []
+    for r in distribution:
+        slot, percentage = r.split('=')
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+                                                            reroute_percentage=float(percentage),
+                                                            name=slot))
+    _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+
+    return configs.experiments.ramp_up_rules
+
+
+def show_traffic_routing(resource_group_name, name):
+    configs = get_site_configs(resource_group_name, name)
+    return configs.experiments.ramp_up_rules
+
+
+def clear_traffic_routing(resource_group_name, name):
+    set_traffic_routing(resource_group_name, name, [])
+
+
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
     scm_url = _get_scm_url(resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
@@ -926,9 +970,6 @@ def get_streaming_log(resource_group_name, name, provider=None, slot=None):
 
 
 def download_historical_logs(resource_group_name, name, log_file=None, slot=None):
-    '''
-    Download historical logs as a zip file
-    '''
     scm_url = _get_scm_url(resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
     import requests
@@ -1170,7 +1211,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
     client = web_client_factory()
     if consumption_plan_location:
         locations = list_consumption_locations()
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)  # pylint: disable=line-too-long
+        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
@@ -1256,7 +1297,7 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 
     endpoint_suffix = CLOUD.suffixes.storage_endpoint
-    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(   # pylint: disable=line-too-long
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
         "https",
         endpoint_suffix,
         storage_account,

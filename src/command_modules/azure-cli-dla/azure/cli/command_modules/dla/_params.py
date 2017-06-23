@@ -12,13 +12,15 @@ from azure.cli.core.commands.parameters import \
      enum_choice_list)
 
 from azure.cli.command_modules.dla._validators import (validate_resource_group_name,
-                                                       datetime_format)
+                                                       datetime_format,
+                                                       process_dla_job_submit_namespace)
 
-# pylint: disable=line-too-long
+
 from azure.mgmt.datalake.analytics.account.models.data_lake_analytics_account_management_client_enums \
     import (FirewallState,
             TierType,
-            FirewallAllowAzureIpsState)
+            FirewallAllowAzureIpsState,
+            AADObjectType)
 
 from azure.mgmt.datalake.analytics.job.models.data_lake_analytics_job_management_client_enums \
     import (CompileMode,
@@ -50,11 +52,15 @@ register_cli_argument('dla account update', 'max_degree_of_parallelism', help='T
 register_cli_argument('dla account update', 'query_store_retention', help='The number of days that job metadata is retained.', type=int)
 register_cli_argument('dla account list', 'resource_group_name', resource_group_name_type, validator=None)
 
+# storage parameters
+register_cli_argument('dla account blob-storage', 'access_key', help='the access key associated with this Azure Storage account that will be used to connect to it')
+register_cli_argument('dla account blob-storage', 'suffix', help='the optional suffix for the storage account')
+
 # Job params
 # pylint: disable=line-too-long
 register_cli_argument('dla job submit', 'compile_mode', help='Indicates the type of compilation to be done on this job. Valid values are: \'Semantic\' (Only performs semantic checks and necessary sanity checks), \'Full\' (full compilation) and \'SingleBox\' (Full compilation performed locally)', **enum_choice_list(CompileMode))
 register_cli_argument('dla job submit', 'compile_only', help='Indicates that the submission should only build the job and not execute if set to true.', action='store_true')
-register_cli_argument('dla job submit', 'script', completer=FilesCompleter(), help="The script to submit. This is either the script contents or use `@<file path>` to load the script from a file")
+register_cli_argument('dla job submit', 'script', completer=FilesCompleter(), help="The script to submit. This is either the script contents or use `@<file path>` to load the script from a file", validator=process_dla_job_submit_namespace)
 register_cli_argument('dla job wait', 'max_wait_time_sec', help='The maximum amount of time to wait before erroring out. Default value is to never timeout. Any value <= 0 means never timeout', type=int)
 register_cli_argument('dla job wait', 'wait_interval_sec', help='The polling interval between checks for the job status, in seconds.', type=int)
 register_cli_argument('dla job list', 'submitted_after', help='A filter which returns jobs only submitted after the specified time, in ISO-8601 format.', type=datetime_format)
@@ -63,6 +69,8 @@ register_cli_argument('dla job list', 'state', help='A filter which returns jobs
 register_cli_argument('dla job list', 'result', help='A filter which returns jobs with only the specified result(s).', nargs='*', **enum_choice_list(JobResult))
 register_cli_argument('dla job list', 'submitter', help='A filter which returns jobs only by the specified submitter.')
 register_cli_argument('dla job list', 'name', help='A filter which returns jobs only by the specified friendly name.')
+register_cli_argument('dla job list', 'pipeline_id', help='A filter which returns jobs only containing the specified pipeline_id.')
+register_cli_argument('dla job list', 'recurrence_id', help='A filter which returns jobs only containing the specified recurrence_id.')
 
 # credential params
 register_cli_argument('dla catalog credential create', 'credential_user_password', options_list=('--password', '-p'), help='Password for the credential user. Will prompt if not given.')
@@ -70,3 +78,9 @@ register_cli_argument('dla catalog credential create', 'credential_user_name', o
 register_cli_argument('dla catalog credential update', 'credential_user_name', options_list=('--user-name',))
 register_cli_argument('dla catalog credential update', 'credential_user_password', options_list=('--password', '-p'), help='Current password for the credential user. Will prompt if not given.')
 register_cli_argument('dla catalog credential update', 'new_credential_user_password', options_list=('--new-password',), help='New password for the credential user. Will prompt if not given.')
+
+# compute policy params
+register_cli_argument('dla account compute_policy', 'max_dop_per_job', help='The maximum degree of parallelism allowed per job for this policy. At least one of --min-priority-per-job and --max-dop-per-job must be specified.', type=int)
+register_cli_argument('dla account compute_policy', 'min_priority_per_job', help='The minimum priority allowed per job for this policy. At least one of --min-priority-per-job and --max-dop-per-job must be specified.', type=int)
+register_cli_argument('dla account compute_policy create', 'object_id', help='The Azure Active Directory object ID of the user, group or service principal to apply the policy to.')
+register_cli_argument('dla account compute_policy create', 'object_type', help='The Azure Active Directory object type associated with the supplied object id.', **enum_choice_list(AADObjectType))

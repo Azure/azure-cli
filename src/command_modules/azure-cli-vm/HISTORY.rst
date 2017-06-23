@@ -1,9 +1,20 @@
 .. :changelog:
+
 Release History
 ===============
-2.0.8 (unreleased)
+2.0.9 (2017-06-21)
 ++++++++++++++++++
+* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
+* diagnostics: Fix a typo in default Linux Diagnostic extension config
+* vmss create: fix failure when running with --use-unmanaged-disk
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* vm: support attaching data disks on vm create (#3644)
 * Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
+* support configuring disk caching on attaching a managed disk (#3513)
+* Support attaching existing data disks on vm create
+* VM/VMSS: fixed an issue with name generation that resulted in the create commands not being idempotent.
 
 2.0.7 (2017-05-09)
 ++++++++++++++++++

@@ -3,11 +3,16 @@
 Release History
 ===============
 
-unreleased
+2.0.9 (2017-06-21)
 ++++++++++++++++++
+* `nic create/update`: Add support for `--accelerated-networking`.
+* BC `nic create`: Remove non-functional `--internal-dns-name-suffix` argument.
 
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* `nic update/create`: Add support for --dns-servers.
 * `local-gateway create`: fix bug where --local-address-prefixes was ignored.
-
+* `vnet update`: Add support for --dns-servers.
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++

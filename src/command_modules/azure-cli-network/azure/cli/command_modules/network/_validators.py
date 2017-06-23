@@ -374,7 +374,7 @@ def process_ag_url_path_map_create_namespace(namespace):  # pylint: disable=unus
             namespace, 'backendAddressPools', namespace.default_address_pool)
 
     if namespace.default_http_settings and not is_valid_resource_id(
-            namespace.default_http_settings):  # pylint: disable=line-too-long
+            namespace.default_http_settings):
         namespace.default_http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
 
@@ -545,10 +545,10 @@ def process_tm_endpoint_create_namespace(namespace):
                                                                                                            endpoint_type)  # pylint: disable=line-too-long
         if missing_options:
             error_message = '{}\nSupply the following: {}'.format(error_message, ', '.join(
-                missing_options))  # pylint: disable=line-too-long
+                missing_options))
         if extra_options:
             error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(
-                extra_options))  # pylint: disable=line-too-long
+                extra_options))
         raise CLIError(error_message)
 
 

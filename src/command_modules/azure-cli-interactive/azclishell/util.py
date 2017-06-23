@@ -24,8 +24,10 @@ def get_window_dim():
 
 def _size_27():
     """ works for python """
-    dim = os.popen('stty size', 'r').read().split()
-    return dim[0], dim[1]
+    from subprocess import check_output
+    lines = check_output(['tput', 'lines'])
+    cols = check_output(['tput', 'cols'])
+    return lines, cols
 
 
 def _size_36():
@@ -54,33 +56,12 @@ def _size_windows():
 
 def parse_quotes(cmd, quotes=True, string=True):
     """ parses quotes """
-    string_literals = ['\'', '\"']
-    args = []
-    words = cmd
-    open_q = False
-    if quotes:
-        for quote in string_literals:
-            if quote in cmd:
-                if cmd.count(quote) % 2 != 0:
-                    raise ValueError("Invalid input: all quotes need accompanied closing quote")
-                while quote in words:
-                    if words.partition(quote)[0] is None:
-                        break
-                    if open_q:
-                        args.append(words.partition(quote)[0])
-                        open_q = False
-                    else:
-                        args.extend(words.partition(quote)[0].split())
-                        open_q = True
+    import shlex
 
-                    words = words.partition(quote)[2]
-                if words is not "":
-                    args.extend(words.split())
-                break
-        else:
-            args.extend(words.split())
+    if quotes:
+        args = shlex.split(cmd)
     else:
-        args = words.split()
+        args = cmd.split()
 
     if string:
         str_args = []

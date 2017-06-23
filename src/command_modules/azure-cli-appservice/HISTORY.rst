@@ -2,6 +2,16 @@
 
 Release History
 ===============
+0.1.9 (2017-06-21)
+++++++++++++++++++
+* BC: webapp: remove all commands under 'az appservice web'
+
+0.1.8 (2017-06-13)
+++++++++++++++++++
+* webapp: mask docker registry passwords from 'webapp appsettings/container' commands' output (#3656)
+* webapp: ensure default browser is used on osx and w/o error on launching (#3623)
+* webapp: improve the help of 'az webapp log tail/download' (#3624)
+* webapp: expose traffic-routing command to configure static routing (#3566)
 
 0.1.7 (2017-05-30)
 ++++++++++++++++++++

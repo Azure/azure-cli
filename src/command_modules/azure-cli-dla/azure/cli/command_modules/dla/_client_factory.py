@@ -17,20 +17,24 @@ def cf_dla_account_firewall(_):
     return get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).firewall_rules
 
 
+def cf_dla_account_compute_policy(_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
+    return get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).compute_policies
+
+
 def cf_dla_account_storage(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).storage_accounts
 
 
-# pylint: disable=line-too-long
 def cf_dla_account_adls(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
     return get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).data_lake_store_accounts
 
 
-# pylint: disable=line-too-long
 def cf_dla_catalog(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.analytics.catalog import DataLakeAnalyticsCatalogManagementClient
@@ -38,6 +42,7 @@ def cf_dla_catalog(_):
         DataLakeAnalyticsCatalogManagementClient,
         subscription_bound=False,
         base_url_bound=False,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id,
         adla_catalog_dns_suffix=CLOUD.suffixes.azure_datalake_analytics_catalog_and_job_endpoint).catalog
 
 
@@ -48,4 +53,27 @@ def cf_dla_job(_):
         DataLakeAnalyticsJobManagementClient,
         subscription_bound=False,
         base_url_bound=False,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id,
         adla_job_dns_suffix=CLOUD.suffixes.azure_datalake_analytics_catalog_and_job_endpoint).job
+
+
+def cf_dla_job_recurrence(_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.datalake.analytics.job import DataLakeAnalyticsJobManagementClient
+    return get_mgmt_service_client(
+        DataLakeAnalyticsJobManagementClient,
+        subscription_bound=False,
+        base_url_bound=False,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id,
+        adla_job_dns_suffix=CLOUD.suffixes.azure_datalake_analytics_catalog_and_job_endpoint).recurrence
+
+
+def cf_dla_job_pipeline(_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.datalake.analytics.job import DataLakeAnalyticsJobManagementClient
+    return get_mgmt_service_client(
+        DataLakeAnalyticsJobManagementClient,
+        subscription_bound=False,
+        base_url_bound=False,
+        resource=CLOUD.endpoints.active_directory_data_lake_resource_id,
+        adla_job_dns_suffix=CLOUD.suffixes.azure_datalake_analytics_catalog_and_job_endpoint).pipeline

@@ -5,16 +5,10 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
 
 helps['appservice'] = """
     type: group
     short-summary: Manage your App Service plans.
-"""
-
-helps['appservice web'] = """
-    type: group
-    short-summary: deprecated, please use 'az webapp'.
 """
 
 helps['webapp'] = """
@@ -173,6 +167,18 @@ helps['webapp log config'] = """
     short-summary: Configure web app logs.
 """
 
+helps['webapp log download'] = """
+    type: command
+    short-summary: Download historical logs as a zip file
+    long-summary: Might not work with Linux webs
+"""
+
+helps['webapp log tail'] = """
+    type: command
+    short-summary: Start live tracing
+    long-summary: Might not work with Linux webs
+"""
+
 helps['webapp deployment'] = """
     type: group
     short-summary: Manage web application deployments.
@@ -275,6 +281,31 @@ helps['webapp deployment source show'] = """
 helps['webapp deployment source sync'] = """
     type: command
     short-summary: Synchronize from the source repository, only needed under manual integration mode.
+"""
+
+helps['webapp traffic-routing'] = """
+    type: group
+    short-summary: Manage traffic routings in production test.
+"""
+
+helps['webapp traffic-routing'] = """
+    type: group
+    short-summary: Manage traffic routings in production test.
+"""
+
+helps['webapp traffic-routing set'] = """
+    type: command
+    short-summary: Routing some percentages of traffic to deployment slots
+"""
+
+helps['webapp traffic-routing show'] = """
+    type: command
+    short-summary: Display the current distribution of traffic across slots
+"""
+
+helps['webapp traffic-routing clear'] = """
+    type: command
+    short-summary: Clear the routing rules to send 100% to production
 """
 
 helps['appservice plan'] = """
@@ -426,6 +457,11 @@ helps['webapp show'] = """
 helps['webapp stop'] = """
     type: command
     short-summary: Stop a web app.
+"""
+
+helps['webapp production-test'] = """
+    type: command
+    short-summary: test in production, including configuring static routings.
 """
 
 helps['functionapp'] = """

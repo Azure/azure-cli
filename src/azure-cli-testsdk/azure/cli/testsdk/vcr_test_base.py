@@ -28,6 +28,8 @@ from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-
 import vcr
 import jmespath
 
+from azure_devtools.scenario_tests.const import ENV_LIVE_TEST
+
 # TODO Should not depend on azure.cli.main package here.
 # Will be ok if this test file is not part of azure.cli.core.utils
 from azure.cli.main import main as cli_main
@@ -39,7 +41,6 @@ from azure.cli.core.util import CLIError
 
 from .base import find_recording_dir
 
-LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
@@ -61,11 +62,17 @@ def patch_vcr_connection_request(*args, **kwargs):
 vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
-def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                                  api_version=None, base_url_bound=None, **kwargs):
+def _mock_get_mgmt_service_client(client_type,
+                                  subscription_bound=True,
+                                  subscription_id=None,
+                                  api_version=None,
+                                  base_url_bound=None,
+                                  resource=CLOUD.endpoints.active_directory_resource_id,
+                                  **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
+                                                             resource=resource)
     client_kwargs = {}
 
     if base_url_bound:
@@ -162,6 +169,11 @@ def _mock_get_progress_view(determinant=False, out=None):  # pylint: disable=unu
 
 def _mock_get_progress_controller(*args, **kwargs):  # pylint: disable=unused-argument
     return MockProgressHook()
+
+
+def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
+    pass
+
 
 # TEST CHECKS
 
@@ -314,7 +326,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
 
-        if os.environ.get(LIVE_TEST_CONTROL_ENV, None) == 'True':
+        if os.environ.get(ENV_LIVE_TEST, None) == 'True':
             self.run_live = True
         else:
             self.run_live = run_live
@@ -396,7 +408,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
     @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client',
-                _mock_get_mgmt_service_client)  # pylint: disable=line-too-long
+                _mock_get_mgmt_service_client)
     def _execute_live_or_recording(self):
         # pylint: disable=no-member
         try:
@@ -421,10 +433,10 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
     @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
-                _mock_user_access_token)  # pylint: disable=line-too-long
+                _mock_user_access_token)
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
     @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client',
-                _mock_get_mgmt_service_client)  # pylint: disable=line-too-long
+                _mock_get_mgmt_service_client)
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)

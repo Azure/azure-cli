@@ -26,10 +26,10 @@ import subprocess
 import hashlib
 try:
     # Attempt to load python 3 module
-    from urllib.request import urlretrieve
+    from urllib.request import urlopen
 except ImportError:
     # Import python 2 version
-    from urllib import urlretrieve
+    from urllib2 import urlopen
 
 try:
     # Rename raw_input to input to support Python 2
@@ -118,15 +118,15 @@ def is_valid_sha256sum(a_file, expected_sum):
 def create_virtualenv(tmp_dir, install_dir):
     download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
     print_status('Downloading virtualenv package from {}.'.format(VIRTUALENV_DOWNLOAD_URL))
-    downloaded_file, _ = urlretrieve(VIRTUALENV_DOWNLOAD_URL,
-                                     download_location)
-    print_status("Downloaded virtualenv package to {}.".format(downloaded_file))
-    if is_valid_sha256sum(downloaded_file, VIRTUALENV_ARCHIVE_SHA256):
-        print_status("Checksum of {} OK.".format(downloaded_file))
+    response = urlopen(VIRTUALENV_DOWNLOAD_URL)
+    with open(download_location, 'wb') as f: f.write(response.read())
+    print_status("Downloaded virtualenv package to {}.".format(download_location))
+    if is_valid_sha256sum(download_location, VIRTUALENV_ARCHIVE_SHA256):
+        print_status("Checksum of {} OK.".format(download_location))
     else:
         raise CLIInstallError("The checksum of the downloaded virtualenv package does not match.")
-    print_status("Extracting '{}' to '{}'.".format(downloaded_file, tmp_dir))
-    package_tar = tarfile.open(downloaded_file)
+    print_status("Extracting '{}' to '{}'.".format(download_location, tmp_dir))
+    package_tar = tarfile.open(download_location)
     package_tar.extractall(path=tmp_dir)
     package_tar.close()
     virtualenv_dir_name = 'virtualenv-'+VIRTUALENV_VERSION

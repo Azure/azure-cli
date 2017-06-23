@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
+
 helps['dla'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics accounts, jobs, and catalogs.
@@ -356,4 +356,93 @@ helps['dla account firewall list'] = """
 helps['dla account firewall delete'] = """
     type: command
     short-summary: Deletes a firewall rule in the Data Lake Analytics account.
+"""
+
+helps['dla account compute-policy'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics account compute policies.
+    long-summary: These commands are in preview.
+"""
+
+helps['dla account compute-policy create'] = """
+    type: command
+    short-summary: Creates a compute policy in the Data Lake Analytics account.
+    parameters:
+        - name: --max-dop-per-job
+          type: int
+          short-summary: 'The maximum degree of parallelism allowed per job for this policy. At least one of --min-priority-per-job and --max-dop-per-job must be specified.'
+        - name: --min-priority-per-job
+          type: int
+          short-summary: 'The minimum priority allowed per job for this policy. At least one of --min-priority-per-job and --max-dop-per-job must be specified.'
+        - name: --compute-policy-name
+          type: string
+          short-summary: 'The name of the compute policy to create.'
+        - name: --object-id
+          type: string
+          short-summary: 'The Azure Active Directory object ID of the user, group or service principal to apply the policy to.'
+        - name: --object-type
+          type: string
+          short-summary: 'The Azure Active Directory object type associated with the supplied object id.'
+"""
+
+helps['dla account compute-policy update'] = """
+    type: command
+    short-summary: Updates a compute policy in the Data Lake Analytics account.
+    parameters:
+        - name: --max-dop-per-job
+          type: int
+          short-summary: 'The maximum degree of parallelism allowed per job for this policy. At least one of --min-priority-per-job and --max-dop-per-job must be specified.'
+        - name: --min-priority-per-job
+          type: int
+          short-summary: 'The minimum priority allowed per job for this policy. At least one of --min-priority-per-job and --max-dop-per-job must be specified.'
+        - name: --compute-policy-name
+          type: string
+          short-summary: 'The name of the compute policy to update.'
+"""
+
+helps['dla account compute-policy show'] = """
+    type: command
+    short-summary: Retrieves a compute policy in the Data Lake Analytics account.
+"""
+
+helps['dla account compute-policy list'] = """
+    type: command
+    short-summary: Lists compute policies in the Data Lake Analytics account.
+"""
+
+helps['dla account compute-policy delete'] = """
+    type: command
+    short-summary: Deletes a compute policy in the Data Lake Analytics account.
+"""
+
+helps['dla job pipeline'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics job pipelines.
+    long-summary: These commands are in preview.
+"""
+
+helps['dla job pipeline show'] = """
+    type: command
+    short-summary: Retrieves a specific job pipeline in the Data Lake Analytics account.
+"""
+
+helps['dla job pipeline list'] = """
+    type: command
+    short-summary: Lists job pipelines in the Data Lake Analytics account.
+"""
+
+helps['dla job recurrence'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics job recurrences.
+    long-summary: These commands are in preview.
+"""
+
+helps['dla job recurrence show'] = """
+    type: command
+    short-summary: Retrieves a specific job recurrence in the Data Lake Analytics account.
+"""
+
+helps['dla job recurrence list'] = """
+    type: command
+    short-summary: Lists job recurrences in the Data Lake Analytics account.
 """

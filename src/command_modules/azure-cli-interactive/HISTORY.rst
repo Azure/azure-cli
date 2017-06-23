@@ -3,11 +3,25 @@
 Release History
 ===============
 
+0.3.5 (2017-06-21)
+++++++++++++++++++
+
+* Enhance the '?' gesture to also inject into the next command
+
+
+0.3.4 (2017-06-13)
+++++++++++++++++++
+
+* Fixes Interactive errors with the profile 2017-03-09-profile-preview (#3587)
+* Allows '--version' as a parameter for interactive mode (#3645)
+* Stop Interactive Mode from Throwing errors from Validation completions (#3570)
+* Progress Reporting for template deployments (#3510)
+
 0.3.3 (2017-05-30)
 ++++++++++++++++++
+
 * --progress flag
 * Removed --debug and --verbose from completions
-
 
 0.3.2 (2017-05-18)
 ++++++++++++++++++

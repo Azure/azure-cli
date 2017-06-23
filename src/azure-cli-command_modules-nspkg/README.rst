@@ -1,5 +1,5 @@
 Microsoft Azure CLI Command modules Namespace Package
-=====================================
+=====================================================
 
 This is the Microsoft Azure CLI command module namespace package.
 

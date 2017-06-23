@@ -9,8 +9,6 @@ from azure.cli.core.cloud import get_clouds, get_custom_clouds, get_active_cloud
 
 from azure.cli.core.profiles import API_PROFILES
 
-# pylint: disable=line-too-long
-
 
 def get_cloud_name_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     return [c.name for c in get_clouds()]
@@ -62,6 +60,10 @@ register_cli_argument('cloud', 'endpoint_active_directory_resource_id',
                       help='The resource ID to obtain AD tokens for')
 register_cli_argument('cloud', 'endpoint_active_directory_graph_resource_id',
                       help='The Active Directory resource ID')
+register_cli_argument('cloud', 'endpoint_active_directory_data_lake_resource_id',
+                      help='The Active Directory resource ID for data lake services')
+register_cli_argument('cloud', 'endpoint_vm_image_alias_doc',
+                      help='The uri of the document which caches commonly used virtual machine images')
 register_cli_argument('cloud', 'suffix_sql_server_hostname',
                       help='The dns suffix for sql servers')
 register_cli_argument('cloud', 'suffix_storage_endpoint',

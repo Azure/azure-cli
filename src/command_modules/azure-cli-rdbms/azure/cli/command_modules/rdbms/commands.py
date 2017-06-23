@@ -52,7 +52,7 @@ def load_commands_from_factory(server_type, command_group_name, management_clien
                                firewall_rule_sa('get'),
                                custom_path.format('_firewall_rule_custom_setter'),
                                firewall_rule_factory,
-                               custom_function_op=custom_path.format('_firewall_rule_update_custom_func'))  # pylint: disable=line-too-long
+                               custom_function_op=custom_path.format('_firewall_rule_update_custom_func'))
 
     # configuration
     configuration_sa = create_service_adapter(
