@@ -35,12 +35,15 @@ class ShellFunctionsTest(unittest.TestCase):
         loe1 = [['start', 'end\n'], ['second', ' friend\n']]
         row1 = 4
         section1 = 1
-        self.assertEqual(space_examples(loe1, row1, section1), '[1] startend\n\n' + '1/2' + up_down_text)
+        self.assertEqual(
+            space_examples(loe1, row1, section1), '[1] startend\n\n' + '1/2' + up_down_text)
 
         loe1 = [['start', 'end\n'], ['second', ' friend\n']]
         row1 = 4
         section1 = 2
-        self.assertEqual(space_examples(loe1, row1, section1), '[2] second friend\n\n' + '\n2/2' + up_down_text)
+        self.assertEqual(
+            space_examples(loe1, row1, section1),
+            '[2] second friend\n\n' + '\n2/2' + up_down_text)
 
     def test_space_toolbar(self):
         """ tests the toolbar spacing """
