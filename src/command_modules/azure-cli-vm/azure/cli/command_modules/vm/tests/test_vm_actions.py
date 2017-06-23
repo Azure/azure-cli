@@ -9,9 +9,8 @@ import unittest
 import mock
 
 from azure.cli.core.util import CLIError
-
+from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
-                                                      _is_valid_ssh_rsa_public_key,
                                                       _figure_out_storage_source,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
@@ -34,7 +33,7 @@ class TestActions(unittest.TestCase):
 
         generated_public_key_string = args.ssh_key_value
         self.assertTrue(bool(args.ssh_key_value))
-        self.assertTrue(_is_valid_ssh_rsa_public_key(generated_public_key_string))
+        self.assertTrue(is_valid_ssh_rsa_public_key(generated_public_key_string))
         self.assertTrue(os.path.isfile(private_key_file))
 
         # 2 verify we load existing key files
@@ -207,3 +206,6 @@ class TestActions(unittest.TestCase):
         np_mock.app_gateway_subnet_address_prefix = None
         _validate_vmss_create_subnet(np_mock)
         self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.4.0/24')
+
+if __name__ == '__main__':
+    unittest.main()

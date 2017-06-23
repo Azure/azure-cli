@@ -21,7 +21,7 @@ from azure.cli.core.commands.parameters import (
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
 from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
-from azure.cli.command_modules.vm._validators import validate_ssh_key
+from azure.cli.command_modules.acs._validators import validate_ssh_key
 
 
 def _compute_client_factory(**_):
