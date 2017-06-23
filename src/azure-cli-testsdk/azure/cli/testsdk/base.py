@@ -10,15 +10,10 @@ import shlex
 import logging
 import inspect
 
-from azure_devtools.scenario_tests import (
-    ReplayableTest,
-    SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
-    GeneralNameReplacer, LargeRequestBodyProcessor,
-    LargeResponseBodyProcessor, LargeResponseBodyReplacer,
-    DeploymentNameReplacer,
-    patch_time_sleep_api,
-    create_random_name,
-)
+from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
+                                           OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
+                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, live_only,
+                                           DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
@@ -76,6 +71,13 @@ class ScenarioTest(ReplayableTest):
 
         return moniker
 
+    @classmethod
+    def cmd(cls, command, checks=None, expect_failure=False):
+        return execute(command, expect_failure=expect_failure).assert_with_checks(checks)
+
+
+@live_only()
+class LiveScenarioTest(IntegrationTestBase):
     @classmethod
     def cmd(cls, command, checks=None, expect_failure=False):
         return execute(command, expect_failure=expect_failure).assert_with_checks(checks)

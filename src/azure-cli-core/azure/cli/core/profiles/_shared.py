@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # TODO Move this to a package shared by CLI and SDK
+from enum import Enum
 from functools import total_ordering
 from importlib import import_module
-from enum import Enum
 
 
 class APIVersionException(Exception):
