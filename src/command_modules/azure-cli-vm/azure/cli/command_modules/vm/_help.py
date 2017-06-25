@@ -878,7 +878,7 @@ helps['vm resize'] = """
         - name: Resize a VM.
           text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2
 {0}
-""".format(vm_ids_example.format('Resize VMs by VM Ids', 'vm redeploy --size Standard_DS3_v2'))
+""".format(vm_ids_example.format('Resize VMs by VM Ids', 'vm resize --size Standard_DS3_v2'))
 
 helps['vm restart'] = """
     type: command
