@@ -23,7 +23,6 @@ cli_command(__name__, 'acs delete', 'azure.mgmt.compute.containerservice.operati
 
 cli_command(__name__, 'acs scale', 'azure.cli.command_modules.acs.custom#update_acs', _acs_client_factory)
 cli_command(__name__, 'acs list', 'azure.cli.command_modules.acs.custom#list_container_services', _acs_client_factory)
-cli_command(__name__, 'acs browse', 'azure.cli.command_modules.acs.custom#acs_browse')
 cli_command(__name__, 'acs install-cli', 'azure.cli.command_modules.acs.custom#acs_install_cli')
 cli_command(__name__, 'acs dcos browse', 'azure.cli.command_modules.acs.custom#dcos_browse')
 cli_command(__name__, 'acs dcos install-cli', 'azure.cli.command_modules.acs.custom#dcos_install_cli')
