@@ -29,7 +29,6 @@ import azclishell.configuration
 from azclishell.az_completer import AzCompleter
 
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
-
 from azclishell.command_tree import in_tree
 from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines, GatherCommands
@@ -116,9 +115,9 @@ def validate_contains_query(args, symbol):
     return False
 
 
-def restart_completer(cls):
-    cls.completer = AzCompleter(GatherCommands())
-    cls.refresh_cli = True
+def restart_completer(shell):
+    shell.completer = AzCompleter(GatherCommands())
+    shell.refresh_cli = True
 
 
 # pylint: disable=too-many-instance-attributes

@@ -38,7 +38,8 @@ def main(style=None):
     shell_config_dir = azclishell.configuration.get_config_dir
 
     try:
-        az_completer = AzCompleter(GatherCommands())
+        commands = GatherCommands()
+        az_completer = AzCompleter(commands)
         cache_load = True
     except IOError:  # if there is no cache
         dump.dump_command_table()
