@@ -694,7 +694,6 @@ class Shell(object):
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
-
         while True:
             try:
                 try:
