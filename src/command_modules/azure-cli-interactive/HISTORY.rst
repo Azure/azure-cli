@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.3.5 (unreleased)
+++++++++++++++++++
+
+* Allow exporting environment variables as an 'outside' command
+
 
 0.3.5 (2017-06-21)
 ++++++++++++++++++
