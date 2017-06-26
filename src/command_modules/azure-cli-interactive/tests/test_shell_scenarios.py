@@ -73,7 +73,7 @@ class ShellScenarioTest(unittest.TestCase):
     def test_on_input_timeout(self):
         """ tests everything """
         self.shell.completer = None
-        self.shell.cli.current_buffer.document = Document(u'az to be or not')
+        self.shell._cli.current_buffer.document = Document(u'az to be or not')  # pylint: disable=protected-access
         self.shell.on_input_timeout(self.shell._cli)  # pylint: disable=protected-access
         cli = self.shell._cli  # pylint: disable=protected-access
         self.assertEqual(cli.current_buffer.document.text, u'az to be or not')
