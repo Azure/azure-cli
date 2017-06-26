@@ -451,6 +451,15 @@ class Shell(object):
         elif text.strip() == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
+        if text.strip() == 'change':
+            self.completer = 
+            self._cli.application.writing_buffer = Buffer(
+                history=self.history,
+                auto_suggest=AutoSuggestFromHistory(),
+                enable_history_search=True,
+                completer=self.completer,
+                complete_while_typing=Always()
+            )
         if text:
             if text[0] == SELECT_SYMBOL['outside']:
                 cmd = text[1:]
