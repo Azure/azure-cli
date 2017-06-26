@@ -2,7 +2,7 @@
 
 Release History
 ===============
-0.0.5 (2017-06-23)
+unreleased
 ++++++++++++++++++
 * Add examples for commands.
 
