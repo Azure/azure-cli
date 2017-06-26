@@ -23,6 +23,7 @@ from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 from azure.cli.core._environment import get_config_dir as cli_config_dir
 from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
 
+
 def main(style=None):
     os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
 
