@@ -434,8 +434,8 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
     parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
 
-    properties = DeploymentProperties(template=template, template_link=template_link,
-                                      parameters=parameters, mode=mode)
+    properties = DeploymentProperties(template=json.dumps(template), template_link=template_link,
+                                      parameters=json.dumps(parameters), mode=mode)
 
     smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:

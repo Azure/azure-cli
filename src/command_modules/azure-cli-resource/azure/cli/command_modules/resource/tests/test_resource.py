@@ -394,7 +394,7 @@ class DeploymentThruUriTest(ResourceGroupVCRTestBase):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/' \
-                       'command_modules/azure-cli-resource/tests/simple_deploy.json'
+                       'command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/simple_deploy.json'
         parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
                                                                                           '\\\\')
         deployment_name = 'simple_deploy'  # auto-gen'd by command
@@ -658,7 +658,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_alt', parameter_name='resource_group_cross')
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_deploy')
-    def test_crossrg_deployment(self, resource_group, resource_group_cross):
+    def test_group_deployment_crossrg(self, resource_group, resource_group_cross):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\')
         deployment_name = 'azure-cli-crossrgdeployment'

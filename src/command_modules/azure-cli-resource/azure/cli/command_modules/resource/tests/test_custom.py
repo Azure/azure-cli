@@ -16,6 +16,12 @@ from azure.cli.command_modules.resource.custom import \
      _prompt_for_parameters)
 
 
+def _simulate_no_tty():
+    from azure.cli.core.prompting import NoTTYException
+    raise NoTTYException
+
+
+@mock.patch('azure.cli.core.prompting._verify_is_a_tty', _simulate_no_tty)
 class TestCustom(unittest.TestCase):
 
     def test_extract_parameters(self):
@@ -246,9 +252,10 @@ class TestCustom(unittest.TestCase):
         result_parameters = _process_parameters(template_param_defs, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
-        param_file_order = "['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"
+        param_file_order = ["[u'secureParam', u'boolParam', u'enumParam', u'arrayParam', u'objectParam']",
+                            "['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
         results = _prompt_for_parameters(missing_parameters, fail_on_no_tty=False)
-        self.assertEqual(str(list(results.keys())), param_file_order)
+        self.assertTrue(str(list(results.keys())) in param_file_order)
 
     def test_deployment_prompt_alphabetical_order(self):
         # check that params are prompted for in alphabetical order when the file is loaded with preserve_order=False
@@ -264,9 +271,10 @@ class TestCustom(unittest.TestCase):
         result_parameters = _process_parameters(template_param_defs, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
-        param_alpha_order = "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"
+        param_alpha_order = ["[u'arrayParam', u'boolParam', u'enumParam', u'objectParam', u'secureParam']",
+                             "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
-        self.assertEqual(str(list(results.keys())), param_alpha_order)
+        self.assertTrue(str(list(results.keys())) in param_alpha_order)
 
 
 if __name__ == '__main__':
