@@ -430,12 +430,15 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
         template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
-    template_param_defs = template.get('parameters', {})
+    template_param_defs = template_obj.get('parameters', {})
     parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
 
-    properties = DeploymentProperties(template=json.dumps(template), template_link=template_link,
-                                      parameters=json.dumps(parameters), mode=mode)
+    template = json.loads(json.dumps(template))
+    parameters = json.loads(json.dumps(parameters))
+
+    properties = DeploymentProperties(template=template, template_link=template_link,
+                                      parameters=parameters, mode=mode)
 
     smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:

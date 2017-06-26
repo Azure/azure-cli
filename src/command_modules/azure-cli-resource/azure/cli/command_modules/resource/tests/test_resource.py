@@ -15,40 +15,28 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneChe
                                              MOCKED_SUBSCRIPTION_ID)
 
 
-class ResourceGroupScenarioTest(VCRTestBase):
-    def test_resource_group(self):
-        self.execute()
+class ResourceGroupScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        self.resource_group = 'travistestrg'
-        super(ResourceGroupScenarioTest, self).__init__(__file__, test_method)
-
-    def set_up(self):
-        if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {} --yes'.format(self.resource_group))
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
+    def test_resource_group(self, resource_group):
         s = self
-        rg = self.resource_group
-        s.cmd('group create -n {} -l westus --tag a=b c'.format(rg), checks=[
-            JMESPathCheck('name', rg),
-            JMESPathCheck('tags', {'a': 'b', 'c': ''})
-        ])
-        s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
-        s.cmd('group show -n {}'.format(rg), checks=[
-            JMESPathCheck('name', rg),
-            JMESPathCheck('tags', {'a': 'b', 'c': ''})
-        ])
-        s.cmd('group list --tag a=b', checks=[
-            JMESPathCheck('[0].name', rg),
-            JMESPathCheck('[0].tags', {'a': 'b', 'c': ''})
-        ])
+        rg = resource_group
         s.cmd('group delete -n {} --yes'.format(rg))
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
 
-    def tear_down(self):
-        if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {} --yes'.format(self.resource_group))
+        s.cmd('group create -n {} -l westus --tag a=b c'.format(rg), checks=[
+            JCheck('name', rg),
+            JCheck('tags', {'a': 'b', 'c': ''})
+        ])
+        s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
+        s.cmd('group show -n {}'.format(rg), checks=[
+            JCheck('name', rg),
+            JCheck('tags', {'a': 'b', 'c': ''})
+        ])
+        s.cmd('group list --tag a=b', checks=[
+            JCheck('[0].name', rg),
+            JCheck('[0].tags', {'a': 'b', 'c': ''})
+        ])
 
 
 class ResourceGroupNoWaitScenarioTest(VCRTestBase):
@@ -382,37 +370,29 @@ class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
                  ])
 
 
-class DeploymentThruUriTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(DeploymentThruUriTest, self).__init__(__file__, test_method,
-                                                    resource_group='azure-cli-deployment-uri-test')
+class DeploymentThruUriTest(ScenarioTest):
 
-    def test_group_deployment_thru_uri(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
+    def test_group_deployment_thru_uri(self, resource_group):
+        self.resource_group = resource_group
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/' \
                        'command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/simple_deploy.json'
         parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
                                                                                           '\\\\')
-        deployment_name = 'simple_deploy'  # auto-gen'd by command
         result = self.cmd('group deployment create -g {} --template-uri {} --parameters @{}'.format(
             self.resource_group, template_uri, parameters_file), checks=[
-            JMESPathCheck('properties.provisioningState', 'Succeeded'),
-            JMESPathCheck('resourceGroup', self.resource_group),
-        ])
+            JCheck('properties.provisioningState', 'Succeeded'),
+            JCheck('resourceGroup', self.resource_group),
+        ]).get_output_in_json()
 
+        deployment_name = result['name']
         result = self.cmd(
-            'group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
-            checks=[
-                JMESPathCheck('name', deployment_name)
-            ])
+            'group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=JCheck('name', deployment_name))
 
         self.cmd('group deployment delete -g {} -n {}'.format(self.resource_group, deployment_name))
-        result = self.cmd('group deployment list -g {}'.format(self.resource_group))
-        self.assertFalse(bool(result))
+        self.cmd('group deployment list -g {}'.format(self.resource_group), checks=NoneCheck())
 
 
 class ResourceMoveScenarioTest(VCRTestBase):
@@ -478,80 +458,61 @@ class FeatureScenarioTest(VCRTestBase):
         ])
 
 
-class PolicyScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(PolicyScenarioTest, self).__init__(__file__, test_method,
-                                                 resource_group='azure-cli-policy-test-group')
+class PolicyScenarioTest(ScenarioTest):
 
-    def test_resource_policy(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_policy')
+    def test_resource_policy(self, resource_group):
         policy_name = 'azure-cli-test-policy'
         policy_display_name = 'test_policy_123'
         policy_description = 'test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
         # create a policy
-        self.cmd(
-            'policy definition create -n {} --rules {} --display-name {} --description {}'.format(
-                policy_name, rules_file, policy_display_name, policy_description), checks=[
-                JMESPathCheck('name', policy_name),
-                JMESPathCheck('displayName', policy_display_name),
-                JMESPathCheck('description', policy_description)
-            ])
+        self.cmd('policy definition create -n {} --rules {} --display-name {} --description {}'.format(policy_name, rules_file, policy_display_name, policy_description), checks=[
+            JCheck('name', policy_name),
+            JCheck('displayName', policy_display_name),
+            JCheck('description', policy_description)
+        ])
 
         # update it
         new_policy_description = policy_description + '_new'
-        self.cmd('policy definition update -n {} --description {}'.format(policy_name,
-                                                                          new_policy_description),
-                 checks=[
-                     JMESPathCheck('description', new_policy_description)
-                 ])
+        self.cmd('policy definition update -n {} --description {}'.format(policy_name, new_policy_description),
+                 checks=JCheck('description', new_policy_description))
 
         # list and show it
-        self.cmd('policy definition list', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(policy_name), 1)
-        ])
+        self.cmd('policy definition list', checks=JMESPathCheck("length([?name=='{}'])".format(policy_name), 1))
         self.cmd('policy definition show -n {}'.format(policy_name), checks=[
-            JMESPathCheck('name', policy_name),
-            JMESPathCheck('displayName', policy_display_name)
+            JCheck('name', policy_name),
+            JCheck('displayName', policy_display_name)
         ])
 
         # create a policy assignment on a resource group
         policy_assignment_name = 'azurecli-test-policy-assignment'
         policy_assignment_display_name = 'test_assignment_123'
-        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
-            policy_name, policy_assignment_name, policy_assignment_display_name,
-            self.resource_group), checks=[
-            JMESPathCheck('name', policy_assignment_name),
-            JMESPathCheck('displayName', policy_assignment_display_name),
+        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(policy_name, policy_assignment_name, policy_assignment_display_name, resource_group), checks=[
+            JCheck('name', policy_assignment_name),
+            JCheck('displayName', policy_assignment_display_name),
         ])
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
-            self.cmd('policy assignment list', checks=[
-                JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 0),
-            ])
+            self.cmd('policy assignment list', checks=JCheck("length([?name=='{}'])".format(policy_assignment_name), 0))
         except jmespath.exceptions.JMESPathTypeError:  # ok if query fails on None result
             pass
 
         # but enable --show-all works
-        self.cmd('policy assignment list --disable-scope-strict-match', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
-        ])
+        self.cmd('policy assignment list --disable-scope-strict-match',
+                 checks=JCheck("length([?name=='{}'])".format(policy_assignment_name), 1))
 
         # delete the assignment
-        self.cmd('policy assignment delete -n {} -g {}'.format(
-            policy_assignment_name, self.resource_group))
+        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name, resource_group))
         self.cmd('policy assignment list --disable-scope-strict-match')
 
         # delete the policy
         self.cmd('policy definition delete -n {}'.format(policy_name))
         time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy definition list', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])
+        self.cmd('policy definition list', checks=JCheck("length([?name=='{}'])".format(policy_name), 0))
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
@@ -665,11 +626,11 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         storage_account_1 = create_random_name(prefix='crossrg')
         storage_account_2 = create_random_name(prefix='crossrg')
 
-        self.cmd('group deployment validate -g {} --template-file {} --parameters CrossRG={} StorageAccountName1={} StorageAccountName2={}'.format(
+        self.cmd('group deployment validate -g {} --template-file {} --parameters CrossRg={} StorageAccountName1={} StorageAccountName2={}'.format(
             resource_group, template_file, resource_group_cross, storage_account_1, storage_account_2), checks=[
             JCheck('properties.provisioningState', 'Succeeded')
         ])
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters CrossRG={}'.format(
+        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters CrossRg={}'.format(
             resource_group, deployment_name, template_file, resource_group_cross), checks=[
             JCheck('properties.provisioningState', 'Succeeded'),
             JCheck('resourceGroup', resource_group),
