@@ -165,6 +165,7 @@ with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_op
         # 0.0.0.0 rule.
         # c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
 
+
 ###############################################
 #                sql server                   #
 ###############################################
