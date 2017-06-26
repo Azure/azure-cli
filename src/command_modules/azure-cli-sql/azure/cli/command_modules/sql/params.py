@@ -536,6 +536,7 @@ with ParametersContext(command='sql elastic-pool list-editions') as c:
                nargs='+',
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails))
 
+    
     search_arg_group = 'Search'
 
     # We could used **enum_choice_list here, but that will validate the inputs which means there
@@ -586,6 +587,7 @@ with ParametersContext(command='sql server update') as c:
 #####
 #           sql server ad-admin
 ######
+
 
 with ParametersContext(command='sql server ad-admin') as c:
     c.argument('server_name', options_list=('--server-name', '-s'),
