@@ -831,13 +831,13 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
         issuer.attributes)
 
 
-def parse_key_id(id):
-    return KeyId(id)
+def parse_key_id(identifier):
+    return KeyId(identifier)
 
 
-def parse_secret_id(id):
-    return SecretId(id)
+def parse_secret_id(identifier):
+    return SecretId(identifier)
 
 
-def parse_certificate_id(id):
-    return CertificateId(id)
+def parse_certificate_id(identifier):
+    return CertificateId(identifier)
