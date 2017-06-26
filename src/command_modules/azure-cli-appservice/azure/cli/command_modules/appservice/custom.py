@@ -322,9 +322,13 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
 
     if (not docker_registry_server_user and not docker_registry_server_password and
             docker_registry_server_url and '.azurecr.io' in docker_registry_server_url):
+        logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
         parsed = urlparse(docker_registry_server_url)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
-        docker_registry_server_user, docker_registry_server_password = _get_acr_cred(registry_name)
+        try:
+            docker_registry_server_user, docker_registry_server_password = _get_acr_cred(registry_name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Error:'%s'", ex)  # consider to throwing if needed
 
     if docker_registry_server_user is not None:
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
@@ -341,9 +345,15 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
 
 def _get_acr_cred(registry_name):
     from azure.mgmt.containerregistry import ContainerRegistryManagementClient
+    from azure.cli.core.commands.parameters import get_resources_in_subscription
     client = get_mgmt_service_client(ContainerRegistryManagementClient).registries
-    arm_resource = _arm_get_resource_by_name(registry_name, 'Microsoft.ContainerRegistry/registries')
-    resource_group_name = parse_resource_id(arm_resource.id)['resource_group']
+
+    result = get_resources_in_subscription('Microsoft.ContainerRegistry/registries')
+    result = [item for item in result if item.name.lower() == registry_name]
+    if not result or len(result) > 1:
+        raise CLIError("No resource or more than one were found with name '{}'.".format(registry_name))
+    resource_group_name = parse_resource_id(result[0].id)['resource_group']
+
     registry = client.get(resource_group_name, registry_name)
 
     if registry.admin_user_enabled:  # pylint: disable=no-member
@@ -352,23 +362,6 @@ def _get_acr_cred(registry_name):
     raise CLIError("Failed to retrieve container registry credentails. Please either provide the "
                    "credentail or run 'az acr update -n {} --admin-enabled true' to enable "
                    "admin first.".format(registry_name))
-
-
-def _arm_get_resource_by_name(resource_name, resource_type):
-    from azure.cli.core.commands.parameters import get_resources_in_subscription
-    result = get_resources_in_subscription(resource_type)
-    elements = [item for item in result if item.name.lower() == resource_name.lower()]
-
-    if not elements:
-        raise CLIError(
-            "No resource with type '{}' can be found with name '{}'.".format(
-                resource_type, resource_name))
-    elif len(elements) == 1:
-        return elements[0]
-    else:
-        raise CLIError(
-            "More than one resources with type '{}' are found with name '{}'.".format(
-                resource_type, resource_name))
 
 
 def delete_container_settings(resource_group_name, name, slot=None):
