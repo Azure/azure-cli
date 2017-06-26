@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-import sys
 
 from prompt_toolkit.completion import Completer, Completion
 
+from azclishell._dump_commands import get_dumped_command_table
 import azclishell.configuration
 from azclishell.argfinder import ArgsFinder
 from azclishell.command_tree import in_tree
@@ -92,7 +92,7 @@ def sort_completions(gen):
 class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
-    def __init__(self, commands, global_params=True, outstream=sys.stderr):
+    def __init__(self, commands, global_params=True):
         # dictionary of command to descriptions
         self.command_description = commands.descrip
         # from a command to a list of parameters
@@ -122,11 +122,14 @@ class AzCompleter(Completer):
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
+        self.cmdtab = None
+        self.initialize_command_table_attributes()
 
-        from azclishell._dump_commands import CMD_TABLE
-        self.cmdtab = CMD_TABLE
-        self.parser.load_command_table(CMD_TABLE)
-        self.argsfinder = ArgsFinder(self.parser, outstream)
+    def initialize_command_table_attributes(self):
+        self.cmdtab = get_dumped_command_table()
+        if self.cmdtab is not None:
+            self.parser.load_command_table(self.cmdtab)
+            self.argsfinder = ArgsFinder(self.parser)
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
@@ -151,8 +154,11 @@ class AzCompleter(Completer):
         for cmd in sort_completions(self.gen_cmd_completions(text)):
             yield cmd
 
-        for val in sort_completions(self.gen_dynamic_completions(text)):
-            yield val
+        if self.cmdtab is not None:
+            for val in sort_completions(self.gen_dynamic_completions(text)):
+                yield val
+        else:
+            self.initialize_command_table_attributes()
 
         for param in sort_completions(self.gen_global_param_completions(text)):
             yield param

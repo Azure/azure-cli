@@ -18,15 +18,14 @@ from azure.cli.core.commands.arm import add_id_parameters
 
 import azclishell.configuration as config
 
-APPLICATION.initialize(Configuration())
-CMD_TABLE = APPLICATION.configuration.get_command_table()
+CMD_TABLE = None
 
 
-def install_modules():
+def install_modules(cmd_table):
     installed_command_modules = []
-    for cmd in CMD_TABLE:
+    for cmd in cmd_table:
         try:
-            CMD_TABLE[cmd].load_arguments()
+            cmd_table[cmd].load_arguments()
         except (ImportError, ValueError):
             pass
         mods_ns_pkg = import_module('azure.cli.command_modules')
@@ -42,37 +41,40 @@ def install_modules():
 
         except Exception:  # pylint: disable=broad-except
             print("Error loading: {}".format(mod))
-    _update_command_definitions(CMD_TABLE)
+    _update_command_definitions(cmd_table)
 
 
 def dump_command_table():
     """ dumps the command table """
+    global CMD_TABLE
+    APPLICATION.initialize(Configuration())
+    cmd_table = APPLICATION.configuration.get_command_table()
     command_file = config.CONFIGURATION.get_help_files()
 
-    install_modules()
-    add_id_parameters(CMD_TABLE)
+    install_modules(cmd_table)
+    add_id_parameters(cmd_table)
 
     data = {}
-    for cmd in CMD_TABLE:
+    for cmd in cmd_table:
         com_descrip = {}
         param_descrip = {}
         try:
-            command_description = CMD_TABLE[cmd].description
+            command_description = cmd_table[cmd].description
             if callable(command_description):
                 command_description = command_description()
             com_descrip['help'] = command_description
             com_descrip['examples'] = ""
 
-            for key in CMD_TABLE[cmd].arguments:
+            for key in cmd_table[cmd].arguments:
                 required = ""
                 help_desc = ""
-                if CMD_TABLE[cmd].arguments[key].type.settings.get('required'):
+                if cmd_table[cmd].arguments[key].type.settings.get('required'):
                     required = "[REQUIRED]"
-                if CMD_TABLE[cmd].arguments[key].type.settings.get('help'):
-                    help_desc = CMD_TABLE[cmd].arguments[key].type.settings.get('help')
+                if cmd_table[cmd].arguments[key].type.settings.get('help'):
+                    help_desc = cmd_table[cmd].arguments[key].type.settings.get('help')
 
                 name_options = []
-                for name in CMD_TABLE[cmd].arguments[key].options_list:
+                for name in cmd_table[cmd].arguments[key].options_list:
                     name_options.append(name)
 
                 options = {
@@ -80,7 +82,7 @@ def dump_command_table():
                     'required': required,
                     'help': help_desc
                 }
-                param_descrip[CMD_TABLE[cmd].arguments[key].options_list[0]] = options
+                param_descrip[cmd_table[cmd].arguments[key].options_list[0]] = options
 
             com_descrip['parameters'] = param_descrip
             data[cmd] = com_descrip
@@ -127,13 +129,11 @@ def dump_command_table():
     with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
         json.dump(data, help_file)
 
+    CMD_TABLE = cmd_table
 
-class Exporter(json.JSONEncoder):
-    def default(self, o):
-        try:
-            return super(Exporter, self).default(o)
-        except TypeError:
-            return str(o)
+
+def get_dumped_command_table():
+    return CMD_TABLE
 
 
 def get_cache_dir():

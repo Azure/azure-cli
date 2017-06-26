@@ -169,7 +169,8 @@ def create_layout(lex, exam_lex, toolbar_lex):
     config = azclishell.configuration.CONFIGURATION
     lexer, exam_lex, toolbar_lex = get_lexers(lex, exam_lex, toolbar_lex)
 
-    input_processors.append(DefaultPrompt(get_prompt_tokens))
+    if not any(isinstance(processor, DefaultPrompt) for processor in input_processors):
+        input_processors.append(DefaultPrompt(get_prompt_tokens))
 
     layout_lower = ConditionalContainer(
         HSplit([
