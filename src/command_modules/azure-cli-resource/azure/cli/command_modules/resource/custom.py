@@ -767,7 +767,7 @@ def _validate_lock_params_match_lock(
             raise CLIError(
                 'Unexpected --resource-group for lock {}, expected {}'.format(
                     name, _resource_group))
-        if _resource_namespace is None:
+        if _resource_namespace is None or _resource_namespace == 'Microsoft.Authorization':
             return
         if resource_provider_namespace != _resource_namespace:
             raise CLIError(
@@ -791,15 +791,33 @@ def _validate_lock_params_match_lock(
                 name, _resource_name))
 
 
-def get_lock(name, resource_group_name=None):
+def get_lock(name, resource_group_name=None, resource_provider_namespace=None,
+             parent_resource_path=None, resource_type=None, resource_name=None):
     """
-    :param name: Name of the lock.
+    :param name: The name of the lock.
     :type name: str
     """
     lock_client = _resource_lock_client_factory()
+
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
+
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
+    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+                                     resource_provider_namespace, parent_resource_path,
+                                     resource_type, resource_name)
+
     if resource_group_name is None:
         return lock_client.management_locks.get_at_subscription_level(name)
-    return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+    if resource_name is None:
+        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+    return lock_client.management_locks.get_at_resource_level(
+        resource_group_name, resource_provider_namespace,
+        parent_resource_path or '', resource_type, resource_name, name)
 
 
 def delete_lock(name,
