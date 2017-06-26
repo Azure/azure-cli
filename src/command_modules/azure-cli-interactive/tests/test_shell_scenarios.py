@@ -70,17 +70,6 @@ class ShellScenarioTest(unittest.TestCase):
         self.assertEqual(description, '--calls:\n' + 'call the friends')
         self.assertEqual(example, space_examples('use with care', 25, 1))
 
-    def test_on_input_timeout(self):
-        """ tests everything """
-        self.shell.completer = None
-        self.shell._cli.current_buffer.document = Document(u'az to be or not')  # pylint: disable=protected-access
-        self.shell.on_input_timeout(self.shell._cli)  # pylint: disable=protected-access
-        cli = self.shell._cli  # pylint: disable=protected-access
-        self.assertEqual(cli.current_buffer.document.text, u'az to be or not')
-        self.assertEqual(cli.buffers['description'].document.text, '')
-        self.assertEqual(cli.buffers['parameter'].document.text, '')
-        self.assertEqual(cli.buffers['examples'].document.text, '')
-
     def test_handle_examples(self):
         """ tests handling of example repl """
         temp_function = self.shell.example_repl
