@@ -11,10 +11,6 @@ import azclishell.configuration
 from azclishell.command_tree import CommandBranch, CommandHead
 from azclishell.util import get_window_dim
 
-try:
-    from sets import Set as set
-except ImportError:  # python 2 and 3 compatibility
-    pass
 
 CONFIGURATION = azclishell.configuration.CONFIGURATION
 

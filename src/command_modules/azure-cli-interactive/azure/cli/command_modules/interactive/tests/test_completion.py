@@ -11,11 +11,6 @@ from azclishell.az_completer import AzCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
-try:
-    from sets import Set as set
-except ImportError:
-    pass
-
 
 class _Commands():
     """ mock model for testing completer """

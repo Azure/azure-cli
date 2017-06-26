@@ -139,10 +139,11 @@ class AzCompleter(Completer):
         # checks for aliasing of parameters
         if double and self.same_param_doubles.get(self.curr_command):
             for double_sets in self.same_param_doubles[self.curr_command]:
+                # if the parameter is in any of the sets
                 if param in double_sets:
-                    for alias in double_sets:
-                        if alias in text_before_cursor.split() and alias != param:
-                            check_doubles = False
+                    # if any of the other aliases are in the line already
+                    check_doubles = not any(
+                        alias in text_before_cursor.split() and alias != param for alias in double_sets)
 
         return position and canceling_positions and check_doubles
 
