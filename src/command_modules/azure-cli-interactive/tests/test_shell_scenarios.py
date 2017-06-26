@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import six
+import sys
 import unittest
 
 from azclishell.app import Shell, space_examples
@@ -53,9 +54,8 @@ class ShellScenarioTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(ShellScenarioTest, self).__init__(*args, **kwargs)
 
-        self.in_stream = six.StringIO()
         self.out_stream = six.StringIO()
-        self.shell = Shell(history=None, input_custom=self.in_stream, output_custom=self.out_stream)
+        self.shell = Shell(history=None, output_custom=self.out_stream)
         self.shell.completer = TestCompleter()
 
     def test_generate_help_text(self):
@@ -91,24 +91,30 @@ class ShellScenarioTest(unittest.TestCase):
         self.shell.handle_example(text, c_flag)
         self.assertEqual(self.out_stream.getvalue(), 'An Integer should follow the colon\n')
         self.out_stream.truncate(0)
+        self.out_stream.seek(0)
 
         text = 'guess :: 2.8'
         c_flag = False
         self.shell.handle_example(text, c_flag)
         self.assertEqual(self.out_stream.getvalue(), 'An Integer should follow the colon\n')
         self.out_stream.truncate(0)
+        self.out_stream.seek(0)
+
 
         text = 'guess :: -3'
         c_flag = False
         self.shell.handle_example(text, c_flag)
         self.assertEqual(self.out_stream.getvalue(), 'Invalid example number\n')
         self.out_stream.truncate(0)
+        self.out_stream.seek(0)
+
 
         text = 'guess :: 3'
         c_flag = False
         self.shell.handle_example(text, c_flag)
         self.assertEqual(self.out_stream.getvalue(), 'Invalid example number\n')
         self.out_stream.truncate(0)
+        self.out_stream.seek(0)
 
         text = 'guess :: 1'
         c_flag = False
