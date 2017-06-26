@@ -58,6 +58,7 @@ DEPENDENCIES = [
     'jmespath',
     'msrest>=0.4.4',
     'msrestazure>=0.4.7',
+    'paramiko',
     'pip',
     'pygments',
     'pyopenssl>=16.2',  # https://github.com/pyca/pyopenssl/issues/568
