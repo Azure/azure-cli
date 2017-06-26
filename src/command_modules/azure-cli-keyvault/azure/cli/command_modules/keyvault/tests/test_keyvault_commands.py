@@ -64,6 +64,76 @@ class DateTimeParseTest(unittest.TestCase):
         self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
 
 
+class ParseKeyVaultIdTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(ParseKeyVaultIdTest, self).__init__(__file__, test_method)
+
+    def test_keyvault_id_parsing(self):
+        self.execute()
+
+    def body(self):
+        self._test_parse_key_id()
+        self._test_parse_secret_id()
+        self._test_parse_certificate_id()
+
+    def _test_parse_key_id(self):
+        vault = 'https://myvault.vault.azure.net'
+        name = 'mykey'
+        version = 'abc123'
+        key_id = 'https://myvault.vault.azure.net/keys/mykey/'
+        key_id_ver = 'https://myvault.vault.azure.net/keys/mykey/abc123'
+
+        self.cmd('keyvault key parse-id --id {}'.format(key_id), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('vault', vault),
+            JMESPathCheck('version', ''),
+        ])
+
+        self.cmd('keyvault key parse-id --id {}'.format(key_id_ver), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('vault', vault),
+            JMESPathCheck('version', version),
+        ])
+
+    def _test_parse_secret_id(self):
+        vault = 'https://myvault.vault.azure.net'
+        name = 'mysecret'
+        version = 'abc123'
+        secret_id = 'https://myvault.vault.azure.net/secrets/mysecret'
+        secret_id_ver = 'https://myvault.vault.azure.net/secrets/mysecret/abc123'
+
+        self.cmd('keyvault secret parse-id --id {}'.format(secret_id), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('vault', vault),
+            JMESPathCheck('version', ''),
+        ])
+
+        self.cmd('keyvault secret parse-id --id {}'.format(secret_id_ver), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('vault', vault),
+            JMESPathCheck('version', version),
+        ])
+
+    def _test_parse_certificate_id(self):
+        vault = 'https://myvault.vault.azure.net'
+        name = 'mycert'
+        version = 'abc123'
+        cert_id = 'https://myvault.vault.azure.net/certificates/mycert'
+        cert_id_ver = 'https://myvault.vault.azure.net/certificates/mycert/abc123'
+
+        self.cmd('keyvault certificate parse-id --id {}'.format(cert_id), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('vault', vault),
+            JMESPathCheck('version', ''),
+        ])
+
+        self.cmd('keyvault certificate parse-id --id {}'.format(cert_id_ver), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('vault', vault),
+            JMESPathCheck('version', version),
+        ])
+
+
 class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(KeyVaultMgmtScenarioTest, self).__init__(__file__, test_method,
