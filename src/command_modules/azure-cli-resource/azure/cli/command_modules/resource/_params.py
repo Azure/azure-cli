@@ -98,7 +98,7 @@ register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
                       completer=get_resource_types_completion_list,)
-register_cli_argument('lock', 'resource_name', options_list=('--resource-name'), help='The name of the resource this lock applies to.')
+register_cli_argument('lock', 'resource_name', options_list=('--resource-name'))
 
 register_cli_argument('managedapp', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application')
 register_cli_argument('managedapp', 'appliance_name', options_list=('--name', '-n'))
