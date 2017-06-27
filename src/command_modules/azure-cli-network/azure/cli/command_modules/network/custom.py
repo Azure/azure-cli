@@ -12,8 +12,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.network._client_factory import \
-    (_network_client_factory)
+from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -917,7 +916,7 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
 def _get_backend_address_pool(resource_group_name, address_pool_name, load_balancer_name=None,
                               application_gateway_name=None):
 
-    if (load_balancer_name and application_gateway_name) or (not load_balancer_name and not application_gateway_name):
+    if bool(load_balancer_name) == bool(application_gateway_name):
         raise ValueError('Must supply only one: load_balancer_name or application_gateway_name')
 
     ncf = _network_client_factory()

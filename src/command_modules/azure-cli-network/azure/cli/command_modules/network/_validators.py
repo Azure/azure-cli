@@ -435,9 +435,7 @@ def process_lb_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
 
     usage_error = CLIError('incorrect usage: --subnet NAME --vnet-name NAME | --subnet ID | --public-ip NAME_OR_ID')
-    if namespace.subnet and namespace.public_ip_address:
-        raise usage_error
-    elif namespace.public_ip_address == '' and not namespace.subnet:
+    if bool(namespace.subnet) == bool(namespace.public_ip_address):
         raise usage_error
 
     if namespace.subnet:
