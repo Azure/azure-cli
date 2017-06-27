@@ -2,11 +2,6 @@
 
 Release History
 ===============
-unreleased
-++++++++++++++++++
-* Add examples for commands.
-
-===============
 0.0.4 (2017-06-21)
 ++++++++++++++++++
 * No changes.

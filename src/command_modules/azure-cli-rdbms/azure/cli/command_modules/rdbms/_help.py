@@ -46,18 +46,12 @@ def add_helps(command_group, server_type):
                 """.format(server_type, command_group)
     helps['{} server delete'.format(command_group)] = """
                 type: command
-                short-summary: Delete an {0} server.
-                examples:
-                    - name: Delete server testsvr.
-                      text: az {1} server delete -g testgroup -n testsvr
-                """.format(server_type, command_group)
+                short-summary: Delete an %s server.
+                """ % server_type
     helps['{} server show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of an {0} server.
-                examples:
-                    - name: Show details of server testsvr.
-                      text: az {1} server show -g testgroup -n testsvr
-                """.format(server_type, command_group)
+                short-summary: Show the details of an %s server.
+                """ % server_type
     helps['{} server list'.format(command_group)] = """
                 type: command
                 short-summary: List all the {0} servers belong to given resource group or subscription.
@@ -89,25 +83,16 @@ def add_helps(command_group, server_type):
                 """.format(server_type, command_group)
     helps['{} server firewall-rule delete'.format(command_group)] = """
                 type: command
-                short-summary: Delete a firewall rule for an {0} server
-                examples:
-                    - name: Delete a firewall rule with name allowall in server testsvr.
-                      text: az {1} server firewall-rule delete -g testgroup -s testsvr -n allowall
-                """.format(server_type, command_group)
+                short-summary: Delete a firewall rule for an %s server
+                """ % server_type
     helps['{} server firewall-rule show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a firewall rule for an {0} server
-                examples:
-                    - name: Show details of firewall rule allowall of server testsvr.
-                      text: az {1} server firewall-rule show -g testgroup -s testsvr -n allowall
-                """.format(server_type, command_group)
+                short-summary: Show the details of a firewall rule for an %s server
+                """ % server_type
     helps['{} server firewall-rule list'.format(command_group)] = """
                 type: command
-                short-summary: List all the firewall rules for an {0} server
-                examples:
-                    - name: List all firewall rules of server testsvr.
-                      text: az {1} server firewall-rule list -g testgroup -s testsvr
-                """.format(server_type, command_group)
+                short-summary: List all the firewall rules for an %s server
+                """ % server_type
     helps['{} server configuration'.format(command_group)] = """
                 type: group
                 short-summary: Commands to configure an %s server
@@ -123,18 +108,12 @@ def add_helps(command_group, server_type):
                 """.format(server_type, command_group)
     helps['{} server configuration show'.format(command_group)] = """
                 type: command
-                short-summary: Show the configuration of an {0} server
-                examples:
-                    - name: Show a configuration of server testsvr.
-                      text: az {1} server configuration show -g testgroup -s testsvr -n <config_name>
-                """.format(server_type, command_group)
+                short-summary: Show the configuration of an %s server
+                """ % server_type
     helps['{} server configuration list'.format(command_group)] = """
                 type: command
-                short-summary: List the configurations of an {0} server
-                examples:
-                    - name: List configurations of server testsvr.
-                      text: az {1} server configuration list -g testgroup -s testsvr
-                """.format(server_type, command_group)
+                short-summary: List the configurations of an %s server
+                """ % server_type
     helps['{} server-logs'.format(command_group)] = """
                 type: group
                 short-summary: Commands to manage %s server logs.
@@ -172,25 +151,16 @@ def add_helps(command_group, server_type):
                 """.format(server_type, command_group)
     helps['{} db delete'.format(command_group)] = """
                 type: command
-                short-summary: Delete a database for {0}
-                examples:
-                    - name: Delete database testdb from server testsvr.
-                      text: az {1} db delete -g testgroup -s testsvr -n testdb
-                """.format(server_type, command_group)
+                short-summary: Delete a database for %s
+                """ % server_type
     helps['{} db show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a database for {0}
-                examples:
-                    - name: Show the details of database testdb in server testsvr.
-                      text: az {1} db show -g testgroup -s testsvr -n testdb
-                """.format(server_type, command_group)
+                short-summary: Show the details of a database for %s
+                """ % server_type
     helps['{} db list'.format(command_group)] = """
                 type: command
-                short-summary: List the databases of an {0} server
-                examples:
-                    - name: List all the databases in server testsvr.
-                      text: az {1} db list -g testgroup -s testsvr
-                """.format(server_type, command_group)
+                short-summary: List the databases of an %s server
+                """ % server_type
 
 
 add_helps("mysql", "Azure Database for MySQL")
