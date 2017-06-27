@@ -384,10 +384,14 @@ class Profile(object):
                 raise CLIError('SDK Auth file is only applicable on service principals')
 
         result[_TENANT_ID] = account[_TENANT_ID]
-        endpoint_mappings = {
-            'active_directory': 'activeDirectoryEndpointUrl',
-            'resource_manager': 'resourceManagerEndpointUrl',
-        }
+        endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
+        endpoint_mappings['active_directory'] = 'activeDirectoryEndpointUrl'
+        endpoint_mappings['resource_manager'] = 'resourceManagerEndpointUrl'
+        endpoint_mappings['active_directory_graph_resource_id'] = 'activeDirectoryGraphResourceId'
+        endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
+        endpoint_mappings['gallery'] = 'galleryEndpointUrl'
+        endpoint_mappings['management'] = 'managementEndpointUrl'
+
         for e in endpoint_mappings:
             result[endpoint_mappings[e]] = getattr(CLOUD.endpoints, e)
         return result
