@@ -803,8 +803,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
         # AppGateway frontend
         required = []
-        if namespace.app_gateway_type == 'new' and namespace.vnet_type != 'new':
-            required.append('app_gateway_subnet_address_prefix')
+        if namespace.app_gateway_type == 'new':
+            required.append('app_gateway_sku')
+            required.append('app_gateway_capacity')
+            if namespace.vnet_type != 'new':
+                required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
         forbidden = ['nat_pool_name', 'load_balancer']
@@ -814,7 +817,8 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
     elif balancer_type == 'loadBalancer':
         # LoadBalancer frontend
         required = []
-        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway']
+        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway', 'app_gateway_sku',
+                     'app_gateway_capacity']
         _validate_network_balancer_required_forbidden_parameters(
             namespace, required, forbidden, 'load balancer')
 

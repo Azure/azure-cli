@@ -1681,6 +1681,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
                 load_balancer=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
+                app_gateway_sku='Standard_Large', app_gateway_capacity=10,
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
@@ -1813,7 +1814,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         ag_resource = build_application_gateway_resource(
             app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
             public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
-            private_ip_allocation='Dynamic')
+            private_ip_allocation='Dynamic', sku=app_gateway_sku, capacity=app_gateway_capacity)
         ag_resource['dependsOn'] = ag_dependencies
         master_template.add_variable(
             'appGwID',
