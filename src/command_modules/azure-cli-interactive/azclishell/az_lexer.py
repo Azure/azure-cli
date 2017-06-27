@@ -32,12 +32,17 @@ class AzLexer(RegexLexer):
                     prefix=r'',
                     suffix=r'\b'),
                  Name.Class),  # parameters
-                (r'.', Text),  # all else
-                (r' .', Text),
+                (r'.', Keyword),  # all else
+                (r' .', Keyword),
             ]
         }
     except IOError:  # if there is no cache
-        pass
+        tokens = {
+            'root': [
+                (r' .', Number),
+                (r'.', Number),
+            ]
+        }
 
 
 class ExampleLexer(RegexLexer):

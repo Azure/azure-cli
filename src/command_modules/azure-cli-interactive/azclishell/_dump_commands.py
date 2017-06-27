@@ -129,8 +129,6 @@ class DumpTable(object):
         with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
             json.dump(data, help_file)
 
-        self.command_table = self.command_table
-
 
 def get_cache_dir():
     """ gets the location of the cache """

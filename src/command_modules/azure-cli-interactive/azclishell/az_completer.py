@@ -144,7 +144,6 @@ class AzCompleter(Completer):
         self.branch = self.command_tree
         self.curr_command = ''
         self._is_command = True
-
         text = reformat_cmd(text)
         if text.split():
 
