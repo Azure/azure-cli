@@ -208,6 +208,11 @@ ag_subresources = [
     {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
     {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
 ]
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    ag_subresources.append({'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'})
+    c.register_cli_argument('network application-gateway ssl-policy predefined', 'predefined_policy_name', name_arg_type)
+
 for item in ag_subresources:
     register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name')
     register_cli_argument('network application-gateway {} create'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)

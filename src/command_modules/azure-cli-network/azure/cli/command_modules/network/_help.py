@@ -317,6 +317,15 @@ helps['network application-gateway probe update'] = """
 """
 # endregion
 
+# region Application Gateway redirect configuration
+
+helps['network application-gateway redirect-config'] = """
+    type: group
+    short-summary: Managed redirect configurations.
+"""
+
+# endregion
+
 # region Application Gateway rules
 
 helps['network application-gateway rule'] = """
