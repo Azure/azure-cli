@@ -301,6 +301,18 @@ def validate_servers(namespace):
     namespace.servers = servers
 
 
+def validate_target_listener(namespace):
+    if namespace.target_listener and not is_valid_resource_id(namespace.target_listener):
+        namespace.target_listener = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            name=namespace.application_gateway_name,
+            namespace='Microsoft.Network',
+            type='applicationGateways',
+            child_type='httpListeners',
+            child_name=namespace.target_listener)
+
+
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
                                   default_none=False):
     def simple_validator(namespace):

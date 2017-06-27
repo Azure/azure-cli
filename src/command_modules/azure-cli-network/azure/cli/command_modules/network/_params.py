@@ -35,7 +35,7 @@ from azure.cli.command_modules.network._validators import \
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
-     validate_peering_type, validate_dns_record_type, validate_route_filter,
+     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
@@ -211,7 +211,13 @@ ag_subresources = [
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
     ag_subresources.append({'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'})
+
     c.register_cli_argument('network application-gateway ssl-policy predefined', 'predefined_policy_name', name_arg_type)
+
+    c.register_cli_argument('network application-gateway redirect-config', 'redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectType'))
+    c.register_cli_argument('network application-gateway redirect-config', 'include_path', **three_state_flag())
+    c.register_cli_argument('network application-gateway redirect-config', 'include_query_string', **three_state_flag())
+    c.register_cli_argument('network application-gateway redirect-config', 'target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
 
 for item in ag_subresources:
     register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name')

@@ -324,6 +324,31 @@ helps['network application-gateway redirect-config'] = """
     short-summary: Managed redirect configurations.
 """
 
+helps['network application-gateway redirect-config create'] = """
+    type: command
+    short-summary: Create a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config delete'] = """
+    type: command
+    short-summary: Delete a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config list'] = """
+    type: command
+    short-summary: List redirect configurations.
+"""
+
+helps['network application-gateway redirect-config show'] = """
+    type: command
+    short-summary: Show details of a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config update'] = """
+    type: command
+    short-summary: Update a redirect configuration.
+"""
+
 # endregion
 
 # region Application Gateway rules

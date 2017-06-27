@@ -430,6 +430,48 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
     return parent
 
 
+def create_ag_redirect_configuration(resource_group_name, application_gateway_name, item_name, redirect_type,
+                                     target_listener=None, target_url=None, include_path=None,
+                                     include_query_string=None, no_wait=False):
+    RedirectConfiguration = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectConfiguration', mod='models')
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    new_config = RedirectConfiguration(
+        name=item_name,
+        redirect_type=redirect_type,
+        target_listener=SubResource(target_listener) if target_listener else None,
+        target_url=target_url,
+        include_path=include_path,
+        include_query_string=include_query_string)
+    _upsert(ag, 'redirect_configurations', new_config, 'name')
+    return ncf.create_or_update(
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+
+def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=None,
+                                     target_listener=None, target_url=None, include_path=None,
+                                     include_query_string=None, no_wait=False):
+    if redirect_type:
+        instance.redirect_type = redirect_type
+    if target_listener:
+        instance.target_listener = SubResource(target_listener)
+        instance.target_url = None
+    if target_url:
+        instance.target_listener = None
+        instance.target_url = target_url
+    if include_path is not None:
+        instance.include_path = include_path
+    if include_query_string is not None:
+        instance.include_query_string = include_query_string
+    return parent
+
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    RedirectConfiguration = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectConfiguration', mod='models')
+    create_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+    update_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+
+
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False):
     ApplicationGatewayProbe = get_sdk(
