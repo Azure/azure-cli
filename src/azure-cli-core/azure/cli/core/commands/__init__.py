@@ -224,8 +224,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             except:  # pylint: disable=bare-except
                 pass
 
-            if is_verbose and datetime.datetime.now() - self.last_progress_report >= datetime.timedelta(seconds=10):
-                self.last_progress_report = datetime.datetime.now()
+            current_time = datetime.datetime.now()
+            if is_verbose and current_time - self.last_progress_report >= datetime.timedelta(seconds=10):
+                self.last_progress_report = current_time
                 try:
                     self._generate_template_progress(correlation_id)
                 except Exception as ex:  # pylint: disable=broad-except
