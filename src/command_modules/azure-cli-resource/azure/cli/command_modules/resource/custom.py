@@ -127,32 +127,22 @@ def create_appliance(resource_group_name,
     return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
 
 
-def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=None):
+def show_appliance(resource_group_name=None, appliance_name=None):
     """ Gets a managed application.
     :param str resource_group_name:the resource group name
     :param str appliance_name:the managed application name
     """
     racf = _resource_managedapps_client_factory()
-    if managedapp_id:
-        appliance = racf.appliances.get_by_id(managedapp_id)
-    else:
-        appliance = racf.appliances.get(resource_group_name, appliance_name)
-    return appliance
+    return racf.appliances.get(resource_group_name, appliance_name)
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None,
-                             managedapp_definition_id=None):
+def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None):
     """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
     :param str appliance_definition_name:the managed application definition name
     """
     racf = _resource_managedapps_client_factory()
-    if managedapp_definition_id:
-        appliancedef = racf.appliance_definitions.get_by_id(managedapp_definition_id)
-    else:
-        appliancedef = racf.appliance_definitions.get(resource_group_name,
-                                                      appliance_definition_name)
-    return appliancedef
+    return racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
 
 
 def create_appliancedefinition(resource_group_name,
@@ -464,10 +454,10 @@ def create_resource(properties,
 
 def show_resource(resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                  resource_name=None, resource_id=None, api_version=None):
+                  resource_name=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
+                         None, api_version)
     return res.get_resource()
 
 

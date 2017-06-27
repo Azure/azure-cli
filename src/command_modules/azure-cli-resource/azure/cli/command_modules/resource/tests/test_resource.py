@@ -518,7 +518,7 @@ class PolicyScenarioTest(ScenarioTest):
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
-        location = 'eastus2euap'
+        location = 'westcentralus'
         appdef_name = 'testappdefname'
         appdef_display_name = 'test_appdef_123'
         appdef_description = 'test_appdef_123'
@@ -528,7 +528,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
 
         # create a managedapp definition
         create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
-        self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
+        appdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
             JCheck('name', appdef_name),
             JCheck('displayName', appdef_display_name),
             JCheck('description', appdef_description),
@@ -538,7 +538,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             JCheck('artifacts[0].type', 'Template'),
             JCheck('artifacts[1].name', 'CreateUiDefinition'),
             JCheck('artifacts[1].type', 'Custom')
-        ])
+        ]).get_output_in_json()
 
         # list and show it
         list_cmd = 'managedapp definition list -g {}'
@@ -546,8 +546,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             JCheck('[0].name', appdef_name)
         ])
 
-        show_cmd = 'managedapp definition show -g {} -n {}'
-        self.cmd(show_cmd.format(resource_group, appdef_name), checks=[
+        show_cmd = 'managedapp definition show --ids {}'
+        self.cmd(show_cmd.format(appdef['id']), checks=[
             JCheck('name', appdef_name),
             JCheck('displayName', appdef_display_name),
             JCheck('description', appdef_description),
@@ -567,7 +567,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
 class ManagedAppScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
-        location = 'eastus2euap'
+        location = 'westcentralus'
         appdef_name = 'testappdefname'
         appdef_display_name = 'test_appdef_123'
         appdef_description = 'test_appdef_123'
@@ -582,18 +582,18 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         # create a managedapp
         managedapp_name = 'mymanagedapp'
-        managedapp_loc = 'eastus2euap'
+        managedapp_loc = 'westcentralus'
         managedapp_kind = 'servicecatalog'
         newrg = self.create_random_name('climanagedapp', 25)
         managedrg = '/subscriptions/{}/resourceGroups/{}'.format(managedappdef['id'].split("/")[2], newrg)
         create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
-        self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
+        app = self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
             JCheck('name', managedapp_name),
             JCheck('type', 'Microsoft.Solutions/appliances'),
             JCheck('kind', 'servicecatalog'),
             JCheck('managedResourceGroupId', managedrg),
             JCheck('applianceDefinitionId', managedappdef['id'])
-        ])
+        ]).get_output_in_json()
 
         # list and show
         list_byrg_cmd = 'managedapp list -g {}'
@@ -601,8 +601,8 @@ class ManagedAppScenarioTest(ScenarioTest):
             JCheck('[0].name', managedapp_name)
         ])
 
-        show_cmd = 'managedapp show -g {} -n {}'
-        self.cmd(show_cmd.format(resource_group, managedapp_name), checks=[
+        show_cmd = 'managedapp show --ids {}'
+        self.cmd(show_cmd.format(app['id']), checks=[
             JCheck('name', managedapp_name),
             JCheck('type', 'Microsoft.Solutions/appliances'),
             JCheck('kind', 'servicecatalog'),
