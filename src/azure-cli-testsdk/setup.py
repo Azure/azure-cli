@@ -31,7 +31,6 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli',
-    'azure-devtools',
     'jmespath',
     'mock',
     'vcrpy>=1.10.3',
