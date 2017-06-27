@@ -95,7 +95,11 @@ for subresource, alias in property_map.items():
                                custom_function_op=custom_path + 'update_ag_{}'.format(_make_singular(subresource)),
                                child_collection_prop_name=subresource)
 
-cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy', no_wait_param='no_wait')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy_2017_06_01', no_wait_param='no_wait')
+else:
+    cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy_2017_03_01', no_wait_param='no_wait')
+
 cli_command(__name__, 'network application-gateway ssl-policy show', custom_path + 'show_ag_ssl_policy', exception_handler=empty_on_404)
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:

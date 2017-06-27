@@ -219,6 +219,10 @@ with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
     c.register_cli_argument('network application-gateway redirect-config', 'include_query_string', **three_state_flag())
     c.register_cli_argument('network application-gateway redirect-config', 'target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
 
+    c.register_cli_argument('network application-gateway ssl-policy', 'policy_name', name_arg_type)
+    c.register_cli_argument('network application-gateway ssl-policy', 'cipher_suites', nargs='+', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySslCipherSuite'))
+    c.register_cli_argument('network application-gateway ssl-policy', 'min_protocol_version', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySslProtocol'))
+
 for item in ag_subresources:
     register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name')
     register_cli_argument('network application-gateway {} create'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)

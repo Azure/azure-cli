@@ -27,40 +27,26 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
-VirtualNetworkPeering, ApplicationGatewayFirewallMode, \
-    ApplicationGatewaySkuName, IPVersion = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'VirtualNetworkPeering', 'ApplicationGatewayFirewallMode',
-        'ApplicationGatewaySkuName', 'IPVersion',
-        mod='models')
-
-PublicIPAddress, PublicIPAddressDnsSettings, VirtualNetwork, DhcpOptions, \
-    AddressSpace, Subnet, NetworkSecurityGroup, NetworkInterfaceIPConfiguration, \
-    InboundNatPool, InboundNatRule, SubResource = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'PublicIPAddress', 'PublicIPAddressDnsSettings',
-        'VirtualNetwork', 'DhcpOptions', 'AddressSpace',
-        'Subnet', 'NetworkSecurityGroup', 'NetworkInterfaceIPConfiguration',
-        'InboundNatPool', 'InboundNatRule', 'SubResource',
-        mod='models')
-
-BackendAddressPool, LoadBalancingRule, VirtualNetworkGatewayType, \
-    VirtualNetworkGatewaySkuName, SecurityRule, FrontendIPConfiguration, \
-    Route, VpnClientRootCertificate, SecurityRuleAccess = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'BackendAddressPool', 'LoadBalancingRule', 'VirtualNetworkGatewayType',
-        'VirtualNetworkGatewaySkuName', 'SecurityRule', 'FrontendIPConfiguration',
-        'Route', 'VpnClientRootCertificate', 'SecurityRuleAccess',
-        mod='models')
-
-SecurityRuleDirection, Probe, VpnClientConfiguration, VpnClientRevokedCertificate, \
-    SecurityRuleProtocol, IPAllocationMethod, ExpressRouteCircuitSkuTier, \
-    ExpressRouteCircuitSkuFamily, VpnType = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'SecurityRuleDirection', 'Probe', 'VpnClientConfiguration',
-        'VpnClientRevokedCertificate', 'SecurityRuleProtocol', 'IPAllocationMethod',
-        'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitSkuFamily', 'VpnType',
-        mod='models')
+AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, ApplicationGatewaySslPolicy, \
+ApplicationGatewaySslPolicyType, \
+BackendAddressPool, DhcpOptions, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, \
+FrontendIPConfiguration, InboundNatPool, InboundNatRule, IPAllocationMethod, IPVersion, \
+LoadBalancingRule, NetworkInterfaceIPConfiguration, NetworkSecurityGroup, Probe, PublicIPAddress, \
+PublicIPAddressDnsSettings, Route, SecurityRule, SecurityRuleAccess, \
+SecurityRuleDirection, SecurityRuleProtocol, Subnet, SubResource, VirtualNetwork, VirtualNetworkGatewaySkuName, \
+VirtualNetworkGatewayType, VirtualNetworkPeering, VpnClientConfiguration, VpnClientRevokedCertificate, \
+VpnClientRootCertificate, VpnType = get_sdk(
+    ResourceType.MGMT_NETWORK,
+    'AddressSpace', 'ApplicationGatewayFirewallMode', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslPolicy',
+    'ApplicationGatewaySslPolicyType',
+    'BackendAddressPool', 'DhcpOptions', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 
+    'FrontendIPConfiguration', 'InboundNatPool', 'InboundNatRule', 'IPAllocationMethod', 'IPVersion',
+    'LoadBalancingRule', 'NetworkInterfaceIPConfiguration', 'NetworkSecurityGroup', 'Probe', 'PublicIPAddress',
+    'PublicIPAddressDnsSettings', 'Route', 'SecurityRule', 'SecurityRuleAccess', 'SecurityRuleDirection',
+    'SecurityRuleProtocol', 'Subnet', 'SubResource', 'VirtualNetwork', 'VirtualNetworkGatewaySkuName',
+    'VirtualNetworkGatewayType', 'VirtualNetworkPeering', 'VpnClientConfiguration', 'VpnClientRevokedCertificate',
+    'VpnClientRootCertificate', 'VpnType',
+    mod='models')
 
 
 def _log_pprint_template(template):
@@ -577,17 +563,32 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
     return parent
 
 
-def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
-                      clear=False, no_wait=False):
-    ApplicationGatewaySslPolicy = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'ApplicationGatewaySslPolicy',
-        mod='models')
+def set_ag_ssl_policy_2017_03_01(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
+                                 clear=False, no_wait=False):
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
         disabled_ssl_protocols=disabled_ssl_protocols)
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+set_ag_ssl_policy_2017_03_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
+
+
+def set_ag_ssl_policy_2017_06_01(resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
+                                 disabled_ssl_protocols=None, cipher_suites=None, min_protocol_version=None,
+                                 no_wait=False):
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.ssl_policy = ApplicationGatewaySslPolicy(
+        policy_name=policy_name,
+        policy_type=ApplicationGatewaySslPolicyType.predefined.value if policy_name else \
+            ApplicationGatewaySslPolicyType.custom.value,
+        disabled_ssl_protocols=disabled_ssl_protocols,
+        cipher_suites=cipher_suites,
+        min_protocol_version=min_protocol_version)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+set_ag_ssl_policy_2017_06_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
 
 
 def show_ag_ssl_policy(resource_group_name, application_gateway_name):

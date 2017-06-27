@@ -14,7 +14,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -117,6 +117,30 @@ class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network application-gateway wait -g {} -n ag2 --deleted'.format(rg))
 
 
+@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
+class NetworkAppGatewayPrivateIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_private_ip')
+    def test_network_app_gateway_with_private_ip(self):
+        rg = self.resource_group
+        private_ip = '10.0.0.15'
+        cert_path = os.path.join(TEST_DIR, 'TestCert.pfx')
+        cert_pass = 'password'
+        self.cmd('network application-gateway create -g {} -n ag3 --subnet subnet1 --private-ip-address {} --cert-file "{}" --cert-password {} --no-wait'.format(rg, private_ip, cert_path, cert_pass))
+        self.cmd('network application-gateway wait -g {} -n ag3 --exists'.format(rg))
+        self.cmd('network application-gateway show -g {} -n ag3'.format(rg), checks=[JMESPathCheck('frontendIpConfigurations[0].privateIpAddress', private_ip), JMESPathCheck('frontendIpConfigurations[0].privateIpAllocationMethod', 'Static')])
+        cert_path = os.path.join(TEST_DIR, 'TestCert2.pfx')
+        self.cmd('network application-gateway ssl-cert update -g {} --gateway-name ag3 -n ag3SslCert --cert-file "{}" --cert-password {}'.format(rg, cert_path, cert_pass))
+        self.cmd('network application-gateway wait -g {} -n ag3 --updated'.format(rg))
+
+        # TODO: Update this for new SSL policy features
+        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 --disabled-ssl-protocols tlsv1_0 tlsv1_1 --no-wait'.format(rg))
+        self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=JMESPathCheck('disabledSslProtocols.length(@)', 2))
+        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 --clear --no-wait'.format(rg))
+        self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=NoneCheck())
+
+
+@api_version_constraint(ResourceType.MGMT_STORAGE, max_api='2017-03-01')
 class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkAppGatewayPrivateIpScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_private_ip')
