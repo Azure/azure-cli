@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from prompt_toolkit.completion import Completer, Completion
 
-from azclishell._dump_commands import get_dumped_command_table
+from azclishell._dump_commands import DUMP_TABLE
 import azclishell.configuration
 from azclishell.argfinder import ArgsFinder
 from azclishell.command_tree import in_tree
@@ -126,7 +126,7 @@ class AzCompleter(Completer):
         self.initialize_command_table_attributes()
 
     def initialize_command_table_attributes(self):
-        self.cmdtab = get_dumped_command_table()
+        self.cmdtab = DUMP_TABLE.command_table
         if self.cmdtab is not None:
             self.parser.load_command_table(self.cmdtab)
             self.argsfinder = ArgsFinder(self.parser)

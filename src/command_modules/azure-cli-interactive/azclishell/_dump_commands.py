@@ -18,122 +18,118 @@ from azure.cli.core.commands.arm import add_id_parameters
 
 import azclishell.configuration as config
 
-CMD_TABLE = None
 
+class DumpTable(object):
+    def __init__(self):
+        self.command_table = None
 
-def install_modules(cmd_table):
-    installed_command_modules = []
-    for cmd in cmd_table:
-        try:
-            cmd_table[cmd].load_arguments()
-        except (ImportError, ValueError):
-            pass
-        mods_ns_pkg = import_module('azure.cli.command_modules')
-    for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__):
-        if modname not in BLACKLISTED_MODS:
-            installed_command_modules.append(modname)
+    def install_modules(self):
+        installed_command_modules = []
+        for cmd in self.command_table:
+            try:
+                self.command_table[cmd].load_arguments()
+            except (ImportError, ValueError):
+                pass
+            mods_ns_pkg = import_module('azure.cli.command_modules')
+        for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__):
+            if modname not in BLACKLISTED_MODS:
+                installed_command_modules.append(modname)
 
-    for mod in installed_command_modules:
-        try:
-            mod = import_module('azure.cli.command_modules.' + mod)
-            mod.load_params(mod)
-            mod.load_commands()
+        for mod in installed_command_modules:
+            try:
+                mod = import_module('azure.cli.command_modules.' + mod)
+                mod.load_params(mod)
+                mod.load_commands()
 
-        except Exception:  # pylint: disable=broad-except
-            print("Error loading: {}".format(mod))
-    _update_command_definitions(cmd_table)
+            except Exception:  # pylint: disable=broad-except
+                print("Error loading: {}".format(mod))
+        _update_command_definitions(self.command_table)
 
+    def dump_command_table(self):
+        """ dumps the command table """
+        APPLICATION.initialize(Configuration())
+        self.command_table = APPLICATION.configuration.get_command_table()
+        command_file = config.CONFIGURATION.get_help_files()
 
-def dump_command_table():
-    """ dumps the command table """
-    global CMD_TABLE
-    APPLICATION.initialize(Configuration())
-    cmd_table = APPLICATION.configuration.get_command_table()
-    command_file = config.CONFIGURATION.get_help_files()
+        self.install_modules()
+        add_id_parameters(self.command_table)
 
-    install_modules(cmd_table)
-    add_id_parameters(cmd_table)
+        data = {}
+        for cmd in self.command_table:
+            com_descrip = {}
+            param_descrip = {}
+            try:
+                command_description = self.command_table[cmd].description
+                if callable(command_description):
+                    command_description = command_description()
+                com_descrip['help'] = command_description
+                com_descrip['examples'] = ""
 
-    data = {}
-    for cmd in cmd_table:
-        com_descrip = {}
-        param_descrip = {}
-        try:
-            command_description = cmd_table[cmd].description
-            if callable(command_description):
-                command_description = command_description()
-            com_descrip['help'] = command_description
-            com_descrip['examples'] = ""
+                for key in self.command_table[cmd].arguments:
+                    required = ""
+                    help_desc = ""
+                    if self.command_table[cmd].arguments[key].type.settings.get('required'):
+                        required = "[REQUIRED]"
+                    if self.command_table[cmd].arguments[key].type.settings.get('help'):
+                        help_desc = self.command_table[cmd].arguments[key].type.settings.get('help')
 
-            for key in cmd_table[cmd].arguments:
-                required = ""
-                help_desc = ""
-                if cmd_table[cmd].arguments[key].type.settings.get('required'):
-                    required = "[REQUIRED]"
-                if cmd_table[cmd].arguments[key].type.settings.get('help'):
-                    help_desc = cmd_table[cmd].arguments[key].type.settings.get('help')
+                    name_options = []
+                    for name in self.command_table[cmd].arguments[key].options_list:
+                        name_options.append(name)
 
-                name_options = []
-                for name in cmd_table[cmd].arguments[key].options_list:
-                    name_options.append(name)
-
-                options = {
-                    'name': name_options,
-                    'required': required,
-                    'help': help_desc
-                }
-                param_descrip[cmd_table[cmd].arguments[key].options_list[0]] = options
-
-            com_descrip['parameters'] = param_descrip
-            data[cmd] = com_descrip
-        except (ImportError, ValueError):
-            pass
-
-    for cmd in helps:
-        diction_help = yaml.load(helps[cmd])
-        if "short-summary" in diction_help:
-            if cmd in data:
-                data[cmd]['help'] = diction_help["short-summary"]
-            else:
-                data[cmd] = {
-                    'help': diction_help["short-summary"],
-                    'parameters': {}
-                }
-            if callable(data[cmd]['help']):
-                data[cmd]['help'] = data[cmd]['help']()
-
-        if cmd not in data:
-            print("Command: {} not in Command Table".format(cmd))
-            continue
-
-        if "parameters" in diction_help:
-            for param in diction_help["parameters"]:
-                if param["name"].split()[0] not in data[cmd]['parameters']:
                     options = {
                         'name': name_options,
                         'required': required,
                         'help': help_desc
                     }
-                    data[cmd]['parameters'] = {
-                        param["name"].split()[0]: options
+                    param_descrip[self.command_table[cmd].arguments[key].options_list[0]] = options
+
+                com_descrip['parameters'] = param_descrip
+                data[cmd] = com_descrip
+            except (ImportError, ValueError):
+                pass
+
+        for cmd in helps:
+            diction_help = yaml.load(helps[cmd])
+            if "short-summary" in diction_help:
+                if cmd in data:
+                    data[cmd]['help'] = diction_help["short-summary"]
+                else:
+                    data[cmd] = {
+                        'help': diction_help["short-summary"],
+                        'parameters': {}
                     }
-                if "short-summary" in param:
-                    data[cmd]['parameters'][param["name"].split()[0]]['help']\
-                        = param["short-summary"]
-        if "examples" in diction_help:
-            examples = []
-            for example in diction_help["examples"]:
-                examples.append([example['name'], example['text']])
-            data[cmd]['examples'] = examples
+                if callable(data[cmd]['help']):
+                    data[cmd]['help'] = data[cmd]['help']()
 
-    with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
-        json.dump(data, help_file)
+            if cmd not in data:
+                print("Command: {} not in Command Table".format(cmd))
+                continue
 
-    CMD_TABLE = cmd_table
+            if "parameters" in diction_help:
+                for param in diction_help["parameters"]:
+                    if param["name"].split()[0] not in data[cmd]['parameters']:
+                        options = {
+                            'name': name_options,
+                            'required': required,
+                            'help': help_desc
+                        }
+                        data[cmd]['parameters'] = {
+                            param["name"].split()[0]: options
+                        }
+                    if "short-summary" in param:
+                        data[cmd]['parameters'][param["name"].split()[0]]['help']\
+                            = param["short-summary"]
+            if "examples" in diction_help:
+                examples = []
+                for example in diction_help["examples"]:
+                    examples.append([example['name'], example['text']])
+                data[cmd]['examples'] = examples
 
+        with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
+            json.dump(data, help_file)
 
-def get_dumped_command_table():
-    return CMD_TABLE
+        self.command_table = self.command_table
 
 
 def get_cache_dir():
@@ -145,3 +141,6 @@ def get_cache_dir():
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
     return cache_path
+
+
+DUMP_TABLE = DumpTable()

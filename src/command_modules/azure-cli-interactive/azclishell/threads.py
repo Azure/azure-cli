@@ -5,7 +5,7 @@
 
 import threading
 
-from azclishell._dump_commands import dump_command_table
+from azclishell._dump_commands import DUMP_TABLE
 
 
 class ExecuteThread(threading.Thread):
@@ -38,17 +38,17 @@ class ProgressViewThread(threading.Thread):
             pass
 
 
-class LoadCommableTableThread(threading.Thread):
+class LoadCommandTableThread(threading.Thread):
     """ a thread that loads the command table """
     def __init__(self, func, arg):
-        super(LoadCommableTableThread, self).__init__()
+        super(LoadCommandTableThread, self).__init__()
         self.daemon = True
         self.arg = arg
         self.func = func
 
     def run(self):
         try:
-            dump_command_table()
+            DUMP_TABLE.dump_command_table()
         except KeyboardInterrupt:
             pass
         self.func(self.arg)

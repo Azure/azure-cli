@@ -36,7 +36,7 @@ from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
 from azclishell.telemetry import SHELL_TELEMETRY as telemetry
-from azclishell.threads import ExecuteThread, ProgressViewThread, LoadCommableTableThread
+from azclishell.threads import ExecuteThread, ProgressViewThread, LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -688,7 +688,7 @@ class Shell(object):
         APPLICATION.get_progress_controller = self.progress_patch
 
         if self.cache_load:
-            command_table_thread = LoadCommableTableThread(restart_completer, self)
+            command_table_thread = LoadCommandTableThread(restart_completer, self)
             command_table_thread.start()
 
         from azclishell.configuration import SHELL_HELP
