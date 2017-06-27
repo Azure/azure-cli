@@ -14,7 +14,7 @@ import yaml
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
-                                                  _acs_browse_internal, _add_role_assignment)
+                                                  _add_role_assignment)
 from azure.mgmt.compute.containerservice.models import (ContainerServiceOchestratorTypes,
                                                         ContainerService,
                                                         ContainerServiceOrchestratorProfile)
@@ -76,7 +76,6 @@ class AcsCustomCommandTest(unittest.TestCase):
                         return_value=acs_info) as get_acs_info:
             with mock.patch(
                     'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-                _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
                 get_acs_info.assert_called_with('name', 'resource-group')
                 k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
 
@@ -88,7 +87,6 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
-            _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
             dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials_non_existent(self):
