@@ -128,24 +128,25 @@ class AzCompleter(Completer):
         self.parser.load_command_table(CMD_TABLE)
         self.argsfinder = ArgsFinder(self.parser, outstream)
 
-    def validate_completion(self, param, words, text_before_cursor, double=True):
+    def validate_completion(self, param, words, text_before_cursor, check_double=True):
         """ validates that a param should be completed """
         # validates the position of the parameter
         position = param.lower().startswith(words.lower()) and not text_before_cursor[-1].isspace()
         # cancels parameters that are already in the in line
         canceling_positions = param.lower() != words.lower() and param not in text_before_cursor.split()
 
-        check_doubles = True
+        double = True
         # checks for aliasing of parameters
-        if double and self.same_param_doubles.get(self.curr_command):
-            for double_sets in self.same_param_doubles[self.curr_command]:
+
+        if check_double:
+            for double_sets in self.same_param_doubles.get(self.curr_command, []):
                 # if the parameter is in any of the sets
                 if param in double_sets:
                     # if any of the other aliases are in the line already
-                    check_doubles = not any(
+                    double = not any(
                         alias in text_before_cursor.split() and alias != param for alias in double_sets)
 
-        return position and canceling_positions and check_doubles
+        return position and canceling_positions and double
 
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor
@@ -336,13 +337,13 @@ class AzCompleter(Completer):
                 if txtspt[-1].startswith('-') \
                         and not txtspt[-1].startswith('--') and \
                         param.startswith('-') and not param.startswith('--') and\
-                        self.validate_completion(param, txtspt[-1], text, double=False):
+                        self.validate_completion(param, txtspt[-1], text, check_double=False):
                     yield Completion(
                         param, -len(txtspt[-1]),
                         display_meta=self.global_param_descriptions[param])
                 # for double dash global parameters
                 elif txtspt[-1].startswith('--') and \
-                        self.validate_completion(param, txtspt[-1], text, double=False):
+                        self.validate_completion(param, txtspt[-1], text, check_double=False):
                     yield Completion(
                         param, -len(txtspt[-1]),
                         display_meta=self.global_param_descriptions[param])
@@ -354,7 +355,7 @@ class AzCompleter(Completer):
             if len(txtspt) > 1 and\
                     txtspt[-2] in self.output_options:
                 for opt in self.output_choices:
-                    if self.validate_completion(opt, txtspt[-1], text, double=False):
+                    if self.validate_completion(opt, txtspt[-1], text, check_double=False):
                         yield Completion(opt, -len(txtspt[-1]))
 
     def is_completable(self, symbol):
