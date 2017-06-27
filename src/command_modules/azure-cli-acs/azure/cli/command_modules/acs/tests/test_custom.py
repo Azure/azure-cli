@@ -13,8 +13,7 @@ import yaml
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
-                                                  _add_role_assignment)
+from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, _add_role_assignment)
 from azure.mgmt.compute.containerservice.models import (ContainerServiceOchestratorTypes,
                                                         ContainerService,
                                                         ContainerServiceOrchestratorProfile)
