@@ -40,3 +40,10 @@ def validate_ssh_key(namespace):
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
                            'You can use --generate-ssh-keys to let CLI generate one for you')
     namespace.ssh_key_value = content
+
+
+def validate_create_parameters(namespace):
+    if not namespace.name:
+        raise CLIError('--name has no value')
+    if namespace.dns_name_prefix is not None and not namespace.dns_name_prefix:
+        raise CLIError('--dns-prefix has no value')
