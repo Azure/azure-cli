@@ -116,3 +116,11 @@ def cli_keyvault_data_plane_command(
     challenge from the service when they make requests. """
     command = _create_key_vault_command(__name__, name, operation, transform, table_transformer)
     command_table[command.name] = command
+
+
+def cli_keyvault_client_agnostic_command(
+        name, operation, transform=None, table_transformer=None):
+    """ Registers an Azure CLI KeyVault Data Plane command. These commands must respond to a
+    challenge from the service when they make requests. """
+    command = _create_key_vault_command(__name__, name, operation, transform, table_transformer)
+    command_table[command.name] = command

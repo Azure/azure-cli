@@ -113,7 +113,12 @@ vault_name_type = CliArgumentType(help='Name of the key vault.',
                                   id_part=None)
 
 # PARAMETER REGISTRATIONS
-
+register_cli_argument('keyvault key', 'identifier',
+                      options_list=('--id', '-i'), help='The URI identifier of a key vault key')
+register_cli_argument('keyvault secret', 'identifier',
+                      options_list=('--id', '-i'), help='The URI identifier of a key vault secret')
+register_cli_argument('keyvault certificate', 'identifier',
+                      options_list=('--id', '-i'), help='The URI identifier of a key vault certificate')
 register_cli_argument('keyvault', 'resource_group_name', resource_group_name_type, id_part=None,
                       required=False,
                       help='Proceed only if Key Vault belongs to the specified resource group.',

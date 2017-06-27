@@ -2,6 +2,13 @@
 
 Release History
 ===============
+Unreleased
+++++++++++++++++++
+* Adding commands for parsing key vault identifiers
+* az keyvault key parse-id
+* az keyvault secret parse-id
+* az keyvault certificate parse-id
+
 2.0.7 (2017-06-21)
 ++++++++++++++++++
 

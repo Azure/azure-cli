@@ -35,7 +35,7 @@ from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from azure.keyvault import KeyVaultClient
+from azure.keyvault import KeyVaultClient, KeyId, SecretId, CertificateId
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
 logger = azlogging.get_az_logger(__name__)
@@ -829,3 +829,15 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
+
+
+def parse_key_id(identifier):
+    return KeyId(identifier)
+
+
+def parse_secret_id(identifier):
+    return SecretId(identifier)
+
+
+def parse_certificate_id(identifier):
+    return CertificateId(identifier)
