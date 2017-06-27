@@ -3,11 +3,15 @@
 Release History
 ===============
 
+0.3.5 (unreleased)
+++++++++++++++++++
+
+* Increase test coverage
+
 0.3.5 (2017-06-21)
 ++++++++++++++++++
 
 * Enhance the '?' gesture to also inject into the next command
-
 
 0.3.4 (2017-06-13)
 ++++++++++++++++++
