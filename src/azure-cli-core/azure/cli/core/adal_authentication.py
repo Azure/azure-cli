@@ -13,8 +13,12 @@ from azure.cli.core.util import CLIError
 
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, token_retriever):
-        self._token_retriever = token_retriever
+    def __init__(self, token):
+        self.token = token
+
+    # Object method to return the tuple to allow backwards compatibility as well as future expansion
+    def _token_retriever(self):
+        return self.token
 
     def signed_session(self):
         session = super(AdalAuthentication, self).signed_session()

@@ -33,6 +33,11 @@ def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     return subscriptions
 
 
+def refresh_subscriptions():
+    profile = Profile()
+    profile.refresh_subscriptions()
+
+
 def show_subscription(subscription=None, expanded_view=None):
     profile = Profile()
     if not expanded_view:
