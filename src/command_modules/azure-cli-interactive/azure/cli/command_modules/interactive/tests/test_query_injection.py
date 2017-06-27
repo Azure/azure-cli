@@ -39,7 +39,7 @@ class QueryInjection(unittest.TestCase):
         self.stream.write('\n')
 
     def test_null(self):
-        """ tests empty case """
+        # tests empty case
         args = []
         self.shell.last.result = {}
         flag = self.shell.handle_jmespath_query(args, False)
@@ -47,7 +47,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual('\n', self.stream.getvalue())
 
     def test_just_query(self):
-        """ tests flushing just the query """
+        # tests flushing just the query
         args = ['?x']
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args, False)
@@ -55,7 +55,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual('"result"\n', self.stream.getvalue())
 
     def test_string_replacement(self):
-        """ tests that the query replaces the values in the command """
+        # tests that the query replaces the values in the command
         args = 'vm show -g "?group" -n "?name"'
         args = parse_quotes(args)
         args_no_quotes = []
@@ -70,7 +70,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(u"vm show -g mygroup -n myname\n", self.stream.getvalue())
 
     def test_list_replacement(self):
-        """ tests that the query replaces the values in the command """
+        # tests that the query replaces the values in the command
         args = 'vm show -g "?[].group" -n "?[].name"'
         args = parse_quotes(args)
         args_no_quotes = []
@@ -99,7 +99,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(results[2], 'vm show -g mygroup3 -n myname3')
 
     def test_quotes(self):
-        """ tests that it parses correctly with quotes in the command """
+        # tests that it parses correctly with quotes in the command
         self.shell.last.result = {'x': 'result'}
         # pylint: disable=protected-access
         b_flag, c_flag, out, cmd = self.shell._special_cases(
@@ -110,7 +110,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(cmd, "this is 'url?what' negative")
 
     def test_errors(self):
-        """ tests invalid query """
+        # tests invalid query
         args = 'vm show -g "?[].group" -n "?[].name"'
         args = parse_quotes(args)
         args_no_quotes = []
@@ -132,7 +132,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(len(results), 2)
 
     def test_singleton(self):
-        """ tests a singleton example """
+        # tests a singleton example
         args = 'vm show -g "?group" -n "?name"'
         args = parse_quotes(args)
         args_no_quotes = []
@@ -149,7 +149,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(results[0], u'vm show -g mygroup -n myname')
 
     def test_spaces(self):
-        """ tests quotes with spaces """
+        # tests quotes with spaces
         args = 'vm show -g "?[?group == \'mygroup\'].name"'
         args = parse_quotes(args)
         args_no_quotes = []
@@ -171,7 +171,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(results[0], u'vm show -g fred')
 
     def test_spaces_with_equal(self):
-        """ tests quotes with spaces """
+        # tests quotes with spaces
         args = 'vm show -g="?[?group == \'myg roup\'].name"'
         args = parse_quotes(args)
         args_no_quotes = []
@@ -193,7 +193,7 @@ class QueryInjection(unittest.TestCase):
         self.assertEqual(results[0], u'vm show -g=fred')
 
     def test_validation(self):
-        """ tests line validation that the command is an injection """
+        # tests line validation that the command is an injection
         args = 'foo bar --foo=?bar'
         self.assertTrue(self.validation_func(args.split(), '?'))
 
