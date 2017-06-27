@@ -458,7 +458,6 @@ def server_ad_admin_set(
         server_name,
         **kwargs):
 
-
     profile = Profile()
     sub = profile.get_subscription()
     kwargs['tenant_id'] = sub['tenantId']

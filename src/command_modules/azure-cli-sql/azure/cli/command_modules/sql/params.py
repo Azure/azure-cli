@@ -536,7 +536,6 @@ with ParametersContext(command='sql elastic-pool list-editions') as c:
                nargs='+',
                **enum_choice_list(ElasticPoolCapabilitiesAdditionalDetails))
 
-    
     search_arg_group = 'Search'
 
     # We could used **enum_choice_list here, but that will validate the inputs which means there
@@ -571,7 +570,8 @@ with ParametersContext(command='sql server') as c:
 with ParametersContext(command='sql server create') as c:
     # Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
-    # signature, therefore, they can't be automatically converted to requirement arguments.    c.expand('parameters', Server, group_name='Authentication', patches={
+    # signature, therefore, they can't be automatically converted to requirement arguments.
+    c.expand('parameters', Server, group_name='Authentication', patches={
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
     })
