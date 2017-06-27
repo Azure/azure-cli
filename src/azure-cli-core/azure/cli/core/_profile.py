@@ -360,7 +360,7 @@ class Profile(object):
 
         # is the credential created through command like 'create-for-rbac'?
         result = OrderedDict()
-        if bool(name) and bool(password):
+        if name and password:
             result['clientId'] = name
             if password:
                 result['clientSecret'] = password

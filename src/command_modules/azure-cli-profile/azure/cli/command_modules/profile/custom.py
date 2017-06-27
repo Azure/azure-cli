@@ -39,6 +39,7 @@ def show_subscription(subscription=None, show_auth_for_sdk=None):
     if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 
+    # sdk-auth file should be in json format all the time, hence the print
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 

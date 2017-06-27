@@ -672,6 +672,7 @@ def create_service_principal_for_rbac(
         profile = Profile()
         result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
                                           app_id, password, cert_file)
+        # sdk-auth file should be in json format all the time, hence the print
         print(json.dumps(result, indent=2))
         return
 
