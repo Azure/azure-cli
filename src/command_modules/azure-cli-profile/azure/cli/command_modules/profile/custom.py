@@ -33,14 +33,14 @@ def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     return subscriptions
 
 
-def show_subscription(subscription=None, expanded_view=None):
+def show_subscription(subscription=None, show_auth_for_sdk=None):
+    import json
     profile = Profile()
-    if not expanded_view:
+    if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 
-    logger.warning("'--expanded-view' is deprecating and will be removed in a future release. You can get the same "
-                   "information using 'az cloud show'")
-    return profile.get_expanded_subscription_info(subscription)
+    # sdk-auth file should be in json format all the time, hence the print
+    print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
 def get_access_token(subscription=None, resource=None):
