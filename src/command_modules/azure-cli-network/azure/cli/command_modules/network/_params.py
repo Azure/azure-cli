@@ -207,21 +207,8 @@ ag_subresources = [
     {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
     {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
     {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
+    {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
 ]
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    ag_subresources.append({'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'})
-
-    c.register_cli_argument('network application-gateway ssl-policy predefined', 'predefined_policy_name', name_arg_type)
-
-    c.register_cli_argument('network application-gateway redirect-config', 'redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectType'))
-    c.register_cli_argument('network application-gateway redirect-config', 'include_path', **three_state_flag())
-    c.register_cli_argument('network application-gateway redirect-config', 'include_query_string', **three_state_flag())
-    c.register_cli_argument('network application-gateway redirect-config', 'target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
-
-    c.register_cli_argument('network application-gateway ssl-policy', 'policy_name', name_arg_type)
-    c.register_cli_argument('network application-gateway ssl-policy', 'cipher_suites', nargs='+', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySslCipherSuite'))
-    c.register_cli_argument('network application-gateway ssl-policy', 'min_protocol_version', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySslProtocol'))
 
 for item in ag_subresources:
     register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name')
@@ -309,6 +296,39 @@ for item in ['ssl-policy', 'waf-config']:
 register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', nargs='+')
 register_cli_argument('network application-gateway waf-config', 'disabled_rules', nargs='+')
 register_cli_argument('network application-gateway waf-config list-rule-sets', '_type', options_list=['--type'])
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network application-gateway ssl-policy predefined', 'predefined_policy_name', name_arg_type)
+
+    c.register_cli_argument('network application-gateway redirect-config', 'redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectType'))
+    c.register_cli_argument('network application-gateway redirect-config', 'include_path', **three_state_flag())
+    c.register_cli_argument('network application-gateway redirect-config', 'include_query_string', **three_state_flag())
+    c.register_cli_argument('network application-gateway redirect-config', 'target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
+
+    c.register_cli_argument('network application-gateway ssl-policy', 'policy_name', name_arg_type)
+    c.register_cli_argument('network application-gateway ssl-policy', 'cipher_suites', nargs='+')
+    c.register_cli_argument('network application-gateway ssl-policy', 'min_protocol_version')
+    c.register_cli_argument('network application-gateway ssl-policy', 'disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.')
+
+    c.register_cli_argument('network application-gateway http-settings', 'host_name', help='Host header sent to the backend servers.')
+    c.register_cli_argument('network application-gateway http-settings', 'host_name_from_backend_pool', help='Use host name of the backend server as the host header.', **three_state_flag())
+    c.register_cli_argument('network application-gateway http-settings', 'affinity_cookie_name', help='Name used for the affinity cookie.')
+    c.register_cli_argument('network application-gateway http-settings', 'enable_probe', help='Whether the probe is enabled.', **three_state_flag())
+    c.register_cli_argument('network application-gateway http-settings', 'path', help='Path that will prefix all HTTP requests.')
+
+    c.register_cli_argument('network application-gateway probe', 'host', default=None, required=False, help='The name of the host to send the probe.')
+    c.register_cli_argument('network application-gateway probe', 'host_name_from_http_settings', help='Use host header from HTTP settings.', **three_state_flag())
+    c.register_cli_argument('network application-gateway probe', 'min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
+    c.register_cli_argument('network application-gateway probe', 'match_body', help='Body that must be contained in the health response.')
+    c.register_cli_argument('network application-gateway probe', 'match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')
+
+    c.register_cli_argument('network application-gateway url-path-map', 'default_redirect_config', help='The name or ID of the default redirect configuration.')
+    c.register_cli_argument('network application-gateway url-path-map', 'redirect_config', help='The name or ID of the redirect configuration to use with the created rule.', arg_group='First Rule')
+
+    c.register_cli_argument('network application-gateway rule', 'redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
+
+for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
+    register_cli_argument('network application-gateway url-path-map rule', item, arg_group=None)
 
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))

@@ -374,6 +374,10 @@ def process_ag_rule_create_namespace(namespace):  # pylint: disable=unused-argum
         namespace.url_path_map = _generate_ag_subproperty_id(
             namespace, 'urlPathMaps', namespace.url_path_map)
 
+    if namespace.redirect_config and not is_valid_resource_id(namespace.redirect_config):
+        namespace.redirect_config = _generate_ag_subproperty_id(
+            namespace, 'redirectConfigurations', namespace.redirect_config)
+
 
 def process_ag_ssl_policy_set_namespace(namespace):
     if namespace.disabled_ssl_protocols and namespace.clear:
@@ -390,7 +394,13 @@ def process_ag_url_path_map_create_namespace(namespace):  # pylint: disable=unus
         namespace.default_http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
 
-    process_ag_url_path_map_rule_create_namespace(namespace)
+    if namespace.default_redirect_config and not is_valid_resource_id(
+            namespace.default_redirect_config):
+        namespace.default_redirect_config = _generate_ag_subproperty_id(
+            namespace, 'redirectConfigurations', namespace.default_redirect_config)
+
+    if hasattr(namespace, 'rule_name'):
+        process_ag_url_path_map_rule_create_namespace(namespace)
 
 
 def process_ag_url_path_map_rule_create_namespace(namespace):  # pylint: disable=unused-argument
@@ -401,6 +411,11 @@ def process_ag_url_path_map_rule_create_namespace(namespace):  # pylint: disable
     if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
         namespace.http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.http_settings)
+
+    if namespace.redirect_config and not is_valid_resource_id(
+            namespace.redirect_config):
+        namespace.redirect_config = _generate_ag_subproperty_id(
+            namespace, 'redirectConfigurations', namespace.redirect_config)
 
 
 def process_ag_create_namespace(namespace):

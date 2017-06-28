@@ -74,7 +74,7 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
 
 
 def _get_default_value(balancer, property_name, option_name):
-    values = [x.name for x in getattr(balancer, property_name)]
+    values = [x.id for x in getattr(balancer, property_name)]
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
@@ -369,10 +369,11 @@ def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, front
     return parent
 
 
-def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
-                                               item_name, port, probe=None, protocol='http',
-                                               cookie_based_affinity=None, timeout=None,
-                                               no_wait=False, connection_draining_timeout=0):
+def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name, item_name, port,
+                                               probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
+                                               no_wait=False, connection_draining_timeout=0,
+                                               host_name=None, host_name_from_backend_pool=None,
+                                               affinity_cookie_name=None, enable_probe=None, path=None):
     ApplicationGatewayBackendHttpSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendHttpSettings',
@@ -392,14 +393,22 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
         new_settings.connection_draining = \
             ApplicationGatewayConnectionDraining(
                 bool(connection_draining_timeout), connection_draining_timeout or 1)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_settings.host_name = host_name
+        new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
+        new_settings.affinity_cookie_name = affinity_cookie_name
+        new_settings.probe_enabled = enable_probe
+        new_settings.path = path
     _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None,  # pylint: disable=unused-argument
-                                               protocol=None, cookie_based_affinity=None,
-                                               timeout=None, connection_draining_timeout=None):
+def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None, protocol=None,
+                                               cookie_based_affinity=None, timeout=None,
+                                               connection_draining_timeout=None,
+                                               host_name=None, host_name_from_backend_pool=None,
+                                               affinity_cookie_name=None, enable_probe=None, path=None):
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -413,6 +422,16 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
     if connection_draining_timeout is not None:
         instance.connection_draining.enabled = bool(connection_draining_timeout)
         instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout
+    if host_name is not None:
+        instance.host_name = host_name
+    if host_name_from_backend_pool is not None:
+        instance.pick_host_name_from_backend_address = host_name_from_backend_pool
+    if affinity_cookie_name is not None:
+        instance.affinity_cookie_name = affinity_cookie_name
+    if enable_probe is not None:
+        instance.probe_enabled = enable_probe
+    if path is not None:
+        instance.path = path
     return parent
 
 
@@ -459,7 +478,8 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
 
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
-                    path, interval=30, timeout=120, threshold=8, no_wait=False):
+                    path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
+                    min_servers=None, match_body=None, match_status_codes=None):
     ApplicationGatewayProbe = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayProbe',
@@ -474,13 +494,21 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
         interval=interval,
         timeout=timeout,
         unhealthy_threshold=threshold)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        ProbeMatchCriteria = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayProbeHealthResponseMatch', mod='models')
+        new_probe.pick_host_name_from_backend_http_settings = host_name_from_http_settings
+        new_probe.min_servers = min_servers
+        new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
+
     _upsert(ag, 'probes', new_probe, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
 def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=None,  # pylint: disable=unused-argument
-                    interval=None, timeout=None, threshold=None):
+                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
+                    min_servers=None, match_body=None, match_status_codes=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -493,11 +521,23 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
         instance.timeout = timeout
     if threshold is not None:
         instance.unhealthy_threshold = threshold
+    if host_name_from_http_settings is not None:
+        instance.pick_host_name_from_backend_http_settings = host_name_from_http_settings
+    if min_servers is not None:
+        instance.min_servers = min_servers
+    if match_body is not None or match_status_codes is not None:
+        ProbeMatchCriteria = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayProbeHealthResponseMatch', mod='models')   
+        instance.match = instance.match or ProbeMatchCriteria()
+        if match_body is not None:
+            instance.match.body = match_body
+        if match_status_codes is not None:
+            instance.match.status_codes = match_status_codes
     return parent
 
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
-                                   address_pool=None, http_settings=None, http_listener=None,
+                                   address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
                                    url_path_map=None, rule_type='Basic', no_wait=False):
     ApplicationGatewayRequestRoutingRule = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -505,9 +545,9 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
         mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    if not address_pool:
+    if not address_pool and not redirect_config:
         address_pool = _get_default_value(ag, 'backend_address_pools', '--address-pool')
-    if not http_settings:
+    if not http_settings and not redirect_config:
         http_settings = _get_default_value(ag, 'backend_http_settings_collection',
                                            '--http-settings')
     if not http_listener:
@@ -515,22 +555,26 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
-        backend_address_pool=SubResource(address_pool),
-        backend_http_settings=SubResource(http_settings),
+        backend_address_pool=SubResource(address_pool) if address_pool else None,
+        backend_http_settings=SubResource(http_settings) if http_settings else None,
         http_listener=SubResource(http_listener),
         url_path_map=SubResource(url_path_map) if url_path_map else None)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else None
     _upsert(ag, 'request_routing_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
 def update_ag_request_routing_rule(instance, parent, item_name, address_pool=None,  # pylint: disable=unused-argument
-                                   http_settings=None, http_listener=None, url_path_map=None,
+                                   http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
                                    rule_type=None):
     if address_pool is not None:
         instance.backend_address_pool = SubResource(address_pool)
     if http_settings is not None:
         instance.backend_http_settings = SubResource(http_settings)
+    if redirect_config is not None:
+        instance.redirect_configuration = SubResource(redirect_config)
     if http_listener is not None:
         instance.http_listener = SubResource(http_listener)
     if url_path_map is not None:
@@ -596,42 +640,69 @@ def show_ag_ssl_policy(resource_group_name, application_gateway_name):
         resource_group_name, application_gateway_name).ssl_policy
 
 
-def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
-                           paths, address_pool, http_settings, rule_name='default',
-                           default_address_pool=None, default_http_settings=None, no_wait=False):  # pylint: disable=unused-argument
+def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name, paths,
+                           address_pool=None, http_settings=None, redirect_config=None,
+                           default_address_pool=None, default_http_settings=None, default_redirect_config=None,
+                           no_wait=False, rule_name='default'):
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    new_rule = ApplicationGatewayPathRule(
+            name=rule_name,
+            backend_address_pool=SubResource(address_pool) if address_pool else None,
+            backend_http_settings=SubResource(http_settings) if http_settings else None,
+            paths=paths
+        )
     new_map = ApplicationGatewayUrlPathMap(
         name=item_name,
-        default_backend_address_pool=SubResource(default_address_pool) if default_address_pool else SubResource(
-            address_pool),
-        default_backend_http_settings=SubResource(default_http_settings) if default_http_settings else SubResource(
-            http_settings),
-        path_rules=[ApplicationGatewayPathRule(
-            name=rule_name,
-            backend_address_pool=SubResource(address_pool),
-            backend_http_settings=SubResource(http_settings),
-            paths=paths
-        )])
+        default_backend_address_pool=SubResource(default_address_pool) if default_address_pool else None,
+        default_backend_http_settings=SubResource(default_http_settings) if default_http_settings else None,
+        path_rules=[])
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else None
+        new_map.default_redirect_configuration = \
+            SubResource(default_redirect_config) if default_redirect_config else None
+
+    # pull defaults from the rule specific properties if the default-* option isn't specified
+    if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
+        new_map.default_backend_address_pool = new_rule.backend_address_pool
+
+    if new_rule.backend_http_settings and not new_map.default_backend_http_settings:
+        new_map.default_backend_http_settings = new_rule.backend_http_settings
+
+    if new_rule.redirect_configuration and not new_map.default_redirect_configuration:
+        new_map.default_redirect_configuration = new_rule.redirect_configuration
+
+    new_map.path_rules.append(new_rule)
     _upsert(ag, 'url_path_maps', new_map, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None,  # pylint: disable=unused-argument
-                           default_http_settings=None, no_wait=False):  # pylint: disable=unused-argument
-    if default_address_pool is not None:
+def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None,
+                           default_http_settings=None, default_redirect_config=None, no_wait=False):
+    if default_address_pool == '':
+        instance.default_backend_address_pool = None
+    elif default_address_pool:
         instance.default_backend_address_pool = SubResource(default_address_pool)
-    if default_http_settings is not None:
+
+    if default_http_settings == '':
+        instance.default_backend_http_settings = None
+    elif default_http_settings:
         instance.default_backend_http_settings = SubResource(default_http_settings)
+
+    if default_redirect_config == '':
+        instance.default_redirect_configuration = None
+    elif default_redirect_config:
+        instance.default_redirect_configuration = SubResource(default_redirect_config)
     return parent
 
 
 def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, paths, address_pool=None, http_settings=None,
+                                item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
                                 no_wait=False):
     ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -641,13 +712,19 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
+    default_backend_pool = SubResource(url_map.default_backend_address_pool.id) \
+        if url_map.default_backend_address_pool else None
+    default_http_settings = SubResource(url_map.default_backend_http_settings.id) \
+        if url_map.default_backend_http_settings else None
     new_rule = ApplicationGatewayPathRule(
         name=item_name,
         paths=paths,
-        backend_address_pool=SubResource(address_pool) if address_pool else SubResource(
-            url_map.default_backend_address_pool.id),
-        backend_http_settings=SubResource(http_settings) if http_settings else SubResource(
-            url_map.default_backend_http_settings.id))
+        backend_address_pool=SubResource(address_pool) if address_pool else default_backend_pool,
+        backend_http_settings=SubResource(http_settings) if http_settings else default_http_settings)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        default_redirect = SubResource(url_map.default_redirect_configuration.id) \
+            if url_map.default_redirect_configuration else None
+        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else default_redirect
     _upsert(url_map, 'path_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)

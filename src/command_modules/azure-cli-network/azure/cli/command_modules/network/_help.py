@@ -425,12 +425,28 @@ helps['network application-gateway ssl-policy'] = """
 helps['network application-gateway ssl-policy set'] = """
     type: command
     short-summary: Update or clear SSL policy settings.
+    parameters:
+        - name: --cipher-suites
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
+        - name: --disabled-ssl-protocols
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
+        - name: --min-protocol-version
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
 """
 
 helps['network application-gateway ssl-policy show'] = """
     type: command
     short-summary: Show the SSL policy settings.
 """
+
+helps['network application-gateway ssl-policy predefined'] = """
+    type: group
+    short-summary: Information on predefined SSL policies.
+"""
+
 # endregion
 
 # region Application Gateway URL path map
