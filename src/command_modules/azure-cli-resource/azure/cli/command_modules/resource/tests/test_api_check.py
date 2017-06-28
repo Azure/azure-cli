@@ -50,14 +50,14 @@ class TestApiCheck(unittest.TestCase):
         _validate_resource_inputs('a', 'b', 'c', 'd')
 
     def test_resolve_api_provider_backup(self):
-        """ Verifies provider is used as backup if api-version not specified. """
+        # Verifies provider is used as backup if api-version not specified.
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(resource_type='Mock/test', resource_name='vnet1',
                                    resource_group_name='rg', rcf=rcf)
         self.assertEqual(res_utils.api_version, "2016-01-01")
 
     def test_resolve_api_provider_with_parent_backup(self):
-        """ Verifies provider (with parent) is used as backup if api-version not specified. """
+        # Verifies provider (with parent) is used as backup if api-version not specified.
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(parent_resource_path='foo/testfoo123', resource_group_name='rg',
                                    resource_provider_namespace='Mock', resource_type='test',
@@ -66,9 +66,7 @@ class TestApiCheck(unittest.TestCase):
         self.assertEqual(res_utils.api_version, "1999-01-01")
 
     def test_resolve_api_all_previews(self):
-        """
-        Verifies most recent preview version returned only if there are no non-preview versions.
-        """
+        # Verifies most recent preview version returned only if there are no non-preview versions.
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(resource_type='Mock/preview', resource_name='vnet1',
                                    resource_group_name='rg', rcf=rcf)

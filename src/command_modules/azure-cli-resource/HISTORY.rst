@@ -4,9 +4,14 @@ Release History
 
 ===============
 
+unreleased
+++++++++++++++++++
+* `group deployment create`: Improve prompting for missing parameters. Improve parsing of `--parameters KEY=VALUE` syntax.
+
 2.0.9 (2017-06-21)
 ++++++++++++++++++
 * `group deployment create`: Fixes issue where some parameter files were no longer recognized using @<file> syntax.
+* `resource\managedapp` commands: Support `--ids` argument.
 
 
 2.0.8 (2017-06-13)

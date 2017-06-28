@@ -155,7 +155,7 @@ class CompletionTest(unittest.TestCase):
         self.completer = AzCompleter(commands, global_params=False, outstream=six.StringIO())
 
     def test_command_completion(self):
-        """ tests general command completion """
+        # tests general command completion
         self.init1()
 
         doc = Document(u'')
@@ -182,7 +182,7 @@ class CompletionTest(unittest.TestCase):
             six.next(gen)
 
     def test_param_completion(self):
-        """ tests param completion """
+        # tests param completion
         self.init2()
         doc = Document(u'create -')
         gen = self.completer.get_completions(doc, None)
@@ -195,7 +195,7 @@ class CompletionTest(unittest.TestCase):
             six.next(gen)
 
     def test_param_double(self):
-        """ tests not generating doubles for parameters """
+        # tests not generating doubles for parameters
         self.init3()
         doc = Document(u'create -f --')
         gen = self.completer.get_completions(doc, None)

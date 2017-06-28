@@ -6,6 +6,7 @@
 # pylint: disable=too-many-lines
 
 from __future__ import print_function
+from collections import OrderedDict
 import json
 import os
 import re
@@ -26,7 +27,7 @@ from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
 from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
+from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -126,32 +127,22 @@ def create_appliance(resource_group_name,
     return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
 
 
-def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=None):
+def show_appliance(resource_group_name=None, appliance_name=None):
     """ Gets a managed application.
     :param str resource_group_name:the resource group name
     :param str appliance_name:the managed application name
     """
     racf = _resource_managedapps_client_factory()
-    if managedapp_id:
-        appliance = racf.appliances.get_by_id(managedapp_id)
-    else:
-        appliance = racf.appliances.get(resource_group_name, appliance_name)
-    return appliance
+    return racf.appliances.get(resource_group_name, appliance_name)
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None,
-                             managedapp_definition_id=None):
+def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None):
     """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
     :param str appliance_definition_name:the managed application definition name
     """
     racf = _resource_managedapps_client_factory()
-    if managedapp_definition_id:
-        appliancedef = racf.appliance_definitions.get_by_id(managedapp_definition_id)
-    else:
-        appliancedef = racf.appliance_definitions.get(resource_group_name,
-                                                      appliance_definition_name)
-    return appliancedef
+    return racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
 
 
 def create_appliancedefinition(resource_group_name,
@@ -239,6 +230,59 @@ def validate_arm_template(resource_group_name, template_file=None, template_uri=
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
 
+def _process_parameters(template_param_defs, parameter_lists):
+
+    def _try_parse_json_object(value):
+        try:
+            parsed = shell_safe_json_parse(value)
+            return parsed.get('parameters', parsed)
+        except CLIError:
+            return None
+
+    def _try_load_file_object(value):
+        if os.path.isfile(value):
+            parsed = get_file_json(value, throw_on_empty=False)
+            return parsed.get('parameters', parsed)
+        return None
+
+    def _try_parse_key_value_object(template_param_defs, parameters, value):
+        try:
+            key, value = value.split('=', 1)
+        except ValueError:
+            return False
+
+        param = template_param_defs.get(key, None)
+        if param is None:
+            raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
+                           .format(key, ', '.join(sorted(template_param_defs.keys()))))
+
+        param_type = param.get('type', None)
+        if param_type in ['object', 'array']:
+            parameters[key] = {'value': shell_safe_json_parse(value)}
+        elif param_type in ['string', 'securestring']:
+            parameters[key] = {'value': value}
+        elif param_type == 'bool':
+            parameters[key] = {'value': value.lower() == 'true'}
+        elif param_type == 'int':
+            parameters[key] = {'value': int(value)}
+        else:
+            logger.warning("Unrecognized type '%s' for parameter '%s'. Interpretting as string.", param_type, key)
+            parameters[key] = {'value': value}
+
+        return True
+
+    parameters = {}
+    for params in parameter_lists or []:
+        for item in params:
+            param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+            if param_obj:
+                parameters.update(param_obj)
+            elif not _try_parse_key_value_object(template_param_defs, parameters, item):
+                raise CLIError('Unable to parse parameter: {}'.format(item))
+
+    return parameters
+
+
 def _find_missing_parameters(parameters, template):
     if template is None:
         return {}
@@ -246,10 +290,10 @@ def _find_missing_parameters(parameters, template):
     if template_parameters is None:
         return {}
 
-    missing = {}
+    missing = OrderedDict()
     for parameter_name in template_parameters:
         parameter = template_parameters[parameter_name]
-        if parameter.get('defaultValue', None) is not None:
+        if 'defaultValue' in parameter:
             continue
         if parameters is not None and parameters.get(parameter_name, None) is not None:
             continue
@@ -257,10 +301,13 @@ def _find_missing_parameters(parameters, template):
     return missing
 
 
-def _prompt_for_parameters(missing_parameters):
-    result = {}
-    for param_name in missing_parameters:
-        prompt_str = 'Please provide a value for \'{}\' (? for help): '.format(param_name)
+def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: disable=too-many-statements
+
+    prompt_list = missing_parameters.keys() if isinstance(missing_parameters, OrderedDict) \
+        else sorted(missing_parameters)
+    result = OrderedDict()
+    no_tty = False
+    for param_name in prompt_list:
         param = missing_parameters[param_name]
         param_type = param.get('type', 'string')
         description = 'Missing description'
@@ -269,27 +316,66 @@ def _prompt_for_parameters(missing_parameters):
             description = metadata.get('description', description)
         allowed_values = param.get('allowedValues', None)
 
+        prompt_str = "Please provide {} value for '{}' (? for help): ".format(param_type, param_name)
         while True:
             if allowed_values is not None:
-                ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
-                result[param_name] = allowed_values[ix]
+                try:
+                    ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
+                    result[param_name] = allowed_values[ix]
+                except NoTTYException:
+                    result[param_name] = None
+                    no_tty = True
                 break
             elif param_type == 'securestring':
-                value = prompt_pass(prompt_str, help_string=description)
+                try:
+                    value = prompt_pass(prompt_str, help_string=description)
+                except NoTTYException:
+                    value = None
+                    no_tty = True
                 result[param_name] = value
+                break
             elif param_type == 'int':
-                int_value = prompt_int(prompt_str, help_string=description)
-                result[param_name] = int_value
+                try:
+                    int_value = prompt_int(prompt_str, help_string=description)
+                    result[param_name] = int_value
+                except NoTTYException:
+                    result[param_name] = 0
+                    no_tty = True
                 break
             elif param_type == 'bool':
-                value = prompt_t_f(prompt_str, help_string=description)
+                try:
+                    value = prompt_t_f(prompt_str, help_string=description)
+                    result[param_name] = value
+                except NoTTYException:
+                    result[param_name] = False
+                    no_tty = True
+                break
+            elif param_type in ['object', 'array']:
+                try:
+                    value = prompt(prompt_str, help_string=description)
+                except NoTTYException:
+                    value = ''
+                    no_tty = True
+
+                if value == '':
+                    value = {} if param_type == 'object' else []
+                else:
+                    try:
+                        value = shell_safe_json_parse(value)
+                    except Exception as ex:  # pylint: disable=broad-except
+                        logger.error(ex)
+                        continue
                 result[param_name] = value
                 break
             else:
-                value = prompt(prompt_str, help_string=description)
-                result[param_name] = value
-            if value:
+                try:
+                    result[param_name] = prompt(prompt_str, help_string=description)
+                except NoTTYException:
+                    result[param_name] = None
+                    no_tty = True
                 break
+    if no_tty and fail_on_no_tty:
+        raise NoTTYException
     return result
 
 
@@ -324,18 +410,22 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
                                                  'DeploymentProperties',
                                                  'TemplateLink',
                                                  mod='models')
-    parameters = parameters or {}
     template = None
     template_link = None
     template_obj = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'))
+        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
     else:
-        template = get_file_json(template_file)
+        template = get_file_json(template_file, preserve_order=True)
         template_obj = template
 
+    template_param_defs = template_obj.get('parameters', {})
+    parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+
+    template = json.loads(json.dumps(template))
+    parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
@@ -364,10 +454,10 @@ def create_resource(properties,
 
 def show_resource(resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                  resource_name=None, resource_id=None, api_version=None):
+                  resource_name=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
+                         None, api_version)
     return res.get_resource()
 
 
@@ -767,7 +857,7 @@ def _validate_lock_params_match_lock(
             raise CLIError(
                 'Unexpected --resource-group for lock {}, expected {}'.format(
                     name, _resource_group))
-        if _resource_namespace is None:
+        if _resource_namespace is None or _resource_namespace == 'Microsoft.Authorization':
             return
         if resource_provider_namespace != _resource_namespace:
             raise CLIError(
@@ -791,15 +881,33 @@ def _validate_lock_params_match_lock(
                 name, _resource_name))
 
 
-def get_lock(name, resource_group_name=None):
+def get_lock(name, resource_group_name=None, resource_provider_namespace=None,
+             parent_resource_path=None, resource_type=None, resource_name=None):
     """
-    :param name: Name of the lock.
+    :param name: The name of the lock.
     :type name: str
     """
     lock_client = _resource_lock_client_factory()
+
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
+
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
+    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+                                     resource_provider_namespace, parent_resource_path,
+                                     resource_type, resource_name)
+
     if resource_group_name is None:
         return lock_client.management_locks.get_at_subscription_level(name)
-    return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+    if resource_name is None:
+        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+    return lock_client.management_locks.get_at_resource_level(
+        resource_group_name, resource_provider_namespace,
+        parent_resource_path or '', resource_type, resource_name, name)
 
 
 def delete_lock(name,
