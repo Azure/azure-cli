@@ -66,6 +66,12 @@ def _generate_lb_id_list_from_names_or_ids(namespace, prop, child_type):
     setattr(namespace, prop, result)
 
 
+def validate_add_vm_resources(namespace):
+    resource_type = namespace.resource_type
+    if resource_type in ['virtualMachineScaleSets', 'availabilitySets'] and len(namespace.resource) != 1:
+        raise CLIError("When adding a resource of type '{}' specify only a single resource".format(resource_type))
+
+
 def validate_address_pool_id_list(namespace):
     _generate_lb_id_list_from_names_or_ids(
         namespace, 'load_balancer_backend_address_pool_ids', 'backendAddressPools')
@@ -428,10 +434,9 @@ def process_auth_create_namespace(namespace):
 def process_lb_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
 
-    if namespace.subnet and namespace.public_ip_address:
-        raise ValueError(
-            'incorrect usage: --subnet NAME --vnet-name NAME | '
-            '--subnet ID | --public-ip NAME_OR_ID')
+    usage_error = CLIError('incorrect usage: --subnet NAME --vnet-name NAME | --subnet ID | --public-ip NAME_OR_ID')
+    if bool(namespace.subnet) == bool(namespace.public_ip_address):
+        raise usage_error
 
     if namespace.subnet:
         # validation for an internal load balancer

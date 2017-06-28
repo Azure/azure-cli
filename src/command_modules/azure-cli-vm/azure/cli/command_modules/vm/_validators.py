@@ -792,8 +792,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         if namespace.application_gateway:
             client = get_network_client().application_gateways
             try:
-                client.get(namespace.resource_group_name, namespace.application_gateway)
+                ag = client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
+                if not namespace.backend_pool_name and len(ag.backend_address_pools) == 1:
+                    namespace.backend_pool_name = ag.backend_address_pools[0].name
             except CloudError:
                 namespace.app_gateway_type = 'new'
         elif namespace.application_gateway == '':

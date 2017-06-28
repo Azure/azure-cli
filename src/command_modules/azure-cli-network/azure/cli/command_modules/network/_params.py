@@ -36,6 +36,7 @@ from azure.cli.command_modules.network._validators import \
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type, validate_route_filter,
+     validate_add_vm_resources,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
@@ -239,8 +240,10 @@ register_cli_argument('network application-gateway http-listener create', 'front
 register_cli_argument('network application-gateway rule create', 'address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
 register_cli_argument('network application-gateway rule create', 'http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
 register_cli_argument('network application-gateway rule create', 'http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
+
 register_cli_argument('network lb rule create', 'backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
 register_cli_argument('network lb rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
 register_cli_argument('network lb inbound-nat-rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
 register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
@@ -529,6 +532,8 @@ register_cli_argument('network lb create', 'vnet_name', virtual_network_name_typ
 register_cli_argument('network lb create', 'vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
 register_cli_argument('network lb create', 'vnet_type', ignore_type)
 
+register_cli_argument('network lb inbound-nat-rule create', 'backend_port', help='Port number. Defaults to the frontend port.')
+
 for item in ['create', 'update']:
     register_cli_argument('network lb frontend-ip {}'.format(item), 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=process_lb_frontend_ip_namespace)
     register_cli_argument('network lb frontend-ip {}'.format(item), 'subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
@@ -543,6 +548,9 @@ register_cli_argument('network lb probe', 'protocol', help='The protocol to prob
 register_cli_argument('network lb probe', 'threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
 
 register_cli_argument('network lb rule', 'load_distribution', help='Affinity rule settings.', **enum_choice_list(LoadDistribution))
+register_cli_argument('network lb rule', 'probe_name', help='The health probe used to determine which VMs can receive load balanced traffic.')
+
+register_cli_argument('network lb rule create', 'backend_port', help='Port number. Defaults to the frontend port.')
 
 register_cli_argument('network nsg create', 'name', name_arg_type)
 
@@ -750,3 +758,11 @@ register_cli_argument('network watcher show-next-hop', 'dest_ip', help='Destinat
 register_cli_argument('network watcher troubleshooting', 'resource_type', options_list=['--resource-type', '-t'], id_part='resource_type', **enum_choice_list(['vnetGateway', 'vpnConnection']))
 register_cli_argument('network watcher troubleshooting start', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_start_namespace)
 register_cli_argument('network watcher troubleshooting show', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_show_namespace)
+
+# Add VM parameter registrations
+add_vm_types = ['virtualMachines', 'availabilitySets']
+for item in ['lb', 'application-gateway']:
+    register_cli_argument('network {} address-pool add-vm'.format(item), 'resource', nargs='+', validator=validate_add_vm_resources)
+    register_cli_argument('network {} address-pool add-vm'.format(item), 'resource_type', **enum_choice_list(add_vm_types))
+    register_cli_argument('network {} address-pool remove-vm'.format(item), 'resource', nargs='+', validator=validate_add_vm_resources)
+    register_cli_argument('network {} address-pool remove-vm'.format(item), 'resource_type', **enum_choice_list(add_vm_types))

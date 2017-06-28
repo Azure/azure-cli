@@ -795,16 +795,15 @@ helps['network lb create'] = """
     type: command
     short-summary: Create a load balancer.
     examples:
-        - name: Create a basic load balancer.
+        - name: Create an internet-facing load balancer, with an auto-created, dynamic public IP address.
           text: >
             az network lb create -g MyResourceGroup -n MyLb
-        - name: Create a load balancer on a specific virtual network and subnet.
+        - name: Create an internet-facing load balancer. The public IP address will be created if it doesn't exist.
           text: >
-            az network lb create
-            -g MyResourceGroup
-            -n MyLb
-            --vnet-name MyVnet
-            --subnet MySubnet
+            az network lb create -g MyResourceGroup -n MyLb --public-ip-address myPublicIP
+        - name: Create an internal load balancer. The virtual network and subnet will be created if they don't exist.
+          text: >
+            az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
 """
 
 helps['network lb delete'] = """
@@ -833,6 +832,25 @@ helps['network lb update'] = """
 helps['network lb address-pool'] = """
     type: group
     short-summary: Manage backend address pools for a load balancer.
+"""
+
+helps['network lb address-pool add-vm'] = """
+    type: command
+    short-summary: Add virtual machines to a backend address pool.
+    long-summary: Under the hood, this is accomplished by associating the IP configuration of a VM's primary NIC with the
+        backend pool.
+    parameters:
+        - name: --resource
+          short-summary: Names or IDs or Virtual Machines to add to the backend pool.
+        - name: --name -n
+          short-summary: Name of the backend address pool. Can be omitted if only a single address
+            pool exists.
+        - name: --ip-config-name
+          short-summary: Name of the IP configuration on the VM's primary NIC to add to the backend pool. Can be omitted
+            if only a single address pool exists.
+    examples:
+        - name: Add a VM to a load balancer's default backend address pool.
+          text: az network lb address-pool add-vm -g myRG --lb-name myLB --resource myVM
 """
 
 helps['network lb address-pool create'] = """
