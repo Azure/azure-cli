@@ -294,6 +294,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         rg = resource_group
         sn = server
         oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
         tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
         user = 'DSEngAll'
         user2 = 'TestUser'
@@ -309,8 +310,9 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('[0].login', user)])
 
         self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
-                 .format(sn, rg, user2, oid),
+                 .format(sn, rg, user2, oid2),
                  checks=[JMESPathCheck('login', user2),
+                         JMESPathCheck('sid', oid2),
                          JMESPathCheck('tenantId', tid)])
 
         self.cmd('sql server ad-admin delete -s {} -g {}'

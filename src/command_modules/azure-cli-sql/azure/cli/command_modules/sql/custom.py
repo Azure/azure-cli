@@ -448,42 +448,6 @@ def db_update(
 
 
 #####
-#           sql server ad-admin
-#####
-
-
-def server_ad_admin_set(
-        client,
-        resource_group_name,
-        server_name,
-        **kwargs):
-
-    profile = Profile()
-    sub = profile.get_subscription()
-    kwargs['tenant_id'] = sub['tenantId']
-
-    return client.create_or_update(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        properties=kwargs)
-
-
-# Update server AD admin. Custom update function to apply parameters to instance.
-def server_ad_admin_update(
-        instance,
-        login=None,
-        sid=None,
-        tenant_id=None):
-
-    # Apply params to instance
-    instance.login = login or instance.login
-    instance.sid = sid or instance.sid
-    instance.tenant_id = tenant_id or instance.tenant_id
-
-    return instance
-
-
-#####
 #           sql db audit-policy & threat-policy
 #####
 
@@ -857,6 +821,42 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+
+    return instance
+
+
+#####
+#           sql server ad-admin
+#####
+
+
+def server_ad_admin_set(
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    kwargs['tenant_id'] = sub['tenantId']
+
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        properties=kwargs)
+
+
+# Update server AD admin. Custom update function to apply parameters to instance.
+def server_ad_admin_update(
+        instance,
+        login=None,
+        sid=None,
+        tenant_id=None):
+
+    # Apply params to instance
+    instance.login = login or instance.login
+    instance.sid = sid or instance.sid
+    instance.tenant_id = tenant_id or instance.tenant_id
 
     return instance
 

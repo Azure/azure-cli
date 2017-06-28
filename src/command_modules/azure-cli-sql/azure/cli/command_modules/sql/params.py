@@ -505,13 +505,15 @@ with ParametersContext(command='sql elastic-pool') as c:
                help='The name of the elastic pool.')
     c.argument('server_name', arg_type=server_param_type)
 
+    # --db-dtu-max and --db-dtu-min were the original param names, which is consistent with the
+    # underlying REST API.
+    # --db-max-dtu and --db-min-dtu are aliases which are consistent with the `sql elastic-pool
+    # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
+    # consistent with other az sql commands, but the original can't be removed due to
+    # compatibility.
+    c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
+    c.register_alias('database_dtu_min', ('--db-dtu-min', '--db-min-dtu'))
 
-with ParametersContext(command='sql elastic-pool') as c:
-    c.argument('server_name', arg_type=server_param_type)
-    c.register_alias('database_dtu_max', ('--db-dtu-max',))
-    c.register_alias('database_dtu_min', ('--db-dtu-min',))
-
-# --storage was the original param name, which is consistent with the underlying REST API.
     # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
     # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
     c.argument('storage_mb', options_list=('--storage', '--max-size',),
