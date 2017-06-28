@@ -6,6 +6,7 @@
 import threading
 
 from azclishell._dump_commands import DUMP_TABLE
+from azclishell.az_completer import initialize_command_table_attributes
 
 
 class ExecuteThread(threading.Thread):
@@ -52,3 +53,4 @@ class LoadCommandTableThread(threading.Thread):
         except KeyboardInterrupt:
             pass
         self.func(self.arg)
+        initialize_command_table_attributes(self.arg.completer)

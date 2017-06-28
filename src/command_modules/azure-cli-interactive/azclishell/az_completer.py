@@ -21,6 +21,13 @@ SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 BLACKLISTED_COMPLETIONS = ['interactive']
 
 
+def initialize_command_table_attributes(completer):
+    completer.cmdtab = DUMP_TABLE.command_table
+    if completer.cmdtab is not None:
+        completer.parser.load_command_table(completer.cmdtab)
+        completer.argsfinder = ArgsFinder(completer.parser)
+
+
 def error_pass(_, message):  # pylint: disable=unused-argument
     return
 
@@ -123,13 +130,6 @@ class AzCompleter(Completer):
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
         self.cmdtab = None
-        self.initialize_command_table_attributes()
-
-    def initialize_command_table_attributes(self):
-        self.cmdtab = DUMP_TABLE.command_table
-        if self.cmdtab is not None:
-            self.parser.load_command_table(self.cmdtab)
-            self.argsfinder = ArgsFinder(self.parser)
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
@@ -156,8 +156,6 @@ class AzCompleter(Completer):
         if self.cmdtab is not None:
             for val in sort_completions(self.gen_dynamic_completions(text)):
                 yield val
-        else:
-            self.initialize_command_table_attributes()
 
         for param in sort_completions(self.gen_global_param_completions(text)):
             yield param
