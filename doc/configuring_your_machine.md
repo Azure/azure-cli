@@ -1,6 +1,6 @@
 ﻿Setting up your development environment
 ========================================
-The Azure Python CLI projects sources are located on GitHub (https://github.com/Azure/azure-cli/). In order to contribute to the project, you are expected to: 
+The Azure Python CLI projects sources are located on GitHub (https://github.com/Azure/azure-cli/). In order to contribute to the project, you are expected to:
 -    Have a GitHub account. For Microsoft contributors, follow the guidelines on https://opensourcehub.microsoft.com/ to create, configure and link your account
 -    Fork the  https://github.com/Azure/azure-cli/ repository into your private GitHub account
 -    Create pull requests against the https://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
@@ -46,9 +46,9 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 7.  Setup tab completion (OSX/Ubuntu ONLY).
 
   Open Bash or zsh window and run:
-  
+
   ```Shell
-  source az.completion.sh
+  source <clone root>/src/azure-cli/az.completion.sh
   ```
 
 ## Configuring your IDE
@@ -62,9 +62,9 @@ Experimental steps – still haven’t been able to get virtual environments to 
 
 1.    Install VS Code
 2.    Install (one of) the python extension(s) (https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
-Debugging should now work (including stepping and setting breakpoints). 
+Debugging should now work (including stepping and setting breakpoints).
 
-The repo has a launch.json file that will launch the version of Python that is first on your path. 
+The repo has a launch.json file that will launch the version of Python that is first on your path.
 
 ## Running CLI
 #### Command line
@@ -105,7 +105,7 @@ The repo has a launch.json file that will launch the version of Python that is f
   ```BatchFile
   python -m unittest discover -s src/azure-cli/azure/cli/tests
   ```
- 
+
   To test the command modules:
   ```BatchFile
   python scripts/command_modules/test.py
@@ -125,7 +125,7 @@ The repo has a launch.json file that will launch the version of Python that is f
 
 #### VS Code
   Under construction...
-  
+
 #### Visual Studio
   Select `Test > Windows > Test Explorer` and click `Run All` in the Test Explorer pane.
 

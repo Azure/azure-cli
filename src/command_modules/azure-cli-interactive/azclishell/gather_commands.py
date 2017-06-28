@@ -13,10 +13,7 @@ from azclishell.util import get_window_dim
 
 CONFIGURATION = azclishell.configuration.CONFIGURATION
 
-ROWS, COLS = get_window_dim()
-
 TOLERANCE = 10
-LINE_MINIMUM = math.floor(int(COLS) / 2 - 15)
 
 GLOBAL_PARAM_DESCRIPTIONS = {
     '--output': 'Output format',
@@ -29,8 +26,16 @@ OUTPUT_OPTIONS = ['--output', '-o']
 GLOBAL_PARAM = list(GLOBAL_PARAM_DESCRIPTIONS.keys())
 
 
-def add_random_new_lines(long_phrase, line_min=LINE_MINIMUM, tolerance=TOLERANCE):
+def _get_window_columns():
+    _, columns = get_window_dim()
+    return columns
+
+
+def add_random_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
     """ not everything fits on the screen, based on the size, add newlines """
+    if line_min is None:
+        line_min = math.floor(int(_get_window_columns()) / 2 - 15)
+
     if long_phrase is None:
         return long_phrase
     line_min = int(line_min)
@@ -127,10 +132,11 @@ class GatherCommands(object):
 
             if 'examples' in data[command]:
                 examples = []
+                cols = _get_window_columns()
                 for example in data[command]['examples']:
                     examples.append([
-                        add_random_new_lines(example[0], line_min=int(COLS) - 2 * TOLERANCE),
-                        add_random_new_lines(example[1], line_min=int(COLS) - 2 * TOLERANCE)])
+                        add_random_new_lines(example[0], line_min=int(cols) - 2 * TOLERANCE),
+                        add_random_new_lines(example[1], line_min=int(cols) - 2 * TOLERANCE)])
                 self.command_example[command] = examples
 
             all_params = []
