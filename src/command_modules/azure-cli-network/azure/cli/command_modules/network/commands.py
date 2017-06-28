@@ -73,6 +73,7 @@ property_map = {
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
     property_map['redirect_configurations'] = 'redirect-config'
 
+
 def _make_singular(value):
     try:
         if value.endswith('ies'):

@@ -128,16 +128,31 @@ class NetworkAppGatewayPrivateIpScenarioTest(ScenarioTest):
         cert_pass = 'password'
         self.cmd('network application-gateway create -g {} -n ag3 --subnet subnet1 --private-ip-address {} --cert-file "{}" --cert-password {} --no-wait'.format(rg, private_ip, cert_path, cert_pass))
         self.cmd('network application-gateway wait -g {} -n ag3 --exists'.format(rg))
-        self.cmd('network application-gateway show -g {} -n ag3'.format(rg), checks=[JMESPathCheck('frontendIpConfigurations[0].privateIpAddress', private_ip), JMESPathCheck('frontendIpConfigurations[0].privateIpAllocationMethod', 'Static')])
+        self.cmd('network application-gateway show -g {} -n ag3'.format(rg), checks=[
+            JMESPathCheckV2('frontendIpConfigurations[0].privateIpAddress', private_ip),
+            JMESPathCheckV2('frontendIpConfigurations[0].privateIpAllocationMethod', 'Static')
+        ])
         cert_path = os.path.join(TEST_DIR, 'TestCert2.pfx')
         self.cmd('network application-gateway ssl-cert update -g {} --gateway-name ag3 -n ag3SslCert --cert-file "{}" --cert-password {}'.format(rg, cert_path, cert_pass))
         self.cmd('network application-gateway wait -g {} -n ag3 --updated'.format(rg))
 
-        # TODO: Update this for new SSL policy features
-        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 --disabled-ssl-protocols tlsv1_0 tlsv1_1 --no-wait'.format(rg))
+        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 --disabled-ssl-protocols TLSv1_0 TLSv1_1 --no-wait'.format(rg))
         self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=JMESPathCheck('disabledSslProtocols.length(@)', 2))
-        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 --clear --no-wait'.format(rg))
-        self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=NoneCheck())
+
+        cipher_suite = 'TLS_RSA_WITH_AES_128_CBC_SHA256'
+        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 --min-protocol-version TLSv1_0 --cipher-suites {} --no-wait'.format(rg, cipher_suite))
+        self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=[
+            JMESPathCheckV2('cipherSuites.length(@)', 1),
+            JMESPathCheckV2('minProtocolVersion', 'TLSv1_0'),
+            JMESPathCheckV2('policyType', 'Custom')
+        ])
+
+        policy_name = 'AppGwSslPolicy20150501'
+        self.cmd('network application-gateway ssl-policy set -g {} --gateway-name ag3 -n {} --no-wait'.format(rg, policy_name))
+        self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=[
+            JMESPathCheckV2('policyName', policy_name),
+            JMESPathCheckV2('policyType', 'Predefined')
+        ])
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, max_api='2017-03-01')
