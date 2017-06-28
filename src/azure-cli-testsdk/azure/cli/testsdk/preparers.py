@@ -69,7 +69,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
             #    parameter name to use in a cleaner fashion. Con: introduce dependencies on SDK from testsdk. Further
             #    complicates the architecture.
             # 2. Two API profile can't be compared except using equalisation operator.
-            if get_active_api_profile() == '2017-03-09-profile-preview':
+            if get_active_api_profile() == '2017-03-09-profile':
                 template = 'az storage account create -n {} -g {} -l {} --account-type {}'
             else:
                 template = 'az storage account create -n {} -g {} -l {} --sku {}'
