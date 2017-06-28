@@ -108,6 +108,6 @@ azure-cli-vm
 * Modify telemetry code to be compatible with the change to azure-cli-core.
 
 0.1.0b11 (2016-12-12)
-++++++++++++++++++++
++++++++++++++++++++++
 
 * Preview release.
