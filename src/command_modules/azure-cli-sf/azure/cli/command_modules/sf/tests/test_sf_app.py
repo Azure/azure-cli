@@ -50,6 +50,6 @@ class SfAppTests(unittest.TestCase):
         res = sf_c.parse_default_service_health_policy(None)
         self.assertIs(res, None)
 
-    def invalid_application_upload_path_raises_cli_error_test(self):
-        with self.assertRaises(CLIError):
+    def invalid_application_upload_path_raises_value_error_test(self):
+        with self.assertRaises(ValueError):
             sf_c.validate_app_path("derp3")
