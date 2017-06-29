@@ -158,7 +158,7 @@ def validate_app_path(app_path):
     if os.path.isdir(abspath):
         return abspath
     else:
-        raise CLIError("Invalid path to application directory: {0}".format(abspath))
+        raise ValueError("Invalid path to application directory: {0}".format(abspath))
 
 
 def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
