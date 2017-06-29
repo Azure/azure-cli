@@ -9,7 +9,7 @@ import os
 from prompt_toolkit.history import FileHistory
 
 from azclishell import __version__
-from azclishell._dump_commands import DUMP_TABLE
+from azclishell._dump_commands import FRESH_TABLE
 import azclishell.configuration
 from azclishell.gather_commands import GatherCommands
 from azclishell.app import Shell
@@ -43,7 +43,7 @@ def main(style=None):
         az_completer = AzCompleter(commands)
         cache_load = True
     except IOError:  # if there is no cache
-        DUMP_TABLE.dump_command_table()
+        FRESH_TABLE.dump_command_table()
         az_completer = AzCompleter(GatherCommands())
         cache_load = False
 

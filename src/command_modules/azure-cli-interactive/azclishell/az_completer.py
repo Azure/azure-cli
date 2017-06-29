@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from prompt_toolkit.completion import Completer, Completion
 
-from azclishell._dump_commands import DUMP_TABLE
+from azclishell._dump_commands import FRESH_TABLE
 import azclishell.configuration
 from azclishell.argfinder import ArgsFinder
 from azclishell.command_tree import in_tree
@@ -22,7 +22,7 @@ BLACKLISTED_COMPLETIONS = ['interactive']
 
 
 def initialize_command_table_attributes(completer):
-    completer.cmdtab = DUMP_TABLE.command_table
+    completer.cmdtab = FRESH_TABLE.command_table
     if completer.cmdtab is not None:
         completer.parser.load_command_table(completer.cmdtab)
         completer.argsfinder = ArgsFinder(completer.parser)
