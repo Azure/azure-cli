@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import azure.cli.command_modules.sf.custom as sf_c
-from azure.cli.core.util import CLIError
-
 
 class SfAppTests(unittest.TestCase):
 
