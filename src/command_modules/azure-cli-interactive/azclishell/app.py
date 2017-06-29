@@ -466,7 +466,8 @@ class Shell(object):
                         env_name = env_half[0]
                         env_val = env_half[2]
                         if '$' in env_val:
-                            regex
+                            values = re.search(r'.*$.*(:|)', env_val)
+
                         os.environ[env_name] = env_val
                         continue_flag = True
                 telemetry.track_ssg('outside', '')
