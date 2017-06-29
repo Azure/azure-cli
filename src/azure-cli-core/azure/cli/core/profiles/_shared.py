@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # TODO Move this to a package shared by CLI and SDK
+from enum import Enum
 from functools import total_ordering
 from importlib import import_module
-from enum import Enum
 
 
 class APIVersionException(Exception):
@@ -78,11 +78,11 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_STORAGE: '2015-06-15',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
-        ResourceType.MGMT_COMPUTE: '2015-06-15',
+        ResourceType.MGMT_COMPUTE: '2016-03-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-04-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2015-04-05'

@@ -2,11 +2,16 @@
 
 Release History
 ===============
+2.0.7 (2017-06-21)
+++++++++++++++++++
+* Add managed registries with Managed SKU.
+* Add webhooks for managed registries with acr webhook command module.
+* Add AAD authentication with acr login command.
+* Add delete command for docker repositories, manifests, and tags.
 
 2.0.6 (2017-06-13)
 ++++++++++++++++++
-* Remove useless line-too-long suppression
-* Move all existing recording files to latest folder
+* Minor fixes.
 
 2.0.5 (2017-05-30)
 ++++++++++++++++++

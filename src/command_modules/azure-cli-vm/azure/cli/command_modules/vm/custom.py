@@ -213,9 +213,9 @@ def list_vm_images(image_location=None, publisher_name=None, offer=None, sku=Non
                            "is supported.")
         all_images = load_images_thru_services(publisher_name, offer, sku, image_location)
     else:
+        all_images = load_images_from_aliases_doc(publisher_name, offer, sku)
         logger.warning(
             'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
-        all_images = load_images_from_aliases_doc(publisher_name, offer, sku)
 
     for i in all_images:
         i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
@@ -473,8 +473,7 @@ def list_images(resource_group_name=None):
     return client.images.list()
 
 
-def create_image(resource_group_name, name, os_type=None, location=None,  # pylint: disable=too-many-locals
-                 source=None, data_disk_sources=None,  # pylint: disable=unused-argument
+def create_image(resource_group_name, name, source, os_type=None, data_disk_sources=None, location=None,  # pylint: disable=too-many-locals,unused-argument
                  # below are generated internally from 'source' and 'data_disk_sources'
                  source_virtual_machine=None,
                  os_blob_uri=None, data_blob_uris=None,

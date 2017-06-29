@@ -3,14 +3,18 @@
 Release History
 ===============
 
-2.0.5 (unreleased)
+2.0.6 (unreleased)
+++++++++++++++++++
+* Support for registering cloud just with ARM resource manager endpoint
+
+2.0.5 (2017-06-21)
 ++++++++++++++++++
 * Provide an option for 'az cloud set' to select the profile while selecting current cloud
+* Expose 'endpoint_vm_image_alias_doc'
 
 2.0.4 (2017-06-13)
 ++++++++++++++++++
-* Remove useless line-too-long suppression
-* Eliminating too-many-arguments pylint disable rule (#3583)
+* Minor fixes.
 
 2.0.3 (2017-05-30)
 ++++++++++++++++++

@@ -7,13 +7,13 @@ Unreleased
 ++++++++++
 * Fixes an issue with large files in applications being truncated on upload (#3666)
 
+1.0.4 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
 1.0.3 (2017-06-13)
 ++++++++++++++++++
-* Remove useless line-too-long suppression
-* Fix various pylint disable rules
-* Eliminating too-many-arguments pylint disable rule (#3583)
 * Adding tests for Service Fabric commands and fixing some arugment parsing logic (#3424)
-* Remove various pylint disable statements
 
 1.0.2 (2017-05-30)
 ++++++++++++++++++

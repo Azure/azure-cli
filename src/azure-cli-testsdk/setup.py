@@ -33,7 +33,8 @@ DEPENDENCIES = [
     'azure-cli',
     'jmespath',
     'mock',
-    'vcrpy==1.10.3'
+    'vcrpy>=1.10.3',
+    'azure-devtools==0.4.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

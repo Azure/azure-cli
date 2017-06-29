@@ -24,8 +24,10 @@ def get_window_dim():
 
 def _size_27():
     """ works for python """
-    dim = os.popen('stty size', 'r').read().split()
-    return dim[0], dim[1]
+    from subprocess import check_output
+    lines = check_output(['tput', 'lines'])
+    cols = check_output(['tput', 'cols'])
+    return lines, cols
 
 
 def _size_36():

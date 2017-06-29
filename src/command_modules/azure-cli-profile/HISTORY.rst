@@ -2,10 +2,17 @@
 
 Release History
 ===============
+(Unreleased)
+++++++++++++++++++
+account show: support output in SDK auth file format
+
+2.0.7 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
 2.0.6 (2017-06-13)
 ++++++++++++++++++
-* Remove useless line-too-long suppression.
-* Remove dead code and updates for ignore_tye (#3659).
+* Minor fixes.
 
 2.0.5 (2017-05-30)
 ++++++++++++++++++

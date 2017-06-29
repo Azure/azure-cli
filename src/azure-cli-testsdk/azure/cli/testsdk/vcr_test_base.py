@@ -62,11 +62,17 @@ def patch_vcr_connection_request(*args, **kwargs):
 vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
-def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                                  api_version=None, base_url_bound=None, **kwargs):
+def _mock_get_mgmt_service_client(client_type,
+                                  subscription_bound=True,
+                                  subscription_id=None,
+                                  api_version=None,
+                                  base_url_bound=None,
+                                  resource=CLOUD.endpoints.active_directory_resource_id,
+                                  **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
+                                                             resource=resource)
     client_kwargs = {}
 
     if base_url_bound:
@@ -423,7 +429,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
-    @mock.patch('azure.cli.core.commands.LongRunningOperation._template_progress', _mock_pass)
     @mock.patch('azure.cli.core.application.Application.get_progress_controller', _mock_get_progress_controller)
     @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)

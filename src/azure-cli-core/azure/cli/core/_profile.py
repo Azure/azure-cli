@@ -46,6 +46,7 @@ _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 # This could mean either real access token, or client secret of a service principal
 # This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
+_REFRESH_TOKEN = 'refreshToken'
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'givenName',
@@ -323,6 +324,20 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def get_refresh_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
+                          subscription=None):
+        account = self.get_subscription(subscription)
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+
+        if user_type == _USER:
+            _, _, token_entry = self._creds_cache.retrieve_token_for_user(
+                username_or_sp_id, account[_TENANT_ID], resource)
+            return None, token_entry[_REFRESH_TOKEN], str(account[_TENANT_ID])
+
+        sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
+        return username_or_sp_id, sp_secret, str(account[_TENANT_ID])
+
     def get_raw_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
                       subscription=None):
         account = self.get_subscription(subscription)
@@ -339,36 +354,46 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    # per ask from java sdk
-    def get_expanded_subscription_info(self, subscription_id=None, name=None, password=None):
+    def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
+        from collections import OrderedDict
         account = self.get_subscription(subscription_id)
 
         # is the credential created through command like 'create-for-rbac'?
-        if bool(name) and bool(password):
-            result = {}
-            result[_SUBSCRIPTION_ID] = subscription_id or account[_SUBSCRIPTION_ID]
-            result['client'] = name
-            result['password'] = password
-            result[_TENANT_ID] = account[_TENANT_ID]
-            result[_ENVIRONMENT_NAME] = CLOUD.name
-            result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
+        result = OrderedDict()
+        if name and password:
+            result['clientId'] = name
+            if password:
+                result['clientSecret'] = password
+            else:
+                result['clientCertificate'] = cert_file
+            result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
         else:  # has logged in through cli
-            result = deepcopy(account)
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
-                result['client'] = account[_USER_ENTITY][_USER_NAME]
-                result['password'] = self._creds_cache.retrieve_secret_of_service_principal(
-                    account[_USER_ENTITY][_USER_NAME])
+                result['clientId'] = account[_USER_ENTITY][_USER_NAME]
+                sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(
+                    account[_USER_ENTITY][_USER_NAME]))
+                secret = getattr(sp_auth, 'secret', None)
+                if secret:
+                    result['clientSecret'] = secret
+                else:
+                    # we can output 'clientCertificateThumbprint' if asked
+                    result['clientCertificate'] = sp_auth.certificate_file
+                result['subscriptionId'] = account[_SUBSCRIPTION_ID]
             else:
-                result['userName'] = account[_USER_ENTITY][_USER_NAME]
+                raise CLIError('SDK Auth file is only applicable on service principals')
 
-            result.pop(_STATE)
-            result.pop(_USER_ENTITY)
-            result.pop(_IS_DEFAULT_SUBSCRIPTION)
-            result['subscriptionName'] = result.pop(_SUBSCRIPTION_NAME)
+        result[_TENANT_ID] = account[_TENANT_ID]
+        endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
+        endpoint_mappings['active_directory'] = 'activeDirectoryEndpointUrl'
+        endpoint_mappings['resource_manager'] = 'resourceManagerEndpointUrl'
+        endpoint_mappings['active_directory_graph_resource_id'] = 'activeDirectoryGraphResourceId'
+        endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
+        endpoint_mappings['gallery'] = 'galleryEndpointUrl'
+        endpoint_mappings['management'] = 'managementEndpointUrl'
 
-        result['subscriptionId'] = result.pop('id')
-        result['endpoints'] = CLOUD.endpoints
+        for e in endpoint_mappings:
+            result[endpoint_mappings[e]] = getattr(CLOUD.endpoints, e)
         return result
 
     def get_installation_id(self):

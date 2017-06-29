@@ -2,31 +2,25 @@
 
 Release History
 ===============
+2.0.10 (2017-06-21)
++++++++++++++++++++
+* Fix deployment progress exceptions
+
 2.0.9 (2017-06-14)
-^^^^^^^^^^^^^^^^^^
+++++++++++++++++++
 * use arm endpoint from the current cloud to create subscription client
 
 2.0.8 (2017-06-13)
 ++++++++++++++++++
-* Remove useless line-too-long suppression
-* Fix unsubscriptable-object pylint disable rules
 * Improve concurrent handling of clouds.config file (#3636)
-* Remove dead code and updates for ignore_tye (#3659)
 * Refresh client request id for each command execution.
 * core: Create subscription clients with right SDK profile (#3635)
-* Fix various pylint disable rules
 * Progress Reporting for template deployments (#3510)
-* Eliminating too-many-arguments pylint disable rule (#3583)
 * output: add support for picking table output fields through jmespath query  (#3581)
 * Improves the muting of parse args + appends history with gestures (#3434)
 * Create subscription clients with right SDK profile
-* Fix method-hidden pylint disable rule
 * Move all existing recording files to latest folder
-* Remove dead code from experimental module
-* Improve concurrent handling of clouds.config file.
-* Remove various pylint disable statements
 * [VM/VMSS] Fix idempotency for VM/VMSS create (#3586)
-* Remove too-many-nested-blocks (#3469) (#3469)
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++
@@ -99,14 +93,14 @@ Release History
 
 
 0.1.2rc2 (2017-02-22)
-++++++++++++++++++^^^
++++++++++++++++++++++
 
 * Telemetry: Generate unique event ID for each exception.
 * Show privacy statement on first invocation of ‘az’ command.
 
 
 0.1.2rc1 (2017-02-17)
-++++++++++++++++++^^^
++++++++++++++++++++++
 
 * Show commands return empty string with exit code 0 for 404 responses
 * Fix: Ensure known clouds are always in cloud config
@@ -116,7 +110,7 @@ Release History
 
 
 0.1.1b3 (2017-01-30)
-++++++++++++++++++^^
+++++++++++++++++++++
 
 * Support Python 3.6.
 * Support prompt for confirmations.
@@ -131,14 +125,14 @@ Release History
 
 
 0.1.1b2 (2017-01-19)
-++++++++++++++++++^^
+++++++++++++++++++++
 
 * Fix argcomplete 'default_completer' error after release of argcomplete 1.8.0.
 * [Telemetry] Update instrumentation key for telemetry and use new DataModel.
 
 
 0.1.1b1 (2017-01-17)
-++++++++++++++++++^^
+++++++++++++++++++++
 
 * Improve @file handling logic.
 * Telemetry code improvements and readability changes.
@@ -147,6 +141,6 @@ Release History
 
 
 0.1.0b11 (2016-12-12)
-++++++++++++++++++^^^
++++++++++++++++++++++
 
 * Preview release.
