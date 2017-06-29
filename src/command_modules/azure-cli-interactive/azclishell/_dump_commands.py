@@ -75,9 +75,9 @@ class LoadFreshTable(object):
                 for param in diction_help["parameters"]:
                     if param["name"].split()[0] not in data[cmd]['parameters']:
                         options = {
-                            'name': name_options,
-                            'required': required,
-                            'help': help_desc
+                            'name': [],
+                            'required': '',
+                            'help': ''
                         }
                         data[cmd]['parameters'] = {
                             param["name"].split()[0]: options
@@ -141,6 +141,7 @@ class LoadFreshTable(object):
                 data[cmd] = com_descrip
             except (ImportError, ValueError):
                 pass
+
         self.load_help_files(data)
 
         # dump into the cache file

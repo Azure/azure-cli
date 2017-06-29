@@ -5,23 +5,9 @@
 
 import threading
 
-from azclishell._dump_commands import FRESH_TABLE
-from azclishell.az_completer import initialize_command_table_attributes
-
-
-class ExecuteThread(threading.Thread):
-    """ thread for executing commands """
-    def __init__(self, func, args):
-        super(ExecuteThread, self).__init__()
-        self.args = args
-        self.func = func
-
-    def run(self):
-        self.func(self.args)
-
 
 class ProgressViewThread(threading.Thread):
-    """ thread to keep the toolbar spinner spinning """
+    """ thread to keep the progress indications running """
     def __init__(self, func, arg):
         super(ProgressViewThread, self).__init__()
         self.func = func
@@ -48,6 +34,9 @@ class LoadCommandTableThread(threading.Thread):
         self.func = func
 
     def run(self):
+        from azclishell._dump_commands import FRESH_TABLE
+        from azclishell.az_completer import initialize_command_table_attributes
+
         try:
             FRESH_TABLE.dump_command_table()
         except KeyboardInterrupt:

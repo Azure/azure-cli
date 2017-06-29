@@ -153,9 +153,11 @@ class AzCompleter(Completer):
         for cmd in sort_completions(self.gen_cmd_completions(text)):
             yield cmd
 
-        if self.cmdtab is not None:
+        if self.cmdtab:
             for val in sort_completions(self.gen_dynamic_completions(text)):
                 yield val
+        else:
+            print('not hap')
 
         for param in sort_completions(self.gen_global_param_completions(text)):
             yield param

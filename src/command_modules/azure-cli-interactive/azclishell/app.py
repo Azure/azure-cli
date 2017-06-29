@@ -11,8 +11,9 @@ import os
 import re
 import subprocess
 import sys
-import jmespath
+from threading import Thread
 
+import jmespath
 import six
 from six.moves import configparser
 
@@ -36,7 +37,7 @@ from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
 from azclishell.telemetry import SHELL_TELEMETRY as telemetry
-from azclishell.threads import ExecuteThread, ProgressViewThread, LoadCommandTableThread
+from azclishell.threads import ProgressViewThread, LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -639,7 +640,7 @@ class Shell(object):
 
             if '--progress' in args:
                 args.remove('--progress')
-                thread = ExecuteThread(self.app.execute, args)
+                thread = Thread(target=self.app.execute, args=args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
