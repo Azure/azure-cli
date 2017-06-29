@@ -454,15 +454,19 @@ class Shell(object):
         if text:
             if text[0] == SELECT_SYMBOL['outside']:
                 cmd = text[1:]
+                cmd_strip = cmd.strip()
                 outside = True
-                if cmd.strip():
+                if cmd_strip:
                     parsed_cmd = parse_quotes(cmd)
-                    if cmd.split()[0] == 'cd':
+                    if cmd_strip[0] == 'cd':
                         self.handle_cd(parsed_cmd)
                         continue_flag = True
-                    elif cmd.split()[0] == 'export' and len(parsed_cmd) > 2:  # sets environment variables
-                        env_name = parsed_cmd[1]
-                        env_val = parsed_cmd[2]
+                    elif cmd_strip[0] == 'export' and len(parsed_cmd) > 2:  # sets environment variables
+                        env_half = parsed_cmd[1].partition('=')
+                        env_name = env_half[0]
+                        env_val = env_half[2]
+                        if '$' in env_val:
+                            regex
                         os.environ[env_name] = env_val
                         continue_flag = True
                 telemetry.track_ssg('outside', '')
