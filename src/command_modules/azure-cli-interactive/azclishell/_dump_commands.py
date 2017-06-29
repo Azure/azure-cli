@@ -49,6 +49,49 @@ class LoadFreshTable(object):
                 print("Error loading: {}".format(mod))
         _update_command_definitions(self.command_table)
 
+    def load_help_files(self, data):
+        """ loads all the extra information from help files """
+        for cmd in helps:
+            diction_help = yaml.load(helps[cmd])
+            # extra descriptions
+            if "short-summary" in diction_help:
+                if cmd in data:
+                    data[cmd]['help'] = diction_help["short-summary"]
+                else:
+                    data[cmd] = {
+                        'help': diction_help["short-summary"],
+                        'parameters': {}
+                    }
+                if callable(data[cmd]['help']):
+                    data[cmd]['help'] = data[cmd]['help']()
+
+            # if there is extra help for this command but it's not reflected in the command table
+            if cmd not in data:
+                print("Command: {} not in Command Table".format(cmd))
+                continue
+
+            # extra parameters
+            if "parameters" in diction_help:
+                for param in diction_help["parameters"]:
+                    if param["name"].split()[0] not in data[cmd]['parameters']:
+                        options = {
+                            'name': name_options,
+                            'required': required,
+                            'help': help_desc
+                        }
+                        data[cmd]['parameters'] = {
+                            param["name"].split()[0]: options
+                        }
+                    if "short-summary" in param:
+                        data[cmd]['parameters'][param["name"].split()[0]]['help']\
+                            = param["short-summary"]
+            # extra examples
+            if "examples" in diction_help:
+                examples = []
+                for example in diction_help["examples"]:
+                    examples.append([example['name'], example['text']])
+                data[cmd]['examples'] = examples
+
     def dump_command_table(self):
         """ dumps the command table """
 
@@ -98,48 +141,7 @@ class LoadFreshTable(object):
                 data[cmd] = com_descrip
             except (ImportError, ValueError):
                 pass
-
-        # loading the extra help information from the help files
-        for cmd in helps:
-            diction_help = yaml.load(helps[cmd])
-            # extra descriptions
-            if "short-summary" in diction_help:
-                if cmd in data:
-                    data[cmd]['help'] = diction_help["short-summary"]
-                else:
-                    data[cmd] = {
-                        'help': diction_help["short-summary"],
-                        'parameters': {}
-                    }
-                if callable(data[cmd]['help']):
-                    data[cmd]['help'] = data[cmd]['help']()
-
-            # if there is extra help for this command but it's not reflected in the command table
-            if cmd not in data:
-                print("Command: {} not in Command Table".format(cmd))
-                continue
-
-            # extra parameters
-            if "parameters" in diction_help:
-                for param in diction_help["parameters"]:
-                    if param["name"].split()[0] not in data[cmd]['parameters']:
-                        options = {
-                            'name': name_options,
-                            'required': required,
-                            'help': help_desc
-                        }
-                        data[cmd]['parameters'] = {
-                            param["name"].split()[0]: options
-                        }
-                    if "short-summary" in param:
-                        data[cmd]['parameters'][param["name"].split()[0]]['help']\
-                            = param["short-summary"]
-            # extra examples
-            if "examples" in diction_help:
-                examples = []
-                for example in diction_help["examples"]:
-                    examples.append([example['name'], example['text']])
-                data[cmd]['examples'] = examples
+        self.load_help_files(data)
 
         # dump into the cache file
         with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
