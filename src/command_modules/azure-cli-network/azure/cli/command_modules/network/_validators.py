@@ -295,7 +295,7 @@ def validate_servers(namespace):
     for item in namespace.servers if namespace.servers else []:
         try:
             socket.inet_aton(item)  # pylint:disable=no-member
-            servers.append({'ipAddress': item})
+            servers.append({'ip_address': item})
         except socket.error:  # pylint:disable=no-member
             servers.append({'fqdn': item})
     namespace.servers = servers
