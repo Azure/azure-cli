@@ -22,11 +22,7 @@ BLACKLISTED_COMPLETIONS = ['interactive']
 
 
 def initialize_command_table_attributes(completer):
-    completer.cmdtab = FRESH_TABLE.command_table
-    if completer.cmdtab is not None:
-        completer.parser.load_command_table(completer.cmdtab)
-        completer.argsfinder = ArgsFinder(completer.parser)
-
+    completer.initialize_command_table_attributes()
 
 def error_pass(_, message):  # pylint: disable=unused-argument
     return
@@ -131,6 +127,12 @@ class AzCompleter(Completer):
         self.parser = AzCliCommandParser(parents=[self.global_parser])
         self.cmdtab = None
 
+    def initialize_command_table_attributes(self):
+        self.cmdtab = FRESH_TABLE.command_table
+        if self.cmdtab is not None:
+            self.parser.load_command_table(self.cmdtab)
+            self.argsfinder = ArgsFinder(self.parser)
+
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
         return param.lower().startswith(words.lower()) and param.lower() != words.lower() and\
@@ -156,8 +158,6 @@ class AzCompleter(Completer):
         if self.cmdtab:
             for val in sort_completions(self.gen_dynamic_completions(text)):
                 yield val
-        else:
-            print('not hap')
 
         for param in sort_completions(self.gen_global_param_completions(text)):
             yield param
