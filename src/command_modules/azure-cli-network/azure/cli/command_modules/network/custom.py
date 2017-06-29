@@ -10,12 +10,13 @@ from msrestazure.azure_exceptions import CloudError
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.commands.validators import DefaultStr
+
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
@@ -144,8 +145,8 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                sku=ApplicationGatewaySkuName.standard_medium.value,
                                private_ip_address='', public_ip_address=None,
                                public_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                               subnet='default', subnet_address_prefix='10.0.0.0/24',
-                               virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
+                               subnet='default', subnet_address_prefix=DefaultStr('10.0.0.0/24'),
+                               virtual_network_name=None, vnet_address_prefix=DefaultStr('10.0.0.0/16'),
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0):
     from azure.cli.core.util import random_string

@@ -12,8 +12,7 @@ from azure.cli.core.commands.parameters import (location_type, get_resource_name
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
                                                 three_state_flag, model_choice_list)
-from azure.cli.core.commands.validators import \
-    (MarkSpecifiedAction, get_default_location_from_resource_group)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
@@ -34,9 +33,9 @@ from azure.cli.command_modules.network._validators import \
      process_nw_test_connectivity_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
-     validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
+     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
-     get_public_ip_validator, get_nsg_validator, get_subnet_validator,
+     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
@@ -166,11 +165,11 @@ register_cli_argument('network application-gateway', 'virtual_network_name', vir
 register_cli_argument('network application-gateway', 'private_ip_address', arg_group='Network')
 register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type, arg_group='Network')
 register_cli_argument('network application-gateway', 'public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', arg_group='Network')
-register_cli_argument('network application-gateway', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=validate_servers, arg_group='Gateway')
+register_cli_argument('network application-gateway', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator(), arg_group='Gateway')
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.', arg_group='Gateway')
 register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.', arg_group='Gateway')
-register_cli_argument('network application-gateway', 'subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', action=MarkSpecifiedAction, arg_group='Network')
-register_cli_argument('network application-gateway', 'vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', action=MarkSpecifiedAction, arg_group='Network')
+register_cli_argument('network application-gateway', 'subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', arg_group='Network')
+register_cli_argument('network application-gateway', 'vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', arg_group='Network')
 register_cli_argument('network application-gateway', 'virtual_network_type', ignore_type, arg_group='Network')
 
 register_cli_argument('network application-gateway create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_ag_create_namespace)
@@ -181,6 +180,7 @@ register_cli_argument('network application-gateway create', 'frontend_port', hel
 register_cli_argument('network application-gateway create', 'capacity', help='The number of instances to use with the application gateway.', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'cert_password', help='The certificate password', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
+register_cli_argument('network application-gateway create', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator(camel_case=True), arg_group='Gateway')
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
     for item in ['create', 'http-settings']:

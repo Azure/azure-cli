@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
 import time
 import random
 from azure.cli.core.profiles import ResourceType
@@ -61,12 +60,44 @@ def validate_file_or_dict(string):
     return shell_safe_json_parse(string)
 
 
-SPECIFIED_SENTINEL = '__SET__'
+def validate_parameter_set(namespace, required, forbidden, dest_to_options=None, description=None):
+    """ validates that a given namespace contains the specified required parameters and does not contain any of
+        the provided forbidden parameters (unless the value came from a default). """
+
+    missing_required = [x for x in required if not getattr(namespace, x)]
+    included_forbidden = [x for x in forbidden if getattr(namespace, x) and
+                          not hasattr(getattr(namespace, x), 'is_default')]
+    if missing_required or included_forbidden:
+        from azure.cli.core.util import CLIError
+
+        def _dest_to_option(dest):
+            try:
+                return dest_to_options[dest]
+            except (KeyError, TypeError):
+                # assume the default dest to option
+                return '--{}'.format(dest).replace('_', '-')
+
+        error = 'invalid usage{}{}'.format(' for ' if description else ':', description)
+        if missing_required:
+            missing_string = ', '.join(_dest_to_option(x) for x in missing_required)
+            error = '{}\n\tmissing: {}'.format(error, missing_string)
+        if included_forbidden:
+            forbidden_string = ', '.join(_dest_to_option(x) for x in included_forbidden)
+            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
+        raise CLIError(error)
 
 
-class MarkSpecifiedAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    """ Use this to identify when a parameter is explicitly set by the user (as opposed to a
-    default). You must remove the __SET__ sentinel substring in a follow-up validator."""
+class DefaultStr(str):
 
-    def __call__(self, parser, args, values, option_string=None):
-        setattr(args, self.dest, '{}{}'.format(SPECIFIED_SENTINEL, values))
+    def __new__(cls, *args, **kwargs):
+        instance = str.__new__(cls, *args, **kwargs)
+        instance.is_default = True
+        return instance
+
+
+class DefaultInt(int):
+
+    def __new__(cls, *args, **kwargs):
+        instance = int.__new__(cls, *args, **kwargs)
+        instance.is_default = True
+        return instance

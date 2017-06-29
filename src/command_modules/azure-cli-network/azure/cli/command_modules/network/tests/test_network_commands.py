@@ -53,76 +53,84 @@ class NetworkUsageListScenarioTest(VCRTestBase):
         self.cmd('network list-usages --location westus', checks=JMESPathCheck('type(@)', 'array'))
 
 
-class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkAppGatewayDefaultScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_basic')
+class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
-    def test_network_app_gateway_with_defaults(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')
+    def test_network_app_gateway_with_defaults(self, resource_group):
+        rg = resource_group
         self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag1 --exists'.format(rg))
         self.cmd('network application-gateway update -g {} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag1 --created'.format(rg))
         self.cmd('network application-gateway list')
 
-        ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[JMESPathCheck('type(@)', 'array'), JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(rg), True)])
+        ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
+            JMESPathCheckV2('type(@)', 'array'),
+            JMESPathCheckV2("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ]).get_output_in_json()
         ag_count = len(ag_list)
 
-        self.cmd('network application-gateway show --resource-group {} --name ag1'.format(rg), checks=[JMESPathCheck('type(@)', 'object'), JMESPathCheck('name', 'ag1'), JMESPathCheck('resourceGroup', rg), JMESPathCheck('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic'), JMESPathCheck("frontendIpConfigurations[0].subnet.contains(id, 'default')", True)])
+        self.cmd('network application-gateway show --resource-group {} --name ag1'.format(rg), checks=[
+            JMESPathCheckV2('type(@)', 'object'),
+            JMESPathCheckV2('name', 'ag1'),
+            JMESPathCheckV2('resourceGroup', rg),
+            JMESPathCheckV2('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheckV2("frontendIpConfigurations[0].subnet.contains(id, 'default')", True)
+        ])
         self.cmd('network application-gateway show-backend-health -g {} -n ag1'.format(rg))
         self.cmd('network application-gateway stop --resource-group {} -n ag1'.format(rg))
         self.cmd('network application-gateway start --resource-group {} -n ag1'.format(rg))
         self.cmd('network application-gateway delete --resource-group {} -n ag1'.format(rg))
-        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=JMESPathCheck('length(@)', ag_count - 1))
+        self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=JMESPathCheckV2('length(@)', ag_count - 1))
 
 
-class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_existing_subnet')
+class NetworkAppGatewayExistingSubnetScenarioTest(ScenarioTest):
 
-    def test_network_app_gateway_with_existing_subnet(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_existing_subnet')
+    def test_network_app_gateway_with_existing_subnet(self, resource_group):
+        rg = resource_group
+        vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg)).get_output_in_json()
         subnet_id = vnet['newVNet']['subnets'][0]['id']
 
         with self.assertRaises(CLIError):
             # make sure it fails
-            self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --subnet-address-prefix 10.0.0.0/28'.format(rg, subnet_id), checks=[JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'), JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)])
+            self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --subnet-address-prefix 10.0.0.0/28'.format(rg, subnet_id), checks=[
+                JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+                JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
+            ])
         # now verify it succeeds
-        self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --servers 172.0.0.1 www.mydomain.com'.format(rg, subnet_id), checks=[JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'), JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)])
+        self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --servers 172.0.0.1 www.mydomain.com'.format(rg, subnet_id), checks=[
+            JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
+        ])
 
 
-class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkAppGatewayNoWaitScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_no_wait')
+class NetworkAppGatewayNoWaitScenarioTest(ScenarioTest):
 
-    def test_network_app_gateway_no_wait(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_no_wait')
+    def test_network_app_gateway_no_wait(self, resource_group):
+        rg = resource_group
         self.cmd('network application-gateway create -g {} -n ag1 --no-wait --connection-draining-timeout 180'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway create -g {} -n ag2 --no-wait'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag1 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag2 --created --interval 120'.format(rg), checks=NoneCheck())
-        self.cmd('network application-gateway show -g {} -n ag1'.format(rg), checks=[JMESPathCheck('provisioningState', 'Succeeded'), JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.enabled', True), JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.drainTimeoutInSec', 180), ])
-        self.cmd('network application-gateway show -g {} -n ag2'.format(rg), checks=[JMESPathCheck('provisioningState', 'Succeeded')])
+        self.cmd('network application-gateway show -g {} -n ag1'.format(rg), checks=[
+            JMESPathCheckV2('provisioningState', 'Succeeded'),
+            JMESPathCheckV2('backendHttpSettingsCollection[0].connectionDraining.enabled', True),
+            JMESPathCheckV2('backendHttpSettingsCollection[0].connectionDraining.drainTimeoutInSec', 180)
+        ])
+        self.cmd('network application-gateway show -g {} -n ag2'.format(rg),
+                 checks=JMESPathCheckV2('provisioningState', 'Succeeded'))
         self.cmd('network application-gateway delete -g {} -n ag2 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag2 --deleted'.format(rg))
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
-class NetworkAppGatewayPrivateIpScenarioTest(ScenarioTest):
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_private_ip')
-    def test_network_app_gateway_with_private_ip(self):
-        rg = self.resource_group
+    def test_network_app_gateway_with_private_ip(self, resource_group):
+        rg = resource_group
         private_ip = '10.0.0.15'
         cert_path = os.path.join(TEST_DIR, 'TestCert.pfx')
         cert_pass = 'password'
@@ -155,10 +163,10 @@ class NetworkAppGatewayPrivateIpScenarioTest(ScenarioTest):
         ])
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, max_api='2017-03-01')
-class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
+@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2017-03-01')
+class NetworkAppGatewayPrivateIpScenarioTest20170301(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(NetworkAppGatewayPrivateIpScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_private_ip')
+        super(NetworkAppGatewayPrivateIpScenarioTest20170301, self).__init__(__file__, test_method, resource_group='cli_test_ag_private_ip')
 
     def test_network_app_gateway_with_private_ip(self):
         self.execute()
@@ -180,21 +188,54 @@ class NetworkAppGatewayPrivateIpScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=NoneCheck())
 
 
-class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkAppGatewayPublicIpScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_public_ip')
+# TODO: Expand and re-enable
+# @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+# class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
-    def test_network_app_gateway_with_public_ip(self):
-        self.execute()
+#    @ResourceGroupPreparer(name_prefix='cli_test_ag_subresource')
+#    def test_network_app_gateway_subresource(self, resource_group):
+#        from msrestazure.azure_exceptions import CloudError
+#        ag = 'ag1'
+#        pub_ip = 'public-ip1'
+#        vnet = 'vnet1'
+#        subnet = 'subnet1'
+#        resource_group = 'tjp-test-app-gateway'
+#        self.cmd('network application-gateway create -g {} -n {} --private-ip-address 10.0.0.4 --no-wait'.format(resource_group, ag))
+#        self.cmd('network public-ip create -g {} -n {}'.format(resource_group, pub_ip))
+#        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(resource_group, vnet, subnet))
 
-    def body(self):
-        rg = self.resource_group
+#        def _test_full_subresource(subgroup_name, item_name, create_params, update_params):
+#            if create_params:
+#                self.cmd('network application-gateway {} create -g {} --gateway-name {} -n {} {} --no-wait'.format(subgroup_name, resource_group, ag, item_name, create_params))
+#                self.cmd('network application-gateway {} show -g {} --gateway-name {} -n {}'.format(subgroup_name, resource_group, ag, item_name))
+#            if update_params:
+#                self.cmd('network application-gateway {} update -g {} --gateway-name {} -n {} {} --no-wait'.format(subgroup_name, resource_group, ag, item_name, update_params))
+#                self.cmd('network application-gateway {} show -g {} --gateway-name {} -n {}'.format(subgroup_name, resource_group, ag, item_name))
+#            self.cmd('network application-gateway {} list -g {} --gateway-name {}'.format(subgroup_name, resource_group, ag))
+#            try:
+#                self.cmd('network application-gateway {} delete -g {} --gateway-name {} -n {} --no-wait'.format(subgroup_name, resource_group, ag, item_name))
+#            except CloudError:
+#                pass
+
+#        _test_full_subresource('address-pool', 'bepool1', '--servers 1.2.3.4 www.test.com', '--servers 4.3.2.1 www.changed.com')
+#        _test_full_subresource('frontend-port', 'myPort', '--port 99', '--port 101')
+#        _test_full_subresource('frontend-ip', 'frontend1', '--public-ip-address {}'.format(pub_ip), None)
+#        _test_full_subresource('frontend-ip', 'appGatewayFrontendIP', None, '--private-ip-address 10.0.0.5')
+
+
+class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_public_ip')
+    def test_network_app_gateway_with_public_ip(self, resource_group):
+        rg = resource_group
         public_ip_name = 'publicip4'
-        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --vnet-address-prefix 10.0.0.1/16 --subnet-address-prefix 10.0.0.1/28 --public-ip-address {}'.format(rg, public_ip_name), checks=[JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True), JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')])
+        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --vnet-address-prefix 10.0.0.1/16 --subnet-address-prefix 10.0.0.1/28 --public-ip-address {}'.format(rg, public_ip_name), checks=[
+            JMESPathCheckV2("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+            JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+        ])
 
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
-
     class NetworkAppGatewayWafConfigScenarioTest(ScenarioTest):
 
         @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
@@ -203,9 +244,13 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
             public_ip_name = 'pip1'
             self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet1 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[JMESPathCheckV2("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True), JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')])
             self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait'.format(rg))
-            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[JMESPathCheckV2('enabled', True), JMESPathCheckV2('firewallMode', 'Prevention'), JMESPathCheckV2('length(disabledRuleGroups)', 2), JMESPathCheckV2('length(disabledRuleGroups[1].rules)', 2)])
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheckV2('enabled', True),
+                JMESPathCheckV2('firewallMode', 'Prevention'),
+                JMESPathCheckV2('length(disabledRuleGroups)', 2),
+                JMESPathCheckV2('length(disabledRuleGroups[1].rules)', 2)
+            ])
 else:
-
     class NetworkAppGatewayWafScenarioTest(ResourceGroupVCRTestBase):
 
         def __init__(self, test_method):

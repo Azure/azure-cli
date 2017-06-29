@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+unreleased
+++++++++++++++++++
+* `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
+
+
 2.0.9 (2017-06-21)
 ++++++++++++++++++
 * vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
