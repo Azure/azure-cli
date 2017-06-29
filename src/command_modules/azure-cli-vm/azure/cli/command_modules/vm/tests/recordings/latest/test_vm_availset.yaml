@@ -6,16 +6,34 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [deb4c38f-5c5a-11e7-b5ba-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [455165a6-5d0a-11e7-80a2-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set?api-version=2017-05-10
   response:
     body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set","name":"cli_test_avail_set","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:33:54 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['226']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:38:20 GMT']
@@ -25,18 +43,28 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
+<<<<<<< HEAD
     body: !!python/unicode '{"properties": {"mode": "Incremental", "parameters": {},
       "template": {"parameters": {}, "outputs": {}, "variables": {}, "contentVersion":
       "1.0.0.0", "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "resources": [{"sku": {"name": "Aligned"}, "name": "availset-test", "tags":
       {}, "apiVersion": "2016-04-30-preview", "location": "westus", "type": "Microsoft.Compute/availabilitySets",
       "properties": {"platformFaultDomainCount": 2}}]}}}'
+=======
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {}, "resources": [{"properties": {"platformFaultDomainCount":
+      2}, "location": "westus", "name": "availset-test", "tags": {}, "sku": {"name":
+      "Aligned"}, "apiVersion": "2017-03-30", "type": "Microsoft.Compute/availabilitySets"}],
+      "contentVersion": "1.0.0.0", "variables": {}, "outputs": {}}, "parameters":
+      {}, "mode": "Incremental"}}'
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['477']
+      Content-Length: ['469']
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
@@ -55,6 +83,27 @@ interactions:
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1193']
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [4567adb6-5d0a-11e7-8722-64510658e3b3]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/av_set_deploy_h5dx4kqYIZGTgmTnRFTdTc25jDTu98dO","name":"av_set_deploy_h5dx4kqYIZGTgmTnRFTdTc25jDTu98dO","properties":{"templateHash":"16724975534458308243","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-06-29T20:33:56.0558022Z","duration":"PT0.1944126S","correlationId":"33013e3f-0677-4f0d-8217-5d32651a2d2d","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
+    headers:
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/av_set_deploy_h5dx4kqYIZGTgmTnRFTdTc25jDTu98dO/operationStatuses/08587028384496162293?api-version=2017-05-10']
+      Cache-Control: [no-cache]
+      Content-Length: ['633']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:33:56 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -63,16 +112,36 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [dec53e4f-5c5a-11e7-82c2-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587029137837193180?api-version=2017-05-10
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [4567adb6-5d0a-11e7-8722-64510658e3b3]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587028384496162293?api-version=2017-05-10
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
   response:
     body: {string: !!python/unicode '{"status":"Succeeded"}'}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:26 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:38:51 GMT']
@@ -88,6 +157,7 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
@@ -105,6 +175,26 @@ interactions:
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [4567adb6-5d0a-11e7-8722-64510658e3b3]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/av_set_deploy_h5dx4kqYIZGTgmTnRFTdTc25jDTu98dO","name":"av_set_deploy_h5dx4kqYIZGTgmTnRFTdTc25jDTu98dO","properties":{"templateHash":"16724975534458308243","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-06-29T20:34:02.2545929Z","duration":"PT6.3932033S","correlationId":"33013e3f-0677-4f0d-8217-5d32651a2d2d","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test"}]}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:26 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+      content-length: ['827']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -113,12 +203,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [f200a4f0-5c5a-11e7-b84c-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [58869170-5d0a-11e7-9739-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
   response:
     body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"platformUpdateDomainCount\"\
         : 5,\r\n    \"platformFaultDomainCount\": 2,\r\n    \"virtualMachines\": []\r\
@@ -127,7 +224,19 @@ interactions:
         ,\r\n  \"name\": \"availset-test\",\r\n  \"sku\": {\r\n    \"name\": \"Aligned\"\
         \r\n  }\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:26 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['449']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:38:52 GMT']
@@ -145,16 +254,34 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [f2287840-5c5a-11e7-9422-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [58b09d46-5d0a-11e7-b8fc-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set?api-version=2017-05-10
   response:
     body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set","name":"cli_test_avail_set","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:27 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['226']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:38:53 GMT']
@@ -164,18 +291,28 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
+<<<<<<< HEAD
     body: !!python/unicode '{"properties": {"mode": "Incremental", "parameters": {},
       "template": {"parameters": {}, "outputs": {}, "variables": {}, "contentVersion":
       "1.0.0.0", "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "resources": [{"sku": {"name": "Aligned"}, "name": "avset2", "tags": {}, "apiVersion":
       "2016-04-30-preview", "location": "westus", "type": "Microsoft.Compute/availabilitySets",
       "properties": {"platformFaultDomainCount": 2, "platformUpdateDomainCount": 2}}]}}}'
+=======
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {}, "resources": [{"properties": {"platformUpdateDomainCount":
+      2, "platformFaultDomainCount": 2}, "location": "westus", "name": "avset2", "tags":
+      {}, "sku": {"name": "Aligned"}, "apiVersion": "2017-03-30", "type": "Microsoft.Compute/availabilitySets"}],
+      "contentVersion": "1.0.0.0", "variables": {}, "outputs": {}}, "parameters":
+      {}, "mode": "Incremental"}}'
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['502']
+      Content-Length: ['494']
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
@@ -194,6 +331,27 @@ interactions:
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1195']
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [58c18e02-5d0a-11e7-9fc9-64510658e3b3]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/av_set_deploy_wMnflCB64Mvms29I1Ih024ImSOAtmGWx","name":"av_set_deploy_wMnflCB64Mvms29I1Ih024ImSOAtmGWx","properties":{"templateHash":"14562559441644411845","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-06-29T20:34:29.1119212Z","duration":"PT0.5041806S","correlationId":"7ddd6e24-a8d1-47f6-964e-89856fcbfa26","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
+    headers:
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/av_set_deploy_wMnflCB64Mvms29I1Ih024ImSOAtmGWx/operationStatuses/08587028384168699109?api-version=2017-05-10']
+      Cache-Control: [no-cache]
+      Content-Length: ['633']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:28 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -202,16 +360,36 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [f2437a4f-5c5a-11e7-abd1-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587029137510020043?api-version=2017-05-10
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [58c18e02-5d0a-11e7-9fc9-64510658e3b3]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587028384168699109?api-version=2017-05-10
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
   response:
     body: {string: !!python/unicode '{"status":"Succeeded"}'}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:58 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:39:24 GMT']
@@ -227,6 +405,7 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
@@ -244,6 +423,26 @@ interactions:
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [58c18e02-5d0a-11e7-9fc9-64510658e3b3]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Resources/deployments/av_set_deploy_wMnflCB64Mvms29I1Ih024ImSOAtmGWx","name":"av_set_deploy_wMnflCB64Mvms29I1Ih024ImSOAtmGWx","properties":{"templateHash":"14562559441644411845","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-06-29T20:34:35.9880274Z","duration":"PT7.3802868S","correlationId":"7ddd6e24-a8d1-47f6-964e-89856fcbfa26","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/avset2"}]}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:59 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+      content-length: ['820']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -252,12 +451,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [05533d0f-5c5b-11e7-bad5-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6c24d9f8-5d0a-11e7-9124-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2017-03-30
   response:
     body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"platformUpdateDomainCount\"\
         : 2,\r\n    \"platformFaultDomainCount\": 2,\r\n    \"virtualMachines\": []\r\
@@ -266,7 +472,19 @@ interactions:
         ,\r\n  \"name\": \"avset2\",\r\n  \"sku\": {\r\n    \"name\": \"Aligned\"\r\
         \n  }\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:34:59 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['435']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:39:25 GMT']
@@ -285,13 +503,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [0586a91e-5c5b-11e7-aa45-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6c480fc0-5d0a-11e7-bcc3-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2017-03-30
   response:
+<<<<<<< HEAD
     body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
@@ -302,6 +528,18 @@ interactions:
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1197']
+=======
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Thu, 29 Jun 2017 20:35:00 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -310,12 +548,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [05c90951-5c5b-11e7-9e4a-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6c811ad8-5d0a-11e7-829a-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
   response:
     body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"platformUpdateDomainCount\"\
         : 5,\r\n    \"platformFaultDomainCount\": 2,\r\n    \"virtualMachines\": []\r\
@@ -324,7 +569,19 @@ interactions:
         ,\r\n  \"name\": \"availset-test\",\r\n  \"sku\": {\r\n    \"name\": \"Aligned\"\
         \r\n  }\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:35:00 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['449']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:39:26 GMT']
@@ -336,21 +593,34 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
+<<<<<<< HEAD
     body: !!python/unicode '{"sku": {"name": "Aligned"}, "location": "westus", "properties":
       {"platformFaultDomainCount": 2, "virtualMachines": [], "platformUpdateDomainCount":
       5}, "tags": {"test": "success"}}'
+=======
+    body: '{"properties": {"virtualMachines": [], "platformUpdateDomainCount": 5,
+      "platformFaultDomainCount": 2}, "location": "westus", "tags": {"test": "success"},
+      "sku": {"name": "Aligned"}}'
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['181']
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [05f87dc0-5c5b-11e7-a3af-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6ca3bde8-5d0a-11e7-abad-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
   response:
     body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"platformUpdateDomainCount\"\
         : 5,\r\n    \"platformFaultDomainCount\": 2\r\n  },\r\n  \"type\": \"Microsoft.Compute/availabilitySets\"\
@@ -359,6 +629,7 @@ interactions:
         ,\r\n  \"name\": \"availset-test\",\r\n  \"sku\": {\r\n    \"name\": \"Aligned\"\
         \r\n  }\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
       content-length: ['448']
       content-type: [application/json; charset=utf-8]
@@ -370,6 +641,19 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-ms-ratelimit-remaining-subscription-writes: ['1194']
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:35:00 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      content-length: ['448']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -378,12 +662,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [0632044f-5c5b-11e7-9d1c-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6cda6b5a-5d0a-11e7-a808-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets?api-version=2017-03-30
   response:
     body: {string: !!python/unicode "{\r\n  \"value\": [\r\n    {\r\n      \"properties\"\
         : {\r\n        \"platformUpdateDomainCount\": 5,\r\n        \"platformFaultDomainCount\"\
@@ -394,7 +685,19 @@ interactions:
         ,\r\n      \"name\": \"availset-test\",\r\n      \"sku\": {\r\n        \"\
         name\": \"Aligned\"\r\n      }\r\n    }\r\n  ]\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:35:00 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['569']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:39:27 GMT']
@@ -412,13 +715,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [0657669e-5c5b-11e7-95dd-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6cfb317e-5d0a-11e7-9fd4-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test/vmSizes?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test/vmSizes?api-version=2017-03-30
   response:
+<<<<<<< HEAD
     body: {string: !!python/unicode "{\r\n  \"value\": [\r\n    {\r\n      \"name\"\
         : \"Standard_DS1_v2\",\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\"\
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 7168,\r\n      \"memoryInMB\"\
@@ -436,6 +747,25 @@ interactions:
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 114688,\r\n      \"memoryInMB\"\
         : 57344,\r\n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"\
         name\": \"Standard_DS11_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
+=======
+    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Standard_DS1_v2\"\
+        ,\r\n      \"numberOfCores\": 1,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 7168,\r\n      \"memoryInMB\": 3584,\r\n\
+        \      \"maxDataDiskCount\": 4\r\n    },\r\n    {\r\n      \"name\": \"Standard_DS2_v2\"\
+        ,\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 14336,\r\n      \"memoryInMB\": 7168,\r\n\
+        \      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\": \"Standard_DS3_v2\"\
+        ,\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 28672,\r\n      \"memoryInMB\": 14336,\r\n\
+        \      \"maxDataDiskCount\": 16\r\n    },\r\n    {\r\n      \"name\": \"Standard_DS4_v2\"\
+        ,\r\n      \"numberOfCores\": 8,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 57344,\r\n      \"memoryInMB\": 28672,\r\n\
+        \      \"maxDataDiskCount\": 32\r\n    },\r\n    {\r\n      \"name\": \"Standard_DS5_v2\"\
+        ,\r\n      \"numberOfCores\": 16,\r\n      \"osDiskSizeInMB\": 1047552,\r\n\
+        \      \"resourceDiskSizeInMB\": 114688,\r\n      \"memoryInMB\": 57344,\r\
+        \n      \"maxDataDiskCount\": 64\r\n    },\r\n    {\r\n      \"name\": \"\
+        Standard_DS11_v2\",\r\n      \"numberOfCores\": 2,\r\n      \"osDiskSizeInMB\"\
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
         : 1047552,\r\n      \"resourceDiskSizeInMB\": 28672,\r\n      \"memoryInMB\"\
         : 14336,\r\n      \"maxDataDiskCount\": 8\r\n    },\r\n    {\r\n      \"name\"\
         : \"Standard_DS12_v2\",\r\n      \"numberOfCores\": 4,\r\n      \"osDiskSizeInMB\"\
@@ -742,6 +1072,7 @@ interactions:
         : 2048000,\r\n      \"memoryInMB\": 229376,\r\n      \"maxDataDiskCount\"\
         : 64\r\n    }\r\n  ]\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
       content-length: ['21785']
       content-type: [application/json; charset=utf-8]
@@ -752,6 +1083,18 @@ interactions:
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:35:01 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      content-length: ['21785']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -760,12 +1103,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [0681f90f-5c5b-11e7-a79a-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6d229ef6-5d0a-11e7-aa70-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
   response:
     body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"platformUpdateDomainCount\"\
         : 5,\r\n    \"platformFaultDomainCount\": 2,\r\n    \"virtualMachines\": []\r\
@@ -775,7 +1125,19 @@ interactions:
         ,\r\n  \"name\": \"availset-test\",\r\n  \"sku\": {\r\n    \"name\": \"Aligned\"\
         \r\n  }\r\n}"}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:35:01 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['476']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:39:27 GMT']
@@ -794,13 +1156,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [06a4270f-5c5b-11e7-b2ea-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6d3bebb8-5d0a-11e7-be14-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
   response:
+<<<<<<< HEAD
     body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
@@ -811,6 +1181,18 @@ interactions:
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1195']
+=======
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Thu, 29 Jun 2017 20:35:02 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -819,16 +1201,33 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
+<<<<<<< HEAD
       User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
           msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
       x-ms-client-request-id: [06e8830f-5c5b-11e7-b218-a0b3ccf7272a]
+=======
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.10 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [6d7512e6-5d0a-11e7-964a-64510658e3b3]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_avail_set/providers/Microsoft.Compute/availabilitySets?api-version=2017-03-30
   response:
     body: {string: !!python/unicode '{"value":[]}'}
     headers:
+<<<<<<< HEAD
       cache-control: [no-cache]
+=======
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 29 Jun 2017 20:35:01 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+>>>>>>> vmn/vmss: use 2017-03-30 api-version
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
       date: ['Wed, 28 Jun 2017 23:39:28 GMT']

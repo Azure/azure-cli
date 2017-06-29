@@ -123,7 +123,7 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual(len(vm.storage_profile.data_disks), 1)
         data_disk = vm.storage_profile.data_disks[0]
         self.assertIsNone(data_disk.caching)
-        self.assertEqual(data_disk.create_option, DiskCreateOptionTypes.empty)
+        self.assertEqual(str(data_disk.create_option), str(DiskCreateOptionTypes.empty))
         self.assertIsNone(data_disk.image)
         self.assertEqual(data_disk.lun, 0)
         self.assertTrue(data_disk.name.startswith('vm1-'))
@@ -149,8 +149,8 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_set.assert_called_once_with(vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 2)
         data_disk = vm.storage_profile.data_disks[1]
-        self.assertEqual(CachingTypes.read_write, data_disk.caching)
-        self.assertEqual(DiskCreateOptionTypes.empty, data_disk.create_option)
+        self.assertEqual(str(CachingTypes.read_write), str(data_disk.caching))
+        self.assertEqual(str(DiskCreateOptionTypes.empty), str(data_disk.create_option))
         self.assertIsNone(data_disk.image)
         self.assertEqual(data_disk.lun, 0)  # the existing disk has '1', so it verifes the second one be picked as '0'
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri2)
@@ -173,8 +173,8 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_set.assert_called_once_with(vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 1)
         data_disk = vm.storage_profile.data_disks[0]
-        self.assertEqual(CachingTypes.read_only, data_disk.caching)
-        self.assertEqual(DiskCreateOptionTypes.attach, data_disk.create_option)
+        self.assertEqual(str(CachingTypes.read_only), str(data_disk.caching))
+        self.assertEqual(str(DiskCreateOptionTypes.attach), str(data_disk.create_option))
         self.assertIsNone(data_disk.image)
         self.assertEqual(data_disk.lun, 0)
         self.assertEqual(data_disk.name, 'd1')

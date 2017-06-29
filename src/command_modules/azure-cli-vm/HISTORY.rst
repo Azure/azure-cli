@@ -2,11 +2,10 @@
 
 Release History
 ===============
-
 unreleased
 ++++++++++++++++++
 * `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
-
+* vm/vmss: use newer api-version of "2017-03-30"
 
 2.0.9 (2017-06-21)
 ++++++++++++++++++
