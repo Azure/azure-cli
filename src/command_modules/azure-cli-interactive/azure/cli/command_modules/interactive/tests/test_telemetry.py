@@ -10,7 +10,7 @@ from azclishell.telemetry import scrub
 class TelemetryTest(unittest.TestCase):
 
     def test_scrubbing(self):
-        """ tests the scrubbing of parameters """
+        # tests the scrubbing of parameters
         text1 = 'this is a --secret value wut wut'
         text2 = 'this has NO secret value'
         text3 = 'this is -my value -is alice --bob knows'

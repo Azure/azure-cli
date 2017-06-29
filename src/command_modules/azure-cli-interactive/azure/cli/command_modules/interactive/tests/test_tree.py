@@ -36,7 +36,7 @@ class TreeTest(unittest.TestCase):
         self.assertEqual(tree.get_subbranch("Hello"), ["World", "Again"])
 
     def test_in_tree(self):
-        """ tests in tree """
+        # tests in tree
         tree4 = CommandBranch("CB1")
         tree3 = CommandBranch("Again")
         tree2 = CommandBranch("World")

@@ -9,7 +9,7 @@ from azure_devtools.scenario_tests import create_random_name as create_random_na
 
 
 def create_random_name(prefix='clitest', length=24):
-    create_random_name_base(prefix=prefix, length=length)
+    return create_random_name_base(prefix=prefix, length=length)
 
 
 def find_recording_dir(test_file):
