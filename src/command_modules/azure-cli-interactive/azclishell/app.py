@@ -32,7 +32,8 @@ from azclishell.az_completer import AzCompleter
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
 from azclishell.frequency_heuristic import DISPLAY_TIME
-from azclishell.gather_commands import add_random_new_lines, GatherCommands
+
+from azclishell.gather_commands import add_new_lines, GatherCommands
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
@@ -404,7 +405,7 @@ class Shell(object):
                 eventloop=create_eventloop())
             example_cli.buffers['example_line'].reset(
                 initial_document=Document(u'{}\n'.format(
-                    add_random_new_lines(example)))
+                    add_new_lines(example)))
             )
             while start_index < len(text.split()):
                 if self.default_command:

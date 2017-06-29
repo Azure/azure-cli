@@ -27,11 +27,10 @@ GLOBAL_PARAM = list(GLOBAL_PARAM_DESCRIPTIONS.keys())
 
 
 def _get_window_columns():
-    _, columns = get_window_dim()
-    return columns
+    _, col = get_window_dim()
+    return col
 
-
-def add_random_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
+def add_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
     """ not everything fits on the screen, based on the size, add newlines """
     if line_min is None:
         line_min = math.floor(int(_get_window_columns()) / 2 - 15)
@@ -110,6 +109,8 @@ class GatherCommands(object):
         """ gathers from the files in a way that is convienent to use """
         command_file = CONFIGURATION.get_help_files()
         cache_path = os.path.join(azclishell.configuration.get_config_dir(), 'cache')
+        cols = _get_window_columns()
+
         with open(os.path.join(cache_path, command_file), 'r') as help_file:
             data = json.load(help_file)
         self.add_exit()
@@ -127,15 +128,14 @@ class GatherCommands(object):
                 branch = branch.get_child(word, branch.children)
 
             description = data[command]['help']
-            self.descrip[command] = add_random_new_lines(description)
+            self.descrip[command] = add_new_lines(description, line_min=int(cols) - 2 * TOLERANCE)
 
             if 'examples' in data[command]:
                 examples = []
-                cols = _get_window_columns()
                 for example in data[command]['examples']:
                     examples.append([
-                        add_random_new_lines(example[0], line_min=int(cols) - 2 * TOLERANCE),
-                        add_random_new_lines(example[1], line_min=int(cols) - 2 * TOLERANCE)])
+                        add_new_lines(example[0], line_min=int(cols) - 2 * TOLERANCE),
+                        add_new_lines(example[1], line_min=int(cols) - 2 * TOLERANCE)])
                 self.command_example[command] = examples
 
             all_params = []
@@ -155,9 +155,10 @@ class GatherCommands(object):
                             self.same_param_doubles[param_double] = par
 
                         self.param_descript[command + " " + par] =  \
-                            add_random_new_lines(
+                            add_new_lines(
                                 data[command]['parameters'][param]['required'] +
-                                " " + data[command]['parameters'][param]['help'])
+                                " " + data[command]['parameters'][param]['help'],
+                                line_min=int(cols) - 2 * TOLERANCE)
                         if par not in self.completable_param:
                             self.completable_param.append(par)
                         all_params.append(par)
