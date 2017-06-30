@@ -572,13 +572,16 @@ with ParametersContext(command='sql server create') as c:
     # Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
     # signature, therefore, they can't be automatically converted to requirement arguments.
-    c.expand('parameters', Server, group_name='Authentication', patches={
+    c.expand('parameters', Server, patches={
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
     })
 
     # 12.0 is the only server version allowed and it's already the default.
     c.ignore('version')
+
+    # Identity will be handled with its own parameter.
+    c.ignore('identity')
 
 
 with ParametersContext(command='sql server update') as c:
