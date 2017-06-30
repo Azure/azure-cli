@@ -108,8 +108,8 @@ with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
     c.cli_command(__name__, 'network application-gateway ssl-policy predefined list', ag_path + 'list_available_ssl_predefined_policies', cf_application_gateways)
     c.cli_command(__name__, 'network application-gateway ssl-policy predefined show', ag_path + 'get_ssl_predefined_policy', cf_application_gateways)
 
-cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule')
-cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule')
+cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule', no_wait_param='no_wait')
+cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule', no_wait_param='no_wait')
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
     cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config_2017_03_01', no_wait_param='no_wait')

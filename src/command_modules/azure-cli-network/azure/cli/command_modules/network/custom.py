@@ -688,7 +688,7 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
 
 
 def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None,
-                           default_http_settings=None, default_redirect_config=None, no_wait=False):
+                           default_http_settings=None, default_redirect_config=None, raw=False):
     if default_address_pool == '':
         instance.default_backend_address_pool = None
     elif default_address_pool:
@@ -736,7 +736,7 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 
 
 def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name):
+                                item_name, no_wait=False):
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
@@ -745,7 +745,7 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     url_map.path_rules = \
         [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
 def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,

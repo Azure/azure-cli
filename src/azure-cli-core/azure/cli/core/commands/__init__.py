@@ -59,11 +59,8 @@ class VersionConstraint(object):
             register_cli_argument(*args, **kwargs)
         else:
             from azure.cli.core.commands.parameters import ignore_type
-            if 'arg_type' in kwargs:
-                kwargs = {'arg_type': ignore_type}
-            else:
-                kwargs = {}
-                args = tuple([args[0], args[1], ignore_type])
+            kwargs = {}
+            args = tuple([args[0], args[1], ignore_type])
             register_cli_argument(*args, **kwargs)
 
     def register_extra_cli_argument(self, *args, **kwargs):

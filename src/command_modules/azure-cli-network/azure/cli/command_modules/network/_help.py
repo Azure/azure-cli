@@ -321,7 +321,7 @@ helps['network application-gateway probe update'] = """
 
 helps['network application-gateway redirect-config'] = """
     type: group
-    short-summary: Managed redirect configurations.
+    short-summary: Manage redirect configurations.
 """
 
 helps['network application-gateway redirect-config create'] = """
