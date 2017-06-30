@@ -12,8 +12,7 @@ from azure.cli.core.commands.parameters import (location_type, get_resource_name
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
                                                 three_state_flag, model_choice_list)
-from azure.cli.core.commands.validators import \
-    (MarkSpecifiedAction, get_default_location_from_resource_group)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
@@ -34,9 +33,9 @@ from azure.cli.command_modules.network._validators import \
      process_nw_test_connectivity_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
-     validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
-     validate_peering_type, validate_dns_record_type, validate_route_filter,
-     get_public_ip_validator, get_nsg_validator, get_subnet_validator,
+     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
+     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
+     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
@@ -150,6 +149,7 @@ load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
 cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
+ag_servers_type = CliArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 
 # ARGUMENT REGISTRATION
 
@@ -166,11 +166,11 @@ register_cli_argument('network application-gateway', 'virtual_network_name', vir
 register_cli_argument('network application-gateway', 'private_ip_address', arg_group='Network')
 register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type, arg_group='Network')
 register_cli_argument('network application-gateway', 'public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', arg_group='Network')
-register_cli_argument('network application-gateway', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=validate_servers, arg_group='Gateway')
+register_cli_argument('network application-gateway', 'servers', ag_servers_type, arg_group='Gateway')
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.', arg_group='Gateway')
 register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.', arg_group='Gateway')
-register_cli_argument('network application-gateway', 'subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', action=MarkSpecifiedAction, arg_group='Network')
-register_cli_argument('network application-gateway', 'vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', action=MarkSpecifiedAction, arg_group='Network')
+register_cli_argument('network application-gateway', 'subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', arg_group='Network')
+register_cli_argument('network application-gateway', 'vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', arg_group='Network')
 register_cli_argument('network application-gateway', 'virtual_network_type', ignore_type, arg_group='Network')
 
 register_cli_argument('network application-gateway create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_ag_create_namespace)
@@ -181,6 +181,7 @@ register_cli_argument('network application-gateway create', 'frontend_port', hel
 register_cli_argument('network application-gateway create', 'capacity', help='The number of instances to use with the application gateway.', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'cert_password', help='The certificate password', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
+register_cli_argument('network application-gateway create', 'servers', ag_servers_type, validator=get_servers_validator(camel_case=True), arg_group='Gateway')
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
     for item in ['create', 'http-settings']:
@@ -207,19 +208,25 @@ ag_subresources = [
     {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
     {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
     {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
+    {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
 ]
+
 for item in ag_subresources:
     register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name')
     register_cli_argument('network application-gateway {} create'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
     register_cli_argument('network application-gateway {}'.format(item['name']), 'resource_name', options_list=('--gateway-name',), help='The name of the application gateway.')
     register_cli_argument('network application-gateway {}'.format(item['name']), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
     register_cli_argument('network application-gateway {} list'.format(item['name']), 'resource_name', options_list=('--gateway-name',))
+    register_cli_argument('network application-gateway {}'.format(item['name']), 'private_ip_address', arg_group=None)
+    register_cli_argument('network application-gateway {}'.format(item['name']), 'virtual_network_name', arg_group=None)
 
-register_cli_argument('network application-gateway auth-cert', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), validator=validate_auth_cert)
+register_cli_argument('network application-gateway address-pool', 'servers', ag_servers_type, arg_group=None)
 
-register_cli_argument('network application-gateway frontend-ip', 'subnet', validator=get_subnet_validator())
+register_cli_argument('network application-gateway auth-cert', 'cert_data', options_list=['--cert-file'], help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_auth_cert)
+
+register_cli_argument('network application-gateway frontend-ip', 'subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
 register_cli_argument('network application-gateway frontend-ip', 'public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-register_cli_argument('network application-gateway frontend-ip', 'virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None)
+register_cli_argument('network application-gateway frontend-ip', 'virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
 
 for item in ['frontend-port', 'http-settings']:
     register_cli_argument('network application-gateway {}'.format(item), 'port', help='The port number.', type=int)
@@ -260,6 +267,7 @@ register_cli_argument('network application-gateway rule', 'rule_type', help='The
 register_cli_argument('network application-gateway rule', 'url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
 
 register_cli_argument('network application-gateway ssl-cert', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_cert)
+register_cli_argument('network application-gateway ssl-cert', 'cert_password', help='Certificate password.')
 
 register_cli_argument('network application-gateway ssl-policy', 'clear', action='store_true', help='Clear SSL policy.', validator=process_ag_ssl_policy_set_namespace)
 register_cli_argument('network application-gateway ssl-policy', 'disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.', **enum_choice_list(ApplicationGatewaySslProtocol))
@@ -294,6 +302,40 @@ for item in ['ssl-policy', 'waf-config']:
 register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', nargs='+')
 register_cli_argument('network application-gateway waf-config', 'disabled_rules', nargs='+')
 register_cli_argument('network application-gateway waf-config list-rule-sets', '_type', options_list=['--type'])
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network application-gateway ssl-policy predefined', 'predefined_policy_name', name_arg_type)
+
+    c.register_cli_argument('network application-gateway redirect-config', 'redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectType'))
+    c.register_cli_argument('network application-gateway redirect-config', 'include_path', **three_state_flag())
+    c.register_cli_argument('network application-gateway redirect-config', 'include_query_string', **three_state_flag())
+    c.register_cli_argument('network application-gateway redirect-config', 'target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
+    c.register_cli_argument('network application-gateway redirect-config', 'target_url', help='URL to redirect the request to.')
+
+    c.register_cli_argument('network application-gateway ssl-policy', 'policy_name', name_arg_type)
+    c.register_cli_argument('network application-gateway ssl-policy', 'cipher_suites', nargs='+')
+    c.register_cli_argument('network application-gateway ssl-policy', 'min_protocol_version')
+    c.register_cli_argument('network application-gateway ssl-policy', 'disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.')
+
+    c.register_cli_argument('network application-gateway http-settings', 'host_name', help='Host header sent to the backend servers.')
+    c.register_cli_argument('network application-gateway http-settings', 'host_name_from_backend_pool', help='Use host name of the backend server as the host header.', **three_state_flag())
+    c.register_cli_argument('network application-gateway http-settings', 'affinity_cookie_name', help='Name used for the affinity cookie.')
+    c.register_cli_argument('network application-gateway http-settings', 'enable_probe', help='Whether the probe is enabled.', **three_state_flag())
+    c.register_cli_argument('network application-gateway http-settings', 'path', help='Path that will prefix all HTTP requests.')
+
+    c.register_cli_argument('network application-gateway probe', 'host', default=None, required=False, help='The name of the host to send the probe.')
+    c.register_cli_argument('network application-gateway probe', 'host_name_from_http_settings', help='Use host header from HTTP settings.', **three_state_flag())
+    c.register_cli_argument('network application-gateway probe', 'min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
+    c.register_cli_argument('network application-gateway probe', 'match_body', help='Body that must be contained in the health response.')
+    c.register_cli_argument('network application-gateway probe', 'match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')
+
+    c.register_cli_argument('network application-gateway url-path-map', 'default_redirect_config', help='The name or ID of the default redirect configuration.')
+    c.register_cli_argument('network application-gateway url-path-map', 'redirect_config', help='The name or ID of the redirect configuration to use with the created rule.', arg_group='First Rule')
+
+    c.register_cli_argument('network application-gateway rule', 'redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
+
+for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
+    register_cli_argument('network application-gateway url-path-map rule', item, arg_group=None)
 
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))

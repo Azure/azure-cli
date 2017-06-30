@@ -5,6 +5,7 @@
 import unittest
 import azure.cli.command_modules.sf.custom as sf_c
 
+
 class SfAppTests(unittest.TestCase):
 
     def empty_parse_params_returns_empty_test(self):

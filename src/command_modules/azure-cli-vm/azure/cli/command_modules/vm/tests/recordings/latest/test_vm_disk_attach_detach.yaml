@@ -6,23 +6,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0abf3092-4572-11e7-ade6-64510658e3b3]
+      x-ms-client-request-id: [badaa091-5c62-11e7-ba30-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
         ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
@@ -34,51 +34,52 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:56:16 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      cache-control: [no-cache]
       content-length: ['1548']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:34:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"osProfile": {"linuxConfiguration": {"disablePasswordAuthentication":
-      false}, "computerName": "vm-diskattach-test", "adminUsername": "admin123", "secrets":
-      []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"dataDisks":
-      [{"createOption": "empty", "diskSizeGB": 1, "lun": 0, "name": "d1", "caching":
-      "ReadOnly"}], "imageReference": {"version": "latest", "offer": "CentOS", "publisher":
-      "OpenLogic", "sku": "7.3"}, "osDisk": {"osType": "Linux", "diskSizeGB": 31,
-      "managedDisk": {"storageAccountType": "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs"},
-      "name": "osdisk_JZtUhT0lRs", "createOption": "fromImage", "caching": "ReadWrite"}},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
-      "tags": {}, "location": "westus"}'
+    body: !!python/unicode '{"location": "westus", "properties": {"storageProfile":
+      {"imageReference": {"sku": "7.3", "publisher": "OpenLogic", "version": "latest",
+      "offer": "CentOS"}, "osDisk": {"diskSizeGB": 31, "createOption": "fromImage",
+      "name": "osdisk_95b96325e7", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7"},
+      "osType": "Linux"}, "dataDisks": [{"caching": "ReadOnly", "diskSizeGB": 1, "createOption":
+      "empty", "name": "d1", "lun": 0}]}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"},
+      "osProfile": {"secrets": [], "adminUsername": "admin123", "computerName": "vm-diskattach-test",
+      "linuxConfiguration": {"disablePasswordAuthentication": false}}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
+      "tags": {}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['1031']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0b04c61e-4572-11e7-a762-64510658e3b3]
+      x-ms-client-request-id: [baff1880-5c62-11e7-992a-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
         \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
@@ -94,18 +95,18 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/84738e27-acde-46eb-a81b-2882211d8aeb?api-version=2016-04-30-preview']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:56:16 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/d5b1a36e-8b44-4b75-b80c-d30548025786?api-version=2016-04-30-preview']
+      cache-control: [no-cache]
       content-length: ['1811']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:34:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -114,28 +115,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0b04c61e-4572-11e7-a762-64510658e3b3]
+      x-ms-client-request-id: [baff1880-5c62-11e7-992a-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/84738e27-acde-46eb-a81b-2882211d8aeb?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/d5b1a36e-8b44-4b75-b80c-d30548025786?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:56:16.3540601+00:00\",\r\
-        \n  \"endTime\": \"2017-05-30T19:56:42.7134481+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"84738e27-acde-46eb-a81b-2882211d8aeb\"\r\n}"}
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:34:37.703074+00:00\"\
+        ,\r\n  \"endTime\": \"2017-06-29T00:34:58.7514138+00:00\",\r\n  \"status\"\
+        : \"Succeeded\",\r\n  \"name\": \"d5b1a36e-8b44-4b75-b80c-d30548025786\"\r\
+        \n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:56:47 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['184']
+      cache-control: [no-cache]
+      content-length: ['183']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -144,23 +145,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0b04c61e-4572-11e7-a762-64510658e3b3]
+      x-ms-client-request-id: [baff1880-5c62-11e7-992a-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
         \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
@@ -177,16 +178,16 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:56:48 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      cache-control: [no-cache]
       content-length: ['1958']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -195,23 +196,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [1e1dc2b4-4572-11e7-882c-64510658e3b3]
+      x-ms-client-request-id: [cdcaa64f-5c62-11e7-801d-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
         \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
@@ -228,54 +229,55 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:56:48 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      cache-control: [no-cache]
       content-length: ['1958']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"osProfile": {"linuxConfiguration": {"disablePasswordAuthentication":
-      false}, "computerName": "vm-diskattach-test", "adminUsername": "admin123", "secrets":
-      []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"dataDisks":
-      [{"diskSizeGB": 1, "managedDisk": {"storageAccountType": "Premium_LRS", "id":
-      "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1"},
-      "lun": 0, "name": "d1", "createOption": "empty", "caching": "ReadOnly"}, {"createOption":
-      "empty", "diskSizeGB": 2, "lun": 2, "name": "d2"}], "imageReference": {"version":
-      "latest", "offer": "CentOS", "publisher": "OpenLogic", "sku": "7.3"}, "osDisk":
-      {"osType": "Linux", "diskSizeGB": 31, "managedDisk": {"storageAccountType":
-      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs"},
-      "name": "osdisk_JZtUhT0lRs", "createOption": "fromImage", "caching": "ReadWrite"}},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
-      "tags": {}, "location": "westus"}'
+    body: !!python/unicode '{"location": "westus", "properties": {"storageProfile":
+      {"imageReference": {"sku": "7.3", "publisher": "OpenLogic", "version": "latest",
+      "offer": "CentOS"}, "osDisk": {"diskSizeGB": 31, "createOption": "fromImage",
+      "name": "osdisk_95b96325e7", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7"},
+      "osType": "Linux"}, "dataDisks": [{"diskSizeGB": 1, "createOption": "empty",
+      "name": "d1", "caching": "ReadOnly", "managedDisk": {"storageAccountType": "Premium_LRS",
+      "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1"},
+      "lun": 0}, {"diskSizeGB": 2, "createOption": "empty", "name": "d2", "lun": 2}]},
+      "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "osProfile": {"secrets": [],
+      "adminUsername": "admin123", "computerName": "vm-diskattach-test", "linuxConfiguration":
+      {"disablePasswordAuthentication": false}}, "networkProfile": {"networkInterfaces":
+      [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
+      "tags": {}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['1286']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [1e60473e-4572-11e7-8f9b-64510658e3b3]
+      x-ms-client-request-id: [cdf1411e-5c62-11e7-8282-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
         \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
@@ -296,812 +298,17 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/dc15fe0b-87d1-47bb-bb5a-eace18ed85a7?api-version=2016-04-30-preview']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:56:50 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/f9f3984e-b66f-4f72-a923-1196f9ed1e3e?api-version=2016-04-30-preview']
+      cache-control: [no-cache]
       content-length: ['2210']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [1e60473e-4572-11e7-8f9b-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/dc15fe0b-87d1-47bb-bb5a-eace18ed85a7?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:56:49.057183+00:00\",\r\n\
-        \  \"endTime\": \"2017-05-30T19:57:12.9690871+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"dc15fe0b-87d1-47bb-bb5a-eace18ed85a7\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:57:20 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['183']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [1e60473e-4572-11e7-8f9b-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        },\r\n        {\r\
-        \n          \"lun\": 2,\r\n          \"name\": \"d2\",\r\n          \"createOption\"\
-        : \"Empty\",\r\n          \"caching\": \"None\",\r\n          \"managedDisk\"\
-        : {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n          \
-        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d2\"\
-        \r\n          },\r\n          \"diskSizeGB\": 2\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:57:21 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2357']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [32113c50-4572-11e7-87ad-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        },\r\n        {\r\
-        \n          \"lun\": 2,\r\n          \"name\": \"d2\",\r\n          \"createOption\"\
-        : \"Empty\",\r\n          \"caching\": \"None\",\r\n          \"managedDisk\"\
-        : {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n          \
-        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d2\"\
-        \r\n          },\r\n          \"diskSizeGB\": 2\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:57:22 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2357']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [326590d8-4572-11e7-b1f0-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        },\r\n        {\r\
-        \n          \"lun\": 2,\r\n          \"name\": \"d2\",\r\n          \"createOption\"\
-        : \"Empty\",\r\n          \"caching\": \"None\",\r\n          \"managedDisk\"\
-        : {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n          \
-        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d2\"\
-        \r\n          },\r\n          \"diskSizeGB\": 2\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:57:23 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2357']
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"osProfile": {"linuxConfiguration": {"disablePasswordAuthentication":
-      false}, "computerName": "vm-diskattach-test", "adminUsername": "admin123", "secrets":
-      []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"dataDisks":
-      [{"diskSizeGB": 1, "managedDisk": {"storageAccountType": "Premium_LRS", "id":
-      "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1"},
-      "lun": 0, "name": "d1", "createOption": "empty", "caching": "ReadOnly"}], "imageReference":
-      {"version": "latest", "offer": "CentOS", "publisher": "OpenLogic", "sku": "7.3"},
-      "osDisk": {"osType": "Linux", "diskSizeGB": 31, "managedDisk": {"storageAccountType":
-      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs"},
-      "name": "osdisk_JZtUhT0lRs", "createOption": "fromImage", "caching": "ReadWrite"}},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
-      "tags": {}, "location": "westus"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['1218']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [32b34554-4572-11e7-b606-64510658e3b3]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/696ad5ed-a8c4-48b1-a4cd-60091cec2f3b?api-version=2016-04-30-preview']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:57:24 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1957']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [32b34554-4572-11e7-b606-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/696ad5ed-a8c4-48b1-a4cd-60091cec2f3b?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:57:23.0333108+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"696ad5ed-a8c4-48b1-a4cd-60091cec2f3b\"\
-        \r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:57:55 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['134']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [32b34554-4572-11e7-b606-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/696ad5ed-a8c4-48b1-a4cd-60091cec2f3b?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:57:23.0333108+00:00\",\r\
-        \n  \"endTime\": \"2017-05-30T19:57:59.3817373+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"696ad5ed-a8c4-48b1-a4cd-60091cec2f3b\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:58:25 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['184']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [32b34554-4572-11e7-b606-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:58:25 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1958']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [58482ea2-4572-11e7-bd6c-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:58:26 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1958']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [58922718-4572-11e7-93e5-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:58:27 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1958']
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"osProfile": {"linuxConfiguration": {"disablePasswordAuthentication":
-      false}, "computerName": "vm-diskattach-test", "adminUsername": "admin123", "secrets":
-      []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"dataDisks":
-      [], "imageReference": {"version": "latest", "offer": "CentOS", "publisher":
-      "OpenLogic", "sku": "7.3"}, "osDisk": {"osType": "Linux", "diskSizeGB": 31,
-      "managedDisk": {"storageAccountType": "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs"},
-      "name": "osdisk_JZtUhT0lRs", "createOption": "fromImage", "caching": "ReadWrite"}},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
-      "tags": {}, "location": "westus"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['942']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [58e86c9c-4572-11e7-8199-64510658e3b3]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/d892ae4c-8890-4310-a627-234b57fd8ee1?api-version=2016-04-30-preview']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:58:27 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1547']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [58e86c9c-4572-11e7-8199-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/d892ae4c-8890-4310-a627-234b57fd8ee1?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:58:26.9292416+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"d892ae4c-8890-4310-a627-234b57fd8ee1\"\
-        \r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:58:59 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['134']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [58e86c9c-4572-11e7-8199-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/d892ae4c-8890-4310-a627-234b57fd8ee1?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:58:26.9292416+00:00\",\r\
-        \n  \"endTime\": \"2017-05-30T19:59:27.3528589+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"d892ae4c-8890-4310-a627-234b57fd8ee1\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:59:29 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['184']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [58e86c9c-4572-11e7-8199-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:59:29 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1548']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [7e7cd66e-4572-11e7-9b91-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:59:30 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1548']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [7ec4c030-4572-11e7-9897-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:59:31 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1548']
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"osProfile": {"linuxConfiguration": {"disablePasswordAuthentication":
-      false}, "computerName": "vm-diskattach-test", "adminUsername": "admin123", "secrets":
-      []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"dataDisks":
-      [{"createOption": "attach", "managedDisk": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1"},
-      "lun": 0, "caching": "ReadWrite"}], "imageReference": {"version": "latest",
-      "offer": "CentOS", "publisher": "OpenLogic", "sku": "7.3"}, "osDisk": {"osType":
-      "Linux", "diskSizeGB": 31, "managedDisk": {"storageAccountType": "Premium_LRS",
-      "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs"},
-      "name": "osdisk_JZtUhT0lRs", "createOption": "fromImage", "caching": "ReadWrite"}},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
-      "tags": {}, "location": "westus"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['1152']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [7f02a83a-4572-11e7-bd9b-64510658e3b3]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
-        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
-        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
-        \n          \"createOption\": \"Attach\",\r\n          \"caching\": \"ReadWrite\"\
-        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
-        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
-        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
-        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
-        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
-        }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
-        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
-        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
-    headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/fddf4382-a643-41a9-b701-b0ae4a7af16a?api-version=2016-04-30-preview']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 19:59:31 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1959']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:09 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
       x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
@@ -1111,28 +318,321 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [7f02a83a-4572-11e7-bd9b-64510658e3b3]
+      x-ms-client-request-id: [cdf1411e-5c62-11e7-8282-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/fddf4382-a643-41a9-b701-b0ae4a7af16a?api-version=2016-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/f9f3984e-b66f-4f72-a923-1196f9ed1e3e?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-05-30T19:59:30.9778551+00:00\",\r\
-        \n  \"endTime\": \"2017-05-30T19:59:56.7635968+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"fddf4382-a643-41a9-b701-b0ae4a7af16a\"\r\n}"}
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:35:09.6428236+00:00\"\
+        ,\r\n  \"endTime\": \"2017-06-29T00:35:31.377334+00:00\",\r\n  \"status\"\
+        : \"Succeeded\",\r\n  \"name\": \"f9f3984e-b66f-4f72-a923-1196f9ed1e3e\"\r\
+        \n}"}
     headers:
-      Cache-Control: [no-cache]
+      cache-control: [no-cache]
+      content-length: ['183']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 20:00:02 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [cdf1411e-5c62-11e7-8282-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        },\r\n        {\r\
+        \n          \"lun\": 2,\r\n          \"name\": \"d2\",\r\n          \"createOption\"\
+        : \"Empty\",\r\n          \"caching\": \"None\",\r\n          \"managedDisk\"\
+        : {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n          \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d2\"\
+        \r\n          },\r\n          \"diskSizeGB\": 2\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2357']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [e0f0891e-5c62-11e7-b56c-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        },\r\n        {\r\
+        \n          \"lun\": 2,\r\n          \"name\": \"d2\",\r\n          \"createOption\"\
+        : \"Empty\",\r\n          \"caching\": \"None\",\r\n          \"managedDisk\"\
+        : {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n          \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d2\"\
+        \r\n          },\r\n          \"diskSizeGB\": 2\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2357']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [e114b2ee-5c62-11e7-8afc-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        },\r\n        {\r\
+        \n          \"lun\": 2,\r\n          \"name\": \"d2\",\r\n          \"createOption\"\
+        : \"Empty\",\r\n          \"caching\": \"None\",\r\n          \"managedDisk\"\
+        : {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n          \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d2\"\
+        \r\n          },\r\n          \"diskSizeGB\": 2\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2357']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:41 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"location": "westus", "properties": {"storageProfile":
+      {"imageReference": {"sku": "7.3", "publisher": "OpenLogic", "version": "latest",
+      "offer": "CentOS"}, "osDisk": {"diskSizeGB": 31, "createOption": "fromImage",
+      "name": "osdisk_95b96325e7", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7"},
+      "osType": "Linux"}, "dataDisks": [{"diskSizeGB": 1, "createOption": "empty",
+      "name": "d1", "caching": "ReadOnly", "managedDisk": {"storageAccountType": "Premium_LRS",
+      "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1"},
+      "lun": 0}]}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "osProfile":
+      {"secrets": [], "adminUsername": "admin123", "computerName": "vm-diskattach-test",
+      "linuxConfiguration": {"disablePasswordAuthentication": false}}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
+      "tags": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['1218']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [e14b0530-5c62-11e7-bb9f-a0b3ccf7272a]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/f7bde94b-1146-478c-92d5-e2840df34e46?api-version=2016-04-30-preview']
+      cache-control: [no-cache]
+      content-length: ['1957']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:35:41 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [e14b0530-5c62-11e7-bb9f-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/f7bde94b-1146-478c-92d5-e2840df34e46?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:35:42.0805233+00:00\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"name\": \"f7bde94b-1146-478c-92d5-e2840df34e46\"\
+        \r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['134']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:36:12 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [e14b0530-5c62-11e7-bb9f-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/f7bde94b-1146-478c-92d5-e2840df34e46?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:35:42.0805233+00:00\"\
+        ,\r\n  \"endTime\": \"2017-06-29T00:36:30.3319346+00:00\",\r\n  \"status\"\
+        : \"Succeeded\",\r\n  \"name\": \"f7bde94b-1146-478c-92d5-e2840df34e46\"\r\
+        \n}"}
+    headers:
+      cache-control: [no-cache]
       content-length: ['184']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:36:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1141,23 +641,526 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [7f02a83a-4572-11e7-bd9b-64510658e3b3]
+      x-ms-client-request-id: [e14b0530-5c62-11e7-bb9f-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1958']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:36:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [061de670-5c63-11e7-9c38-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1958']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:36:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [063e8dcf-5c63-11e7-9e5f-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Empty\",\r\n          \"caching\": \"ReadOnly\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1958']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:36:43 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"location": "westus", "properties": {"storageProfile":
+      {"imageReference": {"sku": "7.3", "publisher": "OpenLogic", "version": "latest",
+      "offer": "CentOS"}, "osDisk": {"diskSizeGB": 31, "createOption": "fromImage",
+      "name": "osdisk_95b96325e7", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7"},
+      "osType": "Linux"}, "dataDisks": []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"},
+      "osProfile": {"secrets": [], "adminUsername": "admin123", "computerName": "vm-diskattach-test",
+      "linuxConfiguration": {"disablePasswordAuthentication": false}}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
+      "tags": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['942']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [06580940-5c63-11e7-b5bc-a0b3ccf7272a]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/a1edb772-5e42-44d7-a3a2-75f91742e30b?api-version=2016-04-30-preview']
+      cache-control: [no-cache]
+      content-length: ['1547']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:36:43 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [06580940-5c63-11e7-b5bc-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/a1edb772-5e42-44d7-a3a2-75f91742e30b?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:36:44.3193935+00:00\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"name\": \"a1edb772-5e42-44d7-a3a2-75f91742e30b\"\
+        \r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['134']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:37:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [06580940-5c63-11e7-b5bc-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/a1edb772-5e42-44d7-a3a2-75f91742e30b?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:36:44.3193935+00:00\"\
+        ,\r\n  \"endTime\": \"2017-06-29T00:37:36.0859779+00:00\",\r\n  \"status\"\
+        : \"Succeeded\",\r\n  \"name\": \"a1edb772-5e42-44d7-a3a2-75f91742e30b\"\r\
+        \n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['184']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:37:44 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [06580940-5c63-11e7-b5bc-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1548']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:37:44 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2bd6e1ee-5c63-11e7-aa8d-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1548']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:37:46 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2c11c811-5c63-11e7-bb23-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1548']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:37:46 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"location": "westus", "properties": {"storageProfile":
+      {"imageReference": {"sku": "7.3", "publisher": "OpenLogic", "version": "latest",
+      "offer": "CentOS"}, "osDisk": {"diskSizeGB": 31, "createOption": "fromImage",
+      "name": "osdisk_95b96325e7", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+      "Premium_LRS", "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7"},
+      "osType": "Linux"}, "dataDisks": [{"caching": "ReadWrite", "managedDisk": {"id":
+      "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1"},
+      "lun": 0, "createOption": "attach"}]}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"},
+      "osProfile": {"secrets": [], "adminUsername": "admin123", "computerName": "vm-diskattach-test",
+      "linuxConfiguration": {"disablePasswordAuthentication": false}}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic"}]}},
+      "tags": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['1152']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2c492bc0-5c63-11e7-9274-a0b3ccf7272a]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
+        \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
+        : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
+        \n          \"createOption\": \"Attach\",\r\n          \"caching\": \"ReadWrite\"\
+        ,\r\n          \"managedDisk\": {\r\n            \"storageAccountType\": \"\
+        Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/d1\"\
+        \r\n          },\r\n          \"diskSizeGB\": 1\r\n        }\r\n      ]\r\n\
+        \    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-diskattach-test\"\
+        ,\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
+        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Network/networkInterfaces/vm-diskattach-testVMNic\"\
+        }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
+        ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/702a83ad-fc5b-442c-921a-5241695302f5?api-version=2016-04-30-preview']
+      cache-control: [no-cache]
+      content-length: ['1959']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:37:47 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2c492bc0-5c63-11e7-9274-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/702a83ad-fc5b-442c-921a-5241695302f5?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"startTime\": \"2017-06-29T00:37:48.1329805+00:00\"\
+        ,\r\n  \"endTime\": \"2017-06-29T00:38:08.5080864+00:00\",\r\n  \"status\"\
+        : \"Succeeded\",\r\n  \"name\": \"702a83ad-fc5b-442c-921a-5241695302f5\"\r\
+        \n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['184']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:38:17 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2c492bc0-5c63-11e7-9274-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
+  response:
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
         \n          \"createOption\": \"Attach\",\r\n          \"caching\": \"ReadWrite\"\
@@ -1174,16 +1177,16 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 20:00:02 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      cache-control: [no-cache]
       content-length: ['1960']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:38:18 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1192,23 +1195,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 computemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.6+dev]
+      User-Agent: [python/2.7.11 (Windows-10-10.0.15063) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 computemanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [921b3a86-4572-11e7-bf59-64510658e3b3]
+      x-ms-client-request-id: [3fffdce1-5c63-11e7-9fa1-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test?api-version=2016-04-30-preview
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1d94ff6f-9069-4d8c-9ba4-b0ee2f9e8ee3\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"OpenLogic\",\r\n        \"offer\": \"CentOS\",\r\n\
-        \        \"sku\": \"7.3\",\r\n        \"version\": \"latest\"\r\n      },\r\
-        \n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\"\
-        : \"osdisk_JZtUhT0lRs\",\r\n        \"createOption\": \"FromImage\",\r\n \
-        \       \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n    \
-        \      \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_JZtUhT0lRs\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        87fc934a-e561-4696-b5d0-5a834df89f11\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"OpenLogic\"\
+        ,\r\n        \"offer\": \"CentOS\",\r\n        \"sku\": \"7.3\",\r\n     \
+        \   \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n       \
+        \ \"osType\": \"Linux\",\r\n        \"name\": \"osdisk_95b96325e7\",\r\n \
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/disks/osdisk_95b96325e7\"\
         \r\n        },\r\n        \"diskSizeGB\": 31\r\n      },\r\n      \"dataDisks\"\
         : [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d1\",\r\
         \n          \"createOption\": \"Attach\",\r\n          \"caching\": \"ReadWrite\"\
@@ -1225,15 +1228,15 @@ interactions:
         tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk/providers/Microsoft.Compute/virtualMachines/vm-diskattach-test\"\
         ,\r\n  \"name\": \"vm-diskattach-test\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Tue, 30 May 2017 20:00:04 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
+      cache-control: [no-cache]
       content-length: ['1960']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 29 Jun 2017 00:38:19 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 version: 1

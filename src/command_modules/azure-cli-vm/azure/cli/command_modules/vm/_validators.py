@@ -11,7 +11,7 @@ from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
-    (get_default_location_from_resource_group, validate_file_or_dict)
+    (get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set)
 from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
@@ -214,60 +214,6 @@ def _get_storage_profile_description(profile):
         return 'attach existing managed OS disk'
 
 
-storage_profile_param_options = {
-    'os_disk_name': '--os-disk-name',
-    'os_caching': '--os-caching',
-    'os_type': '--os-type',
-    'attach_os_disk': '--attach-os-disk',
-    'image': '--image',
-    'storage_account': '--storage-account',
-    'storage_container_name': '--storage-container-name',
-    'storage_sku': '--storage-sku',
-    'use_unmanaged_disk': '--use-unmanaged-disk'
-}
-
-
-network_balancer_param_options = {
-    'application_gateway': '--application-gateway',
-    'load_balancer': '--load-balancer',
-    'app_gateway_subnet_address_prefix': '--app-gateway-subnet-address-prefix',
-    'backend_pool_name': '--backend-pool-name'
-}
-
-
-def _validate_storage_required_forbidden_parameters(namespace, required, forbidden):
-    missing_required = [x for x in required if not getattr(namespace, x)]
-    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
-    if missing_required or included_forbidden:
-        error = 'invalid usage for storage profile: {}:'.format(
-            _get_storage_profile_description(namespace.storage_profile))
-        if missing_required:
-            missing_string = ', '.join(
-                storage_profile_param_options[x] for x in missing_required)
-            error = '{}\n\tmissing: {}'.format(error, missing_string)
-        if included_forbidden:
-            forbidden_string = ', '.join(
-                storage_profile_param_options[x] for x in included_forbidden)
-            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
-        raise CLIError(error)
-
-
-def _validate_network_balancer_required_forbidden_parameters(namespace, required, forbidden, desc):
-    missing_required = [x for x in required if not getattr(namespace, x)]
-    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
-    if missing_required or included_forbidden:
-        error = 'invalid usage for network balancer: {}'.format(desc)
-        if missing_required:
-            missing_string = ', '.join(
-                network_balancer_param_options[x] for x in missing_required)
-            error = '{}\n\tmissing: {}'.format(error, missing_string)
-        if included_forbidden:
-            forbidden_string = ', '.join(
-                network_balancer_param_options[x] for x in included_forbidden)
-            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
-        raise CLIError(error)
-
-
 def _validate_managed_disk_sku(sku):
 
     allowed_skus = ['Premium_LRS', 'Standard_LRS']
@@ -361,7 +307,9 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
-    _validate_storage_required_forbidden_parameters(namespace, required, forbidden)
+    validate_parameter_set(
+        namespace, required, forbidden,
+        description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
@@ -803,20 +751,22 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
         # AppGateway frontend
         required = []
-        if namespace.app_gateway_type == 'new' and namespace.vnet_type != 'new':
-            required.append('app_gateway_subnet_address_prefix')
+        if namespace.app_gateway_type == 'new':
+            required.append('app_gateway_sku')
+            required.append('app_gateway_capacity')
+            if namespace.vnet_type != 'new':
+                required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
         forbidden = ['nat_pool_name', 'load_balancer']
-        _validate_network_balancer_required_forbidden_parameters(
-            namespace, required, forbidden, 'application gateway')
+        validate_parameter_set(namespace, required, forbidden, description='network balancer: application gateway')
 
     elif balancer_type == 'loadBalancer':
         # LoadBalancer frontend
         required = []
-        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway']
-        _validate_network_balancer_required_forbidden_parameters(
-            namespace, required, forbidden, 'load balancer')
+        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway', 'app_gateway_sku',
+                     'app_gateway_capacity']
+        validate_parameter_set(namespace, required, forbidden, description='network balancer: load balancer')
 
         if namespace.load_balancer:
             if check_existence(namespace.load_balancer, namespace.resource_group_name,

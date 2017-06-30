@@ -63,7 +63,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2016-12-01',
-        ResourceType.MGMT_NETWORK: '2017-03-01',
+        ResourceType.MGMT_NETWORK: '2017-06-01',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
