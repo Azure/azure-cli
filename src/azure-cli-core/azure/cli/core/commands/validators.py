@@ -5,8 +5,10 @@
 
 import time
 import random
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core.profiles import ResourceType
 
+logger = azlogging.get_az_logger(__name__)
 
 def validate_tags(ns):
     ''' Extracts multiple space-separated tags in key[=value] format '''
@@ -47,6 +49,7 @@ def get_default_location_from_resource_group(namespace):
         resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+        logger.debug("using location '%s' from resource group '%s'", namespace.location, rg.name)
 
 
 def validate_file_or_dict(string):

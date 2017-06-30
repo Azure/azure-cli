@@ -9,6 +9,7 @@ import re
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set)
@@ -296,6 +297,8 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     else:
         raise CLIError('Unrecognized storage profile: {}'.format(namespace.storage_profile))
 
+    logger.debug("storage profile '%s'", namespace.storage_profile)
+
     if for_scale_set:
         # VMSS lacks some parameters, so scrub these out
         props_to_remove = ['attach_os_disk', 'storage_account']
@@ -367,6 +370,9 @@ def _validate_vm_create_storage_account(namespace):
             # 4 - nothing specified - create a new storage account
             namespace.storage_account_type = 'new'
 
+    logger.debug("using '%s' storage account with name '%s' and tier '%s'", namespace.storage_account_type,
+                 namespace.storage_account, sku_tier)
+
 
 def _validate_vm_create_availability_set(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -384,6 +390,7 @@ def _validate_vm_create_availability_set(namespace):
             namespace='Microsoft.Compute',
             type='availabilitySets',
             name=name)
+        logger.debug("adding to availability set '%s'", namespace.availability_set)
 
 
 def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
@@ -395,6 +402,8 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
     nics = getattr(namespace, 'nics', None)
 
     if not vnet and not subnet and not nics:
+        logger.debug('no subnet specified. Attempting to find an existing VVnet and subnet...')
+
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         client = get_network_client().virtual_networks
 
@@ -418,6 +427,7 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
             namespace.subnet = result.name
             namespace.vnet_name = vnet_match.name
             namespace.vnet_type = 'existing'
+            logger.debug("existing vnet '%s' and subnet '%s' found", namespace.vnet_name, namespace.subnet)
             return
 
     if subnet:
@@ -434,10 +444,11 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
         elif subnet_exists:
             # 2 - user specified existing vnet/subnet
             namespace.vnet_type = 'existing'
+            logger.debug("using specified vnet '%s' and subnet '%s'", namespace.vnet_name, namespace.subnet)
             return
     # 3 - create a new vnet/subnet
     namespace.vnet_type = 'new'
-
+    logger.debug("no suitable subnet found. New one will be created", namespace.vnet_name, namespace.subnet)
 
 def _subnet_capacity_check(subnet_mask, vmss_instance_count):
     mask = int(subnet_mask)
