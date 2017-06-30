@@ -109,37 +109,6 @@ def wait_then_open_async(url):
     t.daemon = True
     t.start()
 
-
-def acs_browse(resource_group, name, disable_browser=False, ssh_key_file=None):
-    """
-    Opens a browser to the web interface for the cluster orchestrator
-
-    :param name: Name of the target Azure container service instance.
-    :type name: String
-    :param resource_group_name:  Name of Azure container service's resource group.
-    :type resource_group_name: String
-    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
-    :type disable_browser: bool
-    :param ssh_key_file: If set a path to an SSH key to use, only applies to DCOS
-    :type ssh_key_file: string
-    """
-    _acs_browse_internal(_get_acs_info(name, resource_group), resource_group, name, disable_browser,
-                         ssh_key_file)
-
-
-def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_key_file):
-    orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
-
-    if orchestrator_type == 'kubernetes' or \
-       orchestrator_type == ContainerServiceOchestratorTypes.kubernetes or \
-       (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
-        return k8s_browse(name, resource_group, disable_browser, ssh_key_file=ssh_key_file)
-    elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOchestratorTypes.dcos:
-        return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
-    else:
-        raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
-
-
 def k8s_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
     Launch a proxy and browse the Kubernetes web UI.
