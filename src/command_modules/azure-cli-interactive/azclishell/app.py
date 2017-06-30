@@ -118,8 +118,7 @@ def validate_contains_query(args, symbol):
 
 
 def restart_completer(shell):
-    shell.completer = AzCompleter(GatherCommands())
-    shell.refresh_cli = True
+    shell.refresh_completer()
 
 
 # pylint: disable=too-many-instance-attributes
@@ -129,7 +128,7 @@ class Shell(object):
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
                  app=None, input_custom=sys.stdin, output_custom=None,
-                 user_feedback=False, cache_load=False):
+                 user_feedback=False):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -155,7 +154,6 @@ class Shell(object):
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
-        self.cache_load = cache_load
 
     @property
     def cli(self):
@@ -164,6 +162,10 @@ class Shell(object):
             self._cli = self.create_interface()
             self.refresh_cli = False
         return self._cli
+
+    def refresh_completer(self):
+        self.completer = AzCompleter(GatherCommands())
+        self.refresh_cli = True
 
     def handle_cd(self, cmd):
         """changes dir """
@@ -220,6 +222,11 @@ class Shell(object):
             toolbar = [
                 ' Try out the \'feedback\' command',
                 'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
+        elif self.command_table_thread.is_alive():
+            toolbar = [
+                ' Loading...',
+                'Hit [enter] to refresh'
+            ]
         else:
             toolbar = self._toolbar_info()
 
@@ -254,6 +261,8 @@ class Shell(object):
         is_command = True
         rows, _ = get_window_dim()
         rows = int(rows)
+        if not self.completer:
+            return param_descrip, example
 
         for word in text.split():
             if word.startswith("-"):  # any parameter
@@ -687,9 +696,9 @@ class Shell(object):
         from azure.cli.core.application import APPLICATION
         APPLICATION.get_progress_controller = self.progress_patch
 
-        if self.cache_load:
-            command_table_thread = LoadCommandTableThread(restart_completer, self)
-            command_table_thread.start()
+        # refresh the cache and completer
+        self.command_table_thread = LoadCommandTableThread(restart_completer, self)
+        self.command_table_thread.start()
 
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(

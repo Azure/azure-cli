@@ -41,11 +41,8 @@ def main(style=None):
     try:
         commands = GatherCommands()
         az_completer = AzCompleter(commands)
-        cache_load = True
     except IOError:  # if there is no cache
-        FRESH_TABLE.dump_command_table()
-        az_completer = AzCompleter(GatherCommands())
-        cache_load = False
+        az_completer = None
 
     if style:
         given_style = style
@@ -67,7 +64,6 @@ def main(style=None):
 
     shell_app = Shell(
         completer=az_completer,
-        cache_load=cache_load,
         lexer=AzLexer,
         history=FileHistory(
             os.path.join(shell_config_dir(), config.get_history())),
