@@ -543,8 +543,8 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
+
         update_service_objective = 'DW200'
-        storage_bytes = str(10 * 1024 * 1024 * 1024 * 1024)
         update_storage = '20TB'
         update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
@@ -552,15 +552,20 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         loc_display = 'West US'
 
         # test sql db commands
-        self.cmd('sql dw create -g {} --server {} --name {}'
+        dw = self.cmd('sql dw create -g {} --server {} --name {}'
                  .format(rg, server, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('edition', 'DataWarehouse'),
-                     JMESPathCheck('maxSizeBytes', storage_bytes),
-                     JMESPathCheck('status', 'Online')])
+                     JMESPathCheck('status', 'Online')]).get_output_in_json()
+
+        # Sanity check that the default max size is not equal to the size that we will update to
+        # later. That way we know that update is actually updating the size.
+        self.assertNotEqual(dw['maxSizeBytes'], update_storage_bytes,
+                            'Initial max size in bytes is equal to the value we want to update to later,'
+                            ' so we will not be able to verify that update max size is actually updating.')
 
         # DataWarehouse is a little quirky and is considered to be both a database and its
         # separate own type of thing. (Why? Because it has the same REST endpoint as regular
