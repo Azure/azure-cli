@@ -659,7 +659,7 @@ class Shell(object):
                 else:
                     formatter = OutputProducer.get_formatter(
                         self.app.configuration.output_format)
-                    OutputProducer(formatter=formatter, file=self.output).out(result)
+                    OutputProducer(formatter=formatter, file=sys.stdout).out(result)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except
