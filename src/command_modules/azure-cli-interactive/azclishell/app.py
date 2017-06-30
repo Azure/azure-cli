@@ -38,7 +38,7 @@ from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
 from azclishell.telemetry import SHELL_TELEMETRY as telemetry
-from azclishell.threads import ProgressViewThread, LoadCommandTableThread
+from azclishell.threads import ContinuousPingThread, LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -647,7 +647,7 @@ class Shell(object):
                 self.threads.append(thread)
                 self.curr_thread = thread
 
-                thread = ProgressViewThread(progress_view, self)
+                thread = ContinuousPingThread(progress_view, self)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)

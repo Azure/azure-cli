@@ -6,10 +6,10 @@
 import threading
 
 
-class ProgressViewThread(threading.Thread):
+class ContinuousPingThread(threading.Thread):
     """ thread to keep the progress indications running """
     def __init__(self, func, arg):
-        super(ProgressViewThread, self).__init__()
+        super(ContinuousPingThread, self).__init__()
         self.func = func
         self.arg = arg
 
