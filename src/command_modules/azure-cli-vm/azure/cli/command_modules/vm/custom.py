@@ -17,7 +17,7 @@ except ImportError:
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
-from azure.cli.core.commands.validators import validate_file_or_dict
+from azure.cli.core.commands.validators import validate_file_or_dict, DefaultStr, DefaultInt
 from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation
@@ -36,11 +36,12 @@ from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-VirtualHardDisk, VirtualMachineScaleSet, VirtualMachineCaptureParameters, VirtualMachineScaleSetExtension, \
-    VirtualMachineScaleSetExtensionProfile = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualHardDisk',
-                                                     'VirtualMachineScaleSet', 'VirtualMachineCaptureParameters',
-                                                     'VirtualMachineScaleSetExtension',
-                                                     'VirtualMachineScaleSetExtensionProfile', mod='models')
+CachingTypes, VirtualHardDisk, VirtualMachineScaleSet, VirtualMachineCaptureParameters, \
+    VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = get_sdk(
+        ResourceType.MGMT_COMPUTE,
+        'CachingTypes', 'VirtualHardDisk', 'VirtualMachineScaleSet', 'VirtualMachineCaptureParameters',
+        'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile',
+        mod='models')
 
 
 def get_resource_group_location(resource_group_name):
@@ -1681,11 +1682,12 @@ def create_vmss(vmss_name, resource_group_name, image,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
                 load_balancer=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
+                app_gateway_sku=DefaultStr('Standard_Large'), app_gateway_capacity=DefaultInt(10),
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
-                os_caching=None, data_caching=None,
-                storage_container_name=None, storage_sku=None,
+                os_caching=DefaultStr(CachingTypes.read_write.value), data_caching=None,
+                storage_container_name=DefaultStr('vhds'), storage_sku=None,
                 os_type=None, os_disk_name=None,
                 use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1704,7 +1706,6 @@ def create_vmss(vmss_name, resource_group_name, image,
                                                                 build_application_gateway_resource)
 
     from azure.cli.core._profile import CLOUD
-    from azure.mgmt.compute.models import CachingTypes
 
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
@@ -1723,8 +1724,6 @@ def create_vmss(vmss_name, resource_group_name, image,
     # determine final defaults and calculated values
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(hash_string(vmss_id, length=10))
-    storage_container_name = storage_container_name or 'vhds'
-    os_caching = os_caching or CachingTypes.read_write.value
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1813,7 +1812,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         ag_resource = build_application_gateway_resource(
             app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
             public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
-            private_ip_allocation='Dynamic')
+            private_ip_allocation='Dynamic', sku=app_gateway_sku, capacity=app_gateway_capacity)
         ag_resource['dependsOn'] = ag_dependencies
         master_template.add_variable(
             'appGwID',
