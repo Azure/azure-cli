@@ -465,10 +465,13 @@ class Shell(object):
                         env_half = parsed_cmd[1].partition('=')
                         env_name = env_half[0]
                         env_val = env_half[2]
-                        if '$' in env_val:
-                            values = re.search(r'.*$.*(:|)', env_val)
-
-                        os.environ[env_name] = env_val
+                        if '$' in env_val:  # example 'export path=$PATH:home
+                            env_var = env_val.partition('$')[2]  # the left side of the evaluate
+                            env_var = env_var.partition(':')[0]  # the right side of any colon
+                            evalulated_env_val = env_val.replace('$' + env_var, os.environ.get(env_var))
+                            os.environ[env_name] = evalulated_env_val
+                        else:
+                            os.environ[env_name] = env_val
                         continue_flag = True
                 telemetry.track_ssg('outside', '')
 
