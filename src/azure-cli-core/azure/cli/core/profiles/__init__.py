@@ -14,7 +14,7 @@ from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
 # API Profiles currently supported in the CLI.
 API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
-    '2017-03-09-profile-preview': AZURE_API_PROFILES['2017-03-09-profile-preview']
+    '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile']
 }
 
 
