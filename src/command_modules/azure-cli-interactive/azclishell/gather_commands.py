@@ -30,6 +30,7 @@ def _get_window_columns():
     _, col = get_window_dim()
     return col
 
+
 def add_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
     """ not everything fits on the screen, based on the size, add newlines """
     if line_min is None:

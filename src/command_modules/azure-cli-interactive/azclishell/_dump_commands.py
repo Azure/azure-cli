@@ -21,7 +21,7 @@ import azclishell.configuration as config
 
 class LoadFreshTable(object):
     """
-    this class generates and dumps the fresh command table into a file 
+    this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
     def __init__(self):
