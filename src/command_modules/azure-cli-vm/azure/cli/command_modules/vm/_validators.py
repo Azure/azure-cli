@@ -564,15 +564,15 @@ def _validate_vm_vmss_create_auth(namespace):
                                      StorageProfile.SASpecializedOSDisk]:
         return
 
-    _validate_admin_username(namespace.admin_username, namespace.os_type)
+    namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
 
     if not namespace.os_type:
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-
-        namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
+        namespace.authentication_type = 'password' \
+            if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
@@ -629,6 +629,7 @@ def _validate_admin_username(username, os_type):
         "sys", "test2", "test3", "user4", "user5"]
     if username.lower() in disallowed_user_names:
         raise CLIError("This user name '{}' meets the general requirements, but is specifically disallowed for this image. Please try a different value.".format(username))
+    return username
 
 
 def _validate_admin_password(password, os_type):
