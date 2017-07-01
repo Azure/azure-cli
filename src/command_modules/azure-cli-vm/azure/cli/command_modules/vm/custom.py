@@ -25,7 +25,7 @@ from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
@@ -297,8 +297,8 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None):
-    Disk, CreationData, DiskCreateOption, DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'Disk', 'CreationData',
-                                                            'DiskCreateOption', 'DiskSku', mod='models')
+    Disk, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Disk', 'CreationData',
+                                                   'DiskCreateOption', mod='models')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -315,8 +315,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
-    disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
-                sku=DiskSku(sku), tags=(tags or {}))
+    disk = Disk(location, creation_data, (tags or {}), _get_sku_object(sku), disk_size_gb=size_gb)
     client = _compute_client_factory()
     return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
 
@@ -325,8 +324,7 @@ def update_managed_disk(instance, size_gb=None, sku=None):
     if size_gb is not None:
         instance.disk_size_gb = size_gb
     if sku is not None:
-        DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')
-        instance.sku = DiskSku(sku)
+        _set_sku(instance, sku)
     return instance
 
 
@@ -410,8 +408,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     tags=None):
-    Snapshot, CreationData, DiskCreateOption, DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'Snapshot', 'CreationData',
-                                                                'DiskCreateOption', 'DiskSku', mod='models')
+    Snapshot, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Snapshot', 'CreationData',
+                                                       'DiskCreateOption', mod='models')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -429,16 +427,28 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
 
-    snapshot = Snapshot(location, disk_size_gb=size_gb, creation_data=creation_data,
-                        sku=DiskSku(sku), tags=(tags or {}))
+    snapshot = Snapshot(location, creation_data, (tags or {}), _get_sku_object(sku), disk_size_gb=size_gb)
     client = _compute_client_factory()
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
 
+def _get_sku_object(sku):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+        DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')
+        return DiskSku(sku)
+    return sku
+
+
+def _set_sku(instance, sku):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+        instance.sku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')(sku)
+    else:
+        instance.account_type = sku
+
+
 def update_snapshot(instance, sku=None):
     if sku is not None:
-        DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')
-        instance.sku = DiskSku(sku)
+        _set_sku(instance, sku)
     return instance
 
 
