@@ -25,7 +25,8 @@ from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -314,9 +315,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
-
-    disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
-                account_type=sku, tags=(tags or {}))
+    disk = Disk(location, creation_data, (tags or {}), _get_sku_object(sku), disk_size_gb=size_gb)
     client = _compute_client_factory()
     return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
 
@@ -325,7 +324,7 @@ def update_managed_disk(instance, size_gb=None, sku=None):
     if size_gb is not None:
         instance.disk_size_gb = size_gb
     if sku is not None:
-        instance.account_type = sku
+        _set_sku(instance, sku)
     return instance
 
 
@@ -333,7 +332,9 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
                              new=False, sku=None, size_gb=None, lun=None, caching=None):
     '''attach a managed disk'''
     vm = get_vm(resource_group_name, vm_name)
-    from azure.mgmt.compute.models import DiskCreateOptionTypes, ManagedDiskParameters, DataDisk
+    DataDisk, ManagedDiskParameters, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'DataDisk',
+                                                                'ManagedDiskParameters', 'DiskCreateOptionTypes',
+                                                                mod='models')
 
     # pylint: disable=no-member
     if lun is None:
@@ -343,13 +344,12 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
-        data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
+        data_disk = DataDisk(lun, DiskCreateOption.empty,
                              name=parse_resource_id(disk)['name'],
                              disk_size_gb=size_gb, caching=caching)
     else:
-        params = ManagedDiskParameters(id=disk,
-                                       storage_account_type=sku)
-        data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params, caching=caching)
+        params = ManagedDiskParameters(id=disk, storage_account_type=sku)
+        data_disk = DataDisk(lun, DiskCreateOption.attach, managed_disk=params, caching=caching)
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(vm)
@@ -368,8 +368,8 @@ def detach_data_disk(resource_group_name, vm_name, disk_name):
 
 def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None,
                                      caching=None):
-    from azure.mgmt.compute.models import (DiskCreateOptionTypes,
-                                           VirtualMachineScaleSetDataDisk)
+    DiskCreateOptionTypes, VirtualMachineScaleSetDataDisk = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskCreateOptionTypes',
+                                                                    'VirtualMachineScaleSetDataDisk', mod='models')
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
@@ -427,15 +427,28 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
 
-    snapshot = Snapshot(location, disk_size_gb=size_gb, creation_data=creation_data,
-                        account_type=sku, tags=(tags or {}))
+    snapshot = Snapshot(location, creation_data, (tags or {}), _get_sku_object(sku), disk_size_gb=size_gb)
     client = _compute_client_factory()
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
 
+def _get_sku_object(sku):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+        DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')
+        return DiskSku(sku)
+    return sku
+
+
+def _set_sku(instance, sku):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+        instance.sku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')(sku)
+    else:
+        instance.account_type = sku
+
+
 def update_snapshot(instance, sku=None):
     if sku is not None:
-        instance.account_type = sku
+        _set_sku(instance, sku)
     return instance
 
 
@@ -520,8 +533,8 @@ def create_image(resource_group_name, name, source, os_type=None, data_disk_sour
 def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
     ''' Attach an unmanaged disk'''
-    from azure.mgmt.compute.models import DiskCreateOptionTypes
-    from azure.mgmt.compute.models import DataDisk
+    DataDisk, DiskCreateOptionTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'DataDisk',
+                                              'DiskCreateOptionTypes', mod='models')
     if not new and not disk_name:
         raise CLIError('Pleae provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
@@ -1264,7 +1277,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
 
 
 def _build_nic_list(nic_ids):
-    from azure.mgmt.compute.models import NetworkInterfaceReference
+    NetworkInterfaceReference = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkInterfaceReference', mod='models')
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
@@ -1285,7 +1298,7 @@ def _get_existing_nics(vm):
 
 
 def _update_vm_nics(vm, nics, primary_nic):
-    from azure.mgmt.compute.models import NetworkProfile
+    NetworkProfile = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', mod='models')
 
     if primary_nic:
         try:
