@@ -515,7 +515,7 @@ def _validate_vm_create_nsg(namespace):
             logger.debug("using specified NSG '%s'", namespace.nsg)
         else:
             namespace.nsg_type = 'new'
-            logger.debug("specified NSG '%s' not found. One will be created.", namespace.nsg)
+            logger.debug("specified NSG '%s' not found. It will be created.", namespace.nsg)
     elif namespace.nsg == '':
         namespace.nsg_type = None
         logger.debug('no NSG will be used')
