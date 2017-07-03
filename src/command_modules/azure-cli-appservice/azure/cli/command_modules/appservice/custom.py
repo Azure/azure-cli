@@ -328,7 +328,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         try:
             docker_registry_server_user, docker_registry_server_password = _get_acr_cred(registry_name)
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning("Error:'%s'", ex)  # consider to throwing if needed
+            logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
 
     if docker_registry_server_user is not None:
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
