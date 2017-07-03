@@ -8,6 +8,7 @@ set -ex
 
 : "${CLI_VERSION:?CLI_VERSION environment variable not set.}"
 : "${CLI_DOWNLOAD_SHA256:?CLI_DOWNLOAD_SHA256 environment variable not set.}"
+: "${BUILD_ARTIFACT_DIR:?BUILD_ARTIFACT_DIR environment variable not set.}"
 
 if [ -z "$1" ]
   then
@@ -64,4 +65,6 @@ cp -r $cli_debian_dir_tmp/* $source_dir/debian
 cd $source_dir
 dpkg-buildpackage -us -uc
 echo "The archive is available at $working_dir/azure-cli_${CLI_VERSION}-1_all.deb"
+cp $working_dir/azure-cli_${CLI_VERSION}-1_all.deb ${BUILD_ARTIFACT_DIR}
+echo "The archive has also been copied to ${BUILD_ARTIFACT_DIR}"
 echo "Done."
