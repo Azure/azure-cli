@@ -10,6 +10,7 @@ from azure.cli.core.profiles import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
+
 def validate_tags(ns):
     ''' Extracts multiple space-separated tags in key[=value] format '''
     if isinstance(ns.tags, list):

@@ -16,7 +16,6 @@ from azure.cli.core.commands.validators import \
 from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.azlogging as azlogging
 import azure.cli.core.keys as keys
 from ._client_factory import _compute_client_factory
 
@@ -348,9 +347,11 @@ def _validate_vm_create_storage_account(namespace):
         if check_existence(storage_id['name'], rg, 'Microsoft.Storage', 'storageAccounts'):
             # 1 - existing storage account specified
             namespace.storage_account_type = 'existing'
+            logger.debug("using specified existing storage account '%s'", storage_id['name'])
         else:
             # 2 - params for new storage account specified
             namespace.storage_account_type = 'new'
+            logger.debug("specified storage account '%s' not found and will be created", storage_id['name'])
     else:
         from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -366,12 +367,11 @@ def _validate_vm_create_storage_account(namespace):
             # 3 - nothing specified - find viable storage account in target resource group
             namespace.storage_account = account.name
             namespace.storage_account_type = 'existing'
+            logger.debug("suitable existing storage account '%s' will be used", account.name)
         else:
             # 4 - nothing specified - create a new storage account
             namespace.storage_account_type = 'new'
-
-    logger.debug("using '%s' storage account with name '%s' and tier '%s'", namespace.storage_account_type,
-                 namespace.storage_account, sku_tier)
+            logger.debug('no suitable storage account found. One will be created.')
 
 
 def _validate_vm_create_availability_set(namespace):
@@ -390,7 +390,7 @@ def _validate_vm_create_availability_set(namespace):
             namespace='Microsoft.Compute',
             type='availabilitySets',
             name=name)
-        logger.debug("adding to availability set '%s'", namespace.availability_set)
+        logger.debug("adding to specified availability set '%s'", namespace.availability_set)
 
 
 def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
@@ -402,7 +402,7 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
     nics = getattr(namespace, 'nics', None)
 
     if not vnet and not subnet and not nics:
-        logger.debug('no subnet specified. Attempting to find an existing VVnet and subnet...')
+        logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         client = get_network_client().virtual_networks
@@ -448,7 +448,8 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
             return
     # 3 - create a new vnet/subnet
     namespace.vnet_type = 'new'
-    logger.debug("no suitable subnet found. New one will be created", namespace.vnet_name, namespace.subnet)
+    logger.debug('no suitable subnet found. One will be created.')
+
 
 def _subnet_capacity_check(subnet_mask, vmss_instance_count):
     mask = int(subnet_mask)
@@ -511,12 +512,16 @@ def _validate_vm_create_nsg(namespace):
         if check_existence(namespace.nsg, namespace.resource_group_name,
                            'Microsoft.Network', 'networkSecurityGroups'):
             namespace.nsg_type = 'existing'
+            logger.debug("using specified NSG '%s'", namespace.nsg)
         else:
             namespace.nsg_type = 'new'
+            logger.debug("specified NSG '%s' not found. One will be created.", namespace.nsg)
     elif namespace.nsg == '':
         namespace.nsg_type = None
+        logger.debug('no NSG will be used')
     elif namespace.nsg is None:
         namespace.nsg_type = 'new'
+        logger.debug('new NSG will be created')
 
 
 def _validate_vm_create_public_ip(namespace):
@@ -524,18 +529,22 @@ def _validate_vm_create_public_ip(namespace):
         if check_existence(namespace.public_ip_address, namespace.resource_group_name,
                            'Microsoft.Network', 'publicIPAddresses'):
             namespace.public_ip_type = 'existing'
+            logger.debug("using existing specified public IP '%s'", namespace.public_ip_address)
         else:
             namespace.public_ip_type = 'new'
+            logger.debug("specified public IP '%s' not found. It will be created.", namespace.public_ip_address)
     elif namespace.public_ip_address == '':
         namespace.public_ip_type = None
+        logger.debug('no public IP address will be used')
     elif namespace.public_ip_address is None:
         namespace.public_ip_type = 'new'
+        logger.debug('new public IP address will be created')
 
 
 def _validate_vmss_create_public_ip(namespace):
     if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
         if namespace.public_ip_address:
-            raise CLIError('--public-ip-address can only be used  when creating a new load '
+            raise CLIError('--public-ip-address can only be used when creating a new load '
                            'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
     _validate_vm_create_public_ip(namespace)
@@ -548,6 +557,7 @@ def _validate_vm_create_nics(namespace):
 
     if not nics_value:
         namespace.nic_type = 'new'
+        logger.debug('new NIC will be created')
         return
 
     if not isinstance(nics_value, list):
@@ -568,6 +578,7 @@ def _validate_vm_create_nics(namespace):
     namespace.nics = nics
     namespace.nic_type = 'existing'
     namespace.public_ip_type = None
+    logger.debug('existing NIC(s) will be used')
 
 
 def _validate_vm_vmss_create_auth(namespace):
@@ -619,8 +630,8 @@ def _validate_vm_vmss_create_auth(namespace):
 
 
 def _validate_admin_username(username, os_type):
-    import getpass
-    username = username or getpass.getuser()
+    if not username:
+        raise CLIError("admin user name can not be empty")
     is_linux = (os_type.lower() == 'linux')
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
@@ -745,6 +756,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         # use defaulting rules to determine
         balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
             else 'applicationGateway'
+        logger.debug("defaulting to '%s' because instance count <= %s", balancer_type, INSTANCE_THRESHOLD)
     elif namespace.load_balancer:
         balancer_type = 'loadBalancer'
     elif namespace.application_gateway:
@@ -757,12 +769,16 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             try:
                 client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
+                logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
             except CloudError:
                 namespace.app_gateway_type = 'new'
+                logger.debug("application gateway '%s' not found. It will be created.", namespace.application_gateway)
         elif namespace.application_gateway == '':
             namespace.app_gateway_type = None
+            logger.debug('no application gateway will be used')
         elif namespace.application_gateway is None:
             namespace.app_gateway_type = 'new'
+            logger.debug('new application gateway will be created')
 
         # AppGateway frontend
         required = []
@@ -787,12 +803,16 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             if check_existence(namespace.load_balancer, namespace.resource_group_name,
                                'Microsoft.Network', 'loadBalancers'):
                 namespace.load_balancer_type = 'existing'
+                logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'
+                logger.debug("load balancer '%s' not found. It will be created.", namespace.load_balancer)
         elif namespace.load_balancer == '':
             namespace.load_balancer_type = None
+            logger.debug('no load balancer will be used')
         elif namespace.load_balancer is None:
             namespace.load_balancer_type = 'new'
+            logger.debug('new load balancer will be created')
 
 
 def get_network_client():
@@ -816,8 +836,7 @@ def process_vmss_create_namespace(namespace):
 
 
 def validate_vm_disk(namespace):
-    namespace.disk = _get_resource_id(namespace.disk, namespace.resource_group_name,
-                                      'disks', 'Microsoft.Compute')
+    namespace.disk = _get_resource_id(namespace.disk, namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
 
 def process_disk_or_snapshot_create_namespace(namespace):
