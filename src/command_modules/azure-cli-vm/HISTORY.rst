@@ -2,11 +2,17 @@
 
 Release History
 ===============
+
 unreleased
 ++++++++++++++++++
-* `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
 * vm/vmss: use newer api-version of "2017-03-30"
 * BC: 'sku.managed' is removed from 'az vm availability-set show' (use sku.name instead)
+* `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
+* `vm/vmss create`: if --admin-password is specified for Linux images, automatically will change from SSH authentication
+  to password without needing `--authentication-type password` explicitly.
+* `vm/vmss create`: added information statements that can be shown using --debug
+* `vm/vmss create`: added client-side validation where certain parameters were previously just ignored.
+
 
 2.0.9 (2017-06-21)
 ++++++++++++++++++
