@@ -454,10 +454,25 @@ class Shell(object):
         if text:
             if text[0] == SELECT_SYMBOL['outside']:
                 cmd = text[1:]
+                cmd_strip = cmd.strip()
                 outside = True
-                if cmd.strip() and cmd.split()[0] == 'cd':
-                    self.handle_cd(parse_quotes(cmd))
-                    continue_flag = True
+                if cmd_strip:
+                    parsed_cmd = parse_quotes(cmd)
+                    if cmd_strip[0] == 'cd':
+                        self.handle_cd(parsed_cmd)
+                        continue_flag = True
+                    elif cmd_strip[0] == 'export' and len(parsed_cmd) > 2:  # sets environment variables
+                        env_half = parsed_cmd[1].partition('=')
+                        env_name = env_half[0]
+                        env_val = env_half[2]
+                        if '$' in env_val:  # example 'export path=$PATH:home
+                            env_var = env_val.partition('$')[2]  # the left side of the evaluate
+                            env_var = env_var.partition(':')[0]  # the right side of any colon
+                            evalulated_env_val = env_val.replace('$' + env_var, os.environ.get(env_var))
+                            os.environ[env_name] = evalulated_env_val
+                        else:
+                            os.environ[env_name] = env_val
+                        continue_flag = True
                 telemetry.track_ssg('outside', '')
 
             elif text[0] == SELECT_SYMBOL['exit_code']:
