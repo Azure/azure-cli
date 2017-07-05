@@ -12,6 +12,7 @@ unreleased
   to password without needing `--authentication-type password` explicitly.
 * `vm/vmss create`: added information statements that can be shown using --debug
 * `vm/vmss create`: added client-side validation where certain parameters were previously just ignored.
+* `vmss create`: support public ip per instance, instance custom domain name, custom dns servers
 
 
 2.0.9 (2017-06-21)

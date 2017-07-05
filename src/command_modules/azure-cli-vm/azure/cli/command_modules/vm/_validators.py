@@ -547,6 +547,8 @@ def _validate_vmss_create_public_ip(namespace):
             raise CLIError('--public-ip-address can only be used when creating a new load '
                            'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
+    if namespace.public_ip_per_vm is None and namespace.vm_domain_name is not None:
+        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
     _validate_vm_create_public_ip(namespace)
 
 
