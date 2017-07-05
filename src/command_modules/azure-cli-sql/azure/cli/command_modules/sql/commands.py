@@ -138,7 +138,6 @@ recommanded_elastic_pools_ops = \
 servers_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
                                             'ServersOperations')
 
-
 with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, custom_path) as s:
     with s.group('sql server') as c:
         c.command('create', 'create_or_update')
