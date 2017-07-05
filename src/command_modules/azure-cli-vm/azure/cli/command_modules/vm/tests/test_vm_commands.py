@@ -1487,6 +1487,18 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
         ])
 
+    @ResourceGroupPreparer()
+    def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --vm-domain-name clitestnewnetwork --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
+            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
+        ])
+        # spot check we have the domain name and have a public ip
+        result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('[0].dnsSettings.domainNameLabel', 'vm0.clitestnewnetwork'),
+        ]).get_output_in_json()
+        self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
+
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 

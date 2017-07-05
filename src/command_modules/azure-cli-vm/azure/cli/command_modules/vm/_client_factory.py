@@ -21,6 +21,13 @@ def cf_ni(_):
     return ni
 
 
+def cf_public_ip_addresses(_):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    public_ip_ops = get_mgmt_service_client(ResourceType.MGMT_NETWORK).public_ip_addresses
+    return public_ip_ops
+
+
 def cf_avail_set(_):
     return _compute_client_factory().availability_sets
 
