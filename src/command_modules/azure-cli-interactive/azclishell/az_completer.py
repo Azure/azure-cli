@@ -22,7 +22,11 @@ BLACKLISTED_COMPLETIONS = ['interactive']
 
 
 def initialize_command_table_attributes(completer):
-    completer.initialize_command_table_attributes()
+    completer.cmdtab = FRESH_TABLE.command_table
+    if completer.cmdtab:
+        completer.parser.load_command_table(completer.cmdtab)
+        completer.argsfinder = ArgsFinder(completer.parser)
+
 
 def error_pass(_, message):  # pylint: disable=unused-argument
     return
@@ -126,12 +130,6 @@ class AzCompleter(Completer):
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
         self.cmdtab = None
-
-    def initialize_command_table_attributes(self):
-        self.cmdtab = FRESH_TABLE.command_table
-        if self.cmdtab is not None:
-            self.parser.load_command_table(self.cmdtab)
-            self.argsfinder = ArgsFinder(self.parser)
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """

@@ -8,16 +8,14 @@ import threading
 
 class ContinuousPingThread(threading.Thread):
     """ thread to keep the progress indications running """
-    def __init__(self, func, arg):
-        super(ContinuousPingThread, self).__init__()
-        self.func = func
-        self.arg = arg
+    def __init__(self, target, args):
+        super(ContinuousPingThread, self).__init__(target=target, args=args)
 
     def run(self):
         import time
         try:
             while True:
-                if self.func(self.arg):
+                if super(ContinuousPingThread, self).run():
                     time.sleep(4)
                     break
                 time.sleep(.25)
@@ -27,11 +25,11 @@ class ContinuousPingThread(threading.Thread):
 
 class LoadCommandTableThread(threading.Thread):
     """ a thread that loads the command table """
-    def __init__(self, func, arg):
+    def __init__(self, target, shell):
         super(LoadCommandTableThread, self).__init__()
+        self.initialize_function = target
+        self.shell = shell
         self.daemon = True
-        self.arg = arg
-        self.func = func
 
     def run(self):
         from azclishell._dump_commands import FRESH_TABLE
@@ -41,5 +39,5 @@ class LoadCommandTableThread(threading.Thread):
             FRESH_TABLE.dump_command_table()
         except KeyboardInterrupt:
             pass
-        self.func(self.arg)
-        initialize_command_table_attributes(self.arg.completer)
+        self.initialize_function(self.shell)
+        initialize_command_table_attributes(self.shell.completer)

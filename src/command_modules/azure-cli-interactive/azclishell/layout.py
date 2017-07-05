@@ -118,13 +118,11 @@ def get_lexers(main_lex, exam_lex, tool_lex):
     if exam_lex:
         if issubclass(exam_lex, PygLex):
             exam_lex = PygmentsLexer(exam_lex)
-    else:
-        exam_lex = None
+
     if tool_lex:
         if issubclass(tool_lex, PygLex):
             tool_lex = PygmentsLexer(tool_lex)
-    else:
-        tool_lex = None
+
     return lexer, exam_lex, tool_lex
 
 

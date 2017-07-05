@@ -118,7 +118,8 @@ def validate_contains_query(args, symbol):
 
 
 def restart_completer(shell):
-    shell.refresh_completer()
+    shell.completer = AzCompleter(GatherCommands())
+    shell.refresh_cli = True
 
 
 # pylint: disable=too-many-instance-attributes
@@ -162,10 +163,6 @@ class Shell(object):
             self._cli = self.create_interface()
             self.refresh_cli = False
         return self._cli
-
-    def refresh_completer(self):
-        self.completer = AzCompleter(GatherCommands())
-        self.refresh_cli = True
 
     def handle_cd(self, cmd):
         """changes dir """
