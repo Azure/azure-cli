@@ -21,7 +21,7 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              NoneCheck, MOCKED_SUBSCRIPTION_ID)
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
+from azure.cli.testsdk.checkers import JMESPathCheck as JMESPathCheckV2, NoneCheck as NoneCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -503,10 +503,22 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
-class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # pylint:disable=too-many-instance-attributes
+class VMCreateAndStateModificationsScenarioTest(ScenarioTest):  # pylint:disable=too-many-instance-attributes
 
-    def __init__(self, test_method):
-        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_state_mod')
+    def _check_vm_power_state(self, expected_power_state):
+        self.cmd('vm get-instance-view --resource-group {} --name {}'.format(
+            self.resource_group, self.vm_name), checks=[
+                JMESPathCheckV2('type(@)', 'object'),
+                JMESPathCheckV2('name', self.vm_name),
+                JMESPathCheckV2('resourceGroup', self.resource_group),
+                JMESPathCheckV2('length(instanceView.statuses)', 2),
+                JMESPathCheckV2('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+                JMESPathCheckV2('instanceView.statuses[1].code', expected_power_state),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
+    def test_vm_create_state_modifications(self, resource_group):
+        self.resource_group = resource_group
         self.location = 'eastus'
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
@@ -514,23 +526,8 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.storage_name = 'clitestvmcreate20170301'
         self.vnet_name = 'myvnet'
 
-    def test_vm_create_state_modifications(self):
-        self.execute()
-
-    def _check_vm_power_state(self, expected_power_state):
-        self.cmd('vm get-instance-view --resource-group {} --name {}'.format(
-            self.resource_group, self.vm_name), checks=[
-                JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', self.vm_name),
-                JMESPathCheck('resourceGroup', self.resource_group),
-                JMESPathCheck('length(instanceView.statuses)', 2),
-                JMESPathCheck('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
-                JMESPathCheck('instanceView.statuses[1].code', expected_power_state),
-        ])
-
-    def body(self):
         # Expecting no results
-        self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheckV2())
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image UbuntuLTS --admin-password testPassword0 '
                  '--authentication-type password '
@@ -541,19 +538,19 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
 
         # Expecting one result, the one we created
         self.cmd('vm list --resource-group {}'.format(self.resource_group), [
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].resourceGroup', self.resource_group),
-            JMESPathCheck('[0].name', self.vm_name),
-            JMESPathCheck('[0].location', self.location),
-            JMESPathCheck('[0].provisioningState', 'Succeeded'),
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('[0].resourceGroup', self.resource_group),
+            JMESPathCheckV2('[0].name', self.vm_name),
+            JMESPathCheckV2('[0].location', self.location),
+            JMESPathCheckV2('[0].provisioningState', 'Succeeded'),
         ])
 
         # Verify tags were set
         self.cmd('vm show --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name), checks=[
-                JMESPathCheck('tags.firsttag', '1'),
-                JMESPathCheck('tags.secondtag', '2'),
-                JMESPathCheck('tags.thirdtag', ''),
+                JMESPathCheckV2('tags.firsttag', '1'),
+                JMESPathCheckV2('tags.secondtag', '2'),
+                JMESPathCheckV2('tags.thirdtag', ''),
         ])
         self._check_vm_power_state('PowerState/running')
 
@@ -562,27 +559,27 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
 
         self.cmd('network nsg show --resource-group {} --name {}'.format(
             self.resource_group, self.nsg_name), checks=[
-                JMESPathCheck('tags.firsttag', '1'),
-                JMESPathCheck('tags.secondtag', '2'),
-                JMESPathCheck('tags.thirdtag', ''),
+                JMESPathCheckV2('tags.firsttag', '1'),
+                JMESPathCheckV2('tags.secondtag', '2'),
+                JMESPathCheckV2('tags.thirdtag', ''),
         ])
         self.cmd('network public-ip show --resource-group {} --name {}'.format(
             self.resource_group, self.ip_name), checks=[
-                JMESPathCheck('tags.firsttag', '1'),
-                JMESPathCheck('tags.secondtag', '2'),
-                JMESPathCheck('tags.thirdtag', ''),
+                JMESPathCheckV2('tags.firsttag', '1'),
+                JMESPathCheckV2('tags.secondtag', '2'),
+                JMESPathCheckV2('tags.thirdtag', ''),
         ])
         self.cmd('network vnet show --resource-group {} --name {}'.format(
             self.resource_group, self.vnet_name), checks=[
-                JMESPathCheck('tags.firsttag', '1'),
-                JMESPathCheck('tags.secondtag', '2'),
-                JMESPathCheck('tags.thirdtag', ''),
+                JMESPathCheckV2('tags.firsttag', '1'),
+                JMESPathCheckV2('tags.secondtag', '2'),
+                JMESPathCheckV2('tags.thirdtag', ''),
         ])
         self.cmd('storage account show --resource-group {} --name {}'.format(
             self.resource_group, self.storage_name), checks=[
-                JMESPathCheck('tags.firsttag', '1'),
-                JMESPathCheck('tags.secondtag', '2'),
-                JMESPathCheck('tags.thirdtag', ''),
+                JMESPathCheckV2('tags.firsttag', '1'),
+                JMESPathCheckV2('tags.secondtag', '2'),
+                JMESPathCheckV2('tags.thirdtag', ''),
         ])
 
         self.cmd('vm stop --resource-group {} --name {}'.format(
@@ -599,11 +596,11 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self._check_vm_power_state('PowerState/deallocated')
         self.cmd('vm resize -g {} -n {} --size {}'.format(
             self.resource_group, self.vm_name, ' Standard_DS2_v2'),
-            checks=JMESPathCheck('hardwareProfile.vmSize', 'Standard_DS2_v2'))
+            checks=JMESPathCheckV2('hardwareProfile.vmSize', 'Standard_DS2_v2'))
         self.cmd('vm delete --resource-group {} --name {} --yes'.format(
             self.resource_group, self.vm_name))
         # Expecting no results
-        self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheckV2())
 
 
 class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
