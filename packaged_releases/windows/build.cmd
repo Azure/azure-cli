@@ -11,6 +11,7 @@ CALL scripts\prepareBuild.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Building MSI...
+where msbuild
 msbuild /t:rebuild /p:Configuration=Release
 
 echo.
