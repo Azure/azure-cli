@@ -253,6 +253,8 @@ register_cli_argument('vmss create', 'backend_pool_name', help='Name to use for 
 register_cli_argument('vmss create', 'nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], arg_group='Network Balancer')
 register_cli_argument('vmss create', 'backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int, arg_group='Network Balancer')
 register_cli_argument('vmss create', 'app_gateway_subnet_address_prefix', help='The subnet IP address prefix to use when creating a new application gateway in CIDR format.', arg_group='Network Balancer')
+register_cli_argument('vmss create', 'app_gateway_sku', help='SKU when creating a new application gateway.', arg_group='Network Balancer')
+register_cli_argument('vmss create', 'app_gateway_capacity', help='The number of instances to use when creating a new application gateway.', arg_group='Network Balancer')
 register_cli_argument('vmss create', 'instance_count', help='Number of VMs in the scale set.', type=int)
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))

@@ -460,10 +460,9 @@ def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
     return frontend_ip_config
 
 
-def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
-                                       frontend_ip_name, public_ip_id,
-                                       subnet_id, gateway_subnet_id,
-                                       private_ip_address, private_ip_allocation):
+def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port, frontend_ip_name,
+                                       public_ip_id, subnet_id, gateway_subnet_id,
+                                       private_ip_address, private_ip_allocation, sku, capacity):
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
                                                    private_ip_address, private_ip_allocation,
                                                    subnet_id)
@@ -523,9 +522,9 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
             }
         ],
         'sku': {
-            'name': 'Standard_Large',
-            'tier': 'Standard',
-            'capacity': '10'
+            'name': sku,
+            'tier': sku.split('_')[0],
+            'capacity': capacity
         },
         'requestRoutingRules': [
             {
