@@ -28,6 +28,8 @@ cli_command(__name__, 'acr delete', 'azure.cli.command_modules.acr.custom#acr_de
 cli_command(__name__, 'acr show', 'azure.cli.command_modules.acr.custom#acr_show',
             table_transformer=output_format, exception_handler=empty_on_404)
 cli_command(__name__, 'acr login', 'azure.cli.command_modules.acr.custom#acr_login')
+cli_command(__name__, 'acr show-usage', 'azure.cli.command_modules.acr.custom#acr_show_usage',
+            table_transformer=output_format)
 cli_generic_update_command(
     __name__,
     'acr update',

@@ -44,14 +44,15 @@ def _get_login_token(login_server, only_refresh_token=True, repository=None):
 
     from azure.cli.core._profile import Profile
     profile = Profile()
-    sp_id, refresh, tenant = profile.get_refresh_token()
+    sp_id, refresh, access, tenant = profile.get_refresh_token()
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     if sp_id is None:
         content = {
-            'grant_type': 'refresh_token',
+            'grant_type': 'access_token_refresh_token',
             'service': params['service'],
             'tenant': tenant,
+            'access_token': access,
             'refresh_token': refresh
         }
     else:
