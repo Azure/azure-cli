@@ -55,6 +55,10 @@ helps['sql db audit-policy'] = """
     type: group
     short-summary: Manage a database's auditing policy.
     """
+helps['sql server ad-admin'] = """
+    type: group
+    short-summary: Manage server Active Directory Administrator.
+    """
 helps['sql server ad-admin create'] = """
     type: command
     short-summary: Creates a new Server Active Directory Administrator.
