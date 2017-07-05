@@ -135,7 +135,7 @@ class AzCompleter(Completer):
         # cancels parameters that are already in the in line
         canceling_positions = param.lower() != words.lower() and param not in text_before_cursor.split()
 
-        double = True
+        found_double = True
         # checks for aliasing of parameters
 
         if check_double:
@@ -143,10 +143,10 @@ class AzCompleter(Completer):
                 # if the parameter is in any of the sets
                 if param in double_sets:
                     # if any of the other aliases are in the line already
-                    double = not any(
+                    found_double = not any(
                         alias in text_before_cursor.split() and alias != param for alias in double_sets)
 
-        return position and canceling_positions and double
+        return position and canceling_positions and found_double
 
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor
