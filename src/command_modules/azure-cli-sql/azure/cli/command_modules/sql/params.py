@@ -499,6 +499,7 @@ with ParametersContext(command='sql dw show') as c:
 ###############################################
 
 
+
 with ParametersContext(command='sql elastic-pool') as c:
     c.argument('elastic_pool_name',
                options_list=('--name', '-n'),
@@ -514,6 +515,7 @@ with ParametersContext(command='sql elastic-pool') as c:
     c.register_alias('database_dtu_max', ('--db-dtu-max', '--db-max-dtu'))
     c.register_alias('database_dtu_min', ('--db-dtu-min', '--db-min-dtu'))
 
+    # --storage was the original param name, which is consistent with the underlying REST API.
     # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
     # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
     c.argument('storage_mb', options_list=('--storage', '--max-size',),
