@@ -30,12 +30,12 @@ class AzHelpGenDirective(Directive):
 
         help_files = []
         for cmd, parser in parser_dict.items():
-            help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
             try:
+                help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
                 help_file.load(parser)
+                help_files.append(help_file)
             except Exception as ex:
-                print(ex)
-            help_files.append(help_file)
+                print("Skipped '{}' due to '{}'".format(cmd, ex))
         help_files = sorted(help_files, key=lambda x: x.command)
 
         for help_file in help_files:
