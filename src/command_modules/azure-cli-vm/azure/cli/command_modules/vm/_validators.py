@@ -830,6 +830,10 @@ def process_vmss_create_namespace(namespace):
     _validate_vmss_create_public_ip(namespace)
     _validate_vm_vmss_create_auth(namespace)
 
+    if not namespace.public_ip_per_vm and namespace.vm_domain_name:
+        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+
+
 # endregion
 
 # region disk, snapshot, image validators
