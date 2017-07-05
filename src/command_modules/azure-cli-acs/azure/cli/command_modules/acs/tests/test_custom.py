@@ -15,7 +15,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
                                                   _acs_browse_internal, _add_role_assignment)
-from azure.mgmt.compute.containerservice.models import (ContainerServiceOchestratorTypes,
+from azure.mgmt.compute.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                         ContainerService,
                                                         ContainerServiceOrchestratorProfile)
 from azure.cli.core.util import CLIError
@@ -70,7 +70,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_browse_k8s(self, get_subscription_id):
         acs_info = ContainerService("location", {}, {}, {})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOchestratorTypes.kubernetes)
+            ContainerServiceOrchestratorTypes.kubernetes)
 
         with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
                         return_value=acs_info) as get_acs_info:
@@ -84,7 +84,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_browse_dcos(self, get_subscription_id):
         acs_info = ContainerService("location", {}, {}, {})
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOchestratorTypes.dcos)
+            ContainerServiceOrchestratorTypes.dcos)
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:

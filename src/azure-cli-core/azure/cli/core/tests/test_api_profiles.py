@@ -18,14 +18,14 @@ class TestAPIProfiles(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2017-01-01-profile'))
     def test_get_api_version(self):
-        ''' Can get correct resource type API version '''
+        # Can get correct resource type API version
         test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             self.assertEqual(get_api_version(ResourceType.MGMT_STORAGE), '2020-10-10')
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2017-01-01-profile'))
     def test_get_api_version_invalid_rt(self):
-        ''' Resource Type not in profile '''
+        # Resource Type not in profile
         test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             with self.assertRaises(APIVersionException):
@@ -33,7 +33,7 @@ class TestAPIProfiles(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='not-a-real-profile'))
     def test_get_api_version_invalid_active_profile(self):
-        ''' The active profile is not in our profile dict '''
+        # The active profile is not in our profile dict
         test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             with self.assertRaises(APIVersionException):
@@ -41,20 +41,20 @@ class TestAPIProfiles(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='not-a-real-profile'))
     def test_supported_api_version_invalid_profile_name(self):
-        ''' Invalid name for the profile name'''
+        # Invalid name for the profile name
         with self.assertRaises(ValueError):
             supported_api_version(PROFILE_TYPE, min_api='2000-01-01')
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2017-01-01-profile'))
     def test_get_api_version_invalid_rt_2(self):
-        ''' None is not a valid resource type '''
+        # None is not a valid resource type
         test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: '2020-10-10'}}
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             with self.assertRaises(APIVersionException):
                 get_api_version(None)
 
     def test_supported_api_profile_no_constraints(self):
-        ''' At least a min or max version must be specified '''
+        # At least a min or max version must be specified
         with self.assertRaises(ValueError):
             supported_api_version(PROFILE_TYPE)
 
@@ -89,7 +89,7 @@ class TestAPIProfiles(unittest.TestCase):
         self.assertTrue(supported_api_version(PROFILE_TYPE, min_api='2000-01-01'))
 
     def test_supported_api_version_no_constraints(self):
-        ''' At least a min or max version must be specified '''
+        # At least a min or max version must be specified
         with self.assertRaises(ValueError):
             supported_api_version(ResourceType.MGMT_STORAGE)
 

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+import os
 
 from azure.cli.core.commands.progress import ProgressReporter, ProgressHook
 
@@ -24,6 +25,7 @@ class ShellProgressViewTest(unittest.TestCase):
         self.assertEqual(prog.get_progress_message(), 'Test1')
         self.assertEqual(prog.PROGRESS_BAR, "")
 
+    @unittest.skipIf(os.getenv('TERM') is None, 'Skip when $TERM is missing')
     def test_shell_progress_write_2(self):
         self.init()
         self.controller.add(message='Test2', total_val=10, value=1)

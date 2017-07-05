@@ -20,8 +20,8 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
-from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
-from azure.cli.command_modules.acs._validators import validate_ssh_key
+from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key
 
 
 def _compute_client_factory(**_):
@@ -67,7 +67,7 @@ register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default=
 
 register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
 
-register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), **enum_choice_list(ContainerServiceOchestratorTypes))
+register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), **enum_choice_list(ContainerServiceOrchestratorTypes))
 # some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
@@ -76,7 +76,7 @@ register_cli_argument('acs', 'container_service_name', options_list=('--name', '
 register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
 register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=validate_ssh_key)
 
-register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
+register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', validator=validate_create_parameters)
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')

@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import shutil
+import os
+import tempfile
 from mock import patch
 from azure.cli.testsdk import (
     ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck
@@ -20,8 +23,6 @@ test_replica_id = "131413730902833907"
 
 # pylint: disable=too-many-public-methods
 class ServiceFabricScenarioTests(ScenarioTest):
-
-    # Application tests
 
     @patch("azure.cli.command_modules.sf._factory.SfConfigParser")
     def app_health_returns_aggregated_and_name_test(self, mock_config_parser):
@@ -54,6 +55,38 @@ class ServiceFabricScenarioTests(ScenarioTest):
         instance.cert_info.return_value = False
 
         self.cmd("az sf application type", checks=[NoneCheck()])
+
+    def valid_application_upload_path_returns_absolute_path_test(self):
+        import azure.cli.command_modules.sf.custom as sf_c
+        temp_dir_path = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(temp_dir_path, ignore_errors=True))
+        self.assertTrue(os.path.isabs(sf_c.validate_app_path(temp_dir_path)))
+
+    @patch("azure.cli.command_modules.sf.config.SfConfigParser")
+    def single_folder_large_file_upload_test(self, mock_config_parser):
+        instance = mock_config_parser.return_value
+        instance.no_verify_setting.return_value = False
+        instance.ca_cert_info.return_value = False
+        instance.connection_endpoint.return_value = test_endpoint
+        instance.cert_info.return_value = False
+
+        # Specifically need a large temporary file in a temporary directory
+        temp_app_dir = tempfile.mkdtemp()
+        dest_app_dir = os.path.join(os.path.dirname(temp_app_dir), "tempdir00")
+        os.rename(temp_app_dir, dest_app_dir)
+        fd, file_path = tempfile.mkstemp(dir=dest_app_dir)
+        os.close(fd)
+        dest_file_path = os.path.join(dest_app_dir, "tempfile00")
+        os.rename(file_path, dest_file_path)
+        self.test_resources_count += 2
+        self.addCleanup(lambda: shutil.rmtree(dest_app_dir, ignore_errors=True))
+
+        with open(dest_file_path, mode='r+b') as f:
+            chunk = bytearray([0] * 1024)
+            for _ in range(5000):
+                f.write(chunk)
+
+        self.cmd("az sf application upload --path {0} --show-progress".format(dest_app_dir), checks=[NoneCheck()])
 
     # Cluster tests
 

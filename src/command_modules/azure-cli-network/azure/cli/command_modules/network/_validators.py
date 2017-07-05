@@ -13,8 +13,8 @@ from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
-from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 
@@ -86,15 +86,12 @@ def validate_address_pool_name_or_id(namespace):
 
 
 def validate_address_prefixes(namespace):
-    subnet_prefix_set = SPECIFIED_SENTINEL in namespace.subnet_address_prefix
-    vnet_prefix_set = SPECIFIED_SENTINEL in namespace.vnet_address_prefix
-    namespace.subnet_address_prefix = \
-        namespace.subnet_address_prefix.replace(SPECIFIED_SENTINEL, '')
-    namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace(SPECIFIED_SENTINEL, '')
 
-    if namespace.subnet_type != 'new' and (subnet_prefix_set or vnet_prefix_set):
-        raise CLIError('Existing subnet ({}) found. Cannot specify address prefixes when '
-                       'reusing an existing subnet.'.format(namespace.subnet))
+    if namespace.subnet_type != 'new':
+        validate_parameter_set(namespace,
+                               required=[],
+                               forbidden=['subnet_address_prefix', 'vnet_address_prefix'],
+                               description='existing subnet')
 
 
 def read_base_64_file(filename):
@@ -290,15 +287,29 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
     return complex_validator_with_type if has_type_field else simple_validator
 
 
-def validate_servers(namespace):
-    servers = []
-    for item in namespace.servers if namespace.servers else []:
-        try:
-            socket.inet_aton(item)  # pylint:disable=no-member
-            servers.append({'ipAddress': item})
-        except socket.error:  # pylint:disable=no-member
-            servers.append({'fqdn': item})
-    namespace.servers = servers
+def get_servers_validator(camel_case=False):
+    def validate_servers(namespace):
+        servers = []
+        for item in namespace.servers if namespace.servers else []:
+            try:
+                socket.inet_aton(item)  # pylint:disable=no-member
+                servers.append({'ipAddress' if camel_case else 'ip_address': item})
+            except socket.error:  # pylint:disable=no-member
+                servers.append({'fqdn': item})
+        namespace.servers = servers
+    return validate_servers
+
+
+def validate_target_listener(namespace):
+    if namespace.target_listener and not is_valid_resource_id(namespace.target_listener):
+        namespace.target_listener = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            name=namespace.application_gateway_name,
+            namespace='Microsoft.Network',
+            type='applicationGateways',
+            child_type='httpListeners',
+            child_name=namespace.target_listener)
 
 
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -362,6 +373,10 @@ def process_ag_rule_create_namespace(namespace):  # pylint: disable=unused-argum
         namespace.url_path_map = _generate_ag_subproperty_id(
             namespace, 'urlPathMaps', namespace.url_path_map)
 
+    if namespace.redirect_config and not is_valid_resource_id(namespace.redirect_config):
+        namespace.redirect_config = _generate_ag_subproperty_id(
+            namespace, 'redirectConfigurations', namespace.redirect_config)
+
 
 def process_ag_ssl_policy_set_namespace(namespace):
     if namespace.disabled_ssl_protocols and namespace.clear:
@@ -378,7 +393,13 @@ def process_ag_url_path_map_create_namespace(namespace):  # pylint: disable=unus
         namespace.default_http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
 
-    process_ag_url_path_map_rule_create_namespace(namespace)
+    if namespace.default_redirect_config and not is_valid_resource_id(
+            namespace.default_redirect_config):
+        namespace.default_redirect_config = _generate_ag_subproperty_id(
+            namespace, 'redirectConfigurations', namespace.default_redirect_config)
+
+    if hasattr(namespace, 'rule_name'):
+        process_ag_url_path_map_rule_create_namespace(namespace)
 
 
 def process_ag_url_path_map_rule_create_namespace(namespace):  # pylint: disable=unused-argument
@@ -390,6 +411,11 @@ def process_ag_url_path_map_rule_create_namespace(namespace):  # pylint: disable
         namespace.http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.http_settings)
 
+    if namespace.redirect_config and not is_valid_resource_id(
+            namespace.redirect_config):
+        namespace.redirect_config = _generate_ag_subproperty_id(
+            namespace, 'redirectConfigurations', namespace.redirect_config)
+
 
 def process_ag_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
@@ -398,19 +424,7 @@ def process_ag_create_namespace(namespace):
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(namespace)
 
-    prefix_usage_error = CLIError('Do not specify --subnet-address-prefix or --vnet-address-prefix'
-                                  ' when using an existing subnet.')
-    if namespace.subnet_address_prefix:
-        if '__SET__' in namespace.subnet_address_prefix:
-            if namespace.subnet_type != 'new':
-                raise prefix_usage_error
-            namespace.subnet_address_prefix = namespace.subnet_address_prefix.replace('__SET__', '')
-
-    if namespace.vnet_address_prefix:
-        if '__SET__' in namespace.vnet_address_prefix:
-            if namespace.subnet_type != 'new':
-                raise prefix_usage_error
-            namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace('__SET__', '')
+    validate_address_prefixes(namespace)
 
     if namespace.public_ip_address:
         get_public_ip_validator(
@@ -834,13 +848,3 @@ def process_nw_troubleshooting_show_namespace(namespace):
             raise resource_usage
 
     get_network_watcher_from_resource(namespace)
-
-
-# ACTIONS
-
-class markSpecifiedAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    """ Use this to identify when a parameter is explicitly set by the user (as opposed to a
-    default). You must remove the __SET__ sentinel substring in a follow-up validator."""
-
-    def __call__(self, parser, args, values, option_string=None):
-        setattr(args, self.dest, '__SET__{}'.format(values))

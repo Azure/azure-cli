@@ -88,20 +88,21 @@ class CompletionTest(unittest.TestCase):
         com_tree3.add_child(com_tree2)
         com_tree3.add_child(com_tree1)
         command_param = {
-            "create": ["--funtimes", "-f", "--helloworld"],
+            "create": ["--funtimes", "-f", '--fun', "--helloworld"],
         }
         completable_param = [
             "--helloworld",
             "--funtimes",
-            "-f"
+            "-f",
+            '--fun'
         ]
         param_descript = {
             "create -f": "There is no work life balance, it's just your life",
-            "create --funtimes": "There is no work life balance, it's just your life"
+            "create --funtimes": "There is no work life balance, it's just your life",
+            "create --fun": "There is no work life balance, it's just your life"
         }
         same_param_doubles = {
-            "-f": "--funtimes",
-            "--funtimes": '-f'
+            "create": [set(["-f", "--funtimes", '--fun']), set(['--unhap', '-u'])]
         }
         command_description = {
             "create": '',
@@ -137,8 +138,7 @@ class CompletionTest(unittest.TestCase):
             "create --funtimes": "There is no work life balance, it's just your life"
         }
         same_param_doubles = {
-            "-f": "--funtimes",
-            "--funtimes": '-f'
+            "create": [set(["-f", "--funtimes", '--fun'])]
         }
         command_description = {
             "create": '',
@@ -155,7 +155,7 @@ class CompletionTest(unittest.TestCase):
         self.completer = AzCompleter(commands, global_params=False, outstream=six.StringIO())
 
     def test_command_completion(self):
-        """ tests general command completion """
+        # tests general command completion
         self.init1()
 
         doc = Document(u'')
@@ -182,7 +182,7 @@ class CompletionTest(unittest.TestCase):
             six.next(gen)
 
     def test_param_completion(self):
-        """ tests param completion """
+        # tests param completion
         self.init2()
         doc = Document(u'create -')
         gen = self.completer.get_completions(doc, None)
@@ -195,7 +195,7 @@ class CompletionTest(unittest.TestCase):
             six.next(gen)
 
     def test_param_double(self):
-        """ tests not generating doubles for parameters """
+        # tests not generating doubles for parameters
         self.init3()
         doc = Document(u'create -f --')
         gen = self.completer.get_completions(doc, None)
@@ -203,6 +203,16 @@ class CompletionTest(unittest.TestCase):
             "--helloworld", -2))
 
         doc = Document(u'create -f -')
+        gen = self.completer.get_completions(doc, None)
+        with self.assertRaises(StopIteration):
+            six.next(gen)
+
+        doc = Document(u'create --fun -')
+        gen = self.completer.get_completions(doc, None)
+        with self.assertRaises(StopIteration):
+            six.next(gen)
+
+        doc = Document(u'create --funtimes -')
         gen = self.completer.get_completions(doc, None)
         with self.assertRaises(StopIteration):
             six.next(gen)

@@ -11,12 +11,10 @@ import azclishell.configuration
 from azclishell.command_tree import CommandBranch, CommandHead
 from azclishell.util import get_window_dim
 
+
 CONFIGURATION = azclishell.configuration.CONFIGURATION
 
-ROWS, COLS = get_window_dim()
-
 TOLERANCE = 10
-LINE_MINIMUM = math.floor(int(COLS) / 2 - 15)
 
 GLOBAL_PARAM_DESCRIPTIONS = {
     '--output': 'Output format',
@@ -29,8 +27,15 @@ OUTPUT_OPTIONS = ['--output', '-o']
 GLOBAL_PARAM = list(GLOBAL_PARAM_DESCRIPTIONS.keys())
 
 
-def add_random_new_lines(long_phrase, line_min=LINE_MINIMUM, tolerance=TOLERANCE):
+def _get_window_columns():
+    _, col = get_window_dim()
+    return col
+
+def add_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
     """ not everything fits on the screen, based on the size, add newlines """
+    if line_min is None:
+        line_min = math.floor(int(_get_window_columns()) / 2 - 15)
+
     if long_phrase is None:
         return long_phrase
     line_min = int(line_min)
@@ -105,6 +110,8 @@ class GatherCommands(object):
         """ gathers from the files in a way that is convienent to use """
         command_file = CONFIGURATION.get_help_files()
         cache_path = os.path.join(azclishell.configuration.get_config_dir(), 'cache')
+        cols = _get_window_columns()
+
         with open(os.path.join(cache_path, command_file), 'r') as help_file:
             data = json.load(help_file)
 
@@ -123,14 +130,14 @@ class GatherCommands(object):
                 branch = branch.get_child(word, branch.children)
 
             description = data[command]['help']
-            self.descrip[command] = add_random_new_lines(description)
+            self.descrip[command] = add_new_lines(description, line_min=int(cols) - 2 * TOLERANCE)
 
             if 'examples' in data[command]:
                 examples = []
                 for example in data[command]['examples']:
                     examples.append([
-                        add_random_new_lines(example[0], line_min=int(COLS) - 2 * TOLERANCE),
-                        add_random_new_lines(example[1], line_min=int(COLS) - 2 * TOLERANCE)])
+                        add_new_lines(example[0], line_min=int(cols) - 2 * TOLERANCE),
+                        add_new_lines(example[1], line_min=int(cols) - 2 * TOLERANCE)])
                 self.command_example[command] = examples
 
             all_params = []
@@ -141,21 +148,23 @@ class GatherCommands(object):
                    '==SUPPRESS==' in data[command]['parameters'][param]['help']:
                     suppress = True
                 if data[command]['parameters'][param]['help'] and not suppress:
-                    param_double = None
+                    param_aliases = set()
+
                     for par in data[command]['parameters'][param]['name']:
-                        if not param_double:
-                            param_double = par
-                        else:
-                            self.same_param_doubles[par] = param_double
-                            self.same_param_doubles[param_double] = par
+                        param_aliases.add(par)
 
                         self.param_descript[command + " " + par] =  \
-                            add_random_new_lines(
+                            add_new_lines(
                                 data[command]['parameters'][param]['required'] +
-                                " " + data[command]['parameters'][param]['help'])
+                                " " + data[command]['parameters'][param]['help'],
+                                line_min=int(cols) - 2 * TOLERANCE)
                         if par not in self.completable_param:
                             self.completable_param.append(par)
                         all_params.append(par)
+                    if len(param_aliases) > 1:
+                        param_list = self.same_param_doubles.get(command, [])
+                        param_list.append(param_aliases)
+                        self.same_param_doubles[command] = param_list
 
             self.command_param[command] = all_params
 

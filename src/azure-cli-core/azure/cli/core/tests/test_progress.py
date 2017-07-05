@@ -8,7 +8,6 @@ import azure.cli.core.commands.progress as progress
 
 
 class MockOutstream(progress.ProgressViewBase):
-    """ mock outstream for testing """
     def __init__(self):
         self.string = ''
 
@@ -20,10 +19,8 @@ class MockOutstream(progress.ProgressViewBase):
 
 
 class TestProgress(unittest.TestCase):
-    """ test the progress reporting """
-
     def test_progress_indicator_det_model(self):
-        """ test the progress reporter """
+        # test the progress reporter
         reporter = progress.ProgressReporter()
         args = reporter.report()
         self.assertEqual(args['message'], '')
@@ -55,7 +52,7 @@ class TestProgress(unittest.TestCase):
         self.assertEqual(message['message'], 'Progress')
 
     def test_progress_indicator_indet_stdview(self):
-        """ tests the indeterminate progress standardout view """
+        # tests the indeterminate progress standardout view
         outstream = MockOutstream()
         view = progress.IndeterminateStandardOut(out=outstream)
         view.write({})
@@ -67,7 +64,7 @@ class TestProgress(unittest.TestCase):
         view.write({'message': 'TESTING'})
 
     def test_progress_indicator_det_stdview(self):
-        """ test the determinate progress standardout view """
+        # test the determinate progress standardout view
         outstream = MockOutstream()
         view = progress.DeterminateStandardOut(out=outstream)
         view.write({'message': 'hihi', 'percent': .5})
@@ -81,7 +78,7 @@ class TestProgress(unittest.TestCase):
         self.assertEqual(outstream.string, '\r[{}]  {:.4%}'.format(bar_str, .9))
 
     def test_progress_indicator_controller(self):
-        """ tests the controller for progress reporting """
+        # tests the controller for progress reporting
         controller = progress.ProgressHook()
         view = MockOutstream()
 
