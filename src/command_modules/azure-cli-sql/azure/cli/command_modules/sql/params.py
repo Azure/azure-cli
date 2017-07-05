@@ -499,7 +499,6 @@ with ParametersContext(command='sql dw show') as c:
 ###############################################
 
 
-
 with ParametersContext(command='sql elastic-pool') as c:
     c.argument('elastic_pool_name',
                options_list=('--name', '-n'),
