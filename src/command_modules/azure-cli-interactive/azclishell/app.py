@@ -16,6 +16,7 @@ from threading import Thread
 import jmespath
 import six
 from six.moves import configparser
+from six.moves._thread import start_new_thread
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.buffer import Buffer
@@ -129,7 +130,7 @@ class Shell(object):
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
                  app=None, input_custom=sys.stdin, output_custom=None,
-                 user_feedback=False):
+                 user_feedback=False, intermediate_sleep=.25, final_sleep=4):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -155,6 +156,8 @@ class Shell(object):
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
+        self.intermediate_sleep = intermediate_sleep  # in seconds
+        self.final_sleep = final_sleep  # in seconds
 
     @property
     def cli(self):
@@ -647,16 +650,18 @@ class Shell(object):
 
             if '--progress' in args:
                 args.remove('--progress')
-                thread = Thread(target=self.app.execute, args=args)
+                execute_args = [args]
+                thread = Thread(target=self.app.execute, args=execute_args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
                 self.curr_thread = thread
 
-                thread = ContinuousPingThread(progress_view, self)
-                thread.daemon = True
-                thread.start()
-                self.threads.append(thread)
+                start_new_thread(target=progress_view, args=self)
+                # thread = ContinuousPingThread(progress_view, self)
+                # thread.daemon = True
+                # thread.start()
+                # self.threads.append(thread)
                 result = None
 
             else:
