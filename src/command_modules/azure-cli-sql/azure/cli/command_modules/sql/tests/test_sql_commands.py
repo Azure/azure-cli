@@ -302,8 +302,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
                  .format(sn, rg, oid, user),
                  checks=[JMESPathCheck('login', user),
-                         JMESPathCheck('sid', oid),
-                         JMESPathCheck('tenantId', tid)])
+                         JMESPathCheck('sid', oid)])
 
         self.cmd('sql server ad-admin list -s {} -g {}'
                  .format(sn, rg),
@@ -312,8 +311,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
                  .format(sn, rg, user2, oid2),
                  checks=[JMESPathCheck('login', user2),
-                         JMESPathCheck('sid', oid2),
-                         JMESPathCheck('tenantId', tid)])
+                         JMESPathCheck('sid', oid2)])
 
         self.cmd('sql server ad-admin delete -s {} -g {}'
                  .format(sn, rg))
