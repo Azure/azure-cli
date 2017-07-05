@@ -13,8 +13,8 @@ import paramiko.agent
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import prompt_pass
+from knack.prompting import prompt_pass
+from knack.util import CLIError
 
 
 def _load_key(key_filename):

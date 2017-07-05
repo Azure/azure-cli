@@ -6,7 +6,7 @@
 import unittest
 import mock
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics, \
     _merge_secrets

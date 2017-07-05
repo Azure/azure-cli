@@ -6,13 +6,12 @@
 from __future__ import print_function
 import platform
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
-from azure.cli.core.commands.arm import (
-    is_valid_resource_id,
-    parse_resource_id,
-    resource_id,
-    resource_exists)
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id, resource_id, resource_exists
+
+from knack.log import get_logger
+from knack.util import CLIError
+
+logger = get_logger(__name__)
 
 
 def get_folded_parameter_help_string(
@@ -103,7 +102,6 @@ def get_folded_parameter_validator(
             setattr(namespace, type_field_name, 'none')
             setattr(namespace, property_name, None)
             if parent_name and parent_val:
-                logger = azlogging.get_az_logger(__name__)
                 logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return  # SUCCESS
@@ -118,7 +116,6 @@ def get_folded_parameter_validator(
             setattr(namespace, property_name, resource_id(**resource_id_parts))
             if parent_val:
                 if value_was_id:
-                    logger = azlogging.get_az_logger(__name__)
                     logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return  # SUCCESS

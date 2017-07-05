@@ -5,7 +5,6 @@
 import time
 import uuid
 
-from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
                                                           FirewallRule,
                                                           DataLakeAnalyticsAccount,
@@ -21,10 +20,9 @@ from azure.mgmt.datalake.analytics.job.models import (JobType,
 from azure.mgmt.datalake.analytics.catalog.models import (DataLakeAnalyticsCatalogCredentialCreateParameters,
                                                           DataLakeAnalyticsCatalogCredentialUpdateParameters)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
 
-logger = azlogging.get_az_logger(__name__)
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
 
 
 # account customiaztions

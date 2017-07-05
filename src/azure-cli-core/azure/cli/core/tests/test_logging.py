@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure.cli.core import get_az_logger
-from azure.cli.core.azlogging import AzLoggingLevelManager
+from azure.cli.core.azlogging import AzCliLogging, AzLoggingLevelManager, CLI_LOGGER_NAME
 
+from knack.log import get_logger
 
 class TestLogging(unittest.TestCase):
 
@@ -59,12 +59,12 @@ class TestLogging(unittest.TestCase):
         self.assertEqual(argv, ['account'])
 
     def test_get_az_logger(self):
-        az_logger = get_az_logger()
-        self.assertEqual(az_logger.name, 'az')
+        logger = get_logger()
+        self.assertEqual(logger.name, 'az')
 
     def test_get_az_logger_module(self):
-        az_module_logger = get_az_logger('azure.cli.module')
-        self.assertEqual(az_module_logger.name, 'az.azure.cli.module')
+        logger = get_logger('azure.cli.module')
+        self.assertEqual(logger.name, 'az.azure.cli.module')
 
 
 if __name__ == '__main__':

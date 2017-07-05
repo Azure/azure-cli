@@ -6,17 +6,16 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.compute.models import (CachingTypes,
-                                       UpgradeMode)
+from azure.mgmt.compute.models import CachingTypes, UpgradeMode
 from azure.mgmt.storage.models import SkuName
 
-from azure.cli.core.commands import register_cli_argument, CliArgumentType, VersionConstraint
+from azure.cli.core.commands import register_cli_argument, VersionConstraint
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
+     get_resource_name_completion_list, tags_type, file_type)
 from azure.cli.command_modules.vm._actions import \
     (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
@@ -24,6 +23,8 @@ from azure.cli.command_modules.vm._validators import \
      process_vmss_create_namespace, process_image_create_namespace,
      process_disk_or_snapshot_create_namespace, validate_vm_disk,
      process_disk_encryption_namespace, process_assign_identity_namespace)
+
+from knack.arguments import enum_choice_list, ignore_type, CLIArgumentType
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -42,18 +43,18 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
 
 # REUSABLE ARGUMENT DEFINITIONS
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-multi_ids_type = CliArgumentType(nargs='+')
-existing_vm_name = CliArgumentType(overrides=name_arg_type,
+name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+multi_ids_type = CLIArgumentType(nargs='+')
+existing_vm_name = CLIArgumentType(overrides=name_arg_type,
                                    configured_default='vm',
                                    help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
                                    completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
-vmss_name_type = CliArgumentType(name_arg_type,
+vmss_name_type = CLIArgumentType(name_arg_type,
                                  configured_default='vmss',
                                  completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                  help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                  id_part='name')
-disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
+disk_sku = CLIArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
 # ARGUMENT REGISTRATION
 
@@ -286,17 +287,17 @@ register_cli_argument('vm encryption', 'volume_type', help='Type of volume that 
 register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
 register_cli_argument('vm encryption', 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
 
-existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
+existing_disk_name = CLIArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
 register_cli_argument('disk', 'name', arg_type=name_arg_type)
 register_cli_argument('disk', 'sku', arg_type=disk_sku)
 
-existing_snapshot_name = CliArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
+existing_snapshot_name = CLIArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
 register_cli_argument('snapshot', 'snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
 register_cli_argument('snapshot', 'name', arg_type=name_arg_type)
 register_cli_argument('snapshot', 'sku', arg_type=disk_sku)
 
-existing_image_name = CliArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
+existing_image_name = CLIArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
 register_cli_argument('image', 'os_type', **enum_choice_list(['Windows', 'Linux']))
 register_cli_argument('image', 'image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
 register_cli_argument('image create', 'name', arg_type=name_arg_type, help='new image name')

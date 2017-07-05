@@ -3,11 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.sf.config import SfConfigParser
-from azure.cli.core.util import CLIError
 from azure.servicefabric import ServiceFabricClientAPIs
+
+from azure.cli.command_modules.sf.config import SfConfigParser
 from azure.cli.command_modules.sf.cluster_auth import ClientCertAuthentication
 from azure.cli.core.commands.client_factory import configure_common_settings
+
+from knack.util import CLIError
 
 
 def cf_sf_client(_):

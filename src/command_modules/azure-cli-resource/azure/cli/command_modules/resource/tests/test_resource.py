@@ -10,6 +10,7 @@ import unittest
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                JMESPathCheck as JCheck, create_random_name)
 # AZURE CLI RESOURCE TEST DEFINITIONS
+from azure.cli.testsdk import TestCli
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
                                              BooleanCheck,
                                              ResourceGroupVCRTestBase,
@@ -40,263 +41,187 @@ class ResourceGroupScenarioTest(ScenarioTest):
         ])
 
 
-class ResourceGroupNoWaitScenarioTest(VCRTestBase):
-    def test_resource_group_no_wait(self):
-        self.execute()
+class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        self.resource_group = 'cli_rg_nowait_test'
-        super(ResourceGroupNoWaitScenarioTest, self).__init__(__file__, test_method)
-
-    def set_up(self):
-        if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {} --yes'.format(self.resource_group))
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_rg_nowait_test')
+    def test_resource_group_no_wait(self, resource_group):
         s = self
-        rg = self.resource_group
-        s.cmd('group create -n {} -l westus'.format(rg), checks=[
-            JMESPathCheck('name', rg),
-        ])
-        s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
-        s.cmd('group wait --exists -n {}'.format(rg), checks=NoneCheck())
+        rg = resource_group
         s.cmd('group delete -n {} --no-wait --yes'.format(rg), checks=NoneCheck())
         s.cmd('group wait --deleted -n {}'.format(rg), checks=NoneCheck())
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
+        s.cmd('group create -n {} -l westus'.format(rg), checks=JCheck('name', rg))
+        s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
+        s.cmd('group wait --exists -n {}'.format(rg), checks=NoneCheck())
 
 
-class ResourceScenarioTest(ResourceGroupVCRTestBase):
-    def test_resource_scenario(self):
-        self.execute()
+class ResourceScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(ResourceScenarioTest, self).__init__(__file__, test_method,
-                                                   resource_group='cli_test_resource_scenario')
-        self.vnet_name = 'cli-test-vnet1'
-        self.subnet_name = 'cli-test-subnet1'
-
-    def set_up(self):
-        super(ResourceScenarioTest, self).set_up()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario')
+    def test_resource_scenario(self, resource_group):
         s = self
-        rg = self.resource_group
-        vnet_count = s.cmd(
-            "resource list --query \"length([?name=='{}'])\"".format(self.vnet_name)) or 0
-        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(
-            self.resource_group, self.vnet_name, self.subnet_name))
+        rg = resource_group
+        vnet_name = 'cli-test-vnet1'
+        subnet_name = 'cli-test-subnet1'
+        vnet_count = s.cmd("resource list --query \"length([?name=='{}'])\"".format(vnet_name)).get_output_in_json() or 0
+        s.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(rg, vnet_name, subnet_name))
         vnet_count += 1
 
         s.cmd('resource list',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JCheck("length([?name=='{}'])".format(vnet_name), vnet_count))
         s.cmd('resource list -l centralus',
-              checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
+              checks=JCheck("length([?location == 'centralus']) == length(@)", True))
         s.cmd('resource list --resource-type Microsoft.Network/virtualNetworks',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
-        s.cmd('resource list --name {}'.format(self.vnet_name),
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JCheck("length([?name=='{}'])".format(vnet_name), vnet_count))
+        s.cmd('resource list --name {}'.format(vnet_name),
+              checks=JCheck("length([?name=='{}'])".format(vnet_name), vnet_count))
         s.cmd('resource list --tag cli-test',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JCheck("length([?name=='{}'])".format(vnet_name), vnet_count))
         s.cmd('resource list --tag cli-test=test',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+              checks=JCheck("length([?name=='{}'])".format(vnet_name), vnet_count))
 
         # check for simple resource with tag
         s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(
-            self.vnet_name, rg), checks=[
-            JMESPathCheck('name', self.vnet_name),
-            JMESPathCheck('location', 'westus'),
-            JMESPathCheck('resourceGroup', rg),
-            JMESPathCheck('tags', {'cli-test': 'test'})
+            vnet_name, rg), checks=[
+            JCheck('name', vnet_name),
+            JCheck('location', 'westus'),
+            JCheck('resourceGroup', rg),
+            JCheck('tags', {'cli-test': 'test'})
         ])
         # check for child resource
-        s.cmd(
-            'resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{}'
-            ' --resource-type subnets'.format(
-                self.subnet_name, self.resource_group, self.vnet_name), checks=[
-                JMESPathCheck('name', self.subnet_name),
-                JMESPathCheck('resourceGroup', rg),
-            ])
+        s.cmd('resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{} --resource-type subnets'.format(subnet_name, rg, vnet_name), checks=[
+            JCheck('name', subnet_name),
+            JCheck('resourceGroup', rg),
+        ])
 
         # clear tag and verify
-        s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'
-              .format(self.vnet_name, rg))
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'
-              .format(self.vnet_name, rg), checks=JMESPathCheck('tags', {}))
+        s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(vnet_name, rg))
+        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(vnet_name, rg),
+            checks=JCheck('tags', {}))
 
 
-class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
-    def test_resource_id_scenario(self):
-        self.execute()
+class ResourceIDScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(ResourceIDScenarioTest, self).__init__(__file__, test_method,
-                                                     resource_group='cli_test_resource_id')
-        self.vnet_name = 'cli_test_resource_id_vnet'
-        self.subnet_name = 'cli_test_resource_id_subnet'
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
+    def test_resource_id_scenario(self, resource_group):
+        vnet_name = 'cli_test_resource_id_vnet'
+        subnet_name = 'cli_test_resource_id_subnet'
 
-    def set_up(self):
-        super(ResourceIDScenarioTest, self).set_up()
-        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(self.resource_group,
-                                                                           self.vnet_name,
-                                                                           self.subnet_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(resource_group, vnet_name, subnet_name))
 
-    def body(self):
-        if self.playback:
-            subscription_id = MOCKED_SUBSCRIPTION_ID
+        if self.in_recording:
+            from azure.cli.core.commands.client_factory import get_subscription_id
+            subscription_id = get_subscription_id(self.ctx)
         else:
-            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+            subscription_id = MOCKED_SUBSCRIPTION_ID
 
         s = self
-        vnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
-                           'virtualNetworks/{}'.format(subscription_id,
-                                                       self.resource_group,
-                                                       self.vnet_name)
+        vnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(
+            subscription_id, resource_group, vnet_name)
         s.cmd('resource tag --id {} --tags {}'.format(vnet_resource_id, 'tag-vnet'))
         s.cmd('resource show --id {}'.format(vnet_resource_id), checks=[
-            JMESPathCheck('name', self.vnet_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('tags', {'tag-vnet': ''})
+            JCheck('name', vnet_name),
+            JCheck('resourceGroup', resource_group),
+            JCheck('tags', {'tag-vnet': ''})
         ])
 
-        subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
-                             'virtualNetworks/{}/subnets/{}'.format(subscription_id,
-                                                                    self.resource_group,
-                                                                    self.vnet_name,
-                                                                    self.subnet_name)
+        subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+            subscription_id, resource_group, vnet_name, subnet_name)
         s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
-            JMESPathCheck('name', self.subnet_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('properties.addressPrefix', '10.0.0.0/24')
+            JCheck('name', subnet_name),
+            JCheck('resourceGroup', resource_group),
+            JCheck('properties.addressPrefix', '10.0.0.0/24')
         ])
 
-        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(
-            subnet_resource_id), checks=[
-            JMESPathCheck('properties.addressPrefix', '10.0.0.0/22')
-        ])
+        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(subnet_resource_id),
+            checks=JCheck('properties.addressPrefix', '10.0.0.0/22'))
 
         s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
         s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
 
 
-class ResourceCreateScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(ResourceCreateScenarioTest, self).__init__(__file__, test_method,
-                                                         resource_group='cli_test_resource_create')
+class ResourceCreateScenarioTest(ScenarioTest):
 
-    def test_resource_create(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_create')
+    def test_resource_create(self, resource_group, resource_group_location):
         appservice_plan = 'cli_res_create_plan'
         webapp = 'clirescreateweb'
 
-        self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms '
-                 '--is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":'
-                 '\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(self.resource_group,
-                                                               appservice_plan,
-                                                               self.location),
-                 checks=[JMESPathCheck('name', appservice_plan)])
+        self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms --is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(resource_group, appservice_plan, resource_group_location),
+                 checks=JCheck('name', appservice_plan))
 
-        result = self.cmd(
-            'resource create -g {} -n {} --resource-type Microsoft.web/sites --properties '
-            '"{{\\"serverFarmId\\":\\"{}\\"}}"'.format(self.resource_group,
-                                                       webapp,
-                                                       appservice_plan),
-            checks=[JMESPathCheck('name', webapp)])
+        result = self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/sites --properties "{{\\"serverFarmId\\":\\"{}\\"}}"'.format(resource_group, webapp, appservice_plan),
+                          checks=JCheck('name', webapp)).get_output_in_json()
 
         app_settings_id = result['id'] + '/config/appsettings'
         self.cmd('resource create --id {} --properties "{{\\"key2\\":\\"value12\\"}}"'.format(
-            app_settings_id), checks=[JMESPathCheck('properties.key2', 'value12')])
+            app_settings_id), checks=[JCheck('properties.key2', 'value12')])
 
 
-class TagScenarioTest(VCRTestBase):
+class TagScenarioTest(ScenarioTest):
+
     def test_tag_scenario(self):
-        self.execute()
-
-    def __init__(self, test_method):
-        self.tag_name = 'travistesttag'
-        super(TagScenarioTest, self).__init__(__file__, test_method)
-
-    def set_up(self):
-        tn = self.tag_name
-        tags = self.cmd('tag list --query "[?tagName == \'{}\'].values[].tagValue"'.format(tn))
+        s = self
+        tn = 'cli_test_tag'
+        tags = self.cmd('tag list --query "[?tagName == \'{}\'].values[].tagValue"'.format(tn)).get_output_in_json()
         for tag in tags:
             self.cmd('tag remove-value -n {} --value {}'.format(tn, tag))
         self.cmd('tag delete -n {}'.format(tn))
 
-    def body(self):
-        s = self
-        tn = s.tag_name
-
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=NoneCheck())
+        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn),
+              checks=NoneCheck())
         s.cmd('tag create -n {}'.format(tn), checks=[
-            JMESPathCheck('tagName', tn),
-            JMESPathCheck('values', []),
-            JMESPathCheck('count.value', 0)
+            JCheck('tagName', tn),
+            JCheck('values', []),
+            JCheck('count.value', 0)
         ])
         s.cmd('tag add-value -n {} --value test'.format(tn))
         s.cmd('tag add-value -n {} --value test2'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=[
-            JMESPathCheck('[].values[].tagValue', [u'test', u'test2'])
-        ])
+        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn),
+              checks=JCheck('[].values[].tagValue', [u'test', u'test2']))
         s.cmd('tag remove-value -n {} --value test'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=[
-            JMESPathCheck('[].values[].tagValue', [u'test2'])
-        ])
+        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn),
+              checks=JCheck('[].values[].tagValue', [u'test2']))
         s.cmd('tag remove-value -n {} --value test2'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=[
-            JMESPathCheck('[].values[].tagValue', [])
-        ])
+        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn),
+              checks=JCheck('[].values[].tagValue', []))
         s.cmd('tag delete -n {}'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), checks=NoneCheck())
+        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn),
+              checks=NoneCheck())
 
 
-class ProviderRegistrationTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ProviderRegistrationTest, self).__init__(__file__, test_method)
+class ProviderRegistrationTest(ScenarioTest):
 
     def test_provider_registration(self):
-        self.execute()
-
-    def body(self):
         provider = 'TrendMicro.DeepSecurity'
-        result = self.cmd('provider show -n {}'.format(provider), checks=None)
+        result = self.cmd('provider show -n {}'.format(provider), checks=None).get_output_in_json()
         if result['registrationState'] == 'Unregistered':
             self.cmd('provider register -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            result = self.cmd('provider show -n {}'.format(provider)).get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
             self.cmd('provider unregister -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            result = self.cmd('provider show -n {}'.format(provider)).get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
         else:
             self.cmd('provider unregister -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            result = self.cmd('provider show -n {}'.format(provider)).get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
             self.cmd('provider register -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            result = self.cmd('provider show -n {}'.format(provider)).get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
 
-class ProviderOperationTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ProviderOperationTest, self).__init__(__file__, test_method)
+class ProviderOperationTest(ScenarioTest):
 
     def test_provider_operation(self):
-        self.execute()
-
-    def body(self):
         self.cmd('provider operation show --namespace microsoft.compute', checks=[
-            JMESPathCheck('id',
-                          '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
-            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+            JCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JCheck('type', 'Microsoft.Authorization/providerOperations')
         ])
-        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01',
-                 checks=[
-                     JMESPathCheck(
-                         'id',
-                         '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
-                     JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
-                 ])
+        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
+            JCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JCheck('type', 'Microsoft.Authorization/providerOperations')
+        ])
 
 
 class DeploymentTest(ScenarioTest):

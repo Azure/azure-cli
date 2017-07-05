@@ -9,11 +9,9 @@ from azure.mgmt.batch.models.batch_management_client_enums import \
 from azure.batch.models.batch_service_client_enums import \
     (ComputeNodeDeallocationOption)
 
-from azure.cli.core.commands import \
-    (register_cli_argument, CliArgumentType, register_extra_cli_argument)
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 from azure.cli.core.commands.parameters import \
-    (tags_type, location_type, resource_group_name_type, ignore_type,
-     get_resource_name_completion_list, enum_choice_list, file_type)
+    (tags_type, location_type, resource_group_name_type, get_resource_name_completion_list, file_type)
 
 from azure.cli.command_modules.batch._validators import \
     (application_enabled, datetime_format, storage_account_id, application_package_reference_format,
@@ -23,10 +21,12 @@ from azure.cli.command_modules.batch._validators import \
 
 from azure.cli.command_modules.batch._command_type import validate_client_parameters
 
+from knack.arguments import ignore_type, enum_choice_list, CLIArgumentType
+
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
 
-batch_name_type = CliArgumentType(help='Name of the Batch account.', options_list=('--account-name',), completer=get_resource_name_completion_list('Microsoft.Batch/batchAccounts'), id_part=None)
+batch_name_type = CLIArgumentType(help='Name of the Batch account.', options_list=('--account-name',), completer=get_resource_name_completion_list('Microsoft.Batch/batchAccounts'), id_part=None)
 
 # PARAMETER REGISTRATIONS
 

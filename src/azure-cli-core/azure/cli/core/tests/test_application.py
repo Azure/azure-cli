@@ -8,26 +8,26 @@ import unittest
 import os
 import tempfile
 
-from azure.cli.core.application import Application, Configuration, IterateAction
 from azure.cli.core.commands import CliCommand
-from azure.cli.core.util import CLIError
+from azure.cli.core.commands.validators import IterateAction
+from knack.util import CLIError
 
 
 class TestApplication(unittest.TestCase):
     def test_client_request_id_is_not_assigned_when_application_is_created(self):
-        app = Application()
-        self.assertNotIn('x-ms-client-request-id', app.session['headers'])
+        app = AZ_CLI
+        self.assertNotIn('x-ms-client-request-id', app.data['headers'])
 
     def test_client_request_id_is_refreshed_correctly(self):
-        app = Application()
+        app = AZ_CLI
         app.refresh_request_id()
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
+        self.assertIn('x-ms-client-request-id', app.data['headers'])
 
-        old_id = app.session['headers']['x-ms-client-request-id']
+        old_id = app.data['headers']['x-ms-client-request-id']
 
         app.refresh_request_id()
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
-        self.assertNotEquals(old_id, app.session['headers']['x-ms-client-request-id'])
+        self.assertIn('x-ms-client-request-id', app.data['headers'])
+        self.assertNotEquals(old_id, app.data['headers']['x-ms-client-request-id'])
 
     def test_client_request_id_is_refreshed_after_execution(self):
         def _handler(args):
@@ -38,12 +38,12 @@ class TestApplication(unittest.TestCase):
         app = Application(config)
 
         app.execute(['test'])
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
-        old_id = app.session['headers']['x-ms-client-request-id']
+        self.assertIn('x-ms-client-request-id', app.data['headers'])
+        old_id = app.data['headers']['x-ms-client-request-id']
 
         app.execute(['test'])
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
-        self.assertNotEquals(old_id, app.session['headers']['x-ms-client-request-id'])
+        self.assertIn('x-ms-client-request-id', app.data['headers'])
+        self.assertNotEquals(old_id, app.data['headers']['x-ms-client-request-id'])
 
     def test_application_register_and_call_handlers(self):
         handler_called = [False]
@@ -54,7 +54,7 @@ class TestApplication(unittest.TestCase):
         def other_handler(**kwargs):
             self.assertEqual(kwargs['args'], 'secret sauce')
 
-        app = Application()
+        app = AZ_CLI
         app.initialize(Configuration())
 
         app.raise_event('was_handler_called', args=handler_called)

@@ -18,7 +18,7 @@ from azure.cli.command_modules.acs.custom import (merge_kubernetes_configuration
 from azure.mgmt.compute.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                         ContainerService,
                                                         ContainerServiceOrchestratorProfile)
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 class AcsCustomCommandTest(unittest.TestCase):

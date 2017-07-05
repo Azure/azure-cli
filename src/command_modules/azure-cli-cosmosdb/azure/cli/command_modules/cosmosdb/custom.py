@@ -9,10 +9,8 @@ from azure.mgmt.documentdb.models import (
     Location
 )
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
 
-logger = azlogging.get_az_logger(__name__)
+from knack.util import CLIError
 
 DEFAULT_INDEXING_POLICY = """{
   "indexingMode": "consistent",

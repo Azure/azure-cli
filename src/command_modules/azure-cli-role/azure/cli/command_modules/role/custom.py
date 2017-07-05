@@ -12,8 +12,8 @@ import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
-from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
 from azure.cli.core import get_az_logger
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -25,6 +25,8 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     UserCreateParameters,
                                     PasswordProfile,
                                     ServicePrincipalCreateParameters)
+
+from knack.util import CLIError, todict
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 

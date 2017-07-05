@@ -11,17 +11,17 @@ import re
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
-import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set)
-from azure.cli.core.util import CLIError, hash_string
+from azure.cli.core.util import hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
-from ._client_factory import _compute_client_factory
 
-logger = azlogging.get_az_logger(__name__)
+from knack.util import CLIError
+
+from ._client_factory import _compute_client_factory
 
 
 def validate_nsg_name(namespace):
@@ -608,7 +608,7 @@ def _validate_vm_vmss_create_auth(namespace):
                 "incorrect usage for authentication-type 'password': "
                 "[--admin-username USERNAME] --admin-password PASSWORD")
 
-        from azure.cli.core.prompting import prompt_pass, NoTTYException
+        from knack.prompting import prompt_pass, NoTTYException
         try:
             if not namespace.admin_password:
                 namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)

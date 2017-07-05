@@ -6,15 +6,13 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
-from azure.cli.core.commands import \
-    (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
+from azure.cli.core.commands import VersionConstraint, register_cli_argument, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
-                                                enum_choice_list, tags_type, ignore_type,
-                                                file_type, get_resource_group_completion_list,
+                                                tags_type, file_type, get_resource_group_completion_list,
                                                 three_state_flag, model_choice_list)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.command_modules.network._client_factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._validators import \
     (dns_zone_name_type,
      process_ag_create_namespace, process_ag_listener_create_namespace,
@@ -41,6 +39,8 @@ from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 from azure.cli.core.util import get_json_object
+
+from knack.arguments import enum_choice_list, ignore_type, CLIArgumentType
 
 (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, ApplicationGatewayFirewallMode,
  ApplicationGatewayProtocol, ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol,
@@ -81,7 +81,7 @@ device_path_values = ['primary', 'secondary']
 
 def get_subnet_completion_list():
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
+        client = network_client_factory()
         if parsed_args.resource_group_name and parsed_args.virtual_network_name:
             rg = parsed_args.resource_group_name
             vnet = parsed_args.virtual_network_name
@@ -91,7 +91,7 @@ def get_subnet_completion_list():
 
 def get_lb_subresource_completion_list(prop):
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
+        client = network_client_factory()
         try:
             lb_name = parsed_args.load_balancer_name
         except AttributeError:
@@ -104,7 +104,7 @@ def get_lb_subresource_completion_list(prop):
 
 def get_ag_subresource_completion_list(prop):
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
+        client = network_client_factory()
         try:
             ag_name = parsed_args.application_gateway_name
         except AttributeError:
@@ -117,7 +117,7 @@ def get_ag_subresource_completion_list(prop):
 
 def get_ag_url_map_rule_completion_list():
     def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
+        client = network_client_factory()
         try:
             ag_name = parsed_args.application_gateway_name
         except AttributeError:
@@ -139,17 +139,17 @@ def get_tm_endpoint_completion_list():
 
 # BASIC PARAMETER CONFIGURATION
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-nic_type = CliArgumentType(options_list=('--nic-name',), metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
-nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NAME', help='Name of the network security group.')
-circuit_name_type = CliArgumentType(options_list=('--circuit-name',), metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
-virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='NAME', help='The virtual network (VNet) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
-subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
-load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
-private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
-cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
-http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
-ag_servers_type = CliArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
+name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+nic_type = CLIArgumentType(options_list=('--nic-name',), metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+nsg_name_type = CLIArgumentType(options_list=('--nsg-name',), metavar='NAME', help='Name of the network security group.')
+circuit_name_type = CLIArgumentType(options_list=('--circuit-name',), metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
+virtual_network_name_type = CLIArgumentType(options_list=('--vnet-name',), metavar='NAME', help='The virtual network (VNet) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
+subnet_name_type = CLIArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
+load_balancer_name_type = CLIArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
+private_ip_address_type = CLIArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
+cookie_based_affinity_type = CLIArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
+http_protocol_type = CLIArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
+ag_servers_type = CLIArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 
 # ARGUMENT REGISTRATION
 

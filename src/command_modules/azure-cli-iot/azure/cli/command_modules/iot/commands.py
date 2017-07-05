@@ -23,7 +23,7 @@ class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-
 # This is a work around to suppress the 404 error. It should be removed after API is fixed.
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
@@ -14,11 +13,11 @@ from ._client_factory import cf_web_client, cf_plans
 
 def deprecate(argv):
     if len(argv) > 1 and argv[0] == 'appservice' and argv[1] == 'web':
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         raise CLIError("All 'appservice web' commands have been renamed to 'webapp'")
 
 
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSING, deprecate)
+AZ_CLI.register(AZ_CLI.COMMAND_PARSER_PARSING, deprecate)
 
 
 def output_slots_in_table(slots):
@@ -44,7 +43,7 @@ def transform_web_list_output(webs):
 def ex_handler_factory(creating_plan=False):
     def _polish_bad_errors(ex):
         import json
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         try:
             detail = json.loads(ex.response.text)['Message']
             if creating_plan:

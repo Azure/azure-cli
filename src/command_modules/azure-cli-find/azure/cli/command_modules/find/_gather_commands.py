@@ -6,7 +6,7 @@
 import yaml
 
 from azure.cli.core.commands import _update_command_definitions
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 def build_command_table():

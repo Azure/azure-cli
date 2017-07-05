@@ -9,8 +9,11 @@ import unittest
 from collections import OrderedDict
 from six import StringIO
 
-from azure.cli.core._output import OutputProducer, format_json, format_table, format_tsv, CommandResultItem
+from azure.cli.core._output import OutputProducer
 import azure.cli.core.util as util
+
+from knack.output import format_json, format_table, format_tsv
+from knack.util import CommandResultItem
 
 
 class TestCoreCLIOutput(unittest.TestCase):

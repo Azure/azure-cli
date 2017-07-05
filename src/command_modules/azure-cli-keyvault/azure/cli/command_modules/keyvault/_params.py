@@ -7,13 +7,12 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
-from azure.cli.core.commands import \
-    (register_cli_argument, register_extra_cli_argument, CliArgumentType)
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type,
-    tags_type, ignore_type, enum_choice_list, file_type, three_state_flag)
+    tags_type, file_type, three_state_flag)
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import get_json_object
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
@@ -30,6 +29,8 @@ from azure.cli.command_modules.keyvault._validators import \
      process_certificate_cancel_namespace,
      process_secret_set_namespace,
      secret_text_encoding_values, secret_binary_encoding_values)
+
+from knack.arguments import enum_choice_list, ignore_type, CLIArgumentType
 
 
 # COMPLETERS
@@ -105,7 +106,7 @@ def register_attributes_argument(scope, name, attr_class, create=False, ignore=N
 
 # ARGUMENT DEFINITIONS
 
-vault_name_type = CliArgumentType(help='Name of the key vault.',
+vault_name_type = CLIArgumentType(help='Name of the key vault.',
                                   options_list=('--vault-name',),
                                   metavar='NAME',
                                   completer=get_resource_name_completion_list(

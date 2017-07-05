@@ -10,9 +10,6 @@ from mock import patch
 from azure.cli.testsdk import (
     ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck
 )
-import azure.cli.core.azlogging as azlogging
-
-logger = azlogging.get_az_logger(__name__)
 
 # Should be fixed unless recordings are being recreated for new versions of Service Fabric
 test_endpoint = "http://eddertester.westus2.cloudapp.azure.com:19080"

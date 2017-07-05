@@ -288,7 +288,7 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_a(zone, 'test.' + zn, [(3600, '7.8.9.0')])
 
     def test_zone_import_errors(self):
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         for f in ['fail1', 'fail2', 'fail3', 'fail4', 'fail5']:
             with self.assertRaises(CLIError):
                 self._get_zone_object('{}.txt'.format(f), 'example.com')

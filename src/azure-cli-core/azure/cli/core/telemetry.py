@@ -24,16 +24,6 @@ AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
-def _user_agrees_to_telemetry(func):
-    @wraps(func)
-    def _wrapper(*args, **kwargs):
-        if not _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True):
-            return
-        return func(*args, **kwargs)
-
-    return _wrapper
-
-
 class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     start_time = None
     end_time = None
@@ -133,7 +123,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'Source', source)
         self.set_custom_properties(result,
                                    'ClientRequestId',
-                                   lambda: self.application.session['headers'][
+                                   lambda: self.application.data['headers'][
                                        'x-ms-client-request-id'])
         self.set_custom_properties(result, 'CoreVersion', _get_core_version)
         self.set_custom_properties(result, 'InstallationId', _get_installation_id)
@@ -141,12 +131,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
         self.set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
         self.set_custom_properties(result, 'DefaultOutputType',
-                                   lambda: _get_azure_cli_config().get('core', 'output',
-                                                                       fallback='unknown'))
+                                   lambda: _get_config(self.application).get('core', 'output', fallback='unknown'))
         self.set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
         self.set_custom_properties(result, 'Locale',
-                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0],
-                                                          locale.getdefaultlocale()[1]))
+                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
@@ -190,6 +178,14 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
 _session = TelemetrySession()
 
+def _user_agrees_to_telemetry(func):
+    @wraps(func)
+    def _wrapper(*args, **kwargs):
+        if not _get_config(_session.application).getboolean('core', 'collect_telemetry', fallback=True):
+            return
+        return func(*args, **kwargs)
+
+    return _wrapper
 
 # public api
 
@@ -263,9 +259,8 @@ def set_command_details(command, output_type=None, parameters=None):
 
 @decorators.call_once
 @decorators.suppress_all_exceptions(fallback_return={})
-def _get_azure_cli_config():
-    from azure.cli.core._config import az_config
-    return az_config
+def _get_config(cli_ctx):
+    return cli_ctx.config
 
 
 # internal utility functions

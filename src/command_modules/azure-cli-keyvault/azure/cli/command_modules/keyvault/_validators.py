@@ -9,6 +9,8 @@ import binascii
 from datetime import datetime
 import re
 
+from azure.keyvault.models import JsonWebKeyOperation
+
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (KeyPermissions, SecretPermissions, CertificatePermissions)
@@ -16,9 +18,8 @@ from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.util import CLIError
 
-from azure.keyvault.models import JsonWebKeyOperation
+from knack.util import CLIError
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']

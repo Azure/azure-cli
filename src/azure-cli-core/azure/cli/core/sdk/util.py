@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import register_cli_argument, cli_command
-from azure.cli.core.commands.parameters import ignore_type
 from azure.cli.core.commands.arm import cli_generic_update_command
 
+from knack.arguments import ignore_type
 
 # COMMANDS UTILITIES
+
 
 def create_service_adapter(service_model, service_class=None):
     def _service_adapter(method_name):
@@ -156,10 +157,8 @@ class ParametersContext(object):
         # two privates symbols are imported here. they should be made public or this utility class
         # should be moved into azure.cli.core
         from azure.cli.core.commands import _cli_extra_argument_registry
-        from azure.cli.core.commands._introspection import \
-            (extract_args_from_signature, _option_descriptions)
-
         from azure.cli.core.sdk.validators import get_complex_argument_processor
+        from knack.introspection import extract_args_from_signature, option_descriptions
 
         if not patches:
             patches = dict()
@@ -169,7 +168,7 @@ class ParametersContext(object):
         # fetch the documentation for model parameters first. for models, which are the classes
         # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
         # document of their properties are attached to the classes instead of constructors.
-        parameter_docs = _option_descriptions(model_type)
+        parameter_docs = option_descriptions(model_type)
 
         expanded_arguments = []
         for name, arg in extract_args_from_signature(model_type.__init__):

@@ -10,7 +10,7 @@ from ._client_factory import cf_cdn
 def _not_found(message):
     def _inner_not_found(ex):
         from azure.mgmt.cdn.models.error_response import ErrorResponseException
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
 
         if isinstance(ex, ErrorResponseException) \
                 and ex.response is not None \

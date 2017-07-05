@@ -9,7 +9,7 @@ import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, api_version_constraint)
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
 from azure.cli.core.profiles import ResourceType
 from .storage_test_util import StorageScenarioMixin

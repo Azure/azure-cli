@@ -13,7 +13,7 @@ from dateutil import tz
 
 from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                              NoneCheck)
 

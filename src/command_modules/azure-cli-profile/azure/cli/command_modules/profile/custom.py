@@ -5,24 +5,33 @@
 
 from __future__ import print_function
 
-from azure.cli.core.prompting import prompt_pass, NoTTYException
-from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import CLIError
-from azure.cli.core.cloud import get_active_cloud
 
-logger = get_az_logger(__name__)
+from knack.log import get_logger
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
+
+logger = get_logger(__name__)
 
 
-def load_subscriptions(all_clouds=False):
-    profile = Profile()
+def _load_subscriptions(cli_ctx, all_clouds=False):
+    profile = Profile(cli_ctx)
     subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
 
-def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
+def get_subscription_id_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
+    subscriptions = _load_subscriptions(cli_ctx)
+    result = []
+    for subscription in subscriptions:
+        result.append(subscription['id'])
+        result.append(subscription['name'])
+    return result
+
+
+def list_subscriptions(cli_ctx, all=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds=all)
+    subscriptions = _load_subscriptions(cli_ctx, all_clouds=all)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
@@ -36,9 +45,9 @@ def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     return subscriptions
 
 
-def show_subscription(subscription=None, show_auth_for_sdk=None):
+def show_subscription(cli_ctx, subscription=None, show_auth_for_sdk=None):
     import json
-    profile = Profile()
+    profile = Profile(cli_ctx)
     if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 
@@ -46,15 +55,15 @@ def show_subscription(subscription=None, show_auth_for_sdk=None):
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
-def get_access_token(subscription=None, resource=None):
+def get_access_token(cli_ctx, subscription=None, resource=None):
     '''
     get AAD token to access to a specified resource
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
     Use 'az cloud show' command for other Azure resources
     '''
-    resource = (resource or get_active_cloud().endpoints.active_directory_resource_id)
-    profile = Profile()
-    creds, subscription, tenant = profile.get_raw_token(resource, subscription=subscription)
+    resource = (resource or cli_ctx.cloud.endpoints.active_directory_resource_id)
+    profile = Profile(cli_ctx)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
@@ -64,21 +73,21 @@ def get_access_token(subscription=None, resource=None):
     }
 
 
-def set_active_subscription(subscription):
+def set_active_subscription(cli_ctx, subscription):
     """Set the current subscription"""
+    profile = Profile(cli_ctx)
     if not id:
         raise CLIError('Please provide subscription id or unique name.')
-    profile = Profile()
     profile.set_active_subscription(subscription)
 
 
-def account_clear():
+def account_clear(cli_ctx):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
-    profile = Profile()
+    profile = Profile(cli_ctx)
     profile.logout_all()
 
 
-def login(username=None, password=None, service_principal=None, tenant=None,
+def login(cli_ctx, username=None, password=None, service_principal=None, tenant=None,
           allow_no_subscriptions=False):
     """Log in to access Azure subscriptions"""
     import os
@@ -108,6 +117,7 @@ def login(username=None, password=None, service_principal=None, tenant=None,
         interactive = True
 
     try:
+        profile = Profile(cli_ctx)
         subscriptions = profile.find_subscriptions_on_login(
             interactive,
             username,
@@ -133,14 +143,14 @@ def login(username=None, password=None, service_principal=None, tenant=None,
     return all_subscriptions
 
 
-def logout(username=None):
+def logout(cli_ctx, username=None):
     """Log out to remove access to Azure subscriptions"""
-    profile = Profile()
+    profile = Profile(cli_ctx)
     if not username:
         username = profile.get_current_account_user()
     profile.logout(username)
 
 
-def list_locations():
+def list_locations(cli_ctx):
     from azure.cli.core.commands.parameters import get_subscription_locations
-    return get_subscription_locations()
+    return get_subscription_locations(cli_ctx)

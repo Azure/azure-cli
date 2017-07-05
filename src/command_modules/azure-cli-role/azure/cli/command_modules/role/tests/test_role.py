@@ -12,11 +12,8 @@ import unittest
 
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer,
                                JMESPathCheck as JMESPathCheckV2)
-import azure.cli.core.azlogging as azlogging
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck,
                                              MOCKED_SUBSCRIPTION_ID)
-
-logger = azlogging.get_az_logger(__name__)
 
 
 class RbacSPSecretScenarioTest(LiveScenarioTest):

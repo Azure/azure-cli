@@ -4,11 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
 from azure.cli.core import __version__ as core_version
 
-logger = azlogging.get_az_logger(__name__)
+from knack.util import CLIError
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specified to access Cosmos DB service. Please provide any of the following:

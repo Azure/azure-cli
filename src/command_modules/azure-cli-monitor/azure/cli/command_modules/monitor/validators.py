@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse_resource_id
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 def get_target_resource_validator(dest, required):

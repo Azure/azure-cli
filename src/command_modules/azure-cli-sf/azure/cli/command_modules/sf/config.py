@@ -4,15 +4,15 @@
 # --------------------------------------------------------------------------------------------
 import os
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core._config import AzConfig
-from azure.cli.core.util import CLIError
+
+from knack.config import CLIConfig
+from knack.util import CLIError
 
 
 class SfConfigParser(object):
     def __init__(self, config_path=None):
         if not config_path:
             config_path = os.path.join(get_config_dir(), "config")
-        self.az_config = AzConfig()
         self.az_config.config_parser.read(config_path)
 
     def no_verify_setting(self):

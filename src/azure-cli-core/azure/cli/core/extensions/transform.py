@@ -7,10 +7,11 @@ import re
 
 from azure.cli.core.util import b64_to_hex
 
+import knack.events as events
 
 def register(application):
-    application.register(application.TRANSFORM_RESULT, _resource_group_transform)
-    application.register(application.TRANSFORM_RESULT, _x509_from_base64_to_hex_transform)
+    application.register_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _resource_group_transform)
+    application.register_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _x509_from_base64_to_hex_transform)
 
 
 def _parse_id(strid):
@@ -55,9 +56,9 @@ def _add_x509_hex(obj):
             _add_x509_hex(obj[item_key])
 
 
-def _resource_group_transform(**kwargs):
+def _resource_group_transform(_, **kwargs):
     _add_resource_group(kwargs['event_data']['result'])
 
 
-def _x509_from_base64_to_hex_transform(**kwargs):
+def _x509_from_base64_to_hex_transform(_, **kwargs):
     _add_x509_hex(kwargs['event_data']['result'])

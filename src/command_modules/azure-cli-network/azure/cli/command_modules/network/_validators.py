@@ -11,14 +11,15 @@ import os
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
-from azure.cli.core.util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
+from azure.cli.core.profiles import ResourceType
 
+from knack.util import CLIError
 
 # PARAMETER VALIDATORS
+
 
 def dns_zone_name_type(value):
     if value:
@@ -512,7 +513,7 @@ def process_route_table_create_namespace(namespace):
 def process_tm_endpoint_create_namespace(namespace):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 
-    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    client = get_mgmt_service_client(namespace.cli_ctx, TrafficManagerManagementClient).profiles
     profile = client.get(namespace.resource_group_name, namespace.profile_name)
 
     routing_type = profile.traffic_routing_method  # pylint: disable=no-member
@@ -667,7 +668,7 @@ def load_cert_file(param_name):
 def get_network_watcher_from_vm(namespace):
     from azure.cli.core.commands.arm import parse_resource_id
 
-    compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
+    compute_client = get_mgmt_service_client(namespace.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.vm)['name']
     vm = compute_client.get(namespace.resource_group_name, vm_name)
     namespace.location = vm.location  # pylint: disable=no-member
@@ -675,7 +676,7 @@ def get_network_watcher_from_vm(namespace):
 
 
 def get_network_watcher_from_resource(namespace):
-    resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    resource_client = get_mgmt_service_client(namespace.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
     resource = resource_client.get_by_id(namespace.resource,
                                          get_api_version(ResourceType.MGMT_NETWORK))
     namespace.location = resource.location  # pylint: disable=no-member
@@ -688,7 +689,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
         from azure.cli.core.commands.arm import parse_resource_id
 
         location = namespace.location
-        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_watchers
+        network_client = get_mgmt_service_client(namespace.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
         watcher = next((x for x in network_client.list_all() if x.location == location), None)
         if not watcher:
             raise CLIError("network watcher is not enabled for region '{}'.".format(location))
@@ -705,7 +706,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 def process_nw_test_connectivity_namespace(namespace):
     from azure.cli.core.commands.arm import parse_resource_id
 
-    compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
+    compute_client = get_mgmt_service_client(namespace.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.source_resource)['name']
     rg = namespace.resource_group_name or parse_resource_id(namespace.source_resource).get('resource_group', None)
     if not rg:
@@ -754,7 +755,7 @@ def process_nw_flow_log_show_namespace(namespace):
             type='networkSecurityGroups',
             name=namespace.nsg)
 
-    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_security_groups
+    network_client = get_mgmt_service_client(namespace.cli_ctx, ResourceType.MGMT_NETWORK).network_security_groups
     id_parts = parse_resource_id(namespace.nsg)
     nsg_name = id_parts['name']
     rg = id_parts['resource_group']
@@ -767,7 +768,7 @@ def process_nw_topology_namespace(namespace):
     location = namespace.location
     if not location:
         resource_client = \
-            get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
+            get_mgmt_service_client(namespace.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
         resource_group = resource_client.get(namespace.target_resource_group_name)
         namespace.location = resource_group.location  # pylint: disable=no-member
 

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from ._client_factory import _graph_client_factory
 
 VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id']

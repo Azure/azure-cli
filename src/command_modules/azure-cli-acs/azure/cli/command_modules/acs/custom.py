@@ -29,10 +29,9 @@ from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 from msrestazure.azure_exceptions import CloudError
 
-import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-from azure.cli.core.util import CLIError, shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
@@ -44,9 +43,11 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
 from azure.mgmt.authorization.models import RoleAssignmentProperties
+
+from knack.util import CLIError
+
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
-logger = azlogging.get_az_logger(__name__)
 
 # pylint:disable=too-many-lines
 

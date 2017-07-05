@@ -7,15 +7,16 @@ import os
 from pprint import pformat
 from six.moves import configparser
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import \
-    (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
-from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import API_PROFILES
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH
+
+from knack.log import get_logger
+from knack.util import CLIError
+from knack.config import get_config_parser
+
+logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
-
-logger = azlogging.get_az_logger(__name__)
 
 
 class CloudNotRegisteredException(Exception):
@@ -139,6 +140,67 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
         }
         return pformat(o)
 
+    def get_api_version(self, resource_type):
+        """ Get the current API version for a given resource_type.
+
+        :param resource_type: The resource type.
+        :type resource_type: ResourceType.
+        :returns:  str -- The API version.
+        """
+        from azure.cli.core.profiles._shared import get_api_version as _sdk_get_api_version
+        return _sdk_get_api_version(self.profile, resource_type)
+
+    def supported_api_version(self, resource_type, min_api=None, max_api=None):
+        """ Method to check if the current API version for a given resource_type is supported.
+            If resource_type is set to None, the current profile version will be used as the basis of
+            the comparison.
+
+        :param resource_type: The resource type.
+        :type resource_type: ResourceType.
+        :param min_api: The minimum API that is supported (inclusive). Omit for no minimum constraint.
+        "type min_api: str
+        :param max_api: The maximum API that is supported (inclusive). Omit for no maximum constraint.
+        "type max_api: str
+        :returns:  bool -- True if the current API version of resource_type satisfies the
+                           min/max constraints. False otherwise.
+        """
+        from azure.cli.core.profiles._shared import supported_api_version as _sdk_supported_api_version
+        return _sdk_supported_api_version(self.profile, resource_type, min_api, max_api)
+
+    def get_sdk(self, resource_type, *attr_args, **kwargs):
+        """ Get any SDK object that's versioned using the current API version for resource_type.
+            Supported keyword arguments:
+                checked - A boolean specifying if this method should suppress/check import exceptions
+                          or not. By default, None is returned.
+                mod - A string specifying the submodule that all attr_args should be prefixed with.
+
+            Example usage:
+                Get a single SDK model.
+                TableService = get_sdk(resource_type, 'table#TableService')
+
+                File, Directory = get_sdk(resource_type,
+                                          'file.models#File',
+                                          'file.models#Directory')
+
+                Same as above but get multiple models where File and Directory are both part of
+                'file.models' and we don't want to specify each full path.
+                File, Directory = get_sdk(resource_type,
+                                          'File',
+                                          'Directory',
+                                          mod='file.models')
+
+        :param resource_type: The resource type.
+        :type resource_type: ResourceType.
+        :param attr_args: Positional arguments for paths to objects to get.
+        :type attr_args: str
+        :param kwargs: Keyword arguments.
+        :type kwargs: str
+        :returns: object -- e.g. an SDK module, model, enum, attribute. The number of objects returned
+                            depends on len(attr_args).
+        """
+        from azure.cli.core.profiles._shared import get_versioned_sdk as _sdk_get_versioned_sdk
+        return _sdk_get_versioned_sdk(self.profile, resource_type, *attr_args, **kwargs)
+
 
 AZURE_PUBLIC_CLOUD = Cloud(
     'AzureCloud',
@@ -215,22 +277,20 @@ AZURE_GERMAN_CLOUD = Cloud(
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 
-def _set_active_cloud(cloud_name):
-    set_global_config_value('cloud', 'name', cloud_name)
+def _set_active_cloud(cli_ctx, cloud_name):
+    cli_ctx.config.set_value('cloud', 'name', cloud_name)
 
 
-def get_active_cloud_name():
-    global_config = get_config_parser()
-    global_config.read(GLOBAL_CONFIG_PATH)
+def get_active_cloud_name(cli_ctx):
     try:
-        return global_config.get('cloud', 'name')
+        return cli_ctx.config.config_parser.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
-        _set_active_cloud(AZURE_PUBLIC_CLOUD.name)
+        _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
 
 
-def _get_cloud(cloud_name):
-    return next((x for x in get_clouds() if x.name == cloud_name), None)
+def _get_cloud(cli_ctx, cloud_name):
+    return next((x for x in get_clouds(cli_ctx) if x.name == cloud_name), None)
 
 
 def get_custom_clouds():
@@ -251,7 +311,7 @@ def init_known_clouds(force=False):
         config.write(configfile)
 
 
-def get_clouds():
+def get_clouds(cli_ctx):
     clouds = []
     # load the config again as it may have changed
     config = get_config_parser()
@@ -275,7 +335,7 @@ def get_clouds():
             # If management endpoint not set, use resource manager endpoint
             c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
-    active_cloud_name = get_active_cloud_name()
+    active_cloud_name = get_active_cloud_name(cli_ctx)
     for c in clouds:
         if c.name == active_cloud_name:
             c.is_active = True
@@ -283,15 +343,15 @@ def get_clouds():
     return clouds
 
 
-def get_cloud(cloud_name):
-    cloud = _get_cloud(cloud_name)
+def get_cloud(cli_ctx, cloud_name):
+    cloud = _get_cloud(cli_ctx, cloud_name)
     if not cloud:
         raise CloudNotRegisteredException(cloud_name)
     return cloud
 
 
-def get_active_cloud():
-    return get_cloud(get_active_cloud_name())
+def get_active_cloud(cli_ctx):
+    return get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
 
 
 def get_cloud_subscription(cloud_name):
@@ -303,8 +363,8 @@ def get_cloud_subscription(cloud_name):
         return None
 
 
-def set_cloud_subscription(cloud_name, subscription):
-    if not _get_cloud(cloud_name):
+def set_cloud_subscription(cli_ctx, cloud_name, subscription):
+    if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
@@ -341,12 +401,12 @@ def _set_active_subscription(cloud_name):
         logger.warning("Use 'az account set' to set the active subscription.")
 
 
-def switch_active_cloud(cloud_name):
-    if get_active_cloud_name() == cloud_name:
+def switch_active_cloud(cli_ctx, cloud_name):
+    if cli_ctx.cloud.name == cloud_name:
         return
-    if not _get_cloud(cloud_name):
+    if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    _set_active_cloud(cloud_name)
+    _set_active_cloud(cli_ctx, cloud_name)
     logger.warning("Switched active cloud to '%s'.", cloud_name)
     _set_active_subscription(cloud_name)
 
@@ -378,22 +438,22 @@ def _save_cloud(cloud, overwrite=False):
         config.write(configfile)
 
 
-def add_cloud(cloud):
-    if _get_cloud(cloud.name):
+def add_cloud(cli_ctx, cloud):
+    if _get_cloud(cli_ctx, cloud.name):
         raise CloudAlreadyRegisteredException(cloud.name)
     _save_cloud(cloud)
 
 
-def update_cloud(cloud):
-    if not _get_cloud(cloud.name):
+def update_cloud(cli_ctx, cloud):
+    if not _get_cloud(cli_ctx, cloud.name):
         raise CloudNotRegisteredException(cloud.name)
     _save_cloud(cloud, overwrite=True)
 
 
-def remove_cloud(cloud_name):
-    if not _get_cloud(cloud_name):
+def remove_cloud(cli_ctx, cloud_name):
+    if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    if cloud_name == get_active_cloud_name():
+    if cloud_name == cli_ctx.cloud.name:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's currently active.".format(cloud_name))
     is_known_cloud = next((x for x in KNOWN_CLOUDS if x.name == cloud_name), None)

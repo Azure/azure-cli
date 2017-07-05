@@ -3,11 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
-
-import azure.cli.core.azlogging as azlogging
-
-logger = azlogging.get_az_logger(__name__)
+from knack.util import CLIError
 
 
 def cli_redis_export(client, resource_group_name, name, prefix, container, file_format=None):
@@ -22,7 +18,7 @@ def cli_redis_import_method(client, resource_group_name, name, file_format, file
     return client.import_method(resource_group_name, name, files, parameters)
 
 
-def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
+def cli_redis_update_settings(cli_ctx, client, resource_group_name, name, redis_configuration):
     from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
     logger.warning('This command is getting deprecated. Please use "redis update" command')
 
@@ -46,7 +42,7 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
     return client.create_or_update(resource_group_name, name, parameters=update_params)
 
 
-def cli_redis_update(instance, sku=None, vm_size=None):
+def cli_redis_update(cli_ctx, instance, sku=None, vm_size=None):
     from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
     if sku is not None:
         instance.sku.name = sku

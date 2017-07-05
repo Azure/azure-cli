@@ -3,10 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import (location_type, enum_choice_list,
-                                                get_resource_name_completion_list, CliArgumentType)
+from azure.cli.core.commands.parameters import location_type, get_resource_name_completion_list
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
+
+from knack.arguments import CLIArgumentType, enum_choice_list
+
 from ._factory import iot_hub_service_factory
 from .custom import iot_device_list, KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
@@ -19,7 +21,7 @@ def get_device_id_completion_list(prefix, action, parsed_args,
             iot_device_list(client, parsed_args.hub_name, top=100)] if parsed_args.hub_name else []
 
 
-hub_name_type = CliArgumentType(
+hub_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
     help='IoT Hub name.')
 

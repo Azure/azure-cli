@@ -7,8 +7,6 @@ import os
 import datetime
 import json
 
-from azure.cli.core._config import set_global_config_value
-
 from azclishell.configuration import CONFIGURATION, get_config_dir as shell_config
 
 SHELL_CONFIG = CONFIGURATION

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.command_modules.lab.validators import (_update_artifacts)
 

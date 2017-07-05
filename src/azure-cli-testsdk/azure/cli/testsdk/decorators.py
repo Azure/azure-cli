@@ -5,9 +5,7 @@
 
 import unittest
 
-from azure.cli.core.profiles import supported_api_version
 
-
-def api_version_constraint(resource_type, **kwargs):
-    return unittest.skipUnless(supported_api_version(resource_type, **kwargs),
+def api_version_constraint(cli_ctx, resource_type, **kwargs):
+    return unittest.skipUnless(cli_ctx.cloud.supported_api_version(resource_type, **kwargs),
                                "Test not supported by current profile.")

@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, too-many-lines
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008R2SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
