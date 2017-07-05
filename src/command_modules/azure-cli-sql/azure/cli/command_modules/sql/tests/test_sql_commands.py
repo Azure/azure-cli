@@ -295,7 +295,6 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
         sn = server
         oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
         oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
-        tid = '72f988bf-86f1-41af-91ab-2d7cd011db47'
         user = 'DSEngAll'
         user2 = 'TestUser'
 
