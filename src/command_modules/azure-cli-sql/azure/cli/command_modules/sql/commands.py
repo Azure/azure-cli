@@ -88,7 +88,6 @@ with ServiceGroup(__name__, get_sql_databases_operations, database_operations, c
         c.command('show', 'get_blob_auditing_policy')
         c.generic_update_command(
             'update', 'get_blob_auditing_policy', 'create_or_update_blob_auditing_policy',
-
             custom_func_name='db_audit_policy_update')
 
     with s.group('sql db threat-policy') as c:
