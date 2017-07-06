@@ -46,3 +46,7 @@ def get_sql_elastic_pools_operations(kwargs):
 
 def get_sql_recommended_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).recommended_elastic_pools
+
+
+def get_sql_server_azure_ad_administrators_operations(kwargs):
+    return get_sql_management_client(kwargs).server_azure_ad_administrators
