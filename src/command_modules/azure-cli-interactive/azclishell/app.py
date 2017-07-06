@@ -16,7 +16,6 @@ from threading import Thread
 import jmespath
 import six
 from six.moves import configparser
-from six.moves._thread import start_new_thread
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.buffer import Buffer
@@ -39,7 +38,7 @@ from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
 from azclishell.telemetry import SHELL_TELEMETRY as telemetry
-from azclishell.threads import ContinuousPingThread, LoadCommandTableThread
+from azclishell.threads import LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -657,13 +656,12 @@ class Shell(object):
                 self.threads.append(thread)
                 self.curr_thread = thread
 
-                start_new_thread(target=progress_view, args=self)
-                # thread = ContinuousPingThread(progress_view, self)
-                # thread.daemon = True
-                # thread.start()
-                # self.threads.append(thread)
+                progress_args = [self]
+                thread = Thread(target=progress_view, args=progress_args)
+                thread.daemon = True
+                thread.start()
+                self.threads.append(thread)
                 result = None
-
             else:
                 result = self.app.execute(args)
 

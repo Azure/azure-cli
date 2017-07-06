@@ -6,24 +6,24 @@
 import threading
 
 
-class ContinuousPingThread(threading.Thread):
-    """ thread to keep the progress indications running """
-    def __init__(self, target, args):
-        super(ContinuousPingThread, self).__init__()
-        self.target = target
-        self.args = args
+# class ContinuousPingThread(threading.Thread):
+#     """ thread to keep the progress indications running """
+#     def __init__(self, target, args):
+#         super(ContinuousPingThread, self).__init__()
+#         self.target = target
+#         self.args = args
 
-    def run(self):
-        import time
-        try:
-            while True:
-                if self.target(self.args):
-                # if super(ContinuousPingThread, self).run():
-                    time.sleep(4)
-                    break
-                time.sleep(.25)
-        except KeyboardInterrupt:
-            pass
+#     def run(self):
+#         import time
+#         try:
+#             while True:
+#                 if self.target(self.args):
+#                 # if super(ContinuousPingThread, self).run():
+#                     time.sleep(4)
+#                     break
+#                 time.sleep(.25)
+#         except KeyboardInterrupt:
+#             pass
 
 
 class LoadCommandTableThread(threading.Thread):
