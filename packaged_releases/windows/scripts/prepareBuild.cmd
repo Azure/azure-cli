@@ -5,18 +5,23 @@
 :: This re-builds partial WiX files for use in cloning the repo after install.
 :: heat.exe from the WiX toolset is used for this.
 ::
-set CLI_VERSION=0.2.10
+if "%CLIVERSION%"=="" (
+    echo "Set the CLIVERSION environment variable."
+    goto ERROR
+)
 
 set PYTHON_VERSION=3.6.1
 
 pushd %~dp0..\
 
-set CLI_ARCHIVE_DOWNLOAD_URL=https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_%CLI_VERSION%.tar.gz
+set CLI_ARCHIVE_DOWNLOAD_URL=https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_%CLIVERSION%.tar.gz
 
 :: Download URL for Wix 10 from https://wix.codeplex.com/downloads/get/1587180
 :: Direct download URL http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=wix&DownloadId=1587180&FileTime=131118854877130000&Build=21050
 :: We use a mirror of Wix storage on Azure blob storage as the above link can be slow...
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
+set TAR_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/tar-1.13-1-bin.zip"
+set GZIP_DOWNLOAD_URL=http://www.gzip.org/gzip124xN.exe
 
 set PYTHON_DOWNLOAD_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%.exe
 
@@ -31,14 +36,19 @@ mkdir %OUTPUT_DIR%
 set TEMP_CLI_FOLDER=zcli
 set TEMP_SCRATCH_FOLDER=zcli_scratch
 set TEMP_WIX_FOLDER=zwix
+set TEMP_TAR_FOLDER=zTar
+set TEMP_GZIP_FOLDER=zgzip
 set TEMP_PYTHON_FOLDER=zPython
 set BUILDING_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_CLI_FOLDER%
 set SCRATCH_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_SCRATCH_FOLDER%
 set WIX_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_WIX_FOLDER%
+set GZIP_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_GZIP_FOLDER%
+set TAR_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_TAR_FOLDER%
 set PYTHON_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_PYTHON_FOLDER%
 
 pushd %HOMEDRIVE%%HOMEPATH%
 if exist %TEMP_CLI_FOLDER% rmdir /s /q %TEMP_CLI_FOLDER%
+if exist %TEMP_WIX_FOLDER% rmdir /s /q %TEMP_WIX_FOLDER%
 ::rmdir always returns 0, so check folder's existence 
 if exist %TEMP_CLI_FOLDER% (
     echo Failed to delete %TEMP_CLI_FOLDER%.
@@ -60,7 +70,7 @@ if not exist %TEMP_PYTHON_FOLDER% (
     mkdir %TEMP_PYTHON_FOLDER%
     pushd %PYTHON_DIR%
     echo Downloading Python %PYTHON_VERSION%
-    curl -o python-installer.exe %PYTHON_DOWNLOAD_URL%
+    curl -o python-installer.exe %PYTHON_DOWNLOAD_URL% -k
     python-installer.exe /quiet InstallAllUsers=0 TargetDir=%PYTHON_DIR% PrependPath=0 AssociateFiles=0 CompileAll=1 Shortcuts=0 Include_test=0 Include_doc=0 Include_dev=0 Include_launcher=0 Include_tcltk=0 Include_tools=0
     if %errorlevel% neq 0 goto ERROR
     del python-installer.exe
@@ -75,7 +85,7 @@ if not exist %TEMP_WIX_FOLDER% (
     mkdir %TEMP_WIX_FOLDER%
     pushd %WIX_DIR%
     echo Downloading Wix.
-    curl -o wix-archive.zip %WIX_DOWNLOAD_URL%
+    curl -o wix-archive.zip %WIX_DOWNLOAD_URL% -k
     unzip -q wix-archive.zip
     del wix-archive.zip
     if %errorlevel% neq 0 goto ERROR
@@ -83,25 +93,58 @@ if not exist %TEMP_WIX_FOLDER% (
     popd
 )
 
+if exist %TEMP_GZIP_FOLDER% (
+    echo Using existing gzip at %GZIP_DIR%
+)
+if not exist %TEMP_GZIP_FOLDER% (
+    mkdir %TEMP_GZIP_FOLDER%
+    pushd %GZIP_DIR%
+    echo Downloading Gzip.
+    curl -o gzip-installer.exe %GZIP_DOWNLOAD_URL% -k
+    gzip-installer.exe
+    if %errorlevel% neq 0 goto ERROR
+    echo Gzip downloaded and extracted successfully.
+    popd
+)
+
+if exist %TEMP_TAR_FOLDER% (
+    echo Using existing Tar at %TAR_DIR%
+)
+if not exist %TEMP_TAR_FOLDER% (
+    mkdir %TEMP_TAR_FOLDER%
+    pushd %TAR_DIR%
+    echo Downloading Tar.
+    curl -o tar-archive.zip %TAR_DOWNLOAD_URL% -k
+    unzip -q tar-archive.zip
+    del tar-archive.zip
+    if %errorlevel% neq 0 goto ERROR
+    echo Tar downloaded and extracted successfully.
+    popd
+)
+
 popd
 
 :: Download & unzip CLI archive
 pushd %BUILDING_DIR%
-echo Downloading CLI archive version %CLI_VERSION%
-curl -o cli-archive.tar.gz %CLI_ARCHIVE_DOWNLOAD_URL%
-gzip -d < cli-archive.tar.gz | tar xvf - 
+echo Downloading CLI archive version %CLIVERSION%
+curl -o cli-archive.tar.gz %CLI_ARCHIVE_DOWNLOAD_URL% -k
+%GZIP_DIR%\gzip.exe -d < cli-archive.tar.gz | %TAR_DIR%\bin\tar.exe xvf - 
+echo Extracted.
 del cli-archive.tar.gz
 if %errorlevel% neq 0 goto ERROR
 echo Downloaded and extracted CLI archive successfully.
 popd
 
+echo Python directory info...
+for %%i in (%PYTHON_DIR%) do echo %%i
+
 :: Use the Python version on the machine that creates the MSI
-robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL /NJH /NJS
+robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 :: Build & install all the packages with bdist_wheel
 %BUILDING_DIR%\python.exe -m pip install wheel
 echo Building CLI packages...
-set CLI_SRC=%BUILDING_DIR%\azure-cli_packaged_%CLI_VERSION%\src
+set CLI_SRC=%BUILDING_DIR%\azure-cli_packaged_%CLIVERSION%\src
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg) do (
    pushd %%a
    %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %SCRATCH_DIR%
@@ -118,7 +161,7 @@ popd
 %BUILDING_DIR%\python.exe -m pip install azure-cli -f %SCRATCH_DIR%
 %BUILDING_DIR%\python.exe -m pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
-rmdir /s /q %BUILDING_DIR%\azure-cli_packaged_%CLI_VERSION%
+rmdir /s /q %BUILDING_DIR%\azure-cli_packaged_%CLIVERSION%
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
