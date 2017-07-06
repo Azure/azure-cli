@@ -618,6 +618,7 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
 # pylint: disable=too-many-locals
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
+                        public_ip_per_vm, vm_domain_name, dns_servers,
                         admin_username, authentication_type,
                         storage_profile, os_disk_name,
                         os_caching, data_caching, storage_sku, data_disk_sizes_gb,
@@ -634,6 +635,18 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'subnet': {'id': subnet_id}
         }
     }
+
+    if public_ip_per_vm:
+        ip_configuration['properties']['publicipaddressconfiguration'] = {
+            'name': 'instancepublicip',
+            'properties': {
+                'idleTimeoutInMinutes': 10,
+            }
+        }
+        if vm_domain_name:
+            ip_configuration['properties']['publicipaddressconfiguration']['properties']['dnsSettings'] = {
+                'domainNameLabel': vm_domain_name
+            }
 
     if backend_address_pool_id:
         key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
@@ -717,6 +730,16 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')
     # Build VMSS
+    nic_config = {
+        'name': nic_name,
+        'properties': {
+            'primary': 'true',
+            'ipConfigurations': [ip_configuration]
+        }
+    }
+    if dns_servers:
+        nic_config['dnsServers'] = dns_servers
+
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
@@ -726,13 +749,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'storageProfile': storage_properties,
             'osProfile': os_profile,
             'networkProfile': {
-                'networkInterfaceConfigurations': [{
-                    'name': nic_name,
-                    'properties': {
-                        'primary': 'true',
-                        'ipConfigurations': [ip_configuration]
-                    }
-                }]
+                'networkInterfaceConfigurations': [nic_config]
             }
         }
     }

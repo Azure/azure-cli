@@ -16,14 +16,12 @@ python -m azure.cli --debug
 # Ensure tokens are erased from VCR recordings
 python -m automation.tests.check_vcr_recordings
 
-# check_style --ci;
+check_style --ci;
 
 if [ "$CODE_COVERAGE" == "True" ]; then
     echo "Run tests with code coverage."
     pip install -qqq coverage codecov
-    find src -name tests | xargs nosetests --with-coverage --cover-branches --processes=-1 --process-timeout=600 --process-restartworker -v -c ./nose.cfg
-
-
+    coverage run -m automation.tests.run --parallel
     coverage combine
     codecov
 else
