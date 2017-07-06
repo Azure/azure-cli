@@ -287,6 +287,39 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_aad_admin(self, resource_group, server):
+        rg = resource_group
+        sn = server
+        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
+        user = 'DSEngAll'
+        user2 = 'TestUser'
+
+        self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
+                 .format(sn, rg, oid, user),
+                 checks=[JMESPathCheck('login', user),
+                         JMESPathCheck('sid', oid)])
+
+        self.cmd('sql server ad-admin list -s {} -g {}'
+                 .format(sn, rg),
+                 checks=[JMESPathCheck('[0].login', user)])
+
+        self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
+                 .format(sn, rg, user2, oid2),
+                 checks=[JMESPathCheck('login', user2),
+                         JMESPathCheck('sid', oid2)])
+
+        self.cmd('sql server ad-admin delete -s {} -g {}'
+                 .format(sn, rg))
+
+        self.cmd('sql server ad-admin list -s {} -g {}'
+                 .format(sn, rg),
+                 checks=[JMESPathCheck('login', None)])
+
+
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
