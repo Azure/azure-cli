@@ -586,13 +586,13 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
 
         # test sql db commands
         dw = self.cmd('sql dw create -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('location', loc_display),
-                     JMESPathCheck('edition', 'DataWarehouse'),
-                     JMESPathCheck('status', 'Online')]).get_output_in_json()
+                      .format(rg, server, database_name),
+                      checks=[
+                          JMESPathCheck('resourceGroup', rg),
+                          JMESPathCheck('name', database_name),
+                          JMESPathCheck('location', loc_display),
+                          JMESPathCheck('edition', 'DataWarehouse'),
+                          JMESPathCheck('status', 'Online')]).get_output_in_json()
 
         # Sanity check that the default max size is not equal to the size that we will update to
         # later. That way we know that update is actually updating the size.
