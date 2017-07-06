@@ -3,12 +3,19 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* Removed broken az sql server create --identity parameter.
+
 2.0.6 (2017-06-21)
 ++++++++++++++++++
+
 * az sql server create/update command output no longer show administratorLoginPassword values.
 
 2.0.5 (2017-06-13)
 ++++++++++++++++++
+
 * Added az sql db list-editions and az sql elastic-pool list-editions commands.
 
 2.0.4 (2017-05-30)

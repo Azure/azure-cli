@@ -13,7 +13,7 @@ from azure.cli.testsdk.preparers import AbstractPreparer
 
 class StorageScenarioMixin(object):
     def get_account_key(self, group, name):
-        if get_active_api_profile() == '2017-03-09-profile-preview':
+        if get_active_api_profile() == '2017-03-09-profile':
             template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
         else:
             template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'

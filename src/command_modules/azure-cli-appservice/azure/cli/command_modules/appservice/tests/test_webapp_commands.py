@@ -105,7 +105,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_win_webapp_quick_create(self, resource_group, resource_group_location):
+    def test_win_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick'
         plan = 'plan-quick'
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
@@ -117,7 +117,7 @@ class WebappQuickCreateTest(ScenarioTest):
         ]))
 
     @ResourceGroupPreparer()
-    def test_win_webapp_quick_create_cd(self, resource_group, resource_group_location):
+    def test_win_webapp_quick_create_cd(self, resource_group):
         webapp_name = 'webapp-quick-cd'
         plan = 'plan-quick'
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
@@ -131,7 +131,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue('Hello world' in str(r.content))
 
     @ResourceGroupPreparer(location='westus')
-    def test_linux_webapp_quick_create(self, resource_group, resource_group_location):
+    def test_linux_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick-linux'
         plan = 'plan-quick-linux'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
@@ -340,6 +340,22 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
         self.assertEqual(result2, [])
 
 
+class WebappACRSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_acr_integration(self, resource_group):
+        plan = 'plan1'
+        webapp = 'webappacrtest1'
+        acr_registry_name = webapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan))
+        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        self.cmd('webapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
+            resource_group, webapp, acr_registry_name), checks=[
+                JMESPathCheckV2("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
+        ])
+
+
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -363,16 +379,6 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
         ])
-
-        '''
-        import time
-        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-
-        import requests
-        r = requests.get('http://{}.azurewebsites.net'.format(webapp))
-        #verify the web page
-        self.assertTrue('Hello world' in str(r.content))
-        '''
 
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
@@ -481,7 +487,7 @@ class WebappSlotTrafficRouting(ScenarioTest):
 class WebappSlotSwapScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_webapp_slot_swap(self, resource_group, resource_group_location):
+    def test_webapp_slot_swap(self, resource_group):
         plan = 'slot-swap-plan2'
         webapp = 'slot-swap-web2'
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
