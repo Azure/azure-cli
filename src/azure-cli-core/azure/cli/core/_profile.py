@@ -333,10 +333,10 @@ class Profile(object):
         if user_type == _USER:
             _, _, token_entry = self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry[_REFRESH_TOKEN], str(account[_TENANT_ID])
+            return None, token_entry[_REFRESH_TOKEN], token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
 
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
-        return username_or_sp_id, sp_secret, str(account[_TENANT_ID])
+        return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
     def get_raw_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
                       subscription=None):

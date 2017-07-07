@@ -101,6 +101,15 @@ helps['acr login'] = """
             az acr login -n MyRegistry
 """
 
+helps['acr show-usage'] = """
+    type: command
+    short-summary: Gets the quota usages for the specified container registry.
+    examples:
+        - name: Get the quota usages for a container registry.
+          text: >
+            az acr show-usage -n MyRegistry
+"""
+
 helps['acr credential show'] = """
     type: command
     short-summary: Gets the login credentials for the specified container registry.
@@ -159,13 +168,13 @@ helps['acr repository delete'] = """
         - name: Delete a repository from the specified container registry.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository
-        - name: Delete a tag from the given repository in the specified container registry, but keep the manifest referenced by the tag.
+        - name: Delete a tag from the given repository. This operation does not delete the manifest referenced by the tag or associated layer data.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag
-        - name: Delete the manifest referenced by a tag and all tags referencing the manifest from the given repository in the specified container registry.
+        - name: Delete the manifest referenced by a tag. This operation also deletes associated layer data and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
-        - name: Delete a manfiest and all tags referencing the manifest from the given repository in the specified container registry.
+        - name: Delete a manfiest from the given repository. This operation also deletes associated layer data and all tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --manifest MyManifest
 """

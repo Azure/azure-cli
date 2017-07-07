@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck,
+from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan,
                                StorageAccountPreparer, ResourceGroupPreparer)
 
 
@@ -63,7 +63,7 @@ class AcrCommandsTests(ScenarioTest):
         self._core_registry_scenario(registry_name, resource_group, resource_group_location,
                                      storage_account_for_update)
 
-    @ResourceGroupPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='eastus')
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 50)
 
@@ -83,7 +83,7 @@ class AcrCommandsTests(ScenarioTest):
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
-    @ResourceGroupPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='eastus')
     def test_acr_create_webhook(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 50)
         webhook_name = self.create_random_name('cliregwebhook', 50)
@@ -140,6 +140,15 @@ class AcrCommandsTests(ScenarioTest):
         # list webhook events
         self.cmd('acr webhook list-events -n {} -r {}'.format(webhook_name, registry_name))
 
+        # get registry usage
+        self.cmd('acr show-usage -n {} -g {}'.format(registry_name, resource_group), checks=[
+            JMESPathCheck('value[?name==`Size`]|[0].currentValue', 0),
+            JMESPathCheckGreaterThan('value[?name==`Size`]|[0].limit', 0),
+            JMESPathCheck('value[?name==`Webhooks`]|[0].currentValue', 1),
+            JMESPathCheckGreaterThan('value[?name==`Webhooks`]|[0].limit', 0)])
+
+        # test webhook delete
+        self.cmd('acr webhook delete -n {} -r {}'.format(webhook_name, registry_name))
         # test acr delete
         self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
 
