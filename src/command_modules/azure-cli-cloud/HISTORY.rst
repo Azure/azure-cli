@@ -3,7 +3,7 @@
 Release History
 ===============
 
-2.0.6 (unreleased)
+2.0.6 (2017-07-07)
 ++++++++++++++++++
 * Support for registering cloud just with ARM resource manager endpoint
 
