@@ -17,7 +17,7 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck)
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
@@ -1865,6 +1865,25 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         # run the command twice with the same parameters and verify it does not fail
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
+
+
+class VMLiveScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_create_progress(self, resource_group):
+        from azure.cli.testsdk.utilities import force_progress_logging
+        vm_name = 'vm123'
+        with force_progress_logging() as test_io:
+            self.cmd('vm create -g {} -n vm123 --admin-username {} --admin-password PasswordPassword1! --image debian'.format(resource_group, vm_name))
+
+        content = test_io.getvalue()
+        # check log has okay format
+        lines = content.splitlines()
+        for l in lines:
+            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        # spot check we do have relevant messages coming out
+        self.assertTrue('Succeeded: {}VMNic (Microsoft.Network/networkInterfaces)'.format(vm_name) in lines)
+        self.assertTrue('Succeeded: {} (Microsoft.Compute/virtualMachines)'.format(vm_name) in lines)
+
 
 # endregion
 
