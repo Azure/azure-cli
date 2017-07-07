@@ -2,8 +2,8 @@
 
 Release History
 ===============
-(unreleased)
-++++++++++++++++++
+0.1.10 (2017-07-07)
++++++++++++++++++++
 * webapp: support to retrieve creds from acr
 
 0.1.9 (2017-06-21)
