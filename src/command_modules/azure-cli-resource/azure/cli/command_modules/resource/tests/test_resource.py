@@ -339,7 +339,6 @@ class DeploymentTest(ScenarioTest):
         ])
 
 
-
 class DeploymentLiveTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_group_deployment_progress(self, resource_group):
