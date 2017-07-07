@@ -20,8 +20,6 @@ set CLI_ARCHIVE_DOWNLOAD_URL=https://azurecliprod.blob.core.windows.net/releases
 :: Direct download URL http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=wix&DownloadId=1587180&FileTime=131118854877130000&Build=21050
 :: We use a mirror of Wix storage on Azure blob storage as the above link can be slow...
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set TAR_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/tar-1.13-1-bin.zip"
-set GZIP_DOWNLOAD_URL=http://www.gzip.org/gzip124xN.exe
 
 set PYTHON_DOWNLOAD_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%.exe
 
@@ -36,14 +34,10 @@ mkdir %OUTPUT_DIR%
 set TEMP_CLI_FOLDER=zcli
 set TEMP_SCRATCH_FOLDER=zcli_scratch
 set TEMP_WIX_FOLDER=zwix
-set TEMP_TAR_FOLDER=zTar
-set TEMP_GZIP_FOLDER=zgzip
 set TEMP_PYTHON_FOLDER=zPython
 set BUILDING_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_CLI_FOLDER%
 set SCRATCH_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_SCRATCH_FOLDER%
 set WIX_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_WIX_FOLDER%
-set GZIP_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_GZIP_FOLDER%
-set TAR_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_TAR_FOLDER%
 set PYTHON_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_PYTHON_FOLDER%
 
 pushd %HOMEDRIVE%%HOMEPATH%
@@ -93,44 +87,20 @@ if not exist %TEMP_WIX_FOLDER% (
     popd
 )
 
-if exist %TEMP_GZIP_FOLDER% (
-    echo Using existing gzip at %GZIP_DIR%
-)
-if not exist %TEMP_GZIP_FOLDER% (
-    mkdir %TEMP_GZIP_FOLDER%
-    pushd %GZIP_DIR%
-    echo Downloading Gzip.
-    curl -o gzip-installer.exe %GZIP_DOWNLOAD_URL% -k
-    gzip-installer.exe
-    if %errorlevel% neq 0 goto ERROR
-    echo Gzip downloaded and extracted successfully.
-    popd
-)
-
-if exist %TEMP_TAR_FOLDER% (
-    echo Using existing Tar at %TAR_DIR%
-)
-if not exist %TEMP_TAR_FOLDER% (
-    mkdir %TEMP_TAR_FOLDER%
-    pushd %TAR_DIR%
-    echo Downloading Tar.
-    curl -o tar-archive.zip %TAR_DOWNLOAD_URL% -k
-    unzip -q tar-archive.zip
-    del tar-archive.zip
-    if %errorlevel% neq 0 goto ERROR
-    echo Tar downloaded and extracted successfully.
-    popd
-)
-
 popd
 
 :: Download & unzip CLI archive
 pushd %BUILDING_DIR%
 echo Downloading CLI archive version %CLIVERSION%
 curl -o cli-archive.tar.gz %CLI_ARCHIVE_DOWNLOAD_URL% -k
-%GZIP_DIR%\gzip.exe -d < cli-archive.tar.gz | %TAR_DIR%\bin\tar.exe xvf - 
+curl -o 7zipsetup.exe http://www.7-zip.org/a/7z1604-x64.exe -k
+7zipsetup.exe /S
+"C:\Program Files\7-Zip\7z.exe" x -r cli-archive.tar.gz
+"C:\Program Files\7-Zip\7z.exe" x -r azure-cli_packaged_%CLIVERSION%.tar
 echo Extracted.
+del 7zipsetup.exe
 del cli-archive.tar.gz
+del azure-cli_packaged_%CLIVERSION%.tar
 if %errorlevel% neq 0 goto ERROR
 echo Downloaded and extracted CLI archive successfully.
 popd
