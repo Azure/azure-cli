@@ -93,7 +93,7 @@ def main():
            path_to_docker_context], _out=sys.stdout, _err=sys.stdout)
     print_status('Docker build complete.')
     print_status('Running Docker log in.')
-    my_vm(['sudo', 'docker', 'login', '--username', ENV_DOCKER_USERNAME, '--password', ENV_DOCKER_PASSWORD],
+    my_vm(['sudo', 'docker', 'login', '--username', ENV_DOCKER_USERNAME, '--password', '"{}"'.format(ENV_DOCKER_PASSWORD)],
           _out=sys.stdout, _err=sys.stdout)
     print_status('Running Docker push.')
     my_vm(['sudo', 'docker', 'push', image_tag], _out=sys.stdout, _err=sys.stdout)
