@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++++++++++
+2.0.10 (2017-07-07)
++++++++++++++++++++
 * vm/vmss: use newer api-version of "2017-03-30"
 * BC: 'sku.managed' is removed from 'az vm availability-set show' (use sku.name instead)
 * `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
