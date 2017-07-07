@@ -14,6 +14,7 @@ https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0.10.ta
   <summary>List of component versions in this release (click to expand)</summary><p>
 
 $ az --version
+
 azure-cli (2.0.10)  
 
 acr (2.0.8)  
@@ -66,6 +67,7 @@ e74150b2db2975e8b17710eb7ef270ded16e6a8c27f77929544533f6b4c33b76
   <summary>List of component versions in this release (click to expand)</summary><p>
 
 $ az --version
+
 azure-cli (2.0.9)  
 
 acr (2.0.7)  
@@ -118,6 +120,7 @@ c1d4f6154cdce38b1b8d14000f0215b0d8e1032bf40feabcb80fc0c48005bc2b
   <summary>List of component versions in this release (click to expand)</summary><p>
 
 $ az --version
+
 azure-cli (2.0.8)
 
 acr (2.0.6)  
