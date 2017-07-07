@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.7 (2017-07-07)
 ++++++++++++++++++
 
 * Removed broken az sql server create --identity parameter.
