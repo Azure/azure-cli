@@ -16,14 +16,15 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _get_extension_instance_name)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
-from azure.cli.command_modules.vm.disk_encryption import (enable,
-                                                          disable,
-                                                          _check_encrypt_is_supported)
+from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, _check_encrypt_is_supported,
+                                                          encrypt_vmss, decrypt_vmss)
 from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
                                        OperatingSystemTypes, InstanceViewStatus,
                                        VirtualMachineExtensionInstanceView,
                                        VirtualMachineExtension, ImageReference,
-                                       DiskCreateOptionTypes, CachingTypes)
+                                       DiskCreateOptionTypes, CachingTypes,
+                                       VirtualMachineScaleSetVMProfile, VirtualMachineScaleSetOSProfile,
+                                       LinuxConfiguration)
 
 
 class Test_Vm_Custom(unittest.TestCase):
@@ -226,13 +227,13 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # throw when VM has disks, but no --volume-type is specified
         with self.assertRaises(CLIError) as context:
-            enable('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
+            encrypt_vm('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
 
         self.assertTrue("supply --volume-type" in str(context.exception))
 
         # throw when no AAD client secrets
         with self.assertRaises(CLIError) as context:
-            enable('rg1', 'vm1', 'client_id', faked_keyvault)
+            encrypt_vm('rg1', 'vm1', 'client_id', faked_keyvault)
 
         self.assertTrue("--aad-client-id or --aad-client-cert-thumbprint" in str(context.exception))
 
@@ -255,19 +256,114 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # throw on disabling encryption on OS disk of a linux VM
         with self.assertRaises(CLIError) as context:
-            disable('rg1', 'vm1', 'OS')
+            decrypt_vm('rg1', 'vm1', 'OS')
 
-        self.assertTrue("Only data disk is supported to disable on Linux VM" in str(context.exception))
+        self.assertTrue("Only Data disks can have encryption disabled in a Linux VM." in str(context.exception))
 
         # throw on disabling encryption on data disk, but os disk is also encrypted
         with self.assertRaises(CLIError) as context:
-            disable('rg1', 'vm1', 'DATA')
+            decrypt_vm('rg1', 'vm1', 'DATA')
 
         self.assertTrue("Disabling encryption on data disk can render the VM unbootable" in str(context.exception))
 
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
-        disable('rg1', 'vm1', 'DATA')
+        decrypt_vm('rg1', 'vm1', 'DATA')
+
+    def test_encryption_distro_check(self):
+        image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+        self.assertEqual(None, msg)
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2n')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+        self.assertEqual(None, msg)
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        result, msg = _check_encrypt_is_supported(image, 'all')
+        self.assertFalse(result)
+        self.assertEqual(msg,
+                         "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+
+    # pylint: disable=line-too-long
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption._get_keyvault_key_url', autospec=True)
+    def test_vmss_enable_encryption_error_cases_handling(self, mock_get_keyvault_key_url, mock_compute_client_factory):
+        faked_keyvault = '/subscriptions/01234567-1bf0-4dda-aec3-cb9272f09590/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/v1'
+        os_disk = OSDisk(DiskCreateOptionTypes.from_image)
+        existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
+        vmss = FakedVMSS([existing_disk], os_disk=os_disk, linux=True)
+
+        compute_client_mock = mock.MagicMock()
+        compute_client_mock.virtual_machine_scale_sets.get.return_value = vmss
+        mock_compute_client_factory.return_value = compute_client_mock
+
+        mock_get_keyvault_key_url.return_value = 'https://somevaults.vault.azure.net/'
+
+        # throw when VM has disks, but no --volume-type is specified
+        with self.assertRaises(CLIError) as context:
+            encrypt_vmss('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
+        self.assertTrue("supply --volume-type" in str(context.exception))
+
+        # throw when no AAD client secrets
+        with self.assertRaises(CLIError) as context:
+            encrypt_vmss('rg1', 'vm1', 'client_id', faked_keyvault)
+        self.assertTrue("--aad-client-id or --aad-client-cert-thumbprint" in str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption.show_vmss_encryption_status', autospec=True)
+    def test_vmss_disable_encryption_error_cases_handling(self, mock_enc_status_mock, mock_compute_client_factory, mock_vm_set):
+        code_mock = mock.MagicMock()
+        code_mock.code = 'EncryptionState/encrypted'
+        m = mock.MagicMock()
+        m.statuses = [code_mock]
+        mock_disk_status = {'disks': [m]}
+        mock_enc_status_mock.return_value = [mock_disk_status]
+        os_disk = OSDisk(None, OperatingSystemTypes.linux)
+        existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
+        vmss = FakedVMSS([existing_disk], os_disk=os_disk, linux=True)
+        compute_client_mock = mock.MagicMock()
+        compute_client_mock.virtual_machines_ca.virtual_machine_scale_sets.return_value = vmss
+        mock_compute_client_factory.return_value = compute_client_mock
+
+        # throw on disabling encryption on OS disk of a linux VM
+        with self.assertRaises(CLIError) as context:
+            decrypt_vmss('rg1', 'vm1', 'OS')
+        self.assertTrue("Linux VM's OS disk is encrypted. Disabling encryption may render the VM unbootable." in str(context.exception))
+
+        # throw on disabling encryption on data disk, but os disk is also encrypted
+        with self.assertRaises(CLIError) as context:
+            decrypt_vmss('rg1', 'vm1', 'DATA')
+        self.assertTrue("Linux VM's OS disk is encrypted. Disabling encryption may render the VM unbootable." in str(context.exception))
+
+        code_mock.code = 'foo-bar'  # make os disk not encrypted
+        with self.assertRaises(CLIError) as context:
+            decrypt_vmss('rg1', 'vm1', 'OS')
+        self.assertTrue("Only Data disks can have encryption disabled in a Linux VM." in str(context.exception))
+
+        # works fine to disable encryption on data disk when OS disk is never encrypted
+        decrypt_vmss('rg1', 'vm1', 'DATA')
+
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
+    def test_vmss_disable_encryption_error_on_missing_volume(self, mock_compute_client_factory, mock_vm_set):
+        os_disk = OSDisk(None, OperatingSystemTypes.windows)
+        existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
+        vmss = FakedVMSS([existing_disk], os_disk=os_disk, linux=False)
+        compute_client_mock = mock.MagicMock()
+        compute_client_mock.virtual_machines_ca.virtual_machine_scale_sets.return_value = vmss
+        mock_compute_client_factory.return_value = compute_client_mock
+
+        with self.assertRaises(CLIError) as context:
+            decrypt_vmss('rg1', 'vm1', None)
+        self.assertTrue("VM scale-set has data disks, please supply --volume-type" in str(context.exception))
 
     def test_encryption_distro_check(self):
         image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')
@@ -374,6 +470,16 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.network_profile = NetworkProfile(nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
         self.location = 'westus'
+
+
+class FakedVMSS(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, data_disks=None, os_disk=None, linux=True):
+        linux_configuration = LinuxConfiguration(disable_password_authentication=True, ssh='123')
+        self.os_profile = VirtualMachineScaleSetOSProfile(linux_configuration=linux_configuration)
+        self.storage_profile = StorageProfile(data_disks=data_disks, os_disk=os_disk)
+        self.location = 'westus'
+        vm_profile = VirtualMachineScaleSetVMProfile(self.os_profile, self.storage_profile)
+        self.virtual_machine_profile = vm_profile
 
 
 class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods

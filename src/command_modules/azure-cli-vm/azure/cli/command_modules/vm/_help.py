@@ -785,6 +785,23 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
             az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
 """
 
+helps['vmss encryption'] = """
+    type: group
+    short-summary: (PREVIEW) Manage encryption of VM instances' disks.
+"""
+
+helps['vmss encryption enable'] = """
+    type: command
+    short-summary: Encrypt a virtual machine scale set with managed disks.
+    long-summary: For linux VM scale-sets, only data disk encryption is supported
+"""
+
+helps['vmss encryption disable'] = """
+    type: command
+    short-summary: disable the encryption on a virtual machine scale set with managed disks.
+    long-summary: For linux VM scale-sets, only data disk encryption is supported
+"""
+
 helps['vm capture'] = """
     type: command
     short-summary: Capture information for a stopped VM.
