@@ -370,7 +370,9 @@ def _get_subscription_id():
 
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
                admin_username="azureuser",
-               api_version="2017-01-31", 
+               api_version="2017-01-31",
+               master_profile=None,
+               agent_profiles=None,
                agent_count=3,
                agent_vm_size="Standard_D2_v2", location=None, master_count=1,
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
@@ -400,6 +402,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type admin_username: str
     :param api_version: ACS API version to use
     :type api_version: str
+    :param agent_profiles: AgentPoolProfiles used to describe agent pools
+    :type agent_profiles: dict
     :param agent_count: The number of agents for the cluster.  Note, for
      DC/OS clusters you will also get 1 or 2 public agents in addition to
      these selected masters.
@@ -484,6 +488,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
                                   ssh_key_value, admin_username=admin_username,
                                   api_version=api_version,
+                                  master_profile=master_profile,
+                                  agent_profiles=agent_profiles,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   location=location, service_principal=service_principal,
                                   client_secret=client_secret, master_count=master_count,
@@ -495,7 +501,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     if location is None:
         location = rg.location  # pylint:disable=no-member
     return _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                                  ssh_key_value, admin_username, api_version, agent_count, agent_vm_size, location,
+                                  ssh_key_value, admin_username, api_version, agent_profiles,
+                                  agent_count, agent_vm_size, location,
                                   orchestrator_type, master_count, tags, validate, no_wait)
 
 
@@ -538,7 +545,8 @@ def load_acs_service_principals(config_path):
 
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-                       admin_username="azureuser", api_version="2017-01-31", 
+                       admin_username="azureuser", api_version="2017-01-31",
+                       master_profile=None, agent_profiles=None,
                        agent_count=3, agent_vm_size="Standard_D2_v2",
                        location=None, service_principal=None, client_secret=None, master_count=1,
                        windows=False, admin_password='', validate=False, no_wait=False, tags=None):
@@ -556,11 +564,36 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
             "adminPassword": admin_password,
         }
         os_type = 'Windows'
-    
+
     # The resources.properties fields should match with ContainerServices' api model
     # So assumption:
     # The API model created for new version should be compatible to use it in an older version
     # There maybe additional field specified, but could be ignored by the older version
+    masterPoolProfile = {}
+    defaultMasterPoolProfile = {
+        "count": int(master_count),
+        "dnsPrefix": dns_name_prefix,
+        "vmSize": "Standard_D2",
+    }
+    if master_profile is None:
+        masterPoolProfile = defaultMasterPoolProfile
+    else:
+        masterPoolProfile = {**defaultMasterPoolProfile, **master_profile}
+
+    agentPoolProfiles = []
+    defaultAgentPoolProfile = {
+        "count": int(agent_count),
+        "vmSize": agent_vm_size,
+        "osType": os_type,
+    }
+    if agent_profiles is None:
+        agentPoolProfiles.append(
+            {**defaultAgentPoolProfile, **{"name" : "agentPool0"}}
+        )
+    else:
+        # override agentPoolProfiles by using the passed in agent_profiles
+        for ap in agent_profiles:
+            agentPoolProfiles.append({**defaultAgentPoolProfile, **ap})
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
@@ -583,19 +616,8 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                     "orchestratorProfile": {
                         "orchestratorType": "kubernetes"
                     },
-                    "masterProfile": {
-                        "count": int(master_count),
-                        "dnsPrefix": dns_name_prefix
-                    },
-                    "agentPoolProfiles": [
-                        {
-                            "name": "agentpools",
-                            "count": int(agent_count),
-                            "vmSize": agent_vm_size,
-                            "dnsPrefix": dns_name_prefix + '-k8s-agents',
-                            "osType": os_type,
-                        }
-                    ],
+                    "masterProfile": masterPoolProfile,
+                    "agentPoolProfiles": agentPoolProfiles,
                     "linuxProfile": {
                         "ssh": {
                             "publicKeys": [
@@ -620,12 +642,12 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
             "value": client_secret
         }
     }
-
     return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
 
 
 def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                           ssh_key_value, admin_username, api_version, agent_count, agent_vm_size, location,
+                           ssh_key_value, admin_username, api_version, agent_profiles, agent_count, 
+                           agent_vm_size, location,
                            orchestrator_type, master_count, tags, validate, no_wait):
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",

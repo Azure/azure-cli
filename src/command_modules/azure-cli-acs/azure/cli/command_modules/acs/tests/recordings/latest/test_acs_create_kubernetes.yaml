@@ -1195,4 +1195,34 @@ interactions:
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 202, message: Accepted}
+- request:
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.9 resourcemanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2017-05-10
+  response:
+    body: {string: '{"error":{"code":"SubscriptionNotFound","message":"The subscription
+        ''00000000-0000-0000-0000-000000000000'' could not be found."}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['129']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Mon, 26 Jun 2017 22:26:34 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-correlation-request-id: [282ec9e7-1505-411e-9ec2-9bf7b5e58fc4]
+      x-ms-failure-cause: [gateway]
+      x-ms-request-id: [282ec9e7-1505-411e-9ec2-9bf7b5e58fc4]
+      x-ms-routing-request-id: ['BRAZILUS:20170626T222634Z:282ec9e7-1505-411e-9ec2-9bf7b5e58fc4']
+    status: {code: 404, message: Not Found}
 version: 1

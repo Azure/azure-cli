@@ -14,6 +14,7 @@ from azure.cli.core.commands import (
     register_cli_argument,
     register_extra_cli_argument)
 from azure.cli.core.commands.parameters import tags_type
+from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     file_type,
@@ -78,6 +79,8 @@ register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file
 register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=validate_ssh_key)
 
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', validator=validate_create_parameters)
+register_cli_argument('acs create', 'master_profile', options_list=('--master-profile', '-m'), type=validate_file_or_dict, help='The file or dictionary representation of the master profile. Note it will override any master settings once set')
+register_cli_argument('acs create', 'agent_profiles', options_list=('--agent-profiles', '-a'), type=validate_file_or_dict, help='The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
