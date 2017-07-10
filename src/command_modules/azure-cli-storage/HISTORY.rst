@@ -6,6 +6,7 @@ Release History
 unreleased
 ++++++++++
 * Remove --marker option from storage blob list, storage container list, and storage share list commands. The change is a part of the solution to issue #3745. This is technically a breaking change. However since the removed options never works, the impact is limited.
+* Enable create https only storage account.
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++

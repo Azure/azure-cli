@@ -39,9 +39,8 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, location=None,
-                           kind=None, tags=None, custom_domain=None,
-                           encryption=None, access_tier=None):
+def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
+                           custom_domain=None, encryption=None, access_tier=None, https_only=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
@@ -59,6 +58,10 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
         custom_domain=CustomDomain(custom_domain, None) if custom_domain else None,
         encryption=encryption,
         access_tier=AccessTier(access_tier) if access_tier else None)
+
+    if https_only:
+        params.enable_https_traffic_only = https_only
+
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
@@ -74,8 +77,8 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
-                           use_subdomain=None, encryption=None, access_tier=None):
+def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None, encryption=None,
+                           access_tier=None, https_only=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
@@ -94,7 +97,8 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
         tags=tags if tags is not None else instance.tags,
         custom_domain=domain,
         encryption=encryption if encryption is not None else instance.encryption,
-        access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier
+        access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
+        enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
     return params
 

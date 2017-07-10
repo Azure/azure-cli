@@ -9,12 +9,13 @@ from argcomplete.completers import FilesCompleter
 from six import u as unicode_string
 
 from azure.cli.core._config import az_config
-from azure.cli.core.commands.parameters import \
-    (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list,
-     model_choice_list, enum_default, location_type)
+from azure.cli.core.commands.parameters import (ignore_type, tags_type, file_type, get_resource_name_completion_list,
+                                                enum_choice_list, model_choice_list, enum_default, location_type,
+                                                three_state_flag)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
-from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType, VersionConstraint
+from azure.cli.core.commands import (register_cli_argument, register_extra_cli_argument, CliArgumentType,
+                                     VersionConstraint)
 
 from azure.common import AzureMissingResourceHttpError
 
@@ -284,11 +285,10 @@ for item in ['blob', 'file', 'queue', 'table']:
 
 register_cli_argument('storage account create', 'location', location_type, validator=get_default_location_from_resource_group)
 register_cli_argument('storage account create', 'account_type', help='The storage account type', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
-
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
-
 register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'), **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
 register_cli_argument('storage account create', 'tags', tags_type)
+register_cli_argument('storage account create', 'https_only', help='Allows https traffic only to storage service.', **three_state_flag())
 
 for item in ['create', 'update']:
     register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
@@ -303,6 +303,7 @@ register_cli_argument('storage account update', 'custom_domain', help='User doma
 register_cli_argument('storage account update', 'use_subdomain', help='Specify whether to use indirect CNAME validation.', **enum_choice_list(['true', 'false']))
 
 register_cli_argument('storage account update', 'tags', tags_type, default=None)
+register_cli_argument('storage account update', 'https_only', help='Allows https traffic only to storage service.', **three_state_flag())
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
