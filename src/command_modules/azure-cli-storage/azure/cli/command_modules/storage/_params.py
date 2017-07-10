@@ -344,6 +344,7 @@ with CommandContext('storage blob list') as c:
               help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.',
               validator=validate_included_datasets)
     c.reg_arg('num_results', type=int)
+    c.reg_arg('marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
 
 for item in ['download', 'upload']:
     register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
@@ -473,6 +474,8 @@ register_cli_argument('storage container policy', 'policy_name', options_list=('
 for item in ['create', 'delete', 'list', 'show', 'update']:
     register_extra_cli_argument('storage container policy {}'.format(item), 'lease_id', options_list=('--lease-id',), help='The container lease ID.')
 
+register_cli_argument('storage container list', 'marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
+
 register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
 
 register_cli_argument('storage share exists', 'directory_name', ignore_type)
@@ -480,6 +483,8 @@ register_cli_argument('storage share exists', 'file_name', ignore_type)
 
 register_cli_argument('storage share policy', 'container_name', share_name_type)
 register_cli_argument('storage share policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(FileService, 'container_name', 'get_share_acl'))
+
+register_cli_argument('storage share list', 'marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
 
 register_cli_argument('storage directory', 'directory_name', directory_type, options_list=('--name', '-n'))
 
