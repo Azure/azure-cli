@@ -10,27 +10,27 @@ from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists,
 class AcrCommandsTests(ScenarioTest):
     def test_check_name_availability(self):
         # the chance of this randomly generated name has a duplication is rare
-        name = self.create_random_name('clireg', 50)
+        name = self.create_random_name('clireg', 20)
         self.cmd('acr check-name -n {}'.format(name), checks=JMESPathCheck('nameAvailable', True))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
     def test_acr_create_with_new_storage(self, resource_group, resource_group_location,
                                          storage_account_for_update):
-        registry_name = self.create_random_name('clireg', 50)
+        registry_name = self.create_random_name('clireg', 20)
 
         self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
             registry_name,
             resource_group,
             resource_group_location,
-            'Basic',
+            'Classic',
             'Microsoft.ContainerRegistry'),
                  checks=[
                      JMESPathCheck('name', registry_name),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('adminUserEnabled', False),
-                     JMESPathCheck('sku.name', 'Basic'),
-                     JMESPathCheck('sku.tier', 'Basic'),
+                     JMESPathCheck('sku.name', 'Classic'),
+                     JMESPathCheck('sku.tier', 'Classic'),
                      JMESPathCheck('provisioningState', 'Succeeded')])
         self._core_registry_scenario(registry_name, resource_group, resource_group_location,
                                      storage_account_for_update)
@@ -41,65 +41,64 @@ class AcrCommandsTests(ScenarioTest):
     def test_acr_create_with_existing_storage(self, resource_group, resource_group_location,
                                               storage_account_for_update,
                                               storage_account_for_create):
-        registry_name = self.create_random_name('clireg', 50)
+        registry_name = self.create_random_name('clireg', 20)
 
         self.cmd('acr create -n {} -g {} -l {} --sku {} '
                  '--storage-account-name {} --deployment-name {}'.format(
                      registry_name,
                      resource_group,
                      resource_group_location,
-                     'Basic',
+                     'Classic',
                      storage_account_for_create,
                      'Microsoft.ContainerRegistry'),
                  checks=[
                      JMESPathCheck('name', registry_name),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('adminUserEnabled', False),
-                     JMESPathCheck('sku.name', 'Basic'),
-                     JMESPathCheck('sku.tier', 'Basic'),
-                     JMESPathCheck('provisioningState', 'Succeeded'),
-                     JMESPathCheck('storageAccount.name', storage_account_for_create)])
+                     JMESPathCheck('sku.name', 'Classic'),
+                     JMESPathCheck('sku.tier', 'Classic'),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location,
                                      storage_account_for_update)
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
-        registry_name = self.create_random_name('clireg', 50)
+        registry_name = self.create_random_name('clireg', 20)
 
         self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
             registry_name,
             resource_group,
             resource_group_location,
-            'Managed_Standard',
+            'Standard',
             'Microsoft.ContainerRegistry'),
                  checks=[
                      JMESPathCheck('name', registry_name),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('adminUserEnabled', False),
-                     JMESPathCheck('sku.name', 'Managed_Standard'),
-                     JMESPathCheck('sku.tier', 'Managed'),
+                     JMESPathCheck('sku.name', 'Standard'),
+                     JMESPathCheck('sku.tier', 'Standard'),
                      JMESPathCheck('provisioningState', 'Succeeded')])
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer()
     def test_acr_create_webhook(self, resource_group, resource_group_location):
-        registry_name = self.create_random_name('clireg', 50)
-        webhook_name = self.create_random_name('cliregwebhook', 50)
+        registry_name = self.create_random_name('clireg', 20)
+        webhook_name = 'cliregwebhook'
 
         self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
             registry_name,
             resource_group,
             resource_group_location,
-            'Managed_Standard',
+            'Standard',
             'Microsoft.ContainerRegistry'),
                  checks=[
                      JMESPathCheck('name', registry_name),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('adminUserEnabled', False),
-                     JMESPathCheck('sku.name', 'Managed_Standard'),
-                     JMESPathCheck('sku.tier', 'Managed'),
+                     JMESPathCheck('sku.name', 'Standard'),
+                     JMESPathCheck('sku.tier', 'Standard'),
                      JMESPathCheck('provisioningState', 'Succeeded')])
 
         self.cmd('acr webhook create -n {} -r {} --uri {} --actions {}'.format(
@@ -149,6 +148,55 @@ class AcrCommandsTests(ScenarioTest):
 
         # test webhook delete
         self.cmd('acr webhook delete -n {} -r {}'.format(webhook_name, registry_name))
+        # test acr delete
+        self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
+
+    @ResourceGroupPreparer()
+    def test_acr_create_replication(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+        # replication location should be different from registry location
+        replication_location = 'southcentralus'
+        replication_name = replication_location
+
+        self.cmd('acr create -n {} -g {} -l {} --sku {} --deployment-name {}'.format(
+            registry_name,
+            resource_group,
+            resource_group_location,
+            'Premium',
+            'Microsoft.ContainerRegistry'),
+                 checks=[
+                     JMESPathCheck('name', registry_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('adminUserEnabled', False),
+                     JMESPathCheck('sku.name', 'Premium'),
+                     JMESPathCheck('sku.tier', 'Premium'),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        self.cmd('acr replication create -n {} -r {} -l {}'.format(
+            replication_name,
+            registry_name,
+            replication_location),
+                 checks=[
+                     JMESPathCheck('name', replication_name),
+                     JMESPathCheck('location', replication_location),
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        self.cmd('acr replication list -r {}'.format(registry_name), checks=[
+            JMESPathCheck('[0].provisioningState', 'Succeeded'),
+            JMESPathCheck('[1].provisioningState', 'Succeeded')])
+        self.cmd('acr replication show -n {} -r {}'.format(replication_name, registry_name), checks=[
+            JMESPathCheck('name', replication_name),
+            JMESPathCheck('provisioningState', 'Succeeded')])
+
+        # update replication
+        self.cmd('acr replication update -n {} -r {} --tags {}'.format(
+            replication_name, registry_name, 'key=value'), checks=[
+                JMESPathCheck('name', replication_name),
+                JMESPathCheck('provisioningState', 'Succeeded'),
+                JMESPathCheck('tags', {'key': 'value'})])
+
+        # test replication delete
+        self.cmd('acr replication delete -n {} -r {}'.format(replication_name, registry_name))
         # test acr delete
         self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
 
@@ -212,8 +260,7 @@ class AcrCommandsTests(ScenarioTest):
                 registry_name, resource_group, storage_account_for_update),
                      checks=[
                          JMESPathCheck('name', registry_name),
-                         JMESPathCheck('location', location),
-                         JMESPathCheck('storageAccount.name', storage_account_for_update)])
+                         JMESPathCheck('location', location)])
 
         # test acr delete
         self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
