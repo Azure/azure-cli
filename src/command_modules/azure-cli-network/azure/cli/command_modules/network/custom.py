@@ -1134,7 +1134,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
-    
+
     network_interface_args = {}
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         network_interface_args['enable_accelerated_networking'] = enable_accelerated_networking
