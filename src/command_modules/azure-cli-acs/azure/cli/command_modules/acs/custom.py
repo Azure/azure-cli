@@ -371,7 +371,7 @@ def _get_subscription_id():
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
                location=None,
                admin_username="azureuser",
-               api_version="2017-01-31",
+               api_version=None,
                master_profile=None,
                master_vm_size="Standard_D2_v2",
                master_osdisk_size=0,
@@ -473,6 +473,16 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     groups = _resource_client_factory().resource_groups
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
+    if location is None:
+        location = rg.location  # pylint:disable=no-member
+
+    #if location in the set below, override api_version with 2017-07-01
+    #once all acs rp support 2017-07-01, set the default to 2017-07-01
+    if api_version is None:
+        if location in ["ukwest", "uksouth"]:
+            api_version = "2017-07-01"
+        else:
+            api_verison = "2017-01-31"
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         # TODO: This really needs to be broken out and unit tested.
@@ -510,7 +520,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   master_profile=master_profile,
                                   master_vm_size=master_vm_size,
                                   master_osdisk_size=master_osdisk_size,
-                                  master_vnet_subnet_id=agent_vnet_subnet_id,
+                                  master_vnet_subnet_id=master_vnet_subnet_id,
                                   agent_profiles=agent_profiles,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   agent_osdisk_size=agent_osdisk_size,
@@ -522,10 +532,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
 
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
-    if location is None:
-        location = rg.location  # pylint:disable=no-member
     return _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                                  ssh_key_value, admin_username, api_version, agent_profiles,
+                                  ssh_key_value, admin_username,
                                   agent_count, agent_vm_size, location,
                                   orchestrator_type, master_count, tags, validate, no_wait)
 
@@ -569,7 +577,7 @@ def load_acs_service_principals(config_path):
 
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-                       admin_username="azureuser", api_version="2017-01-31",
+                       admin_username="azureuser", api_version=None,
                        master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
                        master_vnet_subnet_id="",
                        agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
@@ -676,8 +684,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
 
 
 def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                           ssh_key_value, admin_username, api_version, agent_profiles, agent_count,
-                           agent_vm_size, location,
+                           ssh_key_value, admin_username, agent_count, agent_vm_size, location,
                            orchestrator_type, master_count, tags, validate, no_wait):
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
