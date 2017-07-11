@@ -22,7 +22,7 @@ from azure.cli.core.commands.parameters import (
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
 from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
-from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key
+from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key, validate_list_of_integers
 
 
 def _compute_client_factory(**_):
@@ -88,6 +88,7 @@ register_cli_argument('acs create', 'agent_profiles', options_list=('--agent-pro
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 register_cli_argument('acs create', 'agent_osdisk_size', type=int, help='the disk size for agent pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
 register_cli_argument('acs create', 'agent_vnet_subnet_id', type=str, help='the custom vnet subnet id. Note agent need to used the same vnet if master set')
+register_cli_argument('acs create', 'agent_ports', type=validate_list_of_integers, help='the ports exposed on the agent pool, such as 8080,4000,80')
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
 register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
