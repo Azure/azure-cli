@@ -369,12 +369,15 @@ def _get_subscription_id():
 
 
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
+               location=None,
                admin_username="azureuser",
                api_version="2017-01-31",
                master_profile=None,
+               master_vm_size="Standard_D2_v2",
+               master_count=1,
                agent_profiles=None,
                agent_count=3,
-               agent_vm_size="Standard_D2_v2", location=None, master_count=1,
+               agent_vm_size="Standard_D2_v2",
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
                validate=False, no_wait=False):
@@ -402,6 +405,10 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type admin_username: str
     :param api_version: ACS API version to use
     :type api_version: str
+    :param master_profile: MasterProfile used to describe master pool
+    :type master_profile: dict
+    :param master_vm_size: The size of master pool Virtual Machine
+    :type master_vm_size: str
     :param agent_profiles: AgentPoolProfiles used to describe agent pools
     :type agent_profiles: dict
     :param agent_count: The number of agents for the cluster.  Note, for
@@ -489,6 +496,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   ssh_key_value, admin_username=admin_username,
                                   api_version=api_version,
                                   master_profile=master_profile,
+                                  master_vm_size=master_vm_size,
                                   agent_profiles=agent_profiles,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   location=location, service_principal=service_principal,
@@ -546,9 +554,9 @@ def load_acs_service_principals(config_path):
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", api_version="2017-01-31",
-                       master_profile=None, agent_profiles=None,
-                       agent_count=3, agent_vm_size="Standard_D2_v2",
-                       location=None, service_principal=None, client_secret=None, master_count=1,
+                       master_profile=None, master_vm_size="Standard_D2_v2", master_count=1,
+                       agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2",
+                       location=None, service_principal=None, client_secret=None,
                        windows=False, admin_password='', validate=False, no_wait=False, tags=None):
     if not location:
         location = '[resourceGroup().location]'
@@ -573,7 +581,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     defaultMasterPoolProfile = {
         "count": int(master_count),
         "dnsPrefix": dns_name_prefix,
-        "vmSize": "Standard_D2",
+        "vmSize": master_vm_size,
     }
     if master_profile is None:
         masterPoolProfile = defaultMasterPoolProfile
@@ -646,7 +654,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
 
 
 def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                           ssh_key_value, admin_username, api_version, agent_profiles, agent_count, 
+                           ssh_key_value, admin_username, api_version, agent_profiles, agent_count,
                            agent_vm_size, location,
                            orchestrator_type, master_count, tags, validate, no_wait):
     template = {
