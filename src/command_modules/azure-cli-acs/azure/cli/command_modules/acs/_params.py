@@ -81,8 +81,10 @@ register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=va
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', validator=validate_create_parameters)
 register_cli_argument('acs create', 'master_profile', options_list=('--master-profile', '-m'), type=validate_file_or_dict, help='The file or dictionary representation of the master profile. Note it will override any master settings once set')
 register_cli_argument('acs create', 'master_vm_size', completer=get_vm_size_completion_list)
+register_cli_argument('acs create', 'master_osdisk_size', type=int, help='the disk size for master pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
 register_cli_argument('acs create', 'agent_profiles', options_list=('--agent-profiles', '-a'), type=validate_file_or_dict, help='The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
+register_cli_argument('acs create', 'agent_osdisk_size', type=int, help='the disk size for agent pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
 register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
