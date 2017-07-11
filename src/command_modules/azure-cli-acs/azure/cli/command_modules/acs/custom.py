@@ -377,6 +377,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                master_osdisk_size=0,
                master_count=1,
                master_vnet_subnet_id="",
+               master_first_consecutive_static_ip="",
                agent_profiles=None,
                agent_vm_size="Standard_D2_v2",
                agent_osdisk_size=0,
@@ -521,6 +522,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   master_vm_size=master_vm_size,
                                   master_osdisk_size=master_osdisk_size,
                                   master_vnet_subnet_id=master_vnet_subnet_id,
+                                  master_first_consecutive_static_ip=master_first_consecutive_static_ip,
                                   agent_profiles=agent_profiles,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   agent_osdisk_size=agent_osdisk_size,
@@ -579,7 +581,7 @@ def load_acs_service_principals(config_path):
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", api_version=None,
                        master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
-                       master_vnet_subnet_id="",
+                       master_vnet_subnet_id="", master_first_consecutive_static_ip="",
                        agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
                        agent_vnet_subnet_id="",
                        location=None, service_principal=None, client_secret=None,
@@ -610,6 +612,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
         "vmSize": master_vm_size,
         "osDiskSizeGB": int(master_osdisk_size),
         "vnetSubnetID": master_vnet_subnet_id,
+        "firstConsecutiveStaticIP": master_first_consecutive_static_ip,
     }
     if master_profile is None:
         masterPoolProfile = defaultMasterPoolProfile
