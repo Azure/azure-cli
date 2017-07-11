@@ -38,9 +38,9 @@ def main(args, output=sys.stdout, logging_stream=None):
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
         if cmd_result and cmd_result.result is not None:
-            from azure.cli.core._output import OutputProducer
-            formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
-            OutputProducer(formatter=formatter, file=output).out(cmd_result)
+            from azure.cli.core._output import get_formatter, get_output_producer
+            formatter = get_formatter(APPLICATION.configuration.output_format)
+            get_output_producer(formatter=formatter, output_stream=output)(cmd_result)
 
     except Exception as ex:  # pylint: disable=broad-except
 

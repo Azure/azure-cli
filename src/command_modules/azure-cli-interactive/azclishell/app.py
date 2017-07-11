@@ -668,14 +668,13 @@ class Shell(object):
 
             self.last_exit = 0
             if result and result.result is not None:
-                from azure.cli.core._output import OutputProducer
+                from azure.cli.core._output import get_formatter, get_output_producer
                 if self.output:
                     self.output.write(result)
                     self.output.flush()
                 else:
-                    formatter = OutputProducer.get_formatter(
-                        self.app.configuration.output_format)
-                    OutputProducer(formatter=formatter).out(result)
+                    formatter = get_formatter(self.app.configuration.output_format)
+                    get_output_producer(formatter=formatter)(result)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except

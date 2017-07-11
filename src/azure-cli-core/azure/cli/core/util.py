@@ -13,12 +13,12 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 import six
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core import get_az_logger
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_az_logger(__name__)
 
 
 class CLIError(Exception):
@@ -154,25 +154,31 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
             raise CLIError(json_ex)
 
 
-def todict(obj):  # pylint: disable=too-many-return-statements
+def convert_elements_to_dict(obj):
+    """
+    Recursively covert the command results to a output friendly format, which could be a dict, a list of dict, or a
+    string. How exactly the data will be converted depends its type.
+    """
+    result = obj
 
     if isinstance(obj, dict):
-        return {k: todict(v) for (k, v) in obj.items()}
+        result = {k: convert_elements_to_dict(v) for (k, v) in obj.items()}
     elif isinstance(obj, list):
-        return [todict(a) for a in obj]
+        result = [convert_elements_to_dict(a) for a in obj]
     elif isinstance(obj, Enum):
-        return obj.value
+        result = obj.value
     elif isinstance(obj, datetime):
-        return obj.isoformat()
+        result = obj.isoformat()
     elif isinstance(obj, timedelta):
-        return str(obj)
+        result = str(obj)
     elif hasattr(obj, '_asdict'):
-        return todict(obj._asdict())
+        result = convert_elements_to_dict(obj._asdict())
     elif hasattr(obj, '__dict__'):
-        return dict([(to_camel_case(k), todict(v))
-                     for k, v in obj.__dict__.items()
-                     if not callable(v) and not k.startswith('_')])
-    return obj
+        result = {to_camel_case(k): convert_elements_to_dict(v)
+                  for k, v in obj.__dict__.items()
+                  if not callable(v) and not k.startswith('_')}
+
+    return result
 
 
 KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')

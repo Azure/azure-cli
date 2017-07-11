@@ -285,10 +285,8 @@ class CommandTable(dict):
 
 
 class CliCommand(object):  # pylint:disable=too-many-instance-attributes
-
-    def __init__(self, name, handler, description=None, table_transformer=None,
-                 arguments_loader=None, description_loader=None,
-                 formatter_class=None, deprecate_info=None):
+    def __init__(self, name, handler, description=None, table_transformer=None, arguments_loader=None,
+                 description_loader=None, formatter_class=None, deprecate_info=None):
         self.name = name
         self.handler = handler
         self.help = None
@@ -313,8 +311,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def add_argument(self, param_name, *option_strings, **kwargs):
         dest = kwargs.pop('dest', None)
-        argument = CliCommandArgument(
-            dest or param_name, options_list=option_strings, **kwargs)
+        argument = CliCommandArgument(dest or param_name, options_list=option_strings, **kwargs)
         self.arguments[param_name] = argument
 
     def update_argument(self, param_name, argtype):
@@ -494,9 +491,7 @@ def _load_azure_exception_class():
 def _is_paged(obj):
     # Since loading msrest is expensive, we avoid it until we have to
     import collections
-    if isinstance(obj, collections.Iterable) \
-            and not isinstance(obj, list) \
-            and not isinstance(obj, dict):
+    if isinstance(obj, collections.Iterable) and not isinstance(obj, list) and not isinstance(obj, dict):
         from msrest.paging import Paged
         return isinstance(obj, Paged)
     return False
@@ -510,10 +505,9 @@ def _is_poller(obj):
     return False
 
 
-def create_command(module_name, name, operation,
-                   transform_result, table_transformer, client_factory,
-                   no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None, deprecate_info=None):
+def create_command(module_name, name, operation, transform_result, table_transformer, client_factory,
+                   no_wait_param=None, confirmation=None, exception_handler=None, formatter_class=None,
+                   deprecate_info=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -526,10 +520,10 @@ def create_command(module_name, name, operation,
 
         client = client_factory(kwargs) if client_factory else None
         try:
-            op = get_op_handler(operation)
+            operation_handler = get_op_handler(operation)
             for _ in range(2):  # for possible retry, we do maximum 2 times.
                 try:
-                    result = op(client, **kwargs) if client else op(**kwargs)
+                    result = operation_handler(client, **kwargs) if client else operation_handler(**kwargs)
                     if no_wait_param and kwargs.get(no_wait_param, None):
                         return None  # return None for 'no-wait'
 

@@ -9,3 +9,4 @@ __version__ = "2.0.13+dev"
 # The names are imported here to shorten the name references to core utilities in azure.cli.core package.
 
 from .azlogging import get_az_logger, configure_logging
+from .util import CLIError

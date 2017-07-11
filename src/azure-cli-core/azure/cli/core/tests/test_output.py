@@ -9,7 +9,7 @@ import unittest
 from collections import OrderedDict
 from six import StringIO
 
-from azure.cli.core._output import OutputProducer, format_json, format_table, format_tsv, CommandResultItem
+from azure.cli.core._output import get_output_producer, format_json, format_table, format_tsv, CommandResultItem
 import azure.cli.core.util as util
 
 
@@ -22,8 +22,8 @@ class TestCoreCLIOutput(unittest.TestCase):
 
     def test_out_json_valid(self):
         # The JSON output when the input is a dict should be the dict serialized to JSON
-        output_producer = OutputProducer(formatter=format_json, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
+        output_producer = get_output_producer(formatter=format_json, file=self.io)
+        output_producer(CommandResultItem({'active': True, 'id': '0b1f6472'}, None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """{
   "active": true,
@@ -33,8 +33,8 @@ class TestCoreCLIOutput(unittest.TestCase):
 
     def test_out_json_from_ordered_dict(self):
         # The JSON output when the input is OrderedDict should be serialized to JSON
-        output_producer = OutputProducer(formatter=format_json, file=self.io)
-        output_producer.out(CommandResultItem(OrderedDict({'active': True, 'id': '0b1f6472'})))
+        output_producer = get_output_producer(formatter=format_json, file=self.io)
+        output_producer(CommandResultItem(OrderedDict({'active': True, 'id': '0b1f6472'}), None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """{
   "active": true,
@@ -43,8 +43,8 @@ class TestCoreCLIOutput(unittest.TestCase):
 """))
 
     def test_out_json_byte(self):
-        output_producer = OutputProducer(formatter=format_json, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'contents': b'0b1f6472'}))
+        output_producer = get_output_producer(formatter=format_json, file=self.io)
+        output_producer(CommandResultItem({'active': True, 'contents': b'0b1f6472'}, None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """{
   "active": true,
@@ -53,8 +53,8 @@ class TestCoreCLIOutput(unittest.TestCase):
 """))
 
     def test_out_json_byte_empty(self):
-        output_producer = OutputProducer(formatter=format_json, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'contents': b''}))
+        output_producer = get_output_producer(formatter=format_json, file=self.io)
+        output_producer(CommandResultItem({'active': True, 'contents': b''}, None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """{
   "active": true,
@@ -65,11 +65,11 @@ class TestCoreCLIOutput(unittest.TestCase):
     # TABLE output tests
 
     def test_out_table(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        output_producer = get_output_producer(formatter=format_table, file=self.io)
         obj = OrderedDict()
         obj['active'] = True
         obj['val'] = '0b1f6472'
-        output_producer.out(CommandResultItem(obj))
+        output_producer(CommandResultItem(obj, None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """Active    Val
 --------  --------
@@ -77,9 +77,9 @@ True      0b1f6472
 """))
 
     def test_out_table_list_of_lists(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        output_producer = get_output_producer(formatter=format_table, file=self.io)
         obj = [['a', 'b'], ['c', 'd']]
-        output_producer.out(CommandResultItem(obj))
+        output_producer(CommandResultItem(obj, None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """Column1    Column2
 ---------  ---------
@@ -88,13 +88,12 @@ c          d
 """))
 
     def test_out_table_complex_obj(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        output_producer = get_output_producer(formatter=format_table, file=self.io)
         obj = OrderedDict()
         obj['name'] = 'qwerty'
         obj['val'] = '0b1f6472qwerty'
         obj['sub'] = {'1'}
-        result_item = CommandResultItem(obj)
-        output_producer.out(result_item)
+        output_producer(CommandResultItem(obj, None, False))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """Name    Val
 ------  --------------
@@ -102,10 +101,10 @@ qwerty  0b1f6472qwerty
 """))
 
     def test_out_table_no_query_no_transformer_order(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        output_producer = get_output_producer(formatter=format_table, file=self.io)
         obj = {'name': 'qwerty', 'val': '0b1f6472qwerty', 'active': True, 'sub': '0b1f6472'}
         result_item = CommandResultItem(obj, table_transformer=None, is_query_active=False)
-        output_producer.out(result_item)
+        output_producer(result_item)
         # Should be alphabetical order as no table transformer and query is not active.
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """Active    Name    Sub       Val
@@ -114,7 +113,7 @@ True      qwerty  0b1f6472  0b1f6472qwerty
 """))
 
     def test_out_table_no_query_yes_transformer_order(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        output_producer = get_output_producer(formatter=format_table, file=self.io)
         obj = {'name': 'qwerty', 'val': '0b1f6472qwerty', 'active': True, 'sub': '0b1f6472'}
 
         def transformer(r):
@@ -122,7 +121,7 @@ True      qwerty  0b1f6472  0b1f6472qwerty
                                 ('Active', r['active']), ('Sub', r['sub'])])
 
         result_item = CommandResultItem(obj, table_transformer=transformer, is_query_active=False)
-        output_producer.out(result_item)
+        output_producer(result_item)
         # Should be table transformer order
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """Name    Val             Active    Sub
@@ -131,11 +130,12 @@ qwerty  0b1f6472qwerty  True      0b1f6472
 """))
 
     def test_out_table_no_query_yes_jmespath_table_transformer(self):
-        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        output_producer = get_output_producer(formatter=format_table, file=self.io)
         obj = {'name': 'qwerty', 'val': '0b1f6472qwerty', 'active': True, 'sub': '0b1f6472'}
 
-        result_item = CommandResultItem(obj, table_transformer='{Name:name, Val:val, Active:active}', is_query_active=False)
-        output_producer.out(result_item)
+        result_item = CommandResultItem(obj, table_transformer='{Name:name, Val:val, Active:active}',
+                                        is_query_active=False)
+        output_producer(result_item)
         # Should be table transformer order
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
             """Name    Val             Active
@@ -145,24 +145,20 @@ qwerty  0b1f6472qwerty  True
 
     # TSV output tests
     def test_output_format_dict(self):
-        obj = {}
-        obj['A'] = 1
-        obj['B'] = 2
-        result = format_tsv(CommandResultItem(obj))
+        obj = {'A': 1, 'B': 2}
+        result = format_tsv(obj)
         self.assertEqual(result, '1\t2\n')
 
     def test_output_format_dict_sort(self):
-        obj = {}
-        obj['B'] = 1
-        obj['A'] = 2
-        result = format_tsv(CommandResultItem(obj))
+        obj = {'A': 2, 'B': 1}
+        result = format_tsv(obj)
         self.assertEqual(result, '2\t1\n')
 
     def test_output_format_ordereddict_not_sorted(self):
         obj = OrderedDict()
         obj['B'] = 1
         obj['A'] = 2
-        result = format_tsv(CommandResultItem(obj))
+        result = format_tsv(obj)
         self.assertEqual(result, '1\t2\n')
 
     def test_output_format_ordereddict_list_not_sorted(self):
@@ -173,7 +169,7 @@ qwerty  0b1f6472qwerty  True
         obj2 = OrderedDict()
         obj2['A'] = 3
         obj2['B'] = 4
-        result = format_tsv(CommandResultItem([obj1, obj2]))
+        result = format_tsv([obj1, obj2])
         self.assertEqual(result, '1\t2\n3\t4\n')
 
 

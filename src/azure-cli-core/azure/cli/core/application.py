@@ -13,7 +13,7 @@ from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
+from azure.cli.core.util import convert_elements_to_dict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
 import azure.cli.core.commands.progress as progress
 
@@ -51,9 +51,9 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def build_command_tree(command_table):
-        '''From the list of commands names, find the exact match or
+        """From the list of commands names, find the exact match or
            set of potential matches that we are looking for
-        '''
+        """
         result = {}
         for command in command_table:
             index = result
@@ -209,7 +209,7 @@ class Application(object):
                                           [p for p in unexpanded_argv if p.startswith('-')])
 
             result = expanded_arg.func(params)
-            result = todict(result)
+            result = convert_elements_to_dict(result)
             results.append(result)
 
         if len(results) == 1:
@@ -224,34 +224,34 @@ class Application(object):
                                  is_query_active=self.session['query_active'])
 
     def raise_event(self, name, **kwargs):
-        '''Raise the event `name`.
-        '''
+        """Raise the event `name`.
+        """
         data = truncate_text(str(kwargs), width=500)
         logger.debug("Application event '%s' with event data %s", name, data)
         for func in list(self._event_handlers[name]):  # Make copy in case handler modifies the list
             func(**kwargs)
 
     def register(self, name, handler):
-        '''Register a callable that will be called when the
+        """Register a callable that will be called when the
         event `name` is raised.
 
         param: name: The name of the event
         param: handler: Function that takes two parameters;
           name: name of the event raised
           event_data: `dict` with event specific data.
-        '''
+        """
         self._event_handlers[name].append(handler)
         logger.debug("Registered application event handler '%s' at %s", name, handler)
 
     def remove(self, name, handler):
-        '''Remove a callable that is registered to be called when the
+        """Remove a callable that is registered to be called when the
         event `name` is raised.
 
         param: name: The name of the event
         param: handler: Function that takes two parameters;
           name: name of the event raised
           event_data: `dict` with event specific data.
-        '''
+        """
         self._event_handlers[name].remove(handler)
         logger.debug("Removed application event handler '%s' at %s", name, handler)
 
@@ -330,14 +330,13 @@ def _validate_arguments(args, **_):
 
 
 def _explode_list_args(args):
-    '''Iterate through each attribute member of args and create a copy with
-    the IterateValues 'flattened' to only contain a single value
+    """Iterate through each attribute member of args and create a copy with the IterateValues 'flattened' to only
+    contain a single value
 
     Ex.
         { a1:'x', a2:IterateValue(['y', 'z']) } => [{ a1:'x', a2:'y'),{ a1:'x', a2:'z'}]
-    '''
-    list_args = {argname: argvalue for argname, argvalue in vars(args).items()
-                 if isinstance(argvalue, IterateValue)}
+    """
+    list_args = {name: value for name, value in vars(args).items() if isinstance(value, IterateValue)}
     if not list_args:
         yield args
     else:
@@ -353,22 +352,22 @@ def _explode_list_args(args):
 
 
 class IterateAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    '''Action used to collect argument values in an IterateValue list
+    """Action used to collect argument values in an IterateValue list
     The application will loop through each value in the IterateValue
     and execeute the associated handler for each
-    '''
+    """
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, IterateValue(values))
 
 
 class IterateValue(list):
-    '''Marker class to indicate that, when found as a value in the parsed namespace
+    """Marker class to indicate that, when found as a value in the parsed namespace
     from argparse, the handler should be invoked once per value in the list with all
     other values in the parsed namespace frozen.
 
     Typical use is to allow multiple ID parameter to a show command etc.
-    '''
+    """
     pass
 
 
