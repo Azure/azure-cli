@@ -2,6 +2,12 @@
 
 Release History
 ===============
+unreleased
+++++++++++
+* All resource management now points to 2017-10-01 api-version.
+* Add support for registry geo-replications.
+* Rename Basic SKU to Classic, but Basic is still accepted with a deprecation warning.
+
 2.0.12 (2017-09-22)
 +++++++++++++++++++
 * minor fixes
