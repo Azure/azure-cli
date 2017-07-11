@@ -526,32 +526,47 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 raise CLIError('--client-secret is required if --service-principal is specified')
             _validate_service_principal(client, service_principal)
 
-        return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                                  ssh_key_value, admin_username=admin_username,
-                                  api_version=api_version,
-                                  master_profile=master_profile,
-                                  master_vm_size=master_vm_size,
-                                  master_osdisk_size=master_osdisk_size,
-                                  master_vnet_subnet_id=master_vnet_subnet_id,
-                                  master_first_consecutive_static_ip=master_first_consecutive_static_ip,
-                                  master_storage_profile=master_storage_profile,
-                                  agent_profiles=agent_profiles,
-                                  agent_count=agent_count, agent_vm_size=agent_vm_size,
-                                  agent_osdisk_size=agent_osdisk_size,
-                                  agent_vnet_subnet_id=agent_vnet_subnet_id,
-                                  agent_ports=agent_ports,
-                                  agent_storage_profile=agent_storage_profile,
-                                  location=location, service_principal=service_principal,
-                                  client_secret=client_secret, master_count=master_count,
-                                  windows=windows, admin_password=admin_password,
-                                  validate=validate, no_wait=no_wait, tags=tags)
+        return _create(resource_group_name, deployment_name, dns_name_prefix, name,
+                       ssh_key_value, admin_username=admin_username,
+                       api_version=api_version,
+                       master_profile=master_profile,
+                       master_vm_size=master_vm_size,
+                       master_osdisk_size=master_osdisk_size,
+                       master_vnet_subnet_id=master_vnet_subnet_id,
+                       master_first_consecutive_static_ip=master_first_consecutive_static_ip,
+                       master_storage_profile=master_storage_profile,
+                       agent_profiles=agent_profiles,
+                       agent_count=agent_count, agent_vm_size=agent_vm_size,
+                       agent_osdisk_size=agent_osdisk_size,
+                       agent_vnet_subnet_id=agent_vnet_subnet_id,
+                       agent_ports=agent_ports,
+                       agent_storage_profile=agent_storage_profile,
+                       location=location, service_principal=service_principal,
+                       client_secret=client_secret, master_count=master_count,
+                       windows=windows, admin_password=admin_password,
+                       validate=validate, no_wait=no_wait, tags=tags)
 
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
-    return _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                                  ssh_key_value, admin_username,
-                                  agent_count, agent_vm_size, location,
-                                  orchestrator_type, master_count, tags, validate, no_wait)
+    return _create(resource_group_name, deployment_name, dns_name_prefix, name,
+                   ssh_key_value, admin_username=admin_username,
+                   api_version=api_version,
+                   master_profile=master_profile,
+                   master_vm_size=master_vm_size,
+                   master_osdisk_size=master_osdisk_size,
+                   master_vnet_subnet_id=master_vnet_subnet_id,
+                   master_first_consecutive_static_ip=master_first_consecutive_static_ip,
+                   master_storage_profile=master_storage_profile,
+                   agent_profiles=agent_profiles,
+                   agent_count=agent_count, agent_vm_size=agent_vm_size,
+                   agent_osdisk_size=agent_osdisk_size,
+                   agent_vnet_subnet_id=agent_vnet_subnet_id,
+                   agent_ports=agent_ports,
+                   agent_storage_profile=agent_storage_profile,
+                   location=location, service_principal=service_principal,
+                   client_secret=client_secret, master_count=master_count,
+                   windows=windows, admin_password=admin_password,
+                   validate=validate, no_wait=no_wait, tags=tags)
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
@@ -592,8 +607,8 @@ def load_acs_service_principals(config_path):
         return None
 
 
-def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-                       admin_username="azureuser", api_version=None,
+def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
+                       admin_username="azureuser", api_version=None, orchestrator_type="dcos",
                        master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
                        master_vnet_subnet_id="", master_first_consecutive_static_ip="", master_storage_profile="",
                        agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
@@ -652,116 +667,81 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
         # override agentPoolProfiles by using the passed in agent_profiles
         for ap in agent_profiles:
             agentPoolProfiles.append({**defaultAgentPoolProfile, **ap})
+
+    # define outputs
+    outputs = {
+        "masterFQDN": {
+            "type": "string",
+            "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)  # pylint: disable=line-too-long
+        },
+        "sshMaster0": {
+            "type": "string",
+            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
+        },
+    }
+    if orchestrator_type.lower() != "kubernetes":
+        outputs["agentFQDN"] = {
+            "type": "string",
+            "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
+        }
+
+    resource = {
+        "apiVersion": api_version,
+        "location": location,
+        "type": "Microsoft.ContainerService/containerServices",
+        "name": name,
+        "tags": tags,
+        "properties": {
+            "orchestratorProfile": {
+                "orchestratorType": "kubernetes"
+            },
+            "masterProfile": masterPoolProfile,
+            "agentPoolProfiles": agentPoolProfiles,
+            "linuxProfile": {
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "keyData": ssh_key_value
+                        }
+                    ]
+                },
+                "adminUsername": admin_username
+            },
+        }
+    }
+    if windows_profile is not None:
+        resource["windowsProfile"] = windows_profile
+
+    if service_principal is not None:
+        resource["servicePrincipalProfile"] = {
+            "ClientId": service_principal,
+            "Secret": "[parameters('clientSecret')]"
+        }
+
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
-        "parameters": {
+        "resources": [
+            resource,
+        ],
+        "outputs": outputs,
+    }
+    params = {}
+    if client_secret is not None:
+        template["parameters"] = {
             "clientSecret": {
                 "type": "secureString",
                 "metadata": {
                     "description": "The client secret for the service principal"
                 }
             }
-        },
-        "resources": [
-            {
-                "apiVersion": api_version,
-                "location": location,
-                "type": "Microsoft.ContainerService/containerServices",
-                "name": name,
-                "tags": tags,
-                "properties": {
-                    "orchestratorProfile": {
-                        "orchestratorType": "kubernetes"
-                    },
-                    "masterProfile": masterPoolProfile,
-                    "agentPoolProfiles": agentPoolProfiles,
-                    "linuxProfile": {
-                        "ssh": {
-                            "publicKeys": [
-                                {
-                                    "keyData": ssh_key_value
-                                }
-                            ]
-                        },
-                        "adminUsername": admin_username
-                    },
-                    "windowsProfile": windows_profile,
-                    "servicePrincipalProfile": {
-                        "ClientId": service_principal,
-                        "Secret": "[parameters('clientSecret')]"
-                    }
-                }
-            }
-        ]
-    }
-    params = {
-        "clientSecret": {
-            "value": client_secret
         }
-    }
+        params = {
+            "clientSecret": {
+                "value": client_secret
+            }
+        }
     return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
-
-
-def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
-                           ssh_key_value, admin_username, agent_count, agent_vm_size, location,
-                           orchestrator_type, master_count, tags, validate, no_wait):
-    template = {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "resources": [
-            {
-                "apiVersion": "2016-03-30",
-                "type": "Microsoft.ContainerService/containerServices",
-                "location": location,
-                "tags": tags,
-                "name": name,
-                "properties": {
-                    "orchestratorProfile": {
-                        "orchestratorType": orchestrator_type
-                    },
-                    "masterProfile": {
-                        "count": int(master_count),
-                        "dnsPrefix": dns_name_prefix + 'mgmt'
-                    },
-                    "agentPoolProfiles": [
-                        {
-                            "name": "agentpools",
-                            "count": int(agent_count),
-                            "vmSize": agent_vm_size,
-                            "dnsPrefix": dns_name_prefix + 'agents'
-                        }
-                    ],
-                    "linuxProfile": {
-                        "adminUsername": admin_username,
-                        "ssh": {
-                            "publicKeys": [
-                                {
-                                    "keyData": ssh_key_value
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        ],
-        "outputs": {
-            "masterFQDN": {
-                "type": "string",
-                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)  # pylint: disable=line-too-long
-            },
-            "sshMaster0": {
-                "type": "string",
-                "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
-            },
-            "agentFQDN": {
-                "type": "string",
-                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
-            }
-        }
-    }
-    return _invoke_deployment(resource_group_name, deployment_name, template, {}, validate, no_wait)
-
 
 def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
     from azure.mgmt.resource.resources import ResourceManagementClient
