@@ -3,6 +3,10 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++
+* `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.
+
 2.0.10 (2017-07-07)
 +++++++++++++++++++
 * vm/vmss: use newer api-version of "2017-03-30"
