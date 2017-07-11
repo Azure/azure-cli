@@ -60,6 +60,8 @@ def _get_default_install_location(exe_name):
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
+storageProfileTypes = ["StorageAccount", "ManagedDisk"]
+
 register_cli_argument('acs', 'tags', tags_type)
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default='acs',
@@ -84,11 +86,13 @@ register_cli_argument('acs create', 'master_vm_size', completer=get_vm_size_comp
 register_cli_argument('acs create', 'master_osdisk_size', type=int, help='the disk size for master pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
 register_cli_argument('acs create', 'master_vnet_subnet_id', type=str, help='the custom vnet subnet id. Note agent need to used the same vnet if master set')
 register_cli_argument('acs create', 'master_first_consecutive_static_ip', type=str, help='the first consecutive ip used to specify static ip block')
+register_cli_argument('acs create', 'master_storage_profile', **enum_choice_list(storageProfileTypes))
 register_cli_argument('acs create', 'agent_profiles', options_list=('--agent-profiles', '-a'), type=validate_file_or_dict, help='The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 register_cli_argument('acs create', 'agent_osdisk_size', type=int, help='the disk size for agent pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
 register_cli_argument('acs create', 'agent_vnet_subnet_id', type=str, help='the custom vnet subnet id. Note agent need to used the same vnet if master set')
 register_cli_argument('acs create', 'agent_ports', type=validate_list_of_integers, help='the ports exposed on the agent pool, such as 8080,4000,80')
+register_cli_argument('acs create', 'agent_storage_profile', **enum_choice_list(storageProfileTypes))
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
 register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')

@@ -378,12 +378,14 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                master_count=1,
                master_vnet_subnet_id="",
                master_first_consecutive_static_ip="",
+               master_storage_profile="",
                agent_profiles=None,
                agent_vm_size="Standard_D2_v2",
                agent_osdisk_size=0,
                agent_count=3,
                agent_vnet_subnet_id="",
                agent_ports=[],
+               agent_storage_profile="",
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
                validate=False, no_wait=False):
@@ -421,6 +423,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type master_count: int
     :param master_vnet_subnet_id: The vnet subnet id for master pool
     :type master_vnet_subnet_id: str
+    :param master_storage_profile: The storage profile used for master pool.
+     Possible value could be StorageAccount, ManagedDisk.
+    :type master_storage_profile: str
     :param agent_profiles: AgentPoolProfiles used to describe agent pools
     :type agent_profiles: dict
     :param agent_count: The number of agents for the cluster.  Note, for
@@ -435,6 +440,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type agent_vnet_subnet_id: str
     :param agent_ports: the ports exposed on the agent pool
     :type agent_ports: list
+    :param agent_storage_profile: The storage profile used for agent pool.
+     Possible value could be StorageAccount, ManagedDisk.
+    :type agent_storage_profile: str
     :param location: Location for VM resources.
     :type location: str
     :param orchestrator_type: The type of orchestrator used to manage the
@@ -526,11 +534,13 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   master_osdisk_size=master_osdisk_size,
                                   master_vnet_subnet_id=master_vnet_subnet_id,
                                   master_first_consecutive_static_ip=master_first_consecutive_static_ip,
+                                  master_storage_profile=master_storage_profile,
                                   agent_profiles=agent_profiles,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   agent_osdisk_size=agent_osdisk_size,
                                   agent_vnet_subnet_id=agent_vnet_subnet_id,
                                   agent_ports=agent_ports,
+                                  agent_storage_profile=agent_storage_profile,
                                   location=location, service_principal=service_principal,
                                   client_secret=client_secret, master_count=master_count,
                                   windows=windows, admin_password=admin_password,
@@ -585,9 +595,9 @@ def load_acs_service_principals(config_path):
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", api_version=None,
                        master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
-                       master_vnet_subnet_id="", master_first_consecutive_static_ip="",
+                       master_vnet_subnet_id="", master_first_consecutive_static_ip="", master_storage_profile="",
                        agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
-                       agent_vnet_subnet_id="", agent_ports=[],
+                       agent_vnet_subnet_id="", agent_ports=[], agent_storage_profile="",
                        location=None, service_principal=None, client_secret=None,
                        windows=False, admin_password='', validate=False, no_wait=False, tags=None):
     if not location:
@@ -617,6 +627,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
         "osDiskSizeGB": int(master_osdisk_size),
         "vnetSubnetID": master_vnet_subnet_id,
         "firstConsecutiveStaticIP": master_first_consecutive_static_ip,
+        "storageProfile": master_storage_profile,
     }
     if master_profile is None:
         masterPoolProfile = defaultMasterPoolProfile
@@ -631,6 +642,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
         "osType": os_type,
         "vnetSubnetID": agent_vnet_subnet_id,
         "ports": agent_ports,
+        "storageProfile": agent_storage_profile,
     }
     if agent_profiles is None:
         agentPoolProfiles.append(
