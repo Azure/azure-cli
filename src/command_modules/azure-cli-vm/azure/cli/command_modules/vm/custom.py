@@ -1739,6 +1739,8 @@ def create_vmss(vmss_name, resource_group_name, image,
     # determine final defaults and calculated values
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(hash_string(vmss_id, length=10))
+    load_balancer = load_balancer or '{}LB'.format(vmss_name)
+    app_gateway = application_gateway or '{}AG'.format(vmss_name)
     backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer or application_gateway)
 
     # Build up the ARM template
@@ -1775,7 +1777,6 @@ def create_vmss(vmss_name, resource_group_name, image,
 
     # Handle load balancer creation
     if load_balancer_type == 'new':
-        load_balancer = load_balancer or '{}LB'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []
@@ -1805,7 +1806,6 @@ def create_vmss(vmss_name, resource_group_name, image,
     # Or handle application gateway creation
     app_gateway = application_gateway
     if app_gateway_type == 'new':
-        app_gateway = application_gateway or '{}AG'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
 
         ag_dependencies = []

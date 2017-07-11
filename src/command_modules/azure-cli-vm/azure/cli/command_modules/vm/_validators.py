@@ -727,6 +727,23 @@ def _get_vmss_create_instance_threshold():
     return 100
 
 
+def _get_default_address_pool(resource_group, balancer_name, balancer_type):
+    option_name = '--backend-pool-name'
+    client = getattr(get_network_client(), balancer_type, None)
+    if not client:
+        raise CLIError('unrecognized balancer type: {}'.format(balancer_type))
+
+    balancer = client.get(resource_group, balancer_name)
+    values = [x.name for x in balancer.backend_address_pools]
+    if len(values) > 1:
+        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
+                       "explicitly.".format(option_name, ', '.join(values)))
+    elif not values:
+        raise CLIError("No existing values found for '{0}'. Create one first and try "
+                       "again.".format(option_name))
+    return values[0]
+
+
 def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
     INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
@@ -769,6 +786,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             try:
                 client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
+                namespace.backend_pool_name = namespace.backend_pool_name or \
+                    _get_default_address_pool(namespace.resource_group_name,
+                                              namespace.application_gateway,
+                                              'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
             except CloudError:
                 namespace.app_gateway_type = 'new'
@@ -803,6 +824,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             if check_existence(namespace.load_balancer, namespace.resource_group_name,
                                'Microsoft.Network', 'loadBalancers'):
                 namespace.load_balancer_type = 'existing'
+                namespace.backend_pool_name = namespace.backend_pool_name or \
+                    _get_default_address_pool(namespace.resource_group_name,
+                                              namespace.load_balancer,
+                                              'load_balancers')
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'

@@ -1503,8 +1503,8 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
     def test_vmss_existing_lb(self, resource_group):
         vmss_name = 'vmss1'
         lb_name = 'lb1'
-        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
-        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS'.format(resource_group, vmss_name, lb_name))
+        self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
+        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
