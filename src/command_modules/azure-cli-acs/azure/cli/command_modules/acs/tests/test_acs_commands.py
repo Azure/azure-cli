@@ -25,7 +25,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('properties.outputs.masterFQDN.value',
                                        '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, loc)),
                          JMESPathCheck('properties.outputs.agentFQDN.value',
-                                       '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, loc))])
+                                       '{}agent.{}.cloudapp.azure.com'.format(dns_prefix, loc))])
 
         # show
         self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name), checks=[
@@ -45,17 +45,27 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
                  checks=JMESPathCheck('agentPoolProfiles[0].count', 5))
 
     # the length is set to avoid following error:
-    # Resource name k8s-master-ip-cliacstestdf9e19-clitest.rgbb2842ffee75a33f04366f72f08527c5157885b
-    # 80664c0560e06962ede3e78f0-00977c-7A54A2DE is invalid. The name can be up to 80 characters
-    # long.
-    @ResourceGroupPreparer(random_name_length=30, name_prefix='clitest')
-    @RoleBasedServicePrincipalPreparer()
+    # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
+    # is invalid. The name can be up to 80 characters long.
+    @ResourceGroupPreparer(random_name_length=19, name_prefix='clitest')
+    @RoleBasedServicePrincipalPreparer(skip_assignment=False)
     def test_acs_create_kubernetes(self, resource_group, sp_name, sp_password):
-        acs_name = self.create_random_name('cliacstest', 16)
+        acs_name = self.create_random_name('acs', 16)
         ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
         cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
               '--client-secret {} --ssh-key-value {}'
         self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
+                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+
+    # Need to set the location to be ukwest (-l ukwest)
+    # Once the latest version (2017-07-01) is everywhere, we don't need this flag anymore
+    @ResourceGroupPreparer(random_name_length=19, name_prefix='clitest')
+    def test_acs_create_multiple_agentpools(self, resource_group):
+        acs_name = self.create_random_name('acs', 16)
+        cmd = 'acs create -g {} -n {} -l ukwest ' \
+              '--master-vm-size Standard_D2 --agent-vm-size Standard_D2 ' \
+              """--agent-profiles "[{{'name':'agentpool1'}},{{'name':'agentpool2'}}]" """
+        self.cmd(cmd.format(resource_group, acs_name),
                  checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
 
     @classmethod
