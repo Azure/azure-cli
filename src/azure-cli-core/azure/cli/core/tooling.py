@@ -1,7 +1,8 @@
 """
 Tooling Integration
 
-This module is used by the Azure CLI Tools extension for VSCode. It should not be used anywhere else and will be removed in a future release.
+This module is used by the Azure CLI Tools extension for VSCode. It should not be used
+anywhere else and will be removed in a future release.
 """
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
