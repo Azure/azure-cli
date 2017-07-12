@@ -91,20 +91,20 @@ def show_webapp(resource_group_name, name, slot=None, app_instance=None):
 
 
 def list_webapp(resource_group_name=None):
-    return _list_app('app', resource_group_name)
+    return _list_app(['app', 'app,linux'], resource_group_name)
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app('functionapp', resource_group_name)
+    return _list_app(['functionapp'], resource_group_name)
 
 
-def _list_app(app_type, resource_group_name=None):
+def _list_app(app_types, resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
-    result = [x for x in result if x.kind == app_type]
+    result = [x for x in result if x.kind in app_types]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
