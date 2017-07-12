@@ -47,25 +47,14 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
     # the length is set to avoid following error:
     # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
     # is invalid. The name can be up to 80 characters long.
-    @ResourceGroupPreparer(random_name_length=19, name_prefix='clitest')
-    @RoleBasedServicePrincipalPreparer(skip_assignment=False)
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @RoleBasedServicePrincipalPreparer()
     def test_acs_create_kubernetes(self, resource_group, sp_name, sp_password):
-        acs_name = self.create_random_name('acs', 16)
+        acs_name = self.create_random_name('acs', 14)
         ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
         cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
               '--client-secret {} --ssh-key-value {}'
         self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
-                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
-
-    # Need to set the location to be ukwest (-l ukwest)
-    # Once the latest version (2017-07-01) is everywhere, we don't need this flag anymore
-    @ResourceGroupPreparer(random_name_length=19, name_prefix='clitest')
-    def test_acs_create_multiple_agentpools(self, resource_group):
-        acs_name = self.create_random_name('acs', 16)
-        cmd = 'acs create -g {} -n {} -l ukwest ' \
-              '--master-vm-size Standard_D2 --agent-vm-size Standard_D2 ' \
-              """--agent-profiles "[{{'name':'agentpool1'}},{{'name':'agentpool2'}}]" """
-        self.cmd(cmd.format(resource_group, acs_name),
                  checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
 
     @classmethod
