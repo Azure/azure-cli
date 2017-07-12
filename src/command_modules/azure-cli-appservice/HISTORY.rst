@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* webapp: fix the bug that listing linux webapp returns nothing
+
 0.1.10 (2017-07-07)
 +++++++++++++++++++
 * webapp: support to retrieve creds from acr
