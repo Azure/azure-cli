@@ -367,8 +367,9 @@ def _get_subscription_id():
     _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
     return sub_id
 
-#pylint: disable=too-many-locals
-#pylint: disable-msg=too-many-arguments
+
+# pylint: disable=too-many-locals
+# pylint: disable-msg=too-many-arguments
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -591,7 +592,8 @@ def load_acs_service_principals(config_path):
     except:  # pylint: disable=bare-except
         return None
 
-#pylint: disable-msg=too-many-arguments
+
+# pylint: disable-msg=too-many-arguments
 def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
             admin_username="azureuser", api_version=None, orchestrator_type="dcos",
             master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
@@ -661,7 +663,7 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             "storageProfile": agent_storage_profile,
         }}
     if agent_profiles is None:
-        agentPoolProfiles.append({**defaultAgentPoolProfile, **{"name" : "agentpool0"}})
+        agentPoolProfiles.append({**defaultAgentPoolProfile, **{"name": "agentpool0"}})
     else:
         # override agentPoolProfiles by using the passed in agent_profiles
         for idx, ap in enumerate(agent_profiles):
@@ -743,6 +745,7 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             }
         }
     return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+
 
 def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
     from azure.mgmt.resource.resources import ResourceManagementClient

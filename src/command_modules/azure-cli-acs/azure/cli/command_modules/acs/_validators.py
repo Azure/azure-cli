@@ -41,9 +41,11 @@ def validate_ssh_key(namespace):
                            'You can use --generate-ssh-keys to let CLI generate one for you')
     namespace.ssh_key_value = content
 
+
 def validate_list_of_integers(string):
     # extract comma separated list of integers
     return list(map(int, string.split(',')))
+
 
 def validate_create_parameters(namespace):
     if not namespace.name:
