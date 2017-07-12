@@ -2046,9 +2046,6 @@ def get_vm_format_secret(secrets, certificate_store=None):
 
 def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
                        identity_role_id=None, identity_scope=None, port=None):
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
-    from msrestazure.azure_exceptions import CloudError
     VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models')
     vm = get_vm(resource_group_name, vm_name)
     if not vm.identity:
@@ -2058,16 +2055,7 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
     else:
         logger.info('Managed identity is already enabled')
 
-    logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role, identity_scope)
-    assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
-    properties = RoleAssignmentProperties(identity_role_id, vm.identity.principal_id)
-    try:
-        assignments_client.create(identity_scope, _gen_guid(), properties)
-    except CloudError as ex:
-        if 'role assignment already exists' not in ex.message:
-            raise
-        else:
-            logger.info('Role assignment already exists')
+    _create_role_assignment_with_retries(identity_scope, identity_role_id, vm.identity.principal_id)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
@@ -2083,9 +2071,6 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
 
 def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
                          identity_role_id=None, identity_scope=None, port=None):
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
-    from msrestazure.azure_exceptions import CloudError
     VirtualMachineIdentity, UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity',
                                                   'UpgradeMode', mod='models')
     client = _compute_client_factory()
@@ -2093,20 +2078,14 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultSt
     if not vmss.identity:
         logger.info('Enabling managed identity...')
         vmss.identity = VirtualMachineIdentity(type='systemAssigned')
-        vmss = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        # the 'create_or_update' doesn't deserialize the result right, hence we dig it out ourselves
+        # (TODO open auto-rest bug before merge)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     else:
         logger.info('Managed identity is already enabled')
 
-    logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role, identity_scope)
-    assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
-    properties = RoleAssignmentProperties(identity_role_id, vmss.identity.principal_id)
-    try:
-        assignments_client.create(identity_scope, _gen_guid(), properties)
-    except CloudError as ex:
-        if 'role assignment already exists' not in ex.message:
-            raise
-        else:
-            logger.info('Role assignment already exists')
+    _create_role_assignment_with_retries(identity_scope, identity_role_id, vmss.identity.principal_id)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration
@@ -2128,9 +2107,38 @@ def _construct_identity_info(identity_scope, identity_role, port):
     return {
         'scope': identity_scope,
         'role': str(identity_role),  # could be DefaultStr, so convert to string
-        'token_endpoint': 'http://localhost:{}/oauth2/token'.format(port),
+        'port': port,
         'subscription': re.match(r'/subscriptions/(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})', identity_scope).group(1)
     }
+
+
+# to workaround a known AAD server replicate issue
+def _create_role_assignment_with_retries(identity_scope, identity_role_id, principal_id):
+    import time
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    from azure.mgmt.authorization.models import RoleAssignmentProperties
+    from msrestazure.azure_exceptions import CloudError
+    assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
+    properties = RoleAssignmentProperties(identity_role_id, principal_id)
+
+    logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
+    retry_times = 36
+    assignment_id = _gen_guid()
+    for l in range(0, retry_times):
+        try:
+            assignments_client.create(identity_scope, assignment_id, properties)
+            break
+        except CloudError as ex:
+            if 'role assignment already exists' in ex.message:
+                logger.info('Role assignment already exists')
+                break
+            elif l < retry_times and ' does not exist in the directory ' in ex.message:
+                time.sleep(5)
+                logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                               retry_times)
+                continue
+            else:
+                raise
 
 
 # for injecting test seams to produce predicatable role assignment id for playback
