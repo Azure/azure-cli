@@ -1135,10 +1135,6 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
 
-    network_interface_args = {}
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-        network_interface_args['enable_accelerated_networking'] = enable_accelerated_networking
-
     NetworkInterfaceDnsSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'NetworkInterfaceDnsSettings', mod='models')
@@ -1146,8 +1142,10 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
                                                dns_servers=dns_servers or [])
 
-    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
-                           dns_settings=dns_settings, **network_interface_args)
+    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding, dns_settings=dns_settings)
+
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+        nic.enable_accelerated_networking = enable_accelerated_networking
 
     if network_security_group:
         nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
