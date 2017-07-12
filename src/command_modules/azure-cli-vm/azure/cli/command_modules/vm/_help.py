@@ -935,7 +935,7 @@ helps['vm wait'] = """
 
 helps['vm assign-identity'] = """
     type: command
-    short-summary: Enables managed service identity on a VM
+    short-summary: Enable managed service identity on a VM
     long-summary: required to authenticate and interact with other Azure services using bearer tokens
     examples:
         - name: Enable identity on a VM. It will have a role of 'Reader' to the VM's resource group
@@ -944,7 +944,7 @@ helps['vm assign-identity'] = """
 
 helps['vmss assign-identity'] = """
     type: command
-    short-summary: Enables managed service identity on a VMSS
+    short-summary: Enable managed service identity on a VMSS
     long-summary: required to authenticate and interact with other Azure services using bearer tokens
     examples:
         - name: Enable identity on a VMSS. It will have a role of 'Owner' to the VMSS's resource group.

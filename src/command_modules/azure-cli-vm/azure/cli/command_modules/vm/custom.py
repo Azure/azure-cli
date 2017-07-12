@@ -1699,7 +1699,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             resource_group_name, deployment_name, properties, raw=no_wait))
     vm = get_vm_details(resource_group_name, vm_name)
     if assign_identity:
-        setattr(vm, 'identity', _create_identity_object(identity_scope, identity_role, _MSI_PORT))
+        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT))
     return vm
 
 
@@ -1930,12 +1930,12 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile'] = vmss_resource['properties']['virtualMachineProfile'].get('extensionProfile') or {}
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile']["extensions"] = vmss_resource['properties']['virtualMachineProfile']['extensionProfile'].get('extensions') or []
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile']["extensions"].append({
-            "name": "MSIExtension",
-            "properties": {
-                "publisher": "Microsoft.ManagedIdentity",
-                "type": "ManagedIdentityExtensionFor" + ('Windows' if os_type.lower() == 'windows' else 'Linux'),
-                "typeHandlerVersion": "1.0",
-                "autoUpgradeMinorVersion": True,
+            'name': 'MSIExtension',
+            'properties': {
+                'publisher': 'Microsoft.ManagedIdentity',
+                'type': 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux'),
+                "typeHandlerVersion": _MSI_EXTENSION_VERSION,
+                'autoUpgradeMinorVersion': True,
                 'settings': {'port': _MSI_PORT}
             }
         })
@@ -1961,7 +1961,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     deployment_result = DeploymentOutputLongRunningOperation()(
         client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
     if assign_identity:
-        deployment_result['vmss']['identity'] = _create_identity_object(identity_scope, identity_role, _MSI_PORT)
+        deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role, _MSI_PORT)
     return deployment_result
 
 
@@ -2044,32 +2044,31 @@ def get_vm_format_secret(secrets, certificate_store=None):
     return formatted
 
 
-def assign_vm_identity(resource_group_name, vm_name, identity_role='Contributor', identity_role_id=None,
-                       identity_scope=None, port=None):
+def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
+                       identity_role_id=None, identity_scope=None, port=None):
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.mgmt.authorization.models import RoleAssignmentProperties
     from msrestazure.azure_exceptions import CloudError
     VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models')
     vm = get_vm(resource_group_name, vm_name)
     if not vm.identity:
-        logger.info('Enable managed identity...')
+        logger.info('Enabling managed identity...')
         vm.identity = VirtualMachineIdentity(type='systemAssigned')
         vm = set_vm(vm)
     else:
         logger.info('Managed identity is already enabled')
 
-    # create role assignment
     logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role, identity_scope)
     assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
     properties = RoleAssignmentProperties(identity_role_id, vm.identity.principal_id)
     try:
         assignments_client.create(identity_scope, _gen_guid(), properties)
     except CloudError as ex:
-        if ex.message != 'The role assignment already exists.':
+        if 'role assignment already exists' not in ex.message:
             raise
         else:
             logger.info('Role assignment already exists')
-    # provision msi extension
+
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
@@ -2079,11 +2078,11 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role='Contributor'
                            version=_MSI_EXTENSION_VERSION,
                            settings={'port': port})
     LongRunningOperation()(poller)
-    return _create_identity_object(identity_scope, identity_role, port)
+    return _construct_identity_info(identity_scope, identity_role, port)
 
 
-def assign_vmss_identity(resource_group_name, vmss_name, identity_role='Contributor', identity_role_id=None,
-                         identity_scope=None, port=None):
+def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
+                         identity_role_id=None, identity_scope=None, port=None):
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.mgmt.authorization.models import RoleAssignmentProperties
     from msrestazure.azure_exceptions import CloudError
@@ -2092,24 +2091,23 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role='Contribu
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     if not vmss.identity:
-        logger.info('Enable managed identity...')
+        logger.info('Enabling managed identity...')
         vmss.identity = VirtualMachineIdentity(type='systemAssigned')
         vmss = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     else:
         logger.info('Managed identity is already enabled')
 
-    # create role assignment
     logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role, identity_scope)
     assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
     properties = RoleAssignmentProperties(identity_role_id, vmss.identity.principal_id)
     try:
         assignments_client.create(identity_scope, _gen_guid(), properties)
     except CloudError as ex:
-        if ex.message != 'The role assignment already exists.':
+        if 'role assignment already exists' not in ex.message:
             raise
         else:
             logger.info('Role assignment already exists')
-    # provision msi extension
+
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration
                                                 else 'Windows')
@@ -2123,10 +2121,10 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role='Contribu
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
-    return _create_identity_object(identity_scope, identity_role, port)
+    return _construct_identity_info(identity_scope, identity_role, port)
 
 
-def _create_identity_object(identity_scope, identity_role, port):
+def _construct_identity_info(identity_scope, identity_role, port):
     return {
         'scope': identity_scope,
         'role': str(identity_role),  # could be DefaultStr, so convert to string
@@ -2135,7 +2133,7 @@ def _create_identity_object(identity_scope, identity_role, port):
     }
 
 
-# for injecting test seams to produce predicatable role assignment id
+# for injecting test seams to produce predicatable role assignment id for playback
 def _gen_guid():
     import uuid
     return uuid.uuid4()

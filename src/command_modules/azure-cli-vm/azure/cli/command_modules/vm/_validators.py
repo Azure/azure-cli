@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint:disable=too-many-lines
+
 import os
 import re
 
@@ -713,7 +715,7 @@ def _resolve_msi_role_and_scope(namespace):
         subscription_id = get_subscription_id()
         namespace.identity_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id,
                                                                                 namespace.resource_group_name)
-    # keep 'identity_role' for output as logical name is better
+    # keep 'identity_role' for output as logical name is more readable
     setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
 
 

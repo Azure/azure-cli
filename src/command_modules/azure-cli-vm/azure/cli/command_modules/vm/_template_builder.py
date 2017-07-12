@@ -819,7 +819,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'tier': 'Standard',
             'capacity': instance_count
         },
-        'properties': vmss_properties,
+        'properties': vmss_properties
     }
     return vmss
 

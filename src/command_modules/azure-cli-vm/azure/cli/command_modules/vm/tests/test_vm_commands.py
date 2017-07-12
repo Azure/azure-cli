@@ -1886,12 +1886,15 @@ class MSIScenarioTest(ScenarioTest):
         vm1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}'.format(subscription_id, resource_group, vm1)
         vm2 = 'vm2'
         vm3 = 'vm3'
+
+        # Fixing the role assignment guids so test can run under playback. The assignments will
+        # be auto-deleted when the RG gets recycled, so the same ids can be reused.
         guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C1A0'),
                  uuid.UUID('C1E7FC22-CB48-407E-BE6A-19F0F1ED9C81'),
                  uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
                  uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
-            # create linux vm with default configuration
+            # create a linux vm with default configuration
             self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),
                 JMESPathCheckV2('identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
@@ -1940,6 +1943,8 @@ class MSIScenarioTest(ScenarioTest):
         vmss1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachineScaleSets/{}'.format(subscription_id, resource_group, vmss1)
         vmss2 = 'vmss2'
         vmss3 = 'vmss3'
+        # Fixing the role assignment guids so test can run under playback. The assignments will
+        # be auto-deleted when the RG gets recycled, so the same ids can be reused.
         guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C111'),
                  uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C102'),
                  uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C103'),

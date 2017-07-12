@@ -207,7 +207,7 @@ class Profile(object):
         _, subscription_id = MsiCreds.split_user_info(user)
         if subscription_id is None:
             return None
-        logger.debug('MSI: environment was recognized. Now trying to initialize local account...')
+        logger.debug('MSI: environment was detected. Now trying to initialize a local account...')
         tenant_id = MsiCreds.get_tenant_id(CLOUD.endpoints.resource_manager, subscription_id)
         s = Profile._new_account()
         s.id = '/subscriptions/' + subscription_id
@@ -712,8 +712,8 @@ class MsiCreds(object):
         parts = user.split('@')
         if len(parts) == 2:
             try:
-                uuid.UUID(parts[0])  # subscription id
-                int(parts[1])  # port
+                uuid.UUID(parts[0])  # valid subscription id?
+                int(parts[1])  # valid port?
                 return parts[1], parts[0]
             except ValueError:
                 pass
@@ -723,12 +723,11 @@ class MsiCreds(object):
     def get_tenant_id(arm_endpoint, subscription_id):
         import re
         import requests
-        # get for the tenant
         url = '{}/subscriptions/{}?api-version=2014-04-01'.format(arm_endpoint.rstrip('/'), subscription_id)
         logger.debug('MSI: Retrieving tenant id by invoking GET from %s', url)
         result = requests.get(url)
         if result.status_code != 401:
-            raise CLIError('Failed to retrieve tenant id of subscription {}'.format(subscription_id))
+            raise CLIError('Failed to retrieve the tenant id of subscription {}'.format(subscription_id))
         exp = r'.+authorization_uri="(.*?)".+'
         r = re.match(exp, result.headers['www-authenticate'])
         tenant_id = r.group(1).split('/')[-1]
@@ -744,6 +743,9 @@ class MsiCreds(object):
             'authority': '{}/{}'.format(aad_endpoint, tenant_id),
             'resource': resource
         }
+
+        # retry as the token endpoint might not be available yet, one example is you use CLI in a
+        # custom script extension of VMSS, which might get provisioned before the MSI extensioon
         while True:
             err = None
             try:
@@ -755,8 +757,9 @@ class MsiCreds(object):
                 err = str(ex)
 
             if err:
-                # we might need some error code checking to avoid silly waiting
-                logger.warning("MSI: Failed to retrieve a token from '%s' with error of '%s'. This could be caused "
+                # we might need some error code checking to avoid silly waiting. The bottom line is users can
+                # always press ctrl+c to stop it
+                logger.warning("MSI: Failed to retrieve a token from '%s' with an error of '%s'. This could be caused "
                                "by the MSI extension not yet fullly provisioned. Will retry in 60 seconds...",
                                request_uri, err)
                 time.sleep(60)

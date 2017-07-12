@@ -253,7 +253,7 @@ for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-ide
     register_cli_argument(scope, 'identity_role_id', ignore_type)
 
 for scope in ['vm assign-identity', 'vmss assign-identity']:
-    register_cli_argument(scope, 'port', type=int, help="The port to fetch AAD token. Default: 50342")  # TODO: figure out the right way to set defaults
+    register_cli_argument(scope, 'port', type=int, help="The port to fetch AAD token. Default: 50342")
 register_cli_argument('vm assign-identity', 'vm_name', existing_vm_name, validator=process_assign_identity_namespace)
 register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, validator=process_assign_identity_namespace)
 
