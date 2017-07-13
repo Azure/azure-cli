@@ -42,6 +42,11 @@ def validate_ssh_key(namespace):
     namespace.ssh_key_value = content
 
 
+def validate_list_of_integers(string):
+    # extract comma separated list of integers
+    return list(map(int, string.split(',')))
+
+
 def validate_create_parameters(namespace):
     if not namespace.name:
         raise CLIError('--name has no value')
