@@ -60,7 +60,7 @@ def _get_default_install_location(exe_name):
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
-storageProfileTypes = ["StorageAccount", "ManagedDisk"]
+storageProfileTypes = ["StorageAccount", "ManagedDisks"]
 
 register_cli_argument('acs', 'tags', tags_type)
 
