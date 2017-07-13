@@ -630,7 +630,7 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
         "dnsPrefix": dns_name_prefix + 'mgmt',
     }
     if api_version == "2017-07-01":
-        defaultMasterPoolProfile = {**defaultMasterPoolProfile, **{
+        defaultMasterPoolProfile = _update_dict(defaultMasterPoolProfile, {
             "count": int(master_count),
             "dnsPrefix": dns_name_prefix + 'mgmt',
             "vmSize": master_vm_size,
@@ -638,11 +638,11 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             "vnetSubnetID": master_vnet_subnet_id,
             "firstConsecutiveStaticIP": master_first_consecutive_static_ip,
             "storageProfile": master_storage_profile,
-        }}
+        })
     if not master_profile:
         masterPoolProfile = defaultMasterPoolProfile
     else:
-        masterPoolProfile = {**defaultMasterPoolProfile, **master_profile}
+        masterPoolProfile = _update_dict(defaultMasterPoolProfile, master_profile)
 
     agentPoolProfiles = []
     defaultAgentPoolProfile = {
@@ -652,7 +652,7 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
         "dnsPrefix": dns_name_prefix + 'agent',
     }
     if api_version == "2017-07-01":
-        defaultAgentPoolProfile = {**defaultAgentPoolProfile, **{
+        defaultAgentPoolProfile = _update_dict(defaultAgentPoolProfile, {
             "count": int(agent_count),
             "vmSize": agent_vm_size,
             "osDiskSizeGB": int(agent_osdisk_size),
@@ -661,16 +661,16 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             "vnetSubnetID": agent_vnet_subnet_id,
             "ports": agent_ports,
             "storageProfile": agent_storage_profile,
-        }}
+        })
     if agent_profiles is None:
-        agentPoolProfiles.append({**defaultAgentPoolProfile, **{"name": "agentpool0"}})
+        agentPoolProfiles.append(_update_dict(defaultAgentPoolProfile, {"name": "agentpool0"}))
     else:
         # override agentPoolProfiles by using the passed in agent_profiles
         for idx, ap in enumerate(agent_profiles):
             # if the user specified dnsPrefix, we honor that
             # otherwise, we use the idx to avoid duplicate dns name
-            a = {**{"dnsPrefix": dns_name_prefix + 'agent' + str(idx)}, **ap}
-            agentPoolProfiles.append({**defaultAgentPoolProfile, **a})
+            a = _update_dict({"dnsPrefix": dns_name_prefix + 'agent' + str(idx)}, ap)
+            agentPoolProfiles.append(_update_dict(defaultAgentPoolProfile, a))
 
     # define outputs
     outputs = {
@@ -1096,3 +1096,9 @@ def _get_object_stubs(graph_client, assignees):
     params = GetObjectsParameters(include_directory_object_references=True,
                                   object_ids=assignees)
     return list(graph_client.objects.get_objects_by_object_ids(params))
+
+
+def _update_dict(dict1, dict2):
+    cp = dict1.copy()
+    cp.update(dict2)
+    return cp
