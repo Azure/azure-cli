@@ -6,6 +6,7 @@ Release History
 unreleased
 +++++++++++++++++++
 * `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.
+* `vm image create`: make datadisk's lun start with 0
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++

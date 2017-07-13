@@ -492,6 +492,8 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),
             JMESPathCheck('storageProfile.osDisk.snapshot.id', os_snapshot['id']),
             JMESPathCheck('length(storageProfile.dataDisks)', 3),
+            JMESPathCheck('storageProfile.dataDisks[0].lun', 0),
+            JMESPathCheck('storageProfile.dataDisks[1].lun', 1),
             JMESPathCheck('tags.tag1', 'i1')
         ])
 
@@ -1504,7 +1506,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         vmss_name = 'vmss1'
         lb_name = 'lb1'
         self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
-        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
+        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
