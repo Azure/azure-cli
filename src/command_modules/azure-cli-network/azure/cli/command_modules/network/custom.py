@@ -1142,7 +1142,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
                                                dns_servers=dns_servers or [])
 
-    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding, 
+    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
                            dns_settings=dns_settings)
 
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
