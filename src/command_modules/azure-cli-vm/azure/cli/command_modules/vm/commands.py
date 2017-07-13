@@ -53,14 +53,17 @@ def transform_vm(result):
 def transform_vm_create_output(result):
     from azure.cli.core.commands.arm import parse_resource_id
     try:
-        return OrderedDict([('id', result.id),
-                            ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
-                            ('powerState', result.power_state),
-                            ('publicIpAddress', result.public_ips),
-                            ('fqdns', result.fqdns),
-                            ('privateIpAddress', result.private_ips),
-                            ('macAddress', result.mac_addresses),
-                            ('location', result.location)])
+        output = OrderedDict([('id', result.id),
+                              ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
+                              ('powerState', result.power_state),
+                              ('publicIpAddress', result.public_ips),
+                              ('fqdns', result.fqdns),
+                              ('privateIpAddress', result.private_ips),
+                              ('macAddress', result.mac_addresses),
+                              ('location', result.location)])
+        if getattr(result, 'identity', None):
+            output['identity'] = result.identity
+        return output
     except AttributeError:
         from msrest.pipeline import ClientRawResponse
         return None if isinstance(result, ClientRawResponse) else result
@@ -283,3 +286,8 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'
     cli_command(__name__, 'image list', custom_path.format('list_images'))
     cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
     cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
+
+
+# MSI
+cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
+cli_command(__name__, 'vmss assign-identity', custom_path.format('assign_vmss_identity'))

@@ -73,6 +73,13 @@ class ScenarioTest(ReplayableTest):
     def cmd(cls, command, checks=None, expect_failure=False):
         return execute(command, expect_failure=expect_failure).assert_with_checks(checks)
 
+    def get_subscription_id(self):
+        if self.in_recording or self.is_live:
+            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv').output.strip()
+        else:
+            subscription_id = MOCKED_SUBSCRIPTION_ID
+        return subscription_id
+
 
 @live_only()
 class LiveScenarioTest(IntegrationTestBase):
