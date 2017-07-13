@@ -89,14 +89,12 @@ class ShellScenarioTest(unittest.TestCase):
         self.out_stream.truncate(0)
         self.out_stream.seek(0)
 
-
         text = 'guess :: -3'
         c_flag = False
         self.shell.handle_example(text, c_flag)
         self.assertEqual(self.out_stream.getvalue(), 'Invalid example number\n')
         self.out_stream.truncate(0)
         self.out_stream.seek(0)
-
 
         text = 'guess :: 3'
         c_flag = False
@@ -110,6 +108,7 @@ class ShellScenarioTest(unittest.TestCase):
         self.shell.handle_example(text, c_flag)
 
         self.shell.example_repl = temp_function
+
 
 if __name__ == '__main__':
     unittest.main()
