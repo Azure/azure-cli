@@ -2,6 +2,14 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* webapp: fix the bug that listing linux webapp returns nothing
+
+0.1.10 (2017-07-07)
++++++++++++++++++++
+* webapp: support to retrieve creds from acr
+
 0.1.9 (2017-06-21)
 ++++++++++++++++++
 * BC: webapp: remove all commands under 'az appservice web'

@@ -59,7 +59,8 @@ class VersionConstraint(object):
             register_cli_argument(*args, **kwargs)
         else:
             from azure.cli.core.commands.parameters import ignore_type
-            kwargs = {'arg_type': ignore_type}
+            kwargs = {}
+            args = tuple([args[0], args[1], ignore_type])
             register_cli_argument(*args, **kwargs)
 
     def register_extra_cli_argument(self, *args, **kwargs):
@@ -137,6 +138,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from azure.cli.core.application import APPLICATION
         self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
         self.deploy_dict = {}
+        self.last_progress_report = datetime.datetime.now()
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -222,7 +224,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
-            if is_verbose:
+
+            current_time = datetime.datetime.now()
+            if is_verbose and current_time - self.last_progress_report >= datetime.timedelta(seconds=10):
+                self.last_progress_report = current_time
                 try:
                     self._generate_template_progress(correlation_id)
                 except Exception as ex:  # pylint: disable=broad-except

@@ -41,7 +41,7 @@ class FeedbackTest(unittest.TestCase):
         self.norm_update = fh.update_frequency
 
     def test_heuristic(self):
-        """ test the correct logging of time for frequency """
+        # test the correct logging of time for frequency
         fh.update_frequency = _mock_update
         self.assertEqual(1, fh.frequency_measurement())
 
@@ -52,7 +52,7 @@ class FeedbackTest(unittest.TestCase):
         self.assertEqual(3, fh.frequency_measurement())
 
     def test_update_freq(self):
-        """ tests updating the files for frequency """
+        # tests updating the files for frequency
         fh.update_frequency = self.norm_update
         now = fh.day_format(datetime.datetime.now())
 
@@ -65,7 +65,7 @@ class FeedbackTest(unittest.TestCase):
         self.assertEqual(json_freq, {now: 2})
 
     def test_update_freq_no_file(self):
-        """ tests updating the files for frequency with no file written """
+        # tests updating the files for frequency with no file written
         fh.update_frequency = self.norm_update
 
         _, fh.FREQUENCY_PATH = tempfile.mkstemp()

@@ -2,6 +2,9 @@
 
 Release History
 ===============
+3.0.1 (2017-07-07)
+++++++++++++++++++
+* minor fixes
 
 3.0.0 (2016-04-28)
 ++++++++++++++++++
@@ -24,6 +27,6 @@ Release History
 * Stable release (no code changes since previous version).
 
 0.1.0b11 (2016-12-12)
-++++++++++++++++++^^^
++++++++++++++++++++++
 
 * Preview release.

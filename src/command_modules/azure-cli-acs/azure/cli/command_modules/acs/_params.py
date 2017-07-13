@@ -14,14 +14,15 @@ from azure.cli.core.commands import (
     register_cli_argument,
     register_extra_cli_argument)
 from azure.cli.core.commands.parameters import tags_type
+from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     file_type,
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
-from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
-from azure.cli.command_modules.acs._validators import validate_ssh_key
+from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key, validate_list_of_integers
 
 
 def _compute_client_factory(**_):
@@ -59,6 +60,8 @@ def _get_default_install_location(exe_name):
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
+storageProfileTypes = ["StorageAccount", "ManagedDisks"]
+
 register_cli_argument('acs', 'tags', tags_type)
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default='acs',
@@ -67,17 +70,29 @@ register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default=
 
 register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
 
-register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), **enum_choice_list(ContainerServiceOchestratorTypes))
+register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), **enum_choice_list(ContainerServiceOrchestratorTypes))
 # some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
+register_cli_argument('acs', 'api_version', options_list=('--api-version',), required=False, help='Use API version of ACS to perform az acs operations. Available options: 2017-01-31, 2017-07-01. (2017-07-01 in preview, only in ukwest and uksouth). Default to use the latest version for the location')
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 
 register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
 register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=validate_ssh_key)
 
-register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
+register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', validator=validate_create_parameters)
+register_cli_argument('acs create', 'master_profile', options_list=('--master-profile', '-m'), type=validate_file_or_dict, help='The file or dictionary representation of the master profile. Note it will override any master settings once set')
+register_cli_argument('acs create', 'master_vm_size', completer=get_vm_size_completion_list)
+register_cli_argument('acs create', 'master_osdisk_size', type=int, help='the disk size for master pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
+register_cli_argument('acs create', 'master_vnet_subnet_id', type=str, help='the custom vnet subnet id. Note agent need to used the same vnet if master set')
+register_cli_argument('acs create', 'master_first_consecutive_static_ip', type=str, help='the first consecutive ip used to specify static ip block')
+register_cli_argument('acs create', 'master_storage_profile', **enum_choice_list(storageProfileTypes))
+register_cli_argument('acs create', 'agent_profiles', options_list=('--agent-profiles', '-a'), type=validate_file_or_dict, help='The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
+register_cli_argument('acs create', 'agent_osdisk_size', type=int, help='the disk size for agent pool vms. Unit in GB. If not specified, the corresponding vmsize disk size will apply')
+register_cli_argument('acs create', 'agent_vnet_subnet_id', type=str, help='the custom vnet subnet id. Note agent need to used the same vnet if master set')
+register_cli_argument('acs create', 'agent_ports', type=validate_list_of_integers, help='the ports exposed on the agent pool, such as 8080,4000,80')
+register_cli_argument('acs create', 'agent_storage_profile', **enum_choice_list(storageProfileTypes))
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
 register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')

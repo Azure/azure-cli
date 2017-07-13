@@ -207,5 +207,6 @@ class TestActions(unittest.TestCase):
         _validate_vmss_create_subnet(np_mock)
         self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.4.0/24')
 
+
 if __name__ == '__main__':
     unittest.main()

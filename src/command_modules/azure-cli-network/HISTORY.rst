@@ -3,6 +3,21 @@
 Release History
 ===============
 
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* `application-gateway address-pool create/update`: fix bug when using the `--servers` argument.
+* `application-gateway`: add `redirect-config` commands
+* `application-gateway ssl-policy`: add `list-options`, `predefined list` and `predefined show` commands
+* `application-gateway ssl-policy set`: new arguments `--name`, `--cipher-suites`, `--min-protocol-version`
+* `application-gateway http-settings create/update`: new arguments `--host-name-from-backend-pool`, `--affinity-cookie-name`,
+  `--enable-probe`, `--path`
+* `application-gateway url-path-map create/update`: new arguments `--default-redirect-config`, `--redirect-config`
+* `application-gateway url-path-map rule create`: new argument `--redirect-config`
+* `application-gateway url-path-map rule delete`: add support for `--no-wait`
+* `application-gateway probe create/update`: new arguments `--host-name-from-http-settings`, `--min-servers`, `--match-body`, `--match-status-codes`
+* `application-gateway rule create/update`: new argument `--redirect-config`
+
+
 2.0.9 (2017-06-21)
 ++++++++++++++++++
 * `nic create/update`: Add support for `--accelerated-networking`.

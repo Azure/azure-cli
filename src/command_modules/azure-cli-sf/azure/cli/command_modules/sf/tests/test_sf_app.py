@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 import unittest
 import azure.cli.command_modules.sf.custom as sf_c
 
@@ -49,3 +48,7 @@ class SfAppTests(unittest.TestCase):
     def none_parse_service_health_policy_returns_none_test(self):
         res = sf_c.parse_default_service_health_policy(None)
         self.assertIs(res, None)
+
+    def invalid_application_upload_path_raises_value_error_test(self):
+        with self.assertRaises(ValueError):
+            sf_c.validate_app_path("derp3")

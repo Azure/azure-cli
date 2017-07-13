@@ -6,12 +6,14 @@
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
-from azure.mgmt.containerregistry.v2017_03_01.models import SkuTier
+from azure.mgmt.containerregistry.v2017_06_01_preview.models import SkuTier, Sku
+from azure.mgmt.containerregistry.v2017_03_01.models import StorageAccountParameters
 
 from ._constants import (
     ACR_RESOURCE_PROVIDER,
     ACR_RESOURCE_TYPE,
-    STORAGE_RESOURCE_TYPE
+    STORAGE_RESOURCE_TYPE,
+    MANAGED_REGISTRY_SKU
 )
 from ._factory import (
     get_arm_service_client,
@@ -92,15 +94,6 @@ def get_registry_by_name(registry_name, resource_group_name=None):
     client = get_acr_service_client().registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
-
-
-def get_registry_login_server_by_name(registry_name, resource_group_name=None):
-    """Returns login server for the container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    """
-    registry, _ = get_registry_by_name(registry_name, resource_group_name)
-    return registry.login_server  # pylint: disable=no-member
 
 
 def get_access_key_by_storage_account_name(storage_account_name, resource_group_name=None):
@@ -283,7 +276,7 @@ def random_storage_account_name(registry_name):
             return storage_account_name
 
 
-def registry_sku_validation(registry_name, resource_group_name=None, message=None):
+def managed_registry_validation(registry_name, resource_group_name=None, message=None):
     """Validates if a registry is in Basic SKU.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
@@ -297,3 +290,55 @@ def registry_sku_validation(registry_name, resource_group_name=None, message=Non
         resource_group_name = get_resource_group_name_by_resource_id(arm_resource.id)
 
     return arm_resource, resource_group_name
+
+
+def validate_sku_update(sku_parameter):
+    """Validates a registry SKU update parameter.
+    :param object sku_parameter: The registry SKU update parameter
+    """
+    if sku_parameter is None:
+        return
+
+    if isinstance(sku_parameter, dict):
+        if 'name' not in sku_parameter or sku_parameter['name'] not in MANAGED_REGISTRY_SKU:
+            _invalid_sku_update()
+    elif isinstance(sku_parameter, Sku):
+        if sku_parameter.name not in MANAGED_REGISTRY_SKU:
+            _invalid_sku_update()
+    else:
+        _invalid_sku_update()
+
+
+def _invalid_sku_update():
+    raise CLIError(
+        "Please specify SKU by '--sku SKU' or '--set sku.name=SKU'. Allowed SKU: {}.".format(
+            MANAGED_REGISTRY_SKU))
+
+
+def ensure_storage_account_parameter(storage_account_parameter):
+    """Ensures a registry storage account update parameter is valid and has access key.
+    :param object sku_parameter: The registry storage account update parameter
+    """
+    if storage_account_parameter is None:
+        return
+
+    if isinstance(storage_account_parameter, dict):
+        if 'name' not in storage_account_parameter:
+            _invalid_storage_account_update()
+        if 'access_key' not in storage_account_parameter:
+            storage_account_parameter['access_key'] = get_access_key_by_storage_account_name(
+                storage_account_parameter['name'])
+    elif isinstance(storage_account_parameter, StorageAccountParameters):
+        if not storage_account_parameter.access_key:
+            storage_account_parameter.access_key = get_access_key_by_storage_account_name(
+                storage_account_parameter.name)
+    else:
+        _invalid_storage_account_update()
+
+    return storage_account_parameter
+
+
+def _invalid_storage_account_update():
+    raise CLIError(
+        "Please specify storage account by '--storage-account-name MyStorageAccount' " +
+        "or '--set storageAccount.name=MyStorageAccount'.")

@@ -8,7 +8,7 @@
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
      deployment_validate_table_format)
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command, VersionConstraint
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -70,6 +70,9 @@ property_map = {
     'url_path_maps': 'url-path-map',
 }
 
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    property_map['redirect_configurations'] = 'redirect-config'
+
 
 def _make_singular(value):
     try:
@@ -93,11 +96,20 @@ for subresource, alias in property_map.items():
                                custom_function_op=custom_path + 'update_ag_{}'.format(_make_singular(subresource)),
                                child_collection_prop_name=subresource)
 
-cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy', no_wait_param='no_wait')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy_2017_06_01', no_wait_param='no_wait')
+else:
+    cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy_2017_03_01', no_wait_param='no_wait')
+
 cli_command(__name__, 'network application-gateway ssl-policy show', custom_path + 'show_ag_ssl_policy', exception_handler=empty_on_404)
 
-cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule')
-cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule')
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.cli_command(__name__, 'network application-gateway ssl-policy list-options', ag_path + 'list_available_ssl_options', cf_application_gateways)
+    c.cli_command(__name__, 'network application-gateway ssl-policy predefined list', ag_path + 'list_available_ssl_predefined_policies', cf_application_gateways)
+    c.cli_command(__name__, 'network application-gateway ssl-policy predefined show', ag_path + 'get_ssl_predefined_policy', cf_application_gateways)
+
+cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule', no_wait_param='no_wait')
+cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule', no_wait_param='no_wait')
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
     cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config_2017_03_01', no_wait_param='no_wait')

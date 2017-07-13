@@ -11,6 +11,7 @@ from ._util import (
     get_sql_firewall_rules_operations,
     get_sql_databases_operations,
     get_sql_elastic_pools_operations,
+    get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations)
 
 custom_path = 'azure.cli.command_modules.sql.custom#{}'
@@ -161,3 +162,15 @@ with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_op
         # Keeping this command hidden for now. `firewall-rule create` will explain the special
         # 0.0.0.0 rule.
         # c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
+
+aadadmin_operations = create_service_adapter('azure.mgmt.sql.operations.server_azure_ad_administrators_operations',
+                                             'ServerAzureADAdministratorsOperations')
+
+with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations, aadadmin_operations, custom_path) as s:
+    with s.group('sql server ad-admin') as c:
+        c.custom_command('create', 'server_ad_admin_set')
+        c.command('list', 'list')
+        c.command('delete', 'delete')
+        c.generic_update_command('update', 'get', 'create_or_update',
+                                 custom_func_name='server_ad_admin_update',
+                                 setter_arg_name='properties')

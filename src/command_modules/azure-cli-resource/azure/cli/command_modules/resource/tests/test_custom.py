@@ -3,17 +3,27 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import unittest
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
-from azure.cli.command_modules.resource.custom import (
-    _get_missing_parameters,
-    _extract_lock_params
-)
-
-from azure.cli.command_modules.resource._validators import validate_deployment_parameters
+from azure.cli.core.util import get_file_json
+from azure.cli.command_modules.resource.custom import \
+    (_get_missing_parameters, _extract_lock_params, _process_parameters, _find_missing_parameters,
+     _prompt_for_parameters)
 
 
+def _simulate_no_tty():
+    from azure.cli.core.prompting import NoTTYException
+    raise NoTTYException
+
+
+@mock.patch('azure.cli.core.prompting._verify_is_a_tty', _simulate_no_tty)
 class TestCustom(unittest.TestCase):
+
     def test_extract_parameters(self):
         tests = [
             {
@@ -160,31 +170,111 @@ class TestCustom(unittest.TestCase):
         self.assertDictEqual(out_params, expected)
 
     def test_deployment_parameters(self):
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=True)
+        template_param_defs = template.get('parameters', {})
+
+        # test different ways of passing in parameters
         tests = [
-            {
+            {  # empty parameters works
                 "parameter_list": [],
                 "expected": {},
             },
-            {
-                "parameter_list": [['{"foo": "bar"}']],
-                "expected": {"foo": "bar"},
+            {  # loading from file
+                "parameter_list": [[parameters_path]],
+                "expected": {"stringParam": {"value": "foo"}, "intParam": {"value": 10}, "madeupParam": {"value": "bar"}},
             },
-            {
-                "parameter_list": [['{"foo": "bar"}', '{"baz": "blat"}']],
-                "expected": {"foo": "bar", "baz": "blat"},
+            {  # KEY=VALUE syntax with extra equal sign
+                "parameter_list": [['stringParam=foo=bar']],
+                "expected": {"stringParam": {"value": "foo=bar"}},
             },
-            {
-                "parameter_list": [['{"foo": "bar"}', '{"foo": "baz"}']],
-                "expected": {"foo": "baz"},
+            {  # raw JSON (same as @file)
+                "parameter_list": [['{\"stringParam\": {\"value\": \"foo\"}}']],
+                "expected": {"stringParam": {"value": "foo"}},
+            },
+            {  # multiple KEY=VALUE
+                "parameter_list": [['stringParam=foo', 'intParam=3']],
+                "expected": {"stringParam": {"value": "foo"}, "intParam": {"value": 3}},
+            },
+            {  # KEY=VALUE where last in wins
+                "parameter_list": [['stringParam=foo', 'stringParam=bar']],
+                "expected": {"stringParam": {"value": "bar"}},
+            },
+            {  # file loading overriden by KEY=VALUE
+                "parameter_list": [[parameters_path], ['stringParam=bar']],
+                "expected": {"stringParam": {"value": "bar"}, "intParam": {"value": 10}, "madeupParam": {"value": "bar"}},
             }
         ]
 
         for test in tests:
-            from argparse import Namespace
-            namespace = Namespace()
-            namespace.parameters = test['parameter_list']
-            validate_deployment_parameters(namespace)
-            self.assertEqual(namespace.parameters, test['expected'])
+            parameter_list = test['parameter_list']
+            result_parameters = _process_parameters(template_param_defs, parameter_list)
+            self.assertEqual(result_parameters, test['expected'])
+
+    def test_deployment_missing_values(self):
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+        parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=True)
+        template_param_defs = template.get('parameters', {})
+
+        parameter_list = [[parameters_path], [parameters_with_reference_path]]
+        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        missing_parameters = _find_missing_parameters(result_parameters, template)
+
+        # ensure that parameters with default values are not considered missing
+        params_with_defaults = [x for x in template_param_defs if 'defaultValue' in template_param_defs[x]]
+        for item in params_with_defaults:
+            self.assertTrue(item not in missing_parameters)
+
+        # ensure that a parameter that specifies a reference does not prompt
+        self.assertTrue('secretReference' not in missing_parameters)
+        self.assertTrue('secretReference' in result_parameters)
+
+    def test_deployment_prompt_file_order(self):
+        # check that params are prompted for in file order when the file is loaded with preserve_order=True
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+        parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=True)
+        template_param_defs = template.get('parameters', {})
+
+        parameter_list = [[parameters_path], [parameters_with_reference_path]]
+        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        missing_parameters = _find_missing_parameters(result_parameters, template)
+
+        param_file_order = ["[u'secureParam', u'boolParam', u'enumParam', u'arrayParam', u'objectParam']",
+                            "['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
+        results = _prompt_for_parameters(missing_parameters, fail_on_no_tty=False)
+        self.assertTrue(str(list(results.keys())) in param_file_order)
+
+    def test_deployment_prompt_alphabetical_order(self):
+        # check that params are prompted for in alphabetical order when the file is loaded with preserve_order=False
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
+        parameters_with_reference_path = os.path.join(curr_dir, 'param-validation-ref-params.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=False)
+        template_param_defs = template.get('parameters', {})
+
+        parameter_list = [[parameters_path], [parameters_with_reference_path]]
+        result_parameters = _process_parameters(template_param_defs, parameter_list)
+        missing_parameters = _find_missing_parameters(result_parameters, template)
+
+        param_alpha_order = ["[u'arrayParam', u'boolParam', u'enumParam', u'objectParam', u'secureParam']",
+                             "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
+        results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
+        self.assertTrue(str(list(results.keys())) in param_alpha_order)
 
 
 if __name__ == '__main__':

@@ -15,6 +15,7 @@ import tempfile
 import traceback
 import logging
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -127,6 +128,7 @@ def _mock_operation_delay(_):
 
 class _MockOutstream(object):
     """ mock outstream for testing """
+
     def __init__(self):
         self.string = ''
 
@@ -483,11 +485,13 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             print('\n\tRUNNING: {}'.format(command))
         command_list = shlex.split(command)
         output = StringIO()
+        applog = StringIO()
         try:
-            cli_main(command_list, file=output)
+            cli_main(command_list, output=output, logging_stream=applog)
         except Exception as ex:  # pylint: disable=broad-except
             ex_msg = str(ex)
-            logger.error('Command "%s" => %s. Output: %s', command, ex_msg, output.getvalue())
+            logger.error('Command "%s" => %s. Output: %s. Logging: %s', command, ex_msg, output.getvalue(),
+                         applog.getvalue())
             if not next((x for x in allowed_exceptions if x in ex_msg), None):
                 raise ex
 
@@ -547,7 +551,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
 
 class ResourceGroupVCRTestBase(VCRTestBase):
-
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False,
                  random_tag_format=None):

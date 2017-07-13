@@ -11,11 +11,17 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 
 from azure.mgmt.containerregistry.v2017_03_01.models import (
-    RegistryUpdateParameters,
-    StorageAccountParameters,
-    SkuTier
+    RegistryUpdateParameters as BasicRegistryUpdateParameters,
+    StorageAccountParameters
+)
+from azure.mgmt.containerregistry.v2017_06_01_preview.models import (
+    RegistryUpdateParameters as ManagedRegistryUpdateParameters,
+    SkuName,
+    SkuTier,
+    Sku
 )
 
+from ._constants import MANAGED_REGISTRY_API_VERSION
 from ._factory import get_acr_service_client
 from ._utils import (
     get_resource_group_name_by_registry_name,
@@ -24,8 +30,9 @@ from ._utils import (
     arm_deploy_template_managed_storage,
     random_storage_account_name,
     get_registry_by_name,
-    get_registry_login_server_by_name,
-    get_access_key_by_storage_account_name
+    managed_registry_validation,
+    validate_sku_update,
+    ensure_storage_account_parameter
 )
 from ._docker_utils import get_login_refresh_token
 from .credential import acr_credential_show
@@ -74,7 +81,7 @@ def acr_create(registry_name,
     client = get_acr_service_client().registries
     admin_user_enabled = admin_enabled == 'true'
 
-    if sku == SkuTier.basic.value:
+    if sku == SkuName.basic.value:
         if storage_account_name is None:
             storage_account_name = random_storage_account_name(registry_name)
             logger.warning(
@@ -104,8 +111,9 @@ def acr_create(registry_name,
             )
     else:
         if storage_account_name:
-            logger.warning("'%s' SKU are managed registries. " +
-                           "The specified storage account will be ignored.", sku)
+            logger.warning(
+                "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
+                registry_name, sku)
         LongRunningOperation()(
             arm_deploy_template_managed_storage(
                 resource_group_name,
@@ -153,22 +161,30 @@ def acr_show(registry_name, resource_group_name=None):
     return client.get(resource_group_name, registry_name)
 
 
-def acr_update_get(client):  # pylint: disable=unused-argument
+def acr_update_get(client,  # pylint: disable=unused-argument
+                   registry_name,
+                   resource_group_name=None):
     """Returns an empty RegistryUpdateParameters object.
+    :param str registry_name: The name of container registry
+    :param str resource_group_name: The name of resource group
     """
-    return RegistryUpdateParameters()
+    try:
+        managed_registry_validation(registry_name, resource_group_name)
+        return ManagedRegistryUpdateParameters()
+    except:  # pylint: disable=bare-except
+        return BasicRegistryUpdateParameters()
 
 
 def acr_update_custom(instance,
+                      sku=None,
                       storage_account_name=None,
                       admin_enabled=None,
                       tags=None):
+    if sku is not None:
+        instance.sku = Sku(name=sku)
+
     if storage_account_name is not None:
-        storage_account_key = get_access_key_by_storage_account_name(storage_account_name)
-        instance.storage_account = StorageAccountParameters(
-            storage_account_name,
-            storage_account_key
-        )
+        instance.storage_account = StorageAccountParameters(storage_account_name, "")
 
     if admin_enabled is not None:
         instance.admin_user_enabled = admin_enabled == 'true'
@@ -190,19 +206,22 @@ def acr_update_set(client,
     """
     registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
 
-    if parameters.storage_account and registry.sku.name != SkuTier.basic.value:  # pylint: disable=no-member
-        parameters.storage_account = None
-        logger.warning("'%s' SKU are managed registries. " +
-                       "The specified storage account will be ignored.", registry.sku.name)  # pylint: disable=no-member
-
-    if parameters.storage_account and isinstance(parameters.storage_account, dict):
-        if 'name' not in parameters.storage_account:
-            raise CLIError(
-                "Storage account name is required to update " +
-                "the storage account used by a container registry.")
-        if 'access_key' not in parameters.storage_account:
-            parameters.storage_account['access_key'] = get_access_key_by_storage_account_name(
-                parameters.storage_account['name'])
+    if registry.sku.tier == SkuTier.managed.value:
+        if parameters.sku is not None:
+            validate_sku_update(parameters.sku)
+        if parameters.storage_account is not None:
+            parameters.storage_account = None
+            logger.warning(
+                "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
+                registry_name, registry.sku.name)
+        client = get_acr_service_client(MANAGED_REGISTRY_API_VERSION).registries
+    elif registry.sku.tier == SkuTier.basic.value:
+        if hasattr(parameters, 'sku') and parameters.sku is not None:
+            parameters.sku = None
+            logger.warning(
+                "Updating SKU is not supported for registries in Basic SKU. The specified SKU will be ignored.")
+        if parameters.storage_account is not None:
+            parameters.storage_account = ensure_storage_account_parameter(parameters.storage_account)
 
     return client.update(resource_group_name, registry_name, parameters)
 
@@ -219,7 +238,9 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
     except:
         raise CLIError("Please verify whether docker is installed and running properly")
 
-    login_server = get_registry_login_server_by_name(registry_name, resource_group_name)
+    registry, _ = get_registry_by_name(registry_name, resource_group_name)
+    sku_tier = registry.sku.tier
+    login_server = registry.login_server
 
     # 1. if username was specified, verify that password was also specified
     if username and not password:
@@ -228,22 +249,23 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
         except NoTTYException:
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
-    # 2. if we don't yet have credentials, attempt to get a refresh token
-    if not password:
-        try:
-            username = "00000000-0000-0000-0000-000000000000"
-            password = get_login_refresh_token(login_server)
-        except Exception as e:  # pylint: disable=broad-except
-            logger.warning("AAD authentication failed with message: %s", str(e))
-
-    # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    if not password:
-        try:
-            cred = acr_credential_show(registry_name)
-            username = cred.username
-            password = cred.passwords[0].value
-        except Exception as e:  # pylint: disable=broad-except
-            logger.warning("Admin user authentication failed with message: %s", str(e))
+    if sku_tier == SkuTier.managed.value:
+        # 2. if we don't yet have credentials, attempt to get a refresh token
+        if not password:
+            try:
+                username = "00000000-0000-0000-0000-000000000000"
+                password = get_login_refresh_token(login_server)
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("AAD authentication failed with message: %s", str(e))
+    else:
+        # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
+        if not password:
+            try:
+                cred = acr_credential_show(registry_name)
+                username = cred.username
+                password = cred.passwords[0].value
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("Admin user authentication failed with message: %s", str(e))
 
     # 4. if we still don't have credentials, prompt the user
     if not password:
@@ -259,3 +281,15 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
           "--username", username,
           "--password", password,
           login_server])
+
+
+def acr_show_usage(registry_name, resource_group_name=None):
+    """Gets the quota usages for the specified container registry.
+    :param str registry_name: The name of container registry
+    :param str resource_group_name: The name of resource group
+    """
+    _, resource_group_name = managed_registry_validation(
+        registry_name, resource_group_name, "Usage is not supported for registries in Basic SKU.")
+    client = get_acr_service_client(MANAGED_REGISTRY_API_VERSION).registries
+
+    return client.list_usages(resource_group_name, registry_name)

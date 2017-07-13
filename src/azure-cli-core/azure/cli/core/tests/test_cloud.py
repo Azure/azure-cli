@@ -70,7 +70,7 @@ class TestCloud(unittest.TestCase):
     def test_add_get_cloud_with_profile(self):
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2017-03-09-profile-preview'
+        profile = '2017-03-09-profile'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -89,7 +89,7 @@ class TestCloud(unittest.TestCase):
                              c.profile)
 
     def test_add_get_cloud_with_invalid_profile(self):
-        ''' Cloud has profile that doesn't exist so an exception should be raised '''
+        # Cloud has profile that doesn't exist so an exception should be raised
         profile = 'none-existent-profile'
         c = Cloud('MyOwnCloud', profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
@@ -109,11 +109,11 @@ class TestCloud(unittest.TestCase):
                 self.assertEqual(c.profile, 'latest')
 
     def test_custom_cloud_management_endpoint_set(self):
-        ''' We have set management endpoint so don't override it '''
+        # We have set management endpoint so don't override it
         endpoint_rm = 'http://management.contoso.com'
         endpoint_mgmt = 'http://management.core.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
-        profile = '2017-03-09-profile-preview'
+        profile = '2017-03-09-profile'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)
@@ -126,11 +126,10 @@ class TestCloud(unittest.TestCase):
                              c.endpoints.management)
 
     def test_custom_cloud_no_management_endpoint_set(self):
-        ''' Use ARM 'resource manager' endpoint as 'management' (old ASM) endpoint
-            if only ARM endpoint is set '''
+        # Use ARM 'resource manager' endpoint as 'management' (old ASM) endpoint if only ARM endpoint is set
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2017-03-09-profile-preview'
+        profile = '2017-03-09-profile'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)
@@ -148,7 +147,7 @@ class TestCloud(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_known_cloud_missing_endpoint(self):
-        ''' New endpoints in cloud config should be saved in config for the known clouds '''
+        # New endpoints in cloud config should be saved in config for the known clouds
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             # Save the clouds to config to get started
@@ -178,7 +177,7 @@ class TestCloud(unittest.TestCase):
             self.assertEqual(actual_val, expected_val)
 
     def test_init_known_clouds_force_concurrent(self):
-        ''' Support multiple concurrent calls to clouds init method '''
+        # Support multiple concurrent calls to clouds init method
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
             pool_size = 100
             p = multiprocessing.Pool(pool_size)

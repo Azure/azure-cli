@@ -9,13 +9,13 @@ import re
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
-    (get_default_location_from_resource_group, validate_file_or_dict)
+    (get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set)
 from azure.cli.core.util import CLIError, hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.azlogging as azlogging
 import azure.cli.core.keys as keys
 from ._client_factory import _compute_client_factory
 
@@ -214,60 +214,6 @@ def _get_storage_profile_description(profile):
         return 'attach existing managed OS disk'
 
 
-storage_profile_param_options = {
-    'os_disk_name': '--os-disk-name',
-    'os_caching': '--os-caching',
-    'os_type': '--os-type',
-    'attach_os_disk': '--attach-os-disk',
-    'image': '--image',
-    'storage_account': '--storage-account',
-    'storage_container_name': '--storage-container-name',
-    'storage_sku': '--storage-sku',
-    'use_unmanaged_disk': '--use-unmanaged-disk'
-}
-
-
-network_balancer_param_options = {
-    'application_gateway': '--application-gateway',
-    'load_balancer': '--load-balancer',
-    'app_gateway_subnet_address_prefix': '--app-gateway-subnet-address-prefix',
-    'backend_pool_name': '--backend-pool-name'
-}
-
-
-def _validate_storage_required_forbidden_parameters(namespace, required, forbidden):
-    missing_required = [x for x in required if not getattr(namespace, x)]
-    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
-    if missing_required or included_forbidden:
-        error = 'invalid usage for storage profile: {}:'.format(
-            _get_storage_profile_description(namespace.storage_profile))
-        if missing_required:
-            missing_string = ', '.join(
-                storage_profile_param_options[x] for x in missing_required)
-            error = '{}\n\tmissing: {}'.format(error, missing_string)
-        if included_forbidden:
-            forbidden_string = ', '.join(
-                storage_profile_param_options[x] for x in included_forbidden)
-            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
-        raise CLIError(error)
-
-
-def _validate_network_balancer_required_forbidden_parameters(namespace, required, forbidden, desc):
-    missing_required = [x for x in required if not getattr(namespace, x)]
-    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
-    if missing_required or included_forbidden:
-        error = 'invalid usage for network balancer: {}'.format(desc)
-        if missing_required:
-            missing_string = ', '.join(
-                network_balancer_param_options[x] for x in missing_required)
-            error = '{}\n\tmissing: {}'.format(error, missing_string)
-        if included_forbidden:
-            forbidden_string = ', '.join(
-                network_balancer_param_options[x] for x in included_forbidden)
-            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
-        raise CLIError(error)
-
-
 def _validate_managed_disk_sku(sku):
 
     allowed_skus = ['Premium_LRS', 'Standard_LRS']
@@ -307,6 +253,9 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         # did not specify image XOR attach-os-disk
         raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')
 
+    auth_params = ['admin_password', 'admin_username', 'authentication_type',
+                   'generate_ssh_keys', 'ssh_dest_key_path', 'ssh_key_value']
+
     # perform parameter validation for the specific storage profile
     # start with the required/forbidden parameters for VM
     if namespace.storage_profile == StorageProfile.ManagedPirImage:
@@ -328,7 +277,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
         forbidden = ['os_disk_name', 'os_caching', 'storage_account',
-                     'storage_container_name', 'use_unmanaged_disk', 'storage_sku']
+                     'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
         _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
@@ -342,10 +291,12 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
         forbidden = ['os_disk_name', 'os_caching', 'data_caching', 'image', 'storage_account',
-                     'storage_container_name', 'data_disk_sizes_gb', 'storage_sku']
+                     'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
 
     else:
         raise CLIError('Unrecognized storage profile: {}'.format(namespace.storage_profile))
+
+    logger.debug("storage profile '%s'", namespace.storage_profile)
 
     if for_scale_set:
         # VMSS lacks some parameters, so scrub these out
@@ -361,7 +312,9 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
-    _validate_storage_required_forbidden_parameters(namespace, required, forbidden)
+    validate_parameter_set(
+        namespace, required, forbidden,
+        description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
@@ -394,9 +347,11 @@ def _validate_vm_create_storage_account(namespace):
         if check_existence(storage_id['name'], rg, 'Microsoft.Storage', 'storageAccounts'):
             # 1 - existing storage account specified
             namespace.storage_account_type = 'existing'
+            logger.debug("using specified existing storage account '%s'", storage_id['name'])
         else:
             # 2 - params for new storage account specified
             namespace.storage_account_type = 'new'
+            logger.debug("specified storage account '%s' not found and will be created", storage_id['name'])
     else:
         from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -412,9 +367,11 @@ def _validate_vm_create_storage_account(namespace):
             # 3 - nothing specified - find viable storage account in target resource group
             namespace.storage_account = account.name
             namespace.storage_account_type = 'existing'
+            logger.debug("suitable existing storage account '%s' will be used", account.name)
         else:
             # 4 - nothing specified - create a new storage account
             namespace.storage_account_type = 'new'
+            logger.debug('no suitable storage account found. One will be created.')
 
 
 def _validate_vm_create_availability_set(namespace):
@@ -433,6 +390,7 @@ def _validate_vm_create_availability_set(namespace):
             namespace='Microsoft.Compute',
             type='availabilitySets',
             name=name)
+        logger.debug("adding to specified availability set '%s'", namespace.availability_set)
 
 
 def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
@@ -444,6 +402,8 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
     nics = getattr(namespace, 'nics', None)
 
     if not vnet and not subnet and not nics:
+        logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
+
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         client = get_network_client().virtual_networks
 
@@ -467,6 +427,7 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
             namespace.subnet = result.name
             namespace.vnet_name = vnet_match.name
             namespace.vnet_type = 'existing'
+            logger.debug("existing vnet '%s' and subnet '%s' found", namespace.vnet_name, namespace.subnet)
             return
 
     if subnet:
@@ -483,9 +444,11 @@ def _validate_vm_vmss_create_vnet(namespace, for_scale_set=False):
         elif subnet_exists:
             # 2 - user specified existing vnet/subnet
             namespace.vnet_type = 'existing'
+            logger.debug("using specified vnet '%s' and subnet '%s'", namespace.vnet_name, namespace.subnet)
             return
     # 3 - create a new vnet/subnet
     namespace.vnet_type = 'new'
+    logger.debug('no suitable subnet found. One will be created.')
 
 
 def _subnet_capacity_check(subnet_mask, vmss_instance_count):
@@ -549,12 +512,16 @@ def _validate_vm_create_nsg(namespace):
         if check_existence(namespace.nsg, namespace.resource_group_name,
                            'Microsoft.Network', 'networkSecurityGroups'):
             namespace.nsg_type = 'existing'
+            logger.debug("using specified NSG '%s'", namespace.nsg)
         else:
             namespace.nsg_type = 'new'
+            logger.debug("specified NSG '%s' not found. It will be created.", namespace.nsg)
     elif namespace.nsg == '':
         namespace.nsg_type = None
+        logger.debug('no NSG will be used')
     elif namespace.nsg is None:
         namespace.nsg_type = 'new'
+        logger.debug('new NSG will be created')
 
 
 def _validate_vm_create_public_ip(namespace):
@@ -562,18 +529,22 @@ def _validate_vm_create_public_ip(namespace):
         if check_existence(namespace.public_ip_address, namespace.resource_group_name,
                            'Microsoft.Network', 'publicIPAddresses'):
             namespace.public_ip_type = 'existing'
+            logger.debug("using existing specified public IP '%s'", namespace.public_ip_address)
         else:
             namespace.public_ip_type = 'new'
+            logger.debug("specified public IP '%s' not found. It will be created.", namespace.public_ip_address)
     elif namespace.public_ip_address == '':
         namespace.public_ip_type = None
+        logger.debug('no public IP address will be used')
     elif namespace.public_ip_address is None:
         namespace.public_ip_type = 'new'
+        logger.debug('new public IP address will be created')
 
 
 def _validate_vmss_create_public_ip(namespace):
     if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
         if namespace.public_ip_address:
-            raise CLIError('--public-ip-address can only be used  when creating a new load '
+            raise CLIError('--public-ip-address can only be used when creating a new load '
                            'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
     _validate_vm_create_public_ip(namespace)
@@ -586,6 +557,7 @@ def _validate_vm_create_nics(namespace):
 
     if not nics_value:
         namespace.nic_type = 'new'
+        logger.debug('new NIC will be created')
         return
 
     if not isinstance(nics_value, list):
@@ -606,6 +578,7 @@ def _validate_vm_create_nics(namespace):
     namespace.nics = nics
     namespace.nic_type = 'existing'
     namespace.public_ip_type = None
+    logger.debug('existing NIC(s) will be used')
 
 
 def _validate_vm_vmss_create_auth(namespace):
@@ -613,15 +586,15 @@ def _validate_vm_vmss_create_auth(namespace):
                                      StorageProfile.SASpecializedOSDisk]:
         return
 
-    _validate_admin_username(namespace.admin_username, namespace.os_type)
+    namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
 
     if not namespace.os_type:
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-
-        namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
+        namespace.authentication_type = 'password' \
+            if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
@@ -678,6 +651,7 @@ def _validate_admin_username(username, os_type):
         "sys", "test2", "test3", "user4", "user5"]
     if username.lower() in disallowed_user_names:
         raise CLIError("This user name '{}' meets the general requirements, but is specifically disallowed for this image. Please try a different value.".format(username))
+    return username
 
 
 def _validate_admin_password(password, os_type):
@@ -753,6 +727,23 @@ def _get_vmss_create_instance_threshold():
     return 100
 
 
+def _get_default_address_pool(resource_group, balancer_name, balancer_type):
+    option_name = '--backend-pool-name'
+    client = getattr(get_network_client(), balancer_type, None)
+    if not client:
+        raise CLIError('unrecognized balancer type: {}'.format(balancer_type))
+
+    balancer = client.get(resource_group, balancer_name)
+    values = [x.name for x in balancer.backend_address_pools]
+    if len(values) > 1:
+        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
+                       "explicitly.".format(option_name, ', '.join(values)))
+    elif not values:
+        raise CLIError("No existing values found for '{0}'. Create one first and try "
+                       "again.".format(option_name))
+    return values[0]
+
+
 def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
     INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
@@ -782,6 +773,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         # use defaulting rules to determine
         balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
             else 'applicationGateway'
+        logger.debug("defaulting to '%s' because instance count <= %s", balancer_type, INSTANCE_THRESHOLD)
     elif namespace.load_balancer:
         balancer_type = 'loadBalancer'
     elif namespace.application_gateway:
@@ -794,40 +786,58 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             try:
                 client.get(namespace.resource_group_name, namespace.application_gateway)
                 namespace.app_gateway_type = 'existing'
+                namespace.backend_pool_name = namespace.backend_pool_name or \
+                    _get_default_address_pool(namespace.resource_group_name,
+                                              namespace.application_gateway,
+                                              'application_gateways')
+                logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
             except CloudError:
                 namespace.app_gateway_type = 'new'
+                logger.debug("application gateway '%s' not found. It will be created.", namespace.application_gateway)
         elif namespace.application_gateway == '':
             namespace.app_gateway_type = None
+            logger.debug('no application gateway will be used')
         elif namespace.application_gateway is None:
             namespace.app_gateway_type = 'new'
+            logger.debug('new application gateway will be created')
 
         # AppGateway frontend
         required = []
-        if namespace.app_gateway_type == 'new' and namespace.vnet_type != 'new':
-            required.append('app_gateway_subnet_address_prefix')
+        if namespace.app_gateway_type == 'new':
+            required.append('app_gateway_sku')
+            required.append('app_gateway_capacity')
+            if namespace.vnet_type != 'new':
+                required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
         forbidden = ['nat_pool_name', 'load_balancer']
-        _validate_network_balancer_required_forbidden_parameters(
-            namespace, required, forbidden, 'application gateway')
+        validate_parameter_set(namespace, required, forbidden, description='network balancer: application gateway')
 
     elif balancer_type == 'loadBalancer':
         # LoadBalancer frontend
         required = []
-        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway']
-        _validate_network_balancer_required_forbidden_parameters(
-            namespace, required, forbidden, 'load balancer')
+        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway', 'app_gateway_sku',
+                     'app_gateway_capacity']
+        validate_parameter_set(namespace, required, forbidden, description='network balancer: load balancer')
 
         if namespace.load_balancer:
             if check_existence(namespace.load_balancer, namespace.resource_group_name,
                                'Microsoft.Network', 'loadBalancers'):
                 namespace.load_balancer_type = 'existing'
+                namespace.backend_pool_name = namespace.backend_pool_name or \
+                    _get_default_address_pool(namespace.resource_group_name,
+                                              namespace.load_balancer,
+                                              'load_balancers')
+                logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'
+                logger.debug("load balancer '%s' not found. It will be created.", namespace.load_balancer)
         elif namespace.load_balancer == '':
             namespace.load_balancer_type = None
+            logger.debug('no load balancer will be used')
         elif namespace.load_balancer is None:
             namespace.load_balancer_type = 'new'
+            logger.debug('new load balancer will be created')
 
 
 def get_network_client():
@@ -845,14 +855,17 @@ def process_vmss_create_namespace(namespace):
     _validate_vmss_create_public_ip(namespace)
     _validate_vm_vmss_create_auth(namespace)
 
+    if not namespace.public_ip_per_vm and namespace.vm_domain_name:
+        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+
+
 # endregion
 
 # region disk, snapshot, image validators
 
 
 def validate_vm_disk(namespace):
-    namespace.disk = _get_resource_id(namespace.disk, namespace.resource_group_name,
-                                      'disks', 'Microsoft.Compute')
+    namespace.disk = _get_resource_id(namespace.disk, namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
 
 def process_disk_or_snapshot_create_namespace(namespace):

@@ -17,26 +17,32 @@ class ResourceLockTests(ScenarioTest):
     def test_lock_create_list_delete(self):
         for lock_type in ['ReadOnly', 'CanNotDelete']:
             self.cmd('az lock create -n foo --lock-type {}'.format(lock_type))
+            self.addCleanup(lambda: self.cmd('az lock delete -n foo'))
+
             locks_list = self.cmd('az lock list').get_output_in_json()
-            assert locks_list
-            assert 'foo' in [l['name'] for l in locks_list]
+            self.assertTrue(locks_list)
+            self.assertIn('foo', [l['name'] for l in locks_list])
+
             lock = self.cmd('az lock show -n foo').get_output_in_json()
             self.assertEqual(lock.get('name', None), 'foo')
             self.assertEqual(lock.get('level', None), lock_type)
-            self.cmd('az lock delete -n foo')
 
     # Test for resource group level locks
     @ResourceGroupPreparer()
     def test_lock_create_list_delete_resource_group(self, resource_group):
         for lock_type in ['ReadOnly', 'CanNotDelete']:
             self.cmd('az lock create -n foo -g {} --lock-type {}'.format(resource_group, lock_type))
+
+            delete_cmd = 'az lock delete -g {} -n foo'.format(resource_group)
+            self.addCleanup(lambda: self.cmd(delete_cmd))
+
             locks_list = self.cmd('az lock list').get_output_in_json()
-            assert 'foo' in [l['name'] for l in locks_list]
-            assert locks_list
+            self.assertTrue(locks_list)
+            self.assertIn('foo', [l['name'] for l in locks_list])
+
             lock = self.cmd('az lock show -g {} -n foo'.format(resource_group)).get_output_in_json()
             self.assertEqual(lock.get('name', None), 'foo')
             self.assertEqual(lock.get('level', None), lock_type)
-            self.cmd('az lock delete -g {} -n foo'.format(resource_group))
 
     # TODO: test for resource group level locks
 

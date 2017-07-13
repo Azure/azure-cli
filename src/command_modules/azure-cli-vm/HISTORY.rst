@@ -2,6 +2,24 @@
 
 Release History
 ===============
+
+unreleased
++++++++++++++++++++
+* `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.
+* `vm image create`: make datadisk's lun start with 0
+
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* vm/vmss: use newer api-version of "2017-03-30"
+* BC: 'sku.managed' is removed from 'az vm availability-set show' (use sku.name instead)
+* `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
+* `vm/vmss create`: if --admin-password is specified for Linux images, automatically will change from SSH authentication
+  to password without needing `--authentication-type password` explicitly.
+* `vm/vmss create`: added information statements that can be shown using --debug
+* `vm/vmss create`: added client-side validation where certain parameters were previously just ignored.
+* `vmss create`: support public ip per instance, instance custom domain name, custom dns servers
+
+
 2.0.9 (2017-06-21)
 ++++++++++++++++++
 * vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
