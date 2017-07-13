@@ -4,6 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+<<<<<<< HEAD
+=======
+
+>>>>>>> e28e619d61894ac9d678fa95a835fb5bf0becf21
 import six
 from azclishell.gather_commands import add_new_lines as nl
 
