@@ -25,7 +25,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('properties.outputs.masterFQDN.value',
                                        '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, loc)),
                          JMESPathCheck('properties.outputs.agentFQDN.value',
-                                       '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, loc))])
+                                       '{}agent.{}.cloudapp.azure.com'.format(dns_prefix, loc))])
 
         # show
         self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name), checks=[
@@ -45,13 +45,12 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
                  checks=JMESPathCheck('agentPoolProfiles[0].count', 5))
 
     # the length is set to avoid following error:
-    # Resource name k8s-master-ip-cliacstestdf9e19-clitest.rgbb2842ffee75a33f04366f72f08527c5157885b
-    # 80664c0560e06962ede3e78f0-00977c-7A54A2DE is invalid. The name can be up to 80 characters
-    # long.
-    @ResourceGroupPreparer(random_name_length=30, name_prefix='clitest')
+    # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
+    # is invalid. The name can be up to 80 characters long.
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     @RoleBasedServicePrincipalPreparer()
     def test_acs_create_kubernetes(self, resource_group, sp_name, sp_password):
-        acs_name = self.create_random_name('cliacstest', 16)
+        acs_name = self.create_random_name('acs', 14)
         ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
         cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
               '--client-secret {} --ssh-key-value {}'

@@ -29,3 +29,16 @@ helps['acs install-cli'] = """
     type: command
     short-summary: Download the DCOS/Kubernetes command line.
 """
+helps['acs create'] = """
+    examples:
+        - name: Create a default acs cluster
+          text: az acs create -g MyResourceGroup -n MyContainerService
+        - name: Create a Kubernetes cluster
+          text: az acs create --orchestrator-type Kubernetes -g MyResourceGroup -n MyContainerService
+        - name: Create a Kubernetes cluster with ssh key provided
+          text: az acs create --orchestrator-type Kubernetes -g MyResourceGroup -n MyContainerService --ssh-key-value MySSHKeyValueOrPath
+        - name: Create a acs cluster with two agent pools
+          text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles "[{'name':'agentpool1'},{'name':'agentpool2'}]"
+        - name: Create a acs cluster with the second agent pool with vmSize specified
+          text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles "[{'name':'agentpool1'},{'name':'agentpool2','vmSize':'Standard_D2'}]"
+"""
