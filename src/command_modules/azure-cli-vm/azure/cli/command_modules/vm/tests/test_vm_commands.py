@@ -10,13 +10,15 @@ import platform
 import tempfile
 import time
 import unittest
+import mock
+import uuid
 
 import six
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
-                                             NoneCheck)
+                                             NoneCheck, MOCKED_SUBSCRIPTION_ID)
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
@@ -1874,6 +1876,124 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         # run the command twice with the same parameters and verify it does not fail
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
+
+
+class MSIScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_vm_msi(self, resource_group):
+        subscription_id = self.get_subscription_id()
+
+        vm1 = 'vm1'
+        vm1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}'.format(subscription_id, resource_group, vm1)
+        vm2 = 'vm2'
+        vm3 = 'vm3'
+
+        # Fixing the role assignment guids so test can run under playback. The assignments will
+        # be auto-deleted when the RG gets recycled, so the same ids can be reused.
+        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C1A0'),
+                 uuid.UUID('C1E7FC22-CB48-407E-BE6A-19F0F1ED9C81'),
+                 uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
+                 uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
+        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
+            # create a linux vm with default configuration
+            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
+                JMESPathCheckV2('identity.role', 'Contributor'),
+                JMESPathCheckV2('identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
+                JMESPathCheckV2('identity.subscription', subscription_id),
+                JMESPathCheckV2('identity.port', 50342)
+            ])
+
+            self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm1), checks=[
+                JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
+
+            # create a windows vm with reader role on the linux vm
+            self.cmd('vm create -g {} -n {} --image Win2016Datacenter --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2, vm1_id), checks=[
+                JMESPathCheckV2('identity.role', 'reader'),
+                JMESPathCheckV2('identity.scope', vm1_id),
+                JMESPathCheckV2('identity.subscription', subscription_id),
+                JMESPathCheckV2('identity.port', 50342)
+            ])
+
+            self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
+                JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
+
+            # create a linux vm w/o identity and later enable it
+            vm3_result = self.cmd('vm create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm3)).get_output_in_json()
+            self.assertIsNone(vm3_result.get('identity'))
+            self.cmd('vm assign-identity -g {} -n {} --scope {} --role reader --port 50343'.format(resource_group, vm3, vm1_id), checks=[
+                JMESPathCheckV2('role', 'reader'),
+                JMESPathCheckV2('scope', vm1_id),
+                JMESPathCheckV2('subscription', subscription_id),
+                JMESPathCheckV2('port', 50343)
+            ])
+
+            self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm3), checks=[
+                JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].settings.port', 50343)
+            ])
+
+    @ResourceGroupPreparer()
+    def test_vmss_msi(self, resource_group):
+        subscription_id = self.get_subscription_id()
+
+        vmss1 = 'vmss11'
+        vmss1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachineScaleSets/{}'.format(subscription_id, resource_group, vmss1)
+        vmss2 = 'vmss2'
+        vmss3 = 'vmss3'
+        # Fixing the role assignment guids so test can run under playback. The assignments will
+        # be auto-deleted when the RG gets recycled, so the same ids can be reused.
+        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C121'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C122'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C123'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C124')]
+        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
+            # create linux vm with default configuration
+            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
+                JMESPathCheckV2('vmss.identity.role', 'Contributor'),
+                JMESPathCheckV2('vmss.identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
+                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
+                JMESPathCheckV2('vmss.identity.port', 50342)
+            ])
+
+            self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
+                JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
+
+            # create a windows vm with reader role on the linux vm
+            self.cmd('vmss create -g {} -n {} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2, vmss1_id), checks=[
+                JMESPathCheckV2('vmss.identity.role', 'reader'),
+                JMESPathCheckV2('vmss.identity.scope', vmss1_id),
+                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
+                JMESPathCheckV2('vmss.identity.port', 50342)
+            ])
+            self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
+
+            # create a linux vm w/o identity and later enable it
+            vmss3_result = self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss3)).get_output_in_json()['vmss']
+            self.assertIsNone(vmss3_result.get('identity'))
+
+            # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
+            if self.is_live:
+                self.cmd('vmss assign-identity -g {} -n {} --scope "{}" --role reader --port 50343'.format(resource_group, vmss3, vmss1_id), checks=[
+                    JMESPathCheckV2('role', 'reader'),
+                    JMESPathCheckV2('scope', vmss1_id),
+                    JMESPathCheckV2('subscription', subscription_id),
+                    JMESPathCheckV2('port', 50343)
+                ])
+
+                self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss3), checks=[
+                    JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                    JMESPathCheckV2('[0].settings.port', 50343)
+                ])
 
 
 class VMLiveScenarioTest(LiveScenarioTest):

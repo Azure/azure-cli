@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
+++++++++++++++++++
+support login inside a VM with a managed identity
+
 2.0.8 (2017-07-07)
 ++++++++++++++++++
 account show: support output in SDK auth file format

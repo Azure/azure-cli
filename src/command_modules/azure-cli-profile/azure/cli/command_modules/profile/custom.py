@@ -84,8 +84,12 @@ def login(username=None, password=None, service_principal=None, tenant=None,
     import requests
     interactive = False
 
+    profile = Profile()
     if username:
         if not password:
+            result = profile.init_if_in_msi_env(username)
+            if result:
+                return result
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -93,7 +97,6 @@ def login(username=None, password=None, service_principal=None, tenant=None,
     else:
         interactive = True
 
-    profile = Profile()
     try:
         subscriptions = profile.find_subscriptions_on_login(
             interactive,
