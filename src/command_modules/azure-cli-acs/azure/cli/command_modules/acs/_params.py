@@ -21,7 +21,6 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
-from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key, validate_list_of_integers
 
 
