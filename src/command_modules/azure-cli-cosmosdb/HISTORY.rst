@@ -1,12 +1,12 @@
 .. :changelog:
 
-unreleased
-===============
-
-* Minor fix allowing Creation of Collection with custom partition key
-
 Release History
 ===============
+
+unreleased
++++++++++++++++++++
+* Minor fix allowing Creation of Collection with custom partition key
+
 0.1.10 (2017-07-07)
 +++++++++++++++++++
 * minor fixes
