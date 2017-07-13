@@ -3,6 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# Base Client Factories
+
+def _resource_client_factory(**_):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+
 def _compute_client_factory():
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -25,10 +32,16 @@ def _backup_client_factory():
 def virtual_machines_cf():
     return _compute_client_factory().virtual_machines
 
+def resources_cf():
+    return _resource_client_factory().resources
+
 # Internal Deps Client Factories
 
-def vaults_cf():
+def vaults_cf(_):
     return _common_client_factory().vaults
+
+def backup_storage_configs_cf():
+    return _common_client_factory().backup_storage_configs
 
 # Protection Client Factories
 
@@ -60,3 +73,26 @@ def backup_protected_items_cf():
 
 def backup_operation_statuses_cf():
     return _backup_client_factory().backup_operation_statuses
+
+def backups_cf():
+    return _backup_client_factory().backups
+
+def backup_jobs_cf():
+    return _backup_client_factory().backup_jobs
+
+# Job Client Factories
+
+def job_details_cf():
+    return _backup_client_factory().job_details
+
+def job_cancellations_cf():
+    return _backup_client_factory().job_cancellations
+
+# Recovery Client Factories
+
+def recovery_points_cf():
+    return _backup_client_factory().recovery_points
+
+def restores_cf():
+    return _backup_client_factory().restores
+
