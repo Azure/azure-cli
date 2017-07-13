@@ -287,6 +287,39 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_aad_admin(self, resource_group, server):
+        rg = resource_group
+        sn = server
+        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
+        user = 'DSEngAll'
+        user2 = 'TestUser'
+
+        self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
+                 .format(sn, rg, oid, user),
+                 checks=[JMESPathCheck('login', user),
+                         JMESPathCheck('sid', oid)])
+
+        self.cmd('sql server ad-admin list -s {} -g {}'
+                 .format(sn, rg),
+                 checks=[JMESPathCheck('[0].login', user)])
+
+        self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
+                 .format(sn, rg, user2, oid2),
+                 checks=[JMESPathCheck('login', user2),
+                         JMESPathCheck('sid', oid2)])
+
+        self.cmd('sql server ad-admin delete -s {} -g {}'
+                 .format(sn, rg))
+
+        self.cmd('sql server ad-admin list -s {} -g {}'
+                 .format(sn, rg),
+                 checks=[JMESPathCheck('login', None)])
+
+
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
@@ -543,8 +576,8 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
+
         update_service_objective = 'DW200'
-        storage_bytes = str(10 * 1024 * 1024 * 1024 * 1024)
         update_storage = '20TB'
         update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
@@ -552,15 +585,20 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         loc_display = 'West US'
 
         # test sql db commands
-        self.cmd('sql dw create -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('location', loc_display),
-                     JMESPathCheck('edition', 'DataWarehouse'),
-                     JMESPathCheck('maxSizeBytes', storage_bytes),
-                     JMESPathCheck('status', 'Online')])
+        dw = self.cmd('sql dw create -g {} --server {} --name {}'
+                      .format(rg, server, database_name),
+                      checks=[
+                          JMESPathCheck('resourceGroup', rg),
+                          JMESPathCheck('name', database_name),
+                          JMESPathCheck('location', loc_display),
+                          JMESPathCheck('edition', 'DataWarehouse'),
+                          JMESPathCheck('status', 'Online')]).get_output_in_json()
+
+        # Sanity check that the default max size is not equal to the size that we will update to
+        # later. That way we know that update is actually updating the size.
+        self.assertNotEqual(dw['maxSizeBytes'], update_storage_bytes,
+                            'Initial max size in bytes is equal to the value we want to update to later,'
+                            ' so we will not be able to verify that update max size is actually updating.')
 
         # DataWarehouse is a little quirky and is considered to be both a database and its
         # separate own type of thing. (Why? Because it has the same REST endpoint as regular

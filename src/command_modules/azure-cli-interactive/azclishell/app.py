@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from __future__ import unicode_literals, print_function
 
 import datetime
@@ -10,13 +9,12 @@ import json
 import math
 import os
 import re
-import six
 import subprocess
 import sys
-import threading
-
+from threading import Thread
 
 import jmespath
+import six
 from six.moves import configparser
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -29,14 +27,17 @@ from prompt_toolkit.interface import CommandLineInterface, Application
 from prompt_toolkit.shortcuts import create_eventloop
 
 import azclishell.configuration
+from azclishell.az_completer import AzCompleter
+
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
 from azclishell.frequency_heuristic import DISPLAY_TIME
-from azclishell.gather_commands import add_random_new_lines
+from azclishell.gather_commands import add_new_lines, GatherCommands
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
 from azclishell.telemetry import SHELL_TELEMETRY as telemetry
+from azclishell.threads import LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -115,6 +116,11 @@ def validate_contains_query(args, symbol):
     return False
 
 
+def restart_completer(shell):
+    shell.completer = AzCompleter(GatherCommands())
+    shell.refresh_cli = True
+
+
 # pylint: disable=too-many-instance-attributes
 class Shell(object):
     """ represents the shell """
@@ -122,7 +128,7 @@ class Shell(object):
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
                  app=None, input_custom=sys.stdin, output_custom=None,
-                 user_feedback=False):
+                 user_feedback=False, intermediate_sleep=.25, final_sleep=4):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -148,6 +154,8 @@ class Shell(object):
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
+        self.intermediate_sleep = intermediate_sleep  # in seconds
+        self.final_sleep = final_sleep  # in seconds
 
     @property
     def cli(self):
@@ -212,6 +220,11 @@ class Shell(object):
             toolbar = [
                 ' Try out the \'feedback\' command',
                 'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
+        elif self.command_table_thread.is_alive():
+            toolbar = [
+                ' Loading...',
+                'Hit [enter] to refresh'
+            ]
         else:
             toolbar = self._toolbar_info()
 
@@ -246,6 +259,8 @@ class Shell(object):
         is_command = True
         rows, _ = get_window_dim()
         rows = int(rows)
+        if not self.completer:
+            return param_descrip, example
 
         for word in text.split():
             if word.startswith("-"):  # any parameter
@@ -397,7 +412,7 @@ class Shell(object):
                 eventloop=create_eventloop())
             example_cli.buffers['example_line'].reset(
                 initial_document=Document(u'{}\n'.format(
-                    add_random_new_lines(example)))
+                    add_new_lines(example)))
             )
             while start_index < len(text.split()):
                 if self.default_command:
@@ -631,22 +646,21 @@ class Shell(object):
             CONFIG.load(os.path.join(azure_folder, 'az.json'))
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-            self.app.initialize(Configuration())
-
             if '--progress' in args:
                 args.remove('--progress')
-                thread = ExecuteThread(self.app.execute, args)
+                execute_args = [args]
+                thread = Thread(target=self.app.execute, args=execute_args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
                 self.curr_thread = thread
 
-                thread = ProgressViewThread(progress_view, self)
+                progress_args = [self]
+                thread = Thread(target=progress_view, args=progress_args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
                 result = None
-
             else:
                 result = self.app.execute(args)
 
@@ -659,7 +673,7 @@ class Shell(object):
                 else:
                     formatter = OutputProducer.get_formatter(
                         self.app.configuration.output_format)
-                    OutputProducer(formatter=formatter, file=self.output).out(result)
+                    OutputProducer(formatter=formatter).out(result)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except
@@ -681,10 +695,13 @@ class Shell(object):
         from azure.cli.core.application import APPLICATION
         APPLICATION.get_progress_controller = self.progress_patch
 
+        # refresh the cache and completer
+        self.command_table_thread = LoadCommandTableThread(restart_completer, self)
+        self.command_table_thread.start()
+
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
-
         while True:
             try:
                 try:
@@ -723,33 +740,3 @@ class Shell(object):
 
         print('Have a lovely day!!', file=self.output)
         telemetry.conclude()
-
-
-class ExecuteThread(threading.Thread):
-    """ thread for executing commands """
-    def __init__(self, func, args):
-        super(ExecuteThread, self).__init__()
-        self.args = args
-        self.func = func
-
-    def run(self):
-        self.func(self.args)
-
-
-class ProgressViewThread(threading.Thread):
-    """ thread to keep the toolbar spinner spinning """
-    def __init__(self, func, arg):
-        super(ProgressViewThread, self).__init__()
-        self.func = func
-        self.arg = arg
-
-    def run(self):
-        import time
-        try:
-            while True:
-                if self.func(self.arg):
-                    time.sleep(4)
-                    break
-                time.sleep(.25)
-        except KeyboardInterrupt:
-            pass

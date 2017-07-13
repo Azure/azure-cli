@@ -4,8 +4,8 @@ Release History
 
 ===============
 
-unreleased
-++++++++++++++++++
+2.0.10 (2017-07-07)
++++++++++++++++++++
 * `group deployment create`: Improve prompting for missing parameters. Improve parsing of `--parameters KEY=VALUE` syntax.
 
 2.0.9 (2017-06-21)

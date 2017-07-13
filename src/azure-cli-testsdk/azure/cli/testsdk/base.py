@@ -27,10 +27,8 @@ logger = logging.getLogger('azure.cli.testsdk')
 
 
 class ScenarioTest(ReplayableTest):
-    def __init__(self, method_name, config_file=None,
-                 recording_dir=None, recording_name=None,
-                 recording_processors=None, replay_processors=None,
-                 recording_patches=None, replay_patches=None):
+    def __init__(self, method_name, config_file=None, recording_name=None,
+                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
         self.name_replacer = GeneralNameReplacer()
         super(ScenarioTest, self).__init__(
             method_name,
@@ -56,7 +54,7 @@ class ScenarioTest(ReplayableTest):
                 patch_retrieve_token_for_user,
                 patch_progress_controller,
             ],
-            recording_dir=recording_dir or find_recording_dir(inspect.getfile(self.__class__)),
+            recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
             recording_name=recording_name
         )
 
@@ -83,7 +81,7 @@ class LiveScenarioTest(IntegrationTestBase):
         return execute(command, expect_failure=expect_failure).assert_with_checks(checks)
 
 
-class ExecutionResult(object):  # pylint: disable=too-few-public-methods
+class ExecutionResult(object):
     def __init__(self, command, expect_failure=False, in_process=True):
         if in_process:
             self._in_process_execute(command)
@@ -91,14 +89,16 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
             self._out_of_process_execute(command)
 
         if expect_failure and self.exit_code == 0:
-            logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s', command,
-                         self.exit_code, self.output)
+            logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s. %s', command,
+                         self.exit_code, self.output, ('Logging ' + self.applog) if self.applog else '')
             raise AssertionError('The command did not fail as it was expected.')
         elif not expect_failure and self.exit_code != 0:
-            logger.error('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
+            logger.error('Command "%s" => %d. Output: %s. %s', command, self.exit_code, self.output,
+                         ('Logging ' + self.applog) if self.applog else '')
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 
-        logger.info('Command "%s" => %d. Output: %s', command, self.exit_code, self.output)
+        logger.info('Command "%s" => %d. Output: %s. %s', command, self.exit_code, self.output,
+                    ('Logging ' + self.applog) if self.applog else '')
 
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
@@ -134,12 +134,15 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
         if command.startswith('az '):
             command = command[3:]
 
-        output_buffer = StringIO()
+        stdout_buf = StringIO()
+        logging_buf = StringIO()
         try:
             # issue: stderr cannot be redirect in this form, as a result some failure information
             # is lost when command fails.
-            self.exit_code = cli_main(shlex.split(command), file=output_buffer) or 0
-            self.output = output_buffer.getvalue()
+            self.exit_code = cli_main(shlex.split(command), output=stdout_buf, logging_stream=logging_buf) or 0
+            self.output = stdout_buf.getvalue()
+            self.applog = logging_buf.getvalue()
+
         except CannotOverwriteExistingCassetteException as ex:
             raise AssertionError(ex)
         except CliExecutionError as ex:
@@ -149,10 +152,11 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
                 raise ex
         except Exception as ex:  # pylint: disable=broad-except
             self.exit_code = 1
-            self.output = output_buffer.getvalue()
+            self.output = stdout_buf.getvalue()
             self.process_error = ex
         finally:
-            output_buffer.close()
+            stdout_buf.close()
+            logging_buf.close()
 
     def _out_of_process_execute(self, command):
         try:

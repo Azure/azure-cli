@@ -12,7 +12,9 @@ from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException, prompt
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 
-from ._utils import get_registry_login_server_by_name, registry_sku_validation
+from azure.mgmt.containerregistry.v2017_06_01_preview.models import SkuTier
+
+from ._utils import get_registry_by_name, managed_registry_validation
 from ._docker_utils import get_login_access_token
 from .credential import acr_credential_show
 
@@ -136,7 +138,9 @@ def _validate_user_credentials(registry_name,
                                repository=None,
                                result_index=None,
                                request_method=None):
-    login_server = get_registry_login_server_by_name(registry_name, resource_group_name)
+    registry, _ = get_registry_by_name(registry_name, resource_group_name)
+    sku_tier = registry.sku.tier
+    login_server = registry.login_server
 
     # 1. if username was specified, verify that password was also specified
     if username:
@@ -147,29 +151,31 @@ def _validate_user_credentials(registry_name,
                 raise CLIError('Please specify both username and password in non-interactive mode.')
         return request_method(login_server, path, username, password, result_index)
 
-    # 2. if we don't yet have credentials, attempt to get an access token
-    try:
-        access_token = get_login_access_token(login_server, repository)
-        return request_method(login_server, path, None, access_token, result_index)
-    except NotFound as e:
-        raise CLIError(str(e))
-    except Unauthorized as e:
-        logger.warning("Unable to authenticate using AAD tokens: %s", str(e))
-    except Exception as e:  # pylint: disable=broad-except
-        logger.warning("AAD authentication failed with message: %s", str(e))
-
-    # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    try:
-        cred = acr_credential_show(registry_name)
-        username = cred.username
-        password = cred.passwords[0].value
-        return request_method(login_server, path, username, password, result_index)
-    except NotFound as e:
-        raise CLIError(str(e))
-    except Unauthorized as e:
-        logger.warning("Unable to authenticate using admin login credentials: %s", str(e))
-    except Exception as e:  # pylint: disable=broad-except
-        logger.warning("Admin user authentication failed with message: %s", str(e))
+    if sku_tier == SkuTier.managed.value:
+        # 2. if we don't yet have credentials, attempt to get an access token
+        try:
+            managed_registry_validation(registry_name, resource_group_name)
+            access_token = get_login_access_token(login_server, repository)
+            return request_method(login_server, path, None, access_token, result_index)
+        except NotFound as e:
+            raise CLIError(str(e))
+        except Unauthorized as e:
+            logger.warning("Unable to authenticate using AAD tokens: %s", str(e))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("AAD authentication failed with message: %s", str(e))
+    else:
+        # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
+        try:
+            cred = acr_credential_show(registry_name)
+            username = cred.username
+            password = cred.passwords[0].value
+            return request_method(login_server, path, username, password, result_index)
+        except NotFound as e:
+            raise CLIError(str(e))
+        except Unauthorized as e:
+            logger.warning("Unable to authenticate using admin login credentials: %s", str(e))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Admin user authentication failed with message: %s", str(e))
 
     # 4. if we still don't have credentials, prompt the user
     try:
@@ -240,7 +246,7 @@ def acr_repository_show_manifests(registry_name,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    _, resource_group_name = registry_sku_validation(
+    _, resource_group_name = managed_registry_validation(
         registry_name, resource_group_name, LIST_MANIFESTS_NOT_SUPPORTED)
     return _validate_user_credentials(
         registry_name=registry_name,
@@ -271,7 +277,7 @@ def acr_repository_delete(registry_name,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    _, resource_group_name = registry_sku_validation(
+    _, resource_group_name = managed_registry_validation(
         registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
     _INVALID = "Please specify either a tag name with --tag or a manifest digest with --manifest."
 
@@ -282,7 +288,7 @@ def acr_repository_delete(registry_name,
                                "and all images under it?".format(repository), yes)
             path = '/v2/_acr/{}/repository'.format(repository)
         else:
-            _user_confirmation("Are you sure you want to delete the image '{}:{}'?".format(repository, tag), yes)
+            _user_confirmation("Are you sure you want to delete the tag '{}:{}'?".format(repository, tag), yes)
             path = '/v2/_acr/{}/tags/{}'.format(repository, tag)
     # If --manifest is specified as a flag
     elif not manifest:
@@ -343,7 +349,7 @@ def _delete_manifest_confirmation(yes, registry_name, repository, manifest, tag)
             raise CLIError("More than one manifests can be found with digest '{}'.".format(manifest))
 
     message = "This operation will delete the manifest '{}'".format(manifest)
-    images = "', '".join(["'{}:{}'".format(repository, str(x)) for x in tags])
+    images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in tags])
     if images:
         message += " and all the following images: {}".format(images)
     _user_confirmation("{}.\nAre you sure you want to continue?".format(message))

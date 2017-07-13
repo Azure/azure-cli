@@ -105,7 +105,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_win_webapp_quick_create(self, resource_group, resource_group_location):
+    def test_win_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick'
         plan = 'plan-quick'
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
@@ -117,7 +117,7 @@ class WebappQuickCreateTest(ScenarioTest):
         ]))
 
     @ResourceGroupPreparer()
-    def test_win_webapp_quick_create_cd(self, resource_group, resource_group_location):
+    def test_win_webapp_quick_create_cd(self, resource_group):
         webapp_name = 'webapp-quick-cd'
         plan = 'plan-quick'
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
@@ -131,7 +131,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue('Hello world' in str(r.content))
 
     @ResourceGroupPreparer(location='westus')
-    def test_linux_webapp_quick_create(self, resource_group, resource_group_location):
+    def test_linux_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick-linux'
         plan = 'plan-quick-linux'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
@@ -306,38 +306,54 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
 
 
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
-class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(LinuxWebappSceanrioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-linux2')
+class LinuxWebappSceanrioTest(ScenarioTest):
 
-    def test_linux_webapp(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_linux_webapp(self, resource_group):
         plan = 'webapp-linux-plan'
         webapp = 'webapp-linux1'
-        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(self.resource_group, plan), checks=[
-            JMESPathCheck('reserved', True),  # this weird field means it is a linux
-            JMESPathCheck('sku.name', 'S1'),
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
+            JMESPathCheckV2('sku.name', 'S1'),
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan), checks=[
-            JMESPathCheck('name', webapp),
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan), checks=[
+            JMESPathCheckV2('name', webapp),
         ])
-        self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
-            JMESPathCheck('appCommandLine', 'process.json')
+        self.cmd('webapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].name', webapp)
+        ])
+        self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
+            JMESPathCheckV2('appCommandLine', 'process.json')
         ])
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
-            self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'))
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
 
-        result = self.cmd('webapp config container show -g {} -n {} '.format(self.resource_group, webapp))
+        result = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
         self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
         self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
-        self.cmd('webapp config container delete -g {} -n {}'.format(self.resource_group, webapp))
-        result2 = self.cmd('webapp config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        self.cmd('webapp config container delete -g {} -n {}'.format(resource_group, webapp))
+        result2 = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
         self.assertEqual(result2, [])
+
+
+class WebappACRSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_acr_integration(self, resource_group):
+        plan = 'plan1'
+        webapp = 'webappacrtest1'
+        acr_registry_name = webapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan))
+        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        self.cmd('webapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
+            resource_group, webapp, acr_registry_name), checks=[
+                JMESPathCheckV2("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
+        ])
 
 
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
@@ -363,16 +379,6 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
         ])
-
-        '''
-        import time
-        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-
-        import requests
-        r = requests.get('http://{}.azurewebsites.net'.format(webapp))
-        #verify the web page
-        self.assertTrue('Hello world' in str(r.content))
-        '''
 
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
@@ -481,7 +487,7 @@ class WebappSlotTrafficRouting(ScenarioTest):
 class WebappSlotSwapScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_webapp_slot_swap(self, resource_group, resource_group_location):
+    def test_webapp_slot_swap(self, resource_group):
         plan = 'slot-swap-plan2'
         webapp = 'slot-swap-web2'
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()

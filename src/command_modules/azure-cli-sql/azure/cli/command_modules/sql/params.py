@@ -9,13 +9,14 @@ from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type)
-from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.import_extension_request \
     import ImportExtensionRequest
 from azure.mgmt.sql.models.export_request import ExportRequest
 from azure.mgmt.sql.models.server import Server
+from azure.mgmt.sql.models.server_azure_ad_administrator import ServerAzureADAdministrator
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
@@ -293,6 +294,7 @@ with ParametersContext(command='sql db list-editions') as c:
     c.argument('service_objective',
                arg_group=search_arg_group,
                help='Service objective to search for. If unspecified, all editions are shown.')
+
 
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
@@ -586,6 +588,26 @@ with ParametersContext(command='sql server create') as c:
 
 with ParametersContext(command='sql server update') as c:
     c.argument('administrator_login_password', help='The administrator login password.')
+
+
+#####
+#           sql server ad-admin
+######
+
+
+with ParametersContext(command='sql server ad-admin') as c:
+    c.argument('server_name', options_list=('--server-name', '-s'),
+               help='The name of the SQL Server')
+    c.argument('login', options_list=('--display-name', '-u'),
+               help='Display name of the Azure AD administrator user or group.')
+    c.argument('sid', options_list=('--object-id', '-i'),
+               help='The unique ID of the Azure AD administrator ')
+    c.ignore('tenant_id')
+
+
+with ParametersContext(command='sql server ad-admin create') as c:
+    c.expand('properties', ServerAzureADAdministrator, patches={
+        'tenant_id': patch_arg_make_optional})
 
 
 #####

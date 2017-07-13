@@ -6,21 +6,22 @@ Commands to manage Azure container registries
 ::
 
     Group
-        az acr: Manage Azure container registries.
+        az acr: Manage Azure Container Registries.
 
     Subgroups:
-        credential : Manage login credentials for Azure container registries.
-        repository : Manage repositories for Azure container registries.
-        webhook    : Manage webhooks for Azure container registries.
+        credential: Manage login credentials for Azure container registries.
+        repository: Manage repositories for Azure container registries.
+        webhook   : Manage webhooks for Azure container registries.
 
     Commands:
-        check-name : Checks whether the container registry name is available for use.
-        create     : Creates a container registry.
-        delete     : Deletes a container registry.
-        list       : Lists all the container registries under the current subscription.
-        login      : Login to a container registry through Docker.
-        show       : Gets the properties of the specified container registry.
-        update     : Updates a container registry.
+        check-name: Checks whether the container registry name is available for use.
+        create    : Creates a container registry.
+        delete    : Deletes a container registry.
+        list      : Lists all the container registries under the current subscription.
+        login     : Login to a container registry through Docker.
+        show      : Gets the properties of the specified container registry.
+        show-usage: Gets the quota usages for the specified container registry.
+        update    : Updates a container registry.
 
 Create a container registry
 +++++++++++++++++++++++++++
@@ -161,6 +162,23 @@ Login to a container registry
     Examples
         Login to a container registry
             az acr login -n MyRegistry
+
+Get the quota usages for a container registry
++++++++++++++++++++++++++++++++++++++++++++++
+::
+
+    Command
+        az acr show-usage: Gets the quota usages for the specified container registry.
+
+    Arguments
+        --name -n [Required]: The name of the container registry. You can configure the default registry
+                              name using `az configure --defaults acr=<registry name>`.
+        --resource-group -g : Name of resource group. You can configure the default group using `az
+                              configure --defaults group=<name>`.
+
+    Examples
+        Get the quota usages for a container registry.
+            az acr show-usage -n MyRegistry
 
 Commands to manage login credentials for Azure container registries
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -315,16 +333,16 @@ Delete a repository from a container registry or delete a manifest/tag from a gi
         Delete a repository from the specified container registry.
             az acr repository delete -n MyRegistry --repository MyRepository
 
-        Delete a tag from the given repository in the specified container registry, but keep the
-        manifest referenced by the tag.
+        Delete a tag from the given repository. This operation does not delete the manifest referenced
+        by the tag or associated layer data.
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag
 
-        Delete the manifest referenced by a tag and all tags referencing the manifest from the given
-        repository in the specified container registry.
+        Delete the manifest referenced by a tag. This operation also deletes associated layer data and
+        all other tags referencing the manifest.
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
 
-        Delete a manfiest and all tags referencing the manifest from the given repository in the
-        specified container registry.
+        Delete a manfiest from the given repository. This operation also deletes associated layer data
+        and all tags referencing the manifest.
             az acr repository delete -n MyRegistry --repository MyRepository --manifest MyManifest
 
 Commands to manage webhooks for Azure container registries

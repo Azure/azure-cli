@@ -16,7 +16,10 @@ _registry_map = {
     'scope': 'SCOPE',
     'actions': 'ACTIONS',
     'serviceUri': 'SERVICE URI',
-    'customHeaders': 'HEADERS'
+    'customHeaders': 'HEADERS',
+    'limit': 'LIMIT',
+    'currentValue': 'CURRENT VALUE',
+    'unit': 'UNIT'
 }
 
 _order_map = {
@@ -34,7 +37,10 @@ _order_map = {
     'SCOPE': 42,
     'ACTIONS': 43,
     'SERVICE URI': 44,
-    'HEADERS': 45
+    'HEADERS': 45,
+    'LIMIT': 51,
+    'CURRENT VALUE': 52,
+    'UNIT': 53
 }
 
 
@@ -42,6 +48,8 @@ def output_format(result):
     """Returns the list of container registries each of which is an ordered dictionary.
     :param list/dict result: The (list of) container registry object(s)
     """
+    if 'value' in result and isinstance(result['value'], list):
+        result = result['value']
     obj_list = result if isinstance(result, list) else [result]
     return [_format_group(item) for item in obj_list]
 

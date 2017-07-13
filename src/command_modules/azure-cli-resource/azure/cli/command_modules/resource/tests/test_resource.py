@@ -7,7 +7,8 @@ import os
 import time
 import unittest
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck as JCheck, create_random_name)
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+                               JMESPathCheck as JCheck, create_random_name)
 # AZURE CLI RESOURCE TEST DEFINITIONS
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
                                              BooleanCheck,
@@ -336,6 +337,29 @@ class DeploymentTest(ScenarioTest):
             JCheck('length([])', 2),
             JCheck('[0].resourceGroup', resource_group)
         ])
+
+
+class DeploymentLiveTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    def test_group_deployment_progress(self, resource_group):
+        from azure.cli.testsdk.utilities import force_progress_logging
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
+        object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
+        deployment_name = 'azure-cli-deployment2'
+
+        subnet_id = self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()['newVNet']['subnets'][0]['id']
+
+        with force_progress_logging() as test_io:
+            self.cmd('group deployment create --verbose -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
+                resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file))
+
+        # very the progress
+        lines = test_io.getvalue().splitlines()
+        for l in lines:
+            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(deployment_name), lines)
 
 
 class DeploymentnoWaitTest(ResourceGroupVCRTestBase):

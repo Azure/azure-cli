@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++++++++++
+2.0.10 (2017-07-07)
++++++++++++++++++++
 * `application-gateway address-pool create/update`: fix bug when using the `--servers` argument.
 * `application-gateway`: add `redirect-config` commands
 * `application-gateway ssl-policy`: add `list-options`, `predefined list` and `predefined show` commands

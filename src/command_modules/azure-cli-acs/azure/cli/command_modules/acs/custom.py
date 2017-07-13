@@ -37,7 +37,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core.profiles import ResourceType
-from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
+from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -131,10 +131,10 @@ def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_ke
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
     if orchestrator_type == 'kubernetes' or \
-       orchestrator_type == ContainerServiceOchestratorTypes.kubernetes or \
+       orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes or \
        (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
         return k8s_browse(name, resource_group, disable_browser, ssh_key_file=ssh_key_file)
-    elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOchestratorTypes.dcos:
+    elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
@@ -848,7 +848,7 @@ def update_acs(client, resource_group_name, container_service_name, new_agent_co
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
 
     # null out the service principal because otherwise validation complains
-    if instance.orchestrator_profile.orchestrator_type == ContainerServiceOchestratorTypes.kubernetes:
+    if instance.orchestrator_profile.orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes:
         instance.service_principal_profile = None
 
     # null out the windows profile so that validation doesn't complain about not having the admin password

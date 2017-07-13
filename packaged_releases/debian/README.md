@@ -19,6 +19,7 @@ Then execute it with the appropriate environment variable values.
 ```
 export CLI_VERSION=2.0.9 \
   && export CLI_DOWNLOAD_SHA256=e74150b2db2975e8b17710eb7ef270ded16e6a8c27f77929544533f6b4c33b76 \
+  && export BUILD_ARTIFACT_DIR=$(mktemp -d)\
   && ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 
