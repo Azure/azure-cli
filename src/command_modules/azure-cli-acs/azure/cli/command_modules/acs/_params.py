@@ -60,6 +60,8 @@ def _get_default_install_location(exe_name):
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
+orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
+
 storageProfileTypes = ["StorageAccount", "ManagedDisks"]
 
 register_cli_argument('acs', 'tags', tags_type)
@@ -70,7 +72,7 @@ register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default=
 
 register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
 
-register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), **enum_choice_list(ContainerServiceOrchestratorTypes))
+register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), **enum_choice_list(orchestratorTypes), help='DockerCE only available since api version 2017-07-01')
 # some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'api_version', options_list=('--api-version',), required=False, help='Use API version of ACS to perform az acs operations. Available options: 2017-01-31, 2017-07-01. (2017-07-01 in preview, only in ukwest and uksouth). Default to use the latest version for the location')
