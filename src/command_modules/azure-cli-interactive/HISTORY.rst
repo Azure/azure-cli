@@ -6,6 +6,12 @@ Release History
 ++++++++++++++++++
 * minor fixes
 
+0.3.5 (unreleased)
+++++++++++++++++++
+
+* Improves the start up time by using cached commands
+
+
 0.3.5 (2017-06-21)
 ++++++++++++++++++
 

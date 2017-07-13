@@ -115,7 +115,6 @@ class GatherCommands(object):
 
         with open(os.path.join(cache_path, command_file), 'r') as help_file:
             data = json.load(help_file)
-
         self.add_exit()
         commands = data.keys()
 

@@ -9,7 +9,7 @@ import os
 from prompt_toolkit.history import FileHistory
 
 from azclishell import __version__
-import azclishell._dump_help
+from azclishell._dump_commands import FRESH_TABLE
 import azclishell.configuration
 from azclishell.gather_commands import GatherCommands
 from azclishell.app import Shell
@@ -23,9 +23,6 @@ from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 from azure.cli.core._environment import get_config_dir as cli_config_dir
 from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
 
-AZCOMPLETER = AzCompleter(GatherCommands())
-SHELL_CONFIGURATION = azclishell.configuration.CONFIGURATION
-
 
 def main(style=None):
     os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
@@ -38,8 +35,14 @@ def main(style=None):
     CONFIG.load(os.path.join(azure_folder, 'az.json'))
     SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-    config = SHELL_CONFIGURATION
+    config = azclishell.configuration.CONFIGURATION
     shell_config_dir = azclishell.configuration.get_config_dir
+
+    try:
+        commands = GatherCommands()
+        az_completer = AzCompleter(commands)
+    except IOError:  # if there is no cache
+        az_completer = None
 
     if style:
         given_style = style
@@ -60,7 +63,7 @@ def main(style=None):
         ask_feedback = True
 
     shell_app = Shell(
-        completer=AZCOMPLETER,
+        completer=az_completer,
         lexer=AzLexer,
         history=FileHistory(
             os.path.join(shell_config_dir(), config.get_history())),

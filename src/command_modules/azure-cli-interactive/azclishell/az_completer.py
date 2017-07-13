@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-import sys
 
 from prompt_toolkit.completion import Completer, Completion
 
+from azclishell._dump_commands import FRESH_TABLE
 import azclishell.configuration
 from azclishell.argfinder import ArgsFinder
 from azclishell.command_tree import in_tree
@@ -19,6 +19,13 @@ from azure.cli.core.parser import AzCliCommandParser
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
 BLACKLISTED_COMPLETIONS = ['interactive']
+
+
+def initialize_command_table_attributes(completer):
+    completer.cmdtab = FRESH_TABLE.command_table
+    if completer.cmdtab:
+        completer.parser.load_command_table(completer.cmdtab)
+        completer.argsfinder = ArgsFinder(completer.parser)
 
 
 def error_pass(_, message):  # pylint: disable=unused-argument
@@ -92,7 +99,7 @@ def sort_completions(gen):
 class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
-    def __init__(self, commands, global_params=True, outstream=sys.stderr):
+    def __init__(self, commands, global_params=True):
         # dictionary of command to descriptions
         self.command_description = commands.descrip
         # from a command to a list of parameters
@@ -122,11 +129,7 @@ class AzCompleter(Completer):
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
-
-        from azclishell._dump_commands import CMD_TABLE
-        self.cmdtab = CMD_TABLE
-        self.parser.load_command_table(CMD_TABLE)
-        self.argsfinder = ArgsFinder(self.parser, outstream)
+        self.cmdtab = None
 
     def validate_completion(self, param, words, text_before_cursor, check_double=True):
         """ validates that a param should be completed """
@@ -153,7 +156,6 @@ class AzCompleter(Completer):
         self.branch = self.command_tree
         self.curr_command = ''
         self._is_command = True
-
         text = reformat_cmd(text)
         if text.split():
 
@@ -163,8 +165,9 @@ class AzCompleter(Completer):
         for cmd in sort_completions(self.gen_cmd_completions(text)):
             yield cmd
 
-        for val in sort_completions(self.gen_dynamic_completions(text)):
-            yield val
+        if self.cmdtab:
+            for val in sort_completions(self.gen_dynamic_completions(text)):
+                yield val
 
         for param in sort_completions(self.gen_global_param_completions(text)):
             yield param
