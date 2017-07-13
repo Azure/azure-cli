@@ -507,7 +507,7 @@ def create_image(resource_group_name, name, source, os_type=None, data_disk_sour
                               managed_disk=SubResource(os_disk) if os_disk else None,
                               blob_uri=os_blob_uri)
         all_data_disks = []
-        lun = 1
+        lun = 0
         if data_blob_uris:
             for d in data_blob_uris:
                 all_data_disks.append(ImageDataDisk(lun, blob_uri=d))
