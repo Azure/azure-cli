@@ -13,7 +13,7 @@ from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, SpendingLimit)
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, CLOUD, _AUTH_CTX_FACTORY, MsiCreds)
+                                     ServicePrincipalAuth, CLOUD, _AUTH_CTX_FACTORY)
 from azure.cli.core.util import CLIError
 
 
@@ -459,7 +459,7 @@ class Test_Profile(unittest.TestCase):
         mock_post.side_effect = [ValueError('fail'), bad_response, good_response]
 
         # action
-        token_type, token, whole_entry = MsiCreds.get_token('azure-resource', 'aad-endpoint', 'tenant-id', 12345)
+        token_type, token, whole_entry = Profile.get_msi_token('azure-resource', 'aad-endpoint', 'tenant-id', 12345)
 
         # assert
         self.assertEqual(test_token_entry['access_token'], token)

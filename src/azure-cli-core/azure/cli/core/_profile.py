@@ -56,6 +56,8 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
+_MSI_ACCOUNT_NAME = 'MSI'
+
 
 def _authentication_context_factory(tenant, cache):
     import adal
@@ -195,24 +197,22 @@ class Profile(object):
     @staticmethod
     def _new_account():
         from azure.cli.core.profiles import get_sdk, ResourceType
-        SubscriptionType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-                                   'Subscription', mod='models')
-        StateType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-                            'SubscriptionState', mod='models')
+        SubscriptionType, StateType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                              'Subscription', 'SubscriptionState', mod='models')
         s = SubscriptionType()
         s.state = StateType.enabled
         return s
 
     def init_if_in_msi_env(self, user):
-        _, subscription_id = MsiCreds.split_user_info(user)
+        _, subscription_id = Profile.split_msi_user_info(user)
         if subscription_id is None:
             return None
-        logger.debug('MSI: environment was detected. Now trying to initialize a local account...')
-        tenant_id = MsiCreds.get_tenant_id(CLOUD.endpoints.resource_manager, subscription_id)
+        logger.info('MSI: environment was detected. Now trying to initialize a local account...')
+        tenant_id = Profile.get_msi_tenant_id(CLOUD.endpoints.resource_manager, subscription_id)
         s = Profile._new_account()
         s.id = '/subscriptions/' + subscription_id
         s.tenant_id = tenant_id
-        s.display_name = MsiCreds.MSI_ACCOUNT_NAME
+        s.display_name = _MSI_ACCOUNT_NAME
         consolidated = Profile._normalize_properties(user, [s], False)
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
@@ -333,9 +333,9 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 
         def _retrieve_token():
-            if account[_SUBSCRIPTION_NAME] == MsiCreds.MSI_ACCOUNT_NAME:
-                port, _ = MsiCreds.split_user_info(username_or_sp_id)
-                return MsiCreds.get_token(resource, CLOUD.endpoints.active_directory, account[_TENANT_ID], port)
+            if account[_SUBSCRIPTION_NAME] == _MSI_ACCOUNT_NAME:
+                port, _ = Profile.split_msi_user_info(username_or_sp_id)
+                return Profile.get_msi_token(resource, CLOUD.endpoints.active_directory, account[_TENANT_ID], port)
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -427,6 +427,69 @@ class Profile(object):
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
+
+    @staticmethod
+    def split_msi_user_info(user):
+        import uuid
+        parts = user.split('@')
+        if len(parts) == 2:
+            try:
+                uuid.UUID(parts[0])  # valid subscription id?
+                int(parts[1])  # valid port?
+                return parts[1], parts[0]
+            except ValueError:
+                pass
+        return None, None
+
+    @staticmethod
+    def get_msi_tenant_id(arm_endpoint, subscription_id):
+        import re
+        import requests
+        url = '{}/subscriptions/{}?api-version=2014-04-01'.format(arm_endpoint.rstrip('/'), subscription_id)
+        logger.debug('MSI: Retrieving tenant id by invoking GET from %s', url)
+        result = requests.get(url)
+        if result.status_code != 401:
+            raise CLIError('Failed to retrieve the tenant id of subscription {}'.format(subscription_id))
+        exp = r'.+authorization_uri="(.*?)".+'
+        r = re.match(exp, result.headers['www-authenticate'])
+        tenant_id = r.group(1).split('/')[-1]
+        logger.debug('MSI: Got tenant id: %s', tenant_id)
+        return tenant_id
+
+    @staticmethod
+    def get_msi_token(resource, aad_endpoint, tenant_id, port):
+        import requests
+        import time
+        request_uri = 'http://localhost:{}/oauth2/token'.format(port)
+        payload = {
+            'authority': '{}/{}'.format(aad_endpoint, tenant_id),
+            'resource': resource
+        }
+
+        # retry as the token endpoint might not be available yet, one example is you use CLI in a
+        # custom script extension of VMSS, which might get provisioned before the MSI extensioon
+        while True:
+            err = None
+            try:
+                result = requests.post(request_uri, data=payload)
+                logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
+                if result.status_code != 200:
+                    err = result.text
+            except Exception as ex:  # pylint: disable=broad-except
+                err = str(ex)
+
+            if err:
+                # we might need some error code checking to avoid silly waiting. The bottom line is users can
+                # always press ctrl+c to stop it
+                logger.warning("MSI: Failed to retrieve a token from '%s' with an error of '%s'. This could be caused "
+                               "by the MSI extension not yet fullly provisioned. Will retry in 60 seconds...",
+                               request_uri, err)
+                time.sleep(60)
+            else:
+                logger.debug('MSI: token retrieved')
+                break
+        token_entry = json.loads(result.content.decode())
+        return token_entry['token_type'], token_entry['access_token'], token_entry
 
 
 class SubscriptionFinder(object):
@@ -701,70 +764,3 @@ class ServicePrincipalAuth(object):
             entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
 
         return entry
-
-
-class MsiCreds(object):
-    MSI_ACCOUNT_NAME = 'MSI'
-
-    @staticmethod
-    def split_user_info(user):
-        import uuid
-        parts = user.split('@')
-        if len(parts) == 2:
-            try:
-                uuid.UUID(parts[0])  # valid subscription id?
-                int(parts[1])  # valid port?
-                return parts[1], parts[0]
-            except ValueError:
-                pass
-        return None, None
-
-    @staticmethod
-    def get_tenant_id(arm_endpoint, subscription_id):
-        import re
-        import requests
-        url = '{}/subscriptions/{}?api-version=2014-04-01'.format(arm_endpoint.rstrip('/'), subscription_id)
-        logger.debug('MSI: Retrieving tenant id by invoking GET from %s', url)
-        result = requests.get(url)
-        if result.status_code != 401:
-            raise CLIError('Failed to retrieve the tenant id of subscription {}'.format(subscription_id))
-        exp = r'.+authorization_uri="(.*?)".+'
-        r = re.match(exp, result.headers['www-authenticate'])
-        tenant_id = r.group(1).split('/')[-1]
-        logger.debug('MSI: Got tenant id: %s', tenant_id)
-        return tenant_id
-
-    @staticmethod
-    def get_token(resource, aad_endpoint, tenant_id, port):
-        import requests
-        import time
-        request_uri = 'http://localhost:{}/oauth2/token'.format(port)
-        payload = {
-            'authority': '{}/{}'.format(aad_endpoint, tenant_id),
-            'resource': resource
-        }
-
-        # retry as the token endpoint might not be available yet, one example is you use CLI in a
-        # custom script extension of VMSS, which might get provisioned before the MSI extensioon
-        while True:
-            err = None
-            try:
-                result = requests.post(request_uri, data=payload)
-                logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
-                if result.status_code != 200:
-                    err = result.text
-            except Exception as ex:  # pylint: disable=broad-except
-                err = str(ex)
-
-            if err:
-                # we might need some error code checking to avoid silly waiting. The bottom line is users can
-                # always press ctrl+c to stop it
-                logger.warning("MSI: Failed to retrieve a token from '%s' with an error of '%s'. This could be caused "
-                               "by the MSI extension not yet fullly provisioned. Will retry in 60 seconds...",
-                               request_uri, err)
-                time.sleep(60)
-            else:
-                logger.debug('MSI: token retrieved')
-                break
-        token_entry = json.loads(result.content.decode())
-        return token_entry['token_type'], token_entry['access_token'], token_entry

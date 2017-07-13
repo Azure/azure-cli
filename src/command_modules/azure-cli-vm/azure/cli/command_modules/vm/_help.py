@@ -99,7 +99,7 @@ helps['vm create'] = """
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
-        - name: Create a VM with Manaegd Service Identity. The VM will have a 'Contributor' Role with access to the current resource group
+        - name: Create a VM with Managed Service Identity. The VM will have a 'Contributor' Role with access to the current resource group
           text: >
              az vm create -n MyVm -g MyResourceGroup --assign-identity --image centos
 """.format(image_long_summary)
