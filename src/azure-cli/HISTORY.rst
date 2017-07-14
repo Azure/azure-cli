@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
+++++++++++
+* Allow finer grained chunking for Data Lake Store transfer (#4014)
+
 2.0.10 (2017-07-07)
 +++++++++++++++++++
 * no changes
