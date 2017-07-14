@@ -63,6 +63,7 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
 def show_version_info_exit(out_file):
     import platform
     from pip import get_installed_distributions
+    from azure.cli.core.extension import get_extensions
     installed_dists = get_installed_distributions(local_only=True)
 
     cli_info = None
@@ -84,6 +85,12 @@ def show_version_info_exit(out_file):
     print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]),
           file=out_file)
     print(file=out_file)
+    extensions = get_extensions()
+    if extensions:
+        print('Extensions:', file=out_file)
+        print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in extensions]),
+              file=out_file)
+        print(file=out_file)
     print('Python ({}) {}'.format(platform.system(), sys.version), file=out_file)
     print(file=out_file)
     print("Python location '{}'".format(sys.executable), file=out_file)

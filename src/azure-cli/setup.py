@@ -62,6 +62,7 @@ DEPENDENCIES = [
     'azure-cli-configure',
     'azure-cli-consumption',
     'azure-cli-core',
+    'azure-cli-cosmosdb',
     'azure-cli-dla',
     'azure-cli-dls',
     'azure-cli-cosmosdb',

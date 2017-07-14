@@ -11,6 +11,7 @@ import logging as logs
 import pkgutil
 import re
 import sys
+import os
 import time
 import timeit
 import traceback
@@ -367,9 +368,35 @@ def load_params(command):
         logger.debug("Unable to load commands for '%s'. No module in command module map found.",
                      command)
         return
-    module_to_load = command_module[:command_module.rfind('.')]
+    last_dot_index = command_module.rfind('.')
+    if last_dot_index == -1:
+        module_to_load = command_module
+    else:
+        module_to_load = command_module[:command_module.rfind('.')]
     import_module(module_to_load).load_params(command)
     _apply_parameter_info(command, command_table[command])
+
+
+def _get_command_table_from_extensions():
+    from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX, get_extension_names, get_extension_path
+    extensions = get_extension_names()
+    if extensions:
+        logger.debug("Found {} extensions: {}".format(len(extensions), extensions))
+        for ext_name in extensions:
+            ext_dir = get_extension_path(ext_name)
+            sys.path.append(ext_dir)
+            pos_mods = [n for n in os.listdir(ext_dir) if n.startswith(EXTENSIONS_MOD_PREFIX)]
+            try:
+                if len(pos_mods) != 1:
+                    raise AssertionError("Expected 1 module to load starting with "
+                                         "'{}': got {}".format(EXTENSIONS_MOD_PREFIX, pos_mods))
+                start_time = timeit.default_timer()
+                import_module(pos_mods[0]).load_commands()
+                elapsed_time = timeit.default_timer() - start_time
+                logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
+            except Exception:  # pylint: disable=broad-except
+                logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
+                logger.debug(traceback.format_exc())
 
 
 def get_command_table(module_name=None):
@@ -416,6 +443,13 @@ def get_command_table(module_name=None):
         logger.debug("Loaded all modules in %.3f seconds. "
                      "(note: there's always an overhead with the first module loaded)",
                      cumulative_elapsed_time)
+    try:
+        # We always load extensions even if the appropriate module has been loaded
+        # as an extension could override the commands already loaded.
+        _get_command_table_from_extensions()
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Unable to load extensions. Use --debug for more information.")
+        logger.debug(traceback.format_exc())
     _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
