@@ -155,7 +155,6 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
-    scope = None
     if show_all:
         if resource_group_name or scope:
             raise CLIError('group or scope are not required when --all is used')

@@ -388,7 +388,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                agent_vnet_subnet_id="",
                agent_ports=None,
                agent_storage_profile="",
-               orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
+               orchestrator_type="DCOS", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
                validate=False, no_wait=False):
     """Create a new Acs.
@@ -448,7 +448,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :param location: Location for VM resources.
     :type location: str
     :param orchestrator_type: The type of orchestrator used to manage the
-     applications on the cluster. Possible values include: 'dcos', 'swarm'
+     applications on the cluster.
     :type orchestrator_type: str or :class:`orchestratorType
      <Default.models.orchestratorType>`
     :param service_principal: The service principal used for cluster authentication
@@ -595,7 +595,7 @@ def load_acs_service_principals(config_path):
 
 # pylint: disable-msg=too-many-arguments
 def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-            admin_username="azureuser", api_version=None, orchestrator_type="dcos",
+            admin_username="azureuser", api_version=None, orchestrator_type="DCOS",
             master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
             master_vnet_subnet_id="", master_first_consecutive_static_ip="", master_storage_profile="",
             agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
