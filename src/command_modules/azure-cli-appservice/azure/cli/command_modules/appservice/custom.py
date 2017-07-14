@@ -184,7 +184,12 @@ def _fill_ftp_publishing_url(webapp, resource_group_name, name, slot=None):
 
 
 def _add_linux_fx_version(resource_group_name, name, custom_image_name):
-    fx_version = '{}|{}'.format('DOCKER', custom_image_name)
+    # handles case of only spaces
+    if custom_image_name.strip():
+        fx_version = '{}|{}'.format('DOCKER', custom_image_name)
+    else:
+        # set it as a space (Once fixed in backend, will actually set to empty here)
+        fx_version = ' '  
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
@@ -195,7 +200,7 @@ def _delete_linux_fx_version(resource_group_name, name):
 
 def _get_linux_fx_version(resource_group_name, name):
     site_config = get_site_configs(resource_group_name, name)
-    return str(site_config.linux_fx_version)
+    return site_config.linux_fx_version
 
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
@@ -331,7 +336,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               docker_registry_server_password=None, slot=None):
     settings = []
-    returnVal = ""
+    return_val = ""
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
 
@@ -350,14 +355,12 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
     if docker_custom_image_name is not None:
-        returnVal += str(_add_linux_fx_version(resource_group_name, name, docker_custom_image_name))
+        _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
 
-    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url:
-        update_app_settings(resource_group_name, name, settings, slot)
-        settings = get_app_settings(resource_group_name, name, slot)
-        returnVal += str(_mask_creds_related_appsettings(_filter_for_container_settings(settings)))
+    update_app_settings(resource_group_name, name, settings, slot)
+    settings = get_app_settings(resource_group_name, name, slot)
 
-    return returnVal
+    return _mask_creds_related_appsettings(_filter_for_container_settings(resource_group_name, name, settings))
 
 
 def _get_acr_cred(registry_name):
@@ -388,13 +391,12 @@ def delete_container_settings(resource_group_name, name, slot=None):
 
 def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
-    return "'docker-custom-image-name': {} {}".format(_get_linux_fx_version(resource_group_name, name),
-            _mask_creds_related_appsettings(_filter_for_container_settings(settings)))
+    return _mask_creds_related_appsettings(_filter_for_container_settings(resource_group_name, name, settings))
 
-
-def _filter_for_container_settings(settings):
-    return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
-
+def _filter_for_container_settings(resource_group_name, name, settings):
+    result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
+    result[0].update({'docker-custom-image-name': _get_linux_fx_version(resource_group_name, name)})
+    return result
 
 # TODO: remove this when #3660(service tracking issue) is resolved
 def _mask_creds_related_appsettings(settings):
