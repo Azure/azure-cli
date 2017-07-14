@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import six
 from azclishell.gather_commands import add_new_lines as nl
 
 
@@ -12,7 +11,7 @@ class GatherTest(unittest.TestCase):
     """ tests gathering of commands """
 
     def test_add_new_lines(self):
-        # tests add new lines
+        """ tests add new lines """
         phrase1 = "Hello World"
         phrase2 = "HEllO"
         self.assertEqual("Hello \nWorld\n", nl(phrase1, 5, 1))

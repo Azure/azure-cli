@@ -64,42 +64,48 @@ START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
-def space_examples(list_examples, rows):
+def space_examples(list_examples, rows, section_value):
     """ makes the example text """
     examples_with_index = []
 
     for i, _ in list(enumerate(list_examples)):
-        examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
-                                   list_examples[i][1])
+        if len(list_examples[i]) > 1:
+            examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
+                                       list_examples[i][1])
 
     example = "".join(exam for exam in examples_with_index)
     num_newline = example.count('\n')
 
     page_number = ''
-    if num_newline > rows * PART_SCREEN_EXAMPLE:
+    if num_newline > rows * PART_SCREEN_EXAMPLE and rows > PART_SCREEN_EXAMPLE * 10:
         len_of_excerpt = math.floor(float(rows) * PART_SCREEN_EXAMPLE)
 
         group = example.split('\n')
-        end = int(get_section() * len_of_excerpt)
-        begin = int((get_section() - 1) * len_of_excerpt)
+        end = int(section_value * len_of_excerpt)
+        begin = int((section_value - 1) * len_of_excerpt)
 
-        if get_section() * len_of_excerpt < num_newline:
+        if end < num_newline:
             example = '\n'.join(group[begin:end]) + "\n"
         else:  # default chops top off
             example = '\n'.join(group[begin:]) + "\n"
-            while ((get_section() - 1) * len_of_excerpt) > num_newline:
+            while ((section_value - 1) * len_of_excerpt) > num_newline:
                 sub_section()
-        page_number = '\n' + str(get_section()) + "/" + str(math.ceil(num_newline / len_of_excerpt))
+        page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
 
-    return example + page_number
+    return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
 
 
-def space_toolbar(settings_items, cols, empty_space):
+def space_toolbar(settings_items, empty_space):
     """ formats the toolbar """
     counter = 0
     for part in settings_items:
         counter += len(part)
-    spacing = empty_space[:int(math.floor((cols - counter) / (len(settings_items) - 1)))]
+
+    if len(settings_items) == 1:
+        spacing = ''
+    else:
+        spacing = empty_space[
+            :int(math.floor((len(empty_space) - counter) / (len(settings_items) - 1)))]
 
     settings = spacing.join(settings_items)
 
@@ -183,7 +189,7 @@ class Shell(object):
         document = cli.current_buffer.document
         text = document.text
 
-        text = text.replace('az', '')
+        text = text.replace('az ', '')
         if self.default_command:
             text = self.default_command + ' ' + text
 
@@ -211,9 +217,7 @@ class Shell(object):
         _, cols = get_window_dim()
         cols = int(cols)
 
-        empty_space = ""
-        for _ in range(cols):
-            empty_space += " "
+        empty_space = " " * cols
 
         delta = datetime.datetime.utcnow() - START_TIME
         if self.user_feedback and delta.seconds < DISPLAY_TIME:
@@ -228,7 +232,7 @@ class Shell(object):
         else:
             toolbar = self._toolbar_info()
 
-        toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
+        toolbar, empty_space = space_toolbar(toolbar, empty_space)
         cli.buffers['bottom_toolbar'].reset(
             initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, toolbar, empty_space)))
 
@@ -268,15 +272,14 @@ class Shell(object):
             if is_command:
                 command += str(word) + " "
 
-            if self.completer.is_completable(command.rstrip()):
+            if self.completer and self.completer.is_completable(command.rstrip()):
                 cmdstp = command.rstrip()
                 any_documentation = True
 
-                if word in self.completer.command_parameters[cmdstp] and \
-                   self.completer.has_description(cmdstp + " " + word):
+                if word in self.completer.command_parameters[cmdstp] and self.completer.has_description(
+                        cmdstp + " " + word):
                     param_descrip = word + ":\n" + \
-                        self.completer.get_param_description(
-                            cmdstp + " " + word)
+                        self.completer.param_description.get(cmdstp + " " + word, '')
 
                 self.description_docs = u'{}'.format(
                     self.completer.command_description[cmdstp])
@@ -287,7 +290,7 @@ class Shell(object):
                         for part in example:
                             string_example += part
                     example = space_examples(
-                        self.completer.command_examples[cmdstp], rows)
+                        self.completer.command_examples[cmdstp], rows, get_section())
 
         if not any_documentation:
             self.description_docs = u''
@@ -356,7 +359,6 @@ class Shell(object):
 
     def set_scope(self, value):
         """ narrows the scopes the commands """
-
         set_scope(value)
         if self.default_command:
             self.default_command += ' ' + value
