@@ -78,7 +78,7 @@ register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), he
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
-register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. PHP|5.6. Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
+register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
 register_cli_argument('webapp traffic-routing', 'distribution', options_list=('--distribution', '-d'), nargs='+', help='space separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
