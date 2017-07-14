@@ -6,6 +6,7 @@ unreleased
 +++++++++++++++++++
 * api version 2017-07-01 support
 * update dcos and swarm to use latest api version instead of 2016-03-30
+* expose orchestrator DockerCE
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++
