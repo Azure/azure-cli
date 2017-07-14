@@ -164,6 +164,50 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
+    def find_subscriptions_in_cloud_console(self, tokens):
+        from datetime import datetime, timedelta
+        import jwt
+        arm_token = tokens[0]  # cloud shell gurantees that the 1st is for ARM
+        arm_token_decoded = jwt.decode(arm_token, verify=False, algorithms=['RS256'])
+        tenant = arm_token_decoded['tid']
+        user_id = arm_token_decoded['unique_name'].split('#')[-1]
+        subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, arm_token)
+        consolidated = Profile._normalize_properties(user_id, subscriptions, False)
+        self._set_subscriptions(consolidated)
+
+        # construct token entries to cache
+        decoded_tokens = [arm_token_decoded]
+        for t in tokens[1:]:
+            decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
+        final_tokens = []
+        for t in decoded_tokens:
+            final_tokens.append({
+                '_clientId': _CLIENT_ID,
+                'expiresIn': '3600',
+                'expiresOn':  str(datetime.utcnow() + timedelta(minutes=5)),
+                'userId': t['unique_name'].split('#')[-1],
+                '_authority':  CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
+                'resource': t['aud'],
+                'isMRRT': True,
+                'accessToken': tokens[decoded_tokens.index(t)],
+                'tokenType': 'Bearer',
+                'oid': t['oid']
+            })
+
+        # merging with existing cached ones
+        for t in final_tokens:
+            cached_tokens = self._creds_cache.adal_token_cache.read_items()
+            to_delete = [c for c in cached_tokens if (c['_clientId'].lower() == t['_clientId'].lower() and
+                                                      c['resource'].lower() == t['resource'].lower() and
+                                                      c['_authority'].lower() == t['_authority'].lower() and
+                                                      c['userId'].lower() == t['userId'].lower())]
+            self._creds_cache.adal_token_cache.remove(to_delete)
+        self._creds_cache.adal_token_cache.add(final_tokens)
+        self._creds_cache.persist_cached_creds()
+
+        return deepcopy(consolidated)
+
     @staticmethod
     def _normalize_properties(user, subscriptions, is_service_principal):
         consolidated = []
@@ -547,6 +591,13 @@ class SubscriptionFinder(object):
         token_entry = sp_auth.acquire_token(context, resource, client_id)
         self.user_id = client_id
         result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
+        self.tenants = [tenant]
+        return result
+
+    #  only occur inside cloud console
+    def find_from_raw_token(self, tenant, token):
+        # decode the token, so we know the tenant
+        result = self._find_using_specific_tenant(tenant, token)
         self.tenants = [tenant]
         return result
 

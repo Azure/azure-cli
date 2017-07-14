@@ -80,13 +80,17 @@ def account_clear():
 def login(username=None, password=None, service_principal=None, tenant=None,
           allow_no_subscriptions=False):
     """Log in to access Azure subscriptions"""
+    import os
+    import re
     from adal.adal_error import AdalError
     import requests
     interactive = False
 
     profile = Profile()
+
     if username:
         if not password:
+            # in a VM with managed service identity?
             result = profile.init_if_in_msi_env(username)
             if result:
                 return result
@@ -95,6 +99,11 @@ def login(username=None, password=None, service_principal=None, tenant=None,
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
+        # in a cloud console?
+        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
+        if console_tokens:
+            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
+
         interactive = True
 
     try:
