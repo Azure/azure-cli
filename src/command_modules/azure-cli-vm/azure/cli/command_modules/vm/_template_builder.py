@@ -786,8 +786,11 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'ipConfigurations': [ip_configuration]
         }
     }
+
     if dns_servers:
-        nic_config['dnsServers'] = dns_servers
+        nic_config['properties']['dnsSettings'] = {
+            'dnsServers': dns_servers
+        }
 
     vmss_properties = {
         'overprovision': overprovision,

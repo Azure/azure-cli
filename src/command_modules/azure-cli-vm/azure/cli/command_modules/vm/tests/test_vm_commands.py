@@ -1497,6 +1497,11 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --vm-domain-name clitestnewnetwork --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
             JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
         ])
+        self.cmd("vmss show -n {0} -g {1}".format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('length(virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers)', 2),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers[0]', '10.0.0.6'),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers[1]', '10.0.0.5'),
+        ])
         # spot check we have the domain name and have a public ip
         result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group), checks=[
             JMESPathCheckV2('[0].dnsSettings.domainNameLabel', 'vm0.clitestnewnetwork'),
