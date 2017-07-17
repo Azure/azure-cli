@@ -189,7 +189,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
         fx_version = '{}|{}'.format('DOCKER', custom_image_name)
     else:
         # set it as a space (Once fixed in backend, will actually set to empty here)
-        fx_version = ' ' 
+        fx_version = ' '
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
