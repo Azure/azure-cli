@@ -185,9 +185,9 @@ class Profile(object):
             final_tokens.append({
                 '_clientId': _CLIENT_ID,
                 'expiresIn': '3600',
-                'expiresOn':  str(datetime.utcnow() + timedelta(minutes=5)),
+                'expiresOn': str(datetime.utcnow() + timedelta(minutes=5)),
                 'userId': t['unique_name'].split('#')[-1],
-                '_authority':  CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
+                '_authority': CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
                 'resource': t['aud'],
                 'isMRRT': True,
                 'accessToken': tokens[decoded_tokens.index(t)],
@@ -197,12 +197,13 @@ class Profile(object):
 
         # merging with existing cached ones
         for t in final_tokens:
-            cached_tokens = self._creds_cache.adal_token_cache.read_items()
+            cached_tokens = [entry for _, entry in  self._creds_cache.adal_token_cache.read_items()]
             to_delete = [c for c in cached_tokens if (c['_clientId'].lower() == t['_clientId'].lower() and
                                                       c['resource'].lower() == t['resource'].lower() and
                                                       c['_authority'].lower() == t['_authority'].lower() and
                                                       c['userId'].lower() == t['userId'].lower())]
-            self._creds_cache.adal_token_cache.remove(to_delete)
+            if to_delete:
+                self._creds_cache.adal_token_cache.remove(to_delete)
         self._creds_cache.adal_token_cache.add(final_tokens)
         self._creds_cache.persist_cached_creds()
 
