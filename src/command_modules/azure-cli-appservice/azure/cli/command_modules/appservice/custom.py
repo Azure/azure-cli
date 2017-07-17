@@ -395,7 +395,9 @@ def show_container_settings(resource_group_name, name, slot=None):
 
 def _filter_for_container_settings(resource_group_name, name, settings):
     result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
-    result[0].update({'docker-custom-image-name': _get_linux_fx_version(resource_group_name, name)})
+    added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME' ,
+                        'value': _get_linux_fx_version(resource_group_name, name)}
+    result.append(dict(added_image_name))
     return result
 
 
