@@ -4,10 +4,8 @@ Release History
 ===============
 (unreleased)
 +++++++++++++++++++
+* vmss: fix a bug that dns server is not configured right.
 * vm/vmss: support managed service identity
-
-unreleased
-+++++++++++++++++++
 * `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.
 * `vm image create`: make datadisk's lun start with 0
 
