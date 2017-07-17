@@ -61,8 +61,8 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             _add_linux_fx_version(resource_group_name, name, deployment_container_image_name)
-        else: # must specify runtime
-            raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')
+        else:  # must specify runtime
+            raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
     elif runtime:  # windows webapp
         if startup_file or deployment_container_image_name:
@@ -189,7 +189,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
         fx_version = '{}|{}'.format('DOCKER', custom_image_name)
     else:
         # set it as a space (Once fixed in backend, will actually set to empty here)
-        fx_version = ' '  
+        fx_version = ' ' 
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
@@ -336,7 +336,6 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               docker_registry_server_password=None, slot=None):
     settings = []
-    return_val = ""
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
 
@@ -393,10 +392,12 @@ def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
     return _mask_creds_related_appsettings(_filter_for_container_settings(resource_group_name, name, settings))
 
+
 def _filter_for_container_settings(resource_group_name, name, settings):
     result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
     result[0].update({'docker-custom-image-name': _get_linux_fx_version(resource_group_name, name)})
     return result
+
 
 # TODO: remove this when #3660(service tracking issue) is resolved
 def _mask_creds_related_appsettings(settings):
