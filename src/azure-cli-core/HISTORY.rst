@@ -2,11 +2,6 @@
 
 Release History
 ===============
-
-(unreleased)
-+++++++++++++++++++
-* Removed 'container' from blacklisted mods
-
 2.0.11 (2017-07-07)
 +++++++++++++++++++
 * minor fixes
