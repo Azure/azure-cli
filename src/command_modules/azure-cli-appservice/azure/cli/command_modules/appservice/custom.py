@@ -194,7 +194,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
 
 
 def _delete_linux_fx_version(resource_group_name, name):
-    fx_version = ''
+    fx_version = ' '
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
@@ -356,7 +356,8 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
     if docker_custom_image_name is not None:
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
 
-    update_app_settings(resource_group_name, name, settings, slot)
+    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url:
+        update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
 
     return _mask_creds_related_appsettings(_filter_for_container_settings(resource_group_name, name, settings))
@@ -395,9 +396,11 @@ def show_container_settings(resource_group_name, name, slot=None):
 
 def _filter_for_container_settings(resource_group_name, name, settings):
     result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
-    added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME',
-                        'value': _get_linux_fx_version(resource_group_name, name)}
-    result.append(dict(added_image_name))
+    fx_version =  _get_linux_fx_version(resource_group_name, name).strip()
+    if fx_version:
+        added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME',
+                            'value': fx_version}
+        result.append(dict(added_image_name))
     return result
 
 

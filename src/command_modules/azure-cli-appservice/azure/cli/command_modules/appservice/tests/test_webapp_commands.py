@@ -310,13 +310,14 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
+        runtime = 'node|6.4'
         plan = 'webapp-linux-plan'
         webapp = 'webapp-linux1'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheckV2('name', webapp),
         ])
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
@@ -345,10 +346,11 @@ class WebappACRSceanrioTest(ScenarioTest):
     def test_acr_integration(self, resource_group):
         plan = 'plan1'
         webapp = 'webappacrtest1'
+        runtime = 'node|6.4'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
         creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
         self.cmd('webapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
             resource_group, webapp, acr_registry_name), checks=[
