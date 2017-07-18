@@ -278,7 +278,7 @@ register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale se
 register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
 
 with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
-    c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip", arg_group='Network')
+    c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')
     c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
     c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')
 
