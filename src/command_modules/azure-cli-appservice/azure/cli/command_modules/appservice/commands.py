@@ -126,6 +126,8 @@ cli_command(__name__, 'webapp deployment slot create', custom_path + 'create_web
 cli_command(__name__, 'webapp deployment user set', custom_path + 'set_deployment_user')
 cli_command(__name__, 'webapp deployment list-publishing-profiles',
             custom_path + 'list_publish_profiles')
+cli_command(__name__, 'webapp deployment list-container-cd-url',
+            custom_path + 'list_container_cd_url')
 cli_command(__name__, 'webapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
 cli_command(__name__, 'webapp list-runtimes', custom_path + 'list_runtimes')
 
