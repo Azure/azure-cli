@@ -619,7 +619,7 @@ class NetworkNicScenarioTest(ScenarioTest):
                 JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
                 JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)
             ])
-            self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
+            self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
                 JMESPathCheckV2('enableIpForwarding', True),
                 JMESPathCheckV2('enableAcceleratedNetworking', False),
                 JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
