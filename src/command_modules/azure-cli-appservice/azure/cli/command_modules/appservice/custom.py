@@ -396,7 +396,7 @@ def show_container_settings(resource_group_name, name, slot=None):
 
 def _filter_for_container_settings(resource_group_name, name, settings):
     result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
-    fx_version =  _get_linux_fx_version(resource_group_name, name).strip()
+    fx_version = _get_linux_fx_version(resource_group_name, name).strip()
     if fx_version:
         added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME',
                             'value': fx_version}
