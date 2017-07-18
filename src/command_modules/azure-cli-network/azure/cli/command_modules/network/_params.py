@@ -513,7 +513,6 @@ register_cli_argument('network vnet create', 'subnet_name', help='Name of a new 
 register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
 register_cli_argument('network vnet create', 'vnet_name', virtual_network_name_type, options_list=('--name', '-n'), completer=None)
 
-register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
 
 register_cli_argument('network vnet peering', 'virtual_network_name', virtual_network_name_type)
@@ -525,10 +524,14 @@ register_cli_argument('network vnet peering create', 'allow_gateway_transit', ac
 register_cli_argument('network vnet peering create', 'allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the VMs in the remote VNet.')
 register_cli_argument('network vnet peering create', 'use_remote_gateways', action='store_true', help='Allows VNet to use the remote VNet\'s gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.')
 
+register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name')
 register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
 register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
 register_cli_argument('network vnet subnet', 'network_security_group', validator=get_nsg_validator())
 register_cli_argument('network vnet subnet', 'route_table', help='Name or ID of a route table to associate with the subnet.')
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network vnet subnet', 'private_access_services', nargs='+')
 
 lb_subresources = [
     {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
