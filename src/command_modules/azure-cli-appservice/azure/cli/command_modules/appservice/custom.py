@@ -60,7 +60,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         if runtime:
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
-            _add_linux_fx_version(resource_group_name, name, deployment_container_image_name)
+            site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -183,18 +183,22 @@ def _fill_ftp_publishing_url(webapp, resource_group_name, name, slot=None):
     return webapp
 
 
-def _add_linux_fx_version(resource_group_name, name, custom_image_name):
+def _format_linux_fx_version(custom_image_name):
+    # set it as a space (Once fixed in backend, will actually set to empty here)
+    fx_version = ' '
     # handles case of only spaces
     if custom_image_name.strip():
         fx_version = '{}|{}'.format('DOCKER', custom_image_name)
-    else:
-        # set it as a space (Once fixed in backend, will actually set to empty here)
-        fx_version = ' '
+    return fx_version
+
+
+def _add_linux_fx_version(resource_group_name, name, custom_image_name):
+    fx_version = _format_linux_fx_version(custom_image_name)
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
 def _delete_linux_fx_version(resource_group_name, name):
-    fx_version = ' '
+    fx_version = _format_linux_fx_version('')
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
