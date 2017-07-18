@@ -185,7 +185,7 @@ class Profile(object):
             final_tokens.append({
                 '_clientId': _CLIENT_ID,
                 'expiresIn': '3600',
-                'expiresOn': str(datetime.utcnow() + timedelta(minutes=5)),
+                'expiresOn': str(datetime.utcnow() + timedelta(seconds=3600 * 24)),
                 'userId': t['unique_name'].split('#')[-1],
                 '_authority': CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
                 'resource': t['aud'],
