@@ -197,7 +197,7 @@ class Profile(object):
 
         # merging with existing cached ones
         for t in final_tokens:
-            cached_tokens = [entry for _, entry in  self._creds_cache.adal_token_cache.read_items()]
+            cached_tokens = [entry for _, entry in self._creds_cache.adal_token_cache.read_items()]
             to_delete = [c for c in cached_tokens if (c['_clientId'].lower() == t['_clientId'].lower() and
                                                       c['resource'].lower() == t['resource'].lower() and
                                                       c['_authority'].lower() == t['_authority'].lower() and
@@ -407,8 +407,7 @@ class Profile(object):
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
-    def get_raw_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
-                      subscription=None):
+    def get_raw_token(self, resource, subscription=None):
         account = self.get_subscription(subscription)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]

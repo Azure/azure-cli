@@ -9,6 +9,7 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import CLIError
+from azure.cli.core.cloud import get_active_cloud
 
 logger = get_az_logger(__name__)
 
@@ -51,9 +52,9 @@ def get_access_token(subscription=None, resource=None):
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
     Use 'az cloud show' command for other Azure resources
     '''
+    resource = (resource or get_active_cloud().endpoints.active_directory_resource_id)
     profile = Profile()
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription,
-                                                        resource=resource)
+    creds, subscription, tenant = profile.get_raw_token(resource, subscription=subscription)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
