@@ -173,7 +173,7 @@ class Profile(object):
         user_id = arm_token_decoded['unique_name'].split('#')[-1]
         subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
         subscriptions = subscription_finder.find_from_raw_token(tenant, arm_token)
-        consolidated = Profile._normalize_properties(user_id, subscriptions, False)
+        consolidated = Profile._normalize_properties(user_id, subscriptions, is_service_principal=False)
         self._set_subscriptions(consolidated)
 
         # construct token entries to cache
