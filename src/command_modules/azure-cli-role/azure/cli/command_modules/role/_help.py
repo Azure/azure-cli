@@ -36,7 +36,7 @@ helps['ad sp create-for-rbac'] = """
     examples:
         - name: Create with a default role assignment.
           text: az ad sp create-for-rbac
-        - name: Create using a custom name, and with a default assigment.
+        - name: Create using a custom name, and with a default assignment.
           text: az ad sp create-for-rbac -n "http://MyApp"
         - name: Create without a default assignment.
           text: az ad sp create-for-rbac --skip-assignment
