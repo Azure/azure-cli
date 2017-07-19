@@ -1532,7 +1532,7 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     _set_route_table(ncf, resource_group_name, route_table, subnet)
     if private_access_services:
         PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
-                                        mod='models')
+                                       mod='models')
         subnet.private_access_services = []
         for service in private_access_services:
             subnet.private_access_services.append(PrivateAccessService(service=service))
@@ -1558,14 +1558,14 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
 
     _set_route_table(_network_client_factory(), resource_group_name, route_table, instance)
 
-    if private_access_services:
-        PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
-                                        mod='models')
-        subnet.private_access_services = []
-        for service in private_access_services:
-            subnet.private_access_services.append(PrivateAccessService(service=service))
-    elif private_access_services == '':
+    if private_access_services == ['']:
         instance.private_access_services = None
+    elif private_access_services:
+        PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
+                                       mod='models')
+        instance.private_access_services = []
+        for service in private_access_services:
+            instance.private_access_services.append(PrivateAccessService(service=service))
 
     return instance
 
