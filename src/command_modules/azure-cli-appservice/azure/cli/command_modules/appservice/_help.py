@@ -189,7 +189,7 @@ helps['webapp deployment list-publishing-profiles'] = """
     short-summary: get publishing endpoints, credentials, database connection strings, etc
 """
 
-helps['webapp deployment list-container-cd-url'] = """
+helps['webapp deployment show-container-cd-url'] = """
     type: command
     short-summary: get webhook url for your web app on Linux to configure your container repo for continuous deployment setup
 """
