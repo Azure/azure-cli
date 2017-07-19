@@ -6,7 +6,7 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.profile.custom import list_subscriptions
+from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token
 
 
 class ProfileCommandTest(unittest.TestCase):
@@ -26,3 +26,26 @@ class ProfileCommandTest(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual('Enabled', result[0]['state'])
         logger_mock.warning.assert_called_once_with(mock.ANY)
+
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_row_token(self, get_raw_token_mcok):
+        # arrange
+        get_raw_token_mcok.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], 'sub123', 'tenant123')
+
+        # action
+        result = get_access_token()
+
+        # assert
+        get_raw_token_mcok.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None)
+        expected_result = {
+            'tokenType': 'bearer',
+            'accessToken': 'token123',
+            'expiresOn': '2100-01-01',
+            'subscription': 'sub123',
+            'tenant': 'tenant123'
+        }
+        self.assertEqual(result, expected_result)
+
+        # assert it takes customized resource, subscription
+        get_access_token(subscription='foosub', resource='foores')
+        get_raw_token_mcok.assert_called_with(mock.ANY, 'foores', 'foosub')

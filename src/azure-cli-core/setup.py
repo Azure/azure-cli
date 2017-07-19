@@ -61,6 +61,7 @@ DEPENDENCIES = [
     'paramiko',
     'pip',
     'pygments',
+    'PyJWT',
     'pyopenssl>=16.2',  # https://github.com/pyca/pyopenssl/issues/568
     'pyyaml',
     'requests',
