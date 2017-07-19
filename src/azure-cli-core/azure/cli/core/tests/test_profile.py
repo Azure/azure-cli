@@ -250,9 +250,7 @@ class Test_Profile(unittest.TestCase):
     def test_get_auth_info_for_newly_created_service_principal(self):
         storage_mock = {'subscriptions': []}
         profile = Profile(storage_mock, use_global_creds_cache=False)
-        consolidated = Profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
-                                                     False)
+        consolidated = Profile._normalize_properties(self.user1, [self.subscription1], False)
         profile._set_subscriptions(consolidated)
         # action
         extended_info = profile.get_sp_auth_info(name='1234', cert_file='/tmp/123.pem')
