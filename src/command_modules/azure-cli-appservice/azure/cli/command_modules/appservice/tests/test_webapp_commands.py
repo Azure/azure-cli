@@ -329,6 +329,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 
         result = self.cmd('webapp deployment show-container-cd-url -g {} -n {}'.format(resource_group, webapp)).get_output_in_json()
         self.assertTrue(result.startswith('https://'))
+        self.assertTrue(result.endswith('.scm.azurewebsites.net/docker/hook'))
 
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
             resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url')).get_output_in_json()
