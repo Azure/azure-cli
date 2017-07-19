@@ -160,6 +160,16 @@ helps['dls fs upload'] = """
         - name: --thread-count
           type: int
           short-summary: 'Optionally specify the parallelism of the upload. Default is the number of cores in the local machine.'
+        - name: --chunk-size
+          type: int
+          short-summary: 'Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.'
+        - name: --buffer-size
+          type: int
+          short-summary: 'Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.'
+        - name: --block-size
+          type: int
+          short-summary: 'Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk.'
+
 """
 
 helps['dls fs download'] = """
@@ -175,6 +185,16 @@ helps['dls fs download'] = """
         - name: --thread-count
           type: int
           short-summary: 'Optionally specify the parallelism of the download. Default is the number of cores in the local machine.'
+        - name: --chunk-size
+          type: int
+          short-summary: 'Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.'
+        - name: --buffer-size
+          type: int
+          short-summary: 'Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.'
+        - name: --block-size
+          type: int
+          short-summary: 'Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk.'
+
 """
 
 helps['dls fs test'] = """

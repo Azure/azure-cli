@@ -396,6 +396,77 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(mock_get_token.call_count, 1)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    def test_get_login_credentials_msi(self, mock_post, mock_read_cred_file):
+        mock_read_cred_file.return_value = []
+
+        # setup an existing msi subscription
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_port = '12345'
+        test_user = test_subscription_id + '@' + test_port
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI', self.state1, test_tenant_id)
+        consolidated = Profile._normalize_properties(test_user,
+                                                     [msi_subscription],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+
+        # setup a response for the token request
+        test_token_entry = {
+            'token_type': 'Bearer',
+            'access_token': 'good token for you'
+        }
+        encoded_test_token = json.dumps(test_token_entry).encode()
+        response = mock.MagicMock()
+        response.status_code = 200
+        response.content = encoded_test_token
+        mock_post.return_value = response
+
+        # action
+        cred, subscription_id, _ = profile.get_login_credentials()
+
+        # assert
+        self.assertEqual(subscription_id, test_subscription_id)
+
+        # verify the cred._tokenRetriever is a working lambda
+        token_type, token, whole_entry = cred._token_retriever()
+        self.assertEqual(test_token_entry['access_token'], token)
+        self.assertEqual(test_token_entry['token_type'], token_type)
+        self.assertEqual(test_token_entry, whole_entry)
+        mock_post.assert_called_with('http://localhost:12345/oauth2/token',
+                                     {'authority': 'https://login.microsoftonline.com/{}'.format(test_tenant_id),
+                                      'resource': 'https://management.core.windows.net/'})
+
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('time.sleep', autospec=True)
+    def test_msi_token_request_retries(self, mock_sleep, mock_post):
+        # set up error case: #1 exception thrown, #2 error status
+        bad_response = mock.MagicMock()
+        bad_response.status_code = 400
+        bad_response.text = 'just bad'
+
+        test_token_entry = {
+            'token_type': 'Bearer',
+            'access_token': 'good token for you'
+        }
+        encoded_test_token = json.dumps(test_token_entry).encode()
+        good_response = mock.MagicMock()
+        good_response.status_code = 200
+        good_response.content = encoded_test_token
+
+        mock_post.side_effect = [ValueError('fail'), bad_response, good_response]
+
+        # action
+        token_type, token, whole_entry = Profile.get_msi_token('azure-resource', 'aad-endpoint', 'tenant-id', 12345)
+
+        # assert
+        self.assertEqual(test_token_entry['access_token'], token)
+        self.assertEqual(test_token_entry['token_type'], token_type)
+        self.assertEqual(test_token_entry, whole_entry)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
         some_token_type = 'Bearer'
@@ -443,6 +514,79 @@ class Test_Profile(unittest.TestCase):
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
                                                'https://graph.windows.net/')
         self.assertEqual(tenant_id, self.tenant_id)
+
+    def test_cloud_console_login(self):
+        import tempfile
+        from azure.cli.core.util import get_file_json
+        from azure.cli.core._session import Session
+
+        test_account = Session()
+        test_dir = tempfile.mkdtemp()
+        test_account_file = os.path.join(test_dir, 'azureProfile.json')
+        test_account.load(test_account_file)
+        test_token_file = os.path.join(test_dir, 'accessTokens.json')
+
+        os.environ['AZURE_CONFIG_DIR'] = test_dir
+
+        # NOTE, do not use still valid tokens
+        arm_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjlGWERwYmZNRlQyU3ZRdVhoODQ2WVR3RUlCdyIsImtpZCI6IjlGWERwYmZNRlQyU3ZRdVhoODQ2WVR3RUlCdyJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC81NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEvIiwiaWF0IjoxNTAwMzEwMDA3LCJuYmYiOjE1MDAzMTAwMDcsImV4cCI6MTUwMDMxMzkwNywiYWNyIjoiMSIsImFpbyI6IlkyWmdZTGhrZTZyemJLTGtiNFpVbFZ1N1pyN1F1Uk8zOUsxSDZNbmUzcE85ekp1TU5SZ0EiLCJhbXIiOlsicHdkIl0sImFwcGlkIjoiMDRiMDc3OTUtOGRkYi00NjFhLWJiZWUtMDJmOWUxYmY3YjQ2IiwiYXBwaWRhY3IiOiIwIiwiZV9leHAiOjI2MjgwMCwiZmFtaWx5X25hbWUiOiJzZGsiLCJnaXZlbl9uYW1lIjoiYWRtaW4zIiwiZ3JvdXBzIjpbImU0YmIwYjU2LTEwMTQtNDBmOC04OGFiLTNkOGE4Y2IwZTA4NiIsIjhhOWIxNjE3LWZjOGQtNGFhOS1hNDJmLTk5ODY4ZDMxNDY5OSIsIjU0ODAzOTE3LTRjNzEtNGQ2Yy04YmRmLWJiZDkzMTAxMGY4YyJdLCJpcGFkZHIiOiIxNjcuMjIwLjAuMjM0IiwibmFtZSI6ImFkbWluMyIsIm9pZCI6ImU3ZTE1OGQzLTdjZGMtNDdjZC04ODI1LTU4NTlkN2FiMmI1NSIsInBsYXRmIjoiMTQiLCJwdWlkIjoiMTAwMzNGRkY5NUQ0NEU4NCIsInNjcCI6InVzZXJfaW1wZXJzb25hdGlvbiIsInN1YiI6ImhRenl3b3FTLUEtRzAySTl6ZE5TRmtGd3R2MGVwZ2lWY1Vsdm1PZEZHaFEiLCJ0aWQiOiI1NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEiLCJ1bmlxdWVfbmFtZSI6ImFkbWluM0BBenVyZVNES1RlYW0ub25taWNyb3NvZnQuY29tIiwidXBuIjoiYWRtaW4zQEF6dXJlU0RLVGVhbS5vbm1pY3Jvc29mdC5jb20iLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbIjYyZTkwMzk0LTY5ZjUtNDIzNy05MTkwLTAxMjE3NzE0NWUxMCJdfQ.I-hDlI5osimq7caHUkRAX55RWBDzt-EZl2vus2YUh-knZBlQEcJyfeUhtdZM2bTjaZNx5w3mJTuOfdNb3HSZ9VIgdvatN-Cp1FLFb2TAagTb_hJiVa613ZuQd-m_IZm3suAlTam-3GiqzlrkkPl1wQPv5Z8rSeHa8eEOUKvW0Y1aUuj17Cc3xVCkKu5K-q8eHZMbY-rCceWf25U4dqt7evW_95TokrPpw_KJvXWW-dg3TvTgHZgvyux9ydijCNcQlPE9kPdoHLgolbX4zCcto29-wsmyL5MlVH6etiHCQPRRgI0AUia3aPugTaOw5qKEWlc38DloGGKir64NiD82Jg'
+        kv_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjlGWERwYmZNRlQyU3ZRdVhoODQ2WVR3RUlCdyIsImtpZCI6IjlGWERwYmZNRlQyU3ZRdVhoODQ2WVR3RUlCdyJ9.eyJhdWQiOiJodHRwczovL3ZhdWx0LmF6dXJlLm5ldCIsImlzcyI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzU0ODI2YjIyLTM4ZDYtNGZiMi1iYWQ5LWI3YjkzYTNlOWM1YS8iLCJpYXQiOjE1MDAzMTQ4MDUsIm5iZiI6MTUwMDMxNDgwNSwiZXhwIjoxNTAwMzE4NzA1LCJhY3IiOiIxIiwiYWlvIjoiWTJaZ1lCQ3dGSGhYY3FaczVsU2hvQWpWWXRsM0t5WEU1WHVXUmR1SzEreDZ4dDNidUFBQSIsImFtciI6WyJwd2QiXSwiYXBwaWQiOiIwNGIwNzc5NS04ZGRiLTQ2MWEtYmJlZS0wMmY5ZTFiZjdiNDYiLCJhcHBpZGFjciI6IjAiLCJlX2V4cCI6MjYyODAwLCJmYW1pbHlfbmFtZSI6InNkayIsImdpdmVuX25hbWUiOiJhZG1pbjMiLCJncm91cHMiOlsiZTRiYjBiNTYtMTAxNC00MGY4LTg4YWItM2Q4YThjYjBlMDg2IiwiOGE5YjE2MTctZmM4ZC00YWE5LWE0MmYtOTk4NjhkMzE0Njk5IiwiNTQ4MDM5MTctNGM3MS00ZDZjLThiZGYtYmJkOTMxMDEwZjhjIl0sImlwYWRkciI6IjE2Ny4yMjAuMS4yMzQiLCJuYW1lIjoiYWRtaW4zIiwib2lkIjoiZTdlMTU4ZDMtN2NkYy00N2NkLTg4MjUtNTg1OWQ3YWIyYjU1IiwicGxhdGYiOiIxNCIsInB1aWQiOiIxMDAzM0ZGRjk1RDQ0RTg0Iiwic2NwIjoidXNlcl9pbXBlcnNvbmF0aW9uIiwic3ViIjoidUVNS3FCYld2dFI0SERHZzg2TEdMMGY3dW5zQ0J6MGxlaTJjejE3QmZKRSIsInRpZCI6IjU0ODI2YjIyLTM4ZDYtNGZiMi1iYWQ5LWI3YjkzYTNlOWM1YSIsInVuaXF1ZV9uYW1lIjoiYWRtaW4zQEF6dXJlU0RLVGVhbS5vbm1pY3Jvc29mdC5jb20iLCJ1cG4iOiJhZG1pbjNAQXp1cmVTREtUZWFtLm9ubWljcm9zb2Z0LmNvbSIsInZlciI6IjEuMCJ9.A_3pa1F0qYNZdZE0AwN2YVuNf4aEhfKvkfQkgSHxty284W44VHORixceiDTEtgrM34a00KrRCo-oIMoho5_0mcQbelcjpwP8LSzLZOxk6zrTS0ZhBXywVf0fKD5lsUaOe3r2HnE5MLGzgtJotU72xKnVEslT0-q5miNcKQycx5rm3fUtq9RzETCk2s55qZtT4jdc5HL2HS9Kb8hYLS7VG7H59Rxhq5hoJue4Y7tArS25gIBVgTfUc2nsdj_316l12Cj3G6HXvUp9Gta7AMu6ivQoPSc2U8skOFhDlR7viAQeObWOG7GrERhNQnR2PDxTiJbB7sze_r6znJlVHPFBeQ'
+        test_sub = Subscription()
+        setattr(test_sub, 'id', 'id123')
+        setattr(test_sub, 'subscription_id', 'id123')
+        setattr(test_sub, 'display_name', 'good name')
+        setattr(test_sub, 'state', SubscriptionState.enabled)
+        setattr(test_sub, 'tenant_id', '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+
+        with mock.patch('azure.cli.core._profile.SubscriptionFinder._find_using_specific_tenant', autospec=True, return_value=[test_sub]):
+            profile = Profile(use_global_creds_cache=False, storage=test_account)
+            result_accounts = profile.find_subscriptions_in_cloud_console([arm_token, kv_token])
+
+        # verify the local account
+        expected_subscription = {
+            "state": "Enabled",
+            "user": {
+                "type": "user",
+                "name": "admin3@AzureSDKTeam.onmicrosoft.com"
+            },
+            "name": "good name",
+            "isDefault": True,
+            "id": "id123",
+            "environmentName": "AzureCloud",
+            "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"
+        }
+        self.assertEqual([expected_subscription], result_accounts)
+
+        # verify the token file
+        expected_arm_token_entry = {
+            "isMRRT": True,
+            "_clientId": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+            "accessToken": arm_token,
+            "userId": "admin3@AzureSDKTeam.onmicrosoft.com",
+            # "expiresOn": "2017-07-17 21:26:38.676587",
+            "resource": "https://management.core.windows.net/",
+            "expiresIn": "3600",
+            "_authority": "https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+            "tokenType": "Bearer",
+            "oid": "e7e158d3-7cdc-47cd-8825-5859d7ab2b55"
+        }
+        expected_keyvault_token_entry = {
+            "isMRRT": True,
+            "_clientId": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+            "accessToken": kv_token,
+            "userId": "admin3@AzureSDKTeam.onmicrosoft.com",
+            # "expiresOn": "2017-07-17 21:26:38.676587",
+            "resource": "https://vault.azure.net",
+            "expiresIn": "3600",
+            "_authority": "https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+            "tokenType": "Bearer",
+            "oid": "e7e158d3-7cdc-47cd-8825-5859d7ab2b55"
+        }
+        actual = get_file_json(test_token_file)
+        # per design, 'expiresOn' will not be accurate but doesn't matter. Hence, skip the verification
+        for a in actual:
+            a.pop('expiresOn')
+        self.assertEqual([expected_arm_token_entry, expected_keyvault_token_entry], actual)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
@@ -527,6 +671,42 @@ class Test_Profile(unittest.TestCase):
             mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('requests.get', autospec=True)
+    def test_init_if_in_msi_env(self, get_mock):
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+
+        # setup the response for the tenant search request
+        test_subscription_id = '04b07795-8ddb-461a-bbee-02f9e1bf9999'
+        test_tenant = 'tenant1'
+        test_port = 12345
+        result = mock.MagicMock()
+        result.status_code = 401
+        headers = {
+            'www-authenticate': 'foo;authorization_uri="https://haha/{}";bar'.format(test_tenant)
+        }
+        result.headers = headers
+        get_mock.return_value = result
+        user = test_subscription_id + '@' + str(test_port)
+
+        # action
+        subscriptions = profile.init_if_in_msi_env(user)
+
+        # assert
+        self.assertEqual(len(subscriptions), 1)
+        s = subscriptions[0]
+        self.assertEqual(s['user']['name'], test_subscription_id + '@' + str(test_port))
+        self.assertEqual(s['user']['type'], 'user')
+        self.assertEqual(s['name'], 'MSI')
+        self.assertEqual(s['id'], test_subscription_id)
+        self.assertEqual(s['tenantId'], test_tenant)
+
+    def test_do_nothing_if_not_in_msi_env(self):
+        # verify do nothing on regular user name
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        self.assertIsNone(profile.init_if_in_msi_env('foo@bar.com'))
 
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)

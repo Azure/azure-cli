@@ -167,24 +167,38 @@ def append_adls_item(account_name,
         f.write(content)
 
 
+def upload_to_adls(account_name,
+                   source_path,
+                   destination_path,
+                   chunk_size,
+                   buffer_size,
+                   block_size,
+                   thread_count=None,
+                   overwrite=False):
+    client = cf_dls_filesystem(account_name)
+    ADLUploader(
+        client,
+        destination_path,
+        source_path,
+        thread_count,
+        chunksize=chunk_size,
+        buffersize=buffer_size,
+        blocksize=block_size,
+        overwrite=overwrite)
+
+
 def remove_adls_item(account_name,
                      path,
                      recurse=False):
     cf_dls_filesystem(account_name).rm(path, recurse)
 
 
-def upload_to_adls(account_name,
-                   source_path,
-                   destination_path,
-                   thread_count=None,
-                   overwrite=False):
-    client = cf_dls_filesystem(account_name)
-    ADLUploader(client, destination_path, source_path, thread_count, overwrite=overwrite)
-
-
 def download_from_adls(account_name,
                        source_path,
                        destination_path,
+                       chunk_size,
+                       buffer_size,
+                       block_size,
                        thread_count=None,
                        overwrite=False):
     client = cf_dls_filesystem(account_name)
@@ -193,6 +207,9 @@ def download_from_adls(account_name,
         source_path,
         destination_path,
         thread_count,
+        chunksize=chunk_size,
+        buffersize=buffer_size,
+        blocksize=block_size,
         overwrite=overwrite)
 
 

@@ -356,6 +356,18 @@ class Test_Vm_Custom(unittest.TestCase):
         # assert
         self.assertEqual(result, 'extension1')
 
+    def test_get_extension_instance_name_when_type_none(self):
+        instance_view = mock.MagicMock()
+        extension = mock.MagicMock()
+        extension.type = None
+        instance_view.extensions = [extension]
+
+        # action
+        result = _get_extension_instance_name(instance_view, 'na', 'extension-name')
+
+        # assert
+        self.assertEqual(result, 'extension-name')
+
 
 class FakedVM(object):  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):

@@ -23,7 +23,7 @@ from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
      process_disk_or_snapshot_create_namespace, validate_vm_disk,
-     process_disk_encryption_namespace)
+     process_disk_encryption_namespace, process_assign_identity_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -240,6 +240,22 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
 
     register_cli_argument(scope, 'license_type', help="license type if the Windows image or disk used was licensed on-premises", **enum_choice_list(['Windows_Server', 'Windows_Client']))
+
+    register_cli_argument(scope, 'assign_identity', action='store_true', arg_group='Managed Service Identity',
+                          help='enables the VM/VMSS to autonomously, using its own managed identity, to directly authenticate and interact with other Azure services using bearer tokens')
+
+for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
+    arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
+    register_cli_argument(scope, 'identity_scope', options_list='--scope', arg_group=arg_group,
+                          help="The scope the managed identity has access to. Default: VM/VMSS's resource group.")
+    register_cli_argument(scope, 'identity_role', options_list='--role', arg_group=arg_group,
+                          help="Role name or id the managed identity will be assigned")
+    register_cli_argument(scope, 'identity_role_id', ignore_type)
+
+for scope in ['vm assign-identity', 'vmss assign-identity']:
+    register_cli_argument(scope, 'port', type=int, help="The port to fetch AAD token. Default: 50342")
+register_cli_argument('vm assign-identity', 'vm_name', existing_vm_name, validator=process_assign_identity_namespace)
+register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, validator=process_assign_identity_namespace)
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')

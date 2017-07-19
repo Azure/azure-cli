@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint:disable=too-many-lines
+
 import os
 import re
 
@@ -700,6 +702,52 @@ def validate_ssh_key(namespace):
     namespace.ssh_key_value = content
 
 
+def _validate_vm_vmss_msi(namespace):
+    if namespace.assign_identity:
+        _resolve_msi_role_and_scope(namespace)
+    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
+        raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+
+
+def _resolve_msi_role_and_scope(namespace):
+    if not namespace.identity_scope:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        subscription_id = get_subscription_id()
+        namespace.identity_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id,
+                                                                                namespace.resource_group_name)
+    # keep 'identity_role' for output as logical name is more readable
+    setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
+
+
+def _resolve_role_id(role, scope):
+    import uuid
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    client = get_mgmt_service_client(AuthorizationManagementClient).role_definitions
+
+    role_id = None
+    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
+                role, re.I):
+        role_id = role
+    else:
+        try:
+            uuid.UUID(role)
+            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
+                client.config.subscription_id, role)
+        except ValueError:
+            pass
+        if not role_id:  # retrieve role id
+            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            if not role_defs:
+                raise CLIError("Role '{}' doesn't exist.".format(role))
+            elif len(role_defs) > 1:
+                ids = [r.id for r in role_defs]
+                err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
+                raise CLIError(err.format(role, ids))
+            role_id = role_defs[0].id
+    return role_id
+
+
 def process_vm_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace)
@@ -717,6 +765,7 @@ def process_vm_create_namespace(namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM')
+    _validate_vm_vmss_msi(namespace)
 
 # endregion
 
@@ -854,6 +903,7 @@ def process_vmss_create_namespace(namespace):
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
     _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_msi(namespace)
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
@@ -949,4 +999,7 @@ def process_disk_encryption_namespace(namespace):
                                                              namespace.resource_group_name,
                                                              'vaults', 'Microsoft.KeyVault')
 
+
+def process_assign_identity_namespace(namespace):
+    _resolve_msi_role_and_scope(namespace)
 # endregion

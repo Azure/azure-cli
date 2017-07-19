@@ -210,7 +210,8 @@ class AzCompleter(Completer):
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
-        try:
+        try:  # pylint: disable=too-many-nested-blocks
+
             is_param, started_param, prefix, param = dynamic_param_logic(text)
 
             # command table specific name
@@ -274,8 +275,8 @@ class AzCompleter(Completer):
 
     def yield_param_completion(self, param, last_word):
         """ yields a parameter """
-        return Completion(param, -len(last_word), display_meta=self.get_param_description(
-            self.curr_command + " " + str(param)).replace('\n', ''))
+        return Completion(param, -len(last_word), display_meta=self.param_description.get(
+            self.curr_command + " " + str(param), '').replace('\n', ''))
 
     def gen_cmd_and_param_completions(self, text):
         """ generates command and parameter completions """
@@ -307,7 +308,7 @@ class AzCompleter(Completer):
         # this is for single char parameters
         if last_word.startswith("-") and not last_word.startswith("--"):
             self._is_command = False
-            if self.has_parameters(self.curr_command):
+            if self.curr_command in self.command_parameters:
                 for param in self.command_parameters[self.curr_command]:
                     if self.validate_completion(param, last_word, text) and\
                             not param.startswith("--"):
@@ -316,7 +317,7 @@ class AzCompleter(Completer):
         elif last_word.startswith("--"):  # for regular parameters
             self._is_command = False
 
-            if self.has_parameters(self.curr_command):  # Everything should, map to empty list
+            if self.curr_command in self.command_parameters:  # Everything should, map to empty list
                 for param in self.command_parameters[self.curr_command]:
                     if self.validate_completion(param, last_word, text):
                         yield self.yield_param_completion(param, last_word)
@@ -363,18 +364,7 @@ class AzCompleter(Completer):
 
     def is_completable(self, symbol):
         """ whether the word can be completed as a command or parameter """
-        return self.has_parameters(symbol) or symbol in self.param_description.keys()
-
-    def get_param_description(self, param):
-        """ gets a description of an empty string """
-        if param in self.param_description:
-            return self.param_description[param]
-        else:
-            return ""
-
-    def has_parameters(self, command):
-        """ returns whether given command is valid """
-        return command in self.command_parameters.keys()
+        return symbol in self.command_parameters or symbol in self.param_description.keys()
 
     def has_description(self, param):
         """ if a parameter has a description """
