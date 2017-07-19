@@ -188,7 +188,8 @@ def _format_linux_fx_version(custom_image_name):
     fx_version = ' '
     # handles case of only spaces
     if custom_image_name.strip():
-        fx_version = '{}|{}'.format('DOCKER', custom_image_name)
+        if 'DOCKER|' not in custom_image_name:
+            fx_version = '{}|{}'.format('DOCKER', custom_image_name)
     return fx_version
 
 
@@ -404,7 +405,7 @@ def _filter_for_container_settings(resource_group_name, name, settings):
     if fx_version:
         added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME',
                             'value': fx_version}
-        result.append(dict(added_image_name))
+        result.append(added_image_name)
     return result
 
 
