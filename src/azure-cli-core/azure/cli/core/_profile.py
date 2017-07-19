@@ -428,7 +428,7 @@ class Profile(object):
 
         # is the credential created through command like 'create-for-rbac'?
         result = OrderedDict()
-        if name and password:
+        if name and (password or cert_file):
             result['clientId'] = name
             if password:
                 result['clientSecret'] = password

@@ -247,6 +247,22 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual('https://login.microsoftonline.com', extended_info['activeDirectoryEndpointUrl'])
         self.assertEqual('https://management.azure.com/', extended_info['resourceManagerEndpointUrl'])
 
+    def test_get_auth_info_for_newly_created_service_principal(self):
+        storage_mock = {'subscriptions': []}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+        consolidated = Profile._normalize_properties(self.user1, [self.subscription1], False)
+        profile._set_subscriptions(consolidated)
+        # action
+        extended_info = profile.get_sp_auth_info(name='1234', cert_file='/tmp/123.pem')
+        # assert
+        self.assertEqual(self.id1.split('/')[-1], extended_info['subscriptionId'])
+        self.assertEqual(self.tenant_id, extended_info['tenantId'])
+        self.assertEqual('1234', extended_info['clientId'])
+        self.assertEqual('/tmp/123.pem', extended_info['clientCertificate'])
+        self.assertIsNone(extended_info.get('clientSecret', None))
+        self.assertEqual('https://login.microsoftonline.com', extended_info['activeDirectoryEndpointUrl'])
+        self.assertEqual('https://management.azure.com/', extended_info['resourceManagerEndpointUrl'])
+
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_create_account_without_subscriptions_thru_service_principal(self, mock_auth_context):
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
