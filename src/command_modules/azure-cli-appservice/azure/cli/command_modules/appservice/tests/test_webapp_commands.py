@@ -327,7 +327,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
             JMESPathCheckV2('appCommandLine', 'process.json')
         ])
 
-        result = self.cmd('webapp deployment list-container-cd-url -g {} -n {}'.format(resource_group, webapp)).get_output_in_json()
+        result = self.cmd('webapp deployment show-container-cd-url -g {} -n {}'.format(resource_group, webapp)).get_output_in_json()
         self.assertTrue(result.startswith('https://'))
 
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(

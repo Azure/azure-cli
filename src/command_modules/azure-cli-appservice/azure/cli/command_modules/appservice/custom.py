@@ -840,20 +840,13 @@ def list_publish_profiles(resource_group_name, name, slot=None):
     return converted
 
 
-def list_container_cd_url(resource_group_name, name, slot=None):
-    import xmltodict
-
-    content = _generic_site_operation(resource_group_name, name,
-                                      'list_publishing_profile_xml_with_secrets', slot)
-    full_xml = ''
-    for f in content:
-        full_xml += f.decode()
-
-    profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
-    url = ''
+def show_container_cd_url(resource_group_name, name, slot=None):
+    profiles = list_publish_profiles(resource_group_name, name, slot)
     for profile in profiles:
-        if profile['@publishMethod'] == 'MSDeploy':
-            url = 'https://' + profile['@userName'] + ':' + profile['@userPWD'] + '@' + profile['@publishUrl'] + '/docker/hook'  # pylint: disable=line-too-long
+        if profile['publishMethod'] == 'MSDeploy':
+            scmUrl = profile['publishUrl'].replace(":443", "")
+            url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
+            break
 
     return url
 
