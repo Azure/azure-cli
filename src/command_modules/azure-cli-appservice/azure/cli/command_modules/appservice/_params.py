@@ -101,7 +101,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'repo_url', options_list=('--repo-url', '-u'), help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
     register_cli_argument(scope + ' deployment source', 'branch', help='the branch name of the repository')
     register_cli_argument(scope + ' deployment source', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
-    register_cli_argument(scope + ' deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
+    register_cli_argument(scope + ' deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt', 'PHP']))
     register_cli_argument(scope + ' deployment source', 'cd_account', arg_group='VSTS CD Provider', help='name of the Team Services account to create/use for continuous delivery')
     register_cli_argument(scope + ' deployment source', 'cd_account_must_exist', arg_group='VSTS CD Provider', help='specifies that the account must already exist. If not specified, the account will be created if it does not already exist (existing accounts are updated)', action='store_true')
     register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
