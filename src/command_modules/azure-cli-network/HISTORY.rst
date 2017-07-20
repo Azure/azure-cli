@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++
+* Added `list-private-access-services` command
+* `vnet subnet create/update`: Added `--private-access-services` argument.
+
 2.0.10 (2017-07-07)
 +++++++++++++++++++
 * `application-gateway address-pool create/update`: fix bug when using the `--servers` argument.
