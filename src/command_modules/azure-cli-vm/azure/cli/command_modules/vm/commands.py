@@ -10,9 +10,11 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
-                                                          cf_images)
+                                                          cf_images, cf_public_ip_addresses)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
+from azure.cli.core.commands.arm import \
+    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
+     deployment_validate_table_format)
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -51,14 +53,17 @@ def transform_vm(result):
 def transform_vm_create_output(result):
     from azure.cli.core.commands.arm import parse_resource_id
     try:
-        return OrderedDict([('id', result.id),
-                            ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
-                            ('powerState', result.power_state),
-                            ('publicIpAddress', result.public_ips),
-                            ('fqdns', result.fqdns),
-                            ('privateIpAddress', result.private_ips),
-                            ('macAddress', result.mac_addresses),
-                            ('location', result.location)])
+        output = OrderedDict([('id', result.id),
+                              ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
+                              ('powerState', result.power_state),
+                              ('publicIpAddress', result.public_ips),
+                              ('fqdns', result.fqdns),
+                              ('privateIpAddress', result.private_ips),
+                              ('macAddress', result.mac_addresses),
+                              ('location', result.location)])
+        if getattr(result, 'identity', None):
+            output['identity'] = result.identity
+        return output
     except AttributeError:
         from msrest.pipeline import ClientRawResponse
         return None if isinstance(result, ClientRawResponse) else result
@@ -77,24 +82,9 @@ def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
 
-def transform_av_set_output(av_set):
-    # workaround till compute api version gets to 2017-04-30
-    if hasattr(av_set, 'sku') and hasattr(av_set.sku, 'name'):
-        setattr(av_set.sku, 'managed', av_set.sku.name == 'Aligned')
-        del av_set.sku.name
-    return av_set
-
-
-def transform_av_set_collection_output(av_sets):
-    av_sets = list(av_sets)
-    for av_set in av_sets:
-        transform_av_set_output(av_set)
-    return av_sets
-
-
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait')
+cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True, no_wait_param='raw')
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm, no_wait_param='raw')
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm, no_wait_param='raw')
@@ -145,13 +135,13 @@ cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wa
 cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'), no_wait_param='no_wait')
 
 # # VM Availability Set
-cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), transform=transform_av_set_output)
+cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 
 op_var = 'availability_sets_operations'
 op_class = 'AvailabilitySetsOperations'
 cli_command(__name__, 'vm availability-set delete', mgmt_path.format(op_var, op_class, 'delete'), cf_avail_set)
-cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, transform=transform_av_set_output, exception_handler=empty_on_404)
-cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set, transform=transform_av_set_collection_output)
+cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, exception_handler=empty_on_404)
+cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set)
 cli_command(__name__, 'vm availability-set list-sizes', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_avail_set)
 cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
 
@@ -240,7 +230,7 @@ cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_
 
 cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_scale_set_vms_operations', 'VirtualMachineScaleSetVMsOperations', 'list'), cf_vmss_vm)
 
-cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'),
@@ -255,10 +245,11 @@ cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_i
 cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vmss list-instance-public-ips', 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.list_virtual_machine_scale_set_public_ip_addresses', cf_public_ip_addresses)
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
-
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     # VM Disk
@@ -295,3 +286,8 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'
     cli_command(__name__, 'image list', custom_path.format('list_images'))
     cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
     cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
+
+
+# MSI
+cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
+cli_command(__name__, 'vmss assign-identity', custom_path.format('assign_vmss_identity'))

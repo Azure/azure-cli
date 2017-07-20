@@ -54,7 +54,7 @@ def upload(data_to_save):
 
         if in_diagnostic_mode():
             sys.stdout.write('\nTrack Event: {}\nProperties: {}\nMeasurements: {}'.format(
-                name, json.dumps(properties), json.dumps(measurements)))
+                name, json.dumps(properties, indent='  '), json.dumps(measurements, indent='  ')))
 
     client.flush()
 

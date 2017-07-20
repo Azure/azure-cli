@@ -4,9 +4,24 @@ Release History
 ===============
 
 unreleased
-+++++++++++++++++
+++++++++++
+* Remove --marker option from storage blob list, storage container list, and storage share list commands. The change is a part of the solution to issue #3745. This is technically a breaking change. However since the removed options never works, the impact is limited.
+* Enable create https only storage account.
 
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* minor fixes
+
+2.0.9 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* Update storage metrics, logging and cors commands (#3495)
+* Fix #3362: Rephrase exception message from CORS add (#3638)
 * Fix #3592: convert generator to a list in download batch command dry run mode
+* Fix #3592: Blob download batch dryrun issue (#3640)
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++

@@ -17,16 +17,21 @@ mgmt_path = 'azure.mgmt.keyvault.operations.vaults_operations#{}'
 
 cli_command(__name__, 'keyvault create', custom_path.format('create_keyvault'),
             keyvault_client_vaults_factory)
+cli_command(__name__, 'keyvault recover', custom_path.format('recover_keyvault'),
+            keyvault_client_vaults_factory)
 cli_command(__name__, 'keyvault list', custom_path.format('list_keyvault'),
             keyvault_client_vaults_factory)
 cli_command(__name__, 'keyvault show', mgmt_path.format('VaultsOperations.get'),
             keyvault_client_vaults_factory, exception_handler=empty_on_404)
 cli_command(__name__, 'keyvault delete', mgmt_path.format('VaultsOperations.delete'),
             keyvault_client_vaults_factory)
-
+cli_command(__name__, 'keyvault purge', mgmt_path.format('VaultsOperations.purge_deleted'),
+            keyvault_client_vaults_factory)
 cli_command(__name__, 'keyvault set-policy', custom_path.format('set_policy'),
             keyvault_client_vaults_factory)
 cli_command(__name__, 'keyvault delete-policy', custom_path.format('delete_policy'),
+            keyvault_client_vaults_factory)
+cli_command(__name__, 'keyvault list-deleted', mgmt_path.format('VaultsOperations.list_deleted'),
             keyvault_client_vaults_factory)
 
 cli_generic_update_command(__name__,
@@ -42,13 +47,21 @@ cli_keyvault_data_plane_command('keyvault key list',
                                 data_client_path.format('KeyVaultClient.get_keys'))
 cli_keyvault_data_plane_command('keyvault key list-versions',
                                 data_client_path.format('KeyVaultClient.get_key_versions'))
+cli_keyvault_data_plane_command('keyvault key list-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_keys'))
 cli_keyvault_data_plane_command('keyvault key create', custom_path.format('create_key'))
 cli_keyvault_data_plane_command('keyvault key set-attributes',
                                 data_client_path.format('KeyVaultClient.update_key'))
 cli_keyvault_data_plane_command('keyvault key show',
                                 data_client_path.format('KeyVaultClient.get_key'))
+cli_keyvault_data_plane_command('keyvault key show-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_key'))
 cli_keyvault_data_plane_command('keyvault key delete',
                                 data_client_path.format('KeyVaultClient.delete_key'))
+cli_keyvault_data_plane_command('keyvault key purge',
+                                data_client_path.format('KeyVaultClient.purge_deleted_key'))
+cli_keyvault_data_plane_command('keyvault key recover',
+                                data_client_path.format('KeyVaultClient.recover_deleted_key'))
 cli_keyvault_data_plane_command('keyvault key backup', custom_path.format('backup_key'))
 cli_keyvault_data_plane_command('keyvault key restore', custom_path.format('restore_key'))
 cli_keyvault_data_plane_command('keyvault key import', custom_path.format('import_key'))
@@ -57,15 +70,25 @@ cli_keyvault_data_plane_command('keyvault secret list',
                                 data_client_path.format('KeyVaultClient.get_secrets'))
 cli_keyvault_data_plane_command('keyvault secret list-versions',
                                 data_client_path.format('KeyVaultClient.get_secret_versions'))
+cli_keyvault_data_plane_command('keyvault secret list-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_secrets'))
 cli_keyvault_data_plane_command('keyvault secret set',
                                 data_client_path.format('KeyVaultClient.set_secret'))
 cli_keyvault_data_plane_command('keyvault secret set-attributes',
                                 data_client_path.format('KeyVaultClient.update_secret'))
 cli_keyvault_data_plane_command('keyvault secret show',
                                 data_client_path.format('KeyVaultClient.get_secret'))
+cli_keyvault_data_plane_command('keyvault secret show-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_secret'))
 cli_keyvault_data_plane_command('keyvault secret delete',
                                 data_client_path.format('KeyVaultClient.delete_secret'))
+cli_keyvault_data_plane_command('keyvault secret purge',
+                                data_client_path.format('KeyVaultClient.purge_deleted_secret'))
+cli_keyvault_data_plane_command('keyvault secret recover',
+                                data_client_path.format('KeyVaultClient.recover_deleted_secret'))
 cli_keyvault_data_plane_command('keyvault secret download', custom_path.format('download_secret'))
+cli_keyvault_data_plane_command('keyvault secret backup', custom_path.format('backup_secret'))
+cli_keyvault_data_plane_command('keyvault secret restore', custom_path.format('restore_secret'))
 
 cli_keyvault_data_plane_command('keyvault certificate create',
                                 custom_path.format('create_certificate'))
@@ -73,10 +96,18 @@ cli_keyvault_data_plane_command('keyvault certificate list',
                                 data_client_path.format('KeyVaultClient.get_certificates'))
 cli_keyvault_data_plane_command('keyvault certificate list-versions',
                                 data_client_path.format('KeyVaultClient.get_certificate_versions'))
+cli_keyvault_data_plane_command('keyvault certificate list-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_certificates'))
 cli_keyvault_data_plane_command('keyvault certificate show',
                                 data_client_path.format('KeyVaultClient.get_certificate'))
+cli_keyvault_data_plane_command('keyvault certificate show-deleted',
+                                data_client_path.format('KeyVaultClient.get_deleted_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate delete',
                                 data_client_path.format('KeyVaultClient.delete_certificate'))
+cli_keyvault_data_plane_command('keyvault certificate purge',
+                                data_client_path.format('KeyVaultClient.purge_deleted_certificate'))
+cli_keyvault_data_plane_command('keyvault certificate recover',
+                                data_client_path.format('KeyVaultClient.recover_deleted_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate set-attributes',
                                 data_client_path.format('KeyVaultClient.update_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate import',

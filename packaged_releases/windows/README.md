@@ -26,9 +26,7 @@ Note: The above can be done on a Windows 10 VM.
 Building
 --------
 
-1. Change the version numbers:
-    - Change the 'ProductVersion' in `Product.wxs` when creating a new release.
-    - Also change CLI_VERSION in `.\scripts\prepareBuild.cmd`.
+1. Set the `CLIVERSION` environment variable.
 
 2. Run `build.cmd`.
     - Can `cd packaged_releases\windows` first.

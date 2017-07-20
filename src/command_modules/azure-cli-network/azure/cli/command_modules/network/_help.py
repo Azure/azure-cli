@@ -317,6 +317,40 @@ helps['network application-gateway probe update'] = """
 """
 # endregion
 
+# region Application Gateway redirect configuration
+
+helps['network application-gateway redirect-config'] = """
+    type: group
+    short-summary: Manage redirect configurations.
+"""
+
+helps['network application-gateway redirect-config create'] = """
+    type: command
+    short-summary: Create a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config delete'] = """
+    type: command
+    short-summary: Delete a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config list'] = """
+    type: command
+    short-summary: List redirect configurations.
+"""
+
+helps['network application-gateway redirect-config show'] = """
+    type: command
+    short-summary: Show details of a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config update'] = """
+    type: command
+    short-summary: Update a redirect configuration.
+"""
+
+# endregion
+
 # region Application Gateway rules
 
 helps['network application-gateway rule'] = """
@@ -391,12 +425,28 @@ helps['network application-gateway ssl-policy'] = """
 helps['network application-gateway ssl-policy set'] = """
     type: command
     short-summary: Update or clear SSL policy settings.
+    parameters:
+        - name: --cipher-suites
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
+        - name: --disabled-ssl-protocols
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
+        - name: --min-protocol-version
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
 """
 
 helps['network application-gateway ssl-policy show'] = """
     type: command
     short-summary: Show the SSL policy settings.
 """
+
+helps['network application-gateway ssl-policy predefined'] = """
+    type: group
+    short-summary: Information on predefined SSL policies.
+"""
+
 # endregion
 
 # region Application Gateway URL path map

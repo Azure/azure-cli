@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import datetime
 import json
+import logging as logs
 import pkgutil
 import re
 import sys
@@ -38,7 +39,7 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context', 'container', 'shell', 'documentdb']
+BLACKLISTED_MODS = ['context', 'shell', 'documentdb']
 
 
 class VersionConstraint(object):
@@ -58,7 +59,8 @@ class VersionConstraint(object):
             register_cli_argument(*args, **kwargs)
         else:
             from azure.cli.core.commands.parameters import ignore_type
-            kwargs = {'arg_type': ignore_type}
+            kwargs = {}
+            args = tuple([args[0], args[1], ignore_type])
             register_cli_argument(*args, **kwargs)
 
     def register_extra_cli_argument(self, *args, **kwargs):
@@ -136,17 +138,17 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from azure.cli.core.application import APPLICATION
         self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
         self.deploy_dict = {}
+        self.last_progress_report = datetime.datetime.now()
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
 
-    def _template_progress(self, correlation_id):  # pylint: disable=no-self-use
+    def _generate_template_progress(self, correlation_id):  # pylint: disable=no-self-use
         """ gets the progress for template deployments """
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         from azure.monitor import MonitorClient
 
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
-
             formatter = "eventTimestamp ge {}"
 
             end_time = datetime.datetime.utcnow()
@@ -195,9 +197,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                         # don't want to show the timestamp
                         json_val = deploy_values.copy()
                         json_val.pop('timestamp', None)
-                        if deploy_values['status value'] != 'Started':
+                        status_val = deploy_values.get('status value', None)
+                        if status_val and status_val != 'Started':
                             result = deploy_values['status value'] + ': ' + long_name
-                            result += ' (' + deploy_values['type'] + ')'
+                            result += ' (' + deploy_values.get('type', '') + ')'
 
                             if update:
                                 logger.info(result)
@@ -207,6 +210,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         correlation_message = ''
         self.progress_controller.begin()
         correlation_id = None
+
+        az_logger = azlogging.get_az_logger()
+        is_verbose = any(handler.level <= logs.INFO for handler in az_logger.handlers)
+
         while not poller.done():
             self.progress_controller.add(message='Running')
             try:
@@ -217,7 +224,14 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
-            self._template_progress(correlation_id)
+
+            current_time = datetime.datetime.now()
+            if is_verbose and current_time - self.last_progress_report >= datetime.timedelta(seconds=10):
+                self.last_progress_report = current_time
+                try:
+                    self._generate_template_progress(correlation_id)
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 self._delay()
             except KeyboardInterrupt:
@@ -228,24 +242,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         try:
             result = poller.result()
         except ClientException as client_exception:
-            telemetry.set_exception(
-                client_exception,
-                fault_type='failed-long-running-operation',
-                summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
-            message = getattr(client_exception, 'message', client_exception)
+            from azure.cli.core.commands.arm import handle_long_running_operation_exception
             self.progress_controller.stop()
-
-            try:
-                message = '{} {}'.format(
-                    str(message),
-                    json.loads(client_exception.response.text)['error']['details'][0]['message'])  # pylint: disable=no-member
-            except:  # pylint: disable=bare-except
-                pass
-
-            cli_error = CLIError('{}  {}'.format(message, correlation_message))
-            # capture response for downstream commands (webapp) to dig out more details
-            setattr(cli_error, 'response', getattr(client_exception, 'response', None))
-            raise cli_error
+            handle_long_running_operation_exception(client_exception)
 
         self.progress_controller.end()
         return result

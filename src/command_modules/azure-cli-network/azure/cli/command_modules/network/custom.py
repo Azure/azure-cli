@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -7,15 +7,16 @@ from __future__ import print_function
 from collections import Counter, OrderedDict
 from msrestazure.azure_exceptions import CloudError
 
-# pylint: disable=no-self-use,no-member,too-many-lines
+# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.commands.validators import DefaultStr
+
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
@@ -27,39 +28,25 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
-VirtualNetworkPeering, ApplicationGatewayFirewallMode, \
-    ApplicationGatewaySkuName, IPVersion = get_sdk(
+AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, ApplicationGatewaySslPolicy, \
+    ApplicationGatewaySslPolicyType, \
+    BackendAddressPool, DhcpOptions, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, \
+    FrontendIPConfiguration, InboundNatPool, InboundNatRule, IPAllocationMethod, IPVersion, \
+    LoadBalancingRule, NetworkInterfaceIPConfiguration, NetworkSecurityGroup, Probe, PublicIPAddress, \
+    PublicIPAddressDnsSettings, RedirectConfiguration, Route, SecurityRule, SecurityRuleAccess, \
+    SecurityRuleDirection, SecurityRuleProtocol, Subnet, SubResource, VirtualNetwork, \
+    VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VirtualNetworkPeering, VpnClientConfiguration, \
+    VpnClientRevokedCertificate, VpnClientRootCertificate, VpnType = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'VirtualNetworkPeering', 'ApplicationGatewayFirewallMode',
-        'ApplicationGatewaySkuName', 'IPVersion',
-        mod='models')
-
-PublicIPAddress, PublicIPAddressDnsSettings, VirtualNetwork, DhcpOptions, \
-    AddressSpace, Subnet, NetworkSecurityGroup, NetworkInterfaceIPConfiguration, \
-    InboundNatPool, InboundNatRule, SubResource = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'PublicIPAddress', 'PublicIPAddressDnsSettings',
-        'VirtualNetwork', 'DhcpOptions', 'AddressSpace',
-        'Subnet', 'NetworkSecurityGroup', 'NetworkInterfaceIPConfiguration',
-        'InboundNatPool', 'InboundNatRule', 'SubResource',
-        mod='models')
-
-BackendAddressPool, LoadBalancingRule, VirtualNetworkGatewayType, \
-    VirtualNetworkGatewaySkuName, SecurityRule, FrontendIPConfiguration, \
-    Route, VpnClientRootCertificate, SecurityRuleAccess = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'BackendAddressPool', 'LoadBalancingRule', 'VirtualNetworkGatewayType',
-        'VirtualNetworkGatewaySkuName', 'SecurityRule', 'FrontendIPConfiguration',
-        'Route', 'VpnClientRootCertificate', 'SecurityRuleAccess',
-        mod='models')
-
-SecurityRuleDirection, Probe, VpnClientConfiguration, VpnClientRevokedCertificate, \
-    SecurityRuleProtocol, IPAllocationMethod, ExpressRouteCircuitSkuTier, \
-    ExpressRouteCircuitSkuFamily, VpnType = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'SecurityRuleDirection', 'Probe', 'VpnClientConfiguration',
-        'VpnClientRevokedCertificate', 'SecurityRuleProtocol', 'IPAllocationMethod',
-        'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitSkuFamily', 'VpnType',
+        'AddressSpace', 'ApplicationGatewayFirewallMode', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslPolicy',
+        'ApplicationGatewaySslPolicyType',
+        'BackendAddressPool', 'DhcpOptions', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier',
+        'FrontendIPConfiguration', 'InboundNatPool', 'InboundNatRule', 'IPAllocationMethod', 'IPVersion',
+        'LoadBalancingRule', 'NetworkInterfaceIPConfiguration', 'NetworkSecurityGroup', 'Probe', 'PublicIPAddress',
+        'PublicIPAddressDnsSettings', 'RedirectConfiguration', 'Route', 'SecurityRule', 'SecurityRuleAccess',
+        'SecurityRuleDirection', 'SecurityRuleProtocol', 'Subnet', 'SubResource', 'VirtualNetwork',
+        'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VirtualNetworkPeering', 'VpnClientConfiguration',
+        'VpnClientRevokedCertificate', 'VpnClientRootCertificate', 'VpnType',
         mod='models')
 
 
@@ -88,7 +75,7 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
 
 
 def _get_default_value(balancer, property_name, option_name):
-    values = [x.name for x in getattr(balancer, property_name)]
+    values = [x.id for x in getattr(balancer, property_name)]
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
@@ -158,8 +145,8 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                sku=ApplicationGatewaySkuName.standard_medium.value,
                                private_ip_address='', public_ip_address=None,
                                public_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                               subnet='default', subnet_address_prefix='10.0.0.0/24',
-                               virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
+                               subnet='default', subnet_address_prefix=DefaultStr('10.0.0.0/24'),
+                               virtual_network_name=None, vnet_address_prefix=DefaultStr('10.0.0.0/16'),
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0):
     from azure.cli.core.util import random_string
@@ -257,7 +244,7 @@ def create_ag_authentication_certificate(resource_group_name, application_gatewa
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_authentication_certificate(instance, parent, item_name, cert_data):  # pylint: disable=unused-argument
+def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
     instance.data = cert_data
     return parent
 
@@ -276,7 +263,7 @@ def create_ag_backend_address_pool(resource_group_name, application_gateway_name
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_backend_address_pool(instance, parent, item_name, servers=None):  # pylint: disable=unused-argument
+def update_ag_backend_address_pool(instance, parent, item_name, servers=None):
     if servers is not None:
         instance.backend_addresses = servers
     return parent
@@ -284,8 +271,8 @@ def update_ag_backend_address_pool(instance, parent, item_name, servers=None):  
 
 def create_ag_frontend_ip_configuration(resource_group_name, application_gateway_name, item_name,
                                         public_ip_address=None, subnet=None,
-                                        virtual_network_name=None, private_ip_address=None,  # pylint: disable=unused-argument
-                                        private_ip_address_allocation=None, no_wait=False):  # pylint: disable=unused-argument
+                                        virtual_network_name=None, private_ip_address=None,
+                                        private_ip_address_allocation=None, no_wait=False):
     ApplicationGatewayFrontendIPConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayFrontendIPConfiguration',
@@ -307,8 +294,8 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_address=None,  # pylint: disable=unused-argument
-                                        subnet=None, virtual_network_name=None,  # pylint: disable=unused-argument
+def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_address=None,
+                                        subnet=None, virtual_network_name=None,
                                         private_ip_address=None):
     if public_ip_address is not None:
         instance.public_ip_address = SubResource(public_ip_address)
@@ -334,7 +321,7 @@ def create_ag_frontend_port(resource_group_name, application_gateway_name, item_
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_frontend_port(instance, parent, item_name, port=None):  # pylint: disable=unused-argument
+def update_ag_frontend_port(instance, parent, item_name, port=None):
     if port is not None:
         instance.port = port
     return parent
@@ -364,7 +351,7 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None,  # pylint: disable=unused-argument
+def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None,
                             host_name=None, ssl_cert=None):
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(frontend_ip)
@@ -383,10 +370,11 @@ def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, front
     return parent
 
 
-def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
-                                               item_name, port, probe=None, protocol='http',
-                                               cookie_based_affinity=None, timeout=None,
-                                               no_wait=False, connection_draining_timeout=0):
+def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name, item_name, port,
+                                               probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
+                                               no_wait=False, connection_draining_timeout=0,
+                                               host_name=None, host_name_from_backend_pool=None,
+                                               affinity_cookie_name=None, enable_probe=None, path=None):
     ApplicationGatewayBackendHttpSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendHttpSettings',
@@ -406,14 +394,22 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
         new_settings.connection_draining = \
             ApplicationGatewayConnectionDraining(
                 bool(connection_draining_timeout), connection_draining_timeout or 1)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_settings.host_name = host_name
+        new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
+        new_settings.affinity_cookie_name = affinity_cookie_name
+        new_settings.probe_enabled = enable_probe
+        new_settings.path = path
     _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None,  # pylint: disable=unused-argument
-                                               protocol=None, cookie_based_affinity=None,
-                                               timeout=None, connection_draining_timeout=None):
+def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None, protocol=None,
+                                               cookie_based_affinity=None, timeout=None,
+                                               connection_draining_timeout=None,
+                                               host_name=None, host_name_from_backend_pool=None,
+                                               affinity_cookie_name=None, enable_probe=None, path=None):
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -427,11 +423,62 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
     if connection_draining_timeout is not None:
         instance.connection_draining.enabled = bool(connection_draining_timeout)
         instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout
+    if host_name is not None:
+        instance.host_name = host_name
+    if host_name_from_backend_pool is not None:
+        instance.pick_host_name_from_backend_address = host_name_from_backend_pool
+    if affinity_cookie_name is not None:
+        instance.affinity_cookie_name = affinity_cookie_name
+    if enable_probe is not None:
+        instance.probe_enabled = enable_probe
+    if path is not None:
+        instance.path = path
     return parent
 
 
+def create_ag_redirect_configuration(resource_group_name, application_gateway_name, item_name, redirect_type,
+                                     target_listener=None, target_url=None, include_path=None,
+                                     include_query_string=None, no_wait=False):
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    new_config = RedirectConfiguration(
+        name=item_name,
+        redirect_type=redirect_type,
+        target_listener=SubResource(target_listener) if target_listener else None,
+        target_url=target_url,
+        include_path=include_path,
+        include_query_string=include_query_string)
+    _upsert(ag, 'redirect_configurations', new_config, 'name')
+    return ncf.create_or_update(
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+
+def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=None,
+                                     target_listener=None, target_url=None, include_path=None,
+                                     include_query_string=None, no_wait=False):
+    if redirect_type:
+        instance.redirect_type = redirect_type
+    if target_listener:
+        instance.target_listener = SubResource(target_listener)
+        instance.target_url = None
+    if target_url:
+        instance.target_listener = None
+        instance.target_url = target_url
+    if include_path is not None:
+        instance.include_path = include_path
+    if include_query_string is not None:
+        instance.include_query_string = include_query_string
+    return parent
+
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    create_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+    update_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+
+
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
-                    path, interval=30, timeout=120, threshold=8, no_wait=False):
+                    path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
+                    min_servers=None, match_body=None, match_status_codes=None):
     ApplicationGatewayProbe = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayProbe',
@@ -446,13 +493,21 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
         interval=interval,
         timeout=timeout,
         unhealthy_threshold=threshold)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        ProbeMatchCriteria = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayProbeHealthResponseMatch', mod='models')
+        new_probe.pick_host_name_from_backend_http_settings = host_name_from_http_settings
+        new_probe.min_servers = min_servers
+        new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
+
     _upsert(ag, 'probes', new_probe, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=None,  # pylint: disable=unused-argument
-                    interval=None, timeout=None, threshold=None):
+def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=None,
+                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
+                    min_servers=None, match_body=None, match_status_codes=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -465,11 +520,23 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
         instance.timeout = timeout
     if threshold is not None:
         instance.unhealthy_threshold = threshold
+    if host_name_from_http_settings is not None:
+        instance.pick_host_name_from_backend_http_settings = host_name_from_http_settings
+    if min_servers is not None:
+        instance.min_servers = min_servers
+    if match_body is not None or match_status_codes is not None:
+        ProbeMatchCriteria = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayProbeHealthResponseMatch', mod='models')
+        instance.match = instance.match or ProbeMatchCriteria()
+        if match_body is not None:
+            instance.match.body = match_body
+        if match_status_codes is not None:
+            instance.match.status_codes = match_status_codes
     return parent
 
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
-                                   address_pool=None, http_settings=None, http_listener=None,
+                                   address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
                                    url_path_map=None, rule_type='Basic', no_wait=False):
     ApplicationGatewayRequestRoutingRule = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -477,9 +544,9 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
         mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    if not address_pool:
+    if not address_pool and not redirect_config:
         address_pool = _get_default_value(ag, 'backend_address_pools', '--address-pool')
-    if not http_settings:
+    if not http_settings and not redirect_config:
         http_settings = _get_default_value(ag, 'backend_http_settings_collection',
                                            '--http-settings')
     if not http_listener:
@@ -487,22 +554,26 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
-        backend_address_pool=SubResource(address_pool),
-        backend_http_settings=SubResource(http_settings),
+        backend_address_pool=SubResource(address_pool) if address_pool else None,
+        backend_http_settings=SubResource(http_settings) if http_settings else None,
         http_listener=SubResource(http_listener),
         url_path_map=SubResource(url_path_map) if url_path_map else None)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else None
     _upsert(ag, 'request_routing_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_request_routing_rule(instance, parent, item_name, address_pool=None,  # pylint: disable=unused-argument
-                                   http_settings=None, http_listener=None, url_path_map=None,
+def update_ag_request_routing_rule(instance, parent, item_name, address_pool=None,
+                                   http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
                                    rule_type=None):
     if address_pool is not None:
         instance.backend_address_pool = SubResource(address_pool)
     if http_settings is not None:
         instance.backend_http_settings = SubResource(http_settings)
+    if redirect_config is not None:
+        instance.redirect_configuration = SubResource(redirect_config)
     if http_listener is not None:
         instance.http_listener = SubResource(http_listener)
     if url_path_map is not None:
@@ -527,7 +598,7 @@ def create_ag_ssl_certificate(resource_group_name, application_gateway_name, ite
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):  # pylint: disable=unused-argument
+def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
     if cert_data is not None:
         instance.data = cert_data
     if cert_password is not None:
@@ -535,12 +606,8 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
     return parent
 
 
-def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
-                      clear=False, no_wait=False):
-    ApplicationGatewaySslPolicy = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'ApplicationGatewaySslPolicy',
-        mod='models')
+def set_ag_ssl_policy_2017_03_01(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
+                                 clear=False, no_wait=False):
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
@@ -548,47 +615,99 @@ def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ss
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
+set_ag_ssl_policy_2017_03_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
+
+
+def set_ag_ssl_policy_2017_06_01(resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
+                                 disabled_ssl_protocols=None, cipher_suites=None, min_protocol_version=None,
+                                 no_wait=False):
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    policy_type = None
+    if policy_name:
+        policy_type = ApplicationGatewaySslPolicyType.predefined.value
+    elif cipher_suites or min_protocol_version:
+        policy_type = ApplicationGatewaySslPolicyType.custom.value
+    ag.ssl_policy = ApplicationGatewaySslPolicy(
+        policy_name=policy_name,
+        policy_type=policy_type,
+        disabled_ssl_protocols=disabled_ssl_protocols,
+        cipher_suites=cipher_suites,
+        min_protocol_version=min_protocol_version)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+
+set_ag_ssl_policy_2017_06_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
+
+
 def show_ag_ssl_policy(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(
         resource_group_name, application_gateway_name).ssl_policy
 
 
-def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
-                           paths, address_pool, http_settings, rule_name='default',
-                           default_address_pool=None, default_http_settings=None, no_wait=False):  # pylint: disable=unused-argument
+def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name, paths,
+                           address_pool=None, http_settings=None, redirect_config=None,
+                           default_address_pool=None, default_http_settings=None, default_redirect_config=None,
+                           no_wait=False, rule_name='default'):
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    new_rule = ApplicationGatewayPathRule(
+        name=rule_name,
+        backend_address_pool=SubResource(address_pool) if address_pool else None,
+        backend_http_settings=SubResource(http_settings) if http_settings else None,
+        paths=paths
+    )
     new_map = ApplicationGatewayUrlPathMap(
         name=item_name,
-        default_backend_address_pool=SubResource(default_address_pool) if default_address_pool else SubResource(
-            address_pool),
-        default_backend_http_settings=SubResource(default_http_settings) if default_http_settings else SubResource(
-            http_settings),
-        path_rules=[ApplicationGatewayPathRule(
-            name=rule_name,
-            backend_address_pool=SubResource(address_pool),
-            backend_http_settings=SubResource(http_settings),
-            paths=paths
-        )])
+        default_backend_address_pool=SubResource(default_address_pool) if default_address_pool else None,
+        default_backend_http_settings=SubResource(default_http_settings) if default_http_settings else None,
+        path_rules=[])
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else None
+        new_map.default_redirect_configuration = \
+            SubResource(default_redirect_config) if default_redirect_config else None
+
+    # pull defaults from the rule specific properties if the default-* option isn't specified
+    if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
+        new_map.default_backend_address_pool = new_rule.backend_address_pool
+
+    if new_rule.backend_http_settings and not new_map.default_backend_http_settings:
+        new_map.default_backend_http_settings = new_rule.backend_http_settings
+
+    if new_rule.redirect_configuration and not new_map.default_redirect_configuration:
+        new_map.default_redirect_configuration = new_rule.redirect_configuration
+
+    new_map.path_rules.append(new_rule)
     _upsert(ag, 'url_path_maps', new_map, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
-def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None,  # pylint: disable=unused-argument
-                           default_http_settings=None, no_wait=False):  # pylint: disable=unused-argument
-    if default_address_pool is not None:
+def update_ag_url_path_map(instance, parent, item_name, default_address_pool=None,
+                           default_http_settings=None, default_redirect_config=None, raw=False):
+    if default_address_pool == '':
+        instance.default_backend_address_pool = None
+    elif default_address_pool:
         instance.default_backend_address_pool = SubResource(default_address_pool)
-    if default_http_settings is not None:
+
+    if default_http_settings == '':
+        instance.default_backend_http_settings = None
+    elif default_http_settings:
         instance.default_backend_http_settings = SubResource(default_http_settings)
+
+    if default_redirect_config == '':
+        instance.default_redirect_configuration = None
+    elif default_redirect_config:
+        instance.default_redirect_configuration = SubResource(default_redirect_config)
     return parent
 
 
 def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, paths, address_pool=None, http_settings=None,
+                                item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
                                 no_wait=False):
     ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
@@ -598,20 +717,26 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
+    default_backend_pool = SubResource(url_map.default_backend_address_pool.id) \
+        if url_map.default_backend_address_pool else None
+    default_http_settings = SubResource(url_map.default_backend_http_settings.id) \
+        if url_map.default_backend_http_settings else None
     new_rule = ApplicationGatewayPathRule(
         name=item_name,
         paths=paths,
-        backend_address_pool=SubResource(address_pool) if address_pool else SubResource(
-            url_map.default_backend_address_pool.id),
-        backend_http_settings=SubResource(http_settings) if http_settings else SubResource(
-            url_map.default_backend_http_settings.id))
+        backend_address_pool=SubResource(address_pool) if address_pool else default_backend_pool,
+        backend_http_settings=SubResource(http_settings) if http_settings else default_http_settings)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        default_redirect = SubResource(url_map.default_redirect_configuration.id) \
+            if url_map.default_redirect_configuration else None
+        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else default_redirect
     _upsert(url_map, 'path_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
 def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name):
+                                item_name, no_wait=False):
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
@@ -620,7 +745,7 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     url_map.path_rules = \
         [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag)
+        resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
 def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
@@ -809,7 +934,7 @@ def create_lb_inbound_nat_rule(
 
 
 def set_lb_inbound_nat_rule(
-        instance, parent, item_name, protocol=None, frontend_port=None,  # pylint: disable=unused-argument
+        instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
@@ -846,7 +971,7 @@ def create_lb_inbound_nat_pool(
 
 
 def set_lb_inbound_nat_pool(
-        instance, parent, item_name, protocol=None,  # pylint: disable=unused-argument
+        instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
         frontend_ip_name=None):
     _set_param(instance, 'protocol', protocol)
@@ -865,7 +990,7 @@ def set_lb_inbound_nat_pool(
 
 def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        subnet=None, virtual_network_name=None, private_ip_address=None,  # pylint: disable=unused-argument
+        subnet=None, virtual_network_name=None, private_ip_address=None,
         private_ip_address_allocation='dynamic'):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -881,9 +1006,9 @@ def create_lb_frontend_ip_configuration(
 
 
 def set_lb_frontend_ip_configuration(
-        instance, parent, item_name, private_ip_address=None,  # pylint: disable=unused-argument
+        instance, parent, item_name, private_ip_address=None,
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
-        virtual_network_name=None):  # pylint: disable=unused-argument
+        virtual_network_name=None):
     if private_ip_address == '':
         instance.private_ip_allocation_method = private_ip_address_allocation
         instance.private_ip_address = None
@@ -925,7 +1050,7 @@ def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol
     return _get_property(poller.result().probes, item_name)
 
 
-def set_lb_probe(instance, parent, item_name, protocol=None, port=None,  # pylint: disable=unused-argument
+def set_lb_probe(instance, parent, item_name, protocol=None, port=None,
                  path=None, interval=None, threshold=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'port', port)
@@ -968,7 +1093,7 @@ def create_lb_rule(
 
 
 def set_lb_rule(
-        instance, parent, item_name, protocol=None, frontend_port=None,  # pylint: disable=unused-argument
+        instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None):
     _set_param(instance, 'protocol', protocol)
@@ -1000,25 +1125,28 @@ def set_lb_rule(
 
 # region NIC commands
 
-# pylint: disable=unused-argument
 def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
-               internal_dns_name_label=None, dns_servers=None,
-               internal_domain_name_suffix=None, enable_ip_forwarding=False,
+               internal_dns_name_label=None, dns_servers=None, enable_ip_forwarding=False,
                load_balancer_backend_address_pool_ids=None,
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
-               public_ip_address=None, virtual_network_name=None):
+               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
+
     NetworkInterfaceDnsSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'NetworkInterfaceDnsSettings', mod='models')
 
     dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
                                                dns_servers=dns_servers or [])
+
     nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
                            dns_settings=dns_settings)
+
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+        nic.enable_accelerated_networking = enable_accelerated_networking
 
     if network_security_group:
         nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
@@ -1041,9 +1169,9 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
 
 
 def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
-               internal_dns_name_label=None, dns_servers=None):
+               internal_dns_name_label=None, dns_servers=None, enable_accelerated_networking=None):
     if enable_ip_forwarding is not None:
-        instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
+        instance.enable_ip_forwarding = enable_ip_forwarding
 
     if network_security_group == '':
         instance.network_security_group = None
@@ -1059,11 +1187,14 @@ def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
     elif dns_servers:
         instance.dns_settings.dns_servers = dns_servers
 
+    if enable_accelerated_networking is not None:
+        instance.enable_accelerated_networking = enable_accelerated_networking
+
     return instance
 
 
 def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,  # pylint: disable=unused-argument
+                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
@@ -1102,11 +1233,11 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
 
-def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,  # pylint: disable=unused-argument
-                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None,  # pylint: disable=unused-argument
+def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,
+                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
-                      private_ip_address=None, private_ip_address_allocation=None,  # pylint: disable=unused-argument
+                      private_ip_address=None, private_ip_address_allocation=None,
                       private_ip_address_version='ipv4', make_primary=False):
     if make_primary:
         for config in parent.ip_configurations:
@@ -1160,7 +1291,7 @@ def _get_nic_ip_config(nic, name):
 
 def add_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None):  # pylint: disable=unused-argument
+        load_balancer_name=None):
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
@@ -1173,7 +1304,7 @@ def add_nic_ip_config_address_pool(
 
 def remove_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None):  # pylint: disable=unused-argument
+        load_balancer_name=None):
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
@@ -1185,7 +1316,7 @@ def remove_nic_ip_config_address_pool(
 
 def add_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None):  # pylint: disable=unused-argument
+        load_balancer_name=None):
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
@@ -1198,7 +1329,7 @@ def add_nic_ip_config_inbound_nat_rule(
 
 def remove_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None):  # pylint: disable=unused-argument
+        load_balancer_name=None):
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)

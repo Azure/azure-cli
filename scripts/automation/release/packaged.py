@@ -56,7 +56,9 @@ def _gen_tag(c_name, c_version):
 
 
 def _verified_tags(components):
-    available_tags = check_output(['git', 'tag'], cwd=REPO_ROOT_DIR).split()
+    available_tags = check_output(['git', 'tag'], cwd=REPO_ROOT_DIR)
+    available_tags = str(available_tags, 'utf-8')
+    available_tags = available_tags.split()
     for c_name, c_version in components:
         t = _gen_tag(c_name, c_version)
         if t not in available_tags:

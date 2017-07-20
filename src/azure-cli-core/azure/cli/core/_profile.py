@@ -46,6 +46,7 @@ _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 # This could mean either real access token, or client secret of a service principal
 # This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
+_REFRESH_TOKEN = 'refreshToken'
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'givenName',
@@ -54,6 +55,8 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
+
+_MSI_ACCOUNT_NAME = 'MSI'
 
 
 def _authentication_context_factory(tenant, cache):
@@ -104,6 +107,7 @@ class Profile(object):
             self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
         self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
+        self._msi_creds = None
 
     def find_subscriptions_on_login(self,
                                     interactive,
@@ -160,6 +164,51 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
+    def find_subscriptions_in_cloud_console(self, tokens):
+        from datetime import datetime, timedelta
+        import jwt
+        arm_token = tokens[0]  # cloud shell gurantees that the 1st is for ARM
+        arm_token_decoded = jwt.decode(arm_token, verify=False, algorithms=['RS256'])
+        tenant = arm_token_decoded['tid']
+        user_id = arm_token_decoded['unique_name'].split('#')[-1]
+        subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, arm_token)
+        consolidated = Profile._normalize_properties(user_id, subscriptions, is_service_principal=False)
+        self._set_subscriptions(consolidated)
+
+        # construct token entries to cache
+        decoded_tokens = [arm_token_decoded]
+        for t in tokens[1:]:
+            decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
+        final_tokens = []
+        for t in decoded_tokens:
+            final_tokens.append({
+                '_clientId': _CLIENT_ID,
+                'expiresIn': '3600',
+                'expiresOn': str(datetime.utcnow() + timedelta(seconds=3600 * 24)),
+                'userId': t['unique_name'].split('#')[-1],
+                '_authority': CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
+                'resource': t['aud'],
+                'isMRRT': True,
+                'accessToken': tokens[decoded_tokens.index(t)],
+                'tokenType': 'Bearer',
+                'oid': t['oid']
+            })
+
+        # merging with existing cached ones
+        for t in final_tokens:
+            cached_tokens = [entry for _, entry in self._creds_cache.adal_token_cache.read_items()]
+            to_delete = [c for c in cached_tokens if (c['_clientId'].lower() == t['_clientId'].lower() and
+                                                      c['resource'].lower() == t['resource'].lower() and
+                                                      c['_authority'].lower() == t['_authority'].lower() and
+                                                      c['userId'].lower() == t['userId'].lower())]
+            if to_delete:
+                self._creds_cache.adal_token_cache.remove(to_delete)
+        self._creds_cache.adal_token_cache.add(final_tokens)
+        self._creds_cache.persist_cached_creds()
+
+        return deepcopy(consolidated)
+
     @staticmethod
     def _normalize_properties(user, subscriptions, is_service_principal):
         consolidated = []
@@ -180,21 +229,39 @@ class Profile(object):
 
     @staticmethod
     def _build_tenant_level_accounts(tenants):
-        from azure.cli.core.profiles import get_sdk, ResourceType
-        SubscriptionType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-                                   'Subscription', mod='models')
-        StateType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-                            'SubscriptionState', mod='models')
         result = []
         for t in tenants:
-            s = SubscriptionType()
+            s = Profile._new_account()
             s.id = '/subscriptions/' + t
             s.subscription = t
             s.tenant_id = t
             s.display_name = 'N/A(tenant level account)'
-            s.state = StateType.enabled
             result.append(s)
         return result
+
+    @staticmethod
+    def _new_account():
+        from azure.cli.core.profiles import get_sdk, ResourceType
+        SubscriptionType, StateType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                              'Subscription', 'SubscriptionState', mod='models')
+        s = SubscriptionType()
+        s.state = StateType.enabled
+        return s
+
+    def init_if_in_msi_env(self, user):
+        _, subscription_id = Profile.split_msi_user_info(user)
+        if subscription_id is None:
+            return None
+        logger.info('MSI: environment was detected. Now trying to initialize a local account...')
+        tenant_id = Profile.get_msi_tenant_id(CLOUD.endpoints.resource_manager, subscription_id)
+        s = Profile._new_account()
+        s.id = '/subscriptions/' + subscription_id
+        s.tenant_id = tenant_id
+        s.display_name = _MSI_ACCOUNT_NAME
+        consolidated = Profile._normalize_properties(user, [s], False)
+        self._set_subscriptions(consolidated)
+        # use deepcopy as we don't want to persist these changes to file.
+        return deepcopy(consolidated)
 
     def _set_subscriptions(self, new_subscriptions):
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
@@ -311,7 +378,10 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 
         def _retrieve_token():
-            if user_type == _USER:
+            if account[_SUBSCRIPTION_NAME] == _MSI_ACCOUNT_NAME:
+                port, _ = Profile.split_msi_user_info(username_or_sp_id)
+                return Profile.get_msi_token(resource, CLOUD.endpoints.active_directory, account[_TENANT_ID], port)
+            elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
             return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
@@ -323,8 +393,21 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
-                      subscription=None):
+    def get_refresh_token(self, resource=CLOUD.endpoints.active_directory_resource_id,
+                          subscription=None):
+        account = self.get_subscription(subscription)
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+
+        if user_type == _USER:
+            _, _, token_entry = self._creds_cache.retrieve_token_for_user(
+                username_or_sp_id, account[_TENANT_ID], resource)
+            return None, token_entry[_REFRESH_TOKEN], token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
+
+        sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
+        return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
+
+    def get_raw_token(self, resource, subscription=None):
         account = self.get_subscription(subscription)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -339,36 +422,46 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    # per ask from java sdk
-    def get_expanded_subscription_info(self, subscription_id=None, name=None, password=None):
+    def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
+        from collections import OrderedDict
         account = self.get_subscription(subscription_id)
 
         # is the credential created through command like 'create-for-rbac'?
-        if bool(name) and bool(password):
-            result = {}
-            result[_SUBSCRIPTION_ID] = subscription_id or account[_SUBSCRIPTION_ID]
-            result['client'] = name
-            result['password'] = password
-            result[_TENANT_ID] = account[_TENANT_ID]
-            result[_ENVIRONMENT_NAME] = CLOUD.name
-            result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
+        result = OrderedDict()
+        if name and (password or cert_file):
+            result['clientId'] = name
+            if password:
+                result['clientSecret'] = password
+            else:
+                result['clientCertificate'] = cert_file
+            result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
         else:  # has logged in through cli
-            result = deepcopy(account)
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
-                result['client'] = account[_USER_ENTITY][_USER_NAME]
-                result['password'] = self._creds_cache.retrieve_secret_of_service_principal(
-                    account[_USER_ENTITY][_USER_NAME])
+                result['clientId'] = account[_USER_ENTITY][_USER_NAME]
+                sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(
+                    account[_USER_ENTITY][_USER_NAME]))
+                secret = getattr(sp_auth, 'secret', None)
+                if secret:
+                    result['clientSecret'] = secret
+                else:
+                    # we can output 'clientCertificateThumbprint' if asked
+                    result['clientCertificate'] = sp_auth.certificate_file
+                result['subscriptionId'] = account[_SUBSCRIPTION_ID]
             else:
-                result['userName'] = account[_USER_ENTITY][_USER_NAME]
+                raise CLIError('SDK Auth file is only applicable on service principals')
 
-            result.pop(_STATE)
-            result.pop(_USER_ENTITY)
-            result.pop(_IS_DEFAULT_SUBSCRIPTION)
-            result['subscriptionName'] = result.pop(_SUBSCRIPTION_NAME)
+        result[_TENANT_ID] = account[_TENANT_ID]
+        endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
+        endpoint_mappings['active_directory'] = 'activeDirectoryEndpointUrl'
+        endpoint_mappings['resource_manager'] = 'resourceManagerEndpointUrl'
+        endpoint_mappings['active_directory_graph_resource_id'] = 'activeDirectoryGraphResourceId'
+        endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
+        endpoint_mappings['gallery'] = 'galleryEndpointUrl'
+        endpoint_mappings['management'] = 'managementEndpointUrl'
 
-        result['subscriptionId'] = result.pop('id')
-        result['endpoints'] = CLOUD.endpoints
+        for e in endpoint_mappings:
+            result[endpoint_mappings[e]] = getattr(CLOUD.endpoints, e)
         return result
 
     def get_installation_id(self):
@@ -378,6 +471,69 @@ class Profile(object):
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
+
+    @staticmethod
+    def split_msi_user_info(user):
+        import uuid
+        parts = user.split('@')
+        if len(parts) == 2:
+            try:
+                uuid.UUID(parts[0])  # valid subscription id?
+                int(parts[1])  # valid port?
+                return parts[1], parts[0]
+            except ValueError:
+                pass
+        return None, None
+
+    @staticmethod
+    def get_msi_tenant_id(arm_endpoint, subscription_id):
+        import re
+        import requests
+        url = '{}/subscriptions/{}?api-version=2014-04-01'.format(arm_endpoint.rstrip('/'), subscription_id)
+        logger.debug('MSI: Retrieving tenant id by invoking GET from %s', url)
+        result = requests.get(url)
+        if result.status_code != 401:
+            raise CLIError('Failed to retrieve the tenant id of subscription {}'.format(subscription_id))
+        exp = r'.+authorization_uri="(.*?)".+'
+        r = re.match(exp, result.headers['www-authenticate'])
+        tenant_id = r.group(1).split('/')[-1]
+        logger.debug('MSI: Got tenant id: %s', tenant_id)
+        return tenant_id
+
+    @staticmethod
+    def get_msi_token(resource, aad_endpoint, tenant_id, port):
+        import requests
+        import time
+        request_uri = 'http://localhost:{}/oauth2/token'.format(port)
+        payload = {
+            'authority': '{}/{}'.format(aad_endpoint, tenant_id),
+            'resource': resource
+        }
+
+        # retry as the token endpoint might not be available yet, one example is you use CLI in a
+        # custom script extension of VMSS, which might get provisioned before the MSI extensioon
+        while True:
+            err = None
+            try:
+                result = requests.post(request_uri, data=payload)
+                logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
+                if result.status_code != 200:
+                    err = result.text
+            except Exception as ex:  # pylint: disable=broad-except
+                err = str(ex)
+
+            if err:
+                # we might need some error code checking to avoid silly waiting. The bottom line is users can
+                # always press ctrl+c to stop it
+                logger.warning("MSI: Failed to retrieve a token from '%s' with an error of '%s'. This could be caused "
+                               "by the MSI extension not yet fullly provisioned. Will retry in 60 seconds...",
+                               request_uri, err)
+                time.sleep(60)
+            else:
+                logger.debug('MSI: token retrieved')
+                break
+        token_entry = json.loads(result.content.decode())
+        return token_entry['token_type'], token_entry['access_token'], token_entry
 
 
 class SubscriptionFinder(object):
@@ -397,7 +553,8 @@ class SubscriptionFinder(object):
             from azure.cli.core._debug import change_ssl_cert_verification
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             api_version = get_api_version(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            return change_ssl_cert_verification(client_type(credentials, api_version=api_version))
+            return change_ssl_cert_verification(client_type(credentials, api_version=api_version,
+                                                            base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
@@ -434,6 +591,13 @@ class SubscriptionFinder(object):
         token_entry = sp_auth.acquire_token(context, resource, client_id)
         self.user_id = client_id
         result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
+        self.tenants = [tenant]
+        return result
+
+    #  only occur inside cloud console
+    def find_from_raw_token(self, tenant, token):
+        # decode the token, so we know the tenant
+        result = self._find_using_specific_tenant(tenant, token)
         self.tenants = [tenant]
         return result
 

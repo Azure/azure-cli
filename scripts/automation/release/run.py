@@ -34,7 +34,6 @@ def release(pkg_dir, repo):
     """Release all packages in a directory"""
     pkgs = [os.path.join(pkg_dir, f) for f in os.listdir(pkg_dir) if f != SOURCE_ARCHIVE_NAME]
     for pkg in pkgs:
-        check_call(['twine', 'register', '--repository-url', repo, '--repository', repo, pkg])
         check_call(['twine', 'upload', '--repository-url', repo, '--repository', repo, pkg])
 
 

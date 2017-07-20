@@ -153,6 +153,14 @@ def sf_select(endpoint, cert=None,
     set_global_config_value("servicefabric", "endpoint", endpoint)
 
 
+def validate_app_path(app_path):
+    abspath = os.path.abspath(app_path)
+    if os.path.isdir(abspath):
+        return abspath
+    else:
+        raise ValueError("Invalid path to application directory: {0}".format(abspath))
+
+
 def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
     """
     Copies a Service Fabric application package to the image store.
@@ -169,7 +177,7 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
     """
     from azure.cli.command_modules.sf.config import SfConfigParser
 
-    abspath = os.path.abspath(path)
+    abspath = validate_app_path(path)
     basename = os.path.basename(abspath)
 
     sf_config = SfConfigParser()
@@ -217,8 +225,9 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
                 url = urlunparse(url_parsed)
 
                 def file_chunk(target_file, rel_path, print_progress):
-                    chunk = target_file.read(100000)
-                    if chunk != b'':
+                    chunk = True
+                    while chunk:
+                        chunk = target_file.read(100000)
                         print_progress(len(chunk), rel_path)
                         yield chunk
 

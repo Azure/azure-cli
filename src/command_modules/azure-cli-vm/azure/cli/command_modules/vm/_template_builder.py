@@ -248,6 +248,55 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
+def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
+                              role_assignment_guid, identity_scope, is_vm=True):
+    from azure.cli.core.commands.arm import parse_resource_id
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    result = parse_resource_id(identity_scope)
+    if result.get('type'):  # is a resource id?
+        name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
+        assignment_type = '{}/{}/providers/roleAssignments'.format(result['namespace'], result['type'])
+    else:
+        name = role_assignment_guid
+        assignment_type = 'Microsoft.Authorization/roleAssignments'
+
+    # pylint: disable=line-too-long
+    msi_rp_api_version = '2015-08-31-PREVIEW'
+    authorization_api_version = get_mgmt_service_client(AuthorizationManagementClient).config.api_version
+    return {
+        'name': name,
+        'type': assignment_type,
+        'apiVersion': authorization_api_version,
+        'dependsOn': [
+            'Microsoft.Compute/{}/{}'.format('virtualMachines' if is_vm else 'virtualMachineScaleSets', vm_vmss_name)
+        ],
+        'properties': {
+            'roleDefinitionId': role_definition_id,
+            'principalId': "[reference('{}/providers/Microsoft.ManagedIdentity/Identities/default', '{}').principalId]".format(
+                vm_vmss_resource_id, msi_rp_api_version),
+            'scope': identity_scope
+        }
+    }
+
+
+def build_msi_extension(vm_name, location, role_assignment_guid, port, is_linux, extension_version):
+    return {
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'name': vm_name + '/MSIExtension',
+        'apiVersion': get_api_version(ResourceType.MGMT_COMPUTE),
+        'location': location,
+        'dependsOn': [role_assignment_guid],
+        'properties': {
+            'publisher': "Microsoft.ManagedIdentity",
+            'type': 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows'),
+            'typeHandlerVersion': extension_version,
+            'autoUpgradeMinorVersion': True,
+            'settings': {'port': port}
+        }
+    }
+
+
 def build_vm_resource(  # pylint: disable=too-many-locals
         name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
@@ -394,8 +443,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
-    profile['dataDisks'] = []
     if data_disk_sizes_gb is not None:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
@@ -414,6 +463,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
             lun = lun + 1
 
     if attach_data_disks:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         from azure.cli.core.commands.arm import is_valid_resource_id
         for d in attach_data_disks:
             disk_entry = {
@@ -459,10 +509,9 @@ def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
     return frontend_ip_config
 
 
-def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
-                                       frontend_ip_name, public_ip_id,
-                                       subnet_id, gateway_subnet_id,
-                                       private_ip_address, private_ip_allocation):
+def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port, frontend_ip_name,
+                                       public_ip_id, subnet_id, gateway_subnet_id,
+                                       private_ip_address, private_ip_allocation, sku, capacity):
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
                                                    private_ip_address, private_ip_allocation,
                                                    subnet_id)
@@ -522,9 +571,9 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
             }
         ],
         'sku': {
-            'name': 'Standard_Large',
-            'tier': 'Standard',
-            'capacity': '10'
+            'name': sku,
+            'tier': sku.split('_')[0],
+            'capacity': capacity
         },
         'requestRoutingRules': [
             {
@@ -618,6 +667,7 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
 # pylint: disable=too-many-locals
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
+                        public_ip_per_vm, vm_domain_name, dns_servers,
                         admin_username, authentication_type,
                         storage_profile, os_disk_name,
                         os_caching, data_caching, storage_sku, data_disk_sizes_gb,
@@ -634,6 +684,18 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'subnet': {'id': subnet_id}
         }
     }
+
+    if public_ip_per_vm:
+        ip_configuration['properties']['publicipaddressconfiguration'] = {
+            'name': 'instancepublicip',
+            'properties': {
+                'idleTimeoutInMinutes': 10,
+            }
+        }
+        if vm_domain_name:
+            ip_configuration['properties']['publicipaddressconfiguration']['properties']['dnsSettings'] = {
+                'domainNameLabel': vm_domain_name
+            }
 
     if backend_address_pool_id:
         key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
@@ -717,6 +779,19 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')
     # Build VMSS
+    nic_config = {
+        'name': nic_name,
+        'properties': {
+            'primary': 'true',
+            'ipConfigurations': [ip_configuration]
+        }
+    }
+
+    if dns_servers:
+        nic_config['properties']['dnsSettings'] = {
+            'dnsServers': dns_servers
+        }
+
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
@@ -726,13 +801,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'storageProfile': storage_properties,
             'osProfile': os_profile,
             'networkProfile': {
-                'networkInterfaceConfigurations': [{
-                    'name': nic_name,
-                    'properties': {
-                        'primary': 'true',
-                        'ipConfigurations': [ip_configuration]
-                    }
-                }]
+                'networkInterfaceConfigurations': [nic_config]
             }
         }
     }
