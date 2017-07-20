@@ -5,22 +5,29 @@
 from __future__ import print_function
 import pkgutil
 
-import argparse
 import os
 import sys
 import json
-import yaml
 from importlib import import_module
 
-from automation.utilities.path import filter_user_selected_modules_with_tests
+import yaml
+
 from azure.cli.core.application import APPLICATION, Application
 from azure.cli.core.application import Configuration
 from azure.cli.core.commands import load_params, _update_command_definitions
 from azure.cli.core.help_files import helps
+from azure.cli.core.commands.arm import add_id_parameters
 
+try:
+    from sets import Set as set
+except ImportError:
+    pass
+
+WHITE_DATA_FILE = os.path.join(os.path.dirname(__file__), 'allowed-error.json')
 
 
 def dump_no_help(modules):
+    APPLICATION.initialize(Configuration())
     cmd_table = APPLICATION.configuration.get_command_table()
 
     exit_val = 0
@@ -34,25 +41,35 @@ def dump_no_help(modules):
             print("EXCEPTION: " + str(mod))
 
     _update_command_definitions(cmd_table)
+    add_id_parameters(cmd_table)
 
-    command_list = []
-    subgroups_list = []
+    with open(WHITE_DATA_FILE, 'r') as white:
+        white_data = json.load(white)
+
+    white_list_commands = set(white_data.get('commands', []))
+    white_list_subgroups = set(white_data.get('subgroups', []))
+    white_list_parameters = white_data.get('parameters', {})
+
+    command_list = set()
+    subgroups_list = set()
     parameters = {}
     for cmd in cmd_table:
-        if not cmd_table[cmd].description and cmd not in helps:
-            command_list.append(cmd)
+        if not cmd_table[cmd].description and cmd not in helps and cmd not in white_list_commands:
+            command_list.add(cmd)
             exit_val = 1
         group_name = " ".join(cmd.split()[:-1])
         if group_name not in helps:
-            exit_val = 1
-            if group_name not in subgroups_list:
-                subgroups_list.append(group_name)
-
-        param_list = []
-        for key in cmd_table[cmd].arguments:
-            if not cmd_table[cmd].arguments[key].type.settings.get('help'):
+            if group_name not in subgroups_list and group_name not in white_list_subgroups and group_name:
                 exit_val = 1
-                param_list.append(cmd_table[cmd].arguments[key].name)
+                subgroups_list.add(group_name)
+
+        param_list = set()
+        for key in cmd_table[cmd].arguments:
+            name = cmd_table[cmd].arguments[key].name
+            if not cmd_table[cmd].arguments[key].type.settings.get('help') and \
+                    name not in white_list_parameters.get(cmd, []):
+                exit_val = 1
+                param_list.add(name)
         if param_list:
             parameters[cmd] = param_list
 
@@ -69,14 +86,19 @@ def dump_no_help(modules):
                     parameters.pop(cmd, None)
 
     data = {
-        "subgroups" : subgroups_list,
-        "commands" : command_list,
-        "parameters" : parameters
+        "subgroups": subgroups_list,
+        "commands": command_list,
+        "parameters": parameters
     }
 
-    print(json.dumps(data, indent=2, sort_keys=True))
+    return exit_val, data
 
-    return exit_val
+
+def set_default(obj):
+    """ change sets to lists for json """
+    if isinstance(obj, set):
+        return list(obj)
+
 
 if __name__ == '__main__':
     try:
@@ -85,6 +107,11 @@ if __name__ == '__main__':
                                      pkgutil.iter_modules(mods_ns_pkg.__path__)]
     except ImportError:
         pass
-    exit_value = dump_no_help(installed_command_modules)
-    sys.exit(exit_value)
 
+    result, failed_commands = dump_no_help(installed_command_modules)
+
+    if any(len(failed_commands[key]) > 0 for key in failed_commands) or result != 0:
+        print('==== FAILED COMMANDS ====')
+        print(json.dumps(failed_commands, default=set_default, indent=2))
+
+    sys.exit(0)  # enforce it

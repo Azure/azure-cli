@@ -108,7 +108,7 @@ For more usage examples, take a look at our [GitHub samples repo](http://github.
 
 If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/Azure/azure-cli/issues) section of our GitHub repo.
 
-To provide feedback from the command line, try the `az feedback` command!
+To provide feedback from the command line, try the `az feedback` command.
 
 ## Developer Installation
 

@@ -130,8 +130,8 @@ class ACSClient(object):
 
         :param command: Command to run on the remote host
         :type command: String
-        :param background: True if command should be run in the foreground,
-        false to run it in a separate thread
+        :param background: True to run it in a separate thread,
+               False should be run in the foreground
         :type command: Boolean
         """
         if background:

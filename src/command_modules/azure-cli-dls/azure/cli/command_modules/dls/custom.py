@@ -9,7 +9,9 @@ from azure.mgmt.datalake.store.models import (DataLakeStoreAccountUpdateParamete
                                               EncryptionIdentity,
                                               EncryptionConfig,
                                               EncryptionState,
-                                              KeyVaultMetaInfo)
+                                              KeyVaultMetaInfo,
+                                              UpdateEncryptionConfig,
+                                              UpdateKeyVaultMetaInfo)
 
 from azure.datalake.store.enums import ExpiryOptionType
 from azure.datalake.store.multithread import (ADLUploader, ADLDownloader)
@@ -68,7 +70,7 @@ def create_adls_account(client,
         create_params.identity = None
         create_params.encryption_config = None
 
-    return client.create(resource_group_name, account_name, create_params)
+    return client.create(resource_group_name, account_name, create_params).result()
 
 
 def update_adls_account(client,
@@ -79,7 +81,8 @@ def update_adls_account(client,
                         firewall_state=None,
                         allow_azure_ips=None,
                         trusted_id_provider_state=None,
-                        tier=None):
+                        tier=None,
+                        key_version=None):
     update_params = DataLakeStoreAccountUpdateParameters(
         tags=tags,
         default_group=default_group,
@@ -88,7 +91,12 @@ def update_adls_account(client,
         trusted_id_provider_state=trusted_id_provider_state,
         new_tier=tier)
 
-    return client.update(resource_group_name, account_name, update_params)
+    # this will fail if the encryption is not user managed, as service managed key rotation is not supported.
+    if key_version:
+        update_params.encryption_config = UpdateEncryptionConfig(
+            UpdateKeyVaultMetaInfo(key_version))
+
+    return client.update(resource_group_name, account_name, update_params).result()
 
 
 # firewall customizations
@@ -159,24 +167,38 @@ def append_adls_item(account_name,
         f.write(content)
 
 
+def upload_to_adls(account_name,
+                   source_path,
+                   destination_path,
+                   chunk_size,
+                   buffer_size,
+                   block_size,
+                   thread_count=None,
+                   overwrite=False):
+    client = cf_dls_filesystem(account_name)
+    ADLUploader(
+        client,
+        destination_path,
+        source_path,
+        thread_count,
+        chunksize=chunk_size,
+        buffersize=buffer_size,
+        blocksize=block_size,
+        overwrite=overwrite)
+
+
 def remove_adls_item(account_name,
                      path,
                      recurse=False):
     cf_dls_filesystem(account_name).rm(path, recurse)
 
 
-def upload_to_adls(account_name,
-                   source_path,
-                   destination_path,
-                   thread_count=None,
-                   overwrite=False):
-    client = cf_dls_filesystem(account_name)
-    ADLUploader(client, destination_path, source_path, thread_count, overwrite=overwrite)
-
-
 def download_from_adls(account_name,
                        source_path,
                        destination_path,
+                       chunk_size,
+                       buffer_size,
+                       block_size,
                        thread_count=None,
                        overwrite=False):
     client = cf_dls_filesystem(account_name)
@@ -185,6 +207,9 @@ def download_from_adls(account_name,
         source_path,
         destination_path,
         thread_count,
+        chunksize=chunk_size,
+        buffersize=buffer_size,
+        blocksize=block_size,
         overwrite=overwrite)
 
 

@@ -317,6 +317,40 @@ helps['network application-gateway probe update'] = """
 """
 # endregion
 
+# region Application Gateway redirect configuration
+
+helps['network application-gateway redirect-config'] = """
+    type: group
+    short-summary: Manage redirect configurations.
+"""
+
+helps['network application-gateway redirect-config create'] = """
+    type: command
+    short-summary: Create a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config delete'] = """
+    type: command
+    short-summary: Delete a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config list'] = """
+    type: command
+    short-summary: List redirect configurations.
+"""
+
+helps['network application-gateway redirect-config show'] = """
+    type: command
+    short-summary: Show details of a redirect configuration.
+"""
+
+helps['network application-gateway redirect-config update'] = """
+    type: command
+    short-summary: Update a redirect configuration.
+"""
+
+# endregion
+
 # region Application Gateway rules
 
 helps['network application-gateway rule'] = """
@@ -391,12 +425,28 @@ helps['network application-gateway ssl-policy'] = """
 helps['network application-gateway ssl-policy set'] = """
     type: command
     short-summary: Update or clear SSL policy settings.
+    parameters:
+        - name: --cipher-suites
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
+        - name: --disabled-ssl-protocols
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
+        - name: --min-protocol-version
+          populator-commands:
+            - az network application-gateway ssl-policy list-options
 """
 
 helps['network application-gateway ssl-policy show'] = """
     type: command
     short-summary: Show the SSL policy settings.
 """
+
+helps['network application-gateway ssl-policy predefined'] = """
+    type: group
+    short-summary: Information on predefined SSL policies.
+"""
+
 # endregion
 
 # region Application Gateway URL path map
@@ -1697,16 +1747,16 @@ helps['network vnet subnet'] = """
 helps['network vnet subnet create'] = """
     type: command
     short-summary: Create a subnet and associate an existing NSG and route table.
+    parameters:
+        - name: --private-access-services
+          short-summary: Space separated list of services for which to allow private access to this subnet.
+          populator-commands:
+            - az network list-private-access-services
     examples:
-        - name: <example name>.
+        - name: Create new subnet attached to an NSG with a custom route table.
           text: >
-            az network vnet subnet create
-            -g MyResourceGroup
-            --vnet-name MyVnet
-            -n MySubnet
-            --address-prefix 10.0.0.0/24
-            --network-security-group MyNsg
-            --route-table MyRouteTable
+            az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet
+            --address-prefix 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
 """
 
 helps['network vnet subnet delete'] = """
@@ -1727,6 +1777,11 @@ helps['network vnet subnet show'] = """
 helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
+    parameters:
+        - name: --private-access-services
+          short-summary: Space separated list of services for which to allow private access to this subnet.
+          populator-commands:
+            - az network list-private-access-services
 """
 # endregion
 
@@ -2099,3 +2154,8 @@ helps['network watcher flow-log show'] = """
 """
 
 # endregion
+
+helps['network list-private-access-services'] = """
+    type: command
+    short-summary: List which services support private access for a given region.
+"""

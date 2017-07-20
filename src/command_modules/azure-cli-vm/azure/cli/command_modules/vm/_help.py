@@ -99,6 +99,9 @@ helps['vm create'] = """
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
+        - name: Create a VM with Managed Service Identity. The VM will have a 'Contributor' Role with access to the current resource group
+          text: >
+             az vm create -n MyVm -g MyResourceGroup --assign-identity --image centos
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -123,6 +126,9 @@ helps['vmss create'] = """
         - name: Create a Linux VM scale set from a custom image using an existing ssh public key of ~/.ssh/id_rsa.pub.
           text: >
             az vmss create -n MyVmss -g MyResourceGroup --image MyImage
+        - name: Create a Linux VM scale set, a load balancer, each VM has a public-ip address, a custom domain name, own dns servers
+          text: >
+            az vmss create -n MyVmss -g MyResourceGroup --image centos --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
         - name: Create a Linux VM scale set with a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
           text: >
             az vmss create -g MyResourceGroup -n MyVmss --image debian --custom_data MyCloudInitScript.yml
@@ -304,7 +310,7 @@ helps['vm user delete'] = """
         Delete a user account from a VM without logging into it.
     examples:
         - name: Delete a user account.
-          text: az vm user delete -u username -n MyVm -r MyResourceGroup
+          text: az vm user delete -u username -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Delete User by VM Ids', 'az vm user delete -u username'))
 
@@ -315,7 +321,7 @@ helps['vm user reset-ssh'] = """
         The extension will restart the SSH server, open the SSH port on your VM, and reset the SSH configuration to default values. The user account (name, password, or SSH keys) are not changed.
     examples:
         - name: Reset the SSH configuration.
-          text: az vm user reset-ssh -n MyVm -r MyResourceGroup
+          text: az vm user reset-ssh -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Reset SSH by VM Ids', 'vm user reset-ssh'))
 
@@ -326,7 +332,7 @@ helps['vm user update'] = """
         - name: Update a Windows user account.
           text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
         - name: Update a Linux user account.
-          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -r MyResourceGroup
+          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Set Linux User by VM Ids', 'vm user update -u username '
                                  '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
@@ -641,7 +647,7 @@ helps['vm image'] = """
 
 helps['vm image list'] = """
     type: command
-    short-summary: List the VM images available in the Azure Marketplace.
+    short-summary: List the VM/VMSS images available in the Azure Marketplace.
     examples:
         - name: List all available images.
           text: az vm image list --all
@@ -746,6 +752,11 @@ helps['vmss diagnostics'] = """
 helps['vmss list-instance-connection-info'] = """
     type: command
     short-summary: Get the IP address and port number used to connect to individual instances.
+"""
+
+helps['vmss list-instance-public-ips'] = """
+    type: command
+    short-summary: List public IP addresses of VM instances
 """
 
 helps['vmss extension'] = """
@@ -878,7 +889,7 @@ helps['vm resize'] = """
         - name: Resize a VM.
           text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2
 {0}
-""".format(vm_ids_example.format('Resize VMs by VM Ids', 'vm redeploy --size Standard_DS3_v2'))
+""".format(vm_ids_example.format('Resize VMs by VM Ids', 'vm resize --size Standard_DS3_v2'))
 
 helps['vm restart'] = """
     type: command
@@ -921,6 +932,24 @@ helps['vm wait'] = """
           text: az vm wait -g MyResourceGroup -n MyVm --created
 {0}
 """.format(vm_ids_example.format('Wait until VMs are deleted by Ids', 'vm wait --deleted'))
+
+helps['vm assign-identity'] = """
+    type: command
+    short-summary: Enable managed service identity on a VM
+    long-summary: required to authenticate and interact with other Azure services using bearer tokens
+    examples:
+        - name: Enable identity on a VM. It will have a role of 'Reader' to the VM's resource group
+          text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
+"""
+
+helps['vmss assign-identity'] = """
+    type: command
+    short-summary: Enable managed service identity on a VMSS
+    long-summary: required to authenticate and interact with other Azure services using bearer tokens
+    examples:
+        - name: Enable identity on a VMSS. It will have a role of 'Owner' to the VMSS's resource group.
+          text: az vmss assign-identity -g MyResourceGroup -n MyVmss --role Owner
+"""
 
 helps['disk'] = """
     type: group

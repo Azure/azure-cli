@@ -2,18 +2,19 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from __future__ import unicode_literals, print_function
 
+import datetime
 import json
 import math
 import os
+import re
 import subprocess
 import sys
-import datetime
-import threading
+from threading import Thread
 
 import jmespath
+import six
 from six.moves import configparser
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -26,14 +27,17 @@ from prompt_toolkit.interface import CommandLineInterface, Application
 from prompt_toolkit.shortcuts import create_eventloop
 
 import azclishell.configuration
+from azclishell.az_completer import AzCompleter
+
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
 from azclishell.frequency_heuristic import DISPLAY_TIME
-from azclishell.gather_commands import add_random_new_lines
+from azclishell.gather_commands import add_new_lines, GatherCommands
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
-from azclishell.progress import get_progress_message, progress_view
-from azclishell.telemetry import TC as telemetry
+from azclishell.progress import progress_view
+from azclishell.telemetry import SHELL_TELEMETRY as telemetry
+from azclishell.threads import LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
@@ -44,6 +48,7 @@ from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
+import azure.cli.core.telemetry as cli_telemetry
 from azure.cli.core.util import (show_version_info_exit, handle_exception)
 from azure.cli.core.util import CLIError
 
@@ -59,59 +64,67 @@ START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
-def handle_cd(cmd):
-    """changes dir """
-    if len(cmd) != 2:
-        print("Invalid syntax: cd path")
-        return
-    path = os.path.expandvars(os.path.expanduser(cmd[1]))
-    try:
-        os.chdir(path)
-    except OSError as ex:
-        print("cd: %s\n" % ex)
-
-
-def space_examples(list_examples, rows):
+def space_examples(list_examples, rows, section_value):
     """ makes the example text """
     examples_with_index = []
 
     for i, _ in list(enumerate(list_examples)):
-        examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
-                                   list_examples[i][1])
+        if len(list_examples[i]) > 1:
+            examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
+                                       list_examples[i][1])
 
     example = "".join(exam for exam in examples_with_index)
     num_newline = example.count('\n')
 
     page_number = ''
-    if num_newline > rows * PART_SCREEN_EXAMPLE:
+    if num_newline > rows * PART_SCREEN_EXAMPLE and rows > PART_SCREEN_EXAMPLE * 10:
         len_of_excerpt = math.floor(float(rows) * PART_SCREEN_EXAMPLE)
 
         group = example.split('\n')
-        end = int(get_section() * len_of_excerpt)
-        begin = int((get_section() - 1) * len_of_excerpt)
+        end = int(section_value * len_of_excerpt)
+        begin = int((section_value - 1) * len_of_excerpt)
 
-        if get_section() * len_of_excerpt < num_newline:
+        if end < num_newline:
             example = '\n'.join(group[begin:end]) + "\n"
         else:  # default chops top off
             example = '\n'.join(group[begin:]) + "\n"
-            while ((get_section() - 1) * len_of_excerpt) > num_newline:
+            while ((section_value - 1) * len_of_excerpt) > num_newline:
                 sub_section()
-        page_number = '\n' + str(get_section()) + "/" + str(math.ceil(num_newline / len_of_excerpt))
+        page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
 
-    return example + page_number
+    return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
 
 
-def space_toolbar(settings_items, cols, empty_space):
+def space_toolbar(settings_items, empty_space):
     """ formats the toolbar """
     counter = 0
     for part in settings_items:
         counter += len(part)
-    spacing = empty_space[:int(math.floor((cols - counter) / (len(settings_items) - 1)))]
+
+    if len(settings_items) == 1:
+        spacing = ''
+    else:
+        spacing = empty_space[
+            :int(math.floor((len(empty_space) - counter) / (len(settings_items) - 1)))]
 
     settings = spacing.join(settings_items)
 
     empty_space = empty_space[len(NOTIFICATIONS) + len(settings) + 1:]
     return settings, empty_space
+
+
+def validate_contains_query(args, symbol):
+    """ validates that the query symbol is used as a shell specific gesture """
+    for arg in args:
+        group = re.search(r'\-.*\=\%s.*' % symbol, arg)
+        if arg.startswith(symbol) or group is not None:
+            return True
+    return False
+
+
+def restart_completer(shell):
+    shell.completer = AzCompleter(GatherCommands())
+    shell.refresh_cli = True
 
 
 # pylint: disable=too-many-instance-attributes
@@ -120,8 +133,8 @@ class Shell(object):
 
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdout, output_custom=None,
-                 user_feedback=False):
+                 app=None, input_custom=sys.stdin, output_custom=None,
+                 user_feedback=False, intermediate_sleep=.25, final_sleep=4):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -147,6 +160,8 @@ class Shell(object):
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
+        self.intermediate_sleep = intermediate_sleep  # in seconds
+        self.final_sleep = final_sleep  # in seconds
 
     @property
     def cli(self):
@@ -156,6 +171,17 @@ class Shell(object):
             self.refresh_cli = False
         return self._cli
 
+    def handle_cd(self, cmd):
+        """changes dir """
+        if len(cmd) != 2:
+            print("Invalid syntax: cd path", file=self.output)
+            return
+        path = os.path.expandvars(os.path.expanduser(cmd[1]))
+        try:
+            os.chdir(path)
+        except OSError as ex:
+            print("cd: %s\n" % ex, file=self.output)
+
     def on_input_timeout(self, cli):
         """
         brings up the metadata for the command if there is a valid command already typed
@@ -163,7 +189,7 @@ class Shell(object):
         document = cli.current_buffer.document
         text = document.text
 
-        text = text.replace('az', '')
+        text = text.replace('az ', '')
         if self.default_command:
             text = self.default_command + ' ' + text
 
@@ -191,19 +217,22 @@ class Shell(object):
         _, cols = get_window_dim()
         cols = int(cols)
 
-        empty_space = ""
-        for _ in range(cols):
-            empty_space += " "
+        empty_space = " " * cols
 
         delta = datetime.datetime.utcnow() - START_TIME
         if self.user_feedback and delta.seconds < DISPLAY_TIME:
             toolbar = [
                 ' Try out the \'feedback\' command',
                 'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
+        elif self.command_table_thread.is_alive():
+            toolbar = [
+                ' Loading...',
+                'Hit [enter] to refresh'
+            ]
         else:
             toolbar = self._toolbar_info()
 
-        toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
+        toolbar, empty_space = space_toolbar(toolbar, empty_space)
         cli.buffers['bottom_toolbar'].reset(
             initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, toolbar, empty_space)))
 
@@ -234,6 +263,8 @@ class Shell(object):
         is_command = True
         rows, _ = get_window_dim()
         rows = int(rows)
+        if not self.completer:
+            return param_descrip, example
 
         for word in text.split():
             if word.startswith("-"):  # any parameter
@@ -241,15 +272,14 @@ class Shell(object):
             if is_command:
                 command += str(word) + " "
 
-            if self.completer.is_completable(command.rstrip()):
+            if self.completer and self.completer.is_completable(command.rstrip()):
                 cmdstp = command.rstrip()
                 any_documentation = True
 
-                if word in self.completer.command_parameters[cmdstp] and \
-                   self.completer.has_description(cmdstp + " " + word):
+                if word in self.completer.command_parameters[cmdstp] and self.completer.has_description(
+                        cmdstp + " " + word):
                     param_descrip = word + ":\n" + \
-                        self.completer.get_param_description(
-                            cmdstp + " " + word)
+                        self.completer.param_description.get(cmdstp + " " + word, '')
 
                 self.description_docs = u'{}'.format(
                     self.completer.command_description[cmdstp])
@@ -260,7 +290,7 @@ class Shell(object):
                         for part in example:
                             string_example += part
                     example = space_examples(
-                        self.completer.command_examples[cmdstp], rows)
+                        self.completer.command_examples[cmdstp], rows, get_section())
 
         if not any_documentation:
             self.description_docs = u''
@@ -329,7 +359,6 @@ class Shell(object):
 
     def set_scope(self, value):
         """ narrows the scopes the commands """
-
         set_scope(value)
         if self.default_command:
             self.default_command += ' ' + value
@@ -345,14 +374,14 @@ class Shell(object):
         try:
             num = int(num) - 1
         except ValueError:
-            print("An Integer should follow the colon")
+            print("An Integer should follow the colon", file=self.output)
             return ""
         if cmd in self.completer.command_examples:
             if num >= 0 and num < len(self.completer.command_examples[cmd]):
                 example = self.completer.command_examples[cmd][num][1]
                 example = example.replace('\n', '')
             else:
-                print('Invalid example number')
+                print('Invalid example number', file=self.output)
                 return '', True
 
         example = example.replace('az', '')
@@ -385,7 +414,7 @@ class Shell(object):
                 eventloop=create_eventloop())
             example_cli.buffers['example_line'].reset(
                 initial_document=Document(u'{}\n'.format(
-                    add_random_new_lines(example)))
+                    add_new_lines(example)))
             )
             while start_index < len(text.split()):
                 if self.default_command:
@@ -417,6 +446,10 @@ class Shell(object):
     def _special_cases(self, text, cmd, outside):
         break_flag = False
         continue_flag = False
+        args = parse_quotes(text)
+        args_no_quotes = []
+        for arg in args:
+            args_no_quotes.append(arg.strip("/'").strip('/"'))
 
         if text and len(text.split()) > 0 and text.split()[0].lower() == 'az':
             telemetry.track_ssg('az', text)
@@ -440,23 +473,24 @@ class Shell(object):
                 cmd = text[1:]
                 outside = True
                 if cmd.strip() and cmd.split()[0] == 'cd':
-                    handle_cd(parse_quotes(cmd))
+                    self.handle_cd(parse_quotes(cmd))
                     continue_flag = True
                 telemetry.track_ssg('outside', '')
 
             elif text[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
 
-                print(meaning + ": " + str(self.last_exit))
+                print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
+            elif validate_contains_query(args_no_quotes, SELECT_SYMBOL['query']) and self.last and self.last.result:
+                continue_flag = self.handle_jmespath_query(args_no_quotes, continue_flag)
+                telemetry.track_ssg('query', '')
 
-            elif text[0] == SELECT_SYMBOL['query']:  # query previous output
-                continue_flag = self.handle_jmespath_query(text, continue_flag)
             elif text[0] == '--version' or text[0] == '-v':
                 try:
                     continue_flag = True
-                    show_version_info_exit(sys.stdout)
+                    show_version_info_exit(self.output)
                 except SystemExit:
                     pass
             elif "|" in text or ">" in text:  # anything I don't parse, send off
@@ -466,81 +500,134 @@ class Shell(object):
             elif SELECT_SYMBOL['example'] in text:
                 cmd, continue_flag = self.handle_example(cmd, continue_flag)
                 telemetry.track_ssg('tutorial', text)
-
-        continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text)
+            elif len(text) > 2 and SELECT_SYMBOL['scope'] == text[0:2]:
+                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text)
 
         return break_flag, continue_flag, outside, cmd
 
-    def handle_jmespath_query(self, text, continue_flag):
-        if self.last and self.last.result:
-            if hasattr(self.last.result, '__dict__'):
-                input_dict = dict(self.last.result)
-            else:
-                input_dict = self.last.result
-            try:
-                query_text = text.partition(SELECT_SYMBOL['query'])[2]
-                result = ""
-                if query_text:
-                    result = jmespath.search(
-                        query_text, input_dict)
-                if isinstance(result, str):
-                    print(result)
+    def handle_jmespath_query(self, args, continue_flag):
+        """ handles the jmespath query for injection or printing """
+        if hasattr(self.last.result, '__dict__'):
+            input_dict = dict(self.last.result)
+        else:
+            input_dict = self.last.result
+        try:
+            queries = []
+            results = []
+            injected_command = []
+            for arg in args:
+                if arg.startswith(SELECT_SYMBOL['query']):
+                    query = arg[len(SELECT_SYMBOL['query']):]
+                    queries.append(query)
+                    results.append(jmespath.search(query, input_dict))
+                    injected_command.append(SELECT_SYMBOL['query'])
+                elif re.search(r'\-.*\=\%s.*' % SELECT_SYMBOL['query'], arg) is not None:
+                    parition = arg.partition(SELECT_SYMBOL['query'])
+                    base = parition[0]
+                    query = parition[2]
+                    queries.append(query)
+                    results.append(jmespath.search(query, input_dict))
+                    injected_command.append(base + SELECT_SYMBOL['query'])
                 else:
-                    print(json.dumps(result, sort_keys=True, indent=2))
-            except jmespath.exceptions.ParseError:
-                print("Invalid Query")
-        continue_flag = True
-        telemetry.track_ssg('query', text)
+                    injected_command.append(arg)
+
+            if len(args) > 0 and args[0].startswith(SELECT_SYMBOL['query']):
+                # then push out the query
+                print(json.dumps(results[0], sort_keys=True, indent=2), file=self.output)
+                continue_flag = True
+            else:  # inject into cmd
+                cmd_base = ' '.join(injected_command)
+                if all(isinstance(result, (six.text_type, six.string_types)) for result in results):
+                    for result in results:
+                        cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
+                    self.cli_execute(cmd_base)
+                    continue_flag = True
+                elif all(isinstance(result, list) for result in results):
+                    if len(results) > 1:
+                        for res_counter, _ in enumerate(results[0]):
+                            base = cmd_base
+                            skip = False
+
+                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                                if counter < len(results) and res_counter < len(results[counter]):
+                                    try:
+                                        base = base.replace(
+                                            SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                                    except TypeError:  # because of bad input
+                                        pass
+                                else:  # if there aren't an even number of results, skip it
+                                    skip = True
+                            if not skip:
+                                self.cli_execute(base)
+                    else:
+                        for res_counter, _ in enumerate(results[0]):
+                            base = cmd_base
+                            skip = False
+
+                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                                if counter < len(results) and res_counter < len(results[counter]):
+                                    try:
+                                        base = base.replace(
+                                            SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                                    except TypeError:  # because of bad input
+                                        pass
+                                else:  # if there aren't an even number of results, skip it
+                                    skip = True
+                            if not skip:
+                                self.cli_execute(base)
+                    continue_flag = True
+
+        except (jmespath.exceptions.ParseError, CLIError):
+            print("Invalid Query", file=self.output)
+            continue_flag = True
         return continue_flag
 
     def handle_scoping_input(self, continue_flag, cmd, text):
+        """ handles what to do with a scoping gesture """
         default_split = text.partition(SELECT_SYMBOL['scope'])[2].split()
         cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
 
-        if text and SELECT_SYMBOL['scope'] == text[0:2]:
-            continue_flag = True
+        continue_flag = True
 
-            if not default_split:
-                self.default_command = ""
-                set_scope("", add=False)
-                print('unscoping all')
+        if not default_split:
+            self.default_command = ""
+            set_scope("", add=False)
+            print('unscoping all', file=self.output)
 
-                return continue_flag, cmd
-
-            while default_split:
-                if not text:
-                    value = ''
-                else:
-                    value = default_split[0]
-
-                if self.default_command:
-                    tree_val = self.default_command + " " + value
-                else:
-                    tree_val = value
-
-                if in_tree(self.completer.command_tree, tree_val.strip()):
-                    self.set_scope(value)
-                    print("defaulting: " + value)
-                    cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
-                    telemetry.track_ssg('scope command', value)
-
-                elif SELECT_SYMBOL['unscope'] == default_split[0] and \
-                        len(self.default_command.split()) > 0:
-
-                    value = self.default_command.split()[-1]
-                    self.default_command = ' ' + ' '.join(self.default_command.split()[:-1])
-
-                    if not self.default_command.strip():
-                        self.default_command = self.default_command.strip()
-                    set_scope(self.default_command, add=False)
-                    print('unscoping: ' + value)
-
-                elif SELECT_SYMBOL['unscope'] not in text:
-                    print("Scope must be a valid command")
-
-                default_split = default_split[1:]
-        else:
             return continue_flag, cmd
+
+        while default_split:
+            if not text:
+                value = ''
+            else:
+                value = default_split[0]
+
+            if self.default_command:
+                tree_val = self.default_command + " " + value
+            else:
+                tree_val = value
+
+            if in_tree(self.completer.command_tree, tree_val.strip()):
+                self.set_scope(value)
+                print("defaulting: " + value, file=self.output)
+                cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
+                telemetry.track_ssg('scope command', value)
+
+            elif SELECT_SYMBOL['unscope'] == default_split[0] and \
+                    len(self.default_command.split()) > 0:
+
+                value = self.default_command.split()[-1]
+                self.default_command = ' ' + ' '.join(self.default_command.split()[:-1])
+
+                if not self.default_command.strip():
+                    self.default_command = self.default_command.strip()
+                set_scope(self.default_command, add=False)
+                print('unscoping: ' + value, file=self.output)
+
+            elif SELECT_SYMBOL['unscope'] not in text:
+                print("Scope must be a valid command", file=self.output)
+
+            default_split = default_split[1:]
         return continue_flag, cmd
 
     def cli_execute(self, cmd):
@@ -561,22 +648,21 @@ class Shell(object):
             CONFIG.load(os.path.join(azure_folder, 'az.json'))
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-            self.app.initialize(Configuration())
-
             if '--progress' in args:
                 args.remove('--progress')
-                thread = ExecuteThread(self.app.execute, args)
+                execute_args = [args]
+                thread = Thread(target=self.app.execute, args=execute_args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
                 self.curr_thread = thread
 
-                thread = ProgressViewThread(progress_view, self)
+                progress_args = [self]
+                thread = Thread(target=progress_view, args=progress_args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
                 result = None
-
             else:
                 result = self.app.execute(args)
 
@@ -584,11 +670,12 @@ class Shell(object):
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
                 if self.output:
-                    self.output.out(result)
+                    self.output.write(result)
+                    self.output.flush()
                 else:
                     formatter = OutputProducer.get_formatter(
                         self.app.configuration.output_format)
-                    OutputProducer(formatter=formatter, file=sys.stdout).out(result)
+                    OutputProducer(formatter=formatter).out(result)
                     self.last = result
 
         except Exception as ex:  # pylint: disable=broad-except
@@ -610,10 +697,13 @@ class Shell(object):
         from azure.cli.core.application import APPLICATION
         APPLICATION.get_progress_controller = self.progress_patch
 
+        # refresh the cache and completer
+        self.command_table_thread = LoadCommandTableThread(restart_completer, self)
+        self.command_table_thread.start()
+
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
-
         while True:
             try:
                 try:
@@ -644,40 +734,11 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
+                        cli_telemetry.conclude()  # because I catch the sys exit, I have to push out
 
-            except KeyboardInterrupt:  # CTRL C
+            except (KeyboardInterrupt, ValueError):  # CTRL C
                 self.set_prompt()
                 continue
 
-        print('Have a lovely day!!')
+        print('Have a lovely day!!', file=self.output)
         telemetry.conclude()
-
-
-class ExecuteThread(threading.Thread):
-    """ thread for executing commands """
-    def __init__(self, func, args):
-        super(ExecuteThread, self).__init__()
-        self.args = args
-        self.func = func
-
-    def run(self):
-        self.func(self.args)
-
-
-class ProgressViewThread(threading.Thread):
-    """ thread to keep the toolbar spinner spinning """
-    def __init__(self, func, arg):
-        super(ProgressViewThread, self).__init__()
-        self.func = func
-        self.arg = arg
-
-    def run(self):
-        import time
-        try:
-            while True:
-                if self.func(self.arg):
-                    time.sleep(4)
-                    break
-                time.sleep(.25)
-        except KeyboardInterrupt:
-            pass

@@ -127,7 +127,7 @@ helps['cdn endpoint purge'] = """
     examples:
         - name: Purge content for Javascript and CSS styles
           text: >
-            az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths \\
+            az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths \\
                 '/scripts/app.js' '/styles/*'
 """
 

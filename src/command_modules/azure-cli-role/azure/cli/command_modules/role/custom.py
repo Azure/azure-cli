@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+from __future__ import print_function
+
 import datetime
 import re
 import os
@@ -10,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
 from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core import get_az_logger
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -25,7 +28,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_az_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 
@@ -152,7 +155,6 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
-    scope = None
     if show_all:
         if resource_group_name or scope:
             raise CLIError('group or scope are not required when --all is used')
@@ -579,7 +581,7 @@ def create_service_principal_for_rbac(
         name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
-        expanded_view=None, skip_assignment=False, keyvault=None):
+        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
     import pytz
 
@@ -666,26 +668,28 @@ def create_service_principal_for_rbac(
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
 
-    if expanded_view:
-        logger.warning("'--expanded-view' is deprecating and will be removed in a future release. "
-                       "You can get the same information using 'az cloud show'")
+    if show_auth_for_sdk:
+        import json
         from azure.cli.core._profile import Profile
         profile = Profile()
-        result = profile.get_expanded_subscription_info(scopes[0].split('/')[2] if scopes else None,
-                                                        app_id, password)
-    else:
-        result = {
-            'appId': app_id,
-            'password': password,
-            'name': name,
-            'displayName': app_display_name,
-            'tenant': graph_client.config.tenant_id
-        }
-        if cert_file:
-            logger.warning(
-                "Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument",
-                cert_file)
-            result['fileWithCertAndPrivateKey'] = cert_file
+        result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
+                                          app_id, password, cert_file)
+        # sdk-auth file should be in json format all the time, hence the print
+        print(json.dumps(result, indent=2))
+        return
+
+    result = {
+        'appId': app_id,
+        'password': password,
+        'name': name,
+        'displayName': app_display_name,
+        'tenant': graph_client.config.tenant_id
+    }
+    if cert_file:
+        logger.warning(
+            "Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument",
+            cert_file)
+        result['fileWithCertAndPrivateKey'] = cert_file
     return result
 
 

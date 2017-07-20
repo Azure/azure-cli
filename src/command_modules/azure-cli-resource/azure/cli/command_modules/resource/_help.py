@@ -23,7 +23,7 @@ helps['managedapp create'] = """
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -d "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Solutions/applianceDefinitions/myManagedAppDef"
         - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product
           text: >
-            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
+            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 helps['managedapp definition create'] = """
     type: command
@@ -52,7 +52,35 @@ helps['managedapp list'] = """
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
+    parameters:
+        - name: --resource-type
+          type: string
+          text: >
+            The name of the resource type (e.g. virtualMachines).
+            May have a provider namespace (e.g. Microsoft.Compute) [optional].
+        - name: --resource-provider-namespace
+          type: string
+          text: The name of the resource provider (e.g. Microsoft.Compute).
+        - name: --parent-resource-path
+          type: string
+          text: The path to the parent resource of the resource being locked.
+        - name: --resource-name
+          type: string
+          text: The name of the resource this lock applies to.
 """
+helps['lock create'] = """
+    type: command
+    short-summary: Create a lock.
+    long-summary: Locks can exist at three different scopes, (subscription, resource group and resource).
+    parameters:
+        - name: --notes
+          type: string
+          short-summary: 'Notes about this lock'
+    examples:
+        - name: Update a subscription level lock with new notes
+          text: >
+            az lock update --name lockName --resource-group group --notes newNotesHere
+    """
 helps['lock update'] = """
     type: command
     short-summary: Update the properties of a lock.

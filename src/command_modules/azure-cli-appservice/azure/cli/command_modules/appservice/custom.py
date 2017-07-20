@@ -91,20 +91,20 @@ def show_webapp(resource_group_name, name, slot=None, app_instance=None):
 
 
 def list_webapp(resource_group_name=None):
-    return _list_app('app', resource_group_name)
+    return _list_app(['app', 'app,linux'], resource_group_name)
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app('functionapp', resource_group_name)
+    return _list_app(['functionapp'], resource_group_name)
 
 
-def _list_app(app_type, resource_group_name=None):
+def _list_app(app_types, resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
-    result = [x for x in result if x.kind == app_type]
+    result = [x for x in result if x.kind in app_types]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -319,16 +319,49 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
+
+    if (not docker_registry_server_user and not docker_registry_server_password and
+            docker_registry_server_url and '.azurecr.io' in docker_registry_server_url):
+        logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
+        parsed = urlparse(docker_registry_server_url)
+        registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
+        try:
+            docker_registry_server_user, docker_registry_server_password = _get_acr_cred(registry_name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
+
     if docker_registry_server_user is not None:
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
+
     if docker_custom_image_name is not None:
         settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
     update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
     return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
+
+
+def _get_acr_cred(registry_name):
+    from azure.mgmt.containerregistry import ContainerRegistryManagementClient
+    from azure.cli.core.commands.parameters import get_resources_in_subscription
+    client = get_mgmt_service_client(ContainerRegistryManagementClient).registries
+
+    result = get_resources_in_subscription('Microsoft.ContainerRegistry/registries')
+    result = [item for item in result if item.name.lower() == registry_name]
+    if not result or len(result) > 1:
+        raise CLIError("No resource or more than one were found with name '{}'.".format(registry_name))
+    resource_group_name = parse_resource_id(result[0].id)['resource_group']
+
+    registry = client.get(resource_group_name, registry_name)
+
+    if registry.admin_user_enabled:  # pylint: disable=no-member
+        cred = client.list_credentials(resource_group_name, registry_name)
+        return cred.username, cred.passwords[0].value
+    raise CLIError("Failed to retrieve container registry credentails. Please either provide the "
+                   "credentail or run 'az acr update -n {} --admin-enabled true' to enable "
+                   "admin first.".format(registry_name))
 
 
 def delete_container_settings(resource_group_name, name, slot=None):

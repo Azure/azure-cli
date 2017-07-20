@@ -9,12 +9,14 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
                                                           FirewallRule,
                                                           DataLakeAnalyticsAccount,
-                                                          DataLakeStoreAccountInfo)
+                                                          DataLakeStoreAccountInfo,
+                                                          ComputePolicyCreateOrUpdateParameters)
 
 from azure.mgmt.datalake.analytics.job.models import (JobType,
                                                       JobState,
                                                       JobInformation,
-                                                      USqlJobProperties)
+                                                      USqlJobProperties,
+                                                      JobRelationshipProperties)
 # pylint: disable=line-too-long
 from azure.mgmt.datalake.analytics.catalog.models import (DataLakeAnalyticsCatalogCredentialCreateParameters,
                                                           DataLakeAnalyticsCatalogCredentialUpdateParameters)
@@ -40,7 +42,9 @@ def list_adla_jobs(client,
                    submitted_after=None,
                    submitted_before=None,
                    state=None,
-                   result=None):
+                   result=None,
+                   pipeline_id=None,
+                   recurrence_id=None):
     odata_filter_list = []
     if submitter:
         odata_filter_list.append("submitter eq '{}'".format(submitter))
@@ -56,6 +60,10 @@ def list_adla_jobs(client,
         odata_filter_list.append("submitTime ge datetimeoffset'{}'".format(submitted_after.isoformat()))
     if submitted_before:
         odata_filter_list.append("submitTime lt datetimeoffset'{}'".format(submitted_before.isoformat()))
+    if pipeline_id:
+        odata_filter_list.append("related/pipelineId eq guid'{}'".format(pipeline_id))
+    if recurrence_id:
+        odata_filter_list.append("related/recurrenceId eq guid'{}'".format(recurrence_id))
 
     filter_string = " and ".join(odata_filter_list)
     to_return = []
@@ -99,7 +107,7 @@ def create_adla_account(client,
                                              query_store_retention=query_store_retention,
                                              new_tier=tier)
 
-    return client.create(resource_group_name, account_name, create_params)
+    return client.create(resource_group_name, account_name, create_params).result()
 
 
 def update_adla_account(client,
@@ -121,7 +129,34 @@ def update_adla_account(client,
         firewall_state=firewall_state,
         firewall_allow_azure_ips=allow_azure_ips)
 
-    return client.update(resource_group_name, account_name, update_params)
+    return client.update(resource_group_name, account_name, update_params).result()
+
+
+# storage customizations
+def add_adla_blob_storage(client,
+                          account_name,
+                          storage_account_name,
+                          access_key,
+                          resource_group_name,
+                          suffix=None):
+    return client.add(resource_group_name,
+                      account_name,
+                      storage_account_name,
+                      access_key,
+                      suffix)
+
+
+def update_adla_blob_storage(client,
+                             account_name,
+                             storage_account_name,
+                             access_key,
+                             resource_group_name,
+                             suffix=None):
+    return client.update(resource_group_name,
+                         account_name,
+                         storage_account_name,
+                         access_key,
+                         suffix)
 
 
 # firewall customizations
@@ -136,6 +171,55 @@ def add_adla_firewall_rule(client,
                                    account_name,
                                    firewall_rule_name,
                                    create_params)
+
+
+# compute policy customizations
+def create_adla_compute_policy(client,
+                               account_name,
+                               compute_policy_name,
+                               object_id,
+                               object_type,
+                               resource_group_name,
+                               max_dop_per_job=None,
+                               min_priority_per_job=None):
+    if not max_dop_per_job and not min_priority_per_job:
+        raise CLIError('Please specify at least one of --max-dop-per-job and --min-priority-per-job')
+
+    create_params = ComputePolicyCreateOrUpdateParameters(object_id=object_id,
+                                                          object_type=object_type)
+
+    if max_dop_per_job:
+        create_params.max_degree_of_parallelism_per_job = int(max_dop_per_job)
+
+    if min_priority_per_job:
+        create_params.min_priority_per_job = int(min_priority_per_job)
+
+    return client.create_or_update(resource_group_name,
+                                   account_name,
+                                   compute_policy_name,
+                                   create_params)
+
+
+def update_adla_compute_policy(client,
+                               account_name,
+                               compute_policy_name,
+                               resource_group_name,
+                               max_dop_per_job=None,
+                               min_priority_per_job=None):
+    if not max_dop_per_job and not min_priority_per_job:
+        raise CLIError('Please specify at least one of --max-dop-per-job and --min-priority-per-job')
+
+    if max_dop_per_job:
+        max_dop_per_job = int(max_dop_per_job)
+
+    if min_priority_per_job:
+        min_priority_per_job = int(min_priority_per_job)
+
+    return client.update(resource_group_name,
+                         account_name,
+                         compute_policy_name,
+                         max_dop_per_job,
+                         min_priority_per_job)
 
 
 # catalog customizations
@@ -246,7 +330,13 @@ def submit_adla_job(client,
                     compile_mode=None,
                     compile_only=False,
                     degree_of_parallelism=1,
-                    priority=1000):
+                    priority=1000,
+                    recurrence_id=None,
+                    recurrence_name=None,
+                    pipeline_id=None,
+                    pipeline_name=None,
+                    pipeline_uri=None,
+                    run_id=None):
     if not script or len(script) < 1:
         # pylint: disable=line-too-long
         raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
@@ -263,6 +353,14 @@ def submit_adla_job(client,
                                    job_properties,
                                    degree_of_parallelism,
                                    priority)
+    if recurrence_id:
+        submit_params.related = JobRelationshipProperties(recurrence_id,
+                                                          pipeline_id,
+                                                          pipeline_name,
+                                                          pipeline_uri,
+                                                          run_id,
+                                                          recurrence_name)
+
     if compile_only:
         return client.build(account_name, submit_params)
 

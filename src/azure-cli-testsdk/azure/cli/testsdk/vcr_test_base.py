@@ -15,6 +15,7 @@ import tempfile
 import traceback
 import logging
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -28,6 +29,8 @@ from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-
 import vcr
 import jmespath
 
+from azure_devtools.scenario_tests.const import ENV_LIVE_TEST
+
 # TODO Should not depend on azure.cli.main package here.
 # Will be ok if this test file is not part of azure.cli.core.utils
 from azure.cli.main import main as cli_main
@@ -39,7 +42,6 @@ from azure.cli.core.util import CLIError
 
 from .base import find_recording_dir
 
-LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
@@ -61,11 +63,17 @@ def patch_vcr_connection_request(*args, **kwargs):
 vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
-def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                                  api_version=None, base_url_bound=None, **kwargs):
+def _mock_get_mgmt_service_client(client_type,
+                                  subscription_bound=True,
+                                  subscription_id=None,
+                                  api_version=None,
+                                  base_url_bound=None,
+                                  resource=CLOUD.endpoints.active_directory_resource_id,
+                                  **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
+                                                             resource=resource)
     client_kwargs = {}
 
     if base_url_bound:
@@ -120,6 +128,7 @@ def _mock_operation_delay(_):
 
 class _MockOutstream(object):
     """ mock outstream for testing """
+
     def __init__(self):
         self.string = ''
 
@@ -319,7 +328,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
 
-        if os.environ.get(LIVE_TEST_CONTROL_ENV, None) == 'True':
+        if os.environ.get(ENV_LIVE_TEST, None) == 'True':
             self.run_live = True
         else:
             self.run_live = run_live
@@ -422,7 +431,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
-    @mock.patch('azure.cli.core.commands.LongRunningOperation._template_progress', _mock_pass)
     @mock.patch('azure.cli.core.application.Application.get_progress_controller', _mock_get_progress_controller)
     @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
@@ -477,11 +485,13 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             print('\n\tRUNNING: {}'.format(command))
         command_list = shlex.split(command)
         output = StringIO()
+        applog = StringIO()
         try:
-            cli_main(command_list, file=output)
+            cli_main(command_list, output=output, logging_stream=applog)
         except Exception as ex:  # pylint: disable=broad-except
             ex_msg = str(ex)
-            logger.error('Command "%s" => %s. Output: %s', command, ex_msg, output.getvalue())
+            logger.error('Command "%s" => %s. Output: %s. Logging: %s', command, ex_msg, output.getvalue(),
+                         applog.getvalue())
             if not next((x for x in allowed_exceptions if x in ex_msg), None):
                 raise ex
 
@@ -541,7 +551,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
 
 class ResourceGroupVCRTestBase(VCRTestBase):
-
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False,
                  random_tag_format=None):

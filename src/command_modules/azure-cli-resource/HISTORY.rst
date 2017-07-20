@@ -1,11 +1,24 @@
 .. :changelog:
 
 Release History
+
 ===============
 
-unreleased
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* `group deployment create`: Improve prompting for missing parameters. Improve parsing of `--parameters KEY=VALUE` syntax.
+
+2.0.9 (2017-06-21)
 ++++++++++++++++++
+* `group deployment create`: Fixes issue where some parameter files were no longer recognized using @<file> syntax.
+* `resource\managedapp` commands: Support `--ids` argument.
+
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* Fix up some parsing and error messages. (#3584)
 * Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>
+* Add parameter checking for template link templates (#3629)
 * Add support for specifying deployment parameters using KEY=VALUE syntax.
 
 2.0.7 (2017-05-30)

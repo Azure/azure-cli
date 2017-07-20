@@ -3,12 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
+
 from azure.cli.core.prompting import prompt_pass, NoTTYException
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import CLIError
+from azure.cli.core.cloud import get_active_cloud
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_az_logger(__name__)
 
 
 def load_subscriptions(all_clouds=False):
@@ -33,14 +36,14 @@ def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     return subscriptions
 
 
-def show_subscription(subscription=None, expanded_view=None):
+def show_subscription(subscription=None, show_auth_for_sdk=None):
+    import json
     profile = Profile()
-    if not expanded_view:
+    if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 
-    logger.warning("'--expanded-view' is deprecating and will be removed in a future release. You can get the same "
-                   "information using 'az cloud show'")
-    return profile.get_expanded_subscription_info(subscription)
+    # sdk-auth file should be in json format all the time, hence the print
+    print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
 def get_access_token(subscription=None, resource=None):
@@ -49,9 +52,9 @@ def get_access_token(subscription=None, resource=None):
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
     Use 'az cloud show' command for other Azure resources
     '''
+    resource = (resource or get_active_cloud().endpoints.active_directory_resource_id)
     profile = Profile()
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription,
-                                                        resource=resource)
+    creds, subscription, tenant = profile.get_raw_token(resource, subscription=subscription)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
@@ -78,20 +81,32 @@ def account_clear():
 def login(username=None, password=None, service_principal=None, tenant=None,
           allow_no_subscriptions=False):
     """Log in to access Azure subscriptions"""
+    import os
+    import re
     from adal.adal_error import AdalError
     import requests
     interactive = False
 
+    profile = Profile()
+
     if username:
         if not password:
+            # in a VM with managed service identity?
+            result = profile.init_if_in_msi_env(username)
+            if result:
+                return result
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
+        # in a cloud console?
+        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
+        if console_tokens:
+            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
+
         interactive = True
 
-    profile = Profile()
     try:
         subscriptions = profile.find_subscriptions_on_login(
             interactive,

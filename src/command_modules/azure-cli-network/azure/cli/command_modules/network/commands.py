@@ -5,9 +5,10 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core.commands import \
-    (DeploymentOutputLongRunningOperation, cli_command)
+from azure.cli.core.commands.arm import \
+    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
+     deployment_validate_table_format)
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command, VersionConstraint
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -20,7 +21,7 @@ from ._client_factory import (cf_application_gateways, cf_express_route_circuit_
                               cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
                               cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
                               cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-                              cf_public_ip_addresses)
+                              cf_public_ip_addresses, cf_private_access)
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
                     delete_network_resource_property_entry)
@@ -40,7 +41,7 @@ custom_path = 'azure.cli.command_modules.network.custom#'
 
 # Application gateways
 ag_path = 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.'
-cli_command(__name__, 'network application-gateway create', custom_path + 'create_application_gateway', transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'), no_wait_param='no_wait')
+cli_command(__name__, 'network application-gateway create', custom_path + 'create_application_gateway', transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'), no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'network application-gateway delete', ag_path + 'delete', cf_application_gateways, no_wait_param='raw')
 cli_command(__name__, 'network application-gateway show', ag_path + 'get', cf_application_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network application-gateway list', custom_path + 'list_application_gateways')
@@ -69,6 +70,9 @@ property_map = {
     'url_path_maps': 'url-path-map',
 }
 
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    property_map['redirect_configurations'] = 'redirect-config'
+
 
 def _make_singular(value):
     try:
@@ -92,11 +96,20 @@ for subresource, alias in property_map.items():
                                custom_function_op=custom_path + 'update_ag_{}'.format(_make_singular(subresource)),
                                child_collection_prop_name=subresource)
 
-cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy', no_wait_param='no_wait')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy_2017_06_01', no_wait_param='no_wait')
+else:
+    cli_command(__name__, 'network application-gateway ssl-policy set', custom_path + 'set_ag_ssl_policy_2017_03_01', no_wait_param='no_wait')
+
 cli_command(__name__, 'network application-gateway ssl-policy show', custom_path + 'show_ag_ssl_policy', exception_handler=empty_on_404)
 
-cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule')
-cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule')
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.cli_command(__name__, 'network application-gateway ssl-policy list-options', ag_path + 'list_available_ssl_options', cf_application_gateways)
+    c.cli_command(__name__, 'network application-gateway ssl-policy predefined list', ag_path + 'list_available_ssl_predefined_policies', cf_application_gateways)
+    c.cli_command(__name__, 'network application-gateway ssl-policy predefined show', ag_path + 'get_ssl_predefined_policy', cf_application_gateways)
+
+cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule', no_wait_param='no_wait')
+cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule', no_wait_param='no_wait')
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
     cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config_2017_03_01', no_wait_param='no_wait')
@@ -146,7 +159,7 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
 
 # LoadBalancersOperations
 lb_path = 'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.'
-cli_command(__name__, 'network lb create', custom_path + 'create_load_balancer', transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait')
+cli_command(__name__, 'network lb create', custom_path + 'create_load_balancer', transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'network lb delete', lb_path + 'delete', cf_load_balancers)
 cli_command(__name__, 'network lb show', lb_path + 'get', cf_load_balancers, exception_handler=empty_on_404)
 cli_command(__name__, 'network lb list', custom_path + 'list_lbs')
@@ -365,7 +378,7 @@ cli_command(__name__, 'network list-usages', usage_path + 'list', cf_usages, tra
 
 # VirtualNetworkGatewayConnectionsOperations
 vpn_conn_path = 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.'
-cli_command(__name__, 'network vpn-connection create', custom_path + 'create_vpn_connection', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_create_output)
+cli_command(__name__, 'network vpn-connection create', custom_path + 'create_vpn_connection', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_create_output, exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'network vpn-connection delete', vpn_conn_path + 'delete', cf_virtual_network_gateway_connections)
 cli_command(__name__, 'network vpn-connection show', vpn_conn_path + 'get', cf_virtual_network_gateway_connections, exception_handler=empty_on_404, transform=transform_vpn_connection)
 cli_command(__name__, 'network vpn-connection list', vpn_conn_path + 'list', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_list)
@@ -416,6 +429,10 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
     cli_command(__name__, 'network vnet peering list', vnet_peering_path + 'list', cf_virtual_network_peerings)
     cli_command(__name__, 'network vnet peering delete', vnet_peering_path + 'delete', cf_virtual_network_peerings)
     cli_generic_update_command(__name__, 'network vnet peering update', vnet_peering_path + 'get', vnet_peering_path + 'create_or_update', cf_virtual_network_peerings, setter_arg_name='virtual_network_peering_parameters')
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    private_access_path = 'azure.mgmt.network.operations.available_private_access_services_operations#AvailablePrivateAccessServicesOperations.'
+    cli_command(__name__, 'network list-private-access-services', private_access_path + 'list', cf_private_access)
 
 # Traffic Manager ProfileOperations
 tm_profile_path = 'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.'

@@ -2,11 +2,25 @@
 
 Release History
 ===============
-
 unreleased
-++++++++++++++++++
++++++++++++++++++++
+* api version 2017-07-01 support
+* update dcos and swarm to use latest api version instead of 2016-03-30
+* expose orchestrator DockerCE
 
-* Fix acs kube get-credentials ssh-key loading (
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* minor fixes
+
+2.0.9 (2017-06-21)
+++++++++++++++++++
+* No changes
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* fix acs kube get-credentials ssh-key loading (#3612)
+* Change a message so as not to confuse MacOS users. (#3568)
+* rbac: clean up role assignments and related AAD application when delete a service principal (#3610)
 
 2.0.7 (2017-05-30)
 ++++++++++++++++++

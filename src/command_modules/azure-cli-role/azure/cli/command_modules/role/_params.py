@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import argparse
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import enum_choice_list
 from .custom import get_role_definition_name_completion_list
 from ._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
 
+register_cli_argument('ad app', 'app_id', help='application id')
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
 register_cli_argument('ad app', 'display_name', help='the display name of the application')
 register_cli_argument('ad app', 'homepage', help='the url where users can sign in and use your app.')
@@ -32,7 +32,7 @@ register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help
 register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
-register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help=argparse.SUPPRESS)
+register_cli_argument('ad sp create-for-rbac', 'show_auth_for_sdk', options_list='--sdk-auth', action='store_true', help='output result in compatible with Azure SDK auth file')
 
 for item in ['create-for-rbac', 'reset-credentials']:
     register_cli_argument('ad sp {}'.format(item), 'name', name_arg_type)

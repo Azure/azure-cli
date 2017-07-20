@@ -47,10 +47,10 @@ If the replay passes, you can commit the tests as well as recordings.
 
 When recording file is missing, the test framework will execute the test in live mode. You can force tests to be run live by set following environment variable:
 ```
-export AZURE_CLI_TEST_RUN_LIVE='True'
+export AZURE_TEST_RUN_LIVE='True'
 ```
 
-Also, you can author tests which are for live test only. Just derive the test class from [LiveTest].
+Also, you can author tests which are for live test only. Just derive the test class from [LiveScenarioTest].
 
 ### Rebase recordings
 

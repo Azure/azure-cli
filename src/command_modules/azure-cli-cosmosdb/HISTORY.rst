@@ -3,12 +3,30 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++
+* Minor fix allowing Creation of Collection with custom partition key
+
+0.1.10 (2017-07-07)
++++++++++++++++++++
+* minor fixes
+
+0.1.9 (2017-06-21)
+++++++++++++++++++
+
+* Added Support for Collection Default TTL.
+
+0.1.8 (2017-06-13)
+++++++++++++++++++
+* Minor fixes.
+
 0.1.7 (2017-05-30)
 ++++++++++++++++++
 * Minor fixes.
 
 0.1.6 (2017-05-09)
 ++++++++++++++++++
+
 * Rename documentdb module to cosmosdb.
 
 0.1.5 (2017-05-05)

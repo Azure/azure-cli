@@ -31,8 +31,9 @@ except ImportError:
 
 CLI_VERSION = os.getenv('CLI_VERSION')
 CLI_SOURCE_ARCHIVE_SHA256 = os.getenv('CLI_DOWNLOAD_SHA256')
+CLI_REQUIREMENTS_FILE = os.getenv('CLI_REQUIREMENTS_FILE')
 
-assert CLI_VERSION and CLI_SOURCE_ARCHIVE_SHA256, 'Set env vars CLI_VERSION and CLI_DOWNLOAD_SHA256'
+assert CLI_VERSION and CLI_SOURCE_ARCHIVE_SHA256 and CLI_REQUIREMENTS_FILE, 'Set env vars CLI_VERSION, CLI_DOWNLOAD_SHA256 and CLI_REQUIREMENTS_FILE'
 
 CLI_SOURCE_ARCHIVE_URL = 'https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_{}.tar.gz'.format(CLI_VERSION)
 COMPLETION_FILE_NAME = 'az.completion'
@@ -48,7 +49,16 @@ PLATFORM_SPECIFIC_DEPENDENCIES = [
     ('cryptography', '1.8.1'),
     ('cffi', '1.10.0'),
     ('SecretStorage', '2.3.1'),
+    ('enum34', '1.1.6'),
+    ('funcsigs', '1.0.2'),
+    ('ipaddress', '1.0.18'),
+    ('monotonic', '1.3'),
     ('pywin32-ctypes', '0.0.1'),
+    ('pathlib2', '2.3.0'),
+    ('packaging', '16.8'),
+    ('pyparsing', '2.2.0'),
+    ('prompt_toolkit', '1.0.14'),
+    ('six', '1.10.0'),
 ]
 
 def _error_exit(msg):
@@ -115,9 +125,9 @@ def build_packages(source_dir):
         _build_package(p, dist_dir)
     return dist_dir
 
-def _add_platform_dep_packages(packages_dest):
+def _add_platform_dep_packages(packages_dest, dependencies_list):
     """ Install all platform specific dependencies. """
-    for dep in PLATFORM_SPECIFIC_DEPENDENCIES:
+    for dep in dependencies_list:
         client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
         pypi_hits = client.release_urls(dep[0], dep[1])
         for h in pypi_hits:
@@ -126,24 +136,21 @@ def _add_platform_dep_packages(packages_dest):
                 urlretrieve(h['url'], dest)
                 _print_status('Downloaded {}'.format(h['filename']))
 
-def _get_pip_args(python, cli_packages, cli_dist_dir, packages_dest):
-    args = [python, '-m', 'pip', 'download']
-    args.extend([os.path.join(cli_dist_dir, p) for p in cli_packages])
-    args.extend(['--dest', packages_dest])
-    return args
-
 def add_packages_to_bundle(bundle_working_dir, cli_dist_dir):
     """ Add the CLI packages (and all dependencies) to bundle """
-    cli_packages = os.listdir(cli_dist_dir)
     packages_dest = os.path.join(bundle_working_dir, 'packages')
-    _exec_command(_get_pip_args('python', cli_packages, cli_dist_dir, packages_dest))
-    _exec_command(_get_pip_args('python3', cli_packages, cli_dist_dir, packages_dest))
-    # 'pip download' only downloads packages for current platform. But we need all..
-    # There isn't a way to get pip to download the union of all dependencies required for all platforms.
-    # So we do this instead.
-    # see https://github.com/pypa/pip/pull/4423, https://github.com/pypa/pip/issues/4304
-    # https://github.com/pypa/pip/issues/4289
-    _add_platform_dep_packages(packages_dest)
+    _create_dir(packages_dest)
+    cli_packages = os.listdir(cli_dist_dir)
+    for p in cli_packages:
+        shutil.copy(os.path.join(cli_dist_dir, p), packages_dest)
+    dependencies_list = PLATFORM_SPECIFIC_DEPENDENCIES
+    with open(os.path.expanduser(CLI_REQUIREMENTS_FILE)) as f:
+        content = f.readlines()
+        content = [x.strip() for x in content]
+        for line in content:
+            if not line.startswith('azure-cli'):
+                dependencies_list.append(tuple(line.split('==')))
+    _add_platform_dep_packages(packages_dest, dependencies_list)
 
 def add_completion_to_bundle(bundle_working_dir, cli_source_dir):
     src = os.path.join(cli_source_dir, COMPLETION_FILE_NAME)

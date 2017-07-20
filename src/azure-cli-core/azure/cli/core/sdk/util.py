@@ -118,6 +118,10 @@ def patch_arg_make_required(argument):
     argument.type.settings['required'] = True
 
 
+def patch_arg_make_optional(argument):
+    argument.type.settings['required'] = False
+
+
 def patch_arg_update_description(description):
     def _patch_action(argument):
         argument.type.settings['help'] = description

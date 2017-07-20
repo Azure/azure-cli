@@ -2,9 +2,17 @@
 
 Release History
 ===============
-2.0.6 (unreleased)
+2.0.8 (2017-07-07)
 ++++++++++++++++++
-*rbac: clean up role assignments and related AAD application when delete a service principal
+create-for-rbac: support output in SDK auth file format
+
+2.0.7 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
+2.0.6 (2017-06-13)
+++++++++++++++++++
+* rbac: clean up role assignments and related AAD application when delete a service principal (#3610)
 
 2.0.5 (2017-05-30)
 ++++++++++++++++++

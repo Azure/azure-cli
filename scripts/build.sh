@@ -21,10 +21,8 @@ check_style --ci;
 if [ "$CODE_COVERAGE" == "True" ]; then
     echo "Run tests with code coverage."
     pip install -qqq coverage codecov
-    coverage run -m automation.tests.run
-
+    coverage run -m automation.tests.run --parallel
     coverage combine
-    coverage report
     codecov
 else
     python -m automation.tests.run
@@ -34,6 +32,8 @@ if [[ "$CI" == "true" ]]; then
     $scripts_root/package_verify.sh
 fi
 
+python -m automation.commandlint.run
 python -m automation.tests.verify_doc_source_map
+python -m automation.tests.verify_readme_history
 
 python $scripts_root/license/verify.py

@@ -29,6 +29,7 @@ DEPENDENCIES = [
     'flake8>=3.2.1',
     'pycodestyle>=2.2.0',
     'nose>=1.3.7',
+    'readme_renderer>=17.2',
     'six>=1.10.0',
     'tabulate>=0.7.7'
 ]
