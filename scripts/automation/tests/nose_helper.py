@@ -7,7 +7,7 @@ from __future__ import print_function
 from ..utilities.path import get_repo_root
 
 
-def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_restart=True, xunit_report=False):
+def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_restart=True):
     """Create a nose execution method"""
 
     def _run_nose(test_folders):
@@ -23,15 +23,9 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
             if process_restart:
                 arguments += ['--process-restartworker']
 
-        if xunit_report:
-            test_report = os.path.join(report_folder, 'nosetests-report.xml')
-            arguments += ['--with-xunit', '--xunit-file', test_report]
-        else:
-            test_report = ''
-
         arguments.extend(test_folders)
         result = nose.run(argv=arguments)
 
-        return result, test_report
+        return result
 
     return _run_nose
