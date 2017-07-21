@@ -57,6 +57,7 @@ _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
 _MSI_ACCOUNT_NAME = 'MSI'
+_TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 
 def _authentication_context_factory(tenant, cache):
@@ -235,7 +236,7 @@ class Profile(object):
             s.id = '/subscriptions/' + t
             s.subscription = t
             s.tenant_id = t
-            s.display_name = 'N/A(tenant level account)'
+            s.display_name = _TENANT_LEVEL_ACCOUNT_NAME
             result.append(s)
         return result
 
@@ -422,6 +423,55 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def refresh_accounts(self):
+        subscriptions = self.load_cached_subscriptions()
+        to_refresh = [s for s in subscriptions if s[_SUBSCRIPTION_NAME] != _MSI_ACCOUNT_NAME]
+
+        from azure.cli.core._debug import allow_debug_adal_connection
+        allow_debug_adal_connection()
+        subscription_finder = SubscriptionFinder(self.auth_ctx_factory, self._creds_cache.adal_token_cache)
+        refreshed_list = set()
+        result = []
+        for s in to_refresh:
+            user_name = s[_USER_ENTITY][_USER_NAME]
+            if user_name in refreshed_list:
+                continue
+            refreshed_list.add(user_name)
+            is_service_principal = (s[_USER_ENTITY][_USER_NAME] == _SERVICE_PRINCIPAL)
+            tenant = s[_TENANT_ID]
+            subscriptions = []
+            try:
+                if is_service_principal:
+                    sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(user_name))
+                    subscriptions = subscription_finder.find_from_service_principal_id(user_name, sp_auth, tenant,
+                                                                                       self._ad_resource_uri)
+                else:
+                    subscriptions = subscription_finder.find_from_user_account(user_name, None, tenant,
+                                                                               self._ad_resource_uri)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Refreshing for '%s' failed for an error '%s'. The existing accounts are not modified. "
+                               "You can run 'az login' later to explictly refresh them", user_name, ex)
+                pass
+
+            if not subscriptions:
+                if s[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME:
+                    t_list = [s.tenant_id for s in subscriptions]
+                    bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
+                    subscriptions = Profile._build_tenant_level_accounts(bare_tenants)
+
+                if not subscriptions:
+                    continue
+
+            consolidated = Profile._normalize_properties(subscription_finder.user_id,
+                                                         subscriptions,
+                                                         is_service_principal)
+            result += consolidated
+
+        if self._creds_cache.adal_token_cache.has_state_changed:
+            self._creds_cache.persist_cached_creds()
+
+        self._set_subscriptions(result)
+
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
         from collections import OrderedDict
         account = self.get_subscription(subscription_id)
@@ -561,11 +611,11 @@ class SubscriptionFinder(object):
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        token_entry = context.acquire_token_with_username_password(
-            resource,
-            username,
-            password,
-            _CLIENT_ID)
+        if password:
+            token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
+        else:  # when refresh account, we will leverage local cached tokens
+            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:
