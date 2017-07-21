@@ -461,7 +461,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         with open(src_path, 'r') as f:
             for line in f:
                 # scrub resource group names
-                if rg_name != rg_original:
+                if rg_original and rg_name != rg_original:
                     line = line.replace(rg_name, rg_original)
                 # omit bearer tokens
                 if 'authorization:' not in line.lower():
@@ -546,7 +546,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             elif self.success and not self.playback and os.path.isfile(self.cassette_path):
                 try:
                     self._post_recording_scrub()
-                except Exception:  # pylint: disable=broad-except
+                except Exception as ex:  # pylint: disable=broad-except
+                    print('DISCARDING RECORDING: {} before of exception thrown during post recording scrub {}.'.format(
+                        self.cassette_path, ex))
                     os.remove(self.cassette_path)
 
 

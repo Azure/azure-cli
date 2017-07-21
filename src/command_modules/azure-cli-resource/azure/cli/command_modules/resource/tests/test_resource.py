@@ -483,7 +483,6 @@ class FeatureScenarioTest(VCRTestBase):
 
 
 class PolicyScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
         policy_name = 'azure-cli-test-policy'
@@ -491,6 +490,7 @@ class PolicyScenarioTest(ScenarioTest):
         policy_description = 'test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
+
         # create a policy
         self.cmd('policy definition create -n {} --rules {} --display-name {} --description {}'.format(policy_name, rules_file, policy_display_name, policy_description), checks=[
             JCheck('name', policy_name),
