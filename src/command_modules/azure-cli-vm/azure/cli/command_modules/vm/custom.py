@@ -33,7 +33,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
-from ._client_factory import _compute_client_factory
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -1500,6 +1500,13 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
                                                                        rule.frontend_port)
 
     return instance_addresses
+
+
+def list_vmss_instance_public_ips(resource_group_name, vm_scale_set_name):
+    result = cf_public_ip_addresses().list_virtual_machine_scale_set_public_ip_addresses(resource_group_name,
+                                                                                         vm_scale_set_name)
+    # filter away over-provisioned instances which are deleted after 'create/update' returns
+    return [r for r in result if r.ip_address]
 
 
 def availset_get(resource_group_name, name):

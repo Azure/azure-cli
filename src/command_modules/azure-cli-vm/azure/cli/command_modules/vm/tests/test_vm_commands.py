@@ -763,53 +763,43 @@ class VMExtensionImageSearchScenarioTest(VCRTestBase):
         assert len(result) == 1
 
 
-class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+class VMCreateUbuntuScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_ubuntu')
-        self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu2'
-        self.admin_username = 'ubuntu'
-        self.location = 'westus'
-        self.vm_names = ['cli-test-vm2']
-        self.vm_image = 'UbuntuLTS'
-        self.auth_type = 'ssh'
-
-    def test_vm_create_ubuntu(self):
-        self.execute()
-
-    def set_up(self):
-        super(VMCreateUbuntuScenarioTest, self).set_up()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_vm_create_ubuntu(self, resource_group, resource_group_location):
+        admin_username = 'ubuntu'
+        vm_names = ['cli-test-vm2']
+        vm_image = 'UbuntuLTS'
+        auth_type = 'ssh'
         self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
-            rg=self.resource_group,
-            admin=self.admin_username,
-            vm_name=self.vm_names[0],
-            image=self.vm_image,
-            auth_type=self.auth_type,
+            rg=resource_group,
+            admin=admin_username,
+            vm_name=vm_names[0],
+            image=vm_image,
+            auth_type=auth_type,
             ssh_key=TEST_SSH_KEY_PUB,
-            location=self.location
+            location=resource_group_location
         ))
 
-        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_names[0]), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('osProfile.adminUsername', self.admin_username),
-            JMESPathCheck('osProfile.computerName', self.vm_names[0]),
-            JMESPathCheck('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
-            JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
-            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
-            JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=resource_group, vm_name=vm_names[0]), checks=[
+            JMESPathCheckV2('provisioningState', 'Succeeded'),
+            JMESPathCheckV2('osProfile.adminUsername', admin_username),
+            JMESPathCheckV2('osProfile.computerName', vm_names[0]),
+            JMESPathCheckV2('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            JMESPathCheckV2('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheckV2('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
         self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
-            rg=self.resource_group,
-            admin=self.admin_username,
-            vm_name=self.vm_names[0],
-            image=self.vm_image,
-            auth_type=self.auth_type,
+            rg=resource_group,
+            admin=admin_username,
+            vm_name=vm_names[0],
+            image=vm_image,
+            auth_type=auth_type,
             ssh_key=TEST_SSH_KEY_PUB,
-            location=self.location
+            location=resource_group_location
         ))
 
 
@@ -1503,10 +1493,9 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers[1]', '10.0.0.5'),
         ])
         # spot check we have the domain name and have a public ip
-        result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group), checks=[
-            JMESPathCheckV2('[0].dnsSettings.domainNameLabel', 'vm0.clitestnewnetwork'),
-        ]).get_output_in_json()
+        result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group)).get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
+        self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith('.clitestnewnetwork'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
     def test_vmss_existing_lb(self, resource_group):

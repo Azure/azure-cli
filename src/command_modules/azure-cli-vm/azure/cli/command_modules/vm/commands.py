@@ -10,7 +10,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
-                                                          cf_images, cf_public_ip_addresses)
+                                                          cf_images)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
@@ -246,7 +246,7 @@ cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wai
 cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vmss list-instance-public-ips', 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.list_virtual_machine_scale_set_public_ip_addresses', cf_public_ip_addresses)
+    cli_command(__name__, 'vmss list-instance-public-ips', custom_path.format('list_vmss_instance_public_ips'))
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
