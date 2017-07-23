@@ -1518,7 +1518,7 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 
 def create_subnet(resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
-                  route_table=None):
+                  route_table=None, private_access_services=None):
     '''Create a virtual network (VNet) subnet.
     :param str address_prefix: address prefix in CIDR format.
     :param str network_security_group: Name or ID of network security
@@ -1530,13 +1530,19 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     if network_security_group:
         subnet.network_security_group = NetworkSecurityGroup(id=network_security_group)
     _set_route_table(ncf, resource_group_name, route_table, subnet)
+    if private_access_services:
+        PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
+                                       mod='models')
+        subnet.private_access_services = []
+        for service in private_access_services:
+            subnet.private_access_services.append(PrivateAccessService(service=service))
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
 
 def update_subnet(instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None):
+                  route_table=None, private_access_services=None):
     '''update existing virtual sub network
     :param str address_prefix: New address prefix in CIDR format, for example 10.0.0.0/24.
     :param str network_security_group: attach with existing network security group,
@@ -1551,6 +1557,15 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
         instance.network_security_group = None
 
     _set_route_table(_network_client_factory(), resource_group_name, route_table, instance)
+
+    if private_access_services == ['']:
+        instance.private_access_services = None
+    elif private_access_services:
+        PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
+                                       mod='models')
+        instance.private_access_services = []
+        for service in private_access_services:
+            instance.private_access_services.append(PrivateAccessService(service=service))
 
     return instance
 
