@@ -97,9 +97,17 @@ class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait'.format(**kwargs))
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists'.format(**kwargs))
         self.cmd('network application-gateway redirect-config create --gateway-name {gateway} -g {rg} -n {name} -t permanent --include-query-string --include-path false --target-listener appGatewayHttpListener --no-wait'.format(**kwargs))
-        self.cmd('network application-gateway redirect-config show --gateway-name {gateway} -g {rg} -n {name}'.format(**kwargs))
+        self.cmd('network application-gateway redirect-config show --gateway-name {gateway} -g {rg} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('includePath', False),
+            JMESPathCheckV2('includeQueryString', True),
+            JMESPathCheckV2('redirectType', 'Permanent')
+        ])
         self.cmd('network application-gateway redirect-config update --gateway-name {gateway} -g {rg} -n {name} --include-path --include-query-string false --no-wait'.format(**kwargs))
-        self.cmd('network application-gateway redirect-config show --gateway-name {gateway} -g {rg} -n {name}'.format(**kwargs))
+        self.cmd('network application-gateway redirect-config show --gateway-name {gateway} -g {rg} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('includePath', True),
+            JMESPathCheckV2('includeQueryString', False),
+            JMESPathCheckV2('redirectType', 'Permanent')
+        ])
 
 
 class NetworkAppGatewayExistingSubnetScenarioTest(ScenarioTest):
