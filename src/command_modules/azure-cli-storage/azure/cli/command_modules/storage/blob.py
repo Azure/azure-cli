@@ -8,7 +8,6 @@ import os.path
 from collections import namedtuple
 from azure.common import AzureException
 
-from azure.cli.core.util import CLIError
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
@@ -17,6 +16,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p)
+
+from knack.util import CLIError
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 

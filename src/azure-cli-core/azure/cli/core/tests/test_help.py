@@ -12,11 +12,11 @@ import mock
 from six import StringIO
 
 import azure.cli.core._help as _help
-import azure.cli.core.help_files
 from azure.cli.core._help import ArgumentGroupRegistry
-from azure.cli.core.application import Application, Configuration
 from azure.cli.core.commands import \
     (CliCommand, cli_command, _update_command_definitions, command_table)
+
+import knack.help_files
 
 io = {}
 
@@ -471,7 +471,7 @@ Global Arguments
         def test_handler():
             pass
 
-        azure.cli.core.help_files.helps['test_group1 test_group2'] = """
+        knack.help_files.helps['test_group1 test_group2'] = """
             type: group
             short-summary: this module does xyz one-line or so
             long-summary: |
@@ -532,7 +532,7 @@ Examples
 """
         self.assertEqual(s, io.getvalue())
 
-        del azure.cli.core.help_files.helps['test_group1 test_group2']
+        del knack.help_files.helps['test_group1 test_group2']
 
     @redirect_io
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
@@ -591,7 +591,7 @@ Global Arguments
     def test_help_loads(self):
         app = Application()
         app.initialize(Configuration())
-        with mock.patch('azure.cli.core.commands.arm.APPLICATION', app):
+        with mock.patch('azure.cli.core.commands.arm.AZ_CLI', app):
             from azure.cli.core.commands.arm import add_id_parameters
             parser_dict = {}
             cmd_tbl = app.configuration.get_command_table()

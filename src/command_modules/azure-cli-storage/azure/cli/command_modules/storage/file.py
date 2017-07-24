@@ -10,13 +10,13 @@ Commands for storage file share operations
 
 import os.path
 from azure.cli.core.azlogging import get_az_logger
-from azure.cli.core.util import CLIError
 from azure.common import AzureException, AzureHttpError
 from azure.cli.core.profiles import supported_api_version, ResourceType
-from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
-                                                    create_blob_service_from_storage_client,
-                                                    create_short_lived_container_sas,
-                                                    create_short_lived_share_sas)
+from azure.cli.command_modules.storage.util import \
+    (filter_none, collect_blobs, collect_files, create_blob_service_from_storage_client,
+     create_short_lived_container_sas, create_short_lived_share_sas)
+
+from knack.util import CLIError
 
 
 def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False,

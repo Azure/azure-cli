@@ -5,11 +5,8 @@
 
 import itertools
 from enum import Enum
-from azure.cli.core.commands import CliArgumentType
-from azure.cli.core.commands.parameters import (
-    enum_choice_list,
-    ignore_type)
-from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
+
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.import_extension_request \
@@ -24,6 +21,9 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
     StorageKeyType)
+
+from knack.arguments import CLIArgumentType, ignore_type, enum_choice_list
+
 from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
@@ -34,7 +34,7 @@ from .custom import (
 #####
 
 
-server_param_type = CliArgumentType(
+server_param_type = CLIArgumentType(
     options_list=('--server', '-s'),
     help='Name of the Azure SQL server.')
 

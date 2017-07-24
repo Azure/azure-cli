@@ -6,9 +6,6 @@
 from subprocess import call, PIPE
 
 from azure.cli.core.commands import LongRunningOperation
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 
 from azure.mgmt.containerregistry.v2017_03_01.models import (
     RegistryUpdateParameters as BasicRegistryUpdateParameters,
@@ -20,6 +17,9 @@ from azure.mgmt.containerregistry.v2017_06_01_preview.models import (
     SkuTier,
     Sku
 )
+
+from knack.prompting import prompt, prompt_pass, NoTTYException
+from knack.util import CLIError
 
 from ._constants import MANAGED_REGISTRY_API_VERSION
 from ._factory import get_acr_service_client
@@ -36,9 +36,6 @@ from ._utils import (
 )
 from ._docker_utils import get_login_refresh_token
 from .credential import acr_credential_show
-
-
-logger = azlogging.get_az_logger(__name__)
 
 
 def acr_check_name(registry_name):

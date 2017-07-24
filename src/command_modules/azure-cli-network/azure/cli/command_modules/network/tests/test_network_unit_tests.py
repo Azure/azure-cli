@@ -7,7 +7,7 @@ import unittest
 
 import mock
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 class Test_Network_Unit_Tests(unittest.TestCase):

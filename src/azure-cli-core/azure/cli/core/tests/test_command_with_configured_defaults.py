@@ -9,10 +9,10 @@ import mock
 
 from azure.cli.core.commands import _update_command_definitions
 
-from azure.cli.core.commands import (command_table, CliArgumentType, cli_command,
+from azure.cli.core.commands import (command_table, CLIArgumentType, cli_command,
                                      register_cli_argument)
-from azure.cli.core.application import Application, Configuration
-from azure.cli.core._config import AzConfig
+
+from knack.config import CLIConfig
 
 
 # a dummy callback for arg-parse
@@ -30,7 +30,6 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
-        import azure.cli.main
         logging.basicConfig(level=logging.DEBUG)
 
     @classmethod
@@ -49,7 +48,7 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
                     '{}#TestCommandWithConfiguredDefaults.sample_vm_list'.format(__name__))
 
         register_cli_argument('test sample-vm-list', 'resource_group_name',
-                              CliArgumentType(options_list=('--resource-group-name', '-g'),
+                              CLIArgumentType(options_list=('--resource-group-name', '-g'),
                                               configured_default='group', required=required_arg))
 
         command_table['test sample-vm-list'].load_arguments()
@@ -60,7 +59,7 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
         config.get_command_table = lambda argv: command_table
         self.application = Application(config)
 
-    @mock.patch.dict(os.environ, {AzConfig.env_var_name('defaults', 'group'): 'myRG'})
+    @mock.patch.dict(os.environ, {CLIConfig.env_var_name('defaults', 'group'): 'myRG'})
     def test_apply_configured_defaults_on_required_arg(self):
         self.set_up_command_table(required_arg=True)
 
@@ -70,7 +69,7 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
         # assert
         self.assertEqual(res.result, 'myRG')
 
-    @mock.patch.dict(os.environ, {AzConfig.env_var_name('defaults', 'group'): 'myRG'})
+    @mock.patch.dict(os.environ, {CLIConfig.env_var_name('defaults', 'group'): 'myRG'})
     def test_apply_configured_defaults_on_optional_arg(self):
         self.set_up_command_table(required_arg=False)
 

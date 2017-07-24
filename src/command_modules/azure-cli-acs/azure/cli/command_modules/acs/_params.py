@@ -9,10 +9,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 
-from azure.cli.core.commands import (
-    CliArgumentType,
-    register_cli_argument,
-    register_extra_cli_argument)
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 from azure.cli.core.commands.parameters import tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands.parameters import (
@@ -22,6 +19,8 @@ from azure.cli.core.commands.parameters import (
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
 from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key, validate_list_of_integers
+
+from knack.arguments import CLIArgumentType
 
 
 def _compute_client_factory(**_):
@@ -57,7 +56,7 @@ def _get_default_install_location(exe_name):
     return install_location
 
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 

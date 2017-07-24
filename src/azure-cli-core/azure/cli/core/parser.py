@@ -9,13 +9,28 @@ import argparse
 import argcomplete
 
 import azure.cli.core.telemetry as telemetry
-import azure.cli.core._help as _help
-from azure.cli.core.util import CLIError
 from azure.cli.core._pkg_util import handle_module_not_installed
 
-import azure.cli.core.azlogging as azlogging
+from knack.help import show_help
+from knack.log import get_logger
+from knack.parser import CLICommandParser
+from knack.util import CLIError
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
+
+ARGPARSE_SUPPORTED_KWARGS = [
+    'option_strings',
+    'dest',
+    'nargs',
+    'const',
+    'default',
+    'type',
+    'choices',
+    'help',
+    'metavar',
+    'required',
+    'action'
+]
 
 
 class IncorrectUsageError(CLIError):
@@ -25,40 +40,24 @@ class IncorrectUsageError(CLIError):
     pass
 
 
-class CaseInsensitiveChoicesCompleter(argcomplete.completers.ChoicesCompleter):  # pylint: disable=too-few-public-methods
-
-    def __call__(self, prefix, **kwargs):
-        return (c for c in self.choices if c.lower().startswith(prefix.lower()))
-
-
-# Override the choices completer with one that is case insensitive
-argcomplete.completers.ChoicesCompleter = CaseInsensitiveChoicesCompleter
-
-
 def enable_autocomplete(parser):
     argcomplete.autocomplete = argcomplete.CompletionFinder()
     argcomplete.autocomplete(parser, validator=lambda c, p: c.lower().startswith(p.lower()),
                              default_completer=lambda _: ())
 
 
-class AzCliCommandParser(argparse.ArgumentParser):
-    """ArgumentParser implementation specialized for the
-    Azure CLI utility.
-    """
+class AzCliCommandParser(CLICommandParser):
+    """ArgumentParser implementation specialized for the Azure CLI utility."""
 
-    def __init__(self, **kwargs):
-        self.subparsers = {}
-        self.parents = kwargs.get('parents', [])
-        self.help_file = kwargs.pop('help_file', None)
-        # We allow a callable for description to be passed in in order to delay-load any help
-        # or description for a command. We better stash it away before handing it off for
-        # "normal" argparse handling...
-        self._description = kwargs.pop('description', None)
-        super(AzCliCommandParser, self).__init__(**kwargs)
+    def _add_argument(self, obj, arg):
+        # TODO: This logic should be part of knack, not az
+        options_list = arg.options_list
+        argparse_options = {name: value for name, value in arg.options.items() if name in ARGPARSE_SUPPORTED_KWARGS}
+        return obj.add_argument(*options_list, **argparse_options)
 
-    def load_command_table(self, command_table):
-        """Load a command table into our parser.
-        """
+    # TODO: If not for _add_argument this would not need to be overridden with 99% same implementation
+    def load_command_table(self, cmd_tbl):
+        """Load a command table into our parser."""
         # If we haven't already added a subparser, we
         # better do it.
         if not self.subparsers:
@@ -66,7 +65,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
             sp.required = True
             self.subparsers = {(): sp}
 
-        for command_name, metadata in command_table.items():
+        for command_name, metadata in cmd_tbl.items():
             subparser = self._get_subparser(command_name.split())
             command_verb = command_name.split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
@@ -94,21 +93,11 @@ class AzCliCommandParser(argparse.ArgumentParser):
                     except KeyError:
                         # group not found so create
                         group_name = '{} Arguments'.format(arg.arg_group)
-                        group = command_parser.add_argument_group(
-                            arg.arg_group, group_name)
+                        group = command_parser.add_argument_group(arg.arg_group, group_name)
                         argument_groups[arg.arg_group] = group
-                    param = group.add_argument(
-                        *arg.options_list, **arg.options)
+                    param = self._add_argument(group, arg)
                 else:
-                    try:
-                        param = command_parser.add_argument(
-                            *arg.options_list, **arg.options)
-                    except argparse.ArgumentError:
-                        dest = arg.options['dest']
-                        if dest in ['no_wait', 'raw']:
-                            pass
-                        else:
-                            raise
+                    param = self._add_argument(command_parser, arg)
                 param.completer = arg.completer
 
             command_parser.set_defaults(
@@ -116,32 +105,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 command=command_name,
                 _validators=argument_validators,
                 _parser=command_parser)
-
-    def _get_subparser(self, path):
-        """For each part of the path, walk down the tree of
-        subparsers, creating new ones if one doesn't already exist.
-        """
-        for length in range(0, len(path)):
-            parent_subparser = self.subparsers.get(tuple(path[0:length]), None)
-            if not parent_subparser:
-                # No subparser exists for the given subpath - create and register
-                # a new subparser.
-                # Since we know that we always have a root subparser (we created)
-                # one when we started loading the command table, and we walk the
-                # path from left to right (i.e. for "cmd subcmd1 subcmd2", we start
-                # with ensuring that a subparser for cmd exists, then for subcmd1,
-                # subcmd2 and so on), we know we can always back up one step and
-                # add a subparser if one doesn't exist
-                grandparent_subparser = self.subparsers[tuple(path[:length - 1])]
-                new_parser = grandparent_subparser.add_parser(path[length - 1])
-
-                # Due to http://bugs.python.org/issue9253, we have to give the subparser
-                # a destination and set it to required in order to get a
-                # meaningful error
-                parent_subparser = new_parser.add_subparsers(dest='subcommand')
-                parent_subparser.required = True
-                self.subparsers[tuple(path[0:length])] = parent_subparser
-        return parent_subparser
 
     def _handle_command_package_error(self, err_msg):  # pylint: disable=no-self-use
         if err_msg and err_msg.startswith('argument _command_package: invalid choice:'):
@@ -175,9 +138,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
         telemetry.set_command_details(command=self.prog[3:])
         telemetry.set_success(summary='show help')
 
-        _help.show_help(self.prog.split()[1:],
-                        self._actions[-1] if is_group else self,
-                        is_group)
+        show_help(self.prog.split()[0],
+                  self.prog.split()[1:],
+                  self._actions[-1] if is_group else self,
+                  is_group)
         self.exit()
 
     def _check_value(self, action, value):
@@ -186,22 +150,3 @@ class AzCliCommandParser(argparse.ArgumentParser):
         if action.choices is not None and value not in action.choices:
             msg = 'invalid choice: {}'.format(value)
             raise argparse.ArgumentError(action, msg)
-
-    def is_group(self):
-        """ Determine if this parser instance represents a group
-            or a command. Anything that has a func default is considered
-            a group. This includes any dummy commands served up by the
-            "filter out irrelevant commands based on argv" command filter """
-        cmd = self._defaults.get('func', None)
-        return not (cmd and cmd.handler)
-
-    def __getattribute__(self, name):
-        """ Since getting the description can be expensive (require module loads), we defer
-            this until someone actually wants to use it (i.e. show help for the command)
-        """
-        if name == 'description':
-            if self._description:
-                self.description = self._description() \
-                    if callable(self._description) else self._description
-                self._description = None
-        return object.__getattribute__(self, name)

@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 
-def cf_redis(_):
+def cf_redis(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.redis import RedisManagementClient
-    return get_mgmt_service_client(RedisManagementClient).redis
+    return get_mgmt_service_client(cli_ctx, RedisManagementClient).redis
 
 
-def cf_patch_schedules(_):
+def cf_patch_schedules(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.redis import RedisManagementClient
-    return get_mgmt_service_client(RedisManagementClient).patch_schedules
+    return get_mgmt_service_client(cli_ctx, RedisManagementClient).patch_schedules

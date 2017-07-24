@@ -8,7 +8,7 @@ import adal
 
 from msrest.authentication import Authentication
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods

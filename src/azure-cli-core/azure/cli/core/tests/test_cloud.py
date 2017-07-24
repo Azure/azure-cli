@@ -21,9 +21,8 @@ from azure.cli.core.cloud import (Cloud,
                                   AZURE_PUBLIC_CLOUD,
                                   KNOWN_CLOUDS,
                                   CloudEndpointNotSetException)
-from azure.cli.core._config import get_config_parser
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 def _helper_get_clouds(_):

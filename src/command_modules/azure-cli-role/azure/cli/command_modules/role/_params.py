@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.commands.parameters import enum_choice_list
+
+from knack.arguments import CLIArgumentType, enum_choice_list
+
 from .custom import get_role_definition_name_completion_list
 from ._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
 
@@ -25,7 +26,7 @@ register_cli_argument('ad app', 'key_value', help='the value for the key credent
 register_cli_argument('ad app', 'key_type', default='AsymmetricX509Cert', help='the type of the key credentials associated with the application', **enum_choice_list(['AsymmetricX509Cert', 'Password', 'Symmetric']))
 register_cli_argument('ad app', 'key_usage', default='Verify', help='the usage of the key credentials associated with the application.', **enum_choice_list(['Sign', 'Verify']))
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('ad sp', 'identifier', options_list=('--id',), help='service principal name, or object id')
 register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id of the associated application')

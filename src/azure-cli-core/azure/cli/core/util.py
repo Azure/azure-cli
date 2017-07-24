@@ -4,29 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import re
 import sys
 import json
 import base64
 import binascii
-from datetime import datetime, timedelta
-from enum import Enum
 
+from azure.cli.core._pkg_util import COMPONENT_PREFIX, CLI_PACKAGE_NAME
+
+from knack.log import get_logger
+from knack.util import CLIError, to_snake_case
 import six
-import azure.cli.core.azlogging as azlogging
 
-CLI_PACKAGE_NAME = 'azure-cli'
-COMPONENT_PREFIX = 'azure-cli-'
-
-logger = azlogging.get_az_logger(__name__)
-
-
-class CLIError(Exception):
-    """Base class for exceptions that occur during
-    normal operation of the application.
-    Typically due to user error and can be resolved by the user.
-    """
-    pass
+logger = get_logger(__name__)
 
 
 def handle_exception(ex):
@@ -49,10 +38,6 @@ def empty_on_404(ex):
     raise ex
 
 
-def normalize_newlines(str_to_normalize):
-    return str_to_normalize.replace('\r\n', '\n')
-
-
 def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
     if width <= 0:
         raise ValueError('width must be greater than 0.')
@@ -60,7 +45,7 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
     return str_to_shorten[:s_len] + (str_to_shorten[s_len:] and placeholder)
 
 
-def show_version_info_exit(out_file):
+def get_az_version_string(out_file):
     import platform
     from pip import get_installed_distributions
     installed_dists = get_installed_distributions(local_only=True)
@@ -71,8 +56,9 @@ def show_version_info_exit(out_file):
             cli_info = {'name': dist.key, 'version': dist.version}
             break
 
+    version_string = ''
     if cli_info:
-        print('{} ({})'.format(cli_info['name'], cli_info['version']), file=out_file)
+        version_string += '{} ({})'.format(cli_info['name'], cli_info['version'])
 
     component_version_info = sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''),
                                       'version': dist.version}
@@ -80,15 +66,10 @@ def show_version_info_exit(out_file):
                                      if dist.key.startswith(COMPONENT_PREFIX)],
                                     key=lambda x: x['name'])
 
-    print(file=out_file)
-    print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]),
-          file=out_file)
-    print(file=out_file)
-    print('Python ({}) {}'.format(platform.system(), sys.version), file=out_file)
-    print(file=out_file)
-    print("Python location '{}'".format(sys.executable), file=out_file)
-    print(file=out_file)
-    sys.exit(0)
+    for c in component_version_info:
+        version_string += '\n{} ({})'.format(c['name'], c['version'])
+
+    return version_string
 
 
 def get_json_object(json_string):
@@ -150,39 +131,6 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
             return ast.literal_eval(json_or_dict_string)
         except SyntaxError:
             raise CLIError(json_ex)
-
-
-def todict(obj):  # pylint: disable=too-many-return-statements
-
-    if isinstance(obj, dict):
-        return {k: todict(v) for (k, v) in obj.items()}
-    elif isinstance(obj, list):
-        return [todict(a) for a in obj]
-    elif isinstance(obj, Enum):
-        return obj.value
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
-    elif isinstance(obj, timedelta):
-        return str(obj)
-    elif hasattr(obj, '_asdict'):
-        return todict(obj._asdict())
-    elif hasattr(obj, '__dict__'):
-        return dict([(to_camel_case(k), todict(v))
-                     for k, v in obj.__dict__.items()
-                     if not callable(v) and not k.startswith('_')])
-    return obj
-
-
-KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
-
-
-def to_camel_case(s):
-    return re.sub(KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
-
-
-def to_snake_case(s):
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', s)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 def b64encode(s):

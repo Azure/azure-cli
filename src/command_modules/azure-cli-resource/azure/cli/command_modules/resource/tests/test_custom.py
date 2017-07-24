@@ -17,11 +17,11 @@ from azure.cli.command_modules.resource.custom import \
 
 
 def _simulate_no_tty():
-    from azure.cli.core.prompting import NoTTYException
+    from knack.prompting import NoTTYException
     raise NoTTYException
 
 
-@mock.patch('azure.cli.core.prompting._verify_is_a_tty', _simulate_no_tty)
+@mock.patch('knack.prompting._verify_is_a_tty', _simulate_no_tty)
 class TestCustom(unittest.TestCase):
 
     def test_extract_parameters(self):

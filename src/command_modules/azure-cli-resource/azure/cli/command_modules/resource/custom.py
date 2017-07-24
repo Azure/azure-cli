@@ -27,12 +27,14 @@ from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
 from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import ResourceType
+
+from knack.log import get_logger
+from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
+from knack.util import CLIError
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
@@ -41,14 +43,14 @@ from ._client_factory import (_resource_client_factory,
                               _authorization_management_client,
                               _resource_managedapps_client_factory)
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
-def list_resource_groups(tag=None):  # pylint: disable=no-self-use
+def list_resource_groups(cli_ctx, tag=None):  # pylint: disable=no-self-use
     """ List resource groups, optionally filtered by a tag.
     :param str tag:tag to filter by in 'key[=value]' format
     """
-    rcf = _resource_client_factory()
+    rcf = _resource_client_factory(cli_ctx)
 
     filters = []
     if tag:
@@ -62,15 +64,15 @@ def list_resource_groups(tag=None):  # pylint: disable=no-self-use
     return list(groups)
 
 
-def create_resource_group(rg_name, location, tags=None):
+def create_resource_group(cli_ctx, rg_name, location, tags=None):
     """ Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
     :param str tags:tags in 'a=b c' format
     """
-    rcf = _resource_client_factory()
+    rcf = _resource_client_factory(cli_ctx)
 
-    ResourceGroup = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
+    ResourceGroup = cli_ctx.cloud.get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
     parameters = ResourceGroup(
         location=location,
         tags=tags
@@ -78,7 +80,7 @@ def create_resource_group(rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
-def create_appliance(resource_group_name,
+def create_appliance(cli_ctx, resource_group_name,
                      appliance_name, managedby_resource_group_id,
                      location, kind, managedapp_definition_id=None,
                      plan_name=None, plan_publisher=None, plan_product=None,
@@ -93,7 +95,7 @@ def create_appliance(resource_group_name,
     :param str plan_version:the managed application package plan version
     :param str tags:tags in 'a=b c' format
     """
-    racf = _resource_managedapps_client_factory()
+    racf = _resource_managedapps_client_factory(cli_ctx)
     appliance = Appliance(
         location=location,
         managed_resource_group_id=managedby_resource_group_id,
@@ -127,25 +129,25 @@ def create_appliance(resource_group_name,
     return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
 
 
-def show_appliance(resource_group_name=None, appliance_name=None):
+def show_appliance(cli_ctx, resource_group_name=None, appliance_name=None):
     """ Gets a managed application.
     :param str resource_group_name:the resource group name
     :param str appliance_name:the managed application name
     """
-    racf = _resource_managedapps_client_factory()
+    racf = _resource_managedapps_client_factory(cli_ctx)
     return racf.appliances.get(resource_group_name, appliance_name)
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None):
+def show_appliancedefinition(cli_ctx, resource_group_name=None, appliance_definition_name=None):
     """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
     :param str appliance_definition_name:the managed application definition name
     """
-    racf = _resource_managedapps_client_factory()
+    racf = _resource_managedapps_client_factory(cli_ctx)
     return racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
 
 
-def create_appliancedefinition(resource_group_name,
+def create_appliancedefinition(cli_ctx, resource_group_name,
                                appliance_definition_name, location,
                                lock_level, package_file_uri, authorizations,
                                description, display_name, tags=None):
@@ -157,7 +159,7 @@ def create_appliancedefinition(resource_group_name,
     :param str package_file_uri:the managed application definition package file uri
     :param str tags:tags in 'a=b c' format
     """
-    racf = _resource_managedapps_client_factory()
+    racf = _resource_managedapps_client_factory(cli_ctx)
     authorizations = authorizations or []
     applianceAuthList = []
 
@@ -177,8 +179,8 @@ def create_appliancedefinition(resource_group_name,
                                                        appliance_definition_name, applianceDef)
 
 
-def list_appliances(resource_group_name=None):
-    racf = _resource_managedapps_client_factory()
+def list_appliances(cli_ctx, resource_group_name=None):
+    racf = _resource_managedapps_client_factory(cli_ctx)
 
     if resource_group_name:
         appliances = racf.appliances.list_by_resource_group(resource_group_name)
@@ -188,13 +190,13 @@ def list_appliances(resource_group_name=None):
 
 
 def export_group_as_template(
-        resource_group_name, include_comments=False, include_parameter_default_value=False):
+        cli_ctx, resource_group_name, include_comments=False, include_parameter_default_value=False):
     """Captures a resource group as a template.
     :param str resource_group_name:the name of the resoruce group.
     :param bool include_comments:export template with comments.
     :param bool include_parameter_default_value: export template parameter with default value.
     """
-    rcf = _resource_client_factory()
+    rcf = _resource_client_factory(cli_ctx)
 
     export_options = []
     if include_comments:
@@ -217,16 +219,16 @@ def export_group_as_template(
     print(json.dumps(result.template, indent=2))
 
 
-def deploy_arm_template(resource_group_name,
+def deploy_arm_template(cli_ctx, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
                         parameters=None, mode='incremental', no_wait=False):
-    return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
+    return _deploy_arm_template_core(cli_ctx, resource_group_name, template_file, template_uri,
                                      deployment_name, parameters, mode, no_wait=no_wait)
 
 
-def validate_arm_template(resource_group_name, template_file=None, template_uri=None,
+def validate_arm_template(cli_ctx, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode='incremental'):
-    return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
+    return _deploy_arm_template_core(cli_ctx, resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
 
@@ -402,14 +404,14 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode='incremental', validate_only=False,
                               no_wait=False):
-    DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties',
-                                                 'TemplateLink',
-                                                 mod='models')
+    DeploymentProperties, TemplateLink = cli_ctx.cloud.get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                               'DeploymentProperties',
+                                                               'TemplateLink',
+                                                               mod='models')
     template = None
     template_link = None
     template_obj = None
@@ -436,57 +438,57 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
-def export_deployment_as_template(resource_group_name, deployment_name):
-    smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+def export_deployment_as_template(cli_ctx, resource_group_name, deployment_name):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
-def create_resource(properties,
+def create_resource(cli_ctx, properties,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None, location=None, is_full_object=False):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+    res = _ResourceUtils(cli_ctx, resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.create_resource(properties, location, is_full_object)
 
 
-def show_resource(resource_group_name=None,
+def show_resource(cli_ctx, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+    res = _ResourceUtils(cli_ctx, resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          None, api_version)
     return res.get_resource()
 
 
-def delete_resource(resource_group_name=None,
+def delete_resource(cli_ctx, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                     resource_name=None, resource_id=None, api_version=None):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+    res = _ResourceUtils(cli_ctx, resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.delete()
 
 
-def update_resource(parameters,
+def update_resource(cli_ctx, parameters,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+    res = _ResourceUtils(cli_ctx, resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.update(parameters)
 
 
-def tag_resource(tags,
+def tag_resource(cli_ctx, tags,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+    res = _ResourceUtils(cli_ctx, resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.tag(tags)
@@ -502,10 +504,10 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
     return result
 
 
-def list_resources(resource_group_name=None,
+def list_resources(cli_ctx, resource_group_name=None,
                    resource_provider_namespace=None, resource_type=None, name=None, tag=None,
                    location=None):
-    rcf = _resource_client_factory()
+    rcf = _resource_client_factory(cli_ctx)
 
     if resource_group_name is not None:
         rcf.resource_groups.get(resource_group_name)
@@ -564,14 +566,14 @@ def _list_resources_odata_filter_builder(resource_group_name=None,
     return ' and '.join(filters)
 
 
-def get_providers_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    rcf = _resource_client_factory()
+def get_providers_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
+    rcf = _resource_client_factory(cli_ctx)
     result = rcf.providers.list()
     return [r.namespace for r in result]
 
 
-def get_resource_types_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    rcf = _resource_client_factory()
+def get_resource_types_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
+    rcf = _resource_client_factory(cli_ctx)
     result = rcf.providers.list()
     types = []
     for p in list(result):
@@ -580,17 +582,17 @@ def get_resource_types_completion_list(prefix, **kwargs):  # pylint: disable=unu
     return types
 
 
-def register_provider(resource_provider_namespace, wait=False):
-    _update_provider(resource_provider_namespace, registering=True, wait=wait)
+def register_provider(cli_ctx, resource_provider_namespace, wait=False):
+    _update_provider(cli_ctx, resource_provider_namespace, registering=True, wait=wait)
 
 
-def unregister_provider(resource_provider_namespace, wait=False):
-    _update_provider(resource_provider_namespace, registering=False, wait=wait)
+def unregister_provider(cli_ctx, resource_provider_namespace, wait=False):
+    _update_provider(cli_ctx, resource_provider_namespace, registering=False, wait=wait)
 
 
-def _update_provider(namespace, registering, wait):
+def _update_provider(cli_ctx, namespace, registering, wait):
     import time
-    rcf = _resource_client_factory()
+    rcf = _resource_client_factory(cli_ctx)
     if registering:
         rcf.providers.register(namespace)
     else:
@@ -608,22 +610,21 @@ def _update_provider(namespace, registering, wait):
         logger.warning(msg_template, action, namespace)
 
 
-def list_provider_operations(api_version=None):
-    api_version = api_version or _get_auth_provider_latest_api_version()
-    auth_client = _authorization_management_client()
+def list_provider_operations(cli_ctx, api_version=None):
+    api_version = api_version or _get_auth_provider_latest_api_version(cli_ctx)
+    auth_client = _authorization_management_client(cli_ctx)
     return auth_client.provider_operations_metadata.list(api_version)
 
 
-def show_provider_operations(resource_provider_namespace, api_version=None):
-    api_version = api_version or _get_auth_provider_latest_api_version()
-    auth_client = _authorization_management_client()
+def show_provider_operations(cli_ctx, resource_provider_namespace, api_version=None):
+    api_version = api_version or _get_auth_provider_latest_api_version(cli_ctx)
+    auth_client = _authorization_management_client(cli_ctx)
     return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version)
 
 
-def _get_auth_provider_latest_api_version():
-    rcf = _resource_client_factory()
-    api_version = _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Authorization',
-                                                     None, 'providerOperations')
+def _get_auth_provider_latest_api_version(cli_ctx):
+    rcf = _resource_client_factory(cli_ctx)
+    api_version = _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Authorization', None, 'providerOperations')
     return api_version
 
 
@@ -649,7 +650,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     if len(set([r['resource_group'] for r in resources])) > 1:
         raise CLIError('All resources should be under the same group')
 
-    rcf = _resource_client_factory()
+    rcf = _resource_client_factory(cli_ctx)
     target = resource_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
                          resource_group=destination_group)
 
@@ -662,13 +663,13 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy, name=None, display_name=None,
+def create_policy_assignment(cli_ctx, policy, name=None, display_name=None,
                              resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_id = _resolve_policy_id(policy, policy_client)
-    PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
+    PolicyAssignment = cli_ctx.cloud.get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
     assignment = PolicyAssignment(display_name, policy_id, scope)
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
@@ -747,20 +748,20 @@ def _resolve_policy_id(policy, client):
     return policy_id
 
 
-def create_policy_definition(name, rules, display_name=None, description=None):
+def create_policy_definition(cli_ctx, name, rules, display_name=None, description=None):
     if os.path.exists(rules):
         rules = get_file_json(rules)
     else:
         rules = shell_safe_json_parse(rules)
 
     policy_client = _resource_policy_client_factory()
-    PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
+    PolicyDefinition = cli_ctx.cloud.get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(policy_rule=rules, description=description,
                                   display_name=display_name)
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
-def update_policy_definition(policy_definition_name, rules=None,
+def update_policy_definition(cli_ctx, policy_definition_name, rules=None,
                              display_name=None, description=None):
     if rules is not None:
         if os.path.exists(rules):
@@ -771,7 +772,7 @@ def update_policy_definition(policy_definition_name, rules=None,
     policy_client = _resource_policy_client_factory()
     definition = policy_client.policy_definitions.get(policy_definition_name)
     # pylint: disable=line-too-long,no-member
-    PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
+    PolicyDefinition = cli_ctx.cloud.get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(
         policy_rule=rules if rules is not None else definition.policy_rule,
         description=description if description is not None else definition.description,
@@ -1080,7 +1081,7 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
 
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
-    def __init__(self,
+    def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None, rcf=None):
@@ -1092,7 +1093,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                 resource_provider_namespace = parts[0]
                 resource_type = parts[1]
 
-        self.rcf = rcf or _resource_client_factory()
+        self.rcf = rcf or _resource_client_factory(cli_ctx)
         if api_version is None:
             if resource_id:
                 api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id)

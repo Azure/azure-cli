@@ -5,8 +5,10 @@
 
 import json
 import os
-from azure.cli.core.util import CLIError
+
 from azure.cli.core.commands.arm import parse_resource_id
+
+from knack.util import CLIError
 
 
 def read_content_if_is_file(string_or_file):
@@ -40,9 +42,6 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
 
 
 def log_pprint_template(template):
-    import azure.cli.core.azlogging as azlogging
-
-    logger = azlogging.get_az_logger(__name__)
     logger.info('==== BEGIN TEMPLATE ====')
     logger.info(json.dumps(template, indent=2))
     logger.info('==== END TEMPLATE ====')

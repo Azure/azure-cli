@@ -37,7 +37,6 @@ from ._format import \
      transform_network_usage_list, transform_network_usage_table)
 
 
-custom_path = 'azure.cli.command_modules.network.custom#'
 
 # Application gateways
 ag_path = 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.'
@@ -362,16 +361,6 @@ cli_generic_update_command(__name__, 'network nsg rule update',
                            sr_path + 'get', sr_path + 'create_or_update', cf_security_rules,
                            setter_arg_name='security_rule_parameters', custom_function_op=custom_path + 'update_nsg_rule')
 
-# SubnetsOperations
-subnet_path = 'azure.mgmt.network.operations.subnets_operations#SubnetsOperations.'
-cli_command(__name__, 'network vnet subnet delete', subnet_path + 'delete', cf_subnets)
-cli_command(__name__, 'network vnet subnet show', subnet_path + 'get', cf_subnets, exception_handler=empty_on_404)
-cli_command(__name__, 'network vnet subnet list', subnet_path + 'list', cf_subnets)
-cli_command(__name__, 'network vnet subnet create', custom_path + 'create_subnet')
-cli_generic_update_command(__name__, 'network vnet subnet update',
-                           subnet_path + 'get', subnet_path + 'create_or_update', cf_subnets,
-                           setter_arg_name='subnet_parameters', custom_function_op=custom_path + 'update_subnet')
-
 # Usages operations
 usage_path = 'azure.mgmt.network.operations.usages_operations#UsagesOperations.'
 cli_command(__name__, 'network list-usages', usage_path + 'list', cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
@@ -410,16 +399,6 @@ cli_command(__name__, 'network vnet-gateway root-cert create', custom_path + 'cr
 cli_command(__name__, 'network vnet-gateway root-cert delete', custom_path + 'delete_vnet_gateway_root_cert')
 cli_command(__name__, 'network vnet-gateway revoked-cert create', custom_path + 'create_vnet_gateway_revoked_cert')
 cli_command(__name__, 'network vnet-gateway revoked-cert delete', custom_path + 'delete_vnet_gateway_revoked_cert')
-
-# VirtualNetworksOperations
-vnet_path = 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.'
-cli_command(__name__, 'network vnet delete', vnet_path + 'delete', cf_virtual_networks)
-cli_command(__name__, 'network vnet show', vnet_path + 'get', cf_virtual_networks, exception_handler=empty_on_404)
-cli_command(__name__, 'network vnet list', custom_path + 'list_vnet')
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    cli_command(__name__, 'network vnet check-ip-address', vnet_path + 'check_ip_address_availability', cf_virtual_networks)
-cli_command(__name__, 'network vnet create', custom_path + 'create_vnet', transform=transform_vnet_create_output)
-cli_generic_update_command(__name__, 'network vnet update', vnet_path + 'get', vnet_path + 'create_or_update', cf_virtual_networks, custom_function_op=custom_path + 'update_vnet')
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
     # VNET Peering Operations

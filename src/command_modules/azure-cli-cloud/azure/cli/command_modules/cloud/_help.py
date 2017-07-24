@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=unused-import
 
 
 helps['cloud'] = """
@@ -12,37 +12,37 @@ helps['cloud'] = """
 """
 
 helps['cloud list'] = """
-            type: command
-            short-summary: List the registered clouds.
+    type: command
+    short-summary: List the registered clouds.
 """
 
 helps['cloud show'] = """
-            type: command
-            short-summary: Show the configuration of a registered cloud.
+    type: command
+    short-summary: Show the configuration of a registered cloud.
 """
 
 helps['cloud register'] = """
-            type: command
-            short-summary: Register a cloud.
-            long-summary: When registering a cloud, specify only the resource manager endpoint for the autodetection of other endpoints.
+    type: command
+    short-summary: Register a cloud.
+    long-summary: When registering a cloud, specify only the resource manager endpoint for the autodetection of other endpoints.
 """
 
 helps['cloud unregister'] = """
-            type: command
-            short-summary: Unregister a cloud.
+    type: command
+    short-summary: Unregister a cloud.
 """
 
 helps['cloud set'] = """
-            type: command
-            short-summary: Set the active cloud.
+    type: command
+    short-summary: Set the active cloud.
 """
 
 helps['cloud update'] = """
-            type: command
-            short-summary: Update the configuration for a cloud.
+    type: command
+    short-summary: Update the configuration for a cloud.
 """
 
 helps['cloud list-profiles'] = """
-            type: command
-            short-summary: List the profiles a given cloud supports.
+    type: command
+    short-summary: List the profiles a given cloud supports.
 """

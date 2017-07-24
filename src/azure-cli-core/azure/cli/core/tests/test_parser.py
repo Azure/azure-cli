@@ -7,7 +7,8 @@ import unittest
 from six import StringIO
 from azure.cli.core.parser import AzCliCommandParser
 from azure.cli.core.commands import CliCommand
-from azure.cli.core.commands.parameters import enum_choice_list
+
+from knack.arguments import enum_choice_list
 
 
 class TestParser(unittest.TestCase):

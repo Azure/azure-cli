@@ -11,10 +11,9 @@ from azure.cli.core.commands import (command_table,
                                      CliCommand,
                                      LongRunningOperation,
                                      get_op_handler)
-from azure.cli.core.commands._introspection import \
-    (extract_full_summary_from_signature, extract_args_from_signature)
 
-from azure.cli.core.util import CLIError
+from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
+from knack.util import CLIError
 
 
 def _encode_hex(item):

@@ -8,7 +8,6 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
-from azure.cli.core.util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
@@ -20,6 +19,8 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 )
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
+
+from knack.util import CLIError
 
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error

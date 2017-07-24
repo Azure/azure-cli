@@ -7,9 +7,11 @@ from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
-                                                get_resource_name_completion_list, file_type,
-                                                CliArgumentType, ignore_type, enum_choice_list)
+                                                get_resource_name_completion_list, file_type)
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType
+
+from knack.arguments import CLIArgumentType, ignore_type, enum_choice_list
+
 from ._client_factory import web_client_factory
 from ._validators import validate_existing_function_app, validate_existing_web_app
 
@@ -39,10 +41,10 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pyli
 
 # pylint: disable=line-too-long
 # PARAMETER REGISTRATION
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
+name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
                                **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
-webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('--name', '-n'), metavar='NAME',
+webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=('--name', '-n'), metavar='NAME',
                                        completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                        help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 

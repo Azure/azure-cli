@@ -8,18 +8,16 @@ import argparse
 from argcomplete.completers import FilesCompleter
 from six import u as unicode_string
 
-from azure.cli.core._config import az_config
-from azure.cli.core.commands.parameters import (ignore_type, tags_type, file_type, get_resource_name_completion_list,
-                                                enum_choice_list, model_choice_list, enum_default, location_type,
-                                                three_state_flag)
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
-from azure.cli.core.commands import (register_cli_argument, register_extra_cli_argument, CliArgumentType,
-                                     VersionConstraint)
-
 from azure.common import AzureMissingResourceHttpError
 
+from azure.cli.core.commands.parameters import \
+    (tags_type, file_type, get_resource_name_completion_list, model_choice_list, enum_default, location_type)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
+import azure.cli.core.commands.arm  # pylint: disable=unused-import
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, VersionConstraint
 from azure.cli.core.profiles import get_sdk, ResourceType
+
+from knack.arguments import enum_choice_list, ignore_type, CLIArgumentType
 
 from ._factory import get_storage_data_service_client
 from ._validators import \
@@ -74,7 +72,6 @@ AccountPermissions, BaseBlobService, \
                                                           'file#FileService',
                                                           'queue#QueueService',
                                                           'queue.models#QueuePermissions')
-
 
 # UTILITY
 
@@ -248,14 +245,14 @@ table_payload_formats = {'none': TablePayloadFormat.JSON_NO_METADATA, 'minimal':
 
 # ARGUMENT TYPES
 
-account_name_type = CliArgumentType(options_list=('--account-name', '-n'), help='The storage account name.', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'), id_part='name')
-blob_name_type = CliArgumentType(options_list=('--blob-name', '-b'), help='The blob name.', completer=get_storage_name_completion_list(BaseBlobService, 'list_blobs', parent='container_name'))
-container_name_type = CliArgumentType(options_list=('--container-name', '-c'), help='The container name.', completer=get_storage_name_completion_list(BaseBlobService, 'list_containers'))
-directory_type = CliArgumentType(options_list=('--directory-name', '-d'), help='The directory name.', completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
-file_name_type = CliArgumentType(options_list=('--file-name', '-f'), completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
-share_name_type = CliArgumentType(options_list=('--share-name', '-s'), help='The file share name.', completer=get_storage_name_completion_list(FileService, 'list_shares'))
-table_name_type = CliArgumentType(options_list=('--table-name', '-t'), completer=get_storage_name_completion_list(TableService, 'list_tables'))
-queue_name_type = CliArgumentType(options_list=('--queue-name', '-q'), help='The queue name.', completer=get_storage_name_completion_list(QueueService, 'list_queues'))
+account_name_type = CLIArgumentType(options_list=('--account-name', '-n'), help='The storage account name.', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'), id_part='name')
+blob_name_type = CLIArgumentType(options_list=('--blob-name', '-b'), help='The blob name.', completer=get_storage_name_completion_list(BaseBlobService, 'list_blobs', parent='container_name'))
+container_name_type = CLIArgumentType(options_list=('--container-name', '-c'), help='The container name.', completer=get_storage_name_completion_list(BaseBlobService, 'list_containers'))
+directory_type = CLIArgumentType(options_list=('--directory-name', '-d'), help='The directory name.', completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
+file_name_type = CLIArgumentType(options_list=('--file-name', '-f'), completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
+share_name_type = CLIArgumentType(options_list=('--share-name', '-s'), help='The file share name.', completer=get_storage_name_completion_list(FileService, 'list_shares'))
+table_name_type = CLIArgumentType(options_list=('--table-name', '-t'), completer=get_storage_name_completion_list(TableService, 'list_tables'))
+queue_name_type = CLIArgumentType(options_list=('--queue-name', '-q'), help='The queue name.', completer=get_storage_name_completion_list(QueueService, 'list_queues'))
 
 # PARAMETER REGISTRATIONS
 

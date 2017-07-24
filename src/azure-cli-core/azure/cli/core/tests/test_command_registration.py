@@ -10,11 +10,11 @@ import unittest
 from azure.cli.core.commands import _update_command_definitions
 from azure.cli.core.commands import (
     command_table,
-    CliArgumentType,
-    CliCommandArgument,
     cli_command,
     register_cli_argument,
     register_extra_cli_argument)
+
+from knack.arguments import CLIArgumentType, CLICommandArgument
 
 
 class Test_command_registration(unittest.TestCase):
@@ -22,7 +22,6 @@ class Test_command_registration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
-        import azure.cli.main
         logging.basicConfig(level=logging.DEBUG)
 
     @classmethod
@@ -56,7 +55,7 @@ class Test_command_registration(unittest.TestCase):
         command_table.clear()
         cli_command(None, 'test register sample-vm-get',
                     '{}#Test_command_registration.sample_vm_get'.format(__name__))
-        register_cli_argument('test register sample-vm-get', 'vm_name', CliArgumentType(
+        register_cli_argument('test register sample-vm-get', 'vm_name', CLIArgumentType(
             options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...',
             required=False
         ))
@@ -69,8 +68,8 @@ class Test_command_registration(unittest.TestCase):
         command_metadata = command_table['test register sample-vm-get']
         self.assertEqual(len(command_metadata.arguments), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = {
-            'resource_group_name': CliArgumentType(dest='resource_group_name', required=True),
-            'vm_name': CliArgumentType(dest='vm_name', required=False),
+            'resource_group_name': CLIArgumentType(dest='resource_group_name', required=True),
+            'vm_name': CLIArgumentType(dest='vm_name', required=False),
         }
 
         for probe in some_expected_arguments:
@@ -90,15 +89,15 @@ class Test_command_registration(unittest.TestCase):
         command_metadata = command_table['test command sample-vm-get']
         self.assertEqual(len(command_metadata.arguments), 4, 'We expected exactly 4 arguments')
         some_expected_arguments = {
-            'resource_group_name': CliArgumentType(dest='resource_group_name',
+            'resource_group_name': CLIArgumentType(dest='resource_group_name',
                                                    required=True,
                                                    help='The name of the resource group.'),
-            'vm_name': CliArgumentType(dest='vm_name',
+            'vm_name': CLIArgumentType(dest='vm_name',
                                        required=True,
                                        help='The name of the virtual machine.'),
-            'opt_param': CliArgumentType(required=False,
+            'opt_param': CLIArgumentType(required=False,
                                          help='Used to verify reflection correctly identifies optional params.'),  # pylint: disable=line-too-long
-            'expand': CliArgumentType(required=False,
+            'expand': CLIArgumentType(required=False,
                                       help='The expand expression to apply on the operation.')
         }
 
@@ -112,10 +111,10 @@ class Test_command_registration(unittest.TestCase):
     def test_register_cli_argument_with_overrides(self):
         command_table.clear()
 
-        global_vm_name_type = CliArgumentType(
+        global_vm_name_type = CLIArgumentType(
             options_list=('--foo', '-f'), metavar='FOO', help='foo help'
         )
-        derived_vm_name_type = CliArgumentType(base_type=global_vm_name_type,
+        derived_vm_name_type = CLIArgumentType(base_type=global_vm_name_type,
                                                help='first modification')
 
         cli_command(None, 'test vm-get',
@@ -165,7 +164,7 @@ class Test_command_registration(unittest.TestCase):
         self.assertEqual(len(command_metadata.arguments), 5, 'We expected exactly 5 arguments')
 
         some_expected_arguments = {
-            'added_param': CliArgumentType(dest='added_param', required=True)
+            'added_param': CLIArgumentType(dest='added_param', required=True)
         }
 
         for probe in some_expected_arguments:
@@ -201,9 +200,9 @@ class Test_command_registration(unittest.TestCase):
         command_metadata = command_table['test command foo']
         self.assertEqual(len(command_metadata.arguments), 3, 'We expected exactly 3 arguments')
         some_expected_arguments = {
-            'param_a': CliArgumentType(dest='param_a', required=True, help=''),
-            'param_b': CliArgumentType(dest='param_b', required=True, help='The name of nothing.'),
-            'param_c': CliArgumentType(dest='param_c', required=True, help='The name of nothing2.')
+            'param_a': CLIArgumentType(dest='param_a', required=True, help=''),
+            'param_b': CLIArgumentType(dest='param_b', required=True, help='The name of nothing.'),
+            'param_c': CLIArgumentType(dest='param_c', required=True, help='The name of nothing2.')
         }
 
         for probe in some_expected_arguments:
@@ -213,7 +212,7 @@ class Test_command_registration(unittest.TestCase):
         command_table.clear()
 
     def test_override_existing_option_string(self):
-        arg = CliArgumentType(options_list=('--funky', '-f'))
+        arg = CLIArgumentType(options_list=('--funky', '-f'))
         updated_options_list = ('--something-else', '-s')
         arg.update(options_list=updated_options_list, validator=lambda: (), completer=lambda: ())
         self.assertEqual(arg.settings['options_list'], updated_options_list)
@@ -222,13 +221,13 @@ class Test_command_registration(unittest.TestCase):
 
     def test_dont_override_existing_option_string(self):
         existing_options_list = ('--something-else', '-s')
-        arg = CliArgumentType(options_list=existing_options_list)
+        arg = CLIArgumentType(options_list=existing_options_list)
         arg.update()
         self.assertEqual(arg.settings['options_list'], existing_options_list)
 
     def test_override_remove_validator(self):
         existing_options_list = ('--something-else', '-s')
-        arg = CliArgumentType(options_list=existing_options_list,
+        arg = CLIArgumentType(options_list=existing_options_list,
                               validator=lambda *args, **kwargs: ())
         arg.update(validator=None)
         self.assertIsNone(arg.settings['validator'])
@@ -267,19 +266,19 @@ class Test_command_registration(unittest.TestCase):
 
     def test_override_argtype_with_argtype(self):
         existing_options_list = ('--default', '-d')
-        arg = CliArgumentType(options_list=existing_options_list, validator=None, completer='base',
+        arg = CLIArgumentType(options_list=existing_options_list, validator=None, completer='base',
                               help='base', required=True)
-        overriding_argtype = CliArgumentType(options_list=('--overridden',), validator='overridden',
+        overriding_argtype = CLIArgumentType(options_list=('--overridden',), validator='overridden',
                                              completer=None, overrides=arg, help='overridden',
-                                             required=CliArgumentType.REMOVE)
+                                             required=CLIArgumentType.REMOVE)
         self.assertEqual(overriding_argtype.settings['validator'], 'overridden')
         self.assertEqual(overriding_argtype.settings['completer'], None)
         self.assertEqual(overriding_argtype.settings['options_list'], ('--overridden',))
         self.assertEqual(overriding_argtype.settings['help'], 'overridden')
-        self.assertEqual(overriding_argtype.settings['required'], CliArgumentType.REMOVE)
+        self.assertEqual(overriding_argtype.settings['required'], CLIArgumentType.REMOVE)
 
-        cmd_arg = CliCommandArgument(dest='whatever', argtype=overriding_argtype,
-                                     help=CliArgumentType.REMOVE)
+        cmd_arg = CLICommandArgument(dest='whatever', argtype=overriding_argtype,
+                                     help=CLIArgumentType.REMOVE)
         self.assertFalse('required' in cmd_arg.options)
         self.assertFalse('help' in cmd_arg.options)
 

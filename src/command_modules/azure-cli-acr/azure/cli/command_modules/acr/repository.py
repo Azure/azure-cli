@@ -8,9 +8,8 @@ from base64 import b64encode
 import requests
 from requests.utils import to_native_string
 
-from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException, prompt_y_n
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.prompting import prompt, prompt_pass, NoTTYException, prompt_y_n
+from knack.util import CLIError
 
 from azure.mgmt.containerregistry.v2017_06_01_preview.models import SkuTier
 
@@ -19,7 +18,6 @@ from ._docker_utils import get_login_access_token
 from .credential import acr_credential_show
 
 
-logger = azlogging.get_az_logger(__name__)
 DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
 LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is not supported for registries in Basic SKU.'
 

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument
-from azure.cli.core.util import CLIError, to_snake_case
+from knack.util import CLIError, to_snake_case
 
 from azure.cli.core.cloud import (Cloud,
                                   get_clouds,
@@ -23,15 +23,23 @@ from azure.cli.core.cloud import (Cloud,
 METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2015-01-01'
 
 
-def list_clouds():
-    return get_clouds()
+def get_cloud_name_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    return [c.name for c in get_clouds()]
 
 
-def show_cloud(cloud_name=None):
+def get_custom_cloud_name_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    return [c.name for c in get_custom_clouds()]
+
+
+def list_clouds(cli_ctx):
+    return get_clouds(cli_ctx)
+
+
+def show_cloud(cli_ctx, cloud_name=None):
     if not cloud_name:
-        cloud_name = get_active_cloud_name()
+        cloud_name = cli_ctx.cloud.name
     try:
-        return get_cloud(cloud_name)
+        return get_cloud(cli_ctx, cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
@@ -85,7 +93,8 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
     return c
 
 
-def register_cloud(cloud_name,
+def register_cloud(cli_ctx,
+                   cloud_name,
                    cloud_config=None,
                    profile=None,
                    endpoint_management=None,
@@ -105,12 +114,13 @@ def register_cloud(cloud_name,
     c = _build_cloud(cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
-        add_cloud(c)
+        add_cloud(cli_ctx, c)
     except CloudAlreadyRegisteredException as e:
         raise CLIError(e)
 
 
-def modify_cloud(cloud_name=None,
+def modify_cloud(cli_ctx,
+                 cloud_name=None,
                  cloud_config=None,
                  profile=None,
                  endpoint_management=None,
@@ -128,27 +138,27 @@ def modify_cloud(cloud_name=None,
                  suffix_azure_datalake_store_file_system_endpoint=None,
                  suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     if not cloud_name:
-        cloud_name = get_active_cloud_name()
+        cloud_name = cli_ctx.cloud.name
     c = _build_cloud(cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
-        update_cloud(c)
+        update_cloud(cli_ctx, c)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
 
-def unregister_cloud(cloud_name):
+def unregister_cloud(cli_ctx, cloud_name):
     try:
-        return remove_cloud(cloud_name)
+        return remove_cloud(cli_ctx, cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
     except CannotUnregisterCloudException as e:
         raise CLIError(e)
 
 
-def set_cloud(cloud_name, profile=None):
+def set_cloud(cli_ctx, cloud_name, profile=None):
     try:
-        switch_active_cloud(cloud_name)
+        switch_active_cloud(cli_ctx, cloud_name)
         if profile:
             modify_cloud(cloud_name=cloud_name, profile=profile)
     except CloudNotRegisteredException as e:

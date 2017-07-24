@@ -7,7 +7,7 @@
 def ex_handler_factory(creating_plan=False, no_throw=False):
     def _polish_bad_errors(ex):
         import json
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         try:
             detail = json.loads(ex.response.text)['Message']
             if creating_plan:

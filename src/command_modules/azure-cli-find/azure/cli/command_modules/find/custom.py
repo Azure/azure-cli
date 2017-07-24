@@ -13,10 +13,7 @@ import re
 import six
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
-import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
-
-logger = azlogging.get_az_logger(__name__)
 
 INDEX_DIR_PREFIX = 'search_index'
 INDEX_VERSION = 'v1'

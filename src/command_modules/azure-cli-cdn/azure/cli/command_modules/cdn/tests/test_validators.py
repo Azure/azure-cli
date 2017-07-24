@@ -5,7 +5,7 @@
 import unittest
 import mock
 from azure.cli.command_modules.cdn._validators import validate_origin
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 class ValidatorTests(unittest.TestCase):

@@ -7,20 +7,19 @@
 import argparse
 import platform
 
-from azure.cli.core.commands import \
-    (CliArgumentType, register_cli_argument)
 from azure.cli.core.commands.validators import validate_tag, validate_tags
-from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core.profiles import ResourceType
 
-logger = azlogging.get_az_logger(__name__)
+from knack.arguments import CLIArgumentType, CaseInsensitiveList, enum_choice_list, ignore_type
+from knack.log import get_logger
+from knack.util import CLIError
 
+logger = get_logger(__name__)
 
-def get_subscription_locations():
+def get_subscription_locations(cli_ctx):
     from azure.cli.core.commands.client_factory import get_subscription_service_client
-    subscription_client, subscription_id = get_subscription_service_client()
+    subscription_client, subscription_id = get_subscription_service_client(cli_ctx)
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 
@@ -61,11 +60,11 @@ def get_resource_group_completion_list(prefix, **kwargs):  # pylint: disable=unu
     return [l.name for l in result]
 
 
-def get_resources_in_resource_group(resource_group_name, resource_type=None):
+def get_resources_in_resource_group(cli_ctx, resource_group_name, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
-    if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, max_api='2016-09-01'):
+    if cli_ctx.cloud.supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, max_api='2016-09-01'):
         return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
     return list(rcf.resources.list_by_resource_group(resource_group_name, filter=filter_str))
 
@@ -92,37 +91,14 @@ def get_generic_completion_list(generic_list):
     return completer
 
 
-class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
-
-    def __contains__(self, other):
-        return next((True for x in self if other.lower() == x.lower()), False)
-
-
-def model_choice_list(resource_type, model_name):
-    model = get_sdk(resource_type, model_name, mod='models')
+def model_choice_list(cli_ctx, resource_type, model_name):
+    # TODO: Migrate within the CLI encapsulation
+    model = cli_ctx.cloud.get_sdk(resource_type, model_name, mod='models')
     return enum_choice_list(model) if model else {}
 
 
-def enum_choice_list(data):
-    """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
-    # transform enum types, otherwise assume list of string choices
-    if not data:
-        return {}
-    try:
-        choices = [x.value for x in data]
-    except AttributeError:
-        choices = data
-
-    def _type(value):
-        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
-    params = {
-        'choices': CaseInsensitiveList(choices),
-        'type': _type
-    }
-    return params
-
-
 def enum_default(resource_type, enum_name, enum_val_name):
+    # TODO: Migrate within the CLI encapsulation
     mod = get_sdk(resource_type, enum_name, mod='models')
     try:
         return getattr(mod, enum_val_name).value
@@ -163,31 +139,18 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
     return params
 
 
-class IgnoreAction(argparse.Action):  # pylint: disable=too-few-public-methods
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
-            option_string, values or ''))
-
-
 # GLOBAL ARGUMENT DEFINITIONS
 
-ignore_type = CliArgumentType(
-    help=argparse.SUPPRESS,
-    nargs='?',
-    action=IgnoreAction,
-    required=False)
-
-resource_group_name_type = CliArgumentType(
+resource_group_name_type = CLIArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
     configured_default='group')
 
-name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
+name_type = CLIArgumentType(options_list=('--name', '-n'), help='the primary resource name')
 
-location_type = CliArgumentType(
+location_type = CLIArgumentType(
     options_list=('--location', '-l'),
     completer=get_location_completion_list,
     type=location_name_type,
@@ -195,7 +158,7 @@ location_type = CliArgumentType(
     metavar='LOCATION',
     configured_default='location')
 
-deployment_name_type = CliArgumentType(
+deployment_name_type = CLIArgumentType(
     help=argparse.SUPPRESS,
     required=False,
     validator=generate_deployment_name
@@ -204,25 +167,23 @@ deployment_name_type = CliArgumentType(
 quotes = '""' if platform.system() == 'Windows' else "''"
 quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
-tags_type = CliArgumentType(
+tags_type = CLIArgumentType(
     validator=validate_tags,
     help="space separated tags in 'key[=value]' format. {}".format(quote_text),
     nargs='*'
 )
 
-tag_type = CliArgumentType(
+tag_type = CLIArgumentType(
     type=validate_tag,
     help="a single tag in 'key[=value]' format. {}".format(quote_text),
     nargs='?',
     const=''
 )
 
-no_wait_type = CliArgumentType(
+no_wait_type = CLIArgumentType(
     options_list=('--no-wait', ),
     help='do not wait for the long running operation to finish',
     action='store_true'
 )
 
-register_cli_argument('', 'resource_group_name', resource_group_name_type)
-register_cli_argument('', 'location', location_type)
-register_cli_argument('', 'deployment_name', deployment_name_type)
+cli_context_type = ignore_type

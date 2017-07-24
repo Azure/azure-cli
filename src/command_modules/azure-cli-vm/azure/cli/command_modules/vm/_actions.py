@@ -6,7 +6,7 @@
 import json
 import re
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 

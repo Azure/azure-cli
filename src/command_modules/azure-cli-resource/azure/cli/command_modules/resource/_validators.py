@@ -5,13 +5,11 @@
 
 import os
 
+from knack.util import CLIError
 try:
     from urllib.parse import urlparse, urlsplit
 except ImportError:
     from urlparse import urlparse, urlsplit  # pylint: disable=import-error
-
-
-from azure.cli.core.util import CLIError
 
 
 def _validate_deployment_name(namespace):

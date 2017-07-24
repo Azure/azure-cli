@@ -12,7 +12,7 @@ except ImportError:
 from json import loads
 import requests
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 def _get_login_token(login_server, only_refresh_token=True, repository=None):

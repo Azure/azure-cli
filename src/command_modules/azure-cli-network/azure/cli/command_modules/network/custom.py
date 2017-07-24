@@ -14,7 +14,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 from azure.cli.core.commands.validators import DefaultStr
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.network._client_factory import _network_client_factory
+from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
 from azure.mgmt.dns import DnsManagementClient
@@ -24,30 +24,33 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
+from azure.cli.core.profiles import ResourceType
 
-logger = azlogging.get_az_logger(__name__)
+from knack.log import get_logger
 
-AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, ApplicationGatewaySslPolicy, \
-    ApplicationGatewaySslPolicyType, \
-    BackendAddressPool, DhcpOptions, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, \
-    FrontendIPConfiguration, InboundNatPool, InboundNatRule, IPAllocationMethod, IPVersion, \
-    LoadBalancingRule, NetworkInterfaceIPConfiguration, NetworkSecurityGroup, Probe, PublicIPAddress, \
-    PublicIPAddressDnsSettings, RedirectConfiguration, Route, SecurityRule, SecurityRuleAccess, \
-    SecurityRuleDirection, SecurityRuleProtocol, Subnet, SubResource, VirtualNetwork, \
-    VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VirtualNetworkPeering, VpnClientConfiguration, \
-    VpnClientRevokedCertificate, VpnClientRootCertificate, VpnType = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'AddressSpace', 'ApplicationGatewayFirewallMode', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslPolicy',
-        'ApplicationGatewaySslPolicyType',
-        'BackendAddressPool', 'DhcpOptions', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier',
-        'FrontendIPConfiguration', 'InboundNatPool', 'InboundNatRule', 'IPAllocationMethod', 'IPVersion',
-        'LoadBalancingRule', 'NetworkInterfaceIPConfiguration', 'NetworkSecurityGroup', 'Probe', 'PublicIPAddress',
-        'PublicIPAddressDnsSettings', 'RedirectConfiguration', 'Route', 'SecurityRule', 'SecurityRuleAccess',
-        'SecurityRuleDirection', 'SecurityRuleProtocol', 'Subnet', 'SubResource', 'VirtualNetwork',
-        'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VirtualNetworkPeering', 'VpnClientConfiguration',
-        'VpnClientRevokedCertificate', 'VpnClientRootCertificate', 'VpnType',
-        mod='models')
+logger = get_logger(__name__)
+
+# TODO: Cannot import symbol due to CLI_CTX
+#AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, ApplicationGatewaySslPolicy, \
+#    ApplicationGatewaySslPolicyType, \
+#    BackendAddressPool, DhcpOptions, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, \
+#    FrontendIPConfiguration, InboundNatPool, InboundNatRule, IPAllocationMethod, IPVersion, \
+#    LoadBalancingRule, NetworkInterfaceIPConfiguration, NetworkSecurityGroup, Probe, PublicIPAddress, \
+#    PublicIPAddressDnsSettings, RedirectConfiguration, Route, SecurityRule, SecurityRuleAccess, \
+#    SecurityRuleDirection, SecurityRuleProtocol, Subnet, SubResource, VirtualNetwork, \
+#    VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VirtualNetworkPeering, VpnClientConfiguration, \
+#    VpnClientRevokedCertificate, VpnClientRootCertificate, VpnType = get_sdk(
+#        ResourceType.MGMT_NETWORK,
+#        'AddressSpace', 'ApplicationGatewayFirewallMode', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslPolicy',
+#        'ApplicationGatewaySslPolicyType',
+#        'BackendAddressPool', 'DhcpOptions', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier',
+#        'FrontendIPConfiguration', 'InboundNatPool', 'InboundNatRule', 'IPAllocationMethod', 'IPVersion',
+#        'LoadBalancingRule', 'NetworkInterfaceIPConfiguration', 'NetworkSecurityGroup', 'Probe', 'PublicIPAddress',
+#        'PublicIPAddressDnsSettings', 'RedirectConfiguration', 'Route', 'SecurityRule', 'SecurityRuleAccess',
+#        'SecurityRuleDirection', 'SecurityRuleProtocol', 'Subnet', 'SubResource', 'VirtualNetwork',
+#        'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VirtualNetworkPeering', 'VpnClientConfiguration',
+#        'VpnClientRevokedCertificate', 'VpnClientRootCertificate', 'VpnType',
+#        mod='models')
 
 
 def _log_pprint_template(template):
@@ -87,7 +90,7 @@ def _get_default_value(balancer, property_name, option_name):
 
 # region Generic list commands
 def _generic_list(operation_name, resource_group_name):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     operation_group = getattr(ncf, operation_name)
     if resource_group_name:
         return operation_group.list(resource_group_name)
@@ -135,90 +138,91 @@ def list_network_watchers(resource_group_name=None):
 
 # region Application Gateway commands
 
+# TODO: Cannot import symbol due to CLI_CTX
 # pylint: disable=too-many-locals
-def create_application_gateway(application_gateway_name, resource_group_name, location=None,
-                               tags=None, no_wait=False, capacity=2,
-                               cert_data=None, cert_password=None,
-                               frontend_port=None, http_settings_cookie_based_affinity='disabled',
-                               http_settings_port=80, http_settings_protocol='Http',
-                               routing_rule_type='Basic', servers=None,
-                               sku=ApplicationGatewaySkuName.standard_medium.value,
-                               private_ip_address='', public_ip_address=None,
-                               public_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                               subnet='default', subnet_address_prefix=DefaultStr('10.0.0.0/24'),
-                               virtual_network_name=None, vnet_address_prefix=DefaultStr('10.0.0.0/16'),
-                               public_ip_address_type=None, subnet_type=None, validate=False,
-                               connection_draining_timeout=0):
-    from azure.cli.core.util import random_string
-    from azure.cli.command_modules.network._template_builder import \
-        (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
-         build_vnet_resource)
+#def create_application_gateway(application_gateway_name, resource_group_name, location=None,
+#                               tags=None, no_wait=False, capacity=2,
+#                               cert_data=None, cert_password=None,
+#                               frontend_port=None, http_settings_cookie_based_affinity='disabled',
+#                               http_settings_port=80, http_settings_protocol='Http',
+#                               routing_rule_type='Basic', servers=None,
+#                               sku=ApplicationGatewaySkuName.standard_medium.value,
+#                               private_ip_address='', public_ip_address=None,
+#                               public_ip_address_allocation=IPAllocationMethod.dynamic.value,
+#                               subnet='default', subnet_address_prefix=DefaultStr('10.0.0.0/24'),
+#                               virtual_network_name=None, vnet_address_prefix=DefaultStr('10.0.0.0/16'),
+#                               public_ip_address_type=None, subnet_type=None, validate=False,
+#                               connection_draining_timeout=0):
+#    from azure.cli.core.util import random_string
+#    from azure.cli.command_modules.network._template_builder import \
+#        (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
+#         build_vnet_resource)
 
-    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                   'DeploymentProperties',
-                                   mod='models')
-    tags = tags or {}
-    sku_tier = sku.split('_', 1)[0]
-    http_listener_protocol = 'https' if cert_data else 'http'
-    private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
-    virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
+#    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+#                                   'DeploymentProperties',
+#                                   mod='models')
+#    tags = tags or {}
+#    sku_tier = sku.split('_', 1)[0]
+#    http_listener_protocol = 'https' if cert_data else 'http'
+#    private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
+#    virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
 
-    # Build up the ARM template
-    master_template = ArmTemplateBuilder()
-    ag_dependencies = []
+#    # Build up the ARM template
+#    master_template = ArmTemplateBuilder()
+#    ag_dependencies = []
 
-    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
-    subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
+#    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+#    subnet_id = subnet if is_valid_resource_id(subnet) else None
+#    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
+#        else IPAllocationMethod.dynamic.value
 
-    network_id_template = resource_id(
-        subscription=get_subscription_id(), resource_group=resource_group_name,
-        namespace='Microsoft.Network')
+#    network_id_template = resource_id(
+#        subscription=get_subscription_id(), resource_group=resource_group_name,
+#        namespace='Microsoft.Network')
 
-    if subnet_type == 'new':
-        ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
-        vnet = build_vnet_resource(
-            virtual_network_name, location, tags, vnet_address_prefix, subnet,
-            subnet_address_prefix)
-        master_template.add_resource(vnet)
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
-                                                              virtual_network_name, subnet)
+#    if subnet_type == 'new':
+#        ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
+#        vnet = build_vnet_resource(
+#            virtual_network_name, location, tags, vnet_address_prefix, subnet,
+#            subnet_address_prefix)
+#        master_template.add_resource(vnet)
+#        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
+#                                                              virtual_network_name, subnet)
 
-    if public_ip_address_type == 'new':
-        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-        master_template.add_resource(build_public_ip_resource(public_ip_address, location,
-                                                              tags,
-                                                              public_ip_address_allocation,
-                                                              None))
-        public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                        public_ip_address)
+#    if public_ip_address_type == 'new':
+#        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+#        master_template.add_resource(build_public_ip_resource(public_ip_address, location,
+#                                                              tags,
+#                                                              public_ip_address_allocation,
+#                                                              None))
+#        public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+#                                                        public_ip_address)
 
-    app_gateway_resource = build_application_gateway_resource(
-        application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
-        private_ip_address, private_ip_allocation, cert_data, cert_password,
-        http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
-        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
-        connection_draining_timeout)
-    app_gateway_resource['dependsOn'] = ag_dependencies
-    master_template.add_variable(
-        'appGwID',
-        "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(
-            application_gateway_name))
-    master_template.add_resource(app_gateway_resource)
-    master_template.add_output('applicationGateway', application_gateway_name, output_type='object')
+#    app_gateway_resource = build_application_gateway_resource(
+#        application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
+#        private_ip_address, private_ip_allocation, cert_data, cert_password,
+#        http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
+#        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
+#        connection_draining_timeout)
+#    app_gateway_resource['dependsOn'] = ag_dependencies
+#    master_template.add_variable(
+#        'appGwID',
+#        "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(
+#            application_gateway_name))
+#    master_template.add_resource(app_gateway_resource)
+#    master_template.add_output('applicationGateway', application_gateway_name, output_type='object')
 
-    template = master_template.build()
+#    template = master_template.build()
 
-    # deploy ARM template
-    deployment_name = 'ag_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    if validate:
-        _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
+#    # deploy ARM template
+#    deployment_name = 'ag_deploy_' + random_string(32)
+#    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+#    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+#    if validate:
+#        _log_pprint_template(template)
+#        return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+#    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def update_application_gateway(instance, sku=None, capacity=None, tags=None):
@@ -237,7 +241,7 @@ def create_ag_authentication_certificate(resource_group_name, application_gatewa
     AuthCert = get_sdk(ResourceType.MGMT_NETWORK,
                        'ApplicationGatewayAuthenticationCertificate',
                        mod='models')
-    ncf = _network_client_factory().application_gateways
+    ncf = network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
     _upsert(ag, 'authentication_certificates', new_cert, 'name')
@@ -255,7 +259,7 @@ def create_ag_backend_address_pool(resource_group_name, application_gateway_name
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendAddressPool',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
     _upsert(ag, 'backend_address_pools', new_pool, 'name')
@@ -277,7 +281,7 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayFrontendIPConfiguration',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if public_ip_address:
         new_config = ApplicationGatewayFrontendIPConfiguration(
@@ -313,7 +317,7 @@ def create_ag_frontend_port(resource_group_name, application_gateway_name, item_
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayFrontendPort',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
     _upsert(ag, 'frontend_ports', new_port, 'name')
@@ -334,7 +338,7 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayHttpListener',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if not frontend_ip:
         frontend_ip = _get_default_value(ag, 'frontend_ip_configurations', '--frontend-ip')
@@ -379,7 +383,7 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendHttpSettings',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_settings = ApplicationGatewayBackendHttpSettings(
         port=port,
@@ -439,7 +443,7 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
 def create_ag_redirect_configuration(resource_group_name, application_gateway_name, item_name, redirect_type,
                                      target_listener=None, target_url=None, include_path=None,
                                      include_query_string=None, no_wait=False):
-    ncf = _network_client_factory().application_gateways
+    ncf = network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_config = RedirectConfiguration(
         name=item_name,
@@ -470,10 +474,10 @@ def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=
         instance.include_query_string = include_query_string
     return parent
 
-
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
-    create_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
-    update_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+#    create_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+#    update_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
 
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
@@ -483,7 +487,7 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayProbe',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_probe = ApplicationGatewayProbe(
         name=item_name,
@@ -542,7 +546,7 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayRequestRoutingRule',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if not address_pool and not redirect_config:
         address_pool = _get_default_value(ag, 'backend_address_pools', '--address-pool')
@@ -589,7 +593,7 @@ def create_ag_ssl_certificate(resource_group_name, application_gateway_name, ite
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewaySslCertificate',
         mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
         name=item_name, data=cert_data, password=cert_password)
@@ -608,20 +612,20 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
 
 def set_ag_ssl_policy_2017_03_01(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
                                  clear=False, no_wait=False):
-    ncf = _network_client_factory().application_gateways
+    ncf = network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
         disabled_ssl_protocols=disabled_ssl_protocols)
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-
-set_ag_ssl_policy_2017_03_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#set_ag_ssl_policy_2017_03_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
 
 
 def set_ag_ssl_policy_2017_06_01(resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
                                  disabled_ssl_protocols=None, cipher_suites=None, min_protocol_version=None,
                                  no_wait=False):
-    ncf = _network_client_factory().application_gateways
+    ncf = network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     policy_type = None
     if policy_name:
@@ -636,12 +640,12 @@ def set_ag_ssl_policy_2017_06_01(resource_group_name, application_gateway_name, 
         min_protocol_version=min_protocol_version)
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
-
-set_ag_ssl_policy_2017_06_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#set_ag_ssl_policy_2017_06_01.__doc__ = ApplicationGatewaySslPolicy.__doc__
 
 
 def show_ag_ssl_policy(resource_group_name, application_gateway_name):
-    return _network_client_factory().application_gateways.get(
+    return network_client_factory().application_gateways.get(
         resource_group_name, application_gateway_name).ssl_policy
 
 
@@ -652,7 +656,7 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
 
     new_rule = ApplicationGatewayPathRule(
@@ -712,7 +716,7 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayPathRule', mod='models')
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
@@ -737,7 +741,7 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 
 def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, no_wait=False):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
@@ -754,7 +758,7 @@ def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, 
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
-    ncf = _network_client_factory().application_gateways
+    ncf = network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(
@@ -771,7 +775,7 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
-    ncf = _network_client_factory().application_gateways
+    ncf = network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(
@@ -810,7 +814,7 @@ def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, 
 
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):
-    return _network_client_factory().application_gateways.get(
+    return network_client_factory().application_gateways.get(
         resource_group_name, application_gateway_name).web_application_firewall_configuration
 
 
@@ -843,80 +847,81 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 # region Load Balancer subresource commands
 
-def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
-                         backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
-                         private_ip_address=None, public_ip_address=None,
-                         public_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                         public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
-                         virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
-                         public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False):
-    from azure.cli.core.util import random_string
-    from azure.cli.command_modules.network._template_builder import \
-        (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
-         build_vnet_resource)
+# TODO: Cannot import symbol due to CLI_CTX
+#def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
+#                         backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
+#                         private_ip_address=None, public_ip_address=None,
+#                         public_ip_address_allocation=IPAllocationMethod.dynamic.value,
+#                         public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
+#                         virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
+#                         public_ip_address_type=None, subnet_type=None, validate=False,
+#                         no_wait=False):
+#    from azure.cli.core.util import random_string
+#    from azure.cli.command_modules.network._template_builder import \
+#        (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
+#         build_vnet_resource)
 
-    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                   'DeploymentProperties', mod='models')
-    tags = tags or {}
-    public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
-    backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
+#    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+#                                   'DeploymentProperties', mod='models')
+#    tags = tags or {}
+#    public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
+#    backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
 
-    # Build up the ARM template
-    master_template = ArmTemplateBuilder()
-    lb_dependencies = []
+#    # Build up the ARM template
+#    master_template = ArmTemplateBuilder()
+#    lb_dependencies = []
 
-    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
-    subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
+#    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+#    subnet_id = subnet if is_valid_resource_id(subnet) else None
+#    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
+#        else IPAllocationMethod.dynamic.value
 
-    network_id_template = resource_id(
-        subscription=get_subscription_id(), resource_group=resource_group_name,
-        namespace='Microsoft.Network')
+#    network_id_template = resource_id(
+#        subscription=get_subscription_id(), resource_group=resource_group_name,
+#        namespace='Microsoft.Network')
 
-    if subnet_type == 'new':
-        lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
-        vnet = build_vnet_resource(
-            virtual_network_name, location, tags, vnet_address_prefix, subnet,
-            subnet_address_prefix)
-        master_template.add_resource(vnet)
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(
-            network_id_template, virtual_network_name, subnet)
+#    if subnet_type == 'new':
+#        lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
+#        vnet = build_vnet_resource(
+#            virtual_network_name, location, tags, vnet_address_prefix, subnet,
+#            subnet_address_prefix)
+#        master_template.add_resource(vnet)
+#        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(
+#            network_id_template, virtual_network_name, subnet)
 
-    if public_ip_address_type == 'new':
-        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-        master_template.add_resource(build_public_ip_resource(public_ip_address, location,
-                                                              tags,
-                                                              public_ip_address_allocation,
-                                                              public_ip_dns_name))
-        public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                        public_ip_address)
+#    if public_ip_address_type == 'new':
+#        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+#        master_template.add_resource(build_public_ip_resource(public_ip_address, location,
+#                                                              tags,
+#                                                              public_ip_address_allocation,
+#                                                              public_ip_dns_name))
+#        public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+#                                                        public_ip_address)
 
-    load_balancer_resource = build_load_balancer_resource(
-        load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
-        public_ip_id, subnet_id, private_ip_address, private_ip_allocation)
-    load_balancer_resource['dependsOn'] = lb_dependencies
-    master_template.add_resource(load_balancer_resource)
-    master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
+#    load_balancer_resource = build_load_balancer_resource(
+#        load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
+#        public_ip_id, subnet_id, private_ip_address, private_ip_allocation)
+#    load_balancer_resource['dependsOn'] = lb_dependencies
+#    master_template.add_resource(load_balancer_resource)
+#    master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
 
-    template = master_template.build()
+#    template = master_template.build()
 
-    # deploy ARM template
-    deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    if validate:
-        _log_pprint_template(template)
-        return client.validate(resource_group_name, deployment_name, properties)
+#    # deploy ARM template
+#    deployment_name = 'lb_deploy_' + random_string(32)
+#    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+#    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+#    if validate:
+#        _log_pprint_template(template)
+#        return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+#    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
         backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
@@ -954,7 +959,7 @@ def set_lb_inbound_nat_rule(
 def create_lb_inbound_nat_pool(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
         frontend_port_range_end, backend_port, frontend_ip_name=None):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) \
         if frontend_ip_name else None
@@ -992,7 +997,7 @@ def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         subnet=None, virtual_network_name=None, private_ip_address=None,
         private_ip_address_allocation='dynamic'):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_config = FrontendIPConfiguration(
         name=item_name,
@@ -1030,7 +1035,7 @@ def set_lb_frontend_ip_configuration(
 
 
 def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item_name):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_pool = BackendAddressPool(name=item_name)
     _upsert(lb, 'backend_address_pools', new_pool, 'name')
@@ -1040,7 +1045,7 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
 
 def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_probe = Probe(
         protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
@@ -1066,7 +1071,7 @@ def create_lb_rule(
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
         floating_ip='false', idle_timeout=None):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
         frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
@@ -1132,7 +1137,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
                public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None):
-    client = _network_client_factory().network_interfaces
+    client = network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
 
     NetworkInterfaceDnsSettings = get_sdk(
@@ -1192,45 +1197,45 @@ def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
 
     return instance
 
+# TODO: Cannot import symbol due to CLI_CTX
+#def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
+#                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
+#                         load_balancer_backend_address_pool_ids=None,
+#                         load_balancer_inbound_nat_rule_ids=None,
+#                         private_ip_address=None,
+#                         private_ip_address_allocation=IPAllocationMethod.dynamic.value,
+#                         private_ip_address_version=None,
+#                         make_primary=False):
+#    ncf = network_client_factory()
+#    nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
-def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
-                         load_balancer_backend_address_pool_ids=None,
-                         load_balancer_inbound_nat_rule_ids=None,
-                         private_ip_address=None,
-                         private_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                         private_ip_address_version=None,
-                         make_primary=False):
-    ncf = _network_client_factory()
-    nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
+#    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+#        private_ip_address_version = private_ip_address_version or IPVersion.ipv4.value
+#        if private_ip_address_version == IPVersion.ipv4.value and not subnet:
+#            primary_config = next(x for x in nic.ip_configurations if x.primary)
+#            subnet = primary_config.subnet.id
+#        if make_primary:
+#            for config in nic.ip_configurations:
+#                config.primary = False
 
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-        private_ip_address_version = private_ip_address_version or IPVersion.ipv4.value
-        if private_ip_address_version == IPVersion.ipv4.value and not subnet:
-            primary_config = next(x for x in nic.ip_configurations if x.primary)
-            subnet = primary_config.subnet.id
-        if make_primary:
-            for config in nic.ip_configurations:
-                config.primary = False
+#    new_config_args = {
+#        'name': ip_config_name,
+#        'subnet': Subnet(subnet) if subnet else None,
+#        'public_ip_address': PublicIPAddress(public_ip_address) if public_ip_address else None,
+#        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
+#        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
+#        'private_ip_address': private_ip_address,
+#        'private_ip_allocation_method': private_ip_address_allocation,
+#    }
+#    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+#        new_config_args['private_ip_address_version'] = private_ip_address_version
+#        new_config_args['primary'] = make_primary
+#    new_config = NetworkInterfaceIPConfiguration(**new_config_args)
 
-    new_config_args = {
-        'name': ip_config_name,
-        'subnet': Subnet(subnet) if subnet else None,
-        'public_ip_address': PublicIPAddress(public_ip_address) if public_ip_address else None,
-        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
-        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
-        'private_ip_address': private_ip_address,
-        'private_ip_allocation_method': private_ip_address_allocation,
-    }
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-        new_config_args['private_ip_address_version'] = private_ip_address_version
-        new_config_args['primary'] = make_primary
-    new_config = NetworkInterfaceIPConfiguration(**new_config_args)
-
-    _upsert(nic, 'ip_configurations', new_config, 'name')
-    poller = ncf.network_interfaces.create_or_update(
-        resource_group_name, network_interface_name, nic)
-    return _get_property(poller.result().ip_configurations, ip_config_name)
+#    _upsert(nic, 'ip_configurations', new_config, 'name')
+#    poller = ncf.network_interfaces.create_or_update(
+#        resource_group_name, network_interface_name, nic)
+#    return _get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,
@@ -1292,7 +1297,7 @@ def _get_nic_ip_config(nic, name):
 def add_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
         load_balancer_name=None):
-    client = _network_client_factory().network_interfaces
+    client = network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     _upsert(ip_config, 'load_balancer_backend_address_pools',
@@ -1305,7 +1310,7 @@ def add_nic_ip_config_address_pool(
 def remove_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
         load_balancer_name=None):
-    client = _network_client_factory().network_interfaces
+    client = network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
@@ -1317,7 +1322,7 @@ def remove_nic_ip_config_address_pool(
 def add_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
         load_balancer_name=None):
-    client = _network_client_factory().network_interfaces
+    client = network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     _upsert(ip_config, 'load_balancer_inbound_nat_rules',
@@ -1330,7 +1335,7 @@ def add_nic_ip_config_inbound_nat_rule(
 def remove_nic_ip_config_inbound_nat_rule(
         resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
         load_balancer_name=None):
-    client = _network_client_factory().network_interfaces
+    client = network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = \
@@ -1345,29 +1350,30 @@ def remove_nic_ip_config_inbound_nat_rule(
 # region Network Security Group commands
 
 def create_nsg(resource_group_name, network_security_group_name, location=None, tags=None):
-    client = _network_client_factory().network_security_groups
+    client = network_client_factory().network_security_groups
     nsg = NetworkSecurityGroup(location=location, tags=tags)
     return client.create_or_update(resource_group_name, network_security_group_name, nsg)
 
 
-def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
-                    priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
-                    access=SecurityRuleAccess.allow.value,
-                    direction=SecurityRuleDirection.inbound.value,
-                    source_port_range='*', source_address_prefix='*',
-                    destination_port_range=80, destination_address_prefix='*'):
-    settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
-                            destination_address_prefix=destination_address_prefix, access=access,
-                            direction=direction,
-                            description=description, source_port_range=source_port_range,
-                            destination_port_range=destination_port_range, priority=priority,
-                            name=security_rule_name)
-    ncf = _network_client_factory()
-    return ncf.security_rules.create_or_update(
-        resource_group_name, network_security_group_name, security_rule_name, settings)
+# TODO: Cannot import symbol due to CLI_CTX
+#def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
+#                    priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
+#                    access=SecurityRuleAccess.allow.value,
+#                    direction=SecurityRuleDirection.inbound.value,
+#                    source_port_range='*', source_address_prefix='*',
+#                    destination_port_range=80, destination_address_prefix='*'):
+#    settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
+#                            destination_address_prefix=destination_address_prefix, access=access,
+#                            direction=direction,
+#                            description=description, source_port_range=source_port_range,
+#                            destination_port_range=destination_port_range, priority=priority,
+#                            name=security_rule_name)
+#    ncf = network_client_factory()
+#    return ncf.security_rules.create_or_update(
+#        resource_group_name, network_security_group_name, security_rule_name, settings)
 
 
-create_nsg_rule.__doc__ = SecurityRule.__doc__
+#create_nsg_rule.__doc__ = SecurityRule.__doc__
 
 
 def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
@@ -1390,34 +1396,36 @@ def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
     return instance
 
 
-update_nsg_rule.__doc__ = SecurityRule.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 
 # endregion
 
 # region Public IP commands
 
-def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None):
-    client = _network_client_factory().public_ip_addresses
+# TODO: Cannot import symbol due to CLI_CTX
+#def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
+#                     allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
+#                     idle_timeout=4, reverse_fqdn=None, version=None):
+#    client = network_client_factory().public_ip_addresses
 
-    public_ip_args = {
-        'location': location,
-        'tags': tags,
-        'public_ip_allocation_method': allocation_method,
-        'idle_timeout_in_minutes': idle_timeout,
-        'dns_settings': None
-    }
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-        public_ip_args['public_ip_address_version'] = version
-    public_ip = PublicIPAddress(**public_ip_args)
+#    public_ip_args = {
+#        'location': location,
+#        'tags': tags,
+#        'public_ip_allocation_method': allocation_method,
+#        'idle_timeout_in_minutes': idle_timeout,
+#        'dns_settings': None
+#    }
+#    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+#        public_ip_args['public_ip_address_version'] = version
+#    public_ip = PublicIPAddress(**public_ip_args)
 
-    if dns_name or reverse_fqdn:
-        public_ip.dns_settings = PublicIPAddressDnsSettings(
-            domain_name_label=dns_name,
-            reverse_fqdn=reverse_fqdn)
-    return client.create_or_update(resource_group_name, public_ip_address_name, public_ip)
+#    if dns_name or reverse_fqdn:
+#        public_ip.dns_settings = PublicIPAddressDnsSettings(
+#            domain_name_label=dns_name,
+#            reverse_fqdn=reverse_fqdn)
+#    return client.create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
 
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
@@ -1462,12 +1470,12 @@ def create_vnet_peering(resource_group_name, virtual_network_name, virtual_netwo
         allow_gateway_transit=allow_gateway_transit,
         allow_forwarded_traffic=allow_forwarded_traffic,
         use_remote_gateways=use_remote_gateways)
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     return ncf.virtual_network_peerings.create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
 
-
-create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 
 
 # endregion
@@ -1478,7 +1486,7 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None):
-    client = _network_client_factory().virtual_networks
+    client = network_client_factory().virtual_networks
     tags = tags or {}
     vnet = VirtualNetwork(
         location=location, tags=tags,
@@ -1524,7 +1532,7 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     :param str network_security_group: Name or ID of network security
         group to associate with the subnet.
     '''
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
     if network_security_group:
@@ -1556,7 +1564,7 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
     elif network_security_group == '':  # clear it
         instance.network_security_group = None
 
-    _set_route_table(_network_client_factory(), resource_group_name, route_table, instance)
+    _set_route_table(network_client_factory(), resource_group_name, route_table, instance)
 
     if private_access_services == ['']:
         instance.private_access_services = None
@@ -1569,8 +1577,8 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
 
     return instance
 
-
-update_nsg_rule.__doc__ = SecurityRule.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 
 # endregion
@@ -1629,7 +1637,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
 
 def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
                           enable_bgp=None, use_policy_based_traffic_selectors=None):
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
 
     if routing_weight is not None:
         instance.routing_weight = routing_weight
@@ -1668,7 +1676,7 @@ def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
                               sa_life_time_seconds, sa_data_size_kilobytes,
                               ipsec_encryption, ipsec_integrity,
                               ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    ncf = _network_client_factory().virtual_network_gateway_connections
+    ncf = network_client_factory().virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
     new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
                              sa_data_size_kilobyes=sa_data_size_kilobytes,
@@ -1684,19 +1692,19 @@ def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
         conn.ipsec_policies = [new_policy]
     return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
 
-
-if supported_api_version(ResourceType.MGMT_NETWORK, '2017-03-01'):
-    IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
-    add_vpn_conn_ipsec_policy.__doc__ = IpsecPolicy.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#if supported_api_version(ResourceType.MGMT_NETWORK, '2017-03-01'):
+#    IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
+#    add_vpn_conn_ipsec_policy.__doc__ = IpsecPolicy.__doc__
 
 
 def list_vpn_conn_ipsec_policies(resource_group_name, connection_name):
-    ncf = _network_client_factory().virtual_network_gateway_connections
+    ncf = network_client_factory().virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
 
 
 def clear_vpn_conn_ipsec_policies(resource_group_name, connection_name, no_wait=False):
-    ncf = _network_client_factory().virtual_network_gateway_connections
+    ncf = network_client_factory().virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
     conn.ipsec_policies = None
     conn.use_policy_based_traffic_selectors = False
@@ -1729,7 +1737,7 @@ def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
 # region VNet Gateway Commands
 
 def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert_data, cert_name):
-    ncf = _network_client_factory().virtual_network_gateways
+    ncf = network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     if not gateway.vpn_client_configuration:
         raise CLIError("Must add address prefixes to gateway '{}' prior to adding a root cert."
@@ -1745,7 +1753,7 @@ def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert
 
 
 def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
-    ncf = _network_client_factory().virtual_network_gateways
+    ncf = network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     config = gateway.vpn_client_configuration
 
@@ -1767,7 +1775,7 @@ def create_vnet_gateway_revoked_cert(resource_group_name, gateway_name, thumbpri
 
 
 def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
-    ncf = _network_client_factory().virtual_network_gateways
+    ncf = network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     config = gateway.vpn_client_configuration
 
@@ -1781,7 +1789,7 @@ def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_nam
 
 
 def _prep_cert_create(gateway_name, resource_group_name):
-    ncf = _network_client_factory().virtual_network_gateways
+    ncf = network_client_factory().virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
     if not gateway.vpn_client_configuration:
         gateway.vpn_client_configuration = VpnClientConfiguration()
@@ -1799,43 +1807,44 @@ def _prep_cert_create(gateway_name, resource_group_name):
     return config, gateway, ncf
 
 
-def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, public_ip_address,
-                        virtual_network, location=None, tags=None, address_prefixes=None,
-                        no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
-                        sku=VirtualNetworkGatewaySkuName.basic.value,
-                        vpn_type=VpnType.route_based.value,
-                        asn=None, bgp_peering_address=None, peer_weight=None):
-    VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'VirtualNetworkGateway',
-        'BgpSettings',
-        'VirtualNetworkGatewayIPConfiguration',
-        'VirtualNetworkGatewaySku',
-        mod='models')
+# TODO: Cannot import symbol due to CLI_CTX
+#def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, public_ip_address,
+#                        virtual_network, location=None, tags=None, address_prefixes=None,
+#                        no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
+#                        sku=VirtualNetworkGatewaySkuName.basic.value,
+#                        vpn_type=VpnType.route_based.value,
+#                        asn=None, bgp_peering_address=None, peer_weight=None):
+#    VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku = get_sdk(
+#        ResourceType.MGMT_NETWORK,
+#        'VirtualNetworkGateway',
+#        'BgpSettings',
+#        'VirtualNetworkGatewayIPConfiguration',
+#        'VirtualNetworkGatewaySku',
+#        mod='models')
 
-    client = _network_client_factory().virtual_network_gateways
-    subnet = virtual_network + '/subnets/GatewaySubnet'
-    active_active = len(public_ip_address) == 2
-    vnet_gateway = VirtualNetworkGateway(
-        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
-        ip_configurations=[])
-    for i, public_ip in enumerate(public_ip_address):
-        ip_configuration = VirtualNetworkGatewayIPConfiguration(
-            subnet=SubResource(subnet),
-            public_ip_address=SubResource(public_ip),
-            private_ip_allocation_method='Dynamic',
-            name='vnetGatewayConfig{}'.format(i)
-        )
-        vnet_gateway.ip_configurations.append(ip_configuration)
-    if asn or bgp_peering_address or peer_weight:
-        vnet_gateway.enable_bgp = True
-        vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-    if address_prefixes:
-        vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
-        vnet_gateway.vpn_client_configuration.address_prefixes = address_prefixes
-    return client.create_or_update(
-        resource_group_name, virtual_network_gateway_name, vnet_gateway, raw=no_wait)
+#    client = network_client_factory().virtual_network_gateways
+#    subnet = virtual_network + '/subnets/GatewaySubnet'
+#    active_active = len(public_ip_address) == 2
+#    vnet_gateway = VirtualNetworkGateway(
+#        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
+#        sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
+#        ip_configurations=[])
+#    for i, public_ip in enumerate(public_ip_address):
+#        ip_configuration = VirtualNetworkGatewayIPConfiguration(
+#            subnet=SubResource(subnet),
+#            public_ip_address=SubResource(public_ip),
+#            private_ip_allocation_method='Dynamic',
+#            name='vnetGatewayConfig{}'.format(i)
+#        )
+#        vnet_gateway.ip_configurations.append(ip_configuration)
+#    if asn or bgp_peering_address or peer_weight:
+#        vnet_gateway.enable_bgp = True
+#        vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+#    if address_prefixes:
+#        vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
+#        vnet_gateway.vpn_client_configuration.address_prefixes = address_prefixes
+#    return client.create_or_update(
+#        resource_group_name, virtual_network_gateway_name, vnet_gateway, raw=no_wait)
 
 
 def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
@@ -1905,27 +1914,28 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 
 # region Express Route commands
 
-def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
-                         service_provider_name, location=None, tags=None, no_wait=False,
-                         sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
-                         sku_tier=ExpressRouteCircuitSkuTier.standard.value):
-    ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'ExpressRouteCircuit',
-        'ExpressRouteCircuitSku',
-        'ExpressRouteCircuitServiceProviderProperties',
-        mod='models')
-    client = _network_client_factory().express_route_circuits
-    sku_name = '{}_{}'.format(sku_tier, sku_family)
-    circuit = ExpressRouteCircuit(
-        location=location, tags=tags,
-        service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
-            service_provider_name=service_provider_name,
-            peering_location=peering_location,
-            bandwidth_in_mbps=bandwidth_in_mbps),
-        sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
-    )
-    return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
+# TODO: Cannot import symbol due to CLI_CTX
+#def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
+#                         service_provider_name, location=None, tags=None, no_wait=False,
+#                         sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
+#                         sku_tier=ExpressRouteCircuitSkuTier.standard.value):
+#    ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties = get_sdk(
+#        ResourceType.MGMT_NETWORK,
+#        'ExpressRouteCircuit',
+#        'ExpressRouteCircuitSku',
+#        'ExpressRouteCircuitServiceProviderProperties',
+#        mod='models')
+#    client = network_client_factory().express_route_circuits
+#    sku_name = '{}_{}'.format(sku_tier, sku_family)
+#    circuit = ExpressRouteCircuit(
+#        location=location, tags=tags,
+#        service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
+#            service_provider_name=service_provider_name,
+#            peering_location=peering_location,
+#            bandwidth_in_mbps=bandwidth_in_mbps),
+#        sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
+#    )
+#    return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
 
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
@@ -1979,7 +1989,7 @@ def create_express_route_peering(
 
     # TODO: Remove workaround when issue #1574 is fixed in the service
     # region Issue #1574 workaround
-    circuit = _network_client_factory().express_route_circuits.get(
+    circuit = network_client_factory().express_route_circuits.get(
         resource_group_name, circuit_name)
     if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
        circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
@@ -2063,11 +2073,11 @@ def create_route(resource_group_name, route_table_name, route_name, next_hop_typ
                  next_hop_ip_address=None):
     route = Route(next_hop_type=next_hop_type, address_prefix=address_prefix,
                   next_hop_ip_address=next_hop_ip_address, name=route_name)
-    ncf = _network_client_factory()
+    ncf = network_client_factory()
     return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
 
-
-create_route.__doc__ = Route.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#create_route.__doc__ = Route.__doc__
 
 
 def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_address=None):
@@ -2081,8 +2091,8 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
         instance.next_hop_ip_address = next_hop_ip_address
     return instance
 
-
-update_route.__doc__ = Route.__doc__
+# TODO: Cannot import symbol due to CLI_CTX
+#update_route.__doc__ = Route.__doc__
 
 
 # endregion
@@ -2124,7 +2134,7 @@ def create_local_gateway(resource_group_name, local_network_gateway_name, gatewa
                                                'BgpSettings',
                                                mod='models')
 
-    client = _network_client_factory().local_network_gateways
+    client = network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
         local_network_address_space=AddressSpace(address_prefixes=(local_address_prefix or [])),
         location=location, tags=tags, gateway_ip_address=gateway_ip_address)

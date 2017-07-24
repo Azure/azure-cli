@@ -6,8 +6,10 @@ from azure.mgmt.rdbms import mysql
 from azure.mgmt.rdbms import postgresql
 
 from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.commands.parameters import \
-    (get_resource_name_completion_list, tags_type, enum_choice_list, location_type)
+from azure.cli.core.commands.parameters import get_resource_name_completion_list, tags_type, location_type
+
+from knack.arguments import enum_choice_list
+
 from ._util import PolyParametersContext
 from .validators import configuration_value_validator
 

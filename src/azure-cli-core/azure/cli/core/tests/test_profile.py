@@ -10,11 +10,12 @@ import unittest
 import mock
 
 from adal import AdalError
-from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
-                                                      SubscriptionPolicies, SpendingLimit)
-from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, CLOUD, _AUTH_CTX_FACTORY)
-from azure.cli.core.util import CLIError
+from azure.mgmt.resource.subscriptions.models import \
+    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
+
+from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, ServicePrincipalAuth, _AUTH_CTX_FACTORY
+
+from knack.util import CLIError
 
 
 class Test_Profile(unittest.TestCase):

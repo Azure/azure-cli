@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['login'] = """
             examples:

@@ -5,8 +5,9 @@
 
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_tags)
-from azure.cli.core.prompting import prompt_pass, NoTTYException
-from azure.cli.core.util import CLIError
+
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
 
 
 def get_combined_validator(validators):

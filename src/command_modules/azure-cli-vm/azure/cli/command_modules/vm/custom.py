@@ -23,9 +23,9 @@ from azure.keyvault import KeyVaultId
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
 from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
+from knack.util import CLIError
 
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
@@ -35,7 +35,6 @@ from ._actions import (load_images_from_aliases_doc,
                        load_images_thru_services)
 from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
-logger = azlogging.get_az_logger(__name__)
 
 _MSI_PORT = 50342
 _MSI_EXTENSION_VERSION = '1.0'

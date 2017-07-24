@@ -11,7 +11,7 @@ from azure.cli.command_modules.profile.custom import list_subscriptions, get_acc
 
 class ProfileCommandTest(unittest.TestCase):
 
-    @mock.patch('azure.cli.command_modules.profile.custom.load_subscriptions', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom._load_subscriptions', autospec=True)
     @mock.patch('azure.cli.command_modules.profile.custom.logger', autospec=True)
     def test_list_only_enabled_one(self, logger_mock, load_subscription_mock):
         sub1 = {'state': 'Enabled'}

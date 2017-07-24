@@ -5,7 +5,7 @@
 
 import unittest
 import azure.cli.command_modules.sf.custom as sf_c
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 # pylint: disable=too-many-public-methods

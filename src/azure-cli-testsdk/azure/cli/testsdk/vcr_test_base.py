@@ -28,17 +28,13 @@ from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-
 
 import vcr
 import jmespath
+from knack.util import CLIError
 
 from azure_devtools.scenario_tests.const import ENV_LIVE_TEST
 
-# TODO Should not depend on azure.cli.main package here.
-# Will be ok if this test file is not part of azure.cli.core.utils
-from azure.cli.main import main as cli_main
-
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
-from azure.cli.core._profile import Profile, CLOUD
-from azure.cli.core.util import CLIError
+from azure.cli.core._profile import Profile
 
 from .base import find_recording_dir
 
@@ -63,21 +59,23 @@ def patch_vcr_connection_request(*args, **kwargs):
 vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
-def _mock_get_mgmt_service_client(client_type,
+def _mock_get_mgmt_service_client(cli_ctx,
+                                  client_type,
                                   subscription_bound=True,
                                   subscription_id=None,
                                   api_version=None,
                                   base_url_bound=None,
-                                  resource=CLOUD.endpoints.active_directory_resource_id,
+                                  resource=None,
                                   **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
-    profile = Profile()
+    profile = Profile(cli_ctx)
+    resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
                                                              resource=resource)
     client_kwargs = {}
 
     if base_url_bound:
-        client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
+        client_kwargs = {'base_url': cli_ctx.cloud.endpoints.resource_manager}
     if api_version:
         client_kwargs['api_version'] = api_version
     if kwargs:

@@ -5,11 +5,7 @@
 
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
-from azure.cli.core.commands.parameters import (
-    get_resource_name_completion_list,
-    enum_choice_list,
-    name_type,
-    ignore_type)
+from azure.cli.core.commands.parameters import get_resource_name_completion_list, name_type
 
 from azure.cli.core.util import shell_safe_json_parse
 
@@ -18,7 +14,9 @@ from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLev
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
 from azure.mgmt.documentdb.models.location import Location
-from azure.cli.core.commands import register_cli_argument, CliArgumentType
+from azure.cli.core.commands import register_cli_argument
+
+from knack.arguments import ignore_type, enum_choice_list, CLIArgumentType
 
 
 def validate_failover_policies(ns):
@@ -72,7 +70,7 @@ register_cli_argument('cosmosdb update', 'ip_range_filter', validator=validate_i
 register_cli_argument('cosmosdb update', 'enable_automatic_failover', help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.', type=bool)
 
 # database id
-database_id = CliArgumentType(options_list=('--db-name', '-d'), help='Database Name')
+database_id = CLIArgumentType(options_list=('--db-name', '-d'), help='Database Name')
 register_cli_argument('cosmosdb database', 'database_id', database_id)
 register_cli_argument('cosmosdb collection', 'database_id', database_id)
 

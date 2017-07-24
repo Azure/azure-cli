@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 def validate_origin(namespace):

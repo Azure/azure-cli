@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # Each package management system should patch this file with their own implementations of these.
+from knack.log import get_logger
 
-from azure.cli.core.util import COMPONENT_PREFIX
-import azure.cli.core.azlogging as azlogging
+CLI_PACKAGE_NAME = 'azure-cli'
+COMPONENT_PREFIX = 'azure-cli-'
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
 def handle_module_not_installed(module_name):

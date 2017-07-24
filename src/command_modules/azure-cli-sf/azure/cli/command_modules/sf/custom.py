@@ -17,17 +17,14 @@ except ImportError:
     from urlparse import urlparse, urlunparse  # pylint: disable=import-error
 
 import requests
-import azure.cli.core.azlogging as azlogging
 
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core._config import AzConfig
-from azure.cli.core.util import CLIError
+
+from knack.config import CLIConfig
+from knack.util import CLIError
 
 # Really the CLI should do this for us but I cannot see how to get it to
 CONFIG_PATH = os.path.join(get_config_dir(), "config")
-az_config = AzConfig()
-
-logger = azlogging.get_az_logger(__name__)
 
 
 def sf_create_compose_application(client, compose_file, application_id, repo_user=None, encrypted=False,
@@ -52,10 +49,10 @@ def sf_create_compose_application(client, compose_file, application_id, repo_use
     :param str repo_pass: Encrypted container repository password
     """
     from azure.cli.core.util import read_file_content
-    from azure.cli.core.prompting import prompt_pass
-    # pylint: disable=line-too-long
     from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
     from azure.servicefabric.models.repository_credential import RepositoryCredential
+
+    from knack.prompting import prompt_pass
 
     if (any([encrypted, repo_pass]) and
             not all([encrypted, repo_pass, repo_user])):

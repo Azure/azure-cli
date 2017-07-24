@@ -6,7 +6,7 @@
 import os
 import datetime
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
