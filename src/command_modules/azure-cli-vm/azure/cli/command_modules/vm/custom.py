@@ -1868,7 +1868,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     backend_address_pool_id = None
     inbound_nat_pool_id = None
     if load_balancer_type or app_gateway_type:
-        network_balancer = load_balancer or app_gateway
+        network_balancer = load_balancer if load_balancer_type else app_gateway
         balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
 
         if is_valid_resource_id(network_balancer):
