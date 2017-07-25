@@ -114,6 +114,9 @@ register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 
+two_states_switch = ['true', 'false']
+
+register_cli_argument('webapp deployment container config', 'enable', options_list=('--enable-cd', '-e'), help='enable/disable continuous deployment', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp deployment slot', 'slot', help='the name of the slot')
 register_cli_argument('webapp deployment slot', 'webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                       help='Name of the webapp', id_part='name')
@@ -123,9 +126,6 @@ register_cli_argument('webapp deployment slot', 'target_slot', help="target slot
 register_cli_argument('webapp deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
 register_cli_argument('webapp deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                       **enum_choice_list(['swap', 'preview', 'reset']))
-
-
-two_states_switch = ['true', 'false']
 
 register_cli_argument('webapp log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))

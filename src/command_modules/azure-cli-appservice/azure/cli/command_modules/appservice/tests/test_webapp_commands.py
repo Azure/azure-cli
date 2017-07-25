@@ -327,7 +327,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
             JMESPathCheckV2('appCommandLine', 'process.json')
         ])
 
-        result = self.cmd('webapp deployment show-container-cd-url -g {} -n {}'.format(resource_group, webapp)).get_output_in_json()
+        result = self.cmd('webapp deployment container config -g {} -n {} --enable-cd true'.format(resource_group, webapp)).get_output_in_json()
         self.assertTrue(result.startswith('https://'))
         self.assertTrue(result.endswith('.scm.azurewebsites.net/docker/hook'))
 
