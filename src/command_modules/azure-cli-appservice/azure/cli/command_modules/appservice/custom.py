@@ -840,7 +840,25 @@ def list_publish_profiles(resource_group_name, name, slot=None):
     return converted
 
 
+def enable_cd(resource_group_name, name, enable, slot=None):
+    settings = []
+    settings.append("DOCKER_ENABLE_CI=" + enable)
+    update_app_settings(resource_group_name, name, settings, slot)
+    if enable == 'true':
+        return show_container_cd_url(resource_group_name, name, slot)
+
+
 def show_container_cd_url(resource_group_name, name, slot=None):
+    settings = get_app_settings(resource_group_name, name, slot)
+    docker_enabled = False
+    for setting in settings:
+        if setting['name'] == 'DOCKER_ENABLE_CI' and setting['value'] == 'true':
+            docker_enabled = True
+            break
+
+    if not docker_enabled:
+        raise CLIError('continuous integration is not enabled on docker')
+
     profiles = list_publish_profiles(resource_group_name, name, slot)
     for profile in profiles:
         if profile['publishMethod'] == 'MSDeploy':
