@@ -4,6 +4,12 @@ Release History
 
 ===============
 
+unreleased
+----------
+
+* Add support for YAML template files
+
+
 2.0.10 (2017-07-07)
 +++++++++++++++++++
 * `group deployment create`: Improve prompting for missing parameters. Improve parsing of `--parameters KEY=VALUE` syntax.

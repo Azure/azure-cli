@@ -28,7 +28,7 @@ from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuth
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
+from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse, read_file_content, safe_yaml_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -239,11 +239,21 @@ def _process_parameters(template_param_defs, parameter_lists):
         except CLIError:
             return None
 
+    def _try_parse_yaml_object(value):
+        try:
+            parsed = safe_yaml_parse(value)
+            return parsed.get('parameters', parsed)
+        except:  # pylint: disable=bare-except
+            pass
+        return None
+
     def _try_load_file_object(value):
         if os.path.isfile(value):
-            parsed = get_file_json(value, throw_on_empty=False)
-            return parsed.get('parameters', parsed)
-        return None
+            contents = read_file_content(value)
+            if value.lower().endswith(('yaml', 'yml')):
+                return _try_parse_yaml_object(contents)
+
+            return _try_parse_json_object(contents)
 
     def _try_parse_key_value_object(template_param_defs, parameters, value):
         try:
@@ -274,7 +284,7 @@ def _process_parameters(template_param_defs, parameter_lists):
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+            param_obj = _try_load_file_object(item) or _try_parse_json_object(item) or _try_parse_yaml_object(item)
             if param_obj:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
@@ -417,7 +427,12 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
         template_link = TemplateLink(uri=template_uri)
         template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
     else:
-        template = get_file_json(template_file, preserve_order=True)
+        if template_file.lower().endswith(('yml', 'yaml')):
+            yaml_contents = read_file_content(template_file)
+            template = safe_yaml_parse(yaml_contents)
+        else:
+            template = get_file_json(template_file, preserve_order=True)
+
         template_obj = template
 
     template_param_defs = template_obj.get('parameters', {})

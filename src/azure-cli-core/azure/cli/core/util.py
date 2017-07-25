@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 import six
+import yaml
 import azure.cli.core.azlogging as azlogging
 
 CLI_PACKAGE_NAME = 'azure-cli'
@@ -150,6 +151,15 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
             return ast.literal_eval(json_or_dict_string)
         except SyntaxError:
             raise CLIError(json_ex)
+
+
+def safe_yaml_parse(yaml_contents, throw_on_empty=True):
+    if not yaml_contents and throw_on_empty:
+        raise CLIError('The yaml contents are empty.')
+    try:
+        return yaml.safe_load(yaml_contents)
+    except yaml.parser.ParserError as ex:
+        raise CLIError('Error parsing yaml contents, short snippet {} ({})'.format(yaml_contents[:32], str(ex)))
 
 
 def todict(obj):  # pylint: disable=too-many-return-statements

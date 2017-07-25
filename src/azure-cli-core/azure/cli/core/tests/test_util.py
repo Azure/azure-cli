@@ -9,8 +9,8 @@ import unittest
 import tempfile
 
 from azure.cli.core.util import \
-    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex,
-     hash_string, random_string)
+    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse,
+     safe_yaml_parse, b64_to_hex, hash_string, random_string, CLIError)
 
 
 class TestUtils(unittest.TestCase):
@@ -141,6 +141,32 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(
             len(failed_strings), 0,
             'The following patterns failed: {}'.format(failed_strings))
+
+    def test_safe_yaml_parse(self):
+        valid_yaml = '''---
+list_elements:
+- element1:
+    property: value
+    another_property: value
+- element2: ["one", "two"]
+'''
+        dict_result = safe_yaml_parse(valid_yaml)
+        self.assertEqual(dict_result['list_elements'][0]['element1']['property'], 'value')
+
+        empty_yaml = ''''''
+        try:
+            safe_yaml_parse(empty_yaml, throw_on_empty=True)
+        except CLIError:
+            pass
+        else:
+            raise ValueError('Parsing should have failed on empty yaml')
+
+        # parsing invlid yaml shall raise an error
+        try:
+            safe_yaml_parse('[hello world}')
+        except CLIError:
+            pass
+
 
     def test_hash_string(self):
         def _run_test(length, force_lower):

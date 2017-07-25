@@ -303,9 +303,16 @@ class DeploymentTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment')
     def test_group_deployment(self, resource_group):
+        self._do_deployment(resource_group, 'test-template.json', 'test-params.json')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment')
+    def test_group_deployment_yaml(self, resource_group):
+        self._do_deployment(resource_group, 'test-template.yaml', 'test-params.yaml')
+
+    def _do_deployment(self, resource_group, template_name, parameters_name):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
+        template_file = os.path.join(curr_dir, template_name).replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, parameters_name).replace('\\', '\\\\')
         object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
         deployment_name = 'azure-cli-deployment'
 
