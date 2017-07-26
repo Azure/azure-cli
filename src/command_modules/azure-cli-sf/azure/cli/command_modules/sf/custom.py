@@ -185,7 +185,8 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
     cert = sf_config.cert_info()
     ca_cert = False
     if cert is not None:
-        ca_cert = sf_config.ca_cert_info()
+        if sf_config.no_verify_setting is False:
+            ca_cert = sf_config.ca_cert_info()
     total_files_count = 0
     current_files_count = 0
     total_files_size = 0
