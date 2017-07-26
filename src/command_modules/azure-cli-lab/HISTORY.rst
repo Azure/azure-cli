@@ -4,6 +4,7 @@ Release History
 ===============
 0.0.9 (2017-07-27)
 * Add create command to the custom-images module
+* Fix bug where vm creation from custom image failed due to invalid os_type
 
 0.0.8 (2017-07-07)
 ++++++++++++++++++
