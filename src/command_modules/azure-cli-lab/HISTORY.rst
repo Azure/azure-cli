@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.0.9 (2017-07-27)
+* Add create command to the custom-images module
+
 0.0.8 (2017-07-07)
 ++++++++++++++++++
 * minor fixes

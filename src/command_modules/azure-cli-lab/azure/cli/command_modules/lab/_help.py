@@ -156,6 +156,29 @@ helps['lab custom-image'] = """
             type: group
             short-summary: Commands to manage custom images of a DevTest Lab.
             """
+helps['lab custom-image create'] = """
+            type: command
+            short-summary: Command to create custom image in a DevTest Lab.
+            parameters:
+                - name: --name -n
+                  short-summary: Name of the custom image
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --author
+                  short-summary: The author of the custom image
+                - name: --description
+                  short-summary: A detailed description for the custom image
+                - name: --source-vm-id
+                  short-summary: The resource ID of a lab virtual machine in the provided lab
+                - name: --os-type
+                  short-summary: Type of the OS on which the custom image is based. Allowed values are Windows, Linux
+                - name: --os-state
+                  short-summary: The current state of the virtual machine. For Windows virtual machines - NonSysprepped, SysprepRequested, SysprepApplied.  For Linux virtual machines - NonDeprovisioned, DeprovisionRequested, DeprovisionApplied
+            examples:
+                - name: Create a custom image in the lab from a running Windows virtual machine without applying sysprep
+                  text: >
+                    az lab custom-image create --lab-name MyLab -g MyRG --name MyVM --source-vm-id "/subscriptions/mysubscription/resourcegroups/myresourcegroup/microsoft.devtestlab/labs/mylab/virtualmachines/myvirtualmachine" --os-type Windows --os-state NonSysprepped
+            """
 helps['lab gallery-image'] = """
             type: group
             short-summary: Commands to list Azure Marketplace images allowed in a given DevTest Lab.

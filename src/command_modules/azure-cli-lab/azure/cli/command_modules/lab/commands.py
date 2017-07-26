@@ -120,6 +120,11 @@ with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
         c.command('list', 'list')
         c.command('delete', 'delete')
 
+with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
+                  custom_operations) as s:
+    with s.group('lab custom-image') as c:
+        c.command('create', 'create_custom_image')
+
 # Gallery Image Operations Commands
 gallery_image_operations = create_service_adapter(
     mgmt_operations_path.format('gallery_images_operations'),

@@ -7,6 +7,28 @@ import getpass
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 
+def create_custom_image(client, resource_group, lab_name, name, author=None, description=None,
+						source_vm_id=None, os_type=None, os_state=None):
+	""" Command to create a custom image from a source VM, managed image, or VHD """
+
+	from azure.mgmt.devtestlabs.models.custom_image_properties_from_vm import CustomImagePropertiesFromVm
+	from azure.mgmt.devtestlabs.models import CustomImage
+	from azure.mgmt.devtestlabs.models import WindowsOsInfo
+	from azure.mgmt.devtestlabs.models import LinuxOsInfo
+	
+	if source_vm_id != None:
+		payload = CustomImagePropertiesFromVm(
+			source_vm_id = source_vm_id,
+			windows_os_info = WindowsOsInfo(os_state) if os_type.lower() == "Windows".lower() else None,
+			linux_os_info = LinuxOsInfo(os_state) if os_type.lower() == "Linux".lower() else None)
+
+	customImage = CustomImage(
+		vm = payload,
+		author = author,
+		description=description)
+
+	return client.create_or_update(resource_group, lab_name, name, customImage)
+
 def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
                   size=None, admin_username=getpass.getuser(), admin_password=None,
                   ssh_key=None, authentication_type='password',
