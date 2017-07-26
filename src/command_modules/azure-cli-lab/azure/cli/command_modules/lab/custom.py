@@ -16,7 +16,7 @@ def create_custom_image(client, resource_group, lab_name, name, author=None, des
                         source_vm_id=None, os_type=None, os_state=None):
     """ Command to create a custom image from a source VM, managed image, or VHD """
 
-    if source_vm_id != None:
+    if source_vm_id is not None:
         payload = CustomImagePropertiesFromVm(
             source_vm_id=source_vm_id,
             windows_os_info=WindowsOsInfo(os_state) if os_type.lower() == "Windows".lower() else None,
@@ -28,6 +28,7 @@ def create_custom_image(client, resource_group, lab_name, name, author=None, des
         description=description)
 
     return client.create_or_update(resource_group, lab_name, name, customImage)
+
 
 def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
                   size=None, admin_username=getpass.getuser(), admin_password=None,

@@ -24,6 +24,7 @@ logger = azlogging.get_az_logger(__name__)
 # Odata filter for name
 ODATA_NAME_FILTER = "name eq '{}'"
 
+
 def validate_create_custom_image(namespace):
     """ Validates parameters for lab custom image creation. """
 
@@ -35,6 +36,7 @@ def validate_create_custom_image(namespace):
 
     if not namespace.os_state:
         raise CLIError("usage error: os-state is required")
+
 
 def validate_lab_vm_create(namespace):
     """ Validates parameters for lab vm create and updates namespace. """
