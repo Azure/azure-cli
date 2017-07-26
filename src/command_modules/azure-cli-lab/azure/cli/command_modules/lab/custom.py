@@ -12,8 +12,8 @@ from azure.mgmt.devtestlabs.models import LinuxOsInfo
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 
-def create_custom_image(client, resource_group, lab_name, name, author=None, description=None,
-                        source_vm_id=None, os_type=None, os_state=None):
+def create_custom_image(client, resource_group, lab_name, name, source_vm_id, os_type, os_state,
+                        author=None, description=None):
     """ Command to create a custom image from a source VM, managed image, or VHD """
 
     if source_vm_id is not None:
