@@ -8,7 +8,6 @@ from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_user_name,
                                                       validate_template_id,
                                                       validate_claim_vm,
-                                                      validate_create_custom_image,
                                                       _validate_artifacts)
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
@@ -21,7 +20,7 @@ with ParametersContext(command='lab') as c:
                     'using \'az configure --defaults group=<name>\'')
 
 with ParametersContext(command='lab custom-image create') as c:
-    c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_create_custom_image)
+    c.register_alias('resource_group', ('--resource-group', '-g'))
     c.register_alias('name', ('--name', '-n'))
 
 with ParametersContext(command='lab vm create') as c:
