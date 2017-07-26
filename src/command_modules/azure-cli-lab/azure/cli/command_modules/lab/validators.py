@@ -325,7 +325,18 @@ def _use_custom_image(namespace):
             raise CLIError(err.format(namespace.image, [x.name for x in custom_images]))
         else:
             namespace.custom_image_id = custom_images[0].id
-            namespace.os_type = custom_images[0].vhd.os_type
+
+            if custom_images[0].vm is not None:
+                if custom_images[0].vm.windows_os_info is not None:
+                    os_type = "Windows"
+                else:
+                    os_type = "Linux"
+            elif custom_images[0].vhd is not None:
+                os_type = custom_images[0].vhd.os_type
+            else:
+                raise CLIError("OS type cannot be inferred from the custom image {}".format(custom_images[0].id))
+
+            namespace.os_type = os_type
 
 
 def _get_formula(namespace):
