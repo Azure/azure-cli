@@ -120,8 +120,7 @@ with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
         c.command('list', 'list')
         c.command('delete', 'delete')
 
-with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
-                  custom_operations) as s:
+with ServiceGroup(__name__, get_devtestlabs_custom_image_operation, custom_operations) as s:
     with s.group('lab custom-image') as c:
         c.command('create', 'create_custom_image')
 
