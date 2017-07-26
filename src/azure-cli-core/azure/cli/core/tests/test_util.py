@@ -153,20 +153,19 @@ list_elements:
         dict_result = safe_yaml_parse(valid_yaml)
         self.assertEqual(dict_result['list_elements'][0]['element1']['property'], 'value')
 
-        empty_yaml = ''''''
         try:
-            safe_yaml_parse(empty_yaml, throw_on_empty=True)
+            safe_yaml_parse('', throw_on_empty=True)
         except CLIError:
             pass
         else:
-            raise ValueError('Parsing should have failed on empty yaml')
+            raise ValueError('Parsing empty yaml should have failed')
 
-        # parsing invlid yaml shall raise an error
         try:
             safe_yaml_parse('[hello world}')
         except CLIError:
             pass
-
+        else:
+            raise ValueError('Parsing invalid yaml should have failed')
 
     def test_hash_string(self):
         def _run_test(length, force_lower):
