@@ -10,6 +10,30 @@ from .storage_test_util import StorageScenarioMixin
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_create_storage_account_with_assigned_identity(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        cmd = 'az storage account create -n {} -g {} --sku Standard_LRS --assign-identity'.format(name, resource_group)
+        result = self.cmd(cmd).get_output_in_json()
+
+        self.assertIn('identity', result)
+        self.assertTrue(result['identity']['principalId'])
+        self.assertTrue(result['identity']['tenantId'])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_update_storage_account_with_assigned_identity(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --sku Standard_LRS'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('identity', None)])
+
+        updaet_cmd = 'az storage account update -n {} -g {} --assign-identity'.format(name, resource_group)
+        result = self.cmd(updaet_cmd).get_output_in_json()
+
+        self.assertIn('identity', result)
+        self.assertTrue(result['identity']['principalId'])
+        self.assertTrue(result['identity']['tenantId'])
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
@@ -63,7 +87,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     def test_logging_operations(self, resource_group, storage_account):
         connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'
-            .format(resource_group, storage_account)).output
+                .format(resource_group, storage_account)).output
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', False),

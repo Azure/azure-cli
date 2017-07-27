@@ -436,8 +436,14 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None, deprecate_info=None):
+                formatter_class=None, deprecate_info=None,
+                resource_type=None, max_api=None, min_api=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
+    if resource_type and (max_api or min_api):
+        from azure.cli.core.profiles import supported_api_version
+        if not supported_api_version(resource_type, min_api=min_api, max_api=max_api):
+            return
+
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param, confirmation=confirmation,
                                          exception_handler=exception_handler,
