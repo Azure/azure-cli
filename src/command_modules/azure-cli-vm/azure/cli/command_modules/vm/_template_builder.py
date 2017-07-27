@@ -667,7 +667,7 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
 # pylint: disable=too-many-locals
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
-                        public_ip_per_vm, vm_domain_name, dns_servers,
+                        public_ip_per_vm, vm_domain_name, dns_servers, nsg,
                         admin_username, authentication_type,
                         storage_profile, os_disk_name,
                         os_caching, data_caching, storage_sku, data_disk_sizes_gb,
@@ -788,9 +788,10 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     }
 
     if dns_servers:
-        nic_config['properties']['dnsSettings'] = {
-            'dnsServers': dns_servers
-        }
+        nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
+
+    if nsg:
+        nic_config['properties']['networkSecurityGroup'] = {'id': nsg}
 
     vmss_properties = {
         'overprovision': overprovision,
