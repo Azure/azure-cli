@@ -3,14 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long,superfluous-parens
 
 from collections import OrderedDict
 from azure.cli.core.commands import cli_command
 from azure.cli.core.util import empty_on_404
 from ._client_factory import _container_instance_client_factory
 
+
 custom_path = 'azure.cli.command_modules.container.custom#{}'
+
 
 def transform_log_output(result):
     '''Print log. '''
