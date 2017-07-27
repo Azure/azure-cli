@@ -125,8 +125,12 @@ def should_release_module(mod_name, mod_path, repo_working_dir):
     cur_mod_version = _get_current_module_version(mod_path)
     r_start = '{}-{}'.format(mod_name, cur_mod_version)
     revision_range = "{}..{}".format(r_start, 'HEAD')
-    module_changes = check_output(["git", "log", "--pretty=format:* %s", revision_range, "--", mod_path, ":(exclude)*/tests/*"],
-                                  cwd=repo_working_dir)
+    try:
+        module_changes = check_output(["git", "log", "--pretty=format:* %s", revision_range, "--", mod_path, ":(exclude)*/tests/*"],
+                                    cwd=repo_working_dir)
+    except CalledProcessError:
+        # Maybe the revision_range is invalid if this is a new module.
+        return True
     if module_changes:
         print_status('Begin changes in {}'.format(mod_name))
         print(str(module_changes, 'utf-8'))
