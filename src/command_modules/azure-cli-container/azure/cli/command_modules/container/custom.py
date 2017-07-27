@@ -8,7 +8,7 @@
 import shlex
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
-from azure.mgmt.container.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
+from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                          EnvironmentVariable, ImageRegistryCredential, ResourceRequirements,
                                          ResourceRequests, ContainerGroupNetworkProtocol, OperatingSystemTypes)
 
@@ -17,9 +17,9 @@ ACR_SERVER_SUFFIX = ".azurecr.io/"
 def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
     if resource_group_name is None:
-        return client.container_groups.list_all()
+        return client.container_groups.list()
     else:
-        return client.container_groups.list(resource_group_name)
+        return client.container_groups.list_by_resource_group(resource_group_name)
 
 def get_container(client, resource_group_name, name):
     """Show details of a container group. """

@@ -5,6 +5,6 @@
 
 
 def _container_instance_client_factory(_):
-    from azure.mgmt.container import MicrosoftContainerInstanceManagementClient
+    from azure.mgmt.containerinstance import ContainerInstanceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(MicrosoftContainerInstanceManagementClient)
+    return get_mgmt_service_client(ContainerInstanceManagementClient)
