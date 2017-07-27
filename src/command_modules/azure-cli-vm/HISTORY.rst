@@ -4,6 +4,7 @@ Release History
 ===============
 (unreleased)
 +++++++++++++++++++
+* vmss: support configuring nsg
 * vmss: fix a bug that dns server is not configured right.
 * vm/vmss: support managed service identity
 * `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.
