@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.0.11 (2017-07-27)
++++++++++++++++++++
+* minor fixes
+
 0.0.10 (2017-07-07)
 +++++++++++++++++++
 * Add support for user managed key vault key rotation in `dls account update`
