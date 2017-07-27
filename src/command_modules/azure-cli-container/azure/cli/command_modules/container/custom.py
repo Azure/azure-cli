@@ -3,31 +3,35 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
+# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import shlex
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
-                                         EnvironmentVariable, ImageRegistryCredential, ResourceRequirements,
-                                         ResourceRequests, ContainerGroupNetworkProtocol, OperatingSystemTypes)
+                                                 ImageRegistryCredential, ResourceRequirements, ResourceRequests,
+                                                 ContainerGroupNetworkProtocol, OperatingSystemTypes)
+
 
 ACR_SERVER_SUFFIX = ".azurecr.io/"
+
 
 def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
     if resource_group_name is None:
         return client.container_groups.list()
-    else:
-        return client.container_groups.list_by_resource_group(resource_group_name)
+    return client.container_groups.list_by_resource_group(resource_group_name)
+
 
 def get_container(client, resource_group_name, name):
     """Show details of a container group. """
     return client.container_groups.get(resource_group_name, name)
 
+
 def delete_container(client, resource_group_name, name, **kwargs):
     """Delete a container group. """
     return client.container_groups.delete(resource_group_name, name)
+
 
 def create_container(client,
                      resource_group_name,
@@ -106,6 +110,7 @@ def create_container(client,
                             image_registry_credentials=image_registry_credentials)
 
     return client.container_groups.create_or_update(resource_group_name, name, cgroup)
+
 
 def container_logs(client, resource_group_name, name, container_name=None):
     """Tail a container instance log. """

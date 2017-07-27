@@ -9,12 +9,13 @@ from azure.cli.core.commands.parameters import (enum_choice_list,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import CLIError
-import azure.cli.core.commands.arm # pylint: disable=unused-import
+import azure.cli.core.commands.arm  # pylint: disable=unused-import
 
 # pylint: disable=line-too-long
 
 IP_ADDRESS_TYPES = ['Public']
 OS_TYPES = ['Windows', 'Linux']
+
 
 def environment_variables_format(value):
     """Space separated values in 'key=value' format."""
@@ -25,6 +26,7 @@ def environment_variables_format(value):
                    "Argmuent values should be in the format a=b c=d")
         raise CLIError(message)
     return {'name': env_name, 'value': env_value}
+
 
 register_cli_argument('container', 'resource_group_name', resource_group_name_type)
 register_cli_argument('container', 'name', options_list=('--name', '-n'), help="The name of the container group", id_part='name')
