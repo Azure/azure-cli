@@ -86,6 +86,9 @@ class CommandContext(object):
         self._scope = scope
 
     def reg_arg(self, *args, **kwargs):
+        if not self._in_api_range(kwargs):
+            return register_cli_argument(self._scope, args[0], ignore_type)
+
         return register_cli_argument(self._scope, *args, **kwargs)
 
     def reg_extra_arg(self, *args, **kwargs):
@@ -102,6 +105,16 @@ class CommandContext(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+    @staticmethod
+    def _in_api_range(kwargs):
+        resource_type = kwargs.pop('resource_type', None)
+        max_api = kwargs.pop('max_api', None)
+        min_api = kwargs.pop('min_api', None)
+        if resource_type and (max_api or min_api):
+            from azure.cli.core.profiles import supported_api_version
+            return supported_api_version(resource_type, min_api=min_api, max_api=max_api)
+        return True
 
 
 class ArgumentGroupContext(CommandContext):
@@ -283,27 +296,46 @@ register_cli_argument('storage account show-connection-string', 'key_name', opti
 for item in ['blob', 'file', 'queue', 'table']:
     register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
-register_cli_argument('storage account create', 'location', location_type, validator=get_default_location_from_resource_group)
-register_cli_argument('storage account create', 'account_type', help='The storage account type', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
-register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
-register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'), **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
-register_cli_argument('storage account create', 'tags', tags_type)
-register_cli_argument('storage account create', 'https_only', help='Allows https traffic only to storage service.', **three_state_flag())
 
-for item in ['create', 'update']:
-    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
-    es_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
-    if es_model:
-        register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(es_model._attribute_map.keys())))  # pylint: disable=protected-access
+def register_common_storage_account_options(context):
+    context.reg_arg('https_only', help='Allows https traffic only to storage service.', **three_state_flag())
+    context.reg_arg('sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
+    context.reg_arg('assign_identity', help='Generate and assign a new Storage Account Identity for this storage '
+                                            'account for use with key management services like Azure KeyVault.',
+                    action='store_true', resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01')
+    context.reg_arg('access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for '
+                                        'StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. It is '
+                                        'required for StandardBlob accounts during creation',
+                    **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
 
-register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
-register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
-register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
-register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
-register_cli_argument('storage account update', 'use_subdomain', help='Specify whether to use indirect CNAME validation.', **enum_choice_list(['true', 'false']))
+    encryption_choices = list(get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')._attribute_map.keys())  # pylint: disable=protected-access
 
-register_cli_argument('storage account update', 'tags', tags_type, default=None)
-register_cli_argument('storage account update', 'https_only', help='Allows https traffic only to storage service.', **three_state_flag())
+    context.reg_arg('encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption,
+                    resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01',
+                    **enum_choice_list(encryption_choices))
+
+
+with CommandContext('storage account create') as c:
+    register_common_storage_account_options(c)
+    c.reg_arg('location', location_type, validator=get_default_location_from_resource_group)
+    c.reg_arg('account_type', help='The storage account type',
+              **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
+    c.reg_arg('account_name', account_name_type, options_list=('--name', '-n'), completer=None)
+    c.reg_arg('kind', help='Indicates the type of storage account.',
+              default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'),
+              **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
+    c.reg_arg('tags', tags_type)
+    c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
+
+with CommandContext('storage account update') as c:
+    register_common_storage_account_options(c)
+    c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to '
+                                    'clear existing value.',
+              validator=validate_custom_domain)
+    c.reg_arg('use_subdomain', help='Specify whether to use indirect CNAME validation.',
+              **enum_choice_list(['true', 'false']))
+    c.reg_arg('tags', tags_type, default=None)
+
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
