@@ -3,8 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,superfluous-parens
+# pylint: disable=line-too-long
 
+from __future__ import print_function
 from collections import OrderedDict
 from azure.cli.core.commands import cli_command
 from azure.cli.core.util import empty_on_404
