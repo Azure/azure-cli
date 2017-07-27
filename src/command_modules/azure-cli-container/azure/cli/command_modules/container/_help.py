@@ -12,22 +12,22 @@ helps['container'] = """
 
 helps['container create'] = """
     type: command
-    short-summary: Create or update container group.
+    short-summary: Create a container group.
     examples:
         - name: Create a container group and specify resources required.
-          text: az container create -g MyResourceGroup --name MyAlpine --location westus --image alpine:latest --cpu 1 --memory 1
+          text: az container create -g MyResourceGroup --name MyAlpine --image alpine:latest --cpu 1 --memory 1
         - name: Create a container group with OS type.
-          text: az container create -g MyResourceGroup --name MyWinApp --location westus --image winappimage:latest --os-type Windows
+          text: az container create -g MyResourceGroup --name MyWinApp --image winappimage:latest --os-type Windows
         - name: Create a container group with public IP address.
-          text: az container create -g MyResourceGroup --name MyAlpine --location westus --image alpine:latest --ip-address public
+          text: az container create -g MyResourceGroup --name MyAlpine --image alpine:latest --ip-address public
         - name: Create a container group with starting command line.
-          text: az container create -g MyResourceGroup --name MyAlpine --location westus --image alpine:latest --command-line "/bin/sh -c '/path to/myscript.sh'"
+          text: az container create -g MyResourceGroup --name MyAlpine --image alpine:latest --command-line "/bin/sh -c '/path to/myscript.sh'"
         - name: Create a container group with envrionment variables.
-          text: az contanier create -g MyResourceGroup --name MyAlpine --location westus --image alpine:latest -e key1=value1 key2=value2
+          text: az contanier create -g MyResourceGroup --name MyAlpine --image alpine:latest -e key1=value1 key2=value2
         - name: Create a container group using container image from Azure Container Registry.
-          text: az container create -g MyResourceGroup --name MyAlpine --location westus --image myAcrRegistry.azurecr.io/alpine:latest --image-registry-password password
+          text: az container create -g MyResourceGroup --name MyAlpine --image myAcrRegistry.azurecr.io/alpine:latest --registry-password password
         - name: Create a container group using container image from other private container image registry.
-          text: az container create -g MyResourceGroup --name MyApp --location westus --image myimage:latest --cpu 1 --memory 1.5 --image-registry-login-server myregistry.com --image-registry-username username --image-registry-password password
+          text: az container create -g MyResourceGroup --name MyApp --image myimage:latest --cpu 1 --memory 1.5 --registry-server myregistry.com --registry-username username --registry-password password
 """
 
 helps['container delete'] = """
@@ -37,12 +37,7 @@ helps['container delete'] = """
 
 helps['container list'] = """
     type: command
-    short-summary: List container groups by resource group.
-"""
-
-helps['container listall'] = """
-    type: command
-    short-summary: List all container groups.
+    short-summary: List container groups.
 """
 
 helps['container show'] = """

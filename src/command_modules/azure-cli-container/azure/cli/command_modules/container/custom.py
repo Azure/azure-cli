@@ -6,6 +6,7 @@
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 
 import shlex
+from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
 from azure.mgmt.container.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                          EnvironmentVariable, ImageRegistryCredential, ResourceRequirements,
@@ -13,13 +14,12 @@ from azure.mgmt.container.models import (ContainerGroup, Container, ContainerPor
 
 ACR_SERVER_SUFFIX = ".azurecr.io/"
 
-def list_all_containers(client):
-    """List all container groups. """
-    return client.container_groups.list_all()
-
-def list_containers(client, resource_group_name):
+def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
-    return client.container_groups.list(resource_group_name)
+    if resource_group_name is None:
+        return client.container_groups.list_all()
+    else:
+        return client.container_groups.list(resource_group_name)
 
 def get_container(client, resource_group_name, name):
     """Show details of a container group. """
@@ -41,9 +41,9 @@ def create_container(client,
                      ip_address=None,
                      command_line=None,
                      environment_variables=None,
-                     image_registry_login_server=None,
-                     image_registry_username=None,
-                     image_registry_password=None):
+                     registry_login_server=None,
+                     registry_username=None,
+                     registry_password=None):
     """"Create a container group. """
 
     container_resource_requirements = None
@@ -52,26 +52,35 @@ def create_container(client,
         container_resource_requirements = ResourceRequirements(requests=container_resource_requests)
 
     image_registry_credentials = None
-    if image_registry_login_server is not None:
-        if image_registry_username is None:
-            raise CLIError('Missing --image-registry-username.')
-        if image_registry_password is None:
-            raise CLIError('Missing --image-registry-password.')
-        image_registry_credentials = [ImageRegistryCredential(server=image_registry_login_server,
-                                                              username=image_registry_username,
-                                                              password=image_registry_password)]
+    if registry_login_server is not None:
+        if registry_username is None:
+            try:
+                registry_username = prompt_pass(msg='Image registry username: ')
+            except NoTTYException:
+                raise CLIError('Please specify --username in non-interactive mode.')
+        if registry_password is None:
+            try:
+                registry_password = prompt_pass(msg='Image registry password: ')
+            except NoTTYException:
+                raise CLIError('Please specify --registry-password in non-interactive mode.')
+        image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
+                                                              username=registry_username,
+                                                              password=registry_password)]
     elif ACR_SERVER_SUFFIX in image:
-        if image_registry_password is None:
-            raise CLIError('ACR password missing for using images in ACR; please specify --image-registry-password.')
+        if registry_password is None:
+            try:
+                registry_password = prompt_pass(msg='Image registry password: ')
+            except NoTTYException:
+                raise CLIError('Please specify --registry-password in non-interactive mode.')
 
         acr_server = image.split("/")[0] if image.split("/") else None
         acr_username = image.split(ACR_SERVER_SUFFIX)[0] if image.split(ACR_SERVER_SUFFIX) else None
         if acr_server is not None and acr_username is not None:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
                                                                   username=acr_username,
-                                                                  password=image_registry_password)]
+                                                                  password=registry_password)]
         else:
-            raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --image-registry-login-server and --image-registry-username.')
+            raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --registry-server and --registry-username.')
 
     command = None
     if command_line is not None:

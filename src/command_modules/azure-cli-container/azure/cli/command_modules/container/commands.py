@@ -63,10 +63,8 @@ def format_ip_address(container_group):
 
 def transform_container_group_list(result):
     """Transform a container group list to table output. """
-    if result.get('value', []):
-        return [transform_container_group(container_group) for container_group in result['value']]
+    return [transform_container_group(container_group) for container_group in result]
 
-cli_command(__name__, 'container listall', custom_path.format('list_all_containers'), _container_instance_client_factory, table_transformer=transform_container_group_list)
 cli_command(__name__, 'container list', custom_path.format('list_containers'), _container_instance_client_factory, table_transformer=transform_container_group_list)
 cli_command(__name__, 'container create', custom_path.format('create_container'), _container_instance_client_factory, table_transformer=transform_container_group_list)
 cli_command(__name__, 'container show', custom_path.format('get_container'), _container_instance_client_factory, exception_handler=empty_on_404, table_transformer=transform_container_group)
