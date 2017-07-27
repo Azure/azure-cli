@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.11 (2017-07-27)
 +++++++++++++++++++
 * vmss: support configuring nsg
 * vmss: fix a bug that dns server is not configured right.
