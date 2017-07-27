@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.7 (2017-07-27)
 ++++++++++++++++++
 * Change api version of cloud metadata endpoint to YYYY-MM-DD format.
 * Gallery endpoint isn't required
