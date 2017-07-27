@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.9 (2017-07-27)
 ++++++++++++++++++
 support login inside a VM with a managed identity
 
