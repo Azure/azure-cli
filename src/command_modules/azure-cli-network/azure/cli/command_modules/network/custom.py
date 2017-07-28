@@ -76,7 +76,15 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
     collection.append(obj_to_add)
 
 
-def _get_default_value(balancer, property_name, option_name):
+def _get_default_name(balancer, property_name, option_name):
+    return _get_default_value(balancer, property_name, option_name, True)
+
+
+def _get_default_id(balancer, property_name, option_name):
+    return _get_default_value(balancer, property_name, option_name, False)
+
+
+def _get_default_value(balancer, property_name, option_name, name):
     values = [x.id for x in getattr(balancer, property_name)]
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
@@ -84,7 +92,7 @@ def _get_default_value(balancer, property_name, option_name):
     elif not values:
         raise CLIError("No existing values found for '{0}'. Create one first and try "
                        "again.".format(option_name))
-    return values[0]
+    return values[0].rsplit('/', 1)[1] if name else values[0]
 
 
 # region Generic list commands
@@ -339,7 +347,7 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if not frontend_ip:
-        frontend_ip = _get_default_value(ag, 'frontend_ip_configurations', '--frontend-ip')
+        frontend_ip = _get_default_id(ag, 'frontend_ip_configurations', '--frontend-ip')
     new_listener = ApplicationGatewayHttpListener(
         name=item_name,
         frontend_ip_configuration=SubResource(frontend_ip),
@@ -547,12 +555,11 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if not address_pool and not redirect_config:
-        address_pool = _get_default_value(ag, 'backend_address_pools', '--address-pool')
+        address_pool = _get_default_id(ag, 'backend_address_pools', '--address-pool')
     if not http_settings and not redirect_config:
-        http_settings = _get_default_value(ag, 'backend_http_settings_collection',
-                                           '--http-settings')
+        http_settings = _get_default_id(ag, 'backend_http_settings_collection', '--http-settings')
     if not http_listener:
-        http_listener = _get_default_value(ag, 'http_listeners', '--http-listener')
+        http_listener = _get_default_id(ag, 'http_listeners', '--http-listener')
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
@@ -921,8 +928,7 @@ def create_lb_inbound_nat_rule(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
-        frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
-                                              '--frontend-ip-name')
+        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
     new_rule = InboundNatRule(
         name=item_name, protocol=protocol,
@@ -1071,11 +1077,9 @@ def create_lb_rule(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     if not frontend_ip_name:
-        frontend_ip_name = _get_default_value(lb, 'frontend_ip_configurations',
-                                              '--frontend-ip-name')
+        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     if not backend_address_pool_name:
-        backend_address_pool_name = _get_default_value(lb, 'backend_address_pools',
-                                                       '--backend-pool-name')
+        backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
     new_rule = LoadBalancingRule(
         name=item_name,
         protocol=protocol,
