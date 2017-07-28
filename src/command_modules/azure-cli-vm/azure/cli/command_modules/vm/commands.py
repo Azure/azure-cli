@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -143,7 +143,8 @@ cli_command(__name__, 'vm availability-set delete', mgmt_path.format(op_var, op_
 cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, exception_handler=empty_on_404)
 cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set)
 cli_command(__name__, 'vm availability-set list-sizes', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_avail_set)
-cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+    cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
 
 cli_generic_update_command(__name__, 'vm availability-set update',
                            custom_path.format('availset_get'),
