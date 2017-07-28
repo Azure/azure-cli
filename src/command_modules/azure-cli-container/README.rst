@@ -1,8 +1,8 @@
 Microsoft Azure CLI 'container' Command Module
-==============================================
+==============================================================
 
 Commands to manage Azure container instances
-+++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Group
@@ -16,7 +16,7 @@ Commands to manage Azure container instances
         show  : Show the details of a container group.
 
 Commands to create an Azure container group
-+++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -86,7 +86,7 @@ Commands to create an Azure container group
             password
 
 Commands to get an Azure container group
-+++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -110,7 +110,7 @@ Commands to get an Azure container group
         --verbose          : Increase logging verbosity. Use --debug for full debug logs.
 
 Commands to tail the logs of a Azure container group
-+++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -135,7 +135,7 @@ Commands to tail the logs of a Azure container group
         --verbose          : Increase logging verbosity. Use --debug for full debug logs.
 
 Commands to delete an Azure container group
-+++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
@@ -160,7 +160,7 @@ Commands to delete an Azure container group
         --verbose          : Increase logging verbosity. Use --debug for full debug logs.
 
 Commands to list Azure container groups by resource group
-+++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ::
 
     Command
