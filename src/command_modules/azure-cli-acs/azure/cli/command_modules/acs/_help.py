@@ -42,3 +42,10 @@ helps['acs create'] = """
         - name: Create a acs cluster with the second agent pool with vmSize specified
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles "[{'name':'agentpool1'},{'name':'agentpool2','vmSize':'Standard_D2'}]"
 """
+helps['acs scale'] = """
+    examples:
+        - name: Scale the first (default) agent pool's agent count to 5
+          text: az acs scale -g MyResourceGroup -n MyContainerService --new-agent-count 5
+        - name: Scale agent pool's agent count with name and count
+          text: az acs scale -g MyResourceGroup -n MyContainerService --new-agent-counts "{'pool1':4,'pool2':1}"
+"""
