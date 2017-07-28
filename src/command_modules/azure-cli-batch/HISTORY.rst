@@ -2,6 +2,17 @@
 
 Release History
 ===============
+
+3.1.0 (2017-07-28)
+++++++++++++++++++
+
+* Updated to Batch SDK 3.1.0 and Batch Management SDK 4.1.0.
+* Added a new command show the task counts of a job.
+* Fixed bug in resource file SAS URL processing
+* Batch account endpoint now supports optional 'https://' prefix.
+* Support for adding lists of more than 100 tasks to a job.
+* Added debug logging for loading Extensions command module.
+
 3.0.3 (2017-07-07)
 ++++++++++++++++++
 * minor fixes
