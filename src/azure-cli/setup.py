@@ -58,6 +58,7 @@ DEPENDENCIES = [
     'azure-cli-cloud',
     'azure-cli-cognitiveservices',
     'azure-cli-component',
+    'azure-cli-container',
     'azure-cli-configure',
     'azure-cli-consumption',
     'azure-cli-core',
