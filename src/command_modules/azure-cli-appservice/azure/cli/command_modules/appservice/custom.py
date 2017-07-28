@@ -843,9 +843,12 @@ def list_publish_profiles(resource_group_name, name, slot=None):
 def enable_cd(resource_group_name, name, enable, slot=None):
     settings = []
     settings.append("DOCKER_ENABLE_CI=" + enable)
+    settings_output = []
+    settings_output.append(('DOCKER_ENABLE_CI', enable))
+
     update_app_settings(resource_group_name, name, settings, slot)
-    if enable == 'true':
-        return show_container_cd_url(resource_group_name, name, slot)
+
+    return show_container_cd_url(resource_group_name, name, slot)
 
 
 def show_container_cd_url(resource_group_name, name, slot=None):
@@ -856,17 +859,23 @@ def show_container_cd_url(resource_group_name, name, slot=None):
             docker_enabled = True
             break
 
-    if not docker_enabled:
-        raise CLIError('continuous integration is not enabled on docker')
+    settings = []
+    cd_settings = {}
+    cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
 
-    profiles = list_publish_profiles(resource_group_name, name, slot)
-    for profile in profiles:
-        if profile['publishMethod'] == 'MSDeploy':
-            scmUrl = profile['publishUrl'].replace(":443", "")
-            url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
-            break
+    if docker_enabled:
+        profiles = list_publish_profiles(resource_group_name, name, slot)
+        for profile in profiles:
+            if profile['publishMethod'] == 'MSDeploy':
+                scmUrl = profile['publishUrl'].replace(":443", "")
+                cd_url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
+                cd_settings['CI_CD_URL'] = cd_url
+                break
+    else:
+        cd_settings['CI_CD_URL'] = ''
 
-    return url
+    settings.append(cd_settings)
+    return settings
 
 
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
