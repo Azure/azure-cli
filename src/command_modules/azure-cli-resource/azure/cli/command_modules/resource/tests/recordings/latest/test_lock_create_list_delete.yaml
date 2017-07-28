@@ -1,29 +1,29 @@
 interactions:
 - request:
-    body: '{"properties": {"level": "ReadOnly"}, "name": "foo"}'
+    body: 'b''{"properties": {"level": "ReadOnly"}, "name": "cli-test-lock000001"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [lock create]
       Connection: [keep-alive]
-      Content-Length: ['52']
+      Content-Length: ['97']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001?api-version=2016-09-01
   response:
-    body: {string: '{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"}'}
+    body: {string: '{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001","type":"Microsoft.Authorization/locks","name":"cli-test-lock000001"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['190']
+      content-length: ['280']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:36 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,21 +34,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
-    body: {string: '{"value":[{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwe/providers/Microsoft.Authorization/locks/nod","type":"Microsoft.Authorization/locks","name":"nod"},{"properties":{"level":"CanNotDelete","notes":"keep
-        RG but allow deletes."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-test/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnetlock","type":"Microsoft.Authorization/locks","name":"vnetlock"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TianTest/providers/Microsoft.Authorization/locks/testVivek","type":"Microsoft.Authorization/locks","name":"testVivek"},{"properties":{"level":"CanNotDelete","notes":"vpn
-        client ts"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-client/providers/Microsoft.Network/virtualNetworks/vnet/providers/Microsoft.Authorization/locks/lock1","type":"Microsoft.Authorization/locks","name":"lock1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lock/providers/Microsoft.Authorization/locks/rg-lock","type":"Microsoft.Authorization/locks","name":"rg-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tjp-lock/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnet-lock","type":"Microsoft.Authorization/locks","name":"vnet-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        AAD team to investigate"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwmsi/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"NonONonononON!"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lb/providers/Microsoft.Network/virtualNetworks/vm1VNET/providers/Microsoft.Authorization/locks/nonono","type":"Microsoft.Authorization/locks","name":"nonono"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Authorization/locks/nodel","type":"Microsoft.Authorization/locks","name":"nodel"}]}'}
+    body: {string: '{"value":[{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001","type":"Microsoft.Authorization/locks","name":"cli-test-lock000001"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2848']
+      content-length: ['292']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:40 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -64,21 +60,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
-    body: {string: '{"value":[{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwe/providers/Microsoft.Authorization/locks/nod","type":"Microsoft.Authorization/locks","name":"nod"},{"properties":{"level":"CanNotDelete","notes":"keep
-        RG but allow deletes."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-test/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnetlock","type":"Microsoft.Authorization/locks","name":"vnetlock"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TianTest/providers/Microsoft.Authorization/locks/testVivek","type":"Microsoft.Authorization/locks","name":"testVivek"},{"properties":{"level":"CanNotDelete","notes":"vpn
-        client ts"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-client/providers/Microsoft.Network/virtualNetworks/vnet/providers/Microsoft.Authorization/locks/lock1","type":"Microsoft.Authorization/locks","name":"lock1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lock/providers/Microsoft.Authorization/locks/rg-lock","type":"Microsoft.Authorization/locks","name":"rg-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tjp-lock/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnet-lock","type":"Microsoft.Authorization/locks","name":"vnet-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        AAD team to investigate"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwmsi/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"NonONonononON!"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lb/providers/Microsoft.Network/virtualNetworks/vm1VNET/providers/Microsoft.Authorization/locks/nonono","type":"Microsoft.Authorization/locks","name":"nonono"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Authorization/locks/nodel","type":"Microsoft.Authorization/locks","name":"nodel"}]}'}
+    body: {string: '{"value":[{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001","type":"Microsoft.Authorization/locks","name":"cli-test-lock000001"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2848']
+      content-length: ['292']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:40 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -94,17 +86,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001?api-version=2016-09-01
   response:
-    body: {string: '{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"}'}
+    body: {string: '{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001","type":"Microsoft.Authorization/locks","name":"cli-test-lock000001"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['190']
+      content-length: ['280']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:41 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -112,33 +104,82 @@ interactions:
       vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"level": "CanNotDelete"}, "name": "foo"}'
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [lock delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
+  response:
+    body: {string: '{"value":[{"properties":{"level":"ReadOnly"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001","type":"Microsoft.Authorization/locks","name":"cli-test-lock000001"}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['292']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 20 Jul 2017 23:50:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [lock delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000001?api-version=2016-09-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 20 Jul 2017 23:50:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"properties": {"level": "CanNotDelete"}, "name": "cli-test-lock000002"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [lock create]
       Connection: [keep-alive]
-      Content-Length: ['56']
+      Content-Length: ['101']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002?api-version=2016-09-01
   response:
-    body: {string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"}'}
+    body: {string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002","type":"Microsoft.Authorization/locks","name":"cli-test-lock000002"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['194']
+      content-length: ['284']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:43 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
@@ -148,21 +189,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
-    body: {string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwe/providers/Microsoft.Authorization/locks/nod","type":"Microsoft.Authorization/locks","name":"nod"},{"properties":{"level":"CanNotDelete","notes":"keep
-        RG but allow deletes."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-test/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnetlock","type":"Microsoft.Authorization/locks","name":"vnetlock"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TianTest/providers/Microsoft.Authorization/locks/testVivek","type":"Microsoft.Authorization/locks","name":"testVivek"},{"properties":{"level":"CanNotDelete","notes":"vpn
-        client ts"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-client/providers/Microsoft.Network/virtualNetworks/vnet/providers/Microsoft.Authorization/locks/lock1","type":"Microsoft.Authorization/locks","name":"lock1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lock/providers/Microsoft.Authorization/locks/rg-lock","type":"Microsoft.Authorization/locks","name":"rg-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tjp-lock/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnet-lock","type":"Microsoft.Authorization/locks","name":"vnet-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        AAD team to investigate"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwmsi/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"NonONonononON!"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lb/providers/Microsoft.Network/virtualNetworks/vm1VNET/providers/Microsoft.Authorization/locks/nonono","type":"Microsoft.Authorization/locks","name":"nonono"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Authorization/locks/nodel","type":"Microsoft.Authorization/locks","name":"nodel"}]}'}
+    body: {string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002","type":"Microsoft.Authorization/locks","name":"cli-test-lock000002"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2852']
+      content-length: ['296']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:43 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -178,21 +215,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
-    body: {string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwe/providers/Microsoft.Authorization/locks/nod","type":"Microsoft.Authorization/locks","name":"nod"},{"properties":{"level":"CanNotDelete","notes":"keep
-        RG but allow deletes."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-test/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnetlock","type":"Microsoft.Authorization/locks","name":"vnetlock"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TianTest/providers/Microsoft.Authorization/locks/testVivek","type":"Microsoft.Authorization/locks","name":"testVivek"},{"properties":{"level":"CanNotDelete","notes":"vpn
-        client ts"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-client/providers/Microsoft.Network/virtualNetworks/vnet/providers/Microsoft.Authorization/locks/lock1","type":"Microsoft.Authorization/locks","name":"lock1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lock/providers/Microsoft.Authorization/locks/rg-lock","type":"Microsoft.Authorization/locks","name":"rg-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tjp-lock/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnet-lock","type":"Microsoft.Authorization/locks","name":"vnet-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        AAD team to investigate"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwmsi/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"NonONonononON!"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lb/providers/Microsoft.Network/virtualNetworks/vm1VNET/providers/Microsoft.Authorization/locks/nonono","type":"Microsoft.Authorization/locks","name":"nonono"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Authorization/locks/nodel","type":"Microsoft.Authorization/locks","name":"nodel"}]}'}
+    body: {string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002","type":"Microsoft.Authorization/locks","name":"cli-test-lock000002"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2852']
+      content-length: ['296']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:44 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -208,17 +241,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002?api-version=2016-09-01
   response:
-    body: {string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"}'}
+    body: {string: '{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002","type":"Microsoft.Authorization/locks","name":"cli-test-lock000002"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['194']
+      content-length: ['284']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:44 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -234,21 +267,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
-    body: {string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo","type":"Microsoft.Authorization/locks","name":"foo"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwe/providers/Microsoft.Authorization/locks/nod","type":"Microsoft.Authorization/locks","name":"nod"},{"properties":{"level":"CanNotDelete","notes":"keep
-        RG but allow deletes."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-test/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnetlock","type":"Microsoft.Authorization/locks","name":"vnetlock"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TianTest/providers/Microsoft.Authorization/locks/testVivek","type":"Microsoft.Authorization/locks","name":"testVivek"},{"properties":{"level":"CanNotDelete","notes":"vpn
-        client ts"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-client/providers/Microsoft.Network/virtualNetworks/vnet/providers/Microsoft.Authorization/locks/lock1","type":"Microsoft.Authorization/locks","name":"lock1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lock/providers/Microsoft.Authorization/locks/rg-lock","type":"Microsoft.Authorization/locks","name":"rg-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tjp-lock/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnet-lock","type":"Microsoft.Authorization/locks","name":"vnet-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        AAD team to investigate"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwmsi/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"NonONonononON!"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lb/providers/Microsoft.Network/virtualNetworks/vm1VNET/providers/Microsoft.Authorization/locks/nonono","type":"Microsoft.Authorization/locks","name":"nonono"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Authorization/locks/nodel","type":"Microsoft.Authorization/locks","name":"nodel"}]}'}
+    body: {string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002","type":"Microsoft.Authorization/locks","name":"cli-test-lock000002"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2852']
+      content-length: ['296']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:45 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -265,74 +294,19 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
+          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.11+dev]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/cli-test-lock000002?api-version=2016-09-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 06 Jul 2017 17:38:45 GMT']
+      date: ['Thu, 20 Jul 2017 23:50:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
     status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [lock delete]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
-  response:
-    body: {string: '{"value":[{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwe/providers/Microsoft.Authorization/locks/nod","type":"Microsoft.Authorization/locks","name":"nod"},{"properties":{"level":"CanNotDelete","notes":"keep
-        RG but allow deletes."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-test/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnetlock","type":"Microsoft.Authorization/locks","name":"vnetlock"},{"properties":{"level":"CanNotDelete","notes":"please
-        keep"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdk-test/providers/Microsoft.Authorization/locks/sdk-test-lock","type":"Microsoft.Authorization/locks","name":"sdk-test-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TianTest/providers/Microsoft.Authorization/locks/testVivek","type":"Microsoft.Authorization/locks","name":"testVivek"},{"properties":{"level":"CanNotDelete","notes":"vpn
-        client ts"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-client/providers/Microsoft.Network/virtualNetworks/vnet/providers/Microsoft.Authorization/locks/lock1","type":"Microsoft.Authorization/locks","name":"lock1"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lock/providers/Microsoft.Authorization/locks/rg-lock","type":"Microsoft.Authorization/locks","name":"rg-lock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tjp-lock/providers/Microsoft.Network/virtualNetworks/vnet1/providers/Microsoft.Authorization/locks/vnet-lock","type":"Microsoft.Authorization/locks","name":"vnet-lock"},{"properties":{"level":"CanNotDelete","notes":"for
-        AAD team to investigate"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangwmsi/providers/Microsoft.Authorization/locks/nodelete","type":"Microsoft.Authorization/locks","name":"nodelete"},{"properties":{"level":"CanNotDelete","notes":"NonONonononON!"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-lb/providers/Microsoft.Network/virtualNetworks/vm1VNET/providers/Microsoft.Authorization/locks/nonono","type":"Microsoft.Authorization/locks","name":"nonono"},{"properties":{"level":"CanNotDelete","notes":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugangw/providers/Microsoft.Authorization/locks/nodel","type":"Microsoft.Authorization/locks","name":"nodel"}]}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['2657']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 06 Jul 2017 17:38:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [lock delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 managementlockclient/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.10+dev]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks/foo?api-version=2016-09-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Thu, 06 Jul 2017 17:38:46 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 204, message: No Content}
 version: 1

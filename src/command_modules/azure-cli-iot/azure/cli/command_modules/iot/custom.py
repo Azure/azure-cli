@@ -138,13 +138,12 @@ def iot_hub_policy_get(client, hub_name, policy_name, resource_group_name=None):
 def iot_hub_policy_create(client, hub_name, policy_name, permissions, resource_group_name=None):
     rights = _convert_perms_to_access_rights(permissions)
     hub = iot_hub_get(client, hub_name, resource_group_name)
-    policies = iot_hub_policy_list(client, hub_name, hub.resourcegroup)
+    policies = []
+    policies.extend(iot_hub_policy_list(client, hub_name, hub.resourcegroup))
     if _is_policy_existed(policies, policy_name):
         raise CLIError('Policy {0} already existed.'.format(policy_name))
-    updated_policies = []
-    updated_policies.extend(policies)
-    updated_policies.append(SharedAccessSignatureAuthorizationRule(policy_name, rights))
-    hub.properties.authorization_policies = updated_policies
+    policies.append(SharedAccessSignatureAuthorizationRule(policy_name, rights))
+    hub.properties.authorization_policies = policies
     return client.create_or_update(hub.resourcegroup, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
