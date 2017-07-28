@@ -9,6 +9,8 @@ import os
 import unittest
 import mock
 
+from copy import deepcopy
+
 from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, SpendingLimit)
@@ -884,13 +886,13 @@ class Test_Profile(unittest.TestCase):
     def test_refresh_accounts_one_user_account(self, mock_auth_context):
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock, use_global_creds_cache=False)
-        consolidated = Profile._normalize_properties(self.user1, [self.subscription1], False)
+        consolidated = Profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
         profile._set_subscriptions(consolidated)
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
         mock_auth_context.acquire_token.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1, self.subscription2]
+        mock_arm_client.subscriptions.list.return_value = deepcopy([self.subscription1, self.subscription2])
         finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
                                     None,
                                     lambda _: mock_arm_client)
@@ -909,7 +911,7 @@ class Test_Profile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock, use_global_creds_cache=False)
         sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'foo_tenant.onmicrosoft.com')
-        consolidated = Profile._normalize_properties(self.user1, [self.subscription1], False)
+        consolidated = Profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
         consolidated += Profile._normalize_properties('http://foo', [sp_subscription1], True)
         profile._set_subscriptions(consolidated)
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
@@ -917,7 +919,7 @@ class Test_Profile(unittest.TestCase):
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.side_effect = [[self.subscription1], [self.subscription2, sp_subscription1]]
+        mock_arm_client.subscriptions.list.side_effect = deepcopy([[self.subscription1], [self.subscription2, sp_subscription1]])
         finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
                                     None,
                                     lambda _: mock_arm_client)
@@ -938,7 +940,7 @@ class Test_Profile(unittest.TestCase):
     def test_refresh_accounts_with_nothing(self, mock_auth_context):
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock, use_global_creds_cache=False)
-        consolidated = Profile._normalize_properties(self.user1, [self.subscription1], False)
+        consolidated = Profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
         profile._set_subscriptions(consolidated)
         mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
         mock_auth_context.acquire_token.return_value = self.token_entry1
