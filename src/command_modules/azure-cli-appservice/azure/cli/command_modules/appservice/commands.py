@@ -128,7 +128,7 @@ cli_command(__name__, 'webapp deployment list-publishing-profiles',
             custom_path + 'list_publish_profiles')
 cli_command(__name__, 'webapp deployment container config',
             custom_path + 'enable_cd')
-cli_command(__name__, 'webapp deployment container show-container-cd-url',
+cli_command(__name__, 'webapp deployment container show-cd-url',
             custom_path + 'show_container_cd_url')
 cli_command(__name__, 'webapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
 cli_command(__name__, 'webapp list-runtimes', custom_path + 'list_runtimes')

@@ -5,9 +5,6 @@ Release History
 (unreleased)
 +++++++++++++++++++
 * webapp: Add generate container CI URL for Web App
-
-(unreleased)
-+++++++++++++++++++
 * webapp: fix the bug that listing linux webapp returns nothing
 
 0.1.10 (2017-07-07)

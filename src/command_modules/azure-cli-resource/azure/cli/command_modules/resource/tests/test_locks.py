@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import unittest
-
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from time import sleep
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck
 
 
 class ResourceLockTests(ScenarioTest):
@@ -13,39 +12,50 @@ class ResourceLockTests(ScenarioTest):
         # just make sure this doesn't throw
         self.cmd('az lock list').get_output_in_json()
 
-    # Test for subscription level locks
     def test_lock_create_list_delete(self):
         for lock_type in ['ReadOnly', 'CanNotDelete']:
-            self.cmd('az lock create -n foo --lock-type {}'.format(lock_type))
-            self.addCleanup(lambda: self.cmd('az lock delete -n foo'))
+            lock_name = self.create_random_name('cli-test-lock', 48)
+            self.cmd('az lock create -n {} --lock-type {}'.format(lock_name, lock_type))
+            self._sleep_for_lock_operation()
 
             locks_list = self.cmd('az lock list').get_output_in_json()
             self.assertTrue(locks_list)
-            self.assertIn('foo', [l['name'] for l in locks_list])
+            self.assertIn(lock_name, [l['name'] for l in locks_list])
 
-            lock = self.cmd('az lock show -n foo').get_output_in_json()
-            self.assertEqual(lock.get('name', None), 'foo')
+            lock = self.cmd('az lock show -n {}'.format(lock_name)).get_output_in_json()
+            self.assertEqual(lock.get('name', None), lock_name)
             self.assertEqual(lock.get('level', None), lock_type)
 
-    # Test for resource group level locks
-    @ResourceGroupPreparer()
-    def test_lock_create_list_delete_resource_group(self, resource_group):
-        for lock_type in ['ReadOnly', 'CanNotDelete']:
-            self.cmd('az lock create -n foo -g {} --lock-type {}'.format(resource_group, lock_type))
+            self.cmd('az lock delete -n {}'.format(lock_name))
+            self._sleep_for_lock_operation()
 
-            delete_cmd = 'az lock delete -g {} -n foo'.format(resource_group)
-            self.addCleanup(lambda: self.cmd(delete_cmd))
+    def test_readonly_lock_create_list_delete_resource_group(self):
+        self._lock_operation_with_resource_group('ReadOnly')
 
-            locks_list = self.cmd('az lock list').get_output_in_json()
-            self.assertTrue(locks_list)
-            self.assertIn('foo', [l['name'] for l in locks_list])
+    def test_cannotdelete_lock_create_list_delete_resource_group(self):
+        self._lock_operation_with_resource_group('CanNotDelete')
 
-            lock = self.cmd('az lock show -g {} -n foo'.format(resource_group)).get_output_in_json()
-            self.assertEqual(lock.get('name', None), 'foo')
-            self.assertEqual(lock.get('level', None), lock_type)
+    def _lock_operation_with_resource_group(self, lock_type):
+        rg_name = self.create_random_name('cli.lock.rg', 75)
+        lock_name = self.create_random_name('cli-test-lock', 48)
 
-    # TODO: test for resource group level locks
+        self.cmd('az group create --location {} --name {} --tag use=az-test'.format('southcentralus', rg_name))
+        self.addCleanup(lambda: self.cmd('az group delete -n {} --yes --no-wait'.format(rg_name)))
 
+        self.cmd('az lock create -n {} -g {} --lock-type {}'.format(lock_name, rg_name, lock_type))
+        self._sleep_for_lock_operation()
 
-if __name__ == '__main__':
-    unittest.main()
+        self.cmd('az lock show -g {} -n {}'.format(rg_name, lock_name)).assert_with_checks([
+            JMESPathCheck('name', lock_name),
+            JMESPathCheck('level', lock_type)])
+
+        locks_list = self.cmd("az lock list --query '[].name' -ojson").get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        self.cmd('az lock delete -g {} -n {}'.format(rg_name, lock_name))
+        self._sleep_for_lock_operation()
+
+    def _sleep_for_lock_operation(self):
+        if self.is_live:
+            sleep(5)

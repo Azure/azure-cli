@@ -33,7 +33,8 @@ AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, Applica
     BackendAddressPool, DhcpOptions, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, \
     FrontendIPConfiguration, InboundNatPool, InboundNatRule, IPAllocationMethod, IPVersion, \
     LoadBalancingRule, NetworkInterfaceIPConfiguration, NetworkSecurityGroup, Probe, PublicIPAddress, \
-    PublicIPAddressDnsSettings, RedirectConfiguration, Route, SecurityRule, SecurityRuleAccess, \
+    PublicIPAddressDnsSettings, ApplicationGatewayRedirectConfiguration, Route, SecurityRule, \
+    SecurityRuleAccess, \
     SecurityRuleDirection, SecurityRuleProtocol, Subnet, SubResource, VirtualNetwork, \
     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VirtualNetworkPeering, VpnClientConfiguration, \
     VpnClientRevokedCertificate, VpnClientRootCertificate, VpnType = get_sdk(
@@ -43,7 +44,8 @@ AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, Applica
         'BackendAddressPool', 'DhcpOptions', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier',
         'FrontendIPConfiguration', 'InboundNatPool', 'InboundNatRule', 'IPAllocationMethod', 'IPVersion',
         'LoadBalancingRule', 'NetworkInterfaceIPConfiguration', 'NetworkSecurityGroup', 'Probe', 'PublicIPAddress',
-        'PublicIPAddressDnsSettings', 'RedirectConfiguration', 'Route', 'SecurityRule', 'SecurityRuleAccess',
+        'PublicIPAddressDnsSettings', 'ApplicationGatewayRedirectConfiguration', 'Route', 'SecurityRule',
+        'SecurityRuleAccess',
         'SecurityRuleDirection', 'SecurityRuleProtocol', 'Subnet', 'SubResource', 'VirtualNetwork',
         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VirtualNetworkPeering', 'VpnClientConfiguration',
         'VpnClientRevokedCertificate', 'VpnClientRootCertificate', 'VpnType',
@@ -441,7 +443,7 @@ def create_ag_redirect_configuration(resource_group_name, application_gateway_na
                                      include_query_string=None, no_wait=False):
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    new_config = RedirectConfiguration(
+    new_config = ApplicationGatewayRedirectConfiguration(
         name=item_name,
         redirect_type=redirect_type,
         target_listener=SubResource(target_listener) if target_listener else None,
@@ -455,7 +457,7 @@ def create_ag_redirect_configuration(resource_group_name, application_gateway_na
 
 def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=None,
                                      target_listener=None, target_url=None, include_path=None,
-                                     include_query_string=None, no_wait=False):
+                                     include_query_string=None, raw=False):
     if redirect_type:
         instance.redirect_type = redirect_type
     if target_listener:
@@ -472,8 +474,8 @@ def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=
 
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
-    create_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
-    update_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+    create_ag_redirect_configuration.__doc__ = ApplicationGatewayRedirectConfiguration.__doc__
+    update_ag_redirect_configuration.__doc__ = ApplicationGatewayRedirectConfiguration.__doc__
 
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
@@ -1518,7 +1520,7 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 
 def create_subnet(resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
-                  route_table=None):
+                  route_table=None, private_access_services=None):
     '''Create a virtual network (VNet) subnet.
     :param str address_prefix: address prefix in CIDR format.
     :param str network_security_group: Name or ID of network security
@@ -1530,13 +1532,19 @@ def create_subnet(resource_group_name, virtual_network_name, subnet_name,
     if network_security_group:
         subnet.network_security_group = NetworkSecurityGroup(id=network_security_group)
     _set_route_table(ncf, resource_group_name, route_table, subnet)
+    if private_access_services:
+        PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
+                                       mod='models')
+        subnet.private_access_services = []
+        for service in private_access_services:
+            subnet.private_access_services.append(PrivateAccessService(service=service))
 
     return ncf.subnets.create_or_update(resource_group_name, virtual_network_name,
                                         subnet_name, subnet)
 
 
 def update_subnet(instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None):
+                  route_table=None, private_access_services=None):
     '''update existing virtual sub network
     :param str address_prefix: New address prefix in CIDR format, for example 10.0.0.0/24.
     :param str network_security_group: attach with existing network security group,
@@ -1551,6 +1559,15 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
         instance.network_security_group = None
 
     _set_route_table(_network_client_factory(), resource_group_name, route_table, instance)
+
+    if private_access_services == ['']:
+        instance.private_access_services = None
+    elif private_access_services:
+        PrivateAccessService = get_sdk(ResourceType.MGMT_NETWORK, 'PrivateAccessServicePropertiesFormat',
+                                       mod='models')
+        instance.private_access_services = []
+        for service in private_access_services:
+            instance.private_access_services.append(PrivateAccessService(service=service))
 
     return instance
 

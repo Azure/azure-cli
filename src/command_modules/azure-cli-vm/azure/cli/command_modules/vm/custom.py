@@ -33,7 +33,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
-from ._client_factory import _compute_client_factory
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -751,7 +751,7 @@ def _get_extension_instance_name(instance_view, publisher, extension_type_name,
     full_type_name = '.'.join([publisher, extension_type_name])
     if instance_view.extensions:
         ext = next((x for x in instance_view.extensions
-                    if x.type.lower() == full_type_name.lower()), None)
+                    if x.type and (x.type.lower() == full_type_name.lower())), None)
         if ext:
             extension_instance_name = ext.name
     return extension_instance_name
@@ -1502,6 +1502,13 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     return instance_addresses
 
 
+def list_vmss_instance_public_ips(resource_group_name, vm_scale_set_name):
+    result = cf_public_ip_addresses().list_virtual_machine_scale_set_public_ip_addresses(resource_group_name,
+                                                                                         vm_scale_set_name)
+    # filter away over-provisioned instances which are deleted after 'create/update' returns
+    return [r for r in result if r.ip_address]
+
+
 def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
@@ -1868,7 +1875,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     backend_address_pool_id = None
     inbound_nat_pool_id = None
     if load_balancer_type or app_gateway_type:
-        network_balancer = load_balancer or app_gateway
+        network_balancer = load_balancer if load_balancer_type else app_gateway
         balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
 
         if is_valid_resource_id(network_balancer):

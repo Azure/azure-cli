@@ -9,6 +9,7 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import CLIError
+from azure.cli.core.cloud import get_active_cloud
 
 logger = get_az_logger(__name__)
 
@@ -51,9 +52,9 @@ def get_access_token(subscription=None, resource=None):
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
     Use 'az cloud show' command for other Azure resources
     '''
+    resource = (resource or get_active_cloud().endpoints.active_directory_resource_id)
     profile = Profile()
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription,
-                                                        resource=resource)
+    creds, subscription, tenant = profile.get_raw_token(resource, subscription=subscription)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
@@ -80,13 +81,17 @@ def account_clear():
 def login(username=None, password=None, service_principal=None, tenant=None,
           allow_no_subscriptions=False):
     """Log in to access Azure subscriptions"""
+    import os
+    import re
     from adal.adal_error import AdalError
     import requests
     interactive = False
 
     profile = Profile()
+
     if username:
         if not password:
+            # in a VM with managed service identity?
             result = profile.init_if_in_msi_env(username)
             if result:
                 return result
@@ -95,6 +100,11 @@ def login(username=None, password=None, service_principal=None, tenant=None,
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
+        # in a cloud console?
+        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
+        if console_tokens:
+            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
+
         interactive = True
 
     try:
