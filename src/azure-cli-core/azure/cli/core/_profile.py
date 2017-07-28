@@ -462,9 +462,7 @@ class Profile(object):
 
             if not subscriptions:
                 if s[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME:
-                    t_list = [s.tenant_id for s in subscriptions]
-                    bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
-                    subscriptions = Profile._build_tenant_level_accounts(bare_tenants)
+                    subscriptions = Profile._build_tenant_level_accounts([s[_TENANT_ID]])
 
                 if not subscriptions:
                     continue
