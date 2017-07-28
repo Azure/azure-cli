@@ -7,7 +7,6 @@ import azure.cli.command_modules.batch._help  # pylint: disable=unused-import
 import azure.cli.core.azlogging as azlogging
 
 
-__version__ = "3.1.0"
 logger = azlogging.get_az_logger(__name__)
 
 
