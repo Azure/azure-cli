@@ -33,7 +33,10 @@ REPO_UPLOAD_SCRIPT_TMPL = """
 import os, requests
 payload = {{'name': 'azure-cli', 'version': '{cli_version}-1', 'repositoryId': '{repo_id}', 'sourceUrl': '{source_url}'}}
 r = requests.post('{repo_package_url}', verify=False, auth=('{repo_user}', '{repo_pass}'), json=payload)
+print("Status Code")
 print(r.status_code)
+print("Query with a GET to the following:")
+print(r.headers['Location'])
 """
 
 def print_env_vars():
