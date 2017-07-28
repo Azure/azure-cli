@@ -455,8 +455,8 @@ class Profile(object):
                     subscriptions = subscription_finder.find_from_user_account(user_name, None, None,
                                                                                self._ad_resource_uri)
             except Exception as ex:  # pylint: disable=broad-except
-                logger.warning("Refreshing for '%s' failed for an error '%s'. The existing accounts are not modified. "
-                               "You can run 'az login' later to explictly refresh them", user_name, ex)
+                logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
+                               "modified. You can run 'az login' later to explictly refresh them", user_name, ex)
                 result += deepcopy([r for r in to_refresh if r[_USER_ENTITY][_USER_NAME] == user_name])
                 continue
 
