@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -15,6 +15,7 @@ from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint
+from azure.cli.testsdk.utilities import get_active_api_profile
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -615,15 +616,43 @@ class NetworkNicScenarioTest(ScenarioTest):
             JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
             JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
         ])
-        # exercise optional parameters
-        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {} --accelerated-networking'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
-            JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-            JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
-            JMESPathCheckV2('NewNIC.enableIpForwarding', True),
-            JMESPathCheckV2('NewNIC.enableAcceleratedNetworking', True),
-            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
-            JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
-            JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)])
+
+        # exercise optional parameters; enableAcceleratedNetworking parameter is not available in '2017-03-09-profile'
+        if get_active_api_profile() == '2017-03-09-profile':
+            template = 'network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {}'
+            self.cmd(template.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
+                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+                JMESPathCheckV2('NewNIC.enableIpForwarding', True),
+                JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
+                JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+                JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)
+            ])
+            self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
+                JMESPathCheckV2('enableIpForwarding', True),
+                JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
+                JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
+                JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
+            ])
+        else:
+            template = 'network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {} --accelerated-networking'
+            self.cmd(template.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
+                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+                JMESPathCheckV2('NewNIC.enableIpForwarding', True),
+                JMESPathCheckV2('NewNIC.enableAcceleratedNetworking', True),
+                JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
+                JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+                JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)
+            ])
+            self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
+                JMESPathCheckV2('enableIpForwarding', True),
+                JMESPathCheckV2('enableAcceleratedNetworking', False),
+                JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
+                JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
+                JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
+            ])
+
         # exercise creating with NSG
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
             JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
@@ -652,13 +681,6 @@ class NetworkNicScenarioTest(ScenarioTest):
             JMESPathCheckV2('type', rt),
             JMESPathCheckV2('resourceGroup', rg),
             JMESPathCheckV2('name', nic)
-        ])
-        self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
-            JMESPathCheckV2('enableIpForwarding', True),
-            JMESPathCheckV2('enableAcceleratedNetworking', False),
-            JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
-            JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
-            JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
         ])
         # test generic update
         self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[

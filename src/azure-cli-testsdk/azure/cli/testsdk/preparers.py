@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -22,6 +22,9 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
                  random_name_length=75):
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
+        if get_active_api_profile() == '2017-03-09-profile':
+            location = 'local'
+            dev_setting_location = 'local'
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
@@ -50,6 +53,8 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
+        if get_active_api_profile() == '2017-03-09-profile':
+            location = 'local'
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -102,6 +107,8 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
+        if get_active_api_profile() == '2017-03-09-profile':
+            location = 'local'
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
