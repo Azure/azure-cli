@@ -349,7 +349,8 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
         data_disk = DataDisk(lun, DiskCreateOption.empty,
                              name=parse_resource_id(disk)['name'],
-                             disk_size_gb=size_gb, caching=caching)
+                             disk_size_gb=size_gb, caching=caching,
+                             managed_disk=ManagedDiskParameters(storage_account_type=sku))
     else:
         params = ManagedDiskParameters(id=disk, storage_account_type=sku)
         data_disk = DataDisk(lun, DiskCreateOption.attach, managed_disk=params, caching=caching)
