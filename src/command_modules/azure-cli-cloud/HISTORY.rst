@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.7 (2017-07-27)
+++++++++++++++++++
+* Change api version of cloud metadata endpoint to YYYY-MM-DD format.
+* Gallery endpoint isn't required
+
 2.0.6 (2017-07-07)
 ++++++++++++++++++
 * Support for registering cloud just with ARM resource manager endpoint

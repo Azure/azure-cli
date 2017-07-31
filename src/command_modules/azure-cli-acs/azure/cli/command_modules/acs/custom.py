@@ -32,6 +32,7 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
+from azure.cli.command_modules.acs._params import regionsInPreview
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -493,8 +494,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     # if api-version is not specified, or specified in a version not supported
     # override based on location
     if api_version is None or api_version not in ["2017-01-31", "2017-07-01"]:
-        # 2017-07-01 supported in the following two locations
-        if location in ["ukwest", "uksouth"]:
+        # 2017-07-01 supported in the preview locations
+        if location in regionsInPreview:
             api_version = "2017-07-01"
         # 2017-01-31 applied to other locations
         else:

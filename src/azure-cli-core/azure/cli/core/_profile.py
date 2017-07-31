@@ -57,6 +57,7 @@ _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
 _MSI_ACCOUNT_NAME = 'MSI'
+_TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 
 def _authentication_context_factory(tenant, cache):
@@ -235,7 +236,7 @@ class Profile(object):
             s.id = '/subscriptions/' + t
             s.subscription = t
             s.tenant_id = t
-            s.display_name = 'N/A(tenant level account)'
+            s.display_name = _TENANT_LEVEL_ACCOUNT_NAME
             result.append(s)
         return result
 
@@ -263,7 +264,7 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def _set_subscriptions(self, new_subscriptions):
+    def _set_subscriptions(self, new_subscriptions, merge=True):
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
         active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
@@ -271,27 +272,31 @@ class Profile(object):
         default_sub_id = None
 
         # merge with existing ones
-        dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
+        if merge:
+            dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
+        else:
+            dic = collections.OrderedDict()
+
         dic.update((x[_SUBSCRIPTION_ID], x) for x in new_subscriptions)
         subscriptions = list(dic.values())
+        if subscriptions:
+            if active_one:
+                new_active_one = next(
+                    (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id),
+                    None)
 
-        if active_one:
-            new_active_one = next(
-                (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id),
-                None)
+                for s in subscriptions:
+                    s[_IS_DEFAULT_SUBSCRIPTION] = False
 
-            for s in subscriptions:
-                s[_IS_DEFAULT_SUBSCRIPTION] = False
-
-            if not new_active_one:
+                if not new_active_one:
+                    new_active_one = Profile._pick_working_subscription(new_subscriptions)
+            else:
                 new_active_one = Profile._pick_working_subscription(new_subscriptions)
-        else:
-            new_active_one = Profile._pick_working_subscription(new_subscriptions)
 
-        new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
-        default_sub_id = new_active_one[_SUBSCRIPTION_ID]
+            new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
+            default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
-        set_cloud_subscription(active_cloud.name, default_sub_id)
+            set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     @staticmethod
@@ -422,13 +427,64 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def refresh_accounts(self, subscription_finder=None):
+        subscriptions = self.load_cached_subscriptions()
+        to_refresh = [s for s in subscriptions if s[_SUBSCRIPTION_NAME] != _MSI_ACCOUNT_NAME]
+        not_to_refresh = [s for s in subscriptions if s not in to_refresh]
+
+        from azure.cli.core._debug import allow_debug_adal_connection
+        allow_debug_adal_connection()
+        subscription_finder = subscription_finder or SubscriptionFinder(self.auth_ctx_factory,
+                                                                        self._creds_cache.adal_token_cache)
+        refreshed_list = set()
+        result = []
+        for s in to_refresh:
+            user_name = s[_USER_ENTITY][_USER_NAME]
+            if user_name in refreshed_list:
+                continue
+            refreshed_list.add(user_name)
+            is_service_principal = (s[_USER_ENTITY][_USER_TYPE] == _SERVICE_PRINCIPAL)
+            tenant = s[_TENANT_ID]
+            subscriptions = []
+            try:
+                if is_service_principal:
+                    sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(user_name))
+                    subscriptions = subscription_finder.find_from_service_principal_id(user_name, sp_auth, tenant,
+                                                                                       self._ad_resource_uri)
+                else:
+                    subscriptions = subscription_finder.find_from_user_account(user_name, None, None,
+                                                                               self._ad_resource_uri)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
+                               "modified. You can run 'az login' later to explictly refresh them", user_name, ex)
+                result += deepcopy([r for r in to_refresh if r[_USER_ENTITY][_USER_NAME] == user_name])
+                continue
+
+            if not subscriptions:
+                if s[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME:
+                    subscriptions = Profile._build_tenant_level_accounts([s[_TENANT_ID]])
+
+                if not subscriptions:
+                    continue
+
+            consolidated = Profile._normalize_properties(subscription_finder.user_id,
+                                                         subscriptions,
+                                                         is_service_principal)
+            result += consolidated
+
+        if self._creds_cache.adal_token_cache.has_state_changed:
+            self._creds_cache.persist_cached_creds()
+
+        result = result + not_to_refresh
+        self._set_subscriptions(result, merge=False)
+
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
         from collections import OrderedDict
         account = self.get_subscription(subscription_id)
 
         # is the credential created through command like 'create-for-rbac'?
         result = OrderedDict()
-        if name and password:
+        if name and (password or cert_file):
             result['clientId'] = name
             if password:
                 result['clientSecret'] = password
@@ -561,11 +617,11 @@ class SubscriptionFinder(object):
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        token_entry = context.acquire_token_with_username_password(
-            resource,
-            username,
-            password,
-            _CLIENT_ID)
+        if password:
+            token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
+        else:  # when refresh account, we will leverage local cached tokens
+            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:

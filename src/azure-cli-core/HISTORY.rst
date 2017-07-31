@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.12 (2017-07-27)
++++++++++++++++++++
+* output sdk auth info for service principals with certificates
+
 2.0.11 (2017-07-07)
 +++++++++++++++++++
 * minor fixes

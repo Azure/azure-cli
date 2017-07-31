@@ -1747,16 +1747,16 @@ helps['network vnet subnet'] = """
 helps['network vnet subnet create'] = """
     type: command
     short-summary: Create a subnet and associate an existing NSG and route table.
+    parameters:
+        - name: --private-access-services
+          short-summary: Space separated list of services for which to allow private access to this subnet.
+          populator-commands:
+            - az network list-private-access-services
     examples:
-        - name: <example name>.
+        - name: Create new subnet attached to an NSG with a custom route table.
           text: >
-            az network vnet subnet create
-            -g MyResourceGroup
-            --vnet-name MyVnet
-            -n MySubnet
-            --address-prefix 10.0.0.0/24
-            --network-security-group MyNsg
-            --route-table MyRouteTable
+            az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet
+            --address-prefix 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
 """
 
 helps['network vnet subnet delete'] = """
@@ -1777,6 +1777,11 @@ helps['network vnet subnet show'] = """
 helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
+    parameters:
+        - name: --private-access-services
+          short-summary: Space separated list of services for which to allow private access to this subnet.
+          populator-commands:
+            - az network list-private-access-services
 """
 # endregion
 
@@ -2149,3 +2154,8 @@ helps['network watcher flow-log show'] = """
 """
 
 # endregion
+
+helps['network list-private-access-services'] = """
+    type: command
+    short-summary: List which services support private access for a given region.
+"""

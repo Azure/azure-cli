@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
-                                                          cf_images, cf_public_ip_addresses)
+                                                          cf_images)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
@@ -143,7 +143,8 @@ cli_command(__name__, 'vm availability-set delete', mgmt_path.format(op_var, op_
 cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, exception_handler=empty_on_404)
 cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set)
 cli_command(__name__, 'vm availability-set list-sizes', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_avail_set)
-cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+    cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
 
 cli_generic_update_command(__name__, 'vm availability-set update',
                            custom_path.format('availset_get'),
@@ -246,7 +247,7 @@ cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wai
 cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vmss list-instance-public-ips', 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.list_virtual_machine_scale_set_public_ip_addresses', cf_public_ip_addresses)
+    cli_command(__name__, 'vmss list-instance-public-ips', custom_path.format('list_vmss_instance_public_ips'))
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)

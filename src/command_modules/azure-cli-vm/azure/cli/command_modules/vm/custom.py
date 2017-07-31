@@ -33,7 +33,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
-from ._client_factory import _compute_client_factory
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -1502,6 +1502,13 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     return instance_addresses
 
 
+def list_vmss_instance_public_ips(resource_group_name, vm_scale_set_name):
+    result = cf_public_ip_addresses().list_virtual_machine_scale_set_public_ip_addresses(resource_group_name,
+                                                                                         vm_scale_set_name)
+    # filter away over-provisioned instances which are deleted after 'create/update' returns
+    return [r for r in result if r.ip_address]
+
+
 def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
@@ -1716,7 +1723,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
-                public_ip_per_vm=False, vm_domain_name=None, dns_servers=None,
+                public_ip_per_vm=False, vm_domain_name=None, dns_servers=None, nsg=None,
                 os_caching=DefaultStr(CachingTypes.read_write.value), data_caching=None,
                 storage_container_name=DefaultStr('vhds'), storage_sku=None,
                 os_type=None, os_disk_name=None,
@@ -1868,7 +1875,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     backend_address_pool_id = None
     inbound_nat_pool_id = None
     if load_balancer_type or app_gateway_type:
-        network_balancer = load_balancer or app_gateway
+        network_balancer = load_balancer if load_balancer_type else app_gateway
         balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
 
         if is_valid_resource_id(network_balancer):
@@ -1902,7 +1909,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
                                         ip_config_name, nic_name, subnet_id,
-                                        public_ip_per_vm, vm_domain_name, dns_servers,
+                                        public_ip_per_vm, vm_domain_name, dns_servers, nsg,
                                         admin_username, authentication_type, storage_profile,
                                         os_disk_name, os_caching, data_caching,
                                         storage_sku, data_disk_sizes_gb, image_data_disks,
