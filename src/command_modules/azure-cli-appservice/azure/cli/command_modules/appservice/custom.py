@@ -184,11 +184,11 @@ def _fill_ftp_publishing_url(webapp, resource_group_name, name, slot=None):
 
 
 def _format_linux_fx_version(custom_image_name):
-    # set it as a space (Once fixed in backend, will actually set to empty here)
-    fx_version = ' '
+    fx_version = custom_image_name
+    fx_version_lower = fx_version.lower()
     # handles case of only spaces
     if custom_image_name.strip():
-        if 'DOCKER|' not in custom_image_name:
+        if not fx_version_lower.startswith('docker|'):
             fx_version = '{}|{}'.format('DOCKER', custom_image_name)
     return fx_version
 
@@ -199,7 +199,7 @@ def _add_linux_fx_version(resource_group_name, name, custom_image_name):
 
 
 def _delete_linux_fx_version(resource_group_name, name):
-    fx_version = _format_linux_fx_version('')
+    fx_version = ' '
     return update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
 
 
