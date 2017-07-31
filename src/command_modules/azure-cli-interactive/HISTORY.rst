@@ -6,13 +6,13 @@ Release History
 ++++++++++++++++++
 * minor fixes
 
-0.3.5 (unreleased)
+0.3.7 (2017-07-27)
 ++++++++++++++++++
 
 * Improves the start up time by using cached commands
 
 
-0.3.5 (unreleased)
+0.3.7 (2017-07-27)
 ++++++++++++++++++
 
 * Increase test coverage

@@ -33,7 +33,8 @@ AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, Applica
     BackendAddressPool, DhcpOptions, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, \
     FrontendIPConfiguration, InboundNatPool, InboundNatRule, IPAllocationMethod, IPVersion, \
     LoadBalancingRule, NetworkInterfaceIPConfiguration, NetworkSecurityGroup, Probe, PublicIPAddress, \
-    PublicIPAddressDnsSettings, RedirectConfiguration, Route, SecurityRule, SecurityRuleAccess, \
+    PublicIPAddressDnsSettings, ApplicationGatewayRedirectConfiguration, Route, SecurityRule, \
+    SecurityRuleAccess, \
     SecurityRuleDirection, SecurityRuleProtocol, Subnet, SubResource, VirtualNetwork, \
     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VirtualNetworkPeering, VpnClientConfiguration, \
     VpnClientRevokedCertificate, VpnClientRootCertificate, VpnType = get_sdk(
@@ -43,7 +44,8 @@ AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, Applica
         'BackendAddressPool', 'DhcpOptions', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier',
         'FrontendIPConfiguration', 'InboundNatPool', 'InboundNatRule', 'IPAllocationMethod', 'IPVersion',
         'LoadBalancingRule', 'NetworkInterfaceIPConfiguration', 'NetworkSecurityGroup', 'Probe', 'PublicIPAddress',
-        'PublicIPAddressDnsSettings', 'RedirectConfiguration', 'Route', 'SecurityRule', 'SecurityRuleAccess',
+        'PublicIPAddressDnsSettings', 'ApplicationGatewayRedirectConfiguration', 'Route', 'SecurityRule',
+        'SecurityRuleAccess',
         'SecurityRuleDirection', 'SecurityRuleProtocol', 'Subnet', 'SubResource', 'VirtualNetwork',
         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VirtualNetworkPeering', 'VpnClientConfiguration',
         'VpnClientRevokedCertificate', 'VpnClientRootCertificate', 'VpnType',
@@ -441,7 +443,7 @@ def create_ag_redirect_configuration(resource_group_name, application_gateway_na
                                      include_query_string=None, no_wait=False):
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    new_config = RedirectConfiguration(
+    new_config = ApplicationGatewayRedirectConfiguration(
         name=item_name,
         redirect_type=redirect_type,
         target_listener=SubResource(target_listener) if target_listener else None,
@@ -455,7 +457,7 @@ def create_ag_redirect_configuration(resource_group_name, application_gateway_na
 
 def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=None,
                                      target_listener=None, target_url=None, include_path=None,
-                                     include_query_string=None, no_wait=False):
+                                     include_query_string=None, raw=False):
     if redirect_type:
         instance.redirect_type = redirect_type
     if target_listener:
@@ -472,8 +474,8 @@ def update_ag_redirect_configuration(instance, parent, item_name, redirect_type=
 
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
-    create_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
-    update_ag_redirect_configuration.__doc__ = RedirectConfiguration.__doc__
+    create_ag_redirect_configuration.__doc__ = ApplicationGatewayRedirectConfiguration.__doc__
+    update_ag_redirect_configuration.__doc__ = ApplicationGatewayRedirectConfiguration.__doc__
 
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,

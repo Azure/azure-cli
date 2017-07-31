@@ -3,10 +3,12 @@
 Release History
 ===============
 
-unreleased
+2.0.11 (2017-07-27)
 +++++++++++++++++++
 * Added `list-private-access-services` command
 * `vnet subnet create/update`: Added `--private-access-services` argument.
+* `application-gateway redirect-config create`: Fix issue where create command would fail. Fix issue where `--no-wait`
+  would not work with update command.
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++
