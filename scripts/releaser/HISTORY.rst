@@ -3,6 +3,13 @@
 Release History
 ===============
 
+
+0.1.1 (2017-07-31)
+++++++++++++++++++
+
+* Support releasing a module that hasn't been released before.
+* Support Docker password with special characters.
+
 0.1.0 (2017-07-05)
 ++++++++++++++++++
 
