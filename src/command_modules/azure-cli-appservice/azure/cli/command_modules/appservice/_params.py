@@ -76,7 +76,7 @@ register_cli_argument('webapp', 'name', configured_default='web',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
-                      help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
+                      help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:tag')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
 register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
