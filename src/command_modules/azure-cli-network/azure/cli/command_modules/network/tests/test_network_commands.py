@@ -746,7 +746,7 @@ class NetworkNicScenarioTest(ScenarioTest):
                 JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
                 JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
                 JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
-            ])
+        ])
 
         # test generic update
         self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[
