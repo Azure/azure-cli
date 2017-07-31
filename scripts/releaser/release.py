@@ -24,24 +24,25 @@ from subprocess import check_call, check_output, CalledProcessError
 from uritemplate import URITemplate, expand
 
 
-# Environment variables
-ENV_REPO_NAME = os.environ.get('REPO_NAME')
-ENV_GITHUB_API_USER = os.environ.get('GITHUB_USER')
-ENV_GITHUB_API_USER_TOKEN = os.environ.get('GITHUB_USER_TOKEN')
-ENV_PYPI_REPO = os.environ.get('PYPI_REPO')
+script_env = {}
+
+def add_script_env(name):
+    script_env[name] = os.environ.get(name)
+
+add_script_env('REPO_NAME')
+add_script_env('GITHUB_USER')
+add_script_env('GITHUB_USER_TOKEN')
+add_script_env('PYPI_REPO')
 # although not used directly here, twine env vars are needed for releasing
-ENV_PYPI_USERNAME = os.environ.get('TWINE_USERNAME')
-ENV_PYPI_PASSWORD = os.environ.get('TWINE_PASSWORD')
+add_script_env('TWINE_USERNAME')
+add_script_env('TWINE_PASSWORD')
 # the new version of the CLI
-ENV_CLI_VERSION = os.environ.get('CLI_VERSION')
-ENV_STORAGE_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+add_script_env('CLI_VERSION')
+add_script_env('AZURE_STORAGE_CONNECTION_STRING')
 
+assert (all(script_env[n] != None for n in script_env)), "Not all required environment variables have been set.  {}".format(script_env)
 
-assert (ENV_REPO_NAME and ENV_PYPI_REPO and ENV_PYPI_USERNAME and ENV_PYPI_PASSWORD and ENV_GITHUB_API_USER and ENV_GITHUB_API_USER_TOKEN and ENV_CLI_VERSION and ENV_STORAGE_CONNECTION_STRING),\
-        "Not all required environment variables have been set. "\
-        "Set REPO_NAME, GITHUB_USER, GITHUB_USER_TOKEN, PYPI_REPO, TWINE_USERNAME, TWINE_PASSWORD, CLI_VERSION, AZURE_STORAGE_CONNECTION_STRING"
-
-GITHUB_API_AUTH = (ENV_GITHUB_API_USER, ENV_GITHUB_API_USER_TOKEN)
+GITHUB_API_AUTH = (script_env.get('GITHUB_USER'), script_env.get('GITHUB_USER_TOKEN'))
 GITHUB_API_HEADERS = {'Accept': 'application/vnd.github.v3+json', 'user-agent': 'azure-cli-pypi-github-releaser/v1'}
 
 SOURCE_ARCHIVE_NAME = 'source.tar.gz'
@@ -69,14 +70,8 @@ def give_chance_to_cancel(msg_prefix=''):
         time.sleep(1)
 
 def print_env_vars():
-    print('REPO_NAME = {}'.format(ENV_REPO_NAME))
-    print('GITHUB_USER = {}'.format(ENV_GITHUB_API_USER))
-    print('GITHUB_USER_TOKEN = {}'.format(ENV_GITHUB_API_USER_TOKEN))
-    print('PYPI_REPO = {}'.format(ENV_PYPI_REPO))
-    print('TWINE_USERNAME = {}'.format(ENV_PYPI_USERNAME))
-    print('TWINE_PASSWORD = {}'.format(ENV_PYPI_PASSWORD))
-    print('CLI_VERSION = {}'.format(ENV_CLI_VERSION))
-    print('AZURE_STORAGE_CONNECTION_STRING = {}'.format(ENV_STORAGE_CONNECTION_STRING))
+    for n in script_env:
+        print('{} = {}'.format(n, script_env[n]))
 
 def print_status(msg=''):
     print('-- '+msg)
@@ -111,7 +106,7 @@ def _get_current_module_version(mod_path):
     return mod_version
 
 def clone_repo(repo_working_dir):
-    check_call(['git', 'clone', 'https://github.com/{}'.format(ENV_REPO_NAME), repo_working_dir])
+    check_call(['git', 'clone', 'https://github.com/{}'.format(script_env.get('REPO_NAME')), repo_working_dir])
     check_call(['git', 'checkout', 'master'], cwd=repo_working_dir)
 
 def should_release_module(mod_name, mod_path, repo_working_dir):
@@ -127,7 +122,7 @@ def should_release_module(mod_name, mod_path, repo_working_dir):
     revision_range = "{}..{}".format(r_start, 'HEAD')
     try:
         module_changes = check_output(["git", "log", "--pretty=format:* %s", revision_range, "--", mod_path, ":(exclude)*/tests/*"],
-                                    cwd=repo_working_dir)
+                                      cwd=repo_working_dir)
     except CalledProcessError:
         # Maybe the revision_range is invalid if this is a new module.
         return True
@@ -234,7 +229,7 @@ def install_cli_into_venv():
     venv_dir = tempfile.mkdtemp()
     check_call(['virtualenv', venv_dir])
     path_to_pip = os.path.join(venv_dir, 'bin', 'pip')
-    extra_index_url = 'https://testpypi.python.org/simple' if ENV_PYPI_REPO == 'https://test.pypi.org/legacy/' else None
+    extra_index_url = 'https://testpypi.python.org/simple' if script_env.get('PYPI_REPO') == 'https://test.pypi.org/legacy/' else None
     args = [path_to_pip, 'install', 'azure-cli']
     if extra_index_url:
         args.extend(['--extra-index-url', extra_index_url])
@@ -266,7 +261,7 @@ def run_push_to_git():
 
 def set_up_cli_repo_dir():
     working_dir = tempfile.mkdtemp()
-    check_call(['git', 'clone', 'https://github.com/{}'.format(ENV_REPO_NAME), working_dir])
+    check_call(['git', 'clone', 'https://github.com/{}'.format(script_env.get('REPO_NAME')), working_dir])
     check_call(['pip', 'install', '-e', 'scripts'], cwd=working_dir)
     return working_dir
 
@@ -277,7 +272,7 @@ def publish_to_pypi(working_dir, commitish_list):
         assets_dir = tempfile.mkdtemp()
         check_call(['git', 'checkout', commitish], cwd=working_dir)
         check_call(['python', '-m', 'scripts.automation.release.run', '-c', mod_name,
-                    '-r', ENV_PYPI_REPO, '--dest', assets_dir], cwd=working_dir)
+                    '-r', script_env.get('PYPI_REPO'), '--dest', assets_dir], cwd=working_dir)
         assets_dir_map[mod_name] = assets_dir
     # reset back
     check_call(['git', 'checkout', 'master'], cwd=working_dir)
@@ -308,14 +303,14 @@ def run_create_github_release(commitish_list, assets_dir_map):
         print_status('Publishing GitHub release for {} {}'.format(mod_name, mod_version))
         tag_name = '{}-{}'.format(mod_name, mod_version)
         release_name = "{} {}".format(mod_name, mod_version)
-        if ENV_PYPI_REPO == 'https://upload.pypi.org/legacy/':
+        if script_env.get('PYPI_REPO') == 'https://upload.pypi.org/legacy/':
             released_pypi_url = 'https://pypi.org/project/{}/{}'.format(mod_name, mod_version)
-        elif ENV_PYPI_REPO == 'https://test.pypi.org/legacy/':
+        elif script_env.get('PYPI_REPO') == 'https://test.pypi.org/legacy/':
             released_pypi_url = 'https://test.pypi.org/project/{}/{}'.format(mod_name, mod_version)
         else:
             released_pypi_url = ''
         payload = {'tag_name': tag_name, "target_commitish": commitish, "name": release_name, "body": GITHUB_RELEASE_BODY_TMPL.format(released_pypi_url), "prerelease": False}
-        r = requests.post('https://api.github.com/repos/{}/releases'.format(ENV_REPO_NAME), json=payload, auth=GITHUB_API_AUTH, headers=GITHUB_API_HEADERS)
+        r = requests.post('https://api.github.com/repos/{}/releases'.format(script_env.get('REPO_NAME')), json=payload, auth=GITHUB_API_AUTH, headers=GITHUB_API_HEADERS)
         if r.status_code == 201:
             upload_url = r.json()['upload_url']
             upload_assets_for_github_release(upload_url, mod_name, mod_version, assets_dir_map[mod_name])
@@ -331,7 +326,7 @@ def run_create_packaged_release(working_dir):
     print_status('Finished installing CLI into venv')
     archive_dir = tempfile.mkdtemp()
     # create the packaged releases automatically
-    args = ['python', '-m', 'scripts.automation.release.packaged', '--version', ENV_CLI_VERSION, '--dest', archive_dir, '--components']
+    args = ['python', '-m', 'scripts.automation.release.packaged', '--version', script_env.get('CLI_VERSION'), '--dest', archive_dir, '--components']
     for name, version in components_list:
         # The tag for this module is slightly different so make that change.
         if name == 'azure-cli-command-modules-nspkg':
@@ -349,16 +344,16 @@ def run_create_packaged_release(working_dir):
     computed_hash = sha256.hexdigest()
     print_status('SHA256 of {} is {}'.format(archive_file_path, computed_hash))
     # Upload release archive to Azure Storage
-    check_call(['az', 'storage', 'blob', 'upload', '--file', archive_file_path, '--name', archive_file_name, '--container-name', 'releases', '--connection-string', ENV_STORAGE_CONNECTION_STRING])
-    archive_url = check_output(['az', 'storage', 'blob', 'url', '--name', archive_file_name, '--container-name', 'releases', '--connection-string', ENV_STORAGE_CONNECTION_STRING, '--output', 'tsv'])
+    check_call(['az', 'storage', 'blob', 'upload', '--file', archive_file_path, '--name', archive_file_name, '--container-name', 'releases', '--connection-string', script_env.get('AZURE_STORAGE_CONNECTION_STRING')])
+    archive_url = check_output(['az', 'storage', 'blob', 'url', '--name', archive_file_name, '--container-name', 'releases', '--connection-string', script_env.get('AZURE_STORAGE_CONNECTION_STRING'), '--output', 'tsv'])
     archive_url = str(archive_url, 'utf-8')
     archive_url = archive_url.strip()
     print_status('Archive URL is {}'.format(archive_url))
 
 def configure_git(repo_working_dir):
-    check_call(['git', 'config', 'user.email', '{}@users.noreply.github.com'.format(ENV_GITHUB_API_USER)], cwd=repo_working_dir)
-    check_call(['git', 'config', 'user.name', ENV_GITHUB_API_USER], cwd=repo_working_dir)
-    check_call(['git', 'remote', 'set-url', 'origin', 'https://{}:{}@github.com/{}'.format(ENV_GITHUB_API_USER, ENV_GITHUB_API_USER_TOKEN, ENV_REPO_NAME)], cwd=repo_working_dir)
+    check_call(['git', 'config', 'user.email', '{}@users.noreply.github.com'.format(script_env.get('GITHUB_USER'))], cwd=repo_working_dir)
+    check_call(['git', 'config', 'user.name', script_env.get('GITHUB_USER')], cwd=repo_working_dir)
+    check_call(['git', 'remote', 'set-url', 'origin', 'https://{}:{}@github.com/{}'.format(script_env.get('GITHUB_USER'), script_env.get('GITHUB_USER_TOKEN'), script_env.get('REPO_NAME'))], cwd=repo_working_dir)
 
 if __name__ == "__main__":
     print_env_vars()

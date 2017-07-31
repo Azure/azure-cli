@@ -15,25 +15,23 @@ from datetime import datetime
 from six import StringIO
 from sh import az, ssh
 
-# Environment variables
-ENV_REPO_NAME = os.environ.get('REPO_NAME')
-ENV_CLI_VERSION = os.environ.get('CLI_VERSION')
-ENV_CLI_DOWNLOAD_SHA256 = os.environ.get('CLI_DOWNLOAD_SHA256')
-ENV_DOCKER_REPO = os.environ.get('DOCKER_REPO')
-ENV_DOCKER_USERNAME = os.environ.get('DOCKER_USERNAME')
-ENV_DOCKER_PASSWORD = os.environ.get('DOCKER_PASSWORD')
+script_env = {}
 
-assert (ENV_REPO_NAME and ENV_CLI_VERSION and ENV_CLI_DOWNLOAD_SHA256 and ENV_DOCKER_REPO and ENV_DOCKER_USERNAME and ENV_DOCKER_PASSWORD),\
-        "Not all required environment variables have been set. "\
-        "Set REPO_NAME, CLI_VERSION, CLI_DOWNLOAD_SHA256, DOCKER_REPO, DOCKER_USERNAME, DOCKER_PASSWORD"
+def add_script_env(name):
+    script_env[name] = os.environ.get(name)
+
+add_script_env('REPO_NAME')
+add_script_env('CLI_VERSION')
+add_script_env('CLI_DOWNLOAD_SHA256')
+add_script_env('DOCKER_REPO')
+add_script_env('DOCKER_USERNAME')
+add_script_env('DOCKER_PASSWORD')
+
+assert (all(script_env[n] != None for n in script_env)), "Not all required environment variables have been set.  {}".format(script_env)
 
 def print_env_vars():
-    print('REPO_NAME = {}'.format(ENV_REPO_NAME))
-    print('CLI_VERSION = {}'.format(ENV_CLI_VERSION))
-    print('CLI_DOWNLOAD_SHA256 = {}'.format(ENV_CLI_DOWNLOAD_SHA256))
-    print('DOCKER_REPO = {}'.format(ENV_DOCKER_REPO))
-    print('DOCKER_USERNAME = {}'.format(ENV_DOCKER_USERNAME))
-    print('DOCKER_PASSWORD = {}'.format(ENV_DOCKER_PASSWORD))
+    for n in script_env:
+        print('{} = {}'.format(n, script_env[n]))
 
 def print_status(msg=''):
     print('-- '+msg)
@@ -50,7 +48,7 @@ def give_chance_to_cancel(msg_prefix=''):
 
 def main():
     print_env_vars()
-    time_str = datetime.now().strftime('%Y%m%d%H%M%S')
+    time_str = datetime.utcnow().strftime('%Y%m%d%H%M%S')
     az(["login"], _out=sys.stdout, _err=sys.stdout)
     resource_group = 'azurecli-release-docker-' + time_str
     vm_name = 'vm-docker-' + time_str
@@ -79,21 +77,21 @@ def main():
     repo_dir = io.getvalue().strip()
     io.close()
     print_status('Cloning repo.')
-    my_vm(['git', 'clone', 'https://github.com/{}'.format(ENV_REPO_NAME), repo_dir], _out=sys.stdout, _err=sys.stdout)
-    image_tag = '{}:{}'.format(ENV_DOCKER_REPO, ENV_CLI_VERSION)
+    my_vm(['git', 'clone', 'https://github.com/{}'.format(script_env.get('REPO_NAME')), repo_dir], _out=sys.stdout, _err=sys.stdout)
+    image_tag = '{}:{}'.format(script_env.get('DOCKER_REPO'), script_env.get('CLI_VERSION'))
     path_to_dockerfile = os.path.join(repo_dir, 'packaged_releases', 'docker', 'Dockerfile')
     path_to_docker_context = os.path.join(repo_dir, 'packaged_releases', 'docker')
     print_status('Running Docker build.')
     my_vm(['sudo', 'docker', 'build', '--no-cache',
            '--build-arg', 'BUILD_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`"',
-           '--build-arg', 'CLI_VERSION={}'.format(ENV_CLI_VERSION),
-           '--build-arg', 'CLI_DOWNLOAD_SHA256={}'.format(ENV_CLI_DOWNLOAD_SHA256),
+           '--build-arg', 'CLI_VERSION={}'.format(script_env.get('CLI_VERSION')),
+           '--build-arg', 'CLI_DOWNLOAD_SHA256={}'.format(script_env.get('CLI_DOWNLOAD_SHA256')),
            '-f', path_to_dockerfile,
            '-t', image_tag,
            path_to_docker_context], _out=sys.stdout, _err=sys.stdout)
     print_status('Docker build complete.')
     print_status('Running Docker log in.')
-    my_vm(['sudo', 'docker', 'login', '--username', ENV_DOCKER_USERNAME, '--password', '"{}"'.format(ENV_DOCKER_PASSWORD)],
+    my_vm(['sudo', 'docker', 'login', '--username', script_env.get('DOCKER_USERNAME'), '--password', '"{}"'.format(script_env.get('DOCKER_PASSWORD'))],
           _out=sys.stdout, _err=sys.stdout)
     print_status('Running Docker push.')
     my_vm(['sudo', 'docker', 'push', image_tag], _out=sys.stdout, _err=sys.stdout)
