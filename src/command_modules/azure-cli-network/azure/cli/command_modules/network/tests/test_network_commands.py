@@ -15,7 +15,6 @@ from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint
-from azure.cli.testsdk.utilities import get_active_api_profile
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
