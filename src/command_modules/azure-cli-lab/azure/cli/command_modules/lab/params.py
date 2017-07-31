@@ -19,6 +19,10 @@ with ParametersContext(command='lab') as c:
                help='Name of lab\'s resource group. You can configure the default group '
                     'using \'az configure --defaults group=<name>\'')
 
+with ParametersContext(command='lab custom-image create') as c:
+    c.register_alias('resource_group', ('--resource-group', '-g'))
+    c.register_alias('name', ('--name', '-n'))
+
 with ParametersContext(command='lab vm create') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_create)
     c.register_alias('name', ('--name', '-n'))

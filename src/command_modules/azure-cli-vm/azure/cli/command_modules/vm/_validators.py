@@ -526,6 +526,12 @@ def _validate_vm_create_nsg(namespace):
         logger.debug('new NSG will be created')
 
 
+def _validate_vmss_create_nsg(namespace):
+    if namespace.nsg:
+        namespace.nsg = _get_resource_id(namespace.nsg, namespace.resource_group_name,
+                                         'networkSecurityGroups', 'Microsoft.Network')
+
+
 def _validate_vm_create_public_ip(namespace):
     if namespace.public_ip_address:
         if check_existence(namespace.public_ip_address, namespace.resource_group_name,
@@ -902,6 +908,7 @@ def process_vmss_create_namespace(namespace):
     _validate_vmss_create_load_balancer_or_app_gateway(namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
+    _validate_vmss_create_nsg(namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(namespace)
 
