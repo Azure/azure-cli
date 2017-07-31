@@ -711,7 +711,7 @@ class NetworkNicScenarioTest(ScenarioTest):
                 JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
                 JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
                 JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)
-            ])
+        ])
         # exercise creating with NSG
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
             JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
