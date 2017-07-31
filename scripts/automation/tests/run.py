@@ -18,7 +18,7 @@ def get_unittest_runner(tests):
     def _runner(module_paths):
         from subprocess import check_call, CalledProcessError
         if len(module_paths) > 1:
-            print('When --test is given, no more than 1 module and be selected.')
+            print('When --test is given, no more than 1 module can be selected.')
             return False
 
         module_path = module_paths[0][len(os.path.join(get_repo_root(), 'src/')):]
@@ -68,10 +68,10 @@ def run_tests(modules, parallel, run_live, tests):
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser('Test tools')
-    parse.add_argument('--module', dest='modules', action='append',
+    parse.add_argument('--module', dest='modules', nargs='+',
                        help='The modules of which the test to be run. Accept short names, except azure-cli, '
                             'azure-cli-core and azure-cli-nspkg. The modules list can also be set through environment '
-                            'variable AZURE_CLI_TEST_MODULES. The value should be a string of comma separated module '
+                            'variable AZURE_CLI_TEST_MODULES. The value should be a string of space separated module '
                             'names. The environment variable will be overwritten by command line parameters.')
     parse.add_argument('--parallel', action='store_true',
                        help='Run the tests in parallel. This will affect the test output file.')
