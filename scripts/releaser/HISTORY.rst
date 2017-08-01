@@ -14,7 +14,7 @@ Release History
 ++++++++++++++++++
 
 * First release.
-* Push  modules to Git.
+* Push modules to Git.
 * Publish all modules to PyPI.
 * Create GitHub releases.
 * Create and Publish packaged release archive.
