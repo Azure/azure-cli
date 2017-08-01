@@ -4,8 +4,11 @@ Release History
 ===============
 (unreleased)
 +++++++++++++++++++
+* availability-set: expose fault domain count on convert
 * vm/vmss: support to assign identity w/o creating role assignments
+* vm: expose 'az vm list-skus' command
 * vm: apply storage sku on attaching data disks
+
 
 2.0.11 (2017-07-27)
 +++++++++++++++++++

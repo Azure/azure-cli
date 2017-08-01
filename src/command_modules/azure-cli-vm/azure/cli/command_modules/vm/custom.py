@@ -1528,12 +1528,16 @@ def vmss_set(resource_group_name, name, no_wait=False, **kwargs):
         resource_group_name, name, raw=no_wait, **kwargs)
 
 
-def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
+def convert_av_set_to_managed_disk(resource_group_name, availability_set_name, platform_fault_domain_count=None):
     av_set = availset_get(resource_group_name, availability_set_name)
     if av_set.sku.name != 'Aligned':
         av_set.sku.name = 'Aligned'
+        if platform_fault_domain_count:
+            av_set.platform_fault_domain_count = platform_fault_domain_count
         return availset_set(resource_group_name=resource_group_name, name=availability_set_name,
                             parameters=av_set)
+    else:
+        logger.warning('The availability set is already managed disk based, hence skipping...')
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
@@ -2162,3 +2166,14 @@ def _create_role_assignment_with_retries(identity_scope, identity_role_id, princ
 def _gen_guid():
     import uuid
     return uuid.uuid4()
+
+
+def list_skus(location=None):
+    def _match_location(l, locations):
+        return next((x for x in locations if x.lower() == l.lower()), None)
+
+    client = _compute_client_factory()
+    result = client.resource_skus.list()
+    if location:
+        result = [r for r in result if _match_location(location, r.locations)]
+    return result
