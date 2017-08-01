@@ -1,5 +1,6 @@
 cmd /c az batch --help
 cmd /c az batch account --help
+cmd /c az batch account login --help
 cmd /c az batch account list --help
 cmd /c az batch account show --help
 cmd /c az batch account create --help
@@ -94,6 +95,8 @@ cmd /c az batch job all-statistics --help
 cmd /c az batch job all-statistics show --help
 cmd /c az batch job prep-release-status --help
 cmd /c az batch job prep-release-status list --help
+cmd /c az batch job task-counts --help
+cmd /c az batch job task-counts show --help
 
 cmd /c az batch job-schedule --help
 cmd /c az batch job-schedule create --help

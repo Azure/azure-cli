@@ -116,6 +116,11 @@ helps['batch job'] = """
     short-summary: Manage your Batch jobs.
 """
 
+helps['batch job task-counts'] = """
+    type: group
+    short-summary: View the number of tasks in the job and their states.
+"""
+
 helps['batch job all-statistics'] = """
     type: group
     short-summary: View statistics of all the jobs under your Batch account.
