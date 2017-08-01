@@ -474,87 +474,144 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
                  checks=JMESPathCheckV2("subnet.contains(id, 'subnet2')", True))
 
 
-class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer_subresource')
-        self.lb_name = 'lb1'
+class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
-    def test_network_load_balancer_subresources(self):
-        self.execute()
-
-    def set_up(self):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).set_up()
-        rg = self.resource_group
-        lb = self.lb_name
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules')
+    def test_network_lb_nat_rules(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
         self.cmd('network lb create -g {} -n {}'.format(rg, lb))
 
-    def body(self):  # pylint: disable=too-many-statements
-        rg = self.resource_group
-        lb = self.lb_name
-        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
-
-        # Test inbound NAT rules
-        for count in range(1, 4):
+        for count in range(1, 3):
             self.cmd('network lb inbound-nat-rule create {} -n rule{} --protocol tcp --frontend-port {} --backend-port {} --frontend-ip-name LoadBalancerFrontEnd'.format(lb_rg, count, count, count))
-        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb inbound-nat-rule create {} -n rule3 --protocol tcp --frontend-port 3 --backend-port 3'.format(lb_rg))
+        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
         self.cmd('network lb inbound-nat-rule update {} -n rule1 --floating-ip true --idle-timeout 10'.format(lb_rg))
-        self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[JMESPathCheck('enableFloatingIp', True), JMESPathCheck('idleTimeoutInMinutes', 10)])
+        self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[
+            JMESPathCheckV2('enableFloatingIp', True),
+            JMESPathCheckV2('idleTimeoutInMinutes', 10)
+        ])
         # test generic update
-        self.cmd('network lb inbound-nat-rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg), checks=JMESPathCheck('idleTimeoutInMinutes', 5))
+        self.cmd('network lb inbound-nat-rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg),
+                 checks=JMESPathCheckV2('idleTimeoutInMinutes', 5))
 
         for count in range(1, 4):
             self.cmd('network lb inbound-nat-rule delete {} -n rule{}'.format(lb_rg, count))
-        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 0))
 
-        # Test inbound NAT pools
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools')
+    def test_network_lb_nat_pools(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool create {} -n rule{} --protocol tcp --frontend-port-range-start {}  --frontend-port-range-end {} --backend-port {}'.format(lb_rg, count, count, count + 999, count))
-        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
         self.cmd('network lb inbound-nat-pool update {} -n rule1000 --protocol udp --backend-port 50'.format(lb_rg))
-        self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[JMESPathCheck('protocol', 'Udp'), JMESPathCheck('backendPort', 50)])
+        self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[
+            JMESPathCheckV2('protocol', 'Udp'),
+            JMESPathCheckV2('backendPort', 50)
+        ])
         # test generic update
-        self.cmd('network lb inbound-nat-pool update {} -n rule1000 --set protocol=Tcp'.format(lb_rg), checks=JMESPathCheck('protocol', 'Tcp'))
+        self.cmd('network lb inbound-nat-pool update {} -n rule1000 --set protocol=Tcp'.format(lb_rg),
+                 checks=JMESPathCheckV2('protocol', 'Tcp'))
 
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool delete {} -n rule{}'.format(lb_rg, count))
-        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 0))
 
-        # Test backend address pool
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool')
+    def test_network_lb_address_pool(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
         for i in range(1, 4):
-            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i), checks=JMESPathCheck('name', 'bap{}'.format(i)))
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 4))
-        self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg), checks=JMESPathCheck('name', 'bap1'))
-        self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg), checks=NoneCheck())
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i),
+                     checks=JMESPathCheckV2('name', 'bap{}'.format(i)))
+        self.cmd('network lb address-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 4))
+        self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg),
+                 checks=JMESPathCheckV2('name', 'bap1'))
+        self.cmd('network lb address-pool delete {} -n bap1'.format(lb_rg),
+                 checks=NoneCheck())
+        self.cmd('network lb address-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
 
-        # Test probes
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
+    def test_network_lb_probes(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
         for i in range(1, 4):
             self.cmd('network lb probe create {} -n probe{} --port {} --protocol http --path "/test{}"'.format(lb_rg, i, i, i))
-        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb probe list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
         self.cmd('network lb probe update {} -n probe1 --interval 20 --threshold 5'.format(lb_rg))
         self.cmd('network lb probe update {} -n probe2 --protocol tcp --path ""'.format(lb_rg))
-        self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[JMESPathCheck('intervalInSeconds', 20), JMESPathCheck('numberOfProbes', 5)])
+        self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[
+            JMESPathCheckV2('intervalInSeconds', 20),
+            JMESPathCheckV2('numberOfProbes', 5)
+        ])
         # test generic update
-        self.cmd('network lb probe update {} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3'.format(lb_rg), checks=[JMESPathCheck('intervalInSeconds', 15), JMESPathCheck('numberOfProbes', 3)])
+        self.cmd('network lb probe update {} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3'.format(lb_rg), checks=[
+            JMESPathCheckV2('intervalInSeconds', 15),
+            JMESPathCheckV2('numberOfProbes', 3)
+        ])
 
-        self.cmd('network lb probe show {} -n probe2'.format(lb_rg), checks=[JMESPathCheck('protocol', 'Tcp'), JMESPathCheck('path', None)])
+        self.cmd('network lb probe show {} -n probe2'.format(lb_rg), checks=[
+            JMESPathCheckV2('protocol', 'Tcp'),
+            JMESPathCheckV2('path', None)
+        ])
         self.cmd('network lb probe delete {} -n probe3'.format(lb_rg))
-        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb probe list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 2))
 
-        # Test load balancing rules
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_rules')
+    def test_network_lb_rules(self, resource_group):
+
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
+        self.cmd('network lb rule create {} -n rule2 --frontend-port 60 --backend-port 60 --protocol tcp'.format(lb_rg))
+        self.cmd('network lb address-pool create {} -n bap1'.format(lb_rg))
+        self.cmd('network lb address-pool create {} -n bap2'.format(lb_rg))
         self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
-        self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
-        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+
+        self.cmd('network lb rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 2))
         self.cmd('network lb rule update {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
         self.cmd('network lb rule update {} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
-        self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[JMESPathCheck('enableFloatingIp', True), JMESPathCheck('idleTimeoutInMinutes', 20), JMESPathCheck('loadDistribution', 'SourceIP'), JMESPathCheck('protocol', 'Udp')])
+        self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[
+            JMESPathCheckV2('enableFloatingIp', True),
+            JMESPathCheckV2('idleTimeoutInMinutes', 20),
+            JMESPathCheckV2('loadDistribution', 'SourceIP'),
+            JMESPathCheckV2('protocol', 'Udp')
+        ])
         # test generic update
-        self.cmd('network lb rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg), checks=JMESPathCheck('idleTimeoutInMinutes', 5))
+        self.cmd('network lb rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg),
+                 checks=JMESPathCheckV2('idleTimeoutInMinutes', 5))
 
-        self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[JMESPathCheck("backendAddressPool.contains(id, 'bap2')", True), JMESPathCheck('loadDistribution', 'SourceIPProtocol')])
+        self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[
+            JMESPathCheckV2("backendAddressPool.contains(id, 'bap2')", True),
+            JMESPathCheckV2('loadDistribution', 'SourceIPProtocol')
+        ])
         self.cmd('network lb rule delete {} -n rule1'.format(lb_rg))
         self.cmd('network lb rule delete {} -n rule2'.format(lb_rg))
-        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 0))
 
 
 class NetworkLocalGatewayScenarioTest(ScenarioTest):
