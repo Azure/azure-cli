@@ -149,14 +149,20 @@ class TestActions(unittest.TestCase):
         self.assertTrue(expected_err in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
-    def test_parse_image_argument(self, client_factory_mock):
+    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', autospec=True)
+    def test_parse_image_argument(self, get_subscription_id_mock, client_factory_mock):
+        from msrestazure.azure_exceptions import CloudError
         compute_client = mock.MagicMock()
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 404
         image = mock.MagicMock()
         image.plan.name = 'plan1'
         image.plan.product = 'product1'
         image.plan.publisher = 'publisher1'
+        compute_client.images.get.side_effect = CloudError(mock_response, 'Not found')
         compute_client.virtual_machine_images.get.return_value = image
         client_factory_mock.return_value = compute_client
+        get_subscription_id_mock.return_value = '0000-000-00000000'
 
         np = mock.MagicMock()
         np.location = 'some region'

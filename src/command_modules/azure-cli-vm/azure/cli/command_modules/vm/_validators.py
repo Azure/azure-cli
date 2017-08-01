@@ -139,7 +139,21 @@ def _parse_image_argument(namespace):
     if namespace.image.lower().endswith('.vhd'):
         return 'uri'
 
-    # 2 - attempt to match an URN alias (most likely)
+    # 2 - check if a fully-qualified ID (assumes it is an image ID)
+    if is_valid_resource_id(namespace.image):
+        return 'image_id'
+
+    # 3 - check if an existing managed disk image resource
+    compute_client = _compute_client_factory()
+    try:
+        compute_client.images.get(namespace.resource_group_name, namespace.image)
+        namespace.image = _get_resource_id(namespace.image, namespace.resource_group_name,
+                                           'images', 'Microsoft.Compute')
+        return 'image_id'
+    except CloudError:
+        pass
+
+    # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
     images = load_images_from_aliases_doc()
     matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
@@ -150,7 +164,7 @@ def _parse_image_argument(namespace):
         namespace.os_version = matched['version']
         return 'urn'
 
-    # 3 - attempt to match an URN pattern
+    # 5 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
         namespace.os_publisher = urn_match.group(1)
@@ -185,20 +199,8 @@ def _parse_image_argument(namespace):
             namespace.plan_publisher = image.plan.publisher
         return 'urn'
 
-    # 4 - check if a fully-qualified ID (assumes it is an image ID)
-    if is_valid_resource_id(namespace.image):
-        return 'image_id'
-
-    # 5 - check if an existing managed disk image resource
-    compute_client = _compute_client_factory()
-    try:
-        compute_client.images.get(namespace.resource_group_name, namespace.image)
-        namespace.image = _get_resource_id(namespace.image, namespace.resource_group_name,
-                                           'images', 'Microsoft.Compute')
-        return 'image_id'
-    except CloudError:
-        err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
-        raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
+    err = 'invalid usage: --image {}. Use a custom image name or ID, a valid URN, VHD URI, or select from {}'
+    raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
 
 
 def _get_storage_profile_description(profile):
