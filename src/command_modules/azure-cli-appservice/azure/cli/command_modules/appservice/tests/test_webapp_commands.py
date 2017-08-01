@@ -110,7 +110,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheckV2('[0].value', '6.1.0'),
         ]))
-    
+
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create_cd(self, resource_group):
         webapp_name = 'webapp-quick-cd'
@@ -123,7 +123,7 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
-    
+
     @ResourceGroupPreparer(location='japaneast')
     def test_linux_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick-linux'
