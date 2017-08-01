@@ -308,11 +308,13 @@ def register_common_storage_account_options(context):
                                         'required for StandardBlob accounts during creation',
                     **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
 
-    encryption_choices = list(get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')._attribute_map.keys())  # pylint: disable=protected-access
-
-    context.reg_arg('encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption,
-                    resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01',
-                    **enum_choice_list(encryption_choices))
+    encryption_services_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
+    if encryption_services_model:
+        encryption_choices = list(encryption_services_model._attribute_map.keys())  # pylint: disable=protected-access
+        context.reg_arg('encryption', nargs='+', help='Specifies which service(s) to encrypt.',
+                        validator=validate_encryption,
+                        resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01',
+                        **enum_choice_list(encryption_choices))
 
 
 with CommandContext('storage account create') as c:
