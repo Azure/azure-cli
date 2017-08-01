@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* vm: apply storage sku on attaching data disks
+
 2.0.11 (2017-07-27)
 +++++++++++++++++++
 * vmss: support configuring nsg

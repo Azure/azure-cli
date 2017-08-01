@@ -7,12 +7,40 @@ import argparse
 import os
 import sys
 
-from automation.utilities.path import filter_user_selected_modules_with_tests
+from automation.utilities.path import filter_user_selected_modules_with_tests, get_repo_root
 from automation.tests.nose_helper import get_nose_runner
 from automation.utilities.path import get_test_results_dir
 
 
-def run_tests(modules, parallel, run_live):
+def get_unittest_runner(tests):
+    test_cases = list(tests)
+
+    def _runner(module_paths):
+        from subprocess import check_call, CalledProcessError
+        if len(module_paths) > 1:
+            print('When --test is given, no more than 1 module can be selected.')
+            return False
+
+        module_path = module_paths[0][len(os.path.join(get_repo_root(), 'src/')):]
+        if module_path.startswith('command_modules'):
+            module_path = module_path.split('/', 2)[-1].replace('/', '.')
+        else:
+            module_path = module_path.split('/', 1)[-1].replace('/', '.')
+
+        try:
+            import unittest
+            suite = unittest.TestLoader().loadTestsFromNames(['{}.{}'.format(module_path, t) for t in test_cases])
+            runner = unittest.TextTestRunner()
+            result = runner.run(suite)
+
+            return not result.failures
+        except CalledProcessError:
+            return False
+
+    return _runner
+
+
+def run_tests(modules, parallel, run_live, tests):
     print('Run automation')
     print('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
 
@@ -23,29 +51,35 @@ def run_tests(modules, parallel, run_live):
     if run_live:
         os.environ['AZURE_TEST_RUN_LIVE'] = 'True'
 
-    # get test runner
-    run_nose = get_nose_runner(test_results_folder, xunit_report=False, parallel=parallel,
-                               process_timeout=3600 if run_live else 600)
+    if not tests:
+        # the --test is not given, use nosetests to run entire module
+        print('Drive test by nosetests')
+        runner = get_nose_runner(test_results_folder, parallel=parallel, process_timeout=3600 if run_live else 600)
+    else:
+        # the --test is given, use unittest to run single test
+        print('Drive test by unittest')
+        runner = get_unittest_runner(tests)
 
     # run tests
-    result, test_report = run_nose([p for _, _, p in modules])
-
-    print('==== TEST RESULT ====\n{}'.format(test_report))
+    result = runner([p for _, _, p in modules])
 
     return result
 
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser('Test tools')
-    parse.add_argument('--module', dest='modules', action='append',
-                       help='The modules of which the test to be run. Accept short names, except '
-                            'azure-cli, azure-cli-core and azure-cli-nspkg. The modules list can '
-                            'also be set through environment variable AZURE_CLI_TEST_MODULES. The '
-                            'value should be a string of comma separated module names. The '
-                            'environment variable will be overwritten by command line parameters.')
+    parse.add_argument('--module', dest='modules', nargs='+',
+                       help='The modules of which the test to be run. Accept short names, except azure-cli, '
+                            'azure-cli-core and azure-cli-nspkg. The modules list can also be set through environment '
+                            'variable AZURE_CLI_TEST_MODULES. The value should be a string of space separated module '
+                            'names. The environment variable will be overwritten by command line parameters.')
     parse.add_argument('--parallel', action='store_true',
                        help='Run the tests in parallel. This will affect the test output file.')
     parse.add_argument('--live', action='store_true', help='Run all the tests live.')
+    parse.add_argument('--test', dest='tests', action='append',
+                       help='The specific test to run in the given module. The string can represent a test class or a '
+                            'test class and a test method name. Multiple tests can be given, but they should all '
+                            'belong to one command modules.')
     args = parse.parse_args()
 
     if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
@@ -57,6 +91,6 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live)
+    success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
 
     sys.exit(0 if success else 1)
