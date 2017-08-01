@@ -99,41 +99,41 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 
 
 class WebappQuickCreateTest(ScenarioTest):
-   @ResourceGroupPreparer()
-   def test_win_webapp_quick_create(self, resource_group):
-       webapp_name = 'webapp-quick'
-       plan = 'plan-quick'
-       self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-       r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
-       self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
-       self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
-           JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-           JMESPathCheckV2('[0].value', '6.1.0'),
-       ]))
-
-   @ResourceGroupPreparer()
-   def test_win_webapp_quick_create_cd(self, resource_group):
-       webapp_name = 'webapp-quick-cd'
-       plan = 'plan-quick'
-       self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-       self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
-       import time
-       time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-       import requests
-       r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
-       # verify the web page
-       self.assertTrue('Hello world' in str(r.content))
-
-   @ResourceGroupPreparer(location='japaneast')
-   def test_linux_webapp_quick_create(self, resource_group):
-       webapp_name = 'webapp-quick-linux'
-       plan = 'plan-quick-linux'
-       self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-       self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
-       import requests
-       r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
-       # verify the web page
-       self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+    @ResourceGroupPreparer()
+    def test_win_webapp_quick_create(self, resource_group):
+        webapp_name = 'webapp-quick'
+        plan = 'plan-quick'
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
+            JMESPathCheckV2('[0].value', '6.1.0'),
+        ]))
+    
+    @ResourceGroupPreparer()
+    def test_win_webapp_quick_create_cd(self, resource_group):
+        webapp_name = 'webapp-quick-cd'
+        plan = 'plan-quick'
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
+        import time
+        time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+        import requests
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
+        # verify the web page
+        self.assertTrue('Hello world' in str(r.content))
+    
+    @ResourceGroupPreparer(location='japaneast')
+    def test_linux_webapp_quick_create(self, resource_group):
+        webapp_name = 'webapp-quick-linux'
+        plan = 'plan-quick-linux'
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        import requests
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+        # verify the web page
+        self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
 
 
 class WebappConfigureTest(ResourceGroupVCRTestBase):
@@ -505,6 +505,7 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
 
 
 class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
+
     def __init__(self, test_method):
         super(WebappBackupConfigScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
         self.webapp_name = 'azurecli-webapp-backupconfigtest'
@@ -523,9 +524,11 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         frequency = '1d'
         db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
         retention_period = 5
+
         # set without databases
         self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one true --retention {}'
                  .format(self.resource_group, self.webapp_name, frequency, sas_url, retention_period), checks=NoneCheck())
+
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 1),
             JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
@@ -533,11 +536,13 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period)
         ]
         self.cmd('webapp config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
         # update with databases
         database_name = 'cli-db'
         database_type = 'SqlAzure'
         self.cmd('webapp config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one true'
                  .format(self.resource_group, self.webapp_name, db_conn_str, database_name, database_type), checks=NoneCheck())
+
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 1),
             JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
@@ -548,7 +553,13 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('databases[0].name', database_name)
         ]
         self.cmd('webapp config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+        # update frequency and retention only
+        frequency = '18h'
+        retention_period = 7
+        self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
                  .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
+
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 18),
             JMESPathCheck('backupSchedule.frequencyUnit', 'Hour'),
@@ -600,53 +611,6 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('webapp config backup list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=list_checks)
         import time
         time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
-        self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
-                 .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
-
-
-class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(FunctionAppWithPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
-
-    def test_functionapp_asp_e2e(self):
-        self.execute()
-
-    def body(self):
-        functionapp_name = 'functionapp-e2e3'
-        plan = 'functionapp-e2e-plan'
-        storage = 'functionappplanstorage'
-        self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
-        self.cmd('appservice plan list -g {}'.format(self.resource_group))
-        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, self.resource_group))
-        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, functionapp_name, plan, storage), checks=[
-            JMESPathCheck('state', 'Running'),
-            JMESPathCheck('name', functionapp_name),
-            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
-        ])
-        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
-
-
-class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(FunctionAppWithConsumptionPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-c-e2e')
-
-    def test_functionapp_consumption_e2e(self):
-        self.execute()
-
-    def body(self):
-        functionapp_name = 'functionappconsumption'
-        location = 'westus'
-        storage = 'functionaconstorage'
-        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, self.resource_group, location))
-        self.cmd('functionapp create -g {} -n {} -c {} -s {}'.format(self.resource_group, functionapp_name, location, storage), checks=[
-            JMESPathCheck('state', 'Running'),
-            JMESPathCheck('name', functionapp_name),
-            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
-        ])
-
-        import time
-        time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
-
         self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 
