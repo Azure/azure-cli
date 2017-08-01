@@ -18,8 +18,10 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappBasicE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-e2e')
+
     def test_webapp_e2e(self):
         self.execute()
+
     def body(self):
         import time
         webapp_name = 'webapp-e2e'
@@ -108,6 +110,7 @@ class WebappQuickCreateTest(ScenarioTest):
            JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
            JMESPathCheckV2('[0].value', '6.1.0'),
        ]))
+
    @ResourceGroupPreparer()
    def test_win_webapp_quick_create_cd(self, resource_group):
        webapp_name = 'webapp-quick-cd'
@@ -120,6 +123,7 @@ class WebappQuickCreateTest(ScenarioTest):
        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
        # verify the web page
        self.assertTrue('Hello world' in str(r.content))
+
    @ResourceGroupPreparer(location='japaneast')
    def test_linux_webapp_quick_create(self, resource_group):
        webapp_name = 'webapp-quick-linux'
@@ -136,13 +140,16 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappConfigureTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-config')
         self.webapp_name = 'webapp-config-test'
+
     def test_webapp_config(self):
         self.execute()
+
     def set_up(self):
         super(WebappConfigureTest, self).set_up()
         plan = 'webapp-config-plan'
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan_result['id']))
+
     def body(self):
         # site config testing
         # verify the baseline
@@ -215,8 +222,10 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
 class WebappScaleTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappScaleTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-scale')
+
     def test_webapp_scale(self):
         self.execute()
+
     def body(self):
         plan = 'webapp-scale-plan'
         # start with shared sku
@@ -257,17 +266,21 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
         self.resource_group2 = 'clitest-error2'
         self.webapp_name = 'webapp-error-test123'
         self.plan = 'webapp-error-plan'
+
     def test_appservice_error_polish(self):
         self.execute()
+
     def set_up(self):
         super(AppServiceBadErrorPolishTest, self).set_up()
         self.cmd('group create -n {} -l westus'.format(self.resource_group2))
         self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group, self.plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, self.plan))
         self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group2, self.plan))
+
     def tear_down(self):
         super(AppServiceBadErrorPolishTest, self).tear_down()
         self.cmd('group delete -n {} --yes'.format(self.resource_group2))
+
     def body(self):
         # we will try to produce an error by try creating 2 webapp with same name in different groups
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group2, self.webapp_name, self.plan),
@@ -330,8 +343,10 @@ class WebappACRSceanrioTest(ScenarioTest):
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappGitScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-git4')
+
     def test_webapp_git(self):
         self.execute()
+
     def body(self):
         plan = 'webapp-git-plan5'
         webapp = 'web-git-test2'
@@ -359,8 +374,10 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         super(WebappSlotScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-slot')
         self.plan = 'webapp-slot-test2-plan'
         self.webapp = 'web-slot-test2'
+
     def test_webapp_slot(self):
         self.execute()
+
     def body(self):
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, self.plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp, plan_result['id']))
@@ -419,18 +436,11 @@ class WebappSlotTrafficRouting(ScenarioTest):
         slot = 'staging'
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
-        self.cmd('webapp traffic-routing set -g {} -n {} -d {}=15'.format(resource_group, webapp, slot), checks=[
-            JMESPathCheckV2("[0].actionHostName", slot + '.azurewebsites.net'),
-            JMESPathCheckV2("[0].reroutePercentage", 15.0)
-        ])
         self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
             JMESPathCheckV2("[0].actionHostName", slot + '.azurewebsites.net'),
             JMESPathCheckV2("[0].reroutePercentage", 15.0)
         ])
         self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
-        self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
-            JMESPathCheckV2("length(@)", 0)
-        ])
 
 
 class WebappSlotSwapScenarioTest(ScenarioTest):
@@ -467,8 +477,10 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappSSLCertTest, self).__init__(__file__, test_method, resource_group='test_cli_webapp_ssl')
         self.webapp_name = 'webapp-ssl-test123'
+
     def test_webapp_ssl(self):
         self.execute()
+
     def body(self):
         plan = 'webapp-ssl-test-plan'
         # Cert Generated using
@@ -496,13 +508,16 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappBackupConfigScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
         self.webapp_name = 'azurecli-webapp-backupconfigtest'
+
     def test_webapp_backup_config(self):
         self.execute()
+
     def set_up(self):
         super(WebappBackupConfigScenarioTest, self).set_up()
         plan = 'webapp-backup-plan'
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -l {}'.format(self.resource_group, self.webapp_name, plan_result['id'], self.location))
+
     def body(self):
         sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
         frequency = '1d'
@@ -533,10 +548,6 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('databases[0].name', database_name)
         ]
         self.cmd('webapp config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
-        # update frequency and retention only
-        frequency = '18h'
-        retention_period = 7
-        self.cmd('webapp config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
                  .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 18),
@@ -554,13 +565,16 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappBackupRestoreScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
         self.webapp_name = 'azurecli-webapp-backuptest3'
+
     def test_webapp_backup_restore(self):
         self.execute()
+
     def set_up(self):
         super(WebappBackupRestoreScenarioTest, self).set_up()
         plan = 'webapp-backup-plan'
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -l {}'.format(self.resource_group, self.webapp_name, plan_result['id'], self.location))
+
     def body(self):
         sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=PJpE6swgZ6oZNFTlUz0GOIl87KKdvvgX7Ap8YXKHRp8%3D&se=2017-03-10T23%3A40%3A24Z&sp=rwdl'
         db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
@@ -593,8 +607,10 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
 class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(FunctionAppWithPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
+
     def test_functionapp_asp_e2e(self):
         self.execute()
+
     def body(self):
         functionapp_name = 'functionapp-e2e3'
         plan = 'functionapp-e2e-plan'
@@ -613,8 +629,10 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
 class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(FunctionAppWithConsumptionPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-c-e2e')
+
     def test_functionapp_consumption_e2e(self):
         self.execute()
+
     def body(self):
         functionapp_name = 'functionappconsumption'
         location = 'westus'
@@ -625,6 +643,60 @@ class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
+
+        import time
+        time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
+
+        self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
+                 .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
+
+
+class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
+
+    def test_functionapp_asp_e2e(self):
+        self.execute()
+
+    def body(self):
+        functionapp_name = 'functionapp-e2e3'
+        plan = 'functionapp-e2e-plan'
+        storage = 'functionappplanstorage'
+        self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(self.resource_group))
+
+        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, self.resource_group))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, functionapp_name, plan, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
+
+
+class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithConsumptionPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-c-e2e')
+
+    def test_functionapp_consumption_e2e(self):
+        self.execute()
+
+    def body(self):
+        functionapp_name = 'functionappconsumption'
+        location = 'westus'
+        storage = 'functionaconstorage'
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, self.resource_group, location))
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'.format(self.resource_group, functionapp_name, location, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+        ])
+
         self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
 
 
