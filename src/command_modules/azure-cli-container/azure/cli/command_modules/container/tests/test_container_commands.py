@@ -7,7 +7,6 @@ from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists,
 
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer()
     def test_container_create(self, resource_group, resource_group_location):
         '''Test create container with image, os type, ip address type, port, cpu, memory,
@@ -24,16 +23,16 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         env = 'KEY1=VALUE1 KEY2=VALUE2'
 
         create_cmd = 'container create -g {} -n {} --image {} --os-type {} --ip-address {} --port {} ' \
-              '--cpu {} --memory {} --command-line {} -e {}'.format(resource_group,
-                                                                    container_group_name,
-                                                                    image,
-                                                                    os_type,
-                                                                    ip_address_type,
-                                                                    port,
-                                                                    cpu,
-                                                                    memory,
-                                                                    command,
-                                                                    env)
+            '--cpu {} --memory {} --command-line {} -e {}'.format(resource_group,
+                                                                  container_group_name,
+                                                                  image,
+                                                                  os_type,
+                                                                  ip_address_type,
+                                                                  port,
+                                                                  cpu,
+                                                                  memory,
+                                                                  command,
+                                                                  env)
         # Test create
         self.cmd(create_cmd, checks=[
             JMESPathCheck('name', container_group_name),
@@ -76,7 +75,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             JMESPathCheckExists('[0].containers[0].environmentVariables'),
             JMESPathCheck('[0].containers[0].resources.requests.cpu', cpu),
             JMESPathCheck('[0].containers[0].resources.requests.memoryInGb', memory)])
-
 
     @ResourceGroupPreparer()
     def test_container_create_with_acr(self, resource_group, resource_group_location):
