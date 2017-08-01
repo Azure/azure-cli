@@ -80,4 +80,6 @@ def batch_data_service_factory(kwargs):
             resource=CLOUD.endpoints.batch_resource_id)
     else:
         credentials = batchauth.SharedKeyCredentials(account_name, account_key)
+    if not account_endpoint.startswith('https://'):
+        account_endpoint = 'https://' + account_endpoint
     return batch.BatchServiceClient(credentials, base_url=account_endpoint)

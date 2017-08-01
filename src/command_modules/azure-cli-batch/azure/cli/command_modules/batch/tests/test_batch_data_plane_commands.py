@@ -163,6 +163,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             .assert_with_checks(
                 [JMESPathCheck('id', 'aaa'), JMESPathCheck('commandLine', 'echo hello')])
 
+        task_counts = self.batch_cmd('batch job task-counts show --job-id {}',
+                                     account_info, job_id).get_output_in_json()
+        self.assertEqual(task_counts["completed"], 0)
+        self.assertEqual(task_counts["active"], 1)
+
         self.batch_cmd('batch task delete --job-id {} --task-id aaa --yes', account_info, job_id)
 
         result = self.batch_cmd('batch task create --job-id {} --json-file "{}"', account_info,
