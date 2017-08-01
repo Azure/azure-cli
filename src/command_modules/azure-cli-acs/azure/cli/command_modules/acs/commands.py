@@ -32,4 +32,6 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_generic_wait_command(__name__, 'acs wait', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory)
     cli_command(__name__, 'acs kubernetes browse', 'azure.cli.command_modules.acs.custom#k8s_browse')
     cli_command(__name__, 'acs kubernetes install-cli', 'azure.cli.command_modules.acs.custom#k8s_install_cli')
+    cli_command(__name__, 'acs kubernetes install-helm', 'azure.cli.command_modules.acs.custom#k8s_install_helm')
+    cli_command(__name__, 'acs kubernetes install-draft', 'azure.cli.command_modules.acs.custom#k8s_install_draft')
     cli_command(__name__, 'acs kubernetes get-credentials', 'azure.cli.command_modules.acs.custom#k8s_get_credentials')

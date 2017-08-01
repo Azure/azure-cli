@@ -16,9 +16,11 @@ import random
 import string
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import webbrowser
+import shutil
 import stat
 import ssl
 import re
@@ -50,27 +52,15 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 from azure.mgmt.authorization.models import RoleAssignmentProperties
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
+try:
+    from shutil import which  # pylint:disable-msg=ungrouped-imports
+except ImportError:
+    from backports.shutil_which import which
+
 logger = azlogging.get_az_logger(__name__)
 
+
 # pylint:disable=too-many-lines
-
-
-def which(binary):
-    pathVar = os.getenv('PATH')
-    if platform.system() == 'Windows':
-        binary = binary + '.exe'
-        parts = pathVar.split(';')
-    else:
-        parts = pathVar.split(':')
-
-    for part in parts:
-        bin_path = os.path.join(part, binary)
-        if os.path.exists(bin_path) and os.path.isfile(bin_path) and os.access(bin_path, os.X_OK):
-            return bin_path
-
-    return None
-
-
 def _resource_client_factory():
     return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
@@ -227,14 +217,20 @@ def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
     return
 
 
-def acs_install_cli(resource_group, name, install_location=None, client_version=None):
+def acs_install_cli(resource_group, name, install_location=None, client_version=None, tool=None):
     acs_info = _get_acs_info(name, resource_group)
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
     kwargs = {'install_location': install_location}
     if client_version:
         kwargs['client_version'] = client_version
     if orchestrator_type == 'kubernetes':
-        return k8s_install_cli(**kwargs)
+        if tool is None or tool == 'kubectl':
+            return k8s_install_cli(**kwargs)
+        if tool == 'helm':
+            return k8s_install_helm(**kwargs)
+        if tool == 'draft':
+            return k8s_install_draft(**kwargs)
+        raise CLIError('Unknown tool: {}'.format(tool))
     elif orchestrator_type == 'dcos':
         return dcos_install_cli(**kwargs)
     else:
@@ -284,9 +280,72 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
+def k8s_install_draft(client_version='v0.6.0', install_location=None):
+    base_url = 'https://azuredraft.blob.core.windows.net/draft/draft-{}-{}-amd64.tar.gz'
+    system = platform.system()
+    file_url = ''
+    binary = 'draft'
+    if system == 'Windows':
+        file_url = base_url.format(client_version, 'windows')
+        binary = binary + '.exe'
+    else:
+        file_url = base_url.format(client_version, system.lower())
+    logger.warning('Downloading client to %s from %s', install_location, file_url)
+    tmpdir = tempfile.mkdtemp()
+    file = os.path.join(tmpdir, 'output')
+    try:
+        _urlretrieve(file_url, file)
+
+        import tarfile
+        tar_file = tarfile.open(file, 'r:gz')
+        tar_file.extractall(tmpdir)
+        tar_file.close()
+
+        shutil.copyfile(os.path.join(tmpdir, '{}-amd64'.format(system.lower()), binary), install_location)
+    except IOError as err:
+        raise CLIError('Connection error while attempting to download client ({})'.format(err))
+
+    shutil.rmtree(tmpdir)
+
+
+def k8s_install_helm(client_version='v2.5.1', install_location=None):
+    base_url = 'https://storage.googleapis.com/kubernetes-helm/helm-{}-{}-amd64{}'
+    system = platform.system()
+    file_url = ''
+    binary = 'helm'
+    if system == 'Windows':
+        file_url = base_url.format(client_version, 'windows', '.zip')
+        binary = binary + '.exe'
+    elif system == 'Linux':
+        file_url = base_url.format(client_version, 'linux', '.tar.gz')
+    elif system == 'Darwin':
+        file_url = base_url.format(client_version, 'darwin', '.tar.gz')
+    logger.warning('Downloading client to %s from %s', install_location, file_url)
+    tmpdir = tempfile.mkdtemp()
+    file = os.path.join(tmpdir, 'output')
+    try:
+        _urlretrieve(file_url, file)
+
+        if system == 'Windows':
+            import zipfile
+            zip_file = zipfile.ZipFile(file, 'r')
+            zip_file.extractall(tmpdir)
+            zip_file.close()
+        else:
+            import tarfile
+            tar_file = tarfile.open(file, 'r:gz')
+            tar_file.extractall(tmpdir)
+            tar_file.close()
+
+        shutil.copyfile(os.path.join(tmpdir, '{}-amd64'.format(system.lower()), binary), install_location)
+    except IOError as err:
+        raise CLIError('Connection error while attempting to download client ({})'.format(err))
+
+    shutil.rmtree(tmpdir)
+
+
 def k8s_install_cli(client_version='latest', install_location=None):
     """ Downloads the kubectl command line from Kubernetes """
-
     if client_version == 'latest':
         context = _ssl_context()
         version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt',
