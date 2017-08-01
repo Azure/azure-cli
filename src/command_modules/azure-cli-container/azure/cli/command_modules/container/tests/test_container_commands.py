@@ -3,15 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer)
 
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
+    # Test create container with image, os type, ip address type, port, cpu, memory, command line and evnironment variable specified.
     @ResourceGroupPreparer()
     def test_container_create(self, resource_group, resource_group_location):
-        '''Test create container with image, os type, ip address type, port, cpu, memory,
-        command line and evnironment variable specified. '''
-
         container_group_name = self.create_random_name('clicontainer', 16)
         image = 'alpine:latest'
         os_type = 'Linux'
@@ -76,10 +76,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             JMESPathCheck('[0].containers[0].resources.requests.cpu', cpu),
             JMESPathCheck('[0].containers[0].resources.requests.memoryInGb', memory)])
 
+    # Test create container with azure container registry image.
     @ResourceGroupPreparer()
     def test_container_create_with_acr(self, resource_group, resource_group_location):
-        '''Test create container with azure container registry image. '''
-
         container_group_name = self.create_random_name('clicontainer', 16)
         registry_username = 'testregistry'
         registry_server = '{}.azurecr.io'.format(registry_username)
