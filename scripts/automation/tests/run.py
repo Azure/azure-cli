@@ -21,11 +21,11 @@ def get_unittest_runner(tests):
             print('When --test is given, no more than 1 module can be selected.')
             return False
 
-        module_path = module_paths[0][len(os.path.join(get_repo_root(), 'src/')):]
+        module_path = module_paths[0][len(os.path.join(get_repo_root(), 'src' + os.sep)):]
         if module_path.startswith('command_modules'):
-            module_path = module_path.split('/', 2)[-1].replace('/', '.')
+            module_path = module_path.split(os.sep, 2)[-1].replace(os.sep, '.')
         else:
-            module_path = module_path.split('/', 1)[-1].replace('/', '.')
+            module_path = module_path.split(os.sep, 1)[-1].replace(os.sep, '.')
 
         try:
             import unittest
