@@ -84,7 +84,7 @@ def _get_default_id(balancer, property_name, option_name):
     return _get_default_value(balancer, property_name, option_name, False)
 
 
-def _get_default_value(balancer, property_name, option_name, name):
+def _get_default_value(balancer, property_name, option_name, return_name):
     values = [x.id for x in getattr(balancer, property_name)]
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
@@ -92,7 +92,7 @@ def _get_default_value(balancer, property_name, option_name, name):
     elif not values:
         raise CLIError("No existing values found for '{0}'. Create one first and try "
                        "again.".format(option_name))
-    return values[0].rsplit('/', 1)[1] if name else values[0]
+    return values[0].rsplit('/', 1)[1] if return_name else values[0]
 
 
 # region Generic list commands
