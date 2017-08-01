@@ -83,4 +83,3 @@ if __name__ == '__main__':
         print('-'*len(n['title']))
         print(n['content'])
         print()
-
