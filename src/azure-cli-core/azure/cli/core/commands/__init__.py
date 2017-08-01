@@ -440,7 +440,6 @@ def cli_command(module_name, name, operation,
                 resource_type=None, max_api=None, min_api=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     if resource_type and (max_api or min_api):
-        from azure.cli.core.profiles import supported_api_version
         if not supported_api_version(resource_type, min_api=min_api, max_api=max_api):
             return
 

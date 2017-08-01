@@ -86,8 +86,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     def test_logging_operations(self, resource_group, storage_account):
         connection_string = self.cmd(
-            'storage account show-connection-string -g {} -n {} -otsv'
-                .format(resource_group, storage_account)).output
+            'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, storage_account)).output
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', False),
