@@ -843,8 +843,6 @@ def list_publish_profiles(resource_group_name, name, slot=None):
 def enable_cd(resource_group_name, name, enable, slot=None):
     settings = []
     settings.append("DOCKER_ENABLE_CI=" + enable)
-    settings_output = []
-    settings_output.append(('DOCKER_ENABLE_CI', enable))
 
     update_app_settings(resource_group_name, name, settings, slot)
 
@@ -859,7 +857,6 @@ def show_container_cd_url(resource_group_name, name, slot=None):
             docker_enabled = True
             break
 
-    settings = []
     cd_settings = {}
     cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
 
@@ -874,8 +871,7 @@ def show_container_cd_url(resource_group_name, name, slot=None):
     else:
         cd_settings['CI_CD_URL'] = ''
 
-    settings.append(cd_settings)
-    return settings
+    return cd_settings
 
 
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
