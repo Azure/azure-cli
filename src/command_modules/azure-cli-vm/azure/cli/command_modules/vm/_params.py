@@ -96,7 +96,6 @@ register_cli_argument('vm availability-set create', 'platform_update_domain_coun
                       help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
 register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
-register_cli_argument('vm availability-set convert', 'platform_fault_domain_count', type=int, help="New Fault Domain count if provided. Use 'az vm list-skus -l <location>' to check out available count")
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')

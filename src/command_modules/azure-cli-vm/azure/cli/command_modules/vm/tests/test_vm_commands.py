@@ -664,16 +664,17 @@ class VMAvailSetScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_availset_convert(self, resource_group):
         name = 'availset-test'
-        self.cmd('vm availability-set create -g {} -n {} --unmanaged -l westus'.format(resource_group, name), checks=[
+        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
                 JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('platformFaultDomainCount', 3),
+                # JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
                 JMESPathCheckV2('sku.name', 'Classic')
         ])
 
-        self.cmd('vm availability-set convert -g {} -n {} --platform-fault-domain-count 1'.format(resource_group, name), checks=[
+        # the conversion should auto adjust the FD from 3 to 2 as 'westus2' only offers 2
+        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name), checks=[
                 JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 1),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
                 JMESPathCheckV2('sku.name', 'Aligned')
         ])
 

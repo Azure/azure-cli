@@ -1528,16 +1528,26 @@ def vmss_set(resource_group_name, name, no_wait=False, **kwargs):
         resource_group_name, name, raw=no_wait, **kwargs)
 
 
-def convert_av_set_to_managed_disk(resource_group_name, availability_set_name, platform_fault_domain_count=None):
+def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
     av_set = availset_get(resource_group_name, availability_set_name)
     if av_set.sku.name != 'Aligned':
         av_set.sku.name = 'Aligned'
-        if platform_fault_domain_count:
-            av_set.platform_fault_domain_count = platform_fault_domain_count
+
+        # let us double check whether the existing FD number is supported
+        skus = list_skus(av_set.location)
+        av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
+        if av_sku and av_sku.capabilities:
+            max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
+                              '0'))
+            if max_fd and max_fd < av_set.platform_fault_domain_count:
+                logger.warning("The fault domain count will be adjusted from {} to {} so to stay within region's "
+                               "limitation".format(av_set.platform_fault_domain_count, max_fd))
+                av_set.platform_fault_domain_count = max_fd
+
         return availset_set(resource_group_name=resource_group_name, name=availability_set_name,
                             parameters=av_set)
     else:
-        logger.warning('The availability set is already managed disk based, hence skipping...')
+        logger.warning('Availability set {} is already configured for managed disks.'.format(availability_set_name))
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
