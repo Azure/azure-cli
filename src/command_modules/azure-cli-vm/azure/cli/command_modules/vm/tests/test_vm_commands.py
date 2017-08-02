@@ -661,13 +661,16 @@ class VMAvailSetScenarioTest(ScenarioTest):
         self.cmd('vm availability-set delete -g {} -n {}'.format(resource_group, name))
         self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
 
+
+# once https://github.com/Azure/azure-cli/issues/4127 is fixed, switch back to a regular ScenarioTest
+class VMAvailSetLiveScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_availset_convert(self, resource_group):
         name = 'availset-test'
         self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
                 JMESPathCheckV2('name', name),
                 JMESPathCheckV2('platformFaultDomainCount', 3),
-                # JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
                 JMESPathCheckV2('sku.name', 'Classic')
         ])
 
