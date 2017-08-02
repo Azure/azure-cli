@@ -3,13 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer)
 
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
-    # Test create container with image, os type, ip address type, port, cpu, memory, command line and evnironment variable specified.
+    # Test create container with image, os type, ip address type, port, cpu,
+    # memory, command line and environment variables specified.
     @ResourceGroupPreparer()
     def test_container_create(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
