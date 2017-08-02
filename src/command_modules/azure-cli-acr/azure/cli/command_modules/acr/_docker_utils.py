@@ -47,8 +47,8 @@ def _get_login_token(login_server, only_refresh_token=True, repository=None):
     sp_id, refresh, access, tenant = profile.get_refresh_token()
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    if sp_id is None:
-        if refresh is None:
+    if not sp_id:
+        if not refresh:
             content = {
                 'grant_type': 'access_token',
                 'service': params['service'],
