@@ -80,6 +80,11 @@ def validate_accept(namespace):
         namespace.accept = formats[namespace.accept.lower()]
 
 
+def validate_bypass(namespace):
+    if namespace.bypass:
+        namespace.bypass = ', '.join(namespace.bypass)
+
+
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
     connection string into account name and key """

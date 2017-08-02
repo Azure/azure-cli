@@ -41,7 +41,7 @@ def _update_progress(current, total):
 
 def create_storage_account(resource_group_name, account_name, sku, assign_identity=False, location=None, kind=None,
                            encryption_services=None, tags=None, custom_domain=None, access_tier=None, https_only=None):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption = get_sdk(
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryptionm StorageNetworkAcls = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
@@ -50,6 +50,7 @@ def create_storage_account(resource_group_name, account_name, sku, assign_identi
         'AccessTier',
         'Identity',
         'Encryption',
+        'NetworkRuleSets',
         mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
@@ -63,6 +64,10 @@ def create_storage_account(resource_group_name, account_name, sku, assign_identi
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
+
+    if StorageNetworkAcls:
+        params.network_acls = StorageNetworkAcls(bypass=bypass, default_action=default_action, ip_rules=None,
+                                                 virtual_network_rules=None)
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -81,7 +86,7 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
 def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, assign_identity=False):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption = get_sdk(
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, StorageNetworkAcls = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
         'Sku',
@@ -89,6 +94,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         'AccessTier',
         'Identity',
         'Encryption',
+        'NetworkRuleSets',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -114,6 +120,15 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
     )
     if assign_identity:
         params.identity = Identity()
+
+    if StorageNetworkAcls and (bypass or default_action):
+        acl = instance.network_acls or StorageNetworkAcls(
+            bypass=bypass, virtual_network_rules=None, ip_rules=None, default_action=default_action)
+        if bypass:
+            acl.bypass = bypass
+        if default_action:
+            acl.default_action = default_action
+        params.network_acls = acl
 
     return params
 
@@ -392,20 +407,14 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
         results[s.name] = s.get_metrics(interval, timeout)
     return results
 
-def configure_network_acl():
+def list_network_acl_rules(client, resource_group_name, storage_account_name):
     pass
 
-def show_network_acl():
+def show_network_acl_rule(client, resource_group_name, storage_account_name):
     pass
 
-def list_network_acl_rules():
+def add_network_acl_rule(client, resource_group_name, storage_account_name):
     pass
 
-def show_network_acl_rule():
-    pass
-
-def add_network_acl_rule():
-    pass
-
-def remove_network_acl_rule():
+def remove_network_acl_rule(client, resource_group_name, storage_account_name):
     pass

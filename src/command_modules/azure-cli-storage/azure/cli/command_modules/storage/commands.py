@@ -24,7 +24,7 @@ from azure.cli.command_modules.storage._transformers import \
      transform_logging_list_output, transform_metrics_list_output,
      transform_url, transform_storage_list_output, transform_container_permission_output,
      create_boolean_result_output_transformer)
-from azure.cli.core.commands import cli_command
+from azure.cli.core.commands import cli_command, VersionConstraint
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, get_sdk, ResourceType
@@ -59,12 +59,11 @@ cli_command(__name__, 'storage account show-connection-string', custom_path + 's
 cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
 
-cli_command(__name__, 'storage account network-acl configure', custom_path + 'configure_network_acl', factory)
-cli_command(__name__, 'storage account network-acl show', custom_path + 'show_network_acl', factory)
-cli_command(__name__, 'storage account network-acl rule add', custom_path + 'add_network_acl_rule', factory)
-cli_command(__name__, 'storage account network-acl rule remove', custom_path + 'remove_network_acl_rule', factory)
-cli_command(__name__, 'storage account network-acl rule list', custom_path + 'list_network_acl_rules', factory)
-cli_command(__name__, 'storage account network-acl rule show', custom_path + 'show_network_acl_rule', factory)
+with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
+    c.cli_command(__name__, 'storage account network-rule add', custom_path + 'add_network_acl_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule remove', custom_path + 'remove_network_acl_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule list', custom_path + 'list_network_acl_rules', factory)
+    c.cli_command(__name__, 'storage account network-rule show', custom_path + 'show_network_acl_rule', factory)
 
 if supported_api_version(ResourceType.MGMT_STORAGE, max_api='2015-06-15'):
     cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')

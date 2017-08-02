@@ -541,42 +541,27 @@ helps['storage table policy'] = """
     short-summary: Manage shared access policies of a storage table.
 """
 
-helps['storage account network-acl'] = """
-    type: group
-    short-summary: Manage network ACL settings for service tunneling.
-"""
-
-helps['storage account network-acl configure'] = """
-    type: command
-    short-summary: Configure general network ACL settings.
-"""
-
-helps['storage account network-acl show'] = """
-    type: command
-    short-summary: Show network ACL details.
-"""
-
-helps['storage account network-acl rule'] = """
+helps['storage account network-rule'] = """
     type: group
     short-summary: Manage network ACL rules.
 """
 
-helps['storage account network-acl rule add'] = """
+helps['storage account network-rule add'] = """
     type: command
     short-summary: Add a network ACL rule.
 """
 
-helps['storage account network-acl rule list'] = """
+helps['storage account network-rule list'] = """
     type: command
     short-summary: List network ACL rules.
 """
 
-helps['storage account network-acl rule remove'] = """
+helps['storage account network-rule remove'] = """
     type: command
     short-summary: Remove a network ACL rule.
 """
 
-helps['storage account network-acl rule show'] = """
+helps['storage account network-rule show'] = """
     type: command
     short-summary: Show a network ACL rule.
 """
