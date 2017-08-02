@@ -1994,6 +1994,68 @@ class MSIScenarioTest(ScenarioTest):
                     JMESPathCheckV2('[0].settings.port', 50343)
                 ])
 
+    @ResourceGroupPreparer()
+    def test_msi_no_scope(self, resource_group):
+        subscription_id = self.get_subscription_id()
+
+        vm1 = 'vm1'
+        vmss1 = 'vmss1'
+        vm2 = 'vm2'
+        vmss2 = 'vmss2'
+
+        # create a linux vm with identity but w/o a role assignment (--scope "")
+        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vm1), checks=[
+            JMESPathCheckV2('identity.subscription', subscription_id),
+            JMESPathCheckV2('identity.scope', ''),
+            JMESPathCheckV2('identity.port', 50342)
+        ])
+        # the extension should still get provisioned
+        self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm1), checks=[
+            JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        # create a vmss with identity but w/o a role assignment (--scope "")
+        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vmss1), checks=[
+            JMESPathCheckV2('vmss.identity.subscription', subscription_id),
+            JMESPathCheckV2('vmss.identity.scope', ''),
+            JMESPathCheckV2('vmss.identity.port', 50342)
+        ])
+
+        # the extension should still get provisioned
+        self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
+            JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        # create a vm w/o identity
+        self.cmd('vm create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2))
+        # assign identity but w/o a role assignment
+        self.cmd('vm assign-identity -g {} -n {} --scope ""'.format(resource_group, vm2), checks=[
+            JMESPathCheckV2('scope', ''),
+            JMESPathCheckV2('subscription', subscription_id),
+            JMESPathCheckV2('port', 50342)
+        ])
+        # the extension should still get provisioned
+        self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
+            JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        self.cmd('vmss create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2))
+        # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
+        if self.is_live:
+            self.cmd('vmss assign-identity -g {} -n {} --scope ""'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('scope', ''),
+                JMESPathCheckV2('subscription', subscription_id),
+                JMESPathCheckV2('port', 50342)
+            ])
+
+            self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
+
 
 class VMLiveScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
