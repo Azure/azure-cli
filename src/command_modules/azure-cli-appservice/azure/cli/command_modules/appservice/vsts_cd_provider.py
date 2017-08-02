@@ -15,7 +15,7 @@ class VstsContinuousDeliveryProvider(object):
 
     def setup_continuous_delivery(self,
                                   resource_group_name, name, repo_url, branch, git_token,
-                                  slot, cd_app_type, cd_account, cd_create_account, location):
+                                  slot, cd_app_type_details, cd_account, cd_create_account, location):
         """
         This method sets up CD for an Azure Web App thru Team Services
         """
@@ -34,7 +34,7 @@ class VstsContinuousDeliveryProvider(object):
         cd_manager.set_repository_info(repo_url, branch, git_token)
         cd_manager.set_azure_web_info(resource_group_name, name, cred, subscription['id'],
                                       subscription['name'], subscription['tenantId'], location)
-        vsts_cd_status = cd_manager.setup_continuous_delivery(slot, cd_app_type, cd_account,
+        vsts_cd_status = cd_manager.setup_continuous_delivery(slot, cd_app_type_details, cd_account,
                                                               cd_create_account, auth_token)
         return vsts_cd_status
 
