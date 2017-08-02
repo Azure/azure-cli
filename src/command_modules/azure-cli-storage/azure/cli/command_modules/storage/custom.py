@@ -391,3 +391,21 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
     for s in services:
         results[s.name] = s.get_metrics(interval, timeout)
     return results
+
+def configure_network_acl():
+    pass
+
+def show_network_acl():
+    pass
+
+def list_network_acl_rules():
+    pass
+
+def show_network_acl_rule():
+    pass
+
+def add_network_acl_rule():
+    pass
+
+def remove_network_acl_rule():
+    pass

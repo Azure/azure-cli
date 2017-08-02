@@ -58,8 +58,18 @@ cli_command(__name__, 'storage account show-usage', custom_path + 'show_storage_
 cli_command(__name__, 'storage account show-connection-string', custom_path + 'show_storage_account_connection_string')
 cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
-cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type', resource_type=ResourceType.MGMT_STORAGE, max_api='2015-06-15')
-cli_command(__name__, 'storage account create', custom_path + 'create_storage_account', resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
+
+cli_command(__name__, 'storage account network-acl configure', custom_path + 'configure_network_acl', factory)
+cli_command(__name__, 'storage account network-acl show', custom_path + 'show_network_acl', factory)
+cli_command(__name__, 'storage account network-acl rule add', custom_path + 'add_network_acl_rule', factory)
+cli_command(__name__, 'storage account network-acl rule remove', custom_path + 'remove_network_acl_rule', factory)
+cli_command(__name__, 'storage account network-acl rule list', custom_path + 'list_network_acl_rules', factory)
+cli_command(__name__, 'storage account network-acl rule show', custom_path + 'show_network_acl_rule', factory)
+
+if supported_api_version(ResourceType.MGMT_STORAGE, max_api='2015-06-15'):
+    cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')
+else:
+    cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
 
 if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
     cli_generic_update_command(__name__, 'storage account update',
