@@ -84,6 +84,32 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=JMESPathCheckV2('length(@)', ag_count - 1))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')
+    def test_network_app_gateway_redirect_config(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'gateway': 'ag1',
+            'name': 'redirect1'
+        }
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists'.format(**kwargs))
+        self.cmd('network application-gateway redirect-config create --gateway-name {gateway} -g {rg} -n {name} -t permanent --include-query-string --include-path false --target-listener appGatewayHttpListener --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway redirect-config show --gateway-name {gateway} -g {rg} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('includePath', False),
+            JMESPathCheckV2('includeQueryString', True),
+            JMESPathCheckV2('redirectType', 'Permanent')
+        ])
+        self.cmd('network application-gateway redirect-config update --gateway-name {gateway} -g {rg} -n {name} --include-path --include-query-string false --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway redirect-config show --gateway-name {gateway} -g {rg} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('includePath', True),
+            JMESPathCheckV2('includeQueryString', False),
+            JMESPathCheckV2('redirectType', 'Permanent')
+        ])
+
+
 class NetworkAppGatewayExistingSubnetScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_existing_subnet')
@@ -931,6 +957,23 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
         self.cmd('network nsg delete --resource-group {} --name {}'.format(self.resource_group, nsg_name))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkSubnetPrivateAccessScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_private_access_test', location='westcentralus')
+    def test_network_subnet_private_access(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
+        }
+        self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --private-access-services Microsoft.Storage'.format(**kwargs),
+                 checks=JMESPathCheckV2('privateAccessServices[0].service', 'Microsoft.Storage'))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --private-access-services ""'.format(**kwargs),
+                 checks=JMESPathCheckV2('privateAccessServices', None))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes

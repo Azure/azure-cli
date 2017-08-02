@@ -225,7 +225,7 @@ def _populate_collection_definition(collection,
     if partition_key_path is not None:
         if 'partitionKey' not in collection:
             collection['partitionKey'] = {}
-        collection['partitionKey'] = {'paths': [partition_key_path]}
+        collection['partitionKey'] = {'paths': [partition_key_path], 'kind': 'Hash'}
 
     if default_ttl is not None:
         collection['defaultTtl'] = default_ttl

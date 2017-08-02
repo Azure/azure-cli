@@ -229,8 +229,6 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'subnet', help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created.', arg_group='Network')
     register_cli_argument(scope, 'subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.', arg_group='Network')
     register_cli_argument(scope, 'nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, vnet, public IP or NSG.', arg_group='Network')
-    register_cli_argument(scope, 'nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
-    register_cli_argument(scope, 'nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', **enum_choice_list(['RDP', 'SSH']))
     register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', arg_group='Network')
     register_cli_argument(scope, 'public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.', arg_group='Network')
     register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
@@ -260,8 +258,9 @@ register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, valid
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
-
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
+register_cli_argument('vm create', 'nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
+register_cli_argument('vm create', 'nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', **enum_choice_list(['RDP', 'SSH']))
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'], arg_group='Network Balancer')
@@ -276,9 +275,10 @@ register_cli_argument('vmss create', 'instance_count', help='Number of VMs in th
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
 
 with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
-    c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip", arg_group='Network')
+    c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')
     c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
     c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')
 

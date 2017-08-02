@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.10+dev"
+VERSION = "2.0.12+dev"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -58,6 +58,7 @@ DEPENDENCIES = [
     'azure-cli-cloud',
     'azure-cli-cognitiveservices',
     'azure-cli-component',
+    'azure-cli-container',
     'azure-cli-configure',
     'azure-cli-consumption',
     'azure-cli-core',

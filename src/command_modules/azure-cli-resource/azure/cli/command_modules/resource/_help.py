@@ -235,12 +235,12 @@ helps['resource create'] = """
     type: command
     short-summary: create a resource.
     examples:
-       - name: Create a resource by providing a full resource object json. Note, you can also use `@<file>` to load from a json file.
+       - name: Create a resource, such as an API App, by providing a full resource object json. Note, you can also use `@<file>` to load from a json file.
          text: >
-            az resource create -g myRG -n myPlan --resource-type Microsoft.web/serverFarms --is-full-object --properties "{ \\"location\\":\\"westus\\",\\"sku\\":{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}"
-       - name: Create a resource by only providing resource properties
+            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties "{\\"kind\\":\\"api\\", \\"location\\":\\"West US\\", \\"properties\\":{\\"serverFarmId\\":\\"/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/myRG/providers/Microsoft.Web/serverfarms/appServicePlan1\\"}}"
+       - name: Create a resource, such as a Web App, by only providing resource properties
          text: >
-            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties "{\\"serverFarmId\\":\\"myPlan\\"}"
+            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties "{\\"serverFarmId\\":\\"/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/myRG/providers/Microsoft.Web/serverfarms/appServicePlan1\\"}"
 """
 
 helps['resource update'] = """
