@@ -407,7 +407,9 @@ class Profile(object):
         if user_type == _USER:
             _, _, token_entry = self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry[_REFRESH_TOKEN], token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
+            refresh_token = token_entry[_REFRESH_TOKEN] if _REFRESH_TOKEN in token_entry else None
+            access_token = token_entry[_ACCESS_TOKEN] if _ACCESS_TOKEN in token_entry else None
+            return None, refresh_token, access_token, str(account[_TENANT_ID])
 
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
