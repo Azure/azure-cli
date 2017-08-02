@@ -432,7 +432,7 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
     private_access_path = 'azure.mgmt.network.operations.available_private_access_services_operations#AvailablePrivateAccessServicesOperations.'
-    cli_command(__name__, 'network list-private-access-services', private_access_path + 'list', cf_private_access)
+    cli_command(__name__, 'network vnet list-service-endpoints', private_access_path + 'list', cf_private_access)
 
 # Traffic Manager ProfileOperations
 tm_profile_path = 'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.'
