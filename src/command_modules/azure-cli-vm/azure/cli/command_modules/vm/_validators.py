@@ -708,21 +708,21 @@ def validate_ssh_key(namespace):
     namespace.ssh_key_value = content
 
 
-def _validate_vm_vmss_msi(namespace):
-    if namespace.assign_identity:
-        _resolve_msi_role_and_scope(namespace)
-    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
+def _validate_vm_vmss_msi(namespace, from_set_command=False):
+    if from_set_command or namespace.assign_identity:
+        if namespace.identity_scope == "" and getattr(namespace.identity_role, 'is_default', None) is None:
+            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is set to None".format(
+                namespace.identity_role))
+        if namespace.identity_scope != "":
+            if namespace.identity_scope is None:
+                from azure.cli.core.commands.client_factory import get_subscription_id
+                subscription_id = get_subscription_id()
+                namespace.identity_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id,
+                                                                                        namespace.resource_group_name)
+            # keep 'identity_role' for output as logical name is more readable
+            setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
+    elif namespace.identity_scope is not None or getattr(namespace.identity_role, 'is_default', None) is None:
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
-
-
-def _resolve_msi_role_and_scope(namespace):
-    if not namespace.identity_scope:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        subscription_id = get_subscription_id()
-        namespace.identity_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id,
-                                                                                namespace.resource_group_name)
-    # keep 'identity_role' for output as logical name is more readable
-    setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
 
 
 def _resolve_role_id(role, scope):
@@ -1008,5 +1008,5 @@ def process_disk_encryption_namespace(namespace):
 
 
 def process_assign_identity_namespace(namespace):
-    _resolve_msi_role_and_scope(namespace)
+    _validate_vm_vmss_msi(namespace, from_set_command=True)
 # endregion
