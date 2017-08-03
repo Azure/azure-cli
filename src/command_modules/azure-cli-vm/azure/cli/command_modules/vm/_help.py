@@ -864,6 +864,15 @@ helps['vm list-vm-resize-options'] = """
 {0}
 """.format(vm_ids_example.format('List all available VM sizes for resizing by VM Ids', 'vm list-vm-resize-options'))
 
+helps['vm list-skus'] = """
+    type: command
+    short-summary: Get compute related resource skus, including vm size, fault domain count for an availability set, etc
+    long-summary: this command incorporates subscription level restriction, hence offers the most accurate information.
+    examples:
+        - name: get all skus in the region of West US
+          text: az vm list-skus -l westus
+"""
+
 helps['vm open-port'] = """
     type: command
     examples:
