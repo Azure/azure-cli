@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+unreleased
++++++++++++++++++++
+* fixes issue where `three_state_flag` would not work correctly if custom labels were used.
+
 2.0.12 (2017-07-27)
 +++++++++++++++++++
 * output sdk auth info for service principals with certificates

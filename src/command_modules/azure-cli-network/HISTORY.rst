@@ -7,6 +7,7 @@ unreleased
 +++++++++++++++++++
 * `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted
 * `application-gateway {subresource} delete`: Fixed issue where `--no-wait` was not honored.
+* `application-gateway http-settings update`: Fix issue where `--connection-draining-timeout` could not be turned off.
 
 2.0.11 (2017-07-27)
 +++++++++++++++++++

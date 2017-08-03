@@ -334,6 +334,66 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
         self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
+    def test_network_ag_http_listener(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway http-listener',
+            'name': 'mylistener'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('hostName', 'www.test.com')
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --host-name www.test2.com'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('hostName', 'www.test2.com')
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_http_settings')
+    def test_network_ag_http_settings(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway http-settings',
+            'name': 'mysettings'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --affinity-cookie-name mycookie --connection-draining-timeout 60 --cookie-based-affinity --host-name-from-backend-pool --protocol https --timeout 50 --port 70'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('affinityCookieName', 'mycookie'),
+            JMESPathCheckV2('connectionDraining.drainTimeoutInSec', 60),
+            JMESPathCheckV2('connectionDraining.enabled', True),
+            JMESPathCheckV2('cookieBasedAffinity', 'Enabled'),
+            JMESPathCheckV2('pickHostNameFromBackendAddress', True),
+            JMESPathCheckV2('port', 70),
+            JMESPathCheckV2('protocol', 'Https'),
+            JMESPathCheckV2('requestTimeout', 50)
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --affinity-cookie-name mycookie2 --connection-draining-timeout 0 --cookie-based-affinity disabled --host-name-from-backend-pool false --protocol http --timeout 40 --port 71'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('affinityCookieName', 'mycookie2'),
+            JMESPathCheckV2('connectionDraining.drainTimeoutInSec', 1),
+            JMESPathCheckV2('connectionDraining.enabled', False),
+            JMESPathCheckV2('cookieBasedAffinity', 'Disabled'),
+            JMESPathCheckV2('pickHostNameFromBackendAddress', False),
+            JMESPathCheckV2('port', 71),
+            JMESPathCheckV2('protocol', 'Http'),
+            JMESPathCheckV2('requestTimeout', 40)
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
 
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
