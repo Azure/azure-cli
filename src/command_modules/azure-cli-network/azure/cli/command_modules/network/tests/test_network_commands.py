@@ -214,39 +214,125 @@ class NetworkAppGatewayPrivateIpScenarioTest20170301(ResourceGroupVCRTestBase):
         self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=NoneCheck())
 
 
-# TODO: Expand and re-enable
-# @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
-# class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
-#    @ResourceGroupPreparer(name_prefix='cli_test_ag_subresource')
-#    def test_network_app_gateway_subresource(self, resource_group):
-#        from msrestazure.azure_exceptions import CloudError
-#        ag = 'ag1'
-#        pub_ip = 'public-ip1'
-#        vnet = 'vnet1'
-#        subnet = 'subnet1'
-#        resource_group = 'tjp-test-app-gateway'
-#        self.cmd('network application-gateway create -g {} -n {} --private-ip-address 10.0.0.4 --no-wait'.format(resource_group, ag))
-#        self.cmd('network public-ip create -g {} -n {}'.format(resource_group, pub_ip))
-#        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(resource_group, vnet, subnet))
+    def _create_ag(self, kwargs):
+        self.cmd('network application-gateway create -g {rg} -n {ag} --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists'.format(**kwargs))
 
-#        def _test_full_subresource(subgroup_name, item_name, create_params, update_params):
-#            if create_params:
-#                self.cmd('network application-gateway {} create -g {} --gateway-name {} -n {} {} --no-wait'.format(subgroup_name, resource_group, ag, item_name, create_params))
-#                self.cmd('network application-gateway {} show -g {} --gateway-name {} -n {}'.format(subgroup_name, resource_group, ag, item_name))
-#            if update_params:
-#                self.cmd('network application-gateway {} update -g {} --gateway-name {} -n {} {} --no-wait'.format(subgroup_name, resource_group, ag, item_name, update_params))
-#                self.cmd('network application-gateway {} show -g {} --gateway-name {} -n {}'.format(subgroup_name, resource_group, ag, item_name))
-#            self.cmd('network application-gateway {} list -g {} --gateway-name {}'.format(subgroup_name, resource_group, ag))
-#            try:
-#                self.cmd('network application-gateway {} delete -g {} --gateway-name {} -n {} --no-wait'.format(subgroup_name, resource_group, ag, item_name))
-#            except CloudError:
-#                pass
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_address_pool')
+    def test_network_ag_address_pool(self, resource_group):
 
-#        _test_full_subresource('address-pool', 'bepool1', '--servers 1.2.3.4 www.test.com', '--servers 4.3.2.1 www.changed.com')
-#        _test_full_subresource('frontend-port', 'myPort', '--port 99', '--port 101')
-#        _test_full_subresource('frontend-ip', 'frontend1', '--public-ip-address {}'.format(pub_ip), None)
-#        _test_full_subresource('frontend-ip', 'appGatewayFrontendIP', None, '--private-ip-address 10.0.0.5')
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway address-pool',
+            'name': 'pool1'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --servers 123.4.5.6 www.mydns.com'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(backendAddresses)', 2),
+            JMESPathCheckV2('backendAddresses[0].ipAddress', '123.4.5.6'),
+            JMESPathCheckV2('backendAddresses[1].fqdn', 'www.mydns.com'),
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --servers 5.4.3.2'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(backendAddresses)', 1),
+            JMESPathCheckV2('backendAddresses[0].ipAddress', '5.4.3.2')
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_frontend_port')
+    def test_network_ag_frontend_port(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway frontend-port',
+            'name': 'myport'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --port 111'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('name', 'myport'),
+            JMESPathCheckV2('port', 111)
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --port 112'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('name', 'myport'),
+            JMESPathCheckV2('port', 112)
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_frontend_ip_public')
+    def test_network_ag_frontend_ip_public(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway frontend-ip',
+            'name': 'myfrontend',
+            'ip1': 'myip1',
+            'ip2': 'myip2'
+        }
+        self.cmd('network application-gateway create -g {rg} -n {ag} --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists'.format(**kwargs))
+
+        self.cmd('network public-ip create -g {rg} -n {ip1}'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {ip2}'.format(**kwargs))
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip1}'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('subnet', None)
+        ])
+
+        # NOTE: Service states that public IP address cannot be changed. https://github.com/Azure/azure-cli/issues/4133
+        # self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip2}'.format(**kwargs))
+        # self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs))
+
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_frontend_ip_private')
+    def test_network_ag_frontend_ip_private(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway frontend-ip',
+            'name': 'appGatewayFrontendIP',
+            'ip1': 'myip1',
+            'vnet1': 'vnet1',
+            'vnet2': 'vnet2',
+            'subnet': 'subnet1'
+        }
+        self.cmd('network public-ip create -g {rg} -n {ip1}'.format(**kwargs))
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet}'.format(**kwargs))
+
+        self.cmd('network application-gateway create -g {rg} -n {ag} --no-wait --public-ip-address {ip1} --vnet-name {vnet1} --subnet {subnet}'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists'.format(**kwargs))
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --private-ip-address 10.0.0.10 --vnet-name {vnet1} --subnet {subnet}'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+        ])
+
+        # NOTE: Service states that frontend subnet cannot differ from gateway subnet https://github.com/Azure/azure-cli/issues/4134
+        # self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name {subnet} --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.10.0/24'.format(**kwargs))
+        # self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --private-ip-address 11.0.10.10 --vnet-name {vnet2} --subnet {subnet}'.format(**kwargs))
+        # self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs))
+
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
 
 
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
