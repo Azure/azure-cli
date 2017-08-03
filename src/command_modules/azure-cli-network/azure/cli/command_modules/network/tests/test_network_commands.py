@@ -309,7 +309,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'ag': 'ag1',
             'rg': resource_group,
             'res': 'application-gateway frontend-ip',
-            'name': 'appGatewayFrontendIP',
+            'name': 'frontendip',
             'ip1': 'myip1',
             'vnet1': 'vnet1',
             'vnet2': 'vnet2',
