@@ -326,8 +326,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 class WebappACRSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_integration(self, resource_group):
-        plan = 'plan1'
-        webapp = 'webappacrtest1'
+        plan = 'plan11'
+        webapp = 'webappacrtest11'
         runtime = 'node|6.4'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
