@@ -8,6 +8,7 @@ Release History
 * vm: expose 'az vm list-skus' command
 * vm/vmss: support to assign identity w/o creating role assignments
 * vm: apply storage sku on attaching data disks
+* vm: remove default os-disk name and storage SKU when using managed disks.
 
 2.0.11 (2017-07-27)
 +++++++++++++++++++
