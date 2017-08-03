@@ -628,46 +628,71 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         ])
 
 
-class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
+class VMAvailSetScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(VMAvailSetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_avail_set')
-        self.location = 'westus'
-        self.name = 'availset-test'
-
-    def test_vm_availset(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('vm availability-set create -g {} -n {}'.format(
-            self.resource_group, self.name), checks=[
-                JMESPathCheck('name', self.name),
-                JMESPathCheck('platformFaultDomainCount', 2),
-                JMESPathCheck('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheck('sku.name', 'Aligned')
+    @ResourceGroupPreparer()
+    def test_vm_availset(self, resource_group):
+        name = 'availset-test'
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('sku.name', 'Aligned')
         ])
 
         # create with explict UD count
-        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
-            self.resource_group), checks=[
-                JMESPathCheck('platformFaultDomainCount', 2),
-                JMESPathCheck('platformUpdateDomainCount', 2),
-                JMESPathCheck('sku.name', 'Aligned')
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group), checks=[
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('platformUpdateDomainCount', 2),
+                JMESPathCheckV2('sku.name', 'Aligned')
         ])
-        self.cmd('vm availability-set delete -g {} -n avset2'.format(self.resource_group))
+        self.cmd('vm availability-set delete -g {} -n avset2'.format(resource_group))
 
-        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(self.resource_group, self.name),
-                 checks=JMESPathCheck('tags.test', 'success'))
-        self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', self.name),
+        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(resource_group, name),
+                 checks=JMESPathCheckV2('tags.test', 'success'))
+        self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('[0].name', name),
         ])
         self.cmd('vm availability-set list-sizes -g {} -n {}'.format(
-            self.resource_group, self.name), checks=JMESPathCheck('type(@)', 'array'))
+            resource_group, name), checks=JMESPathCheckV2('type(@)', 'array'))
         self.cmd('vm availability-set show -g {} -n {}'.format(
-            self.resource_group, self.name), checks=[JMESPathCheck('name', self.name)])
-        self.cmd('vm availability-set delete -g {} -n {}'.format(self.resource_group, self.name))
-        self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[JMESPathCheck('length(@)', 0)])
+            resource_group, name), checks=[JMESPathCheckV2('name', name)])
+        self.cmd('vm availability-set delete -g {} -n {}'.format(resource_group, name))
+        self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
+
+
+# once https://github.com/Azure/azure-cli/issues/4127 is fixed, switch back to a regular ScenarioTest
+class VMAvailSetLiveScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_availset_convert(self, resource_group):
+        name = 'availset-test'
+        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 3),
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('sku.name', 'Classic')
+        ])
+
+        # the conversion should auto adjust the FD from 3 to 2 as 'westus2' only offers 2
+        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('sku.name', 'Aligned')
+        ])
+
+
+class ComputeListSkusScenarioTest(LiveScenarioTest):
+
+    def test_list_compute_skus_table_output(self):
+        result = self.cmd('vm list-skus -l westus -otable')
+        lines = result.output.split('\n')
+        # 1st line is header
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Size', 'Tier'])
+        # spot check the first 3 entries
+        self.assertEqual(lines[3].split(), ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3'])
+        self.assertEqual(lines[4].split(), ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3'])
+        self.assertEqual(lines[5].split(), ['virtualMachines', 'westus', 'Standard_DS1_v2', 'DS1_v2', 'Standard'])
 
 
 class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
