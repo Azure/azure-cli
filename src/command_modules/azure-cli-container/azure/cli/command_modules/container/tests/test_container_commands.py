@@ -19,7 +19,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         cpu = 1
         memory = 1
         command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
-        env = 'KEY1=VALUE1 KEY2=VALUE2'
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
 
         create_cmd = 'container create -g {} -n {} --image {} --os-type {} --ip-address {} --port {} ' \
             '--cpu {} --memory {} --command-line {} -e {}'.format(resource_group,

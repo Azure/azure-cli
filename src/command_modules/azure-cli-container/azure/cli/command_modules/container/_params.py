@@ -20,7 +20,7 @@ OS_TYPES = ['Windows', 'Linux']
 def environment_variables_format(value):
     """Space separated values in 'key=value' format."""
     try:
-        env_name, env_value = value.split('=')
+        env_name, env_value = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted enviroment settings. "
                    "Argmuent values should be in the format a=b c=d")

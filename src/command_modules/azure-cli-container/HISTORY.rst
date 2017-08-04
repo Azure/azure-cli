@@ -1,5 +1,10 @@
 .. :changelog:
 
+unreleased
+----------
+
+* container create: Fixes issue where equals sign was not allowed inside an environment variable.
+
 Release History
 ===============
 
