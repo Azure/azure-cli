@@ -72,7 +72,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2016-04-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2016-05-31'
+        ResourceType.DATA_STORAGE: '2017-04-17'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2015-06-15',
