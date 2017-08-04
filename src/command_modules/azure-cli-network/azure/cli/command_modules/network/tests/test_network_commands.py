@@ -433,6 +433,30 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
         self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 0))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_rule')
+    def test_network_ag_rule(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway rule',
+            'name': 'myrule'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com'.format(**kwargs))
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener2 --no-wait --frontend-port appGatewayFrontendPort --host-name www.test2.com'.format(**kwargs))
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener'.format(**kwargs))
+        rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue(rule['httpListener']['id'].endswith('mylistener'))
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2'.format(**kwargs))
+        rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
 
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
