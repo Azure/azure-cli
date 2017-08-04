@@ -32,7 +32,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-authorization==0.30.0rc6',
-    'azure-mgmt-compute==2.0.0',
+    'azure-mgmt-compute==2.9999.0',
     'azure-mgmt-keyvault==0.40.0',
     'azure-keyvault==0.3.4',
     'azure-mgmt-network==1.3.0',

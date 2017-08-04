@@ -41,13 +41,16 @@ def transform_ip_addresses(result):
     return transformed
 
 
-def transform_vm(result):
-    return OrderedDict([('name', result['name']),
-                        ('resourceGroup', result['resourceGroup']),
-                        ('powerState', result.get('powerState')),
-                        ('publicIps', result.get('publicIps')),
-                        ('fqdns', result.get('fqdns')),
-                        ('location', result['location'])])
+def transform_vm(vm):
+    result = OrderedDict([('name', vm['name']),
+                          ('resourceGroup', vm['resourceGroup']),
+                          ('powerState', vm.get('powerState')),
+                          ('publicIps', vm.get('publicIps')),
+                          ('fqdns', vm.get('fqdns')),
+                          ('location', vm['location'])])
+    if 'zones' in vm:
+        result['zones'] = ','.join(vm['zones']) if vm['zones'] else ''
+    return result
 
 
 def transform_vm_create_output(result):
@@ -63,6 +66,8 @@ def transform_vm_create_output(result):
                               ('location', result.location)])
         if getattr(result, 'identity', None):
             output['identity'] = result.identity
+        if hasattr(result, 'zones'):  # output 'zones' column even the property value is None
+            output['zones'] = result.zones[0] if result.zones else ''
         return output
     except AttributeError:
         from msrest.pipeline import ClientRawResponse

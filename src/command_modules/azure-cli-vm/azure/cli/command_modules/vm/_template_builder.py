@@ -128,7 +128,7 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None):
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None, zones=None):
 
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
@@ -136,7 +136,7 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2016-11-01' if zones else '2015-06-15',
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -144,6 +144,9 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
         'dependsOn': [],
         'properties': public_ip_properties
     }
+    if zones:
+        public_ip['zones'] = zones
+
     return public_ip
 
 
@@ -304,7 +307,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None, secrets=None, license_type=None):
+        custom_data=None, secrets=None, license_type=None, zones=None):
 
     def _build_os_profile():
 
@@ -437,6 +440,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         'dependsOn': [],
         'properties': vm_properties,
     }
+    if zones:
+        vm['zones'] = zones
     return vm
 
 
@@ -675,7 +680,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None, secrets=None):
+                        single_placement_group=None, custom_data=None, secrets=None, zones=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -825,6 +830,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         },
         'properties': vmss_properties
     }
+    if zones:
+        vmss['zones'] = zones
     return vmss
 
 

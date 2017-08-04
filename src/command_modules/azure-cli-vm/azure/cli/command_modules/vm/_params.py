@@ -63,6 +63,11 @@ for scope in ['vm', 'disk', 'snapshot', 'image']:
     register_cli_argument(scope, 'tags', tags_type)
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
+    c.register_cli_argument('vm', 'zones', help='availability zone the virtual machine will be in, e.g. 1, 2, etc')
+    c.register_cli_argument('disk', 'zones', help='availability zone the disk will be in, e.g. 1, 2, etc.')
+    c.register_cli_argument('vmss', 'zones', nargs='+', help='space separated availability zone list instances will be in, e.g. 1 2')
+
 for item in ['show', 'list']:
     register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')
 
