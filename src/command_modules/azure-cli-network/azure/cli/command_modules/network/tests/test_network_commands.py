@@ -394,6 +394,45 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
         self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_probe')
+    def test_network_ag_probe(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway probe',
+            'name': 'myprobe'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test --protocol http --interval 25 --timeout 100 --threshold 10 --min-servers 2 --host www.test.com --match-status-codes 200 204 --host-name-from-http-settings false'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('path', '/test'),
+            JMESPathCheckV2('protocol', 'Http'),
+            JMESPathCheckV2('interval', 25),
+            JMESPathCheckV2('timeout', 100),
+            JMESPathCheckV2('unhealthyThreshold', 10),
+            JMESPathCheckV2('minServers', 2),
+            JMESPathCheckV2('host', 'www.test.com'),
+            JMESPathCheckV2('length(match.statusCodes)', 2),
+            JMESPathCheckV2('pickHostNameFromBackendHttpSettings', False)
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test2 --protocol https --interval 26 --timeout 101 --threshold 11 --min-servers 3 --host "" --match-status-codes 201 --host-name-from-http-settings'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('path', '/test2'),
+            JMESPathCheckV2('protocol', 'Https'),
+            JMESPathCheckV2('interval', 26),
+            JMESPathCheckV2('timeout', 101),
+            JMESPathCheckV2('unhealthyThreshold', 11),
+            JMESPathCheckV2('minServers', 3),
+            JMESPathCheckV2('host', ''),
+            JMESPathCheckV2('length(match.statusCodes)', 1),
+            JMESPathCheckV2('pickHostNameFromBackendHttpSettings', True)
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 0))
+
 
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
