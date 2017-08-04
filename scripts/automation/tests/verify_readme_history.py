@@ -12,9 +12,13 @@ import os
 import sys
 import argparse
 import subprocess
+from docutils import core, io
 
 from ..utilities.path import get_all_module_paths
 from ..utilities.display import print_heading
+
+HISTORY_NAME = 'HISTORY.rst'
+RELEASE_HISTORY_TITLE = 'Release History'
 
 def exec_command(command, cwd=None, stdout=None, env=None):
     """Returns True in the command was executed successfully"""
@@ -30,8 +34,35 @@ def exec_command(command, cwd=None, stdout=None, env=None):
         return False
 
 
+def check_history_headings(mod_path):
+    history_path = os.path.join(mod_path, HISTORY_NAME)
+
+    source_path = None
+    destination_path = None
+    with open(history_path, 'r') as f:
+        input_string = f.read()
+        _, pub = core.publish_programmatically(
+                source_class=io.StringInput, source=input_string,
+                source_path=source_path,
+                destination_class=io.NullOutput, destination=None,
+                destination_path=destination_path,
+                reader=None, reader_name='standalone',
+                parser=None, parser_name='restructuredtext',
+                writer=None, writer_name='null',
+                settings=None, settings_spec=None, settings_overrides={},
+                config_section=None, enable_exit_status=None)
+        if pub.writer.document.children[0].rawsource == RELEASE_HISTORY_TITLE:
+            return True
+        else:
+            print("Expected '{}' as first heading in HISTORY.rst".format(RELEASE_HISTORY_TITLE))
+            return False
+
+
 def check_readme_render(mod_path):
-    return exec_command('python setup.py check -r -s', cwd=mod_path)
+    checks = []
+    checks.append(exec_command('python setup.py check -r -s', cwd=mod_path))
+    checks.append(check_history_headings(mod_path))
+    return all(checks)
 
 def verify_all():
     all_paths = get_all_module_paths()
