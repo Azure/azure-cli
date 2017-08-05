@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from subprocess import call, PIPE
-
 from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
@@ -233,10 +231,16 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
+    from subprocess import PIPE, Popen
+    _DOCKER_NOT_AVAILABLE = "Please verify whether docker is installed and running properly"
+
     try:
-        call(["docker", "ps"], stdout=PIPE, stderr=PIPE)
+        p = Popen(["docker", "ps"], stdout=PIPE, stderr=PIPE)
+        returncode = p.wait()
+        if returncode:
+            raise CLIError(_DOCKER_NOT_AVAILABLE)
     except:
-        raise CLIError("Please verify whether docker is installed and running properly")
+        raise CLIError(_DOCKER_NOT_AVAILABLE)
 
     registry, _ = get_registry_by_name(registry_name, resource_group_name)
     sku_tier = registry.sku.tier
@@ -277,10 +281,27 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
                 'Unable to authenticate using AAD or admin login credentials. ' +
                 'Please specify both username and password in non-interactive mode.')
 
-    call(["docker", "login",
-          "--username", username,
-          "--password", password,
-          login_server])
+    use_password_stdin = False
+    try:
+        p = Popen(["docker", "login", "--help"], stdout=PIPE, stderr=PIPE)
+        stdout, _ = p.communicate()
+        if b'--password-stdin' in stdout:
+            use_password_stdin = True
+    except:
+        raise CLIError(_DOCKER_NOT_AVAILABLE)
+
+    if use_password_stdin:
+        p = Popen(["docker", "login",
+                   "--username", username,
+                   "--password-stdin",
+                   login_server], stdin=PIPE)
+        p.communicate(input=password.encode())
+    else:
+        p = Popen(["docker", "login",
+                   "--username", username,
+                   "--password", password,
+                   login_server])
+        p.wait()
 
 
 def acr_show_usage(registry_name, resource_group_name=None):
