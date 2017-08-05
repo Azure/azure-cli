@@ -224,7 +224,10 @@ def acr_update_set(client,
     return client.update(resource_group_name, registry_name, parameters)
 
 
-def acr_login(registry_name, resource_group_name=None, username=None, password=None):
+def acr_login(registry_name,  # pylint: disable=too-many-statements
+              resource_group_name=None,
+              username=None,
+              password=None):
     """Login to a container registry through Docker.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
