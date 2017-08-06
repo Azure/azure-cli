@@ -109,6 +109,7 @@ cli_batch_data_plane_command('batch job disable', data_path.format('job', 'JobOp
 cli_batch_data_plane_command('batch job enable', data_path.format('job', 'JobOperations.enable'), job_client_factory)
 cli_batch_data_plane_command('batch job stop', data_path.format('job', 'JobOperations.terminate'), job_client_factory)
 cli_batch_data_plane_command('batch job prep-release-status list', data_path.format('job', 'JobOperations.list_preparation_and_release_task_status'), job_client_factory)
+cli_batch_data_plane_command('batch job task-counts show', data_path.format('job', 'JobOperations.get_task_counts'), job_client_factory)
 
 cli_batch_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), job_schedule_client_factory,
                              ignore=['cloud_job_schedule.job_specification.job_preparation_task', 'cloud_job_schedule.job_specification.on_task_failure',

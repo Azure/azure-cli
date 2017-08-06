@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.8 msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.6+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,41 +20,40 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 26 May 2017 22:49:19 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: !!python/unicode '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location":
-      "westus"}'
+      "westus", "properties": {"supportsHttpsTrafficOnly": false}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Length: ['74']
+      Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.8 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.6+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-06-01
   response:
     body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 26 May 2017 22:49:21 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:05 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/f8aa35e5-89ee-4a12-bd71-0abc3d5b215d?monitor=true&api-version=2016-12-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/64f88545-b190-4f91-97cf-d6fd7fff00f2?monitor=true&api-version=2017-06-01']
       pragma: [no-cache]
-      retry-after: ['17']
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -64,21 +63,21 @@ interactions:
       CommandName: [storage account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.8 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.6+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/f8aa35e5-89ee-4a12-bd71-0abc3d5b215d?monitor=true&api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/64f88545-b190-4f91-97cf-d6fd7fff00f2?monitor=true&api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"westus","name":"clitest000002","properties":{"creationTime":"2017-05-26T22:49:21.2938605Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"westus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"westus","name":"clitest000002","properties":{"creationTime":"2017-08-01T22:36:05.8370888Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"westus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['861']
       content-type: [application/json]
-      date: ['Fri, 26 May 2017 22:49:39 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -95,35 +94,35 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.8 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.6+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"t675wi9pvO4ADufDmA1zbFw5HV1T8xVgkA1e6zvJEPwKIgWcTYpzB1S7TcbywM1hmyFKsGKVDuuRIxYReQp+oA=="},{"keyName":"key2","permissions":"Full","value":"zezWrLD8eXXHWTZ42L7g41q3nF7TwsLIF+0ZnNJjanXAF8GM7lf1qWNjtJJExhWFY7etmiPZcVeDSbQdixneCw=="}]}
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"nOA8xM1v3YcB7NTUHbVNS3MuZlSv6e3MkYqblEJpsrl1qAcC2bC8wqeYyFk95VhRcf4znVshha5kYWtKRKK5Cg=="},{"keyName":"key2","permissions":"Full","value":"c/nqW/6LUHy4SnaCDJjFH4lRab064wz2r7mSvCzZ8noEmdDITmOb3Gz5Uo4eUsPSsFAFktMpzo8fSHOOCCZ4ZQ=="}]}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Fri, 26 May 2017 22:49:41 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:24 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.queue.core.windows.net/?comp=properties&restype=service
@@ -133,7 +132,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:41 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -142,8 +141,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=properties&restype=service
@@ -152,7 +151,7 @@ interactions:
         /></StorageServiceProperties>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:41 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:24 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -163,8 +162,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/?comp=properties&restype=service
@@ -173,7 +172,7 @@ interactions:
         /></StorageServiceProperties>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:41 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:24 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -182,8 +181,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.file.core.windows.net/?comp=properties&restype=service
@@ -192,7 +191,7 @@ interactions:
         /></StorageServiceProperties>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:41 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:24 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -204,15 +203,15 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['386']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.file.core.windows.net/?comp=properties&restype=service
   response:
     body: {string: !!python/unicode ''}
     headers:
-      date: ['Fri, 26 May 2017 22:49:42 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -221,8 +220,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:26 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.queue.core.windows.net/?comp=properties&restype=service
@@ -232,7 +231,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:42 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:24 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -241,8 +240,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:26 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=properties&restype=service
@@ -251,7 +250,7 @@ interactions:
         /></StorageServiceProperties>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:41 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -262,8 +261,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:26 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/?comp=properties&restype=service
@@ -272,7 +271,7 @@ interactions:
         /></StorageServiceProperties>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:42 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -281,8 +280,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.6.0) AZURECLI/2.0.6+dev]
-      x-ms-date: ['Fri, 26 May 2017 22:49:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 22:36:26 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.file.core.windows.net/?comp=properties&restype=service
@@ -291,7 +290,7 @@ interactions:
         /></StorageServiceProperties>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 26 May 2017 22:49:42 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:25 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -305,9 +304,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.6.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.8 msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.6+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -316,11 +315,10 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 26 May 2017 22:49:43 GMT']
+      date: ['Tue, 01 Aug 2017 22:36:27 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdCM0o1UllQUVROWVhKMlA0Rzc0N0E3RFZUUUpRM1JYSDVFWHwyNzk3MTBENkJDMTY0NjIzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdZM1E0NkhCUlFVRVhHT1dMSlpIUUNMUjRMT0VTT0EyQVVCUnxCMTYxNDAzRUJGMDYzNThCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
-      retry-after: ['15']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
