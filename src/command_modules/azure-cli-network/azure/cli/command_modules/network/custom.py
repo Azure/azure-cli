@@ -432,7 +432,7 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
         instance.request_timeout = timeout
     if connection_draining_timeout is not None:
         instance.connection_draining.enabled = bool(connection_draining_timeout)
-        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout
+        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout or 1
     if host_name is not None:
         instance.host_name = host_name
     if host_name_from_backend_pool is not None:
