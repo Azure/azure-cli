@@ -917,9 +917,22 @@ def _mkdir_p(path):
             raise
 
 
-def update_acs(client, resource_group_name, container_service_name, new_agent_count):
+def update_acs(client, resource_group_name, container_service_name, new_agent_count=None, new_agent_counts=None):
     instance = client.get(resource_group_name, container_service_name)
-    instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
+    if new_agent_counts is None and new_agent_count is None:
+        raise CLIError('specify either --new-agent-counts or --new-agent-count, --new-agent-counts will override --new-agent-count')  # pylint: disable=C0321
+
+    if new_agent_counts is None:
+        instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
+    else:
+        for name, count in new_agent_counts.items():
+            find = False
+            for ap in instance.agent_pool_profiles:
+                if ap.name == name:
+                    find = True
+                    ap.count = int(count)
+            if find is False:
+                raise CLIError('agent pool name ' + name + ' does not exist in the current cluster')
 
     # null out the service principal because otherwise validation complains
     if instance.orchestrator_profile.orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes:

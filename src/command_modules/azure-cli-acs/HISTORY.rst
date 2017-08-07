@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++
+* acs scale on multiple agent pools
+
 2.0.11 (2017-07-27)
 +++++++++++++++++++
 * api version 2017-07-01 support
