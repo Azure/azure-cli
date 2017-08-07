@@ -147,9 +147,9 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
     class ThreeStateAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
-            if not values:
-                values = negative_label if invert else positive_label
+            values = values or positive_label
             is_positive = values.lower() == positive_label.lower()
+            is_positive = not is_positive if invert else is_positive
             set_val = None
             if return_label:
                 set_val = positive_label if is_positive else negative_label
