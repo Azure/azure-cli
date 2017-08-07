@@ -1405,7 +1405,7 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None):
+                     idle_timeout=4, reverse_fqdn=None, version=None, zone=None):
     client = _network_client_factory().public_ip_addresses
 
     public_ip_args = {
@@ -1417,6 +1417,8 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
     }
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        public_ip_args['zones'] = zone
     public_ip = PublicIPAddress(**public_ip_args)
 
     if dns_name or reverse_fqdn:

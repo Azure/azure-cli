@@ -5,6 +5,7 @@ Release History
 
 unreleased
 +++++++++++++++++++
+* `public-ip`: Add availability zone support.
 * `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted
 
 

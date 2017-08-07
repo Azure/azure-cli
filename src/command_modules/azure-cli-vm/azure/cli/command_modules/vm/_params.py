@@ -16,7 +16,7 @@ from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
+     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import \
     (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
@@ -64,9 +64,9 @@ for scope in ['vm', 'disk', 'snapshot', 'image']:
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
 with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
-    c.register_cli_argument('vm', 'zones', help='availability zone the virtual machine will be in, e.g. 1, 2, etc')
-    c.register_cli_argument('disk', 'zones', help='availability zone the disk will be in, e.g. 1, 2, etc.')
-    c.register_cli_argument('vmss', 'zones', nargs='+', help='space separated availability zone list instances will be in, e.g. 1 2')
+    c.register_cli_argument('vm', 'zone', zone_type)
+    c.register_cli_argument('disk', 'zone', zone_type, options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
+    c.register_cli_argument('vmss', 'zones', zones_type)
 
 for item in ['show', 'list']:
     register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')

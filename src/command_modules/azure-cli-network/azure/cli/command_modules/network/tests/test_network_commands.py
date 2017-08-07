@@ -322,6 +322,19 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('network public-ip list -g {}'.format(rg), checks=JMESPathCheck("length[?name == '{}']".format(public_ip_dns), None))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkZonedPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
+    def test_network_zoned_public_ip(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'ip': 'pubip'
+        }
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2'.format(**kwargs),
+                 checks=JMESPathCheck('publicIp.zones[0]', '2'))
+
+
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_express_route')

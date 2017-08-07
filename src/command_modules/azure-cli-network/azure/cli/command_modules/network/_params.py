@@ -11,7 +11,7 @@ from azure.cli.core.commands import \
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
-                                                three_state_flag, model_choice_list)
+                                                three_state_flag, model_choice_list, zone_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -467,6 +467,9 @@ register_cli_argument('network public-ip', 'idle_timeout', help='Idle timeout in
 register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
 register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network public-ip', 'zone', zone_type)
 
 for item in ['create', 'update']:
     register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))

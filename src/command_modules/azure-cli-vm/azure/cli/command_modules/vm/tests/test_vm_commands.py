@@ -2106,9 +2106,12 @@ class VMZoneScenarioTest(ScenarioTest):
     def test_vm_create_zones(self, resource_group, resource_group_location):
         zones = '2'
         vm_name = 'vm123'
-        self.cmd('vm create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {}'.format(resource_group, vm_name, zones), checks=[
+        ip_name = 'vm123ip'
+        self.cmd('vm create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zone {} --public-ip-address {}'.format(resource_group, vm_name, zones, ip_name), checks=[
             JMESPathCheckV2('zones', zones)
         ])
+        self.cmd('network public-ip show -g {} -n {}'.format(resource_group, ip_name),
+                 checks=JMESPathCheckV2('zones[0]', zones))
         # Test VM's specific table output
         result = self.cmd('vm show -g {} -n {} -otable'.format(resource_group, vm_name))
         table_output = set(result.output.split('\n')[2].split())
@@ -2127,7 +2130,7 @@ class VMZoneScenarioTest(ScenarioTest):
     def test_disk_create_zones(self, resource_group):
         zones = '2'
         disk_name = 'disk123'
-        self.cmd('disk create -g {} -n {} --size-gb 1 --zones {}'.format(resource_group, disk_name, zones), checks=[
+        self.cmd('disk create -g {} -n {} --size-gb 1 --zone {}'.format(resource_group, disk_name, zones), checks=[
             JMESPathCheckV2('zones[0]', zones)
         ])
         self.cmd('disk show -g {} -n {}'.format(resource_group, disk_name), checks=[
