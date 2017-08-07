@@ -61,7 +61,7 @@ def _get_feature_in_preview_message():
     return "Feature in preview, only in " + ", ".join(regionsInPreview) + ". "
 
 
-regionsInPreview = ["ukwest", "uksouth"]
+regionsInPreview = ["ukwest", "uksouth", "eastus", "westcentralus", "westus2", "canadaeast", "canadacentral", "westindia", "southindia", "centralindia"]
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
