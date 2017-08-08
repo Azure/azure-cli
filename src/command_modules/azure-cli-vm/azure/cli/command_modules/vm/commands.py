@@ -254,7 +254,8 @@ cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'Usa
             table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
 
 # VMSS
-vmss_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, Capacity:sku.capacity, Overprovision:overprovision, upgradePolicy:upgradePolicy.mode}'
+vmss_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Capacity:sku.capacity, Overprovision:overprovision, UpgradePolicy:upgradePolicy.mode}'
+vmss_show_table_transform = vmss_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') else ' ')
 cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, no_wait_param='raw')
 cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'list_skus'), cf_vmss)
 
@@ -283,11 +284,13 @@ cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_o
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     # VM Disk
+    disk_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Sku:sku.name, OsType:osType, SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
+    disk_show_table_transform = disk_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') else ' ')
     op_var = 'disks_operations'
     op_class = 'DisksOperations'
-    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'), no_wait_param='no_wait')
-    cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'))
-    cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404)
+    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'), no_wait_param='no_wait', table_transformer=disk_show_table_transform)
+    cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'), table_transformer='[].' + disk_show_table_transform)
+    cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404, table_transformer=disk_show_table_transform)
     cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks, no_wait_param='raw', confirmation=True)
     cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
     cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)

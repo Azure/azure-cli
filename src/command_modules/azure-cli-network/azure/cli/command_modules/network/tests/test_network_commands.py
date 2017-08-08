@@ -334,6 +334,9 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2'.format(**kwargs),
                  checks=JMESPathCheck('publicIp.zones[0]', '2'))
 
+        table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable'.format(**kwargs)).output
+        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+
 
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):

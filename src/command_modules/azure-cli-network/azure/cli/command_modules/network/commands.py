@@ -306,10 +306,13 @@ cli_command(__name__, 'network watcher troubleshooting start', custom_path + 'st
 cli_command(__name__, 'network watcher troubleshooting show', custom_path + 'show_nw_troubleshooting_result', cf_network_watcher)
 
 # PublicIPAddressesOperations
+public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') else ' ')
+
 public_ip_path = 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.'
 cli_command(__name__, 'network public-ip delete', public_ip_path + 'delete', cf_public_ip_addresses)
-cli_command(__name__, 'network public-ip show', public_ip_path + 'get', cf_public_ip_addresses, exception_handler=empty_on_404)
-cli_command(__name__, 'network public-ip list', custom_path + 'list_public_ips')
+cli_command(__name__, 'network public-ip show', public_ip_path + 'get', cf_public_ip_addresses, exception_handler=empty_on_404, table_transformer=public_ip_show_table_transform)
+cli_command(__name__, 'network public-ip list', custom_path + 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
 cli_command(__name__, 'network public-ip create', custom_path + 'create_public_ip', transform=transform_public_ip_create_output)
 cli_generic_update_command(__name__, 'network public-ip update', public_ip_path + 'get', public_ip_path + 'create_or_update', cf_public_ip_addresses, custom_function_op=custom_path + 'update_public_ip')
 

@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -20,16 +20,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 04 Aug 2017 20:29:11 GMT']
+      date: ['Mon, 07 Aug 2017 23:27:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"properties": {"idleTimeoutInMinutes": 4, "publicIPAllocationMethod":
-      "Dynamic", "publicIPAddressVersion": "IPv4"}, "location": "centralus", "zones":
-      ["2"]}'
+    body: '{"zones": ["2"], "properties": {"idleTimeoutInMinutes": 4, "publicIPAddressVersion":
+      "IPv4", "publicIPAllocationMethod": "Dynamic"}, "location": "centralus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -45,18 +44,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2017-06-01
   response:
     body: {string: "{\r\n  \"name\": \"pubip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip\"\
-        ,\r\n  \"etag\": \"W/\\\"77534db0-ad28-4635-8199-0f62d603186c\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"cf4f5f22-d2b5-436c-9bd9-df9ab1684dbb\\\"\",\r\n \
         \ \"location\": \"centralus\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n\
         \  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"\
-        resourceGuid\": \"d0dfa65a-622b-4fb9-8f2a-d1a0e292a5e3\",\r\n    \"publicIPAddressVersion\"\
+        resourceGuid\": \"812c07e4-dcfd-42af-b7aa-22bfffb8c74e\",\r\n    \"publicIPAddressVersion\"\
         : \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\"\
         : 4\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\"\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/9b4a3da6-f80a-4ea1-896b-e7294d257f53?api-version=2017-06-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/f1f5ba16-1ebf-4032-b62a-6dab08ace62c?api-version=2017-06-01']
       cache-control: [no-cache]
       content-length: ['632']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 04 Aug 2017 20:29:12 GMT']
+      date: ['Mon, 07 Aug 2017 23:27:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -76,19 +75,18 @@ interactions:
           AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/9b4a3da6-f80a-4ea1-896b-e7294d257f53?api-version=2017-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/f1f5ba16-1ebf-4032-b62a-6dab08ace62c?api-version=2017-06-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 04 Aug 2017 20:29:15 GMT']
+      date: ['Mon, 07 Aug 2017 23:27:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
@@ -107,23 +105,56 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2017-06-01
   response:
     body: {string: "{\r\n  \"name\": \"pubip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip\"\
-        ,\r\n  \"etag\": \"W/\\\"2db5b8bc-f274-40e8-a238-0d7cad9d5332\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"95e8e4ca-f13c-45f2-b48c-63bc2ebe6986\\\"\",\r\n \
         \ \"location\": \"centralus\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n\
         \  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        resourceGuid\": \"d0dfa65a-622b-4fb9-8f2a-d1a0e292a5e3\",\r\n    \"publicIPAddressVersion\"\
+        resourceGuid\": \"812c07e4-dcfd-42af-b7aa-22bfffb8c74e\",\r\n    \"publicIPAddressVersion\"\
         : \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\"\
         : 4\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['633']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 04 Aug 2017 20:29:16 GMT']
-      etag: [W/"2db5b8bc-f274-40e8-a238-0d7cad9d5332"]
+      date: ['Mon, 07 Aug 2017 23:27:27 GMT']
+      etag: [W/"95e8e4ca-f13c-45f2-b48c-63bc2ebe6986"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network public-ip show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.11 networkmanagementclient/1.9999.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2017-06-01
+  response:
+    body: {string: "{\r\n  \"name\": \"pubip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip\"\
+        ,\r\n  \"etag\": \"W/\\\"95e8e4ca-f13c-45f2-b48c-63bc2ebe6986\\\"\",\r\n \
+        \ \"location\": \"centralus\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n\
+        \  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        resourceGuid\": \"812c07e4-dcfd-42af-b7aa-22bfffb8c74e\",\r\n    \"publicIPAddressVersion\"\
+        : \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\"\
+        : 4\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['633']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 07 Aug 2017 23:27:28 GMT']
+      etag: [W/"95e8e4ca-f13c-45f2-b48c-63bc2ebe6986"]
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
@@ -146,11 +177,71 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 04 Aug 2017 20:29:17 GMT']
+      date: ['Mon, 07 Aug 2017 23:27:29 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGWk9ORUQ6NUZQVUJMSUM6NUZJUFhIN1FRTk9TVlVUNUtFSnxCNDdGQTk5QUM4N0ZCQzMyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGWk9ORUQ6NUZQVUJMSUM6NUZJUDIyVzRUVTRVRUhKSUlBU3xENkExMkY4OUJDNjg2Q0I3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network public-ip show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.11 networkmanagementclient/1.9999.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2017-06-01
+  response:
+    body: {string: '{"error":{"code":"SubscriptionNotFound","message":"The subscription
+        ''00000000-0000-0000-0000-000000000000'' could not be found."}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['129']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Mon, 07 Aug 2017 23:36:06 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-correlation-request-id: [be5947c1-1d57-4276-894c-3f45ec37fb65]
+      x-ms-failure-cause: [gateway]
+      x-ms-request-id: [be5947c1-1d57-4276-894c-3f45ec37fb65]
+      x-ms-routing-request-id: ['WESTUS:20170807T233607Z:be5947c1-1d57-4276-894c-3f45ec37fb65']
+    status: {code: 404, message: Not Found}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network public-ip show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
+          msrest_azure/0.4.11 networkmanagementclient/1.9999.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2017-06-01
+  response:
+    body: {string: '{"error":{"code":"SubscriptionNotFound","message":"The subscription
+        ''00000000-0000-0000-0000-000000000000'' could not be found."}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['129']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Mon, 07 Aug 2017 23:36:13 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-correlation-request-id: [24964d2a-3092-4203-bf18-3d3a44773987]
+      x-ms-failure-cause: [gateway]
+      x-ms-request-id: [24964d2a-3092-4203-bf18-3d3a44773987]
+      x-ms-routing-request-id: ['WESTUS:20170807T233613Z:24964d2a-3092-4203-bf18-3d3a44773987']
+    status: {code: 404, message: Not Found}
 version: 1
