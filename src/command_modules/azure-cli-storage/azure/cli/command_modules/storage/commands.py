@@ -98,7 +98,8 @@ cli_storage_data_plane_command('storage container policy create', custom_path + 
 cli_storage_data_plane_command('storage container policy delete', custom_path + 'delete_acl_policy', factory)
 cli_storage_data_plane_command('storage container policy show', custom_path + 'get_acl_policy', factory, exception_handler=_dont_fail_not_exist)
 cli_storage_data_plane_command('storage container policy list', custom_path + 'list_acl_policies', factory, table_transformer=transform_acl_list_output)
-cli_storage_data_plane_command('storage container policy update', custom_path + 'set_acl_policy', factory)
+cli_storage_data_plane_command('storage container policy update', custom_path + 'set_acl_policy', factory,
+                               resource_type=ResourceType.DATA_STORAGE, min_api='2017-04-17')
 
 # blob commands
 cli_storage_data_plane_command('storage blob list', block_blob_path + 'list_blobs', factory, transform=transform_storage_list_output, table_transformer=transform_blob_output)
@@ -124,6 +125,7 @@ cli_storage_data_plane_command('storage blob copy start-batch', 'azure.cli.comma
 cli_storage_data_plane_command('storage blob copy cancel', block_blob_path + 'abort_copy_blob', factory)
 cli_storage_data_plane_command('storage blob upload-batch', 'azure.cli.command_modules.storage.blob#storage_blob_upload_batch', factory)
 cli_storage_data_plane_command('storage blob download-batch', 'azure.cli.command_modules.storage.blob#storage_blob_download_batch', factory)
+cli_storage_data_plane_command('storage blob set-tier', custom_path + 'set_blob_tier', factory)
 
 # page blob commands
 cli_storage_data_plane_command('storage blob incremental-copy start',

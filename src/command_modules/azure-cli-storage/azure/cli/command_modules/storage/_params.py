@@ -35,7 +35,7 @@ from ._validators import \
      process_file_download_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri,
-     get_char_options_validator, validate_bypass, validate_subnet)
+     get_char_options_validator, validate_bypass, validate_subnet, page_blob_tier_validator, blob_tier_validator)
 
 
 DeleteSnapshot, BlockBlobService, \
@@ -420,10 +420,32 @@ for item in ['download', 'upload']:
 for item in ['update', 'upload', 'upload-batch']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
-register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
-register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
-with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
-    c.register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+with CommandContext('storage blob upload') as c:
+    c.reg_arg('blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.",
+              options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
+    c.reg_arg('maxsize_condition', help='The max length in bytes permitted for an append blob.')
+    c.reg_arg('validate_content',
+              help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the '
+                   'service when the chunk has arrived.',
+              resource_type=ResourceType.DATA_STORAGE,
+              min_api='2016-05-31')
+
+    from azure.cli.command_modules.storage.util import get_blob_tier_names
+    c.reg_arg('tier',
+              help='A page blob tier value to set the blob to. The tier correlates to the size of the blob and number '
+                   'of allowed IOPS. This is only applicable to page blobs on premium storage accounts.',
+              resource_type=ResourceType.DATA_STORAGE,
+              min_api='2017-04-17',
+              validator=page_blob_tier_validator,
+              **enum_choice_list(get_blob_tier_names('PremiumPageBlobTier')))
+
+with CommandContext('storage blob set-tier') as c:
+    c.reg_arg('blob_type', help="The blob's type", options_list=('--type', '-t'), **enum_choice_list(['block', 'page']))
+    c.reg_arg('tier', help='The tier value to set the blob to.', validator=blob_tier_validator)
+    c.reg_arg('timeout', help='The timeout parameter is expressed in seconds. This method may make multiple calls to '
+                              'the Azure service and the timeout will apply to each call individually.',
+              type=int)
+
 
 # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
 register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)

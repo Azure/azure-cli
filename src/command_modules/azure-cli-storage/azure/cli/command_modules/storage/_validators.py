@@ -877,3 +877,42 @@ def get_char_options_validator(types, property_name):
 
         setattr(namespace, property_name, service_types)
     return _validator
+
+
+def page_blob_tier_validator(namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'page' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
+
+    try:
+        namespace.tier = getattr(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#PremiumPageBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.util import get_blob_tier_names
+        raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(
+            get_blob_tier_names('PremiumPageBlobTier'))))
+
+
+def block_blob_tier_validator(namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'block' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
+
+    try:
+        namespace.tier = getattr(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#StandardBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.util import get_blob_tier_names
+        raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(
+            get_blob_tier_names('StandardBlobTier'))))
+
+
+def blob_tier_validator(namespace):
+    if namespace.blob_type == 'page':
+        page_blob_tier_validator(namespace)
+    elif namespace.blob_type == 'block':
+        block_blob_tier_validator(namespace)
+    else:
+        raise ValueError('Blob tier is only applicable to block or page blob.')
