@@ -15,11 +15,12 @@ import uuid
 
 import six
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck, MOCKED_SUBSCRIPTION_ID)
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
@@ -2100,6 +2101,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
         self.assertTrue('Succeeded: {} (Microsoft.Compute/virtualMachines)'.format(vm_name) in lines)
 
 
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMZoneScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus2')
