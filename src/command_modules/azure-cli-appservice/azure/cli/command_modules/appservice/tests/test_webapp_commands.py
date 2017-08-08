@@ -311,6 +311,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         ])
 
         result = self.cmd('webapp deployment container config -g {} -n {} --enable-cd true'.format(resource_group, webapp)).get_output_in_json()
+
         self.assertTrue(result['CI_CD_URL'].startswith('https://'))
         self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
 
