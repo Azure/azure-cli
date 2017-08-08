@@ -27,4 +27,5 @@ register_cli_argument('logout', 'username', help='account user, if missing, logo
 
 register_cli_argument('account', 'subscription', options_list=('--subscription', '-s'), help='Name or ID of subscription.', completer=get_subscription_id_list)
 register_cli_argument('account list', 'all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
+register_cli_argument('account list', 'refresh', help="retrieve up to date subscriptions from server", action='store_true')
 register_cli_argument('account show', 'show_auth_for_sdk', options_list=('--sdk-auth',), action='store_true', help='output result in compatible with Azure SDK auth file')

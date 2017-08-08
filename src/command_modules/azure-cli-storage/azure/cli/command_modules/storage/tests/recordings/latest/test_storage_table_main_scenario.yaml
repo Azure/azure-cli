@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.7 msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.4+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,41 +20,40 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:20 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1188']
     status: {code: 201, message: Created}
 - request:
     body: !!python/unicode '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location":
-      "westus"}'
+      "westus", "properties": {"supportsHttpsTrafficOnly": false}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Length: ['74']
+      Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.7 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.4+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-06-01
   response:
     body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:21 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:23 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/ca2488b5-f23b-4223-b52b-639b7f16a142?monitor=true&api-version=2016-12-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/e07ded09-4948-43c7-86fe-c779deb3cd71?monitor=true&api-version=2017-06-01']
       pragma: [no-cache]
-      retry-after: ['17']
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -64,21 +63,21 @@ interactions:
       CommandName: [storage account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.7 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.4+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/ca2488b5-f23b-4223-b52b-639b7f16a142?monitor=true&api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/e07ded09-4948-43c7-86fe-c779deb3cd71?monitor=true&api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"westus","name":"clitest000002","properties":{"creationTime":"2017-05-05T21:15:22.1316346Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"westus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"westus","name":"clitest000002","properties":{"creationTime":"2017-08-01T23:08:23.4878288Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"westus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['861']
       content-type: [application/json]
-      date: ['Fri, 05 May 2017 21:15:39 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -95,21 +94,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.7 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.4+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"a1F7mEi0YXlOkgqBzEw34uTHwHTTB2MSuSU+JTKbwZDb5iuToN8it6hSDFFKb2uMWS9Noyi6z2b/ufrCF2Gb6w=="},{"keyName":"key2","permissions":"Full","value":"8/zCogwX0LeRKxoYqWw6udcNmzIdI/r6sIxmHio9pwcEtimiUub242XdGOtMPsgupSJ8ajvJZhwZRMl2M/58Pw=="}]}
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"qpBD+BSEmyE6tGL/YNN+vwzCFvKOQQz15LjOnh9R8A5GMXkffapjxWmE3+zJO6LuLUEl9/q94lH1NJlOsggkgA=="},{"keyName":"key2","permissions":"Full","value":"/KBAgTjPb2WqeQDK+gDBnvCn/9cC8lEopiDAyKPkGut5pZVjG34DwZot5QADI23Yrxo64a9MVACg18AfOQfi/w=="}]}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Fri, 05 May 2017 21:15:40 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -127,28 +126,28 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.7 msrest_azure/0.4.7 storagemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/2.0.4+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2016-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"a1F7mEi0YXlOkgqBzEw34uTHwHTTB2MSuSU+JTKbwZDb5iuToN8it6hSDFFKb2uMWS9Noyi6z2b/ufrCF2Gb6w=="},{"keyName":"key2","permissions":"Full","value":"8/zCogwX0LeRKxoYqWw6udcNmzIdI/r6sIxmHio9pwcEtimiUub242XdGOtMPsgupSJ8ajvJZhwZRMl2M/58Pw=="}]}
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"qpBD+BSEmyE6tGL/YNN+vwzCFvKOQQz15LjOnh9R8A5GMXkffapjxWmE3+zJO6LuLUEl9/q94lH1NJlOsggkgA=="},{"keyName":"key2","permissions":"Full","value":"/KBAgTjPb2WqeQDK+gDBnvCn/9cC8lEopiDAyKPkGut5pZVjG34DwZot5QADI23Yrxo64a9MVACg18AfOQfi/w=="}]}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Fri, 05 May 2017 21:15:40 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
     status: {code: 200, message: OK}
 - request:
     body: !!python/unicode '{"TableName": "table000003"}'
@@ -160,8 +159,8 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:42 GMT']
       x-ms-version: ['2016-05-31']
     method: POST
     uri: https://clitest000002.table.core.windows.net/Tables
@@ -170,8 +169,8 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      dataserviceid: ['https://clitestj34hovt3l75j7wp7p.table.core.windows.net/Tables(''tableljx2vsqmmvmbnn64gmb'')']
-      date: ['Fri, 05 May 2017 21:15:40 GMT']
+      dataserviceid: ['https://clitesth5337ya524u2tbiqj.table.core.windows.net/Tables(''table5uaju5227u4c45ejqub'')']
+      date: ['Tue, 01 Aug 2017 23:08:41 GMT']
       location: ['https://clitest000002.table.core.windows.net/Tables(''table000003'')']
       preference-applied: [return-no-content]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
@@ -185,8 +184,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:42 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/Tables('table000003')
@@ -195,7 +194,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:41 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:42 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -208,8 +207,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:41 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:42 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/Tables
@@ -218,7 +217,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:40 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:42 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -235,8 +234,8 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       x-ms-version: ['2016-05-31']
     method: POST
     uri: https://clitest000002.table.core.windows.net/table000003
@@ -245,9 +244,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      dataserviceid: ['https://clitestj34hovt3l75j7wp7p.table.core.windows.net/tableljx2vsqmmvmbnn64gmb(PartitionKey=''001'',RowKey=''001'')']
-      date: ['Fri, 05 May 2017 21:15:41 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A42.0371421Z'"]
+      dataserviceid: ['https://clitesth5337ya524u2tbiqj.table.core.windows.net/table5uaju5227u4c45ejqub(PartitionKey=''001'',RowKey=''001'')']
+      date: ['Tue, 01 Aug 2017 23:08:41 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A42.6926491Z'"]
       location: ['https://clitest000002.table.core.windows.net/table000003(PartitionKey=''001'',RowKey=''001'')']
       preference-applied: [return-no-content]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
@@ -261,18 +260,18 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
-    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2017-05-05T21%3A15%3A42.0371421Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-05-05T21:15:42.0371421Z","name":"test","value":"something"}'}
+    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2017-08-01T23%3A08%3A42.6926491Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-08-01T23:08:42.6926491Z","name":"test","value":"something"}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:42 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A42.0371421Z'"]
+      date: ['Tue, 01 Aug 2017 23:08:42 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A42.6926491Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -285,18 +284,18 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')?%24select=name
   response:
-    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element&$select=name","odata.etag":"W/\"datetime''2017-05-05T21%3A15%3A42.0371421Z''\"","name":"test"}'}
+    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element&$select=name","odata.etag":"W/\"datetime''2017-08-01T23%3A08%3A42.6926491Z''\"","name":"test"}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:41 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A42.0371421Z'"]
+      date: ['Tue, 01 Aug 2017 23:08:43 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A42.6926491Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -313,8 +312,8 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: ['*']
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       x-ms-version: ['2016-05-31']
     method: MERGE
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
@@ -323,8 +322,8 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:42 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A42.6671092Z'"]
+      date: ['Tue, 01 Aug 2017 23:08:42 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A43.8402758Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-content-type-options: [nosniff]
       x-ms-version: ['2016-05-31']
@@ -336,18 +335,18 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
-    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2017-05-05T21%3A15%3A42.6671092Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-05-05T21:15:42.6671092Z","name":"test","value":"newval"}'}
+    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2017-08-01T23%3A08%3A43.8402758Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-08-01T23:08:43.8402758Z","name":"test","value":"newval"}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:42 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A42.6671092Z'"]
+      date: ['Tue, 01 Aug 2017 23:08:44 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A43.8402758Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -363,8 +362,8 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: ['*']
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:42 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
@@ -373,8 +372,8 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:42 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A43.0154407Z'"]
+      date: ['Tue, 01 Aug 2017 23:08:43 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A44.1565026Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-content-type-options: [nosniff]
       x-ms-version: ['2016-05-31']
@@ -386,18 +385,18 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:43 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
-    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2017-05-05T21%3A15%3A43.0154407Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-05-05T21:15:43.0154407Z","cat":"hat"}'}
+    body: {string: !!python/unicode '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2017-08-01T23%3A08%3A44.1565026Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-08-01T23:08:44.1565026Z","cat":"hat"}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:42 GMT']
-      etag: [W/"datetime'2017-05-05T21%3A15%3A43.0154407Z'"]
+      date: ['Tue, 01 Aug 2017 23:08:43 GMT']
+      etag: [W/"datetime'2017-08-01T23%3A08%3A44.1565026Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -412,8 +411,8 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: ['*']
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:43 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
@@ -422,7 +421,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:43 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:43 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-content-type-options: [nosniff]
       x-ms-version: ['2016-05-31']
@@ -434,18 +433,18 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:43 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body: {string: !!python/unicode '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
-        specified resource does not exist.\nRequestId:4a2e54b5-0002-0100-1ee4-c5a25d000000\nTime:2017-05-05T21:15:43.8535325Z"}}}'}
+        specified resource does not exist.\nRequestId:8e0c5e05-0002-00bc-731b-0bbfba000000\nTime:2017-08-01T23:08:44.4029708Z"}}}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:43 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -457,8 +456,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:43 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -467,7 +466,7 @@ interactions:
         />"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:43 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -478,8 +477,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:43 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -488,7 +487,7 @@ interactions:
         />"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:43 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -502,8 +501,8 @@ interactions:
       Content-Length: ['184']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:44 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -511,7 +510,7 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:43 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
@@ -521,8 +520,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:44 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -530,7 +529,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -544,8 +543,8 @@ interactions:
       Content-Length: ['296']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:44 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -553,7 +552,7 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:44 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
@@ -563,8 +562,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:44 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -572,7 +571,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -586,8 +585,8 @@ interactions:
       Content-Length: ['413']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:44 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -595,7 +594,7 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
@@ -605,8 +604,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:44 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -614,7 +613,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -628,8 +627,8 @@ interactions:
       Content-Length: ['591']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:45 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -637,7 +636,7 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
@@ -647,8 +646,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:45 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -656,7 +655,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:45 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -667,8 +666,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:45 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -676,7 +675,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:45 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:45 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -687,8 +686,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:45 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -696,7 +695,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:44 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -707,8 +706,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:45 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -716,7 +715,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:45 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -727,8 +726,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:46 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -736,7 +735,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:46 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -747,8 +746,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:46 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -756,7 +755,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:46 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -770,8 +769,8 @@ interactions:
       Content-Length: ['598']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:46 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -779,7 +778,7 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:46 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
@@ -789,8 +788,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:46 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -798,7 +797,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>au</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:46 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:46 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -809,8 +808,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:46 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:48 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -818,7 +817,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>au</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:46 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -832,8 +831,8 @@ interactions:
       Content-Length: ['491']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:47 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:48 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -841,7 +840,7 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:47 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
@@ -851,8 +850,8 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:47 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:48 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003?comp=acl
@@ -860,7 +859,7 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Fri, 05 May 2017 21:15:46 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2016-05-31']
@@ -873,8 +872,8 @@ interactions:
       Content-Length: ['0']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:47 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:48 GMT']
       x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://clitest000002.table.core.windows.net/Tables('table000003')
@@ -883,7 +882,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:47 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:47 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-content-type-options: [nosniff]
       x-ms-version: ['2016-05-31']
@@ -895,18 +894,18 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.5.0) AZURECLI/2.0.4+dev]
-      x-ms-date: ['Fri, 05 May 2017 21:15:47 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.12+dev]
+      x-ms-date: ['Tue, 01 Aug 2017 23:08:48 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://clitest000002.table.core.windows.net/Tables('table000003')
   response:
     body: {string: !!python/unicode '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
-        specified resource does not exist.\nRequestId:aaba5365-0002-0126-52e4-c539e9000000\nTime:2017-05-05T21:15:47.8757244Z"}}}'}
+        specified resource does not exist.\nRequestId:077f4f86-0002-013b-1f1b-0bacc0000000\nTime:2017-08-01T23:08:49.4131794Z"}}}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
-      date: ['Fri, 05 May 2017 21:15:47 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:49 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
@@ -921,9 +920,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.7 msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.4+dev]
+      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.11 msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.12+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -932,12 +931,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 05 May 2017 21:15:48 GMT']
+      date: ['Tue, 01 Aug 2017 23:08:48 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc3TUdIQjZGSjQ3R1lLR1FSSDJNR0pEM1hPSUhHSTdFT1UyNnxFQzE5NDcwMTc3MTA0RjdDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2016-09-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdENUtINlhDNFlXR1IyQUJORTVYUEMzS0dGSEtVV1RLMkpYQnwwMjYzNTIxQjczMDBENjhDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
-      retry-after: ['15']
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+      x-ms-ratelimit-remaining-subscription-writes: ['1186']
     status: {code: 202, message: Accepted}
 version: 1

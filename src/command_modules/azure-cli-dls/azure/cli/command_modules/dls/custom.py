@@ -20,8 +20,17 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.application import APPLICATION
 
 logger = azlogging.get_az_logger(__name__)
+
+
+def _update_progress(current, total):
+    hook = APPLICATION.get_progress_controller(det=True)
+    if total:
+        hook.add(message='Alive', value=current, total_val=total)
+        if total == current:
+            hook.end()
 
 
 # account customiaztions
@@ -174,7 +183,8 @@ def upload_to_adls(account_name,
                    buffer_size,
                    block_size,
                    thread_count=None,
-                   overwrite=False):
+                   overwrite=False,
+                   progress_callback=_update_progress):
     client = cf_dls_filesystem(account_name)
     ADLUploader(
         client,
@@ -184,7 +194,8 @@ def upload_to_adls(account_name,
         chunksize=chunk_size,
         buffersize=buffer_size,
         blocksize=block_size,
-        overwrite=overwrite)
+        overwrite=overwrite,
+        progress_callback=progress_callback)
 
 
 def remove_adls_item(account_name,
@@ -200,7 +211,8 @@ def download_from_adls(account_name,
                        buffer_size,
                        block_size,
                        thread_count=None,
-                       overwrite=False):
+                       overwrite=False,
+                       progress_callback=_update_progress):
     client = cf_dls_filesystem(account_name)
     ADLDownloader(
         client,
@@ -210,7 +222,8 @@ def download_from_adls(account_name,
         chunksize=chunk_size,
         buffersize=buffer_size,
         blocksize=block_size,
-        overwrite=overwrite)
+        overwrite=overwrite,
+        progress_callback=progress_callback)
 
 
 def test_adls_item(account_name,

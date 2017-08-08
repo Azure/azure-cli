@@ -628,46 +628,71 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         ])
 
 
-class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
+class VMAvailSetScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(VMAvailSetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_avail_set')
-        self.location = 'westus'
-        self.name = 'availset-test'
-
-    def test_vm_availset(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('vm availability-set create -g {} -n {}'.format(
-            self.resource_group, self.name), checks=[
-                JMESPathCheck('name', self.name),
-                JMESPathCheck('platformFaultDomainCount', 2),
-                JMESPathCheck('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheck('sku.name', 'Aligned')
+    @ResourceGroupPreparer()
+    def test_vm_availset(self, resource_group):
+        name = 'availset-test'
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('sku.name', 'Aligned')
         ])
 
         # create with explict UD count
-        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
-            self.resource_group), checks=[
-                JMESPathCheck('platformFaultDomainCount', 2),
-                JMESPathCheck('platformUpdateDomainCount', 2),
-                JMESPathCheck('sku.name', 'Aligned')
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group), checks=[
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('platformUpdateDomainCount', 2),
+                JMESPathCheckV2('sku.name', 'Aligned')
         ])
-        self.cmd('vm availability-set delete -g {} -n avset2'.format(self.resource_group))
+        self.cmd('vm availability-set delete -g {} -n avset2'.format(resource_group))
 
-        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(self.resource_group, self.name),
-                 checks=JMESPathCheck('tags.test', 'success'))
-        self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', self.name),
+        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(resource_group, name),
+                 checks=JMESPathCheckV2('tags.test', 'success'))
+        self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('[0].name', name),
         ])
         self.cmd('vm availability-set list-sizes -g {} -n {}'.format(
-            self.resource_group, self.name), checks=JMESPathCheck('type(@)', 'array'))
+            resource_group, name), checks=JMESPathCheckV2('type(@)', 'array'))
         self.cmd('vm availability-set show -g {} -n {}'.format(
-            self.resource_group, self.name), checks=[JMESPathCheck('name', self.name)])
-        self.cmd('vm availability-set delete -g {} -n {}'.format(self.resource_group, self.name))
-        self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[JMESPathCheck('length(@)', 0)])
+            resource_group, name), checks=[JMESPathCheckV2('name', name)])
+        self.cmd('vm availability-set delete -g {} -n {}'.format(resource_group, name))
+        self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
+
+
+# once https://github.com/Azure/azure-cli/issues/4127 is fixed, switch back to a regular ScenarioTest
+class VMAvailSetLiveScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_availset_convert(self, resource_group):
+        name = 'availset-test'
+        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 3),
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('sku.name', 'Classic')
+        ])
+
+        # the conversion should auto adjust the FD from 3 to 2 as 'westus2' only offers 2
+        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('sku.name', 'Aligned')
+        ])
+
+
+class ComputeListSkusScenarioTest(LiveScenarioTest):
+
+    def test_list_compute_skus_table_output(self):
+        result = self.cmd('vm list-skus -l westus -otable')
+        lines = result.output.split('\n')
+        # 1st line is header
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Size', 'Tier'])
+        # spot check the first 3 entries
+        self.assertEqual(lines[3].split(), ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3'])
+        self.assertEqual(lines[4].split(), ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3'])
+        self.assertEqual(lines[5].split(), ['virtualMachines', 'westus', 'Standard_DS1_v2', 'DS1_v2', 'Standard'])
 
 
 class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
@@ -1208,14 +1233,16 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
         disk_name2 = 'd2'
         self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1 --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name))
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2 --sku standard_lrs'.format(
             self.resource_group, self.vm_name, disk_name2))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 2),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
             JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             JMESPathCheck('storageProfile.dataDisks[1].name', disk_name2),
             JMESPathCheck('storageProfile.dataDisks[1].lun', 2),
+            JMESPathCheck('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             JMESPathCheck('storageProfile.dataDisks[1].caching', 'None')
         ])
         self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
@@ -1229,10 +1256,11 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 0),
         ])
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite --sku standard_lrs'.format(
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
-            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite')
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
 
 
@@ -1349,8 +1377,7 @@ class VMSSCreateAndModify(ResourceGroupVCRTestBase):
         self.cmd('vmss create --admin-password testPassword0 --name {} -g {} --admin-username myadmin --image Win2012R2Datacenter --instance-count {}'
                  .format(vmss_name, self.resource_group, instance_count))
 
-        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group),
-                 )
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group))
 
         self.cmd('vmss list', checks=JMESPathCheck('type(@)', 'array'))
 
@@ -1990,6 +2017,68 @@ class MSIScenarioTest(ScenarioTest):
                     JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
                     JMESPathCheckV2('[0].settings.port', 50343)
                 ])
+
+    @ResourceGroupPreparer()
+    def test_msi_no_scope(self, resource_group):
+        subscription_id = self.get_subscription_id()
+
+        vm1 = 'vm1'
+        vmss1 = 'vmss1'
+        vm2 = 'vm2'
+        vmss2 = 'vmss2'
+
+        # create a linux vm with identity but w/o a role assignment (--scope "")
+        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vm1), checks=[
+            JMESPathCheckV2('identity.subscription', subscription_id),
+            JMESPathCheckV2('identity.scope', ''),
+            JMESPathCheckV2('identity.port', 50342)
+        ])
+        # the extension should still get provisioned
+        self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm1), checks=[
+            JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        # create a vmss with identity but w/o a role assignment (--scope "")
+        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vmss1), checks=[
+            JMESPathCheckV2('vmss.identity.subscription', subscription_id),
+            JMESPathCheckV2('vmss.identity.scope', ''),
+            JMESPathCheckV2('vmss.identity.port', 50342)
+        ])
+
+        # the extension should still get provisioned
+        self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
+            JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        # create a vm w/o identity
+        self.cmd('vm create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2))
+        # assign identity but w/o a role assignment
+        self.cmd('vm assign-identity -g {} -n {} --scope ""'.format(resource_group, vm2), checks=[
+            JMESPathCheckV2('scope', ''),
+            JMESPathCheckV2('subscription', subscription_id),
+            JMESPathCheckV2('port', 50342)
+        ])
+        # the extension should still get provisioned
+        self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
+            JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        self.cmd('vmss create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2))
+        # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
+        if self.is_live:
+            self.cmd('vmss assign-identity -g {} -n {} --scope ""'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('scope', ''),
+                JMESPathCheckV2('subscription', subscription_id),
+                JMESPathCheckV2('port', 50342)
+            ])
+
+            self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
 
 
 class VMLiveScenarioTest(LiveScenarioTest):

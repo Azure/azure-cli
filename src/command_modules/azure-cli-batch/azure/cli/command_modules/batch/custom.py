@@ -25,6 +25,7 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
+MAX_TASKS_PER_REQUEST = 100
 
 
 def transfer_doc(source_func, *additional_source_funcs):
@@ -307,10 +308,16 @@ def create_task(client,
             client.add(job_id=job_id, task=task)
             return client.get(job_id=job_id, task_id=task.id)
 
-        result = client.add_collection(job_id=job_id, value=tasks)
-        return result.value
+        submitted_tasks = []
+        for i in range(0, len(tasks), MAX_TASKS_PER_REQUEST):
+            submission = client.add_collection(
+                job_id=job_id,
+                value=tasks[i:i + MAX_TASKS_PER_REQUEST])
+            submitted_tasks.extend(submission.value)  # pylint: disable=no-member
+        return submitted_tasks
 
     task = None
+    tasks = []
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
@@ -322,7 +329,7 @@ def create_task(client,
                     tasks = client._deserialize(  # pylint: disable=protected-access
                         '[TaskAddParameter]', json_obj)
                 except DeserializationError:
-                    raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
+                    raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "

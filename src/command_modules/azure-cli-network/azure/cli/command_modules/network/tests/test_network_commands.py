@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -214,39 +214,248 @@ class NetworkAppGatewayPrivateIpScenarioTest20170301(ResourceGroupVCRTestBase):
         self.cmd('network application-gateway ssl-policy show -g {} --gateway-name ag3'.format(rg), checks=NoneCheck())
 
 
-# TODO: Expand and re-enable
-# @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
-# class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
-#    @ResourceGroupPreparer(name_prefix='cli_test_ag_subresource')
-#    def test_network_app_gateway_subresource(self, resource_group):
-#        from msrestazure.azure_exceptions import CloudError
-#        ag = 'ag1'
-#        pub_ip = 'public-ip1'
-#        vnet = 'vnet1'
-#        subnet = 'subnet1'
-#        resource_group = 'tjp-test-app-gateway'
-#        self.cmd('network application-gateway create -g {} -n {} --private-ip-address 10.0.0.4 --no-wait'.format(resource_group, ag))
-#        self.cmd('network public-ip create -g {} -n {}'.format(resource_group, pub_ip))
-#        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(resource_group, vnet, subnet))
+    def _create_ag(self, kwargs):
+        self.cmd('network application-gateway create -g {rg} -n {ag} --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists'.format(**kwargs))
 
-#        def _test_full_subresource(subgroup_name, item_name, create_params, update_params):
-#            if create_params:
-#                self.cmd('network application-gateway {} create -g {} --gateway-name {} -n {} {} --no-wait'.format(subgroup_name, resource_group, ag, item_name, create_params))
-#                self.cmd('network application-gateway {} show -g {} --gateway-name {} -n {}'.format(subgroup_name, resource_group, ag, item_name))
-#            if update_params:
-#                self.cmd('network application-gateway {} update -g {} --gateway-name {} -n {} {} --no-wait'.format(subgroup_name, resource_group, ag, item_name, update_params))
-#                self.cmd('network application-gateway {} show -g {} --gateway-name {} -n {}'.format(subgroup_name, resource_group, ag, item_name))
-#            self.cmd('network application-gateway {} list -g {} --gateway-name {}'.format(subgroup_name, resource_group, ag))
-#            try:
-#                self.cmd('network application-gateway {} delete -g {} --gateway-name {} -n {} --no-wait'.format(subgroup_name, resource_group, ag, item_name))
-#            except CloudError:
-#                pass
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_address_pool')
+    def test_network_ag_address_pool(self, resource_group):
 
-#        _test_full_subresource('address-pool', 'bepool1', '--servers 1.2.3.4 www.test.com', '--servers 4.3.2.1 www.changed.com')
-#        _test_full_subresource('frontend-port', 'myPort', '--port 99', '--port 101')
-#        _test_full_subresource('frontend-ip', 'frontend1', '--public-ip-address {}'.format(pub_ip), None)
-#        _test_full_subresource('frontend-ip', 'appGatewayFrontendIP', None, '--private-ip-address 10.0.0.5')
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway address-pool',
+            'name': 'pool1'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --servers 123.4.5.6 www.mydns.com'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(backendAddresses)', 2),
+            JMESPathCheckV2('backendAddresses[0].ipAddress', '123.4.5.6'),
+            JMESPathCheckV2('backendAddresses[1].fqdn', 'www.mydns.com'),
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --servers 5.4.3.2'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(backendAddresses)', 1),
+            JMESPathCheckV2('backendAddresses[0].ipAddress', '5.4.3.2')
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_frontend_port')
+    def test_network_ag_frontend_port(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway frontend-port',
+            'name': 'myport'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --port 111'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('name', 'myport'),
+            JMESPathCheckV2('port', 111)
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --port 112'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('name', 'myport'),
+            JMESPathCheckV2('port', 112)
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_frontend_ip_public')
+    def test_network_ag_frontend_ip_public(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway frontend-ip',
+            'name': 'myfrontend',
+            'ip1': 'myip1',
+            'ip2': 'myip2'
+        }
+        self.cmd('network application-gateway create -g {rg} -n {ag} --no-wait'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists'.format(**kwargs))
+
+        self.cmd('network public-ip create -g {rg} -n {ip1}'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {ip2}'.format(**kwargs))
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip1}'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('subnet', None)
+        ])
+
+        # NOTE: Service states that public IP address cannot be changed. https://github.com/Azure/azure-cli/issues/4133
+        # self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --public-ip-address {ip2}'.format(**kwargs))
+        # self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs))
+
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_frontend_ip_private')
+    def test_network_ag_frontend_ip_private(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway frontend-ip',
+            'name': 'frontendip',
+            'ip1': 'myip1',
+            'vnet1': 'vnet1',
+            'vnet2': 'vnet2',
+            'subnet': 'subnet1'
+        }
+        self.cmd('network public-ip create -g {rg} -n {ip1}'.format(**kwargs))
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name {subnet}'.format(**kwargs))
+
+        self.cmd('network application-gateway create -g {rg} -n {ag} --no-wait --public-ip-address {ip1} --vnet-name {vnet1} --subnet {subnet}'.format(**kwargs))
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists'.format(**kwargs))
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --private-ip-address 10.0.0.10 --vnet-name {vnet1} --subnet {subnet}'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+        ])
+
+        # NOTE: Service states that frontend subnet cannot differ from gateway subnet https://github.com/Azure/azure-cli/issues/4134
+        # self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name {subnet} --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.10.0/24'.format(**kwargs))
+        # self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --private-ip-address 11.0.10.10 --vnet-name {vnet2} --subnet {subnet}'.format(**kwargs))
+        # self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs))
+
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
+    def test_network_ag_http_listener(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway http-listener',
+            'name': 'mylistener'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('hostName', 'www.test.com')
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --host-name www.test2.com'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('hostName', 'www.test2.com')
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_http_settings')
+    def test_network_ag_http_settings(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway http-settings',
+            'name': 'mysettings'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --affinity-cookie-name mycookie --connection-draining-timeout 60 --cookie-based-affinity --host-name-from-backend-pool --protocol https --timeout 50 --port 70'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('affinityCookieName', 'mycookie'),
+            JMESPathCheckV2('connectionDraining.drainTimeoutInSec', 60),
+            JMESPathCheckV2('connectionDraining.enabled', True),
+            JMESPathCheckV2('cookieBasedAffinity', 'Enabled'),
+            JMESPathCheckV2('pickHostNameFromBackendAddress', True),
+            JMESPathCheckV2('port', 70),
+            JMESPathCheckV2('protocol', 'Https'),
+            JMESPathCheckV2('requestTimeout', 50)
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --affinity-cookie-name mycookie2 --connection-draining-timeout 0 --cookie-based-affinity disabled --host-name-from-backend-pool false --protocol http --timeout 40 --port 71'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('affinityCookieName', 'mycookie2'),
+            JMESPathCheckV2('connectionDraining.drainTimeoutInSec', 1),
+            JMESPathCheckV2('connectionDraining.enabled', False),
+            JMESPathCheckV2('cookieBasedAffinity', 'Disabled'),
+            JMESPathCheckV2('pickHostNameFromBackendAddress', False),
+            JMESPathCheckV2('port', 71),
+            JMESPathCheckV2('protocol', 'Http'),
+            JMESPathCheckV2('requestTimeout', 40)
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_probe')
+    def test_network_ag_probe(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway probe',
+            'name': 'myprobe'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test --protocol http --interval 25 --timeout 100 --threshold 10 --min-servers 2 --host www.test.com --match-status-codes 200 204 --host-name-from-http-settings false'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('path', '/test'),
+            JMESPathCheckV2('protocol', 'Http'),
+            JMESPathCheckV2('interval', 25),
+            JMESPathCheckV2('timeout', 100),
+            JMESPathCheckV2('unhealthyThreshold', 10),
+            JMESPathCheckV2('minServers', 2),
+            JMESPathCheckV2('host', 'www.test.com'),
+            JMESPathCheckV2('length(match.statusCodes)', 2),
+            JMESPathCheckV2('pickHostNameFromBackendHttpSettings', False)
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --path /test2 --protocol https --interval 26 --timeout 101 --threshold 11 --min-servers 3 --host "" --match-status-codes 201 --host-name-from-http-settings'.format(**kwargs))
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs), checks=[
+            JMESPathCheckV2('path', '/test2'),
+            JMESPathCheckV2('protocol', 'Https'),
+            JMESPathCheckV2('interval', 26),
+            JMESPathCheckV2('timeout', 101),
+            JMESPathCheckV2('unhealthyThreshold', 11),
+            JMESPathCheckV2('minServers', 3),
+            JMESPathCheckV2('host', ''),
+            JMESPathCheckV2('length(match.statusCodes)', 1),
+            JMESPathCheckV2('pickHostNameFromBackendHttpSettings', True)
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_rule')
+    def test_network_ag_rule(self, resource_group):
+
+        kwargs = {
+            'ag': 'ag1',
+            'rg': resource_group,
+            'res': 'application-gateway rule',
+            'name': 'myrule'
+        }
+        self._create_ag(kwargs)
+
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com'.format(**kwargs))
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener2 --no-wait --frontend-port appGatewayFrontendPort --host-name www.test2.com'.format(**kwargs))
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener'.format(**kwargs))
+        rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue(rule['httpListener']['id'].endswith('mylistener'))
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2'.format(**kwargs))
+        rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}'.format(**kwargs))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}'.format(**kwargs), checks=JMESPathCheckV2('length(@)', 1))
 
 
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
@@ -474,87 +683,144 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
                  checks=JMESPathCheckV2("subnet.contains(id, 'subnet2')", True))
 
 
-class NetworkLoadBalancerSubresourceScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer_subresource')
-        self.lb_name = 'lb1'
+class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
-    def test_network_load_balancer_subresources(self):
-        self.execute()
-
-    def set_up(self):
-        super(NetworkLoadBalancerSubresourceScenarioTest, self).set_up()
-        rg = self.resource_group
-        lb = self.lb_name
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules')
+    def test_network_lb_nat_rules(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
         self.cmd('network lb create -g {} -n {}'.format(rg, lb))
 
-    def body(self):  # pylint: disable=too-many-statements
-        rg = self.resource_group
-        lb = self.lb_name
-        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
-
-        # Test inbound NAT rules
-        for count in range(1, 4):
+        for count in range(1, 3):
             self.cmd('network lb inbound-nat-rule create {} -n rule{} --protocol tcp --frontend-port {} --backend-port {} --frontend-ip-name LoadBalancerFrontEnd'.format(lb_rg, count, count, count))
-        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb inbound-nat-rule create {} -n rule3 --protocol tcp --frontend-port 3 --backend-port 3'.format(lb_rg))
+        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
         self.cmd('network lb inbound-nat-rule update {} -n rule1 --floating-ip true --idle-timeout 10'.format(lb_rg))
-        self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[JMESPathCheck('enableFloatingIp', True), JMESPathCheck('idleTimeoutInMinutes', 10)])
+        self.cmd('network lb inbound-nat-rule show {} -n rule1'.format(lb_rg), checks=[
+            JMESPathCheckV2('enableFloatingIp', True),
+            JMESPathCheckV2('idleTimeoutInMinutes', 10)
+        ])
         # test generic update
-        self.cmd('network lb inbound-nat-rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg), checks=JMESPathCheck('idleTimeoutInMinutes', 5))
+        self.cmd('network lb inbound-nat-rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg),
+                 checks=JMESPathCheckV2('idleTimeoutInMinutes', 5))
 
         for count in range(1, 4):
             self.cmd('network lb inbound-nat-rule delete {} -n rule{}'.format(lb_rg, count))
-        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb inbound-nat-rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 0))
 
-        # Test inbound NAT pools
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools')
+    def test_network_lb_nat_pools(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool create {} -n rule{} --protocol tcp --frontend-port-range-start {}  --frontend-port-range-end {} --backend-port {}'.format(lb_rg, count, count, count + 999, count))
-        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
         self.cmd('network lb inbound-nat-pool update {} -n rule1000 --protocol udp --backend-port 50'.format(lb_rg))
-        self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[JMESPathCheck('protocol', 'Udp'), JMESPathCheck('backendPort', 50)])
+        self.cmd('network lb inbound-nat-pool show {} -n rule1000'.format(lb_rg), checks=[
+            JMESPathCheckV2('protocol', 'Udp'),
+            JMESPathCheckV2('backendPort', 50)
+        ])
         # test generic update
-        self.cmd('network lb inbound-nat-pool update {} -n rule1000 --set protocol=Tcp'.format(lb_rg), checks=JMESPathCheck('protocol', 'Tcp'))
+        self.cmd('network lb inbound-nat-pool update {} -n rule1000 --set protocol=Tcp'.format(lb_rg),
+                 checks=JMESPathCheckV2('protocol', 'Tcp'))
 
         for count in range(1000, 4000, 1000):
             self.cmd('network lb inbound-nat-pool delete {} -n rule{}'.format(lb_rg, count))
-        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb inbound-nat-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 0))
 
-        # Test backend address pool
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool')
+    def test_network_lb_address_pool(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
         for i in range(1, 4):
-            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i), checks=JMESPathCheck('name', 'bap{}'.format(i)))
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 4))
-        self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg), checks=JMESPathCheck('name', 'bap1'))
-        self.cmd('network lb address-pool delete {} -n bap3'.format(lb_rg), checks=NoneCheck())
-        self.cmd('network lb address-pool list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+            self.cmd('network lb address-pool create {} -n bap{}'.format(lb_rg, i),
+                     checks=JMESPathCheckV2('name', 'bap{}'.format(i)))
+        self.cmd('network lb address-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 4))
+        self.cmd('network lb address-pool show {} -n bap1'.format(lb_rg),
+                 checks=JMESPathCheckV2('name', 'bap1'))
+        self.cmd('network lb address-pool delete {} -n bap1'.format(lb_rg),
+                 checks=NoneCheck())
+        self.cmd('network lb address-pool list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
 
-        # Test probes
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
+    def test_network_lb_probes(self, resource_group):
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
         for i in range(1, 4):
             self.cmd('network lb probe create {} -n probe{} --port {} --protocol http --path "/test{}"'.format(lb_rg, i, i, i))
-        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 3))
+        self.cmd('network lb probe list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 3))
         self.cmd('network lb probe update {} -n probe1 --interval 20 --threshold 5'.format(lb_rg))
         self.cmd('network lb probe update {} -n probe2 --protocol tcp --path ""'.format(lb_rg))
-        self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[JMESPathCheck('intervalInSeconds', 20), JMESPathCheck('numberOfProbes', 5)])
+        self.cmd('network lb probe show {} -n probe1'.format(lb_rg), checks=[
+            JMESPathCheckV2('intervalInSeconds', 20),
+            JMESPathCheckV2('numberOfProbes', 5)
+        ])
         # test generic update
-        self.cmd('network lb probe update {} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3'.format(lb_rg), checks=[JMESPathCheck('intervalInSeconds', 15), JMESPathCheck('numberOfProbes', 3)])
+        self.cmd('network lb probe update {} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3'.format(lb_rg), checks=[
+            JMESPathCheckV2('intervalInSeconds', 15),
+            JMESPathCheckV2('numberOfProbes', 3)
+        ])
 
-        self.cmd('network lb probe show {} -n probe2'.format(lb_rg), checks=[JMESPathCheck('protocol', 'Tcp'), JMESPathCheck('path', None)])
+        self.cmd('network lb probe show {} -n probe2'.format(lb_rg), checks=[
+            JMESPathCheckV2('protocol', 'Tcp'),
+            JMESPathCheckV2('path', None)
+        ])
         self.cmd('network lb probe delete {} -n probe3'.format(lb_rg))
-        self.cmd('network lb probe list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+        self.cmd('network lb probe list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 2))
 
-        # Test load balancing rules
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_rules')
+    def test_network_lb_rules(self, resource_group):
+
+        rg = resource_group
+        lb = 'lb1'
+        lb_rg = '-g {} --lb-name {}'.format(rg, lb)
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+
+        self.cmd('network lb rule create {} -n rule2 --frontend-port 60 --backend-port 60 --protocol tcp'.format(lb_rg))
+        self.cmd('network lb address-pool create {} -n bap1'.format(lb_rg))
+        self.cmd('network lb address-pool create {} -n bap2'.format(lb_rg))
         self.cmd('network lb rule create {} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp'.format(lb_rg))
-        self.cmd('network lb rule create {} -n rule2 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 60 --backend-pool-name bap1 --backend-port 60 --protocol tcp'.format(lb_rg))
-        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 2))
+
+        self.cmd('network lb rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 2))
         self.cmd('network lb rule update {} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp'.format(lb_rg))
         self.cmd('network lb rule update {} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol'.format(lb_rg))
-        self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[JMESPathCheck('enableFloatingIp', True), JMESPathCheck('idleTimeoutInMinutes', 20), JMESPathCheck('loadDistribution', 'SourceIP'), JMESPathCheck('protocol', 'Udp')])
+        self.cmd('network lb rule show {} -n rule1'.format(lb_rg), checks=[
+            JMESPathCheckV2('enableFloatingIp', True),
+            JMESPathCheckV2('idleTimeoutInMinutes', 20),
+            JMESPathCheckV2('loadDistribution', 'SourceIP'),
+            JMESPathCheckV2('protocol', 'Udp')
+        ])
         # test generic update
-        self.cmd('network lb rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg), checks=JMESPathCheck('idleTimeoutInMinutes', 5))
+        self.cmd('network lb rule update {} -n rule1 --set idleTimeoutInMinutes=5'.format(lb_rg),
+                 checks=JMESPathCheckV2('idleTimeoutInMinutes', 5))
 
-        self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[JMESPathCheck("backendAddressPool.contains(id, 'bap2')", True), JMESPathCheck('loadDistribution', 'SourceIPProtocol')])
+        self.cmd('network lb rule show {} -n rule2'.format(lb_rg), checks=[
+            JMESPathCheckV2("backendAddressPool.contains(id, 'bap2')", True),
+            JMESPathCheckV2('loadDistribution', 'SourceIPProtocol')
+        ])
         self.cmd('network lb rule delete {} -n rule1'.format(lb_rg))
         self.cmd('network lb rule delete {} -n rule2'.format(lb_rg))
-        self.cmd('network lb rule list {}'.format(lb_rg), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network lb rule list {}'.format(lb_rg),
+                 checks=JMESPathCheckV2('length(@)', 0))
 
 
 class NetworkLocalGatewayScenarioTest(ScenarioTest):
@@ -582,7 +848,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
 
 class NetworkNicScenarioTest(ScenarioTest):
-
+    @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario')
     def test_network_nic(self, resource_group):
         rg = resource_group
@@ -660,6 +926,93 @@ class NetworkNicScenarioTest(ScenarioTest):
             JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
             JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
         ])
+        # test generic update
+        self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[
+            JMESPathCheckV2('enableIpForwarding', False),
+            JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'doodle')
+        ])
+
+        self.cmd('network nic delete --resource-group {} --name {}'.format(rg, nic))
+        self.cmd('network nic list -g {}'.format(rg), checks=NoneCheck())
+
+    @api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2015-06-15')
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_stack_scenario', location='local', dev_setting_location='local')
+    def test_network_nic_stack(self, resource_group):
+        rg = resource_group
+        nic = 'cli-test-nic'
+        rt = 'Microsoft.Network/networkInterfaces'
+        subnet = 'mysubnet'
+        vnet = 'myvnet'
+        nsg = 'mynsg'
+        alt_nsg = 'myothernsg'
+        lb = 'mylb'
+        private_ip = '10.0.0.15'
+        public_ip_name = 'publicip1'
+
+        subnet_id = self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(rg, vnet, subnet)).get_output_in_json()['newVNet']['subnets'][0]['id']
+        self.cmd('network nsg create -g {} -n {}'.format(rg, nsg))
+        nsg_id = self.cmd('network nsg show -g {} -n {}'.format(rg, nsg)).get_output_in_json()['id']
+        self.cmd('network nsg create -g {} -n {}'.format(rg, alt_nsg))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_name))
+        public_ip_id = self.cmd('network public-ip show -g {} -n {}'.format(rg, public_ip_name)).get_output_in_json()['id']
+        self.cmd('network lb create -g {} -n {}'.format(rg, lb))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 100 --backend-port 100 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n rule2 --protocol tcp --frontend-port 200 --backend-port 200 --frontend-ip-name LoadBalancerFrontEnd'.format(rg, lb))
+        rule_ids = ' '.join(self.cmd('network lb inbound-nat-rule list -g {} --lb-name {} --query "[].id"'.format(rg, lb)).get_output_in_json())
+        self.cmd('network lb address-pool create -g {} --lb-name {} -n bap1'.format(rg, lb))
+        self.cmd('network lb address-pool create -g {} --lb-name {} -n bap2'.format(rg, lb))
+        address_pool_ids = ' '.join(self.cmd('network lb address-pool list -g {} --lb-name {} --query "[].id"'.format(rg, lb)).get_output_in_json())
+
+        # create with minimum parameters
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
+            JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
+        ])
+        # exercise optional parameters
+        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
+                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+                JMESPathCheckV2('NewNIC.enableIpForwarding', True),
+                JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
+                JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+                JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)
+        ])
+        # exercise creating with NSG
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
+            JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheckV2('NewNIC.enableIpForwarding', False),
+            JMESPathCheckV2("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
+        ])
+        # exercise creating with NSG and Public IP
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
+            JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheckV2('NewNIC.enableIpForwarding', False),
+            JMESPathCheckV2("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
+        ])
+        self.cmd('network nic list', checks=[
+            JMESPathCheckV2('type(@)', 'array'),
+            JMESPathCheckV2("length([?contains(id, 'networkInterfaces')]) == length(@)", True)
+        ])
+        self.cmd('network nic list --resource-group {}'.format(rg), checks=[
+            JMESPathCheckV2('type(@)', 'array'),
+            JMESPathCheckV2("length([?type == '{}']) == length(@)".format(rt), True),
+            JMESPathCheckV2("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
+        ])
+        self.cmd('network nic show --resource-group {} --name {}'.format(rg, nic), checks=[
+            JMESPathCheckV2('type(@)', 'object'),
+            JMESPathCheckV2('type', rt),
+            JMESPathCheckV2('resourceGroup', rg),
+            JMESPathCheckV2('name', nic)
+        ])
+        self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
+                JMESPathCheckV2('enableIpForwarding', True),
+                JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
+                JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
+                JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
+        ])
+
         # test generic update
         self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[
             JMESPathCheckV2('enableIpForwarding', False),
