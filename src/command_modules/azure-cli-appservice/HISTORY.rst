@@ -4,6 +4,7 @@ Release History
 ===============
 0.1.11 (2017-07-27)
 +++++++++++++++++++
+* webapp: Add generate container CI URL for Web App
 * webapp: fix the bug that listing linux webapp returns nothing
 * webapp: setting runtime is mandatory for linux
 * webapp: use only linux-fx-version instead of CUSTOM_DOCKER_IMAGE_NAME
