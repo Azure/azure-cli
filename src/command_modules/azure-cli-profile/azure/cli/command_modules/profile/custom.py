@@ -14,15 +14,17 @@ from azure.cli.core.cloud import get_active_cloud
 logger = get_az_logger(__name__)
 
 
-def load_subscriptions(all_clouds=False):
+def load_subscriptions(all_clouds=False, refresh=False):
     profile = Profile()
+    if refresh:
+        subscriptions = profile.refresh_accounts()
     subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
 
-def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds=all)
+    subscriptions = load_subscriptions(all_clouds=all, refresh=refresh)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:

@@ -16,17 +16,19 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
-        super(WebappBasicE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-e2e2')
+        super(WebappBasicE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-e2e')
 
     def test_webapp_e2e(self):
         self.execute()
 
     def body(self):
-        webapp_name = 'webapp-e2e3'
+        import time
+        webapp_name = 'webapp-e2e'
         plan = 'webapp-e2e-plan'
         self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
+        time.sleep(60)
+
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -39,13 +41,13 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         self.cmd('appservice plan show -g {} -n {}'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
+        time.sleep(60)
         # scale up
         self.cmd('appservice plan update -g {} -n {} --sku S1'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan),
             JMESPathCheck('sku.tier', 'Standard'),
             JMESPathCheck('sku.name', 'S1')
         ])
-
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
@@ -60,13 +62,11 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
-
         result = self.cmd('webapp deployment source config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
         self.assertTrue(result['url'].endswith(webapp_name + '.git'))
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('repoUrl', 'https://{}.scm.azurewebsites.net'.format(webapp_name))
         ])
-
         # turn on diagnostics
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
                     '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
@@ -78,23 +78,19 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('requestTracingEnabled', True)
             # TODO: contact webapp team for where to retrieve 'level'
         ])
-
         # show publish profile info
         result = self.cmd('webapp deployment list-publishing-profiles -g {} -n {}'.format(self.resource_group, webapp_name))
         self.assertTrue(result[1]['publishUrl'].startswith('ftp://'))
-
         self.cmd('webapp stop -g {} -n {}'.format(self.resource_group, webapp_name))
         self.cmd('webapp show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('state', 'Stopped'),
             JMESPathCheck('name', webapp_name)
         ])
-
         self.cmd('webapp start -g {} -n {}'.format(self.resource_group, webapp_name))
         self.cmd('webapp show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name)
         ])
-
         self.cmd('webapp delete -g {} -n {}'.format(self.resource_group, webapp_name))
         # test empty service plan should be automatically deleted.
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
@@ -103,7 +99,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 
 
 class WebappQuickCreateTest(ScenarioTest):
-
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick'
@@ -122,7 +117,6 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = 'plan-quick'
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
-
         import time
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         import requests
@@ -130,7 +124,7 @@ class WebappQuickCreateTest(ScenarioTest):
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
 
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='japaneast')
     def test_linux_webapp_quick_create(self, resource_group):
         webapp_name = 'webapp-quick-linux'
         plan = 'plan-quick-linux'
@@ -143,7 +137,6 @@ class WebappQuickCreateTest(ScenarioTest):
 
 
 class WebappConfigureTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
         super(WebappConfigureTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-config')
         self.webapp_name = 'webapp-config-test'
@@ -159,7 +152,6 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
 
     def body(self):
         # site config testing
-
         # verify the baseline
         result = self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('alwaysOn', False),
@@ -170,7 +162,6 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('use32BitWorkerProcess', True),
             JMESPathCheck('webSocketsEnabled', False)
         ])
-
         # update and verify
         checks = [
             JMESPathCheck('alwaysOn', True),
@@ -184,16 +175,13 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
             self.resource_group, self.webapp_name), checks=checks)
         self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
-
         # site appsettings testing
-
         # update
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('s1', 'foo'),
             JMESPathCheck('s2', 'bar'),
             JMESPathCheck('s3', 'bar2')
         ])
-
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
         s2 = next((x for x in result if x['name'] == 's2'))
@@ -201,18 +189,15 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
         self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
-
         # delete
         self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name))
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
         self.assertEqual(set([x['name'] for x in result]), set(['s3', 'WEBSITE_NODE_DEFAULT_VERSION']))
-
         # hostnames
         self.cmd('webapp config hostname list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(self.webapp_name))
         ])
-
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
         result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
@@ -229,14 +214,12 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].slotSetting', False),
             JMESPathCheck('[0].name', 'c2')
         ])
-
         # see deployment user
         result = self.cmd('webapp deployment user show')
         self.assertTrue(result['type'])  # just make sure the command does return something
 
 
 class WebappScaleTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
         super(WebappScaleTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-scale')
 
@@ -278,7 +261,6 @@ class WebappScaleTest(ResourceGroupVCRTestBase):
 
 
 class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
         super(AppServiceBadErrorPolishTest, self).__init__(__file__, test_method, resource_group='clitest-error')
         self.resource_group2 = 'clitest-error2'
@@ -310,13 +292,14 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
+        runtime = 'node|6.4'
         plan = 'webapp-linux-plan'
         webapp = 'webapp-linux1'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheckV2('name', webapp),
         ])
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
@@ -348,12 +331,13 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 class WebappACRSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_integration(self, resource_group):
-        plan = 'plan1'
-        webapp = 'webappacrtest1'
+        plan = 'plan11'
+        webapp = 'webappacrtest11'
+        runtime = 'node|6.4'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
         creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
         self.cmd('webapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
             resource_group, webapp, acr_registry_name), checks=[
@@ -362,7 +346,6 @@ class WebappACRSceanrioTest(ScenarioTest):
 
 
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
         super(WebappGitScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-git4')
 
@@ -372,19 +355,15 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         plan = 'webapp-git-plan5'
         webapp = 'web-git-test2'
-
         # You can create and use any repros with the 3 files under "./sample_web"
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
-
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan))
-
         self.cmd('webapp deployment source config -g {} -n {} --repo-url {} --branch {} --manual-integration'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
         ])
-
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('isMercurial', False),
@@ -412,10 +391,8 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
         test_php_version = '5.6'
-
         # create a few app-settings to test they can be cloned
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
-
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
             JMESPathCheck('name', slot)
@@ -424,12 +401,10 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('branch', slot)
         ])
-
         # swap with prod and verify the git branch also switched
         self.cmd('webapp deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         result = self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['s1']))
-
         # create a new slot by cloning from prod slot
         self.cmd('webapp config set -g {} -n {} --php-version {}'.format(self.resource_group, self.webapp, test_php_version))
         self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
@@ -438,30 +413,25 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         ])
         self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
         self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
-
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
         result = self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['s1', 's4']))
         result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['c2']))
-
         result = self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertTrue(set(['s3']).issubset(set([x['name'] for x in result])))
         result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['c1']))
-
         self.cmd('webapp deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
             JMESPathCheck("length([])", 2),
             JMESPathCheck("length([?name=='{}'])".format(slot2), 1),
             JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
-
         self.cmd('webapp deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
 
 
 class WebappSlotTrafficRouting(ScenarioTest):
-
     @ResourceGroupPreparer()
     def test_traffic_routing(self, resource_group):
         webapp = 'clitestwebtraffic'
@@ -471,26 +441,18 @@ class WebappSlotTrafficRouting(ScenarioTest):
         slot = 'staging'
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
-
         self.cmd('webapp traffic-routing set -g {} -n {} -d {}=15'.format(resource_group, webapp, slot), checks=[
             JMESPathCheckV2("[0].actionHostName", slot + '.azurewebsites.net'),
             JMESPathCheckV2("[0].reroutePercentage", 15.0)
         ])
-
         self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
             JMESPathCheckV2("[0].actionHostName", slot + '.azurewebsites.net'),
             JMESPathCheckV2("[0].reroutePercentage", 15.0)
         ])
-
         self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
-
-        self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
-            JMESPathCheckV2("length(@)", 0)
-        ])
 
 
 class WebappSlotSwapScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer()
     def test_webapp_slot_swap(self, resource_group):
         plan = 'slot-swap-plan2'
@@ -499,26 +461,20 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan_result['id']))
         # You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
-
         self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=prod'.format(resource_group, webapp))
-
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
-
         self.cmd('webapp config appsettings set -g {} -n {} --slot-settings s1=slot --slot {}'.format(resource_group, webapp, slot))
-
         # swap with preview
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action preview'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
             JMESPathCheckV2("[?name=='s1']|[0].value", 'prod')
         ])
-
         # complete the swap
         self.cmd('webapp deployment slot swap -g {} -n {} -s {}'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
             JMESPathCheckV2("[?name=='s1']|[0].value", 'slot')
         ])
-
         # reset
         self.cmd('webapp deployment slot swap -g {} -n {} -s {} --action reset'.format(resource_group, webapp, slot))
         self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot), checks=[
@@ -527,7 +483,6 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
 
 
 class WebappSSLCertTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
         super(WebappSSLCertTest, self).__init__(__file__, test_method, resource_group='test_cli_webapp_ssl')
         self.webapp_name = 'webapp-ssl-test123'
@@ -537,10 +492,8 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
 
     def body(self):
         plan = 'webapp-ssl-test-plan'
-
         # Cert Generated using
         # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
-
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
@@ -629,7 +582,6 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
 
 
 class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
         super(WebappBackupRestoreScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
         self.webapp_name = 'azurecli-webapp-backuptest3'
@@ -649,7 +601,6 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         database_name = 'cli-db'
         database_type = 'SqlAzure'
         backup_name = 'mybackup'
-
         create_checks = [
             JMESPathCheck('backupItemName', backup_name),
             JMESPathCheck('storageAccountUrl', sas_url),
@@ -659,7 +610,6 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         ]
         self.cmd('webapp config backup create -g {} --webapp-name {} --container-url {} --db-connection-string "{}" --db-name {} --db-type {} --backup-name {}'
                  .format(self.resource_group, self.webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
-
         list_checks = [
             JMESPathCheck('[-1].backupItemName', backup_name),
             JMESPathCheck('[-1].storageAccountUrl', sas_url),
@@ -668,10 +618,8 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[-1].databases[0].name', database_name)
         ]
         self.cmd('webapp config backup list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=list_checks)
-
         import time
         time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
-
         self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 

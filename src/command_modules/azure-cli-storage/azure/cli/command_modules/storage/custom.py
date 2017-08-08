@@ -39,34 +39,34 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
-                           custom_domain=None, encryption=None, access_tier=None, https_only=None):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_sdk(
+def create_storage_account(resource_group_name, account_name, sku, assign_identity=False, location=None, kind=None,
+                           tags=None, custom_domain=None, encryption=None, access_tier=None, https_only=None):
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
         'Sku',
         'CustomDomain',
         'AccessTier',
+        'Identity',
         mod='models')
     scf = storage_client_factory()
-    params = StorageAccountCreateParameters(
-        sku=Sku(sku),
-        kind=Kind(kind),
-        location=location,
-        tags=tags,
-        custom_domain=CustomDomain(custom_domain, None) if custom_domain else None,
-        encryption=encryption,
-        access_tier=AccessTier(access_tier) if access_tier else None)
-
+    params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
+    if custom_domain:
+        params.custom_domain = CustomDomain(custom_domain, None)
+    if encryption:
+        params.encryption = encryption
+    if access_tier:
+        params.access_tier = AccessTier(access_tier)
+    if assign_identity:
+        params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def create_storage_account_with_account_type(resource_group_name, account_name, account_type,
-                                             location=None, tags=None):
+def create_storage_account_with_account_type(resource_group_name, account_name, account_type, location=None, tags=None):
     StorageAccountCreateParameters, AccountType = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
@@ -78,13 +78,14 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
 
 
 def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None, encryption=None,
-                           access_tier=None, https_only=None):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_sdk(
+                           access_tier=None, https_only=None, assign_identity=False):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
         'Sku',
         'CustomDomain',
         'AccessTier',
+        'Identity',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -100,6 +101,9 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+    if assign_identity:
+        params.identity = Identity()
+
     return params
 
 

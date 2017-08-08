@@ -2,9 +2,14 @@
 
 Release History
 ===============
+unreleased
+++++++++++
+* Enable progress controller (#4072)
+
+
 0.0.11 (2017-07-27)
 +++++++++++++++++++
-* minor fixes
+* Allow finer grained chunking for Data Lake Store transfer (#4014)
 
 0.0.10 (2017-07-07)
 +++++++++++++++++++

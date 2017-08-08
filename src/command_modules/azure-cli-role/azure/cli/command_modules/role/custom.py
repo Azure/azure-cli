@@ -200,7 +200,7 @@ def _get_displayable_name(graph_object):
         return graph_object.user_principal_name
     elif graph_object.service_principal_names:
         return graph_object.service_principal_names[0]
-    return ''
+    return graph_object.display_name or ''
 
 
 def delete_role_assignments(ids=None, assignee=None, role=None,

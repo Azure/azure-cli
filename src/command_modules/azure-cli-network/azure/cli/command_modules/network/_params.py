@@ -147,7 +147,7 @@ virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metav
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
-cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
+cookie_based_affinity_type = CliArgumentType(**three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
 ag_servers_type = CliArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 

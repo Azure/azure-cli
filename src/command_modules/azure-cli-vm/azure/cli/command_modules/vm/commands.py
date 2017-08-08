@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -82,6 +82,30 @@ def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
 
+# flattern out important fields (single member arrays) to be displayed in the table output
+def transform_sku_for_table_output(skus):
+    result = []
+    for k in skus:
+        order_dict = OrderedDict()
+        order_dict['resourceType'] = k['resourceType']
+        order_dict['locations'] = str(k['locations']) if len(k['locations']) > 1 else k['locations'][0]
+        order_dict['name'] = k['name']
+        order_dict['size'] = k['size']
+        order_dict['tier'] = k['tier']
+        if k['capabilities']:
+            temp = ['{}={}'.format(pair['name'], pair['value']) for pair in k['capabilities']]
+            order_dict['capabilities'] = str(temp) if len(temp) > 1 else temp[0]
+        else:
+            order_dict['capabilities'] = None
+        if k['restrictions']:
+            reasons = [x['reasonCode'] for x in k['restrictions']]
+            order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]
+        else:
+            order_dict['restrictions'] = None
+        result.append(order_dict)
+    return result
+
+
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
 cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
@@ -143,7 +167,8 @@ cli_command(__name__, 'vm availability-set delete', mgmt_path.format(op_var, op_
 cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, exception_handler=empty_on_404)
 cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set)
 cli_command(__name__, 'vm availability-set list-sizes', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_avail_set)
-cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+    cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
 
 cli_generic_update_command(__name__, 'vm availability-set update',
                            custom_path.format('availset_get'),
@@ -287,6 +312,8 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'
     cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
     cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
 
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vm list-skus', custom_path.format('list_skus'), table_transformer=transform_sku_for_table_output)
 
 # MSI
 cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
