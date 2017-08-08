@@ -197,6 +197,12 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
+helps['storage blob set-tier'] = """
+    type: command
+    short-summary: Sets the block or page blob tiers on the blob.
+    long-summary:  For block blob this command only supports block blob on standard storage accounts.
+                   For page blob, this command only supports for page blobs on premium accounts.
+"""
 helps['storage blob copy start-batch'] = """
     type: command
     short-summary: Copy multiple blobs or files to a blob container.

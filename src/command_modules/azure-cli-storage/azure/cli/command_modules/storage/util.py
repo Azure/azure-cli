@@ -131,3 +131,7 @@ def _pattern_has_wildcards(p):
 
 def _match_path(pattern, *args):
     return fnmatch(os.path.join(*args), pattern) if pattern else True
+
+
+def get_blob_tier_names(model):
+    return [v for v in dir(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#' + model)) if not v.startswith('_')]

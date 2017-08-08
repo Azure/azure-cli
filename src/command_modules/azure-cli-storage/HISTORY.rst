@@ -5,6 +5,7 @@ Release History
 
 unreleased
 ++++++++++
+* Enable set blob tier
 * `storage account create/update`: Add `--bypass` and `--default-action` arguments to support service tunneling.
 * `storage account network-rule`: Added commands to add VNET rules and IP based rules.
 * Enable service encryption by customer managed key
