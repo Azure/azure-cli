@@ -38,7 +38,8 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core.profiles import ResourceType
-from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -894,7 +895,7 @@ def _get_acs_info(name, resource_group_name):
     :param resource_group_name: Resource group name
     :type resource_group_name: String
     """
-    mgmt_client = get_mgmt_service_client(ResourceType.MGMT_CONTAINER_SERVICE)
+    mgmt_client = get_mgmt_service_client(ContainerServiceClient)
     return mgmt_client.container_services.get(resource_group_name, name)
 
 
