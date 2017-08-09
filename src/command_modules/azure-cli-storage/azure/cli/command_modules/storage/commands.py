@@ -172,7 +172,7 @@ cli_storage_data_plane_command('storage file copy start-batch', 'azure.cli.comma
 # table commands
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', table_path + 'generate_table_shared_access_signature', factory)
-cli_storage_data_plane_command('storage table stats', table_path + 'get_table_service_stats', factory)
+cli_storage_data_plane_command('storage table stats', table_path + 'get_table_service_stats', factory, resource_type=ResourceType.DATA_STORAGE, min_api='2016-05-31')
 cli_storage_data_plane_command('storage table list', table_path + 'list_tables', factory, transform=transform_storage_list_output)
 cli_storage_data_plane_command('storage table create', table_path + 'create_table', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage table exists', table_path + 'exists', factory, transform=create_boolean_result_output_transformer('exists'))
@@ -194,10 +194,7 @@ cli_storage_data_plane_command('storage entity delete', table_path + 'delete_ent
 # queue commands
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', queue_path + 'generate_queue_shared_access_signature', factory)
-
-if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
-    cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory)
-
+cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory, resource_type=ResourceType.DATA_STORAGE, min_api='2016-05-31')
 cli_storage_data_plane_command('storage queue list', queue_path + 'list_queues', factory, transform=transform_storage_list_output)
 cli_storage_data_plane_command('storage queue create', queue_path + 'create_queue', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage queue delete', queue_path + 'delete_queue', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
