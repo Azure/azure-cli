@@ -226,7 +226,7 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
             def file_chunk(target_file, rel_path, print_progress):
                 chunk = True
                 while chunk:
-                    chunk = target_file.read(10000)
+                    chunk = target_file.read(1000000)
                     if chunk:
                         print_progress(len(chunk), rel_path)
                     yield chunk
