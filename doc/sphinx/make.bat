@@ -278,4 +278,15 @@ if "%1" == "dummy" (
 	goto end
 )
 
+if "%1" == "xmlwithversion" (
+	for /f %%i in ('az cloud list-profiles -o tsv') do (
+		az cloud update --profile %%i
+		%SPHINXBUILD% -E -b xml %ALLSPHINXOPTS% %BUILDDIR%/xml/%%i
+		if errorlevel 1 exit /b 1
+		echo.
+		echo.Build of profile %%i finished. The XML files are in %BUILDDIR%/xml/%%i.
+	)
+	goto end
+)
+
 :end
