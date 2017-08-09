@@ -102,6 +102,9 @@ helps['vm create'] = """
         - name: Create a VM with Managed Service Identity. The VM will have a 'Contributor' Role with access to the current resource group
           text: >
              az vm create -n MyVm -g MyResourceGroup --assign-identity --image centos
+        - name: Create a VM in an availability zone in the current resource group's region
+          text: >
+             az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -144,6 +147,9 @@ helps['vmss create'] = """
 
             az vmss create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
+        - name: Create a single zone VM scaleset in the current resource group's region
+          text: >
+             az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
@@ -985,6 +991,8 @@ helps['disk create'] = """
           text: az disk create -g MyResourceGroup -n MyDisk --size-gb 10
         - name: Create a managed disk by copying from an existing disk or snapshot.
           text: az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
+        - name: Create a disk in an availability zone in the region of "East US 2"
+          text: az disk create -n MyDisk -g MyResourceGroup --size-gb 10 --location eastus2 --zone 1
 """
 
 helps['disk list'] = """

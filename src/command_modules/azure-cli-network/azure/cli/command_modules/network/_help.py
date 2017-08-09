@@ -1418,6 +1418,9 @@ helps['network public-ip create'] = """
             -n MyIp
             --dns-name MyLabel
             --allocation-method Static
+        - name: Create a public IP resource in an availability zone in the current resource group's region.
+          text: >
+            az network public-ip create -g MyResourceGroup -n MyIp --zone 2
 """
 
 helps['network public-ip delete'] = """
