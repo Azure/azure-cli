@@ -12,7 +12,8 @@ from ._util import (
     get_sql_databases_operations,
     get_sql_elastic_pools_operations,
     get_sql_server_azure_ad_administrators_operations,
-    get_sql_capabilities_operations)
+    get_sql_capabilities_operations,
+    get_sql_virtual_network_rules_operations)
 
 custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
@@ -174,3 +175,16 @@ with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations, a
         c.generic_update_command('update', 'get', 'create_or_update',
                                  custom_func_name='server_ad_admin_update',
                                  setter_arg_name='properties')
+
+virtual_network_rules_operations = create_service_adapter(
+    'azure.mgmt.sql.operations.virtual_network_rules_operations',
+    'VirtualNetworkRulesOperations')
+
+with ServiceGroup(__name__, get_sql_virtual_network_rules_operations, virtual_network_rules_operations,
+                  custom_path) as s:
+    with s.group('sql server vnet-rule') as c:
+        c.command('create', 'create_or_update')
+        c.command('show', 'get')
+        c.command('list', 'list_by_server')
+        c.command('delete', 'delete')
+        c.generic_update_command('update', 'get', 'create_or_update')

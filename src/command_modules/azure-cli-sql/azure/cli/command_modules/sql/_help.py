@@ -280,3 +280,11 @@ helps['sql server firewall-rule list'] = """
     type: command
     short-summary: Lists the firewall rules.
     """
+helps['sql server vnet-rule'] = """
+    type: group
+    short-summary: Manage a server's virtual network rules.
+    """
+helps['sql server vnet-rule update'] = """
+    type: command
+    short-summary: Updates a virtual network rule.
+    """

@@ -635,3 +635,21 @@ with ParametersContext(command='sql server firewall-rule') as c:
                options_list=('--end-ip-address',),
                help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
                ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+
+
+#####
+#           sql server vnet-rule
+#####
+
+
+with ParametersContext(command='sql server vnet-rule') as c:
+    # Help text needs to be specified because 'sql server firewall-rule update' is a custom
+    # command.
+    c.argument('server_name',
+               options_list=('--server', '-s'))
+
+    c.argument('virtual_network_rule_name',
+               options_list=('--name', '-n'))
+
+    c.argument('virtual_network_subnet_id',
+               options_list=('--vnet-id', '-v'))
