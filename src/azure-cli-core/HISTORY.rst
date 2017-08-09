@@ -6,7 +6,6 @@ Release History
 unreleased
 +++++++++++++++++++
 * fixes issue where `three_state_flag` would not work correctly if custom labels were used.
-* remove Container Service from profiles
 
 2.0.12 (2017-07-27)
 +++++++++++++++++++

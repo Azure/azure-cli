@@ -5,7 +5,6 @@ Release History
 unreleased
 +++++++++++++++++++
 * add preview regions
-* use azure-mgmt-containerservice client instead of azure-mgmt-compute embedded one
 
 2.0.11 (2017-07-27)
 +++++++++++++++++++
