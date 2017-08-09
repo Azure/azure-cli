@@ -16,6 +16,8 @@ unreleased
 * `vnet subnet create/update`: Added `--private-access-services` argument.
 * `application-gateway redirect-config create`: Fix issue where create command would fail. Fix issue where `--no-wait`
   would not work with update command.
+* `application-gateway url-path-map rule create`: Fix issue where certain parameters which should accept names or IDs
+  would only accept IDs.
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++
