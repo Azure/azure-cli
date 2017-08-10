@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+
+* Add deprecation warning to 'az component' commands.
+
 2.0.6 (2017-06-21)
 ++++++++++++++++++
 
