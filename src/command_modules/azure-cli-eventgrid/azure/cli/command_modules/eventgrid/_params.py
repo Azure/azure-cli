@@ -45,7 +45,7 @@ register_cli_argument('eventgrid topic event-subscription', 'event_subscription_
 register_cli_argument('eventgrid event-subscription', 'event_subscription_name', name_type, help='Name of the event subscription')
 register_cli_argument('eventgrid resource event-subscription', 'event_subscription_name', name_type, help='Name of the event subscription')
 
-register_cli_argument('eventgrid', 'is_subject_case_sensitive', help="Specify to indicate whether the subject fields should be compared in a case sensitive manner. True if flag present.", **three_state_flag())
+register_cli_argument('eventgrid', 'is_subject_case_sensitive', options_list=['--subject-case-sensitive'], help="Specify to indicate whether the subject fields should be compared in a case sensitive manner. True if flag present.", **three_state_flag())
 
 register_cli_argument('eventgrid', 'included_event_types', included_event_types_type)
 register_cli_argument('eventgrid', 'labels', labels_type)

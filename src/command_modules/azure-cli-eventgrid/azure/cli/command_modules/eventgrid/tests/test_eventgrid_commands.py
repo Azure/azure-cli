@@ -107,7 +107,7 @@ class EventGridTests(ScenarioTest):
         LABEL_1 = 'Finance'
         LABEL_2 = 'HR'
 
-        self.cmd('az eventgrid event-subscription create -g {} --name {} --endpoint {} --subject-ends-with {} --included-event-types {} {} --is-subject-case-sensitive --labels {} {}'.format(resource_group, event_subscription_name, ENDPOINT_URL, SUBJECT_ENDS_WITH, EVENT_TYPE_1, EVENT_TYPE_2, LABEL_1, LABEL_2))
+        self.cmd('az eventgrid event-subscription create -g {} --name {} --endpoint {} --subject-ends-with {} --included-event-types {} {} --subject-case-sensitive --labels {} {}'.format(resource_group, event_subscription_name, ENDPOINT_URL, SUBJECT_ENDS_WITH, EVENT_TYPE_1, EVENT_TYPE_2, LABEL_1, LABEL_2))
 
         # TODO: Add a verification that filter.isSubjectCaseSensitive is true after resolving why it shows as null in the response
         self.cmd('az eventgrid event-subscription show -g {} --name {}'.format(resource_group, event_subscription_name), checks=[
