@@ -371,7 +371,7 @@ def load_params(command):
     if last_dot_index == -1:
         module_to_load = command_module
     else:
-        module_to_load = command_module[:command_module.rfind('.')]
+        module_to_load = command_module[:last_dot_index]
     import_module(module_to_load).load_params(command)
     _apply_parameter_info(command, command_table[command])
 
