@@ -874,6 +874,40 @@ def list_publish_profiles(resource_group_name, name, slot=None):
     return converted
 
 
+def enable_cd(resource_group_name, name, enable, slot=None):
+    settings = []
+    settings.append("DOCKER_ENABLE_CI=" + enable)
+
+    update_app_settings(resource_group_name, name, settings, slot)
+
+    return show_container_cd_url(resource_group_name, name, slot)
+
+
+def show_container_cd_url(resource_group_name, name, slot=None):
+    settings = get_app_settings(resource_group_name, name, slot)
+    docker_enabled = False
+    for setting in settings:
+        if setting['name'] == 'DOCKER_ENABLE_CI' and setting['value'] == 'true':
+            docker_enabled = True
+            break
+
+    cd_settings = {}
+    cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
+
+    if docker_enabled:
+        profiles = list_publish_profiles(resource_group_name, name, slot)
+        for profile in profiles:
+            if profile['publishMethod'] == 'MSDeploy':
+                scmUrl = profile['publishUrl'].replace(":443", "")
+                cd_url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
+                cd_settings['CI_CD_URL'] = cd_url
+                break
+    else:
+        cd_settings['CI_CD_URL'] = ''
+
+    return cd_settings
+
+
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)
     url = site.default_host_name
