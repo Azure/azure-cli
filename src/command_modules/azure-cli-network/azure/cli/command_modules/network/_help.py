@@ -525,11 +525,11 @@ helps['network application-gateway waf-config set'] = """
           - az application-gateway waf-config list-rule-sets
         - name: --disabled-rule-groups
           short-summary: Space separated list of rule groups to disable. This disables the entire group.
-            To disable specifc rules, use '--disabled-rule-ids'.
+            To disable specifc rules, use '--disabled-rules'.
           populator-commands:
           - az application-gateway waf-config list-rule-sets
         - name: --disabled-rules
-          short-summary: Space separated list of rule IDs to disable.
+          short-summary: List of rule IDs to disable, separate arguments not a single space separated string.
           populator-commands:
           - az application-gateway waf-config list-rule-sets
 """
