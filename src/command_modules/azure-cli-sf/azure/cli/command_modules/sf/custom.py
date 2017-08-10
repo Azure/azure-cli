@@ -191,7 +191,6 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
     total_files_count = 0
     current_files_count = {"val": 0}
     total_files_size = 0
-    # For py2 we use dictionary instead of nonlocal
     current_files_size = {"val": 0}
 
     for root, _, files in os.walk(abspath):
@@ -211,9 +210,9 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
                     total_files_size,
                     rel_file_path), file=sys.stderr)
 
-    def upload_file(root, rel_path, file):
-        url_path = os.path.normpath(os.path.join("ImageStore", basename, rel_path, file)).replace("\\", "/")
-        fp = os.path.normpath(os.path.join(root, file))
+    def upload_file(root, rel_path, f):
+        url_path = os.path.normpath(os.path.join("ImageStore", basename, rel_path, f)).replace("\\", "/")
+        fp = os.path.normpath(os.path.join(root, f))
         with open(fp, 'rb') as file_opened:
             url_parsed = list(urlparse(endpoint))
             url_parsed[2] = url_path
@@ -230,14 +229,12 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
                     yield chunk
 
             fc = file_chunk(file_opened, os.path.normpath(
-                os.path.join(rel_path, file)
+                os.path.join(rel_path, f)
             ), print_progress)
-            requests.put(url, data=fc, cert=cert,
-                            verify=ca_cert)
+            requests.put(url, data=fc, cert=cert, verify=ca_cert)
             current_files_count["val"] += 1
-            
             print_progress(0, os.path.normpath(
-                os.path.join(rel_path, file)
+                os.path.join(rel_path, f)
             ))
 
     def upload_dir_file(rel_path):
@@ -254,8 +251,8 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
         futures = []
         for root, _, files in os.walk(abspath):
             rel_path = os.path.normpath(os.path.relpath(root, abspath))
-            for file in files:
-                futures.append(executor.submit(upload_file, root, rel_path, file))
+            for f in files:
+                futures.append(executor.submit(upload_file, root, rel_path, f))
             futures.append(executor.submit(upload_dir_file, rel_path))
 
         concurrent.futures.wait(futures)
