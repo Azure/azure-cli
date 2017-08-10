@@ -58,5 +58,5 @@ setup(
         'azure.cli.command_modules.extension',
     ],
     install_requires=DEPENDENCIES,
-    cmdclass=cmdclass,
+    cmdclass=cmdclass
 )
