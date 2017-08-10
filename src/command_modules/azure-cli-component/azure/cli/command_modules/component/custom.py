@@ -16,6 +16,10 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 
+def _deprecate_warning():
+    logger.warning("The 'component' commands will be deprecated in the future.")
+
+
 def _verify_not_dev():
     from azure.cli.core import __version__ as core_version
     dev_version = core_version.endswith('+dev')
@@ -25,6 +29,7 @@ def _verify_not_dev():
 
 def list_components():
     """ List the installed components """
+    _deprecate_warning()
     _verify_not_dev()
     import pip
     return sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''), 'version': dist.version}
@@ -53,6 +58,7 @@ def _get_first_party_pypi_command_modules():
 
 def list_available_components():
     """ List publicly available components that can be installed """
+    _deprecate_warning()
     _verify_not_dev()
     import pip
     available_components = []
@@ -74,6 +80,7 @@ def list_available_components():
 
 def remove(component_name):
     """ Remove a component """
+    _deprecate_warning()
     _verify_not_dev()
     if component_name in ['nspkg', 'core']:
         raise CLIError("This component cannot be removed, it is required for the CLI to function.")
@@ -166,6 +173,7 @@ def update(private=False,
            additional_components=None,
            allow_third_party=False):
     """ Update the CLI and all installed components """
+    _deprecate_warning()
     _verify_not_dev()
     import pip
     # Update the CLI itself
