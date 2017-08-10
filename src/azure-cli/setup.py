@@ -65,6 +65,7 @@ DEPENDENCIES = [
     'azure-cli-dla',
     'azure-cli-dls',
     'azure-cli-cosmosdb',
+    'azure-cli-eventgrid',
     'azure-cli-feedback',
     'azure-cli-find',
     'azure-cli-interactive',
