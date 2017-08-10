@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-# --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-# --------------------------------------------------------------------------------------------
-
 from codecs import open
 from setuptools import setup, find_packages
 
@@ -32,9 +27,9 @@ setup(
     description='An Azure CLI Extension.',
     long_description='An example Azure CLI Extension.',
     license='MIT',
-    author='Microsoft Corporation',
-    author_email='contoso@microsoft.com',
-    url='https://github.com/Azure/azure-cli',
+    author='MY CORP.',
+    author_email='example@contoso.com',
+    url='https://github.com/ORG/REPO',
     classifiers=CLASSIFIERS,
     packages=find_packages(),
     package_data={'azext_hello': ['azext_metadata.json']},

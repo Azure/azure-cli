@@ -113,7 +113,8 @@ class WheelExtension(Extension):
     @staticmethod
     def get_azext_metadata(ext_dir):
         azext_metadata = None
-        azext_metadata_filepath = os.path.join(ext_dir, get_extension_modname(ext_dir=ext_dir), AZEXT_METADATA_FILENAME)
+        ext_modname = get_extension_modname(ext_dir=ext_dir)
+        azext_metadata_filepath = os.path.join(ext_dir, ext_modname, AZEXT_METADATA_FILENAME)
         if os.path.isfile(azext_metadata_filepath):
             with open(azext_metadata_filepath) as f:
                 azext_metadata = json.load(f)
@@ -156,7 +157,8 @@ def ext_compat_with_cli(azext_metadata):
 
 def get_extension_modname(ext_name=None, ext_dir=None):
     ext_dir = ext_dir or get_extension_path(ext_name)
-    pos_mods = [n for n in os.listdir(ext_dir) if n.startswith(EXTENSIONS_MOD_PREFIX) and os.path.isdir(os.path.join(ext_dir, n))]
+    pos_mods = [n for n in os.listdir(ext_dir)
+                if n.startswith(EXTENSIONS_MOD_PREFIX) and os.path.isdir(os.path.join(ext_dir, n))]
     if len(pos_mods) != 1:
         raise AssertionError("Expected 1 module to load starting with "
                              "'{}': got {}".format(EXTENSIONS_MOD_PREFIX, pos_mods))

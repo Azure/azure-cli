@@ -44,8 +44,7 @@ def _run_pip(pip, pip_exec_args):
     log_output = log_stream.getvalue()
     logger.debug(log_output)
     log_stream.close()
-    if status_code > 0:
-        raise CLIError('An error occurred. Use --debug for more information.')
+    return status_code
 
 
 def _whl_download_from_url(url_parse_result, ext_file):
@@ -85,7 +84,7 @@ def _validate_whl_extension(ext_file):
     _validate_whl_cli_compat(azext_metadata)
 
 
-def _add_whl_ext(source):
+def _add_whl_ext(source):  # pylint: disable=too-many-statements
     import pip
     url_parse_result = urlparse(source)
     is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
@@ -127,11 +126,17 @@ def _add_whl_ext(source):
         raise CLIError('Error validating extension. Use --debug for more information.')
     logger.debug('Validation successful on {}'.format(ext_file))
     # Install with pip
-    pip_args = ['install', '--target', get_extension_path(extension_name), ext_file]
+    extension_path = get_extension_path(extension_name)
+    pip_args = ['install', '--target', extension_path, ext_file]
     logger.debug('Executing pip with args: %s', pip_args)
-    _run_pip(pip, pip_args)
+    pip_status_code = _run_pip(pip, pip_args)
+    if pip_status_code > 0:
+        logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
+        shutil.rmtree(extension_path, ignore_errors=True)
+        raise CLIError('An error occurred. Pip failed with status code {}. '
+                       'Use --debug for more information.'.format(pip_status_code))
     # Save the whl we used to install the extension in the extension dir.
-    dst = os.path.join(get_extension_path(extension_name), whl_filename)
+    dst = os.path.join(extension_path, whl_filename)
     shutil.copyfile(ext_file, dst)
     logger.debug('Saved the whl to %s', dst)
 

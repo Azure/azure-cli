@@ -18,7 +18,7 @@ What an Extension is not
 
 - An extension is not an external executable or product outside of `az`.
 
-- If you're looking to create a command module for `az`, see [authoring command modules](https://github.com/Azure/azure-cli/tree/master/doc/authoring_command_modules).
+- If you're looking to create a command module which is installed by default for `az`, see [authoring command modules](https://github.com/Azure/azure-cli/tree/master/doc/authoring_command_modules).
 
 - If you're looking to build your own CLI using `az` patterns, see [knack](https://github.com/Microsoft/knack).
 
