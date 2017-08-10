@@ -14,7 +14,7 @@ FAQ
 
 ### How do I specify which versions of the CLI my extension works with?
 
-- TODO
+- See [Extension Metadata](metadata.md).
 
 ### How do I build my Autorest-based Azure SDK to be compatible with extensions?
 

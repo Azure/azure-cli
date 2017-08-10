@@ -30,4 +30,6 @@ Doc Sections
 
 - [Publishing](publishing.md) - How to publish an extension
 
+- [Extension Metadata](metadata.md) - How to add additional extension metadata
+
 - [FAQ](faq.md) - Commonly asked questions

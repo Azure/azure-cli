@@ -99,6 +99,13 @@ az extension list -ojson
 ]
 ```
 
+Extension Metadata (optional)
+-----------------------------
+
+Additional metadata can be added to your extension.
+
+See [Extension Metadata](metadata.md) for more information.
+
 
 Tips/Notes
 ----------

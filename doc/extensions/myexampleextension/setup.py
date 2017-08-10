@@ -37,5 +37,6 @@ setup(
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
     packages=find_packages(),
+    package_data={'azext_hello': ['azext_metadata.json']},
     install_requires=DEPENDENCIES
 )

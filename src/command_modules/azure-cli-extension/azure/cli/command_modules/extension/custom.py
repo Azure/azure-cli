@@ -6,6 +6,8 @@ import os
 import tempfile
 import shutil
 import logging
+import zipfile
+import traceback
 
 import requests
 from wheel.install import WHEEL_INFO_RE
@@ -15,7 +17,8 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
-                                      get_extension, ExtensionNotInstalledException)
+                                      get_extension, ext_compat_with_cli,
+                                      WheelExtension, ExtensionNotInstalledException)
 
 import azure.cli.core.azlogging as azlogging
 
@@ -56,6 +59,32 @@ def _whl_download_from_url(url_parse_result, ext_file):
                 f.write(chunk)
 
 
+def _validate_whl_cli_compat(azext_metadata):
+    is_compatible, cli_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_version, min_required, max_required)
+    if not is_compatible:
+        min_max_msg_fmt = "The extension is not compatible with this version of the CLI.\n" \
+                          "You have CLI version {} and this extension " \
+                          "requires ".format(cli_version)
+        if min_required and max_required:
+            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
+        elif min_required:
+            min_max_msg_fmt += 'a min of {}.'.format(min_required)
+        elif max_required:
+            min_max_msg_fmt += 'a max of {}.'.format(max_required)
+        raise CLIError(min_max_msg_fmt)
+
+
+def _validate_whl_extension(ext_file):
+    tmp_dir = tempfile.mkdtemp()
+    zip_ref = zipfile.ZipFile(ext_file, 'r')
+    zip_ref.extractall(tmp_dir)
+    zip_ref.close()
+    azext_metadata = WheelExtension.get_azext_metadata(tmp_dir)
+    _validate_whl_cli_compat(azext_metadata)
+
+
 def _add_whl_ext(source):
     import pip
     url_parse_result = urlparse(source)
@@ -65,7 +94,7 @@ def _add_whl_ext(source):
     parsed_filename = WHEEL_INFO_RE(whl_filename)
     extension_name = parsed_filename.groupdict().get('name') if parsed_filename else None
     if not extension_name:
-        raise CLIError('Unable to determine extension name from {}'.format(source))
+        raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name):
         raise CLIError('The extension {} already exists.'.format(extension_name))
     ext_file = None
@@ -74,13 +103,29 @@ def _add_whl_ext(source):
         tmp_dir = tempfile.mkdtemp()
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
-        _whl_download_from_url(url_parse_result, ext_file)
+        try:
+            _whl_download_from_url(url_parse_result, ext_file)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+            raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
         logger.debug('Downloaded to %s', ext_file)
     else:
         # Get file path
         ext_file = os.path.realpath(os.path.expanduser(source))
         if not os.path.isfile(ext_file):
             raise CLIError("File {} not found.".format(source))
+    # Validate the extension
+    logger.debug('Validating the extension {}'.format(ext_file))
+    try:
+        _validate_whl_extension(ext_file)
+    except AssertionError:
+        logger.debug(traceback.format_exc())
+        raise CLIError('The extension is invalid. Use --debug for more information.')
+    except CLIError as e:
+        raise e
+    except Exception:  # pylint:disable=broad-except
+        logger.debug(traceback.format_exc())
+        raise CLIError('Error validating extension. Use --debug for more information.')
+    logger.debug('Validation successful on {}'.format(ext_file))
     # Install with pip
     pip_args = ['install', '--target', get_extension_path(extension_name), ext_file]
     logger.debug('Executing pip with args: %s', pip_args)

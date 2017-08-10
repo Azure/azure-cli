@@ -19,6 +19,12 @@ EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR \
                     else os.path.join(GLOBAL_CONFIG_DIR, 'cliextensions')
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
+WHL_METADATA_FILENAME = 'metadata.json'
+AZEXT_METADATA_FILENAME = 'azext_metadata.json'
+
+EXT_METADATA_MINCLIVERSION = 'azext.minCliVersion'
+EXT_METADATA_MAXCLIVERSION = 'azext.maxCliVersion'
+
 logger = azlogging.get_az_logger(__name__)
 
 logger.debug("Extension directory: '%s'", EXTENSIONS_DIR)
@@ -89,17 +95,29 @@ class WheelExtension(Extension):
     def get_metadata(self):
         if not extension_exists(self.name):
             return None
+        metadata = {}
         ext_dir = get_extension_path(self.name)
         dist_info_dirs = [f for f in os.listdir(ext_dir) if f.endswith('.dist-info')]
+        azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
+        if azext_metadata:
+            metadata.update(azext_metadata)
         for dist_info_dirname in dist_info_dirs:
             parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
             if parsed_dist_info_dir and parsed_dist_info_dir.groupdict().get('name') == self.name:
-                metadata_filepath = os.path.join(ext_dir, dist_info_dirname, 'metadata.json')
-                metadata = None
-                if os.path.isfile(metadata_filepath):
-                    with open(metadata_filepath) as f:
-                        metadata = json.load(f)
-                return metadata
+                whl_metadata_filepath = os.path.join(ext_dir, dist_info_dirname, WHL_METADATA_FILENAME)
+                if os.path.isfile(whl_metadata_filepath):
+                    with open(whl_metadata_filepath) as f:
+                        metadata.update(json.load(f))
+        return metadata
+
+    @staticmethod
+    def get_azext_metadata(ext_dir):
+        azext_metadata = None
+        azext_metadata_filepath = os.path.join(ext_dir, get_extension_modname(ext_dir=ext_dir), AZEXT_METADATA_FILENAME)
+        if os.path.isfile(azext_metadata_filepath):
+            with open(azext_metadata_filepath) as f:
+                azext_metadata = json.load(f)
+        return azext_metadata
 
     @staticmethod
     def get_all():
@@ -117,6 +135,32 @@ class WheelExtension(Extension):
 
 
 EXTENSION_TYPES = [WheelExtension]
+
+
+def ext_compat_with_cli(azext_metadata):
+    from azure.cli import __version__ as cli_version  # pylint:disable=no-name-in-module
+    from pkg_resources import parse_version
+    is_compatible, min_required, max_required = (True, None, None)
+    if azext_metadata:
+        min_required = azext_metadata.get(EXT_METADATA_MINCLIVERSION)
+        max_required = azext_metadata.get(EXT_METADATA_MAXCLIVERSION)
+        parsed_cli_version = parse_version(cli_version)
+        if min_required and parsed_cli_version < parse_version(min_required):
+            is_compatible = False
+        elif max_required and parsed_cli_version > parse_version(max_required):
+            is_compatible = False
+        else:
+            is_compatible = True
+    return is_compatible, cli_version, min_required, max_required
+
+
+def get_extension_modname(ext_name=None, ext_dir=None):
+    ext_dir = ext_dir or get_extension_path(ext_name)
+    pos_mods = [n for n in os.listdir(ext_dir) if n.startswith(EXTENSIONS_MOD_PREFIX) and os.path.isdir(os.path.join(ext_dir, n))]
+    if len(pos_mods) != 1:
+        raise AssertionError("Expected 1 module to load starting with "
+                             "'{}': got {}".format(EXTENSIONS_MOD_PREFIX, pos_mods))
+    return pos_mods[0]
 
 
 def get_extension_path(ext_name):

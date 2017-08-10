@@ -11,7 +11,6 @@ import logging as logs
 import pkgutil
 import re
 import sys
-import os
 import time
 import timeit
 import traceback
@@ -378,20 +377,17 @@ def load_params(command):
 
 
 def _get_command_table_from_extensions():
-    from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX, get_extension_names, get_extension_path
+    from azure.cli.core.extension import get_extension_names, get_extension_path, get_extension_modname
     extensions = get_extension_names()
     if extensions:
         logger.debug("Found {} extensions: {}".format(len(extensions), extensions))
         for ext_name in extensions:
             ext_dir = get_extension_path(ext_name)
             sys.path.append(ext_dir)
-            pos_mods = [n for n in os.listdir(ext_dir) if n.startswith(EXTENSIONS_MOD_PREFIX)]
             try:
-                if len(pos_mods) != 1:
-                    raise AssertionError("Expected 1 module to load starting with "
-                                         "'{}': got {}".format(EXTENSIONS_MOD_PREFIX, pos_mods))
+                ext_mod = get_extension_modname(ext_dir=ext_dir)
                 start_time = timeit.default_timer()
-                import_module(pos_mods[0]).load_commands()
+                import_module(ext_mod).load_commands()
                 elapsed_time = timeit.default_timer() - start_time
                 logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
             except Exception:  # pylint: disable=broad-except
