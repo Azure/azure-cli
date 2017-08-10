@@ -1378,8 +1378,7 @@ class VMSSCreateAndModify(ResourceGroupVCRTestBase):
         self.cmd('vmss create --admin-password testPassword0 --name {} -g {} --admin-username myadmin --image Win2012R2Datacenter --instance-count {}'
                  .format(vmss_name, self.resource_group, instance_count))
 
-        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group),
-                 )
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group))
 
         self.cmd('vmss list', checks=JMESPathCheck('type(@)', 'array'))
 

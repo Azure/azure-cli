@@ -147,7 +147,7 @@ virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metav
 subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
 load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
-cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
+cookie_based_affinity_type = CliArgumentType(**three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
 ag_servers_type = CliArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 
@@ -284,9 +284,9 @@ register_cli_argument('network application-gateway url-path-map', 'address_pool'
 register_cli_argument('network application-gateway url-path-map', 'http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
 
 register_cli_argument('network application-gateway url-path-map rule', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list(), id_part='grandchild_name')
-register_cli_argument('network application-gateway url-path-map rule create', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None)
+register_cli_argument('network application-gateway url-path-map rule create', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None, validator=process_ag_url_path_map_rule_create_namespace)
 register_cli_argument('network application-gateway url-path-map rule', 'url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name')
-register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', validator=process_ag_url_path_map_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
+register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
 register_cli_argument('network application-gateway waf-config', 'enabled', help='Specify whether the application firewall is enabled.', **enum_choice_list(['true', 'false']))

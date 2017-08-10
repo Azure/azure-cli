@@ -131,7 +131,7 @@ def enum_default(resource_type, enum_name, enum_val_name):
         return None
 
 
-def three_state_flag(positive_label='true', negative_label='false', invert=False):
+def three_state_flag(positive_label='true', negative_label='false', invert=False, return_label=False):
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
     positive/negative values without introducing breaking changes. Flag-like behavior always
@@ -139,6 +139,7 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
     - positive_label: label for the positive value (ex: 'enabled')
     - negative_label: label for the negative value (ex: 'disabled')
     - invert: invert the boolean logic for the flag
+    - return_label: if true, return the corresponding label. Otherwise, return a boolean value
     """
     choices = [positive_label, negative_label]
 
@@ -146,14 +147,15 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
     class ThreeStateAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
-            if invert:
-                if values:
-                    values = positive_label if values.lower() == negative_label else negative_label
-                else:
-                    values = values or negative_label
+            values = values or positive_label
+            is_positive = values.lower() == positive_label.lower()
+            is_positive = not is_positive if invert else is_positive
+            set_val = None
+            if return_label:
+                set_val = positive_label if is_positive else negative_label
             else:
-                values = values or positive_label
-            setattr(namespace, self.dest, values.lower() == positive_label)
+                set_val = is_positive
+            setattr(namespace, self.dest, set_val)
 
     params = {
         'choices': CaseInsensitiveList(choices),

@@ -432,7 +432,7 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
         instance.request_timeout = timeout
     if connection_draining_timeout is not None:
         instance.connection_draining.enabled = bool(connection_draining_timeout)
-        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout
+        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout or 1
     if host_name is not None:
         instance.host_name = host_name
     if host_name_from_backend_pool is not None:
@@ -1679,7 +1679,7 @@ def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
     ncf = _network_client_factory().virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
     new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
-                             sa_data_size_kilobyes=sa_data_size_kilobytes,
+                             sa_data_size_kilobytes=sa_data_size_kilobytes,
                              ipsec_encryption=ipsec_encryption,
                              ipsec_integrity=ipsec_integrity,
                              ike_encryption=ike_encryption,

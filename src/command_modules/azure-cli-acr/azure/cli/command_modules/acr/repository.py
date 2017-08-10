@@ -163,19 +163,19 @@ def _validate_user_credentials(registry_name,
             logger.warning("Unable to authenticate using AAD tokens: %s", str(e))
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("AAD authentication failed with message: %s", str(e))
-    else:
-        # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-        try:
-            cred = acr_credential_show(registry_name)
-            username = cred.username
-            password = cred.passwords[0].value
-            return request_method(login_server, path, username, password, result_index)
-        except NotFound as e:
-            raise CLIError(str(e))
-        except Unauthorized as e:
-            logger.warning("Unable to authenticate using admin login credentials: %s", str(e))
-        except Exception as e:  # pylint: disable=broad-except
-            logger.warning("Admin user authentication failed with message: %s", str(e))
+
+    # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
+    try:
+        cred = acr_credential_show(registry_name)
+        username = cred.username
+        password = cred.passwords[0].value
+        return request_method(login_server, path, username, password, result_index)
+    except NotFound as e:
+        raise CLIError(str(e))
+    except Unauthorized as e:
+        logger.warning("Unable to authenticate using admin login credentials: %s", str(e))
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Admin user authentication failed with message: %s", str(e))
 
     # 4. if we still don't have credentials, prompt the user
     try:

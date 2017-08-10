@@ -30,8 +30,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
                     'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute.compute',
                     'ComputeManagementClient')
-    MGMT_CONTAINER_SERVICE = ('azure.mgmt.compute.containerservice',
-                              'ContainerServiceClient')
     MGMT_NETWORK = ('azure.mgmt.network',
                     'NetworkManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features',
@@ -64,7 +62,6 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-06-01',
         ResourceType.MGMT_NETWORK: '2017-06-01',
-        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2017-03-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -72,12 +69,11 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2016-04-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2016-05-31'
+        ResourceType.DATA_STORAGE: '2017-04-17'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2015-06-15',
         ResourceType.MGMT_NETWORK: '2015-06-15',
-        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2016-03-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',

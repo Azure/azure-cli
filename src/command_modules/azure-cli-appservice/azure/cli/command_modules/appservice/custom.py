@@ -54,12 +54,16 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     if is_linux:
         if runtime and deployment_container_image_name:
             raise CLIError('usage error: --runtime | --deployment-container-image-name')
-        if startup_file or runtime:
+        if startup_file:
             site_config.app_command_line = startup_file
+
+        if runtime:
             site_config.linux_fx_version = runtime
-        if deployment_container_image_name:
-            site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
-                                                          deployment_container_image_name))
+        elif deployment_container_image_name:
+            site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
+        else:  # must specify runtime
+            raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
+
     elif runtime:  # windows webapp
         if startup_file or deployment_container_image_name:
             raise CLIError("usage error: --startup-file or --deployment-container-image-name is "
@@ -116,7 +120,7 @@ def list_runtimes(linux=False):
         # workaround before API is exposed
         logger.warning('You are viewing an offline list of runtimes. For up to date list, '
                        'check out https://aka.ms/linux-stacks')
-        return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9',
+        return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9', 'node|6.10',
                 'php|5.6', 'php|7.0', 'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
 
     runtime_helper = _StackRuntimeHelper(client)
@@ -179,9 +183,31 @@ def _fill_ftp_publishing_url(webapp, resource_group_name, name, slot=None):
     return webapp
 
 
-def _add_linux_fx_version(resource_group_name, name, custom_image_name):
-    fx_version = '{}|{}'.format('DOCKER', custom_image_name)
-    update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
+def _format_linux_fx_version(custom_image_name):
+    fx_version = custom_image_name.strip()
+    fx_version_lower = fx_version.lower()
+    # handles case of only spaces
+    if fx_version:
+        if not fx_version_lower.startswith('docker|'):
+            fx_version = '{}|{}'.format('DOCKER', custom_image_name)
+    else:
+        fx_version = ' '
+    return fx_version
+
+
+def _add_linux_fx_version(resource_group_name, name, custom_image_name, slot=None):
+    fx_version = _format_linux_fx_version(custom_image_name)
+    return update_site_configs(resource_group_name, name, linux_fx_version=fx_version, slot=slot)
+
+
+def _delete_linux_fx_version(resource_group_name, name, slot=None):
+    fx_version = ' '
+    return update_site_configs(resource_group_name, name, linux_fx_version=fx_version, slot=slot)
+
+
+def _get_linux_fx_version(resource_group_name, name, slot=None):
+    site_config = get_site_configs(resource_group_name, name, slot)
+    return site_config.linux_fx_version
 
 
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
@@ -309,7 +335,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
-                              'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
+                              'DOCKER_REGISTRY_SERVER_PASSWORD']
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
@@ -334,13 +360,14 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
-
     if docker_custom_image_name is not None:
-        settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
-        _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
-    update_app_settings(resource_group_name, name, settings, slot)
+        _add_linux_fx_version(resource_group_name, name, docker_custom_image_name, slot)
+
+    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url:
+        update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
-    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
+
+    return _mask_creds_related_appsettings(_filter_for_container_settings(resource_group_name, name, settings))
 
 
 def _get_acr_cred(registry_name):
@@ -365,16 +392,23 @@ def _get_acr_cred(registry_name):
 
 
 def delete_container_settings(resource_group_name, name, slot=None):
+    _delete_linux_fx_version(resource_group_name, name, slot)
     delete_app_settings(resource_group_name, name, CONTAINER_APPSETTING_NAMES, slot)
 
 
 def show_container_settings(resource_group_name, name, slot=None):
     settings = get_app_settings(resource_group_name, name, slot)
-    return _mask_creds_related_appsettings(_filter_for_container_settings(settings))
+    return _mask_creds_related_appsettings(_filter_for_container_settings(resource_group_name, name, settings, slot))
 
 
-def _filter_for_container_settings(settings):
-    return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
+def _filter_for_container_settings(resource_group_name, name, settings, slot=None):
+    result = [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
+    fx_version = _get_linux_fx_version(resource_group_name, name, slot).strip()
+    if fx_version:
+        added_image_name = {'name': 'DOCKER_CUSTOM_IMAGE_NAME',
+                            'value': fx_version}
+        result.append(added_image_name)
+    return result
 
 
 # TODO: remove this when #3660(service tracking issue) is resolved
