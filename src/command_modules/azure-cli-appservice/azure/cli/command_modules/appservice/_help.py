@@ -189,6 +189,11 @@ helps['webapp deployment list-publishing-profiles'] = """
     short-summary: get publishing endpoints, credentials, database connection strings, etc
 """
 
+helps['webapp deployment container show-cd-url'] = """
+    type: command
+    short-summary: get the webhook url of the linux webapp you can use to configure the container repository for continuous deployment
+"""
+
 helps['webapp deployment slot auto-swap'] = """
     type: command
     short-summary: Configure slot auto swap.
