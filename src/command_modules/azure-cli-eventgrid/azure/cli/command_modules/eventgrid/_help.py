@@ -123,11 +123,11 @@ helps['eventgrid resource event-subscription create'] = """
     type: command
     short-summary: Create a new event subscription to a resource.
     examples:
-        - name: Create a new event subscription with default filters
+        - name: Create a new event subscription to subscribe to events from an Azure Event Hubs namespace, using default filters
           text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
-        - name: Create a new event subscription with a filter specifying a subject prefix
+        - name: Create a new event subscription to subscribe to events from an Azure Storage account, using a filter specifying a subject prefix
           text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.Storage --resource-type storageAccounts --resource-name sa1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
-        - name: Create a new event subscription with default filters and with additional labels
+        - name: Create a new event subscription to subscribe to events from an Azure Event Hubs namespace, using default filters and additional labels
           text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --labels Finance HR
     """
 helps['eventgrid resource event-subscription delete'] = """
