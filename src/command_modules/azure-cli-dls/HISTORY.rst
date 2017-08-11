@@ -2,8 +2,8 @@
 
 Release History
 ===============
-unreleased
-++++++++++
+0.0.12 (2017-08-11)
++++++++++++++++++++
 * Enable progress controller (#4072)
 
 
