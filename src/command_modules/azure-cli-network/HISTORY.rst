@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.12 (2017-08-11)
 +++++++++++++++++++
 * `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted
 * `application-gateway {subresource} delete`: Fixed issue where `--no-wait` was not honored.
