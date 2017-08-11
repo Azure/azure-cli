@@ -2,7 +2,7 @@
 
 Release History
 ===============
-unreleased
+2.0.12 (2017-08-11)
 +++++++++++++++++++
 * add preview regions
 
