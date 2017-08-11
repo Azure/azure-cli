@@ -73,3 +73,4 @@ on_success:
   - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content /e
   - git add -A
   - git diff --quiet --exit-code --cached || git commit -m "Update Document Content" && git push origin %TARGET_BRANCH% && appveyor AddMessage "Document Updated"
+  
