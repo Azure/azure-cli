@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.12 (2017-08-11)
 +++++++++++++++++++
 * availability-set: expose fault domain count on convert
 * vm: expose 'az vm list-skus' command
