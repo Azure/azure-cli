@@ -652,4 +652,4 @@ with ParametersContext(command='sql server vnet-rule') as c:
                options_list=('--name', '-n'))
 
     c.argument('virtual_network_subnet_id',
-               options_list=('--vnet-id', '-v'))
+               options_list=('--vnet-subnet-id', '-v'))

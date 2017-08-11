@@ -1315,3 +1315,49 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('serverName', server),
                      JMESPathCheck('status', 'Completed')])
+
+
+class SqlServerVnetMgmtScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
+        rg = resource_group
+        vnet_rule_1 = 'rule1'
+        vnet_rule_2 = 'rule2'
+        # Create two vnets using cloudnet's cli cmdlets
+        vnet_id_1 = ''
+        vnet_id_2 = ''
+
+        # test sql server vnet-rule create
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --vnet-subnet-id {}'
+                 .format(vnet_rule_1, rg, server, vnet_id_1),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1))
+
+        # test sql server vnet-rule show
+        self.cmd('sql server vnet-rule show --name {} -g {} --server {}'
+                 .format(vnet_rule_1, rg, server),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg))
+
+        # test sql server vnet-rule update
+        self.cmd('sql server vnet-rule update --name {} -g {} --server {} --vnet-subnet-id {}'
+                 .format(vnet_rule_1, rg, server, vnet_id_2),
+
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2))
+
+
+        # test sql server vnet-rule list
+        self.cmd('sql server vnet-rule list -g {} --server {}'
+                 .format(rg, server), checks=[JMESPathCheck('length(@)', 1)])
+
+        # test sql server vnet-rule delete
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
+                 .format(vnet_rule_1, rg, server), checks=NoneCheck())
