@@ -293,8 +293,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
         runtime = 'node|6.4'
-        plan = 'webapp-linux-plan'
-        webapp = 'webapp-linux1'
+        plan = 'webapp-linux-plan2'
+        webapp = 'webapp-linux2'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
@@ -309,6 +309,12 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
             JMESPathCheckV2('appCommandLine', 'process.json')
         ])
+
+        result = self.cmd('webapp deployment container config -g {} -n {} --enable-cd true'.format(resource_group, webapp)).get_output_in_json()
+
+        self.assertTrue(result['CI_CD_URL'].startswith('https://'))
+        self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
+
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
             resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password

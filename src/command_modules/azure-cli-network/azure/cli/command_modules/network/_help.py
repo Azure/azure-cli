@@ -518,20 +518,24 @@ helps['network application-gateway waf-config set'] = """
         - name: --rule-set-type
           short-summary: Rule set type.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
         - name: --rule-set-version
           short-summary: Rule set version.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rule-groups
           short-summary: Space separated list of rule groups to disable. This disables the entire group.
-            To disable specifc rules, use '--disabled-rule-ids'.
+            To disable specifc rules, use '--disabled-rules'.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rules
           short-summary: Space separated list of rule IDs to disable.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
+    examples:
+        - name: Disable two rules for validation of request body parsing and SQL Injection
+          text: >
+            az network application-gateway waf-config set -g MyResourceGroup -n MyGatewayName --enabled true --rule-set-type OWASP --rule-set-version 3.0 --disabled-rules 920130 920140 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI
 """
 
 helps['network application-gateway waf-config show'] = """

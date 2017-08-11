@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.12 (2017-08-11)
 +++++++++++++++++++
 * `public-ip`: Add availability zone support.
 * `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted

@@ -7,7 +7,14 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.0.1b1+dev"
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
+
+VERSION = "0.0.1+dev"
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -25,6 +32,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-cli-core',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -42,13 +50,12 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages = [
+    packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-    ],
-    packages=[
         'azure.cli.command_modules.example',
     ],
     install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )
