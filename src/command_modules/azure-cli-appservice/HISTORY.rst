@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.12 (2017-08-11)
++++++++++++++++++++
+* minor fixes
+
 0.1.11 (2017-07-27)
 +++++++++++++++++++
 * webapp: Add generate container CI URL for Web App
