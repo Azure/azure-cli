@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.10 (2017-08-11)
 +++++++++++++++++++
 * account list: add `--refresh` to sycn up the latest subscriptions from server
 
