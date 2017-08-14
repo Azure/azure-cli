@@ -690,7 +690,7 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             "type": "string",
             "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
         }
-        # override sshMaster0 for non-kubernetes scenarioes
+        # override sshMaster0 for non-kubernetes scenarios
         outputs["sshMaster0"] = {
             "type": "string",
             "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
