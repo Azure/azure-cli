@@ -24,12 +24,13 @@ class AzHelpGenDirective(Directive):
     def make_rst(self):
         INDENT = '   '
         DOUBLEINDENT = INDENT * 2
-        parser_dict = {}
-        _store_parsers(app.parser, parser_dict)
+        parser_keys = []
+        parser_values = []
+        _store_parsers(app.parser, parser_keys, parser_values)
         doc_source_map = _load_doc_source_map()
 
         help_files = []
-        for cmd, parser in parser_dict.items():
+        for cmd, parser in zip(parser_keys, parser_values):
             try:
                 help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
                 help_file.load(parser)
@@ -98,13 +99,15 @@ class AzHelpGenDirective(Directive):
 def setup(app):
     app.add_directive('azhelpgen', AzHelpGenDirective)
 
-def _store_parsers(parser, d):
+def _store_parsers(parser, parser_keys, parser_values):
     for s in parser.subparsers.values():
-        d[_get_parser_name(s)] = s
+        parser_keys.append(_get_parser_name(s))
+        parser_values.append(s)
         if _is_group(s):
             for c in s.choices.values():
-                d[_get_parser_name(c)] = c
-                _store_parsers(c, d)
+                parser_keys.append(_get_parser_name(c))
+                parser_values.append(c)
+                _store_parsers(c, parser_keys, parser_values)
 
 def _load_doc_source_map():
     with open('azhelpgen/doc_source_map.json') as open_file:
