@@ -9,6 +9,7 @@ if "%CLIVERSION%"=="" (
     echo Please set the CLIVERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
+set PYTHON_VERSION=3.6.1
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 
@@ -24,6 +25,12 @@ set WIX_DIR=%HOMEDRIVE%%HOMEPATH%\zwix
 set REPO_ROOT=%~dp0..\..\..
 
 :: look for python 3.x so we can build into the installer
+if not "%1"=="" (
+   set PYTHON_DIR=%1
+   set PYTHON_EXE=%1\python.exe
+   goto PYTHON_FOUND
+)
+
 FOR /f %%i IN ('where python') DO (
   set PY_FILE_DRIVE=%%~di
   set PY_FILE_PATH=%%~pi
@@ -32,13 +39,13 @@ FOR /f %%i IN ('where python') DO (
   set PYTHON_DIR=!PY_FILE_DRIVE!!PY_FILE_PATH!
   FOR /F "delims=" %%j IN ('!PYTHON_EXE! --version') DO (
     set PYTHON_VER=%%j
-    echo.!PYTHON_VER!|findstr /C:"3." >nul 2>&1
+    echo.!PYTHON_VER!|findstr /C:"%PYTHON_VERSION%" >nul 2>&1
     if not errorlevel 1 (
        goto PYTHON_FOUND
     )
   )
 )
-echo python 3.x is needed to create installer.
+echo python %PYTHON_VERSION% is needed to create installer.
 exit /b 1
 :PYTHON_FOUND
 echo Python Executables: %PYTHON_DIR%, %PYTHON_EXE%
@@ -82,6 +89,7 @@ robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 :: Build & install all the packages with bdist_wheel
 %BUILDING_DIR%\python %~dp0build-packages.py %TEMP_SCRATCH_FOLDER% %REPO_ROOT%
+if %errorlevel% neq 0 goto ERROR
 :: Install them to the temp folder so to be packaged 
 %BUILDING_DIR%\python.exe -m pip install -f %TEMP_SCRATCH_FOLDER% --no-cache-dir azure-cli
 %BUILDING_DIR%\python.exe -m pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
@@ -100,9 +108,7 @@ if %errorlevel% neq 0 goto ERROR
 echo Building MSI...
 msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\packaged_releases\windows\azure-cli.wixproj
 
-if not "%1"=="-noprompt" (
-   start %OUTPUT_DIR%
-)
+start %OUTPUT_DIR%
 
 goto END
 
