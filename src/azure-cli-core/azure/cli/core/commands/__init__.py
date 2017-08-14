@@ -555,6 +555,8 @@ def create_command(module_name, name, operation,
                 and not _user_confirmed(confirmation, kwargs):
             raise CLIError('Operation cancelled.')
 
+        # Remove the confirm param from kwargs.
+        kwargs.pop(CONFIRM_PARAM_NAME, None)
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)

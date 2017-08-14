@@ -61,7 +61,7 @@ class TestExtensionCommands(unittest.TestCase):
             add_extension(MY_EXT_SOURCE)
 
     def test_add_extension_invalid(self):
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ValueError):
             add_extension(MY_BAD_EXT_SOURCE)
         actual = list_extensions()
         self.assertEqual(len(actual), 0)

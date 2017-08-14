@@ -35,12 +35,15 @@ def _run_pip(pip, pip_exec_args):
     log_stream = StringIO()
     log_handler = logging.StreamHandler(log_stream)
     log_handler.setFormatter(logging.Formatter('%(name)s : %(message)s'))
+
     pip.logger.handlers = []
     pip.logger.addHandler(log_handler)
+
     # Don't propagate to root logger as we catch the pip logs in our own log stream
     pip.logger.propagate = False
     logger.debug('Running pip: %s %s', pip, pip_exec_args)
     status_code = pip.main(pip_exec_args)
+
     log_output = log_stream.getvalue()
     logger.debug(log_output)
     log_stream.close()
@@ -81,6 +84,7 @@ def _validate_whl_extension(ext_file):
     zip_ref.extractall(tmp_dir)
     zip_ref.close()
     azext_metadata = WheelExtension.get_azext_metadata(tmp_dir)
+    shutil.rmtree(tmp_dir)
     _validate_whl_cli_compat(azext_metadata)
 
 
@@ -121,9 +125,6 @@ def _add_whl_ext(source):  # pylint: disable=too-many-statements
         raise CLIError('The extension is invalid. Use --debug for more information.')
     except CLIError as e:
         raise e
-    except Exception:  # pylint:disable=broad-except
-        logger.debug(traceback.format_exc())
-        raise CLIError('Error validating extension. Use --debug for more information.')
     logger.debug('Validation successful on {}'.format(ext_file))
     # Install with pip
     extension_path = get_extension_path(extension_name)
@@ -145,7 +146,7 @@ def add_extension(source):
     if source.endswith('.whl'):
         _add_whl_ext(source)
     else:
-        raise CLIError('Unknown extension type. Only Python wheels are supported.')
+        raise ValueError('Unknown extension type. Only Python wheels are supported.')
 
 
 def remove_extension(extension_name):
@@ -157,12 +158,8 @@ def remove_extension(extension_name):
 
 
 def list_extensions():
-    extensions = []
-    for ext in get_extensions():
-        extensions.append({OUT_KEY_NAME: ext.name,
-                           OUT_KEY_VERSION: ext.version,
-                           OUT_KEY_TYPE: ext.ext_type})
-    return extensions
+    return [{OUT_KEY_NAME: ext.name, OUT_KEY_VERSION: ext.version, OUT_KEY_TYPE: ext.ext_type}
+            for ext in get_extensions()]
 
 
 def show_extension(extension_name):
