@@ -134,8 +134,16 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def delete_webapp(resource_group_name, name, slot=None):
+def delete_function_app(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'delete', slot)
+
+
+def delete_webapp(resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
+                  keep_dns_registration=None, slot=None):
+    client = web_client_factory()
+    delete_method = getattr(client.web_apps, 'delete' if slot is None else 'delete_slot')
+    delete_method(resource_group_name, name, delete_metrics=not (keep_metrics),
+                  delete_empty_server_farm=not(keep_empty_plan), skip_dns_registration=not(keep_dns_registration))
 
 
 def stop_webapp(resource_group_name, name, slot=None):
@@ -277,9 +285,13 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _mask_creds_related_appsettings(_generic_site_operation(resource_group_name, name,
-                                                                   'update_application_settings',
-                                                                   slot, app_settings).properties)
+    result = _generic_site_operation(resource_group_name, name,
+                                     'update_application_settings', slot, app_settings)
+
+    result = [{'name': p,
+               'value': result.properties[p],
+               'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(result.properties)]
+    return result
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
@@ -974,6 +986,10 @@ def config_diagnostics(resource_group_name, name, level=None,
 
     return _generic_site_operation(resource_group_name, name, 'update_diagnostic_logs_config',
                                    slot, site_log_config)
+
+
+def get_diagnostics(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
 def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):

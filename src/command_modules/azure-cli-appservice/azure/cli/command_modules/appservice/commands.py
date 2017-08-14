@@ -115,6 +115,7 @@ cli_command(__name__, 'webapp deployment source update-token', custom_path + 'up
 cli_command(__name__, 'webapp log tail', custom_path + 'get_streaming_log')
 cli_command(__name__, 'webapp log download', custom_path + 'download_historical_logs')
 cli_command(__name__, 'webapp log config', custom_path + 'config_diagnostics')
+cli_command(__name__, 'webapp log show', custom_path + 'get_diagnostics')
 cli_command(__name__, 'webapp browse', custom_path + 'view_in_browser')
 
 cli_command(__name__, 'webapp deployment slot list', custom_path + 'list_slots', table_transformer=output_slots_in_table)
@@ -146,7 +147,7 @@ cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_mana
 cli_command(__name__, 'functionapp create', custom_path + 'create_function')
 cli_command(__name__, 'functionapp list', custom_path + 'list_function_app', table_transformer=transform_web_list_output)
 cli_command(__name__, 'functionapp show', custom_path + 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
-cli_command(__name__, 'functionapp delete', custom_path + 'delete_webapp')
+cli_command(__name__, 'functionapp delete', custom_path + 'delete_function_app')
 cli_command(__name__, 'functionapp stop', custom_path + 'stop_webapp')
 cli_command(__name__, 'functionapp start', custom_path + 'start_webapp')
 cli_command(__name__, 'functionapp restart', custom_path + 'restart_webapp')

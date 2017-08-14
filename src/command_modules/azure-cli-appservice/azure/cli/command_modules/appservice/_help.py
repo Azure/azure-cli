@@ -167,6 +167,11 @@ helps['webapp log config'] = """
     short-summary: Configure web app logs.
 """
 
+helps['webapp log show'] = """
+    type: command
+    short-summary: Show web app log configurations.
+"""
+
 helps['webapp log download'] = """
     type: command
     short-summary: Download historical logs as a zip file

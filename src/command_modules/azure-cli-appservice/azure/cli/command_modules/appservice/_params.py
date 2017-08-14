@@ -86,6 +86,9 @@ register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), co
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('webapp browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
+register_cli_argument('webapp delete', 'keep_empty_plan', action='store_true', help='keep empty app service plan')
+register_cli_argument('webapp delete', 'keep_metrics', action='store_true', help='keep app metrics')
+register_cli_argument('webapp delete', 'keep_dns_registration', action='store_true', help='keep DNS registration')
 
 for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
@@ -109,6 +112,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
     register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
     register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
+
 
 register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
