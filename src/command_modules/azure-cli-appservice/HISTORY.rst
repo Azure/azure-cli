@@ -2,6 +2,10 @@
 
 Release History
 ===============
+Unreleased
+++++++++++++++++++
+webapp: fix an exception when create a new git based linux webapp
+
 0.1.12 (2017-08-11)
 +++++++++++++++++++
 * minor fixes
