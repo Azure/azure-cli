@@ -1354,9 +1354,8 @@ def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_sourc
     if deployment_source_url:
         logger.warning("Linking to git repository '%s'", deployment_source_url)
         try:
-            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
-                                           deployment_source_branch, manual_integration=True)
-            LongRunningOperation()(poller)
+            config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                  deployment_source_branch, manual_integration=True)
         except Exception as ex:  # pylint: disable=broad-except
             ex = ex_handler_factory(no_throw=True)(ex)
             logger.warning("Link to git repository failed due to error '%s'", ex)

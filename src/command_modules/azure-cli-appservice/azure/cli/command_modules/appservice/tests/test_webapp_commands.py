@@ -136,15 +136,15 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
 
     @ResourceGroupPreparer(location='westus')
-    def test_linux_webapp_quick_cd(self, resource_group):
-        webapp_name = 'webapp-quick-linux_cd'
-        plan = 'plan-quick-linux_cd'
+    def test_linux_webapp_quick_create_cd(self, resource_group):
+        webapp_name = 'webapp-quick-linux-cd'
+        plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r node|6.10'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
         import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        # self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+        self.assertTrue('Hello world' in str(r.content))
 
 
 class WebappConfigureTest(ResourceGroupVCRTestBase):
