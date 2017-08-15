@@ -217,7 +217,9 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.assertEqual(s2['value'], 'bar')
         self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
         # delete
-        self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name))
+        self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name), checks=[
+            JMESPathCheck("length([?name=='s3'])", 1)
+        ])
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
         self.assertEqual(set([x['name'] for x in result]), set(['s3', 'WEBSITE_NODE_DEFAULT_VERSION']))
         # hostnames
