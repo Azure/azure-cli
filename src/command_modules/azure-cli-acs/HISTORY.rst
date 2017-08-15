@@ -2,7 +2,7 @@
 
 Release History
 ===============
-unreleased
+2.0.13 (2017-08-15)
 +++++++++++++++++++
 * correct sshMaster0 port number for kubernetes
 
