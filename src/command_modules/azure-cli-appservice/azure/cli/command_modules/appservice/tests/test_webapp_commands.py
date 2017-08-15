@@ -147,6 +147,19 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue('Hello world' in str(r.content))
 
 
+class AppServicePlanSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_retain_plan(self, resource_group):
+        webapp_name = 'webapp-quick'
+        plan = 'plan-quick'
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp delete -g {} -n {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp_name))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('[0].name', plan)
+        ])
+
+
 class WebappConfigureTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappConfigureTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-config')
@@ -189,9 +202,12 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         # site appsettings testing
         # update
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('s1', 'foo'),
-            JMESPathCheck('s2', 'bar'),
-            JMESPathCheck('s3', 'bar2')
+            JMESPathCheck("length([?name=='s1'])", 1),
+            JMESPathCheck("length([?name=='s2'])", 1),
+            JMESPathCheck("length([?name=='s3'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1),
+            JMESPathCheck("length([?value=='bar'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1)
         ])
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))

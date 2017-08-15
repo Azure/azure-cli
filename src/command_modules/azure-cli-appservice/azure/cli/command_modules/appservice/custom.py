@@ -142,8 +142,10 @@ def delete_webapp(resource_group_name, name, keep_metrics=None, keep_empty_plan=
                   keep_dns_registration=None, slot=None):
     client = web_client_factory()
     delete_method = getattr(client.web_apps, 'delete' if slot is None else 'delete_slot')
-    delete_method(resource_group_name, name, delete_metrics=not (keep_metrics),
-                  delete_empty_server_farm=not(keep_empty_plan), skip_dns_registration=not(keep_dns_registration))
+    delete_method(resource_group_name, name,
+                  delete_metrics=False if keep_metrics else None,
+                  delete_empty_server_farm=False if keep_empty_plan else None,
+                  skip_dns_registration=False if keep_dns_registration else None)
 
 
 def stop_webapp(resource_group_name, name, slot=None):
@@ -165,11 +167,11 @@ def get_site_configs(resource_group_name, name, slot=None):
 def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
-    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
-                              .connection_string_names or []
+    slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
+    slot_app_setting_names = slot_app_setting_names or []
     result = [{'name': p,
                'value': result.properties[p],
-               'slotSetting': p in slot_constr_names} for p in _mask_creds_related_appsettings(result.properties)]
+               'slotSetting': p in slot_app_setting_names} for p in _mask_creds_related_appsettings(result.properties)]
     return result
 
 
@@ -259,16 +261,17 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
 
     result = _generic_site_operation(resource_group_name, name, 'update_application_settings',
                                      slot, app_settings)
-
+    app_settings_slot_cfg_names = []
     if slot_settings:
         client = web_client_factory()
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
+        app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _mask_creds_related_appsettings(result.properties)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
@@ -287,11 +290,13 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
     result = _generic_site_operation(resource_group_name, name,
                                      'update_application_settings', slot, app_settings)
+    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
-    result = [{'name': p,
-               'value': result.properties[p],
-               'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(result.properties)]
-    return result
+
+def _build_app_settings_output(app_settings, slot_cfg_names):
+    return [{'name': p,
+             'value': app_settings[p],
+             'slotSetting': p in (slot_cfg_names or [])} for p in _mask_creds_related_appsettings(app_settings)]
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
