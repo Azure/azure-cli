@@ -294,9 +294,10 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
 
 def _build_app_settings_output(app_settings, slot_cfg_names):
+    slot_cfg_names = slot_cfg_names or []
     return [{'name': p,
              'value': app_settings[p],
-             'slotSetting': p in (slot_cfg_names or [])} for p in _mask_creds_related_appsettings(app_settings)]
+             'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
