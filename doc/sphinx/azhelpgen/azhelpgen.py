@@ -26,11 +26,16 @@ class AzHelpGenDirective(Directive):
         DOUBLEINDENT = INDENT * 2
         parser_keys = []
         parser_values = []
-        _store_parsers(app.parser, parser_keys, parser_values)
-        doc_source_map = _load_doc_source_map()
-
-        help_files = []
+        sub_parser_keys = []
+        sub_parser_values = []
+        _store_parsers(app.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
         for cmd, parser in zip(parser_keys, parser_values):
+            if cmd not in sub_parser_keys:
+                sub_parser_keys.append(cmd)
+                sub_parser_values.append(parser)
+        doc_source_map = _load_doc_source_map()
+        help_files = []
+        for cmd, parser in zip(sub_parser_keys, sub_parser_values):
             try:
                 help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
                 help_file.load(parser)
@@ -99,15 +104,15 @@ class AzHelpGenDirective(Directive):
 def setup(app):
     app.add_directive('azhelpgen', AzHelpGenDirective)
 
-def _store_parsers(parser, parser_keys, parser_values):
+def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):
     for s in parser.subparsers.values():
         parser_keys.append(_get_parser_name(s))
         parser_values.append(s)
         if _is_group(s):
             for c in s.choices.values():
-                parser_keys.append(_get_parser_name(c))
-                parser_values.append(c)
-                _store_parsers(c, parser_keys, parser_values)
+                sub_parser_keys.append(_get_parser_name(c))
+                sub_parser_values.append(c)
+                _store_parsers(c, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
 
 def _load_doc_source_map():
     with open('azhelpgen/doc_source_map.json') as open_file:
