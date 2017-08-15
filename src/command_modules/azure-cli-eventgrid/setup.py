@@ -54,7 +54,10 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.eventgrid'
+        'azure.cli.command_modules.eventgrid',
+        'azure.cli.command_modules.eventgrid.sdk',
+        'azure.cli.command_modules.eventgrid.sdk.models',
+        'azure.cli.command_modules.eventgrid.sdk.operations'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
