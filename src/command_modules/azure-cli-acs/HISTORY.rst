@@ -4,6 +4,10 @@ Release History
 ===============
 unreleased
 +++++++++++++++++++
+* correct sshMaster0 port number for kubernetes
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
 * add preview regions
 
 2.0.11 (2017-07-27)

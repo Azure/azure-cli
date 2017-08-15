@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+2.0.12 (2017-08-11)
++++++++++++++++++++
 * Enable create storage account with system assigned identity
 * Enable update storage account with system assigned identity
 

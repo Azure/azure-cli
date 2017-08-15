@@ -1677,7 +1677,7 @@ def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
     ncf = _network_client_factory().virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
     new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
-                             sa_data_size_kilobyes=sa_data_size_kilobytes,
+                             sa_data_size_kilobytes=sa_data_size_kilobytes,
                              ipsec_encryption=ipsec_encryption,
                              ipsec_integrity=ipsec_integrity,
                              ike_encryption=ike_encryption,
