@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+0.1.2 (2017-08-15)
 ++++++++++++++++++
 
 * Added SDK dependencies.
