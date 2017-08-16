@@ -36,7 +36,12 @@ helps['webapp config appsettings'] = """
     short-summary: Configure web app settings.
 """
 
-helps['webapp config appsettings show'] = """
+helps['webapp config appsettings delete'] = """
+    type: command
+    short-summary: Delete web app settings.
+"""
+
+helps['webapp config appsettings list'] = """
     type: command
     short-summary: Show web app settings.
 """

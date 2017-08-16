@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import os
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
@@ -23,12 +24,9 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        import time
         webapp_name = 'webapp-e2e'
         plan = 'webapp-e2e-plan'
         self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
-        time.sleep(60)
-
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -36,17 +34,10 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].sku.name', 'B1')
         ])
         self.cmd('appservice plan list', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(plan), 1)
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, self.resource_group), 1)
         ])
         self.cmd('appservice plan show -g {} -n {}'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan)
-        ])
-        time.sleep(60)
-        # scale up
-        self.cmd('appservice plan update -g {} -n {} --sku S1'.format(self.resource_group, plan), checks=[
-            JMESPathCheck('name', plan),
-            JMESPathCheck('sku.tier', 'Standard'),
-            JMESPathCheck('sku.name', 'S1')
         ])
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
             JMESPathCheck('state', 'Running'),
@@ -71,6 +62,10 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
                     '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
+        self.cmd('webapp log show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('detailedErrorMessages.enabled', True),
+            JMESPathCheck('failedRequestsTracing.enabled', True)
+        ])
         self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorLoggingEnabled', True),
             JMESPathCheck('httpLoggingEnabled', True),
@@ -90,11 +85,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         self.cmd('webapp show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name)
-        ])
-        self.cmd('webapp delete -g {} -n {}'.format(self.resource_group, webapp_name))
-        # test empty service plan should be automatically deleted.
-        self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
-            JMESPathCheck('length(@)', 0)
         ])
 
 
@@ -157,6 +147,40 @@ class AppServicePlanSceanrioTest(ScenarioTest):
         self.cmd('webapp delete -g {} -n {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp_name))
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheckV2('[0].name', plan)
+        ])
+
+    @ResourceGroupPreparer()
+    def test_auto_delete_plan(self, resource_group):
+        webapp_name = 'webapp-delete2'
+        plan = 'webapp-delete-plan2'
+        self.cmd('appservice plan create -g {} -n {} -l westus'.format(resource_group, plan))
+
+        retries = 0
+        while retries < 10:
+            try:
+                self.cmd('appservice plan update -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
+                    JMESPathCheckV2('name', plan),
+                    JMESPathCheckV2('sku.tier', 'Standard'),
+                    JMESPathCheckV2('sku.name', 'S1')
+                ])
+                break
+            except:
+                time.sleep(60)
+                retries += 1
+
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+
+        retries = 0
+        while retries < 10:
+            try:
+                self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+                break
+            except:
+                time.sleep(60)
+                retries += 1
+        # test empty service plan should be automatically deleted.
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length(@)', 0)
         ])
 
 

@@ -994,7 +994,7 @@ def config_diagnostics(resource_group_name, name, level=None,
                                    slot, site_log_config)
 
 
-def get_diagnostics(resource_group_name, name, slot=None):
+def show_diagnostic_settings(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
