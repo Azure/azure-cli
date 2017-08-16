@@ -2022,10 +2022,8 @@ def create_av_set(availability_set_name, resource_group_name,
     if validate:
         return client.validate(resource_group_name, deployment_name, properties)
 
-    LongRunningOperation()(client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait))
-    compute_client = _compute_client_factory()
-    return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+    return client.create_or_update(
+        resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def _get_vault_id_from_name(client, vault_name):

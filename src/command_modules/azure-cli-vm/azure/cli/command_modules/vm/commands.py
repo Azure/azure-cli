@@ -159,7 +159,7 @@ cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wa
 cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'), no_wait_param='no_wait')
 
 # # VM Availability Set
-cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
+cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format, no_wait_param='no_wait')
 
 op_var = 'availability_sets_operations'
 op_class = 'AvailabilitySetsOperations'
