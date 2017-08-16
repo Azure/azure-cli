@@ -6,14 +6,14 @@
 import unittest
 from argparse import Namespace
 from six import StringIO
-from azure.cli.command_modules.storage._validators import (
-    get_permission_validator, get_datetime_type, datetime, ipv4_range_type, resource_type_type, services_type,
-    process_blob_source_uri, get_char_options_validator)
+
+from azure.cli.command_modules.storage._validators import (get_permission_validator, get_datetime_type, datetime,
+                                                           ipv4_range_type, resource_type_type, services_type,
+                                                           process_blob_source_uri, get_char_options_validator)
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.testsdk import api_version_constraint
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class TestStorageValidators(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
@@ -114,6 +114,60 @@ class TestStorageValidators(unittest.TestCase):
         result = getattr(ns, 'services')
         self.assertIs(type(result), set)
         self.assertEqual(result, set('ab'))
+
+
+@api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
+class TestEncryptionValidators(unittest.TestCase):
+    def test_validate_encryption_services(self):
+        from azure.cli.command_modules.storage._validators import validate_encryption_services
+
+        ns = Namespace(encryption_services=['blob'])
+        validate_encryption_services(ns)
+        self.assertIsNotNone(ns.encryption_services.blob)
+        self.assertTrue(ns.encryption_services.blob.enabled)
+        self.assertIsNone(ns.encryption_services.file)
+
+        ns = Namespace(encryption_services=['file'])
+        validate_encryption_services(ns)
+        self.assertIsNotNone(ns.encryption_services.file)
+        self.assertTrue(ns.encryption_services.file.enabled)
+        self.assertIsNone(ns.encryption_services.blob)
+
+        ns = Namespace(encryption_services=['blob', 'file'])
+        validate_encryption_services(ns)
+        self.assertIsNotNone(ns.encryption_services.blob)
+        self.assertTrue(ns.encryption_services.blob.enabled)
+        self.assertIsNotNone(ns.encryption_services.file)
+        self.assertTrue(ns.encryption_services.file.enabled)
+
+    def test_validate_encryption_source(self):
+        from azure.cli.command_modules.storage._validators import validate_encryption_source
+
+        with self.assertRaises(ValueError):
+            validate_encryption_source(Namespace(encryption_key_source='Notanoption'))
+
+        with self.assertRaises(ValueError):
+            validate_encryption_source(Namespace(encryption_key_source='Microsoft.Keyvault'))
+
+        with self.assertRaises(ValueError):
+            validate_encryption_source(Namespace(encryption_key_source='Microsoft.Storage',
+                                                 encryption_key_name='key_name',
+                                                 encryption_key_version='key_version',
+                                                 encryption_key_vault='https://example.com/key_uri'))
+
+        ns = Namespace(encryption_key_source='Microsoft.Keyvault',
+                       encryption_key_name='key_name',
+                       encryption_key_version='key_version',
+                       encryption_key_vault='https://example.com/key_uri')
+        validate_encryption_source(ns)
+        self.assertFalse(hasattr(ns, 'encryption_key_name'))
+        self.assertFalse(hasattr(ns, 'encryption_key_version'))
+        self.assertFalse(hasattr(ns, 'encryption_key_uri'))
+
+        properties = ns.encryption_key_vault_properties
+        self.assertEqual(properties.key_name, 'key_name')
+        self.assertEqual(properties.key_version, 'key_version')
+        self.assertEqual(properties.key_vault_uri, 'https://example.com/key_uri')
 
 
 if __name__ == '__main__':

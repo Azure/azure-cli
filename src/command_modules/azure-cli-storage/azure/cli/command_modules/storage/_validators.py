@@ -371,17 +371,43 @@ def validate_custom_domain(namespace):
         raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
 
 
-def validate_encryption(namespace):
-    ''' Builds up the encryption object for storage account operations based on the
-    list of services passed in. '''
-    if namespace.encryption:
-        Encryption, EncryptionServices, EncryptionService = get_sdk(ResourceType.MGMT_STORAGE,
-                                                                    'Encryption',
-                                                                    'EncryptionServices',
-                                                                    'EncryptionService',
-                                                                    mod='models')
-        services = {service: EncryptionService(True) for service in namespace.encryption}
-        namespace.encryption = Encryption(EncryptionServices(**services))
+def validate_encryption_services(namespace):
+    """
+    Builds up the encryption services object for storage account operations based on the list of services passed in.
+    """
+    if namespace.encryption_services:
+        EncryptionServices, EncryptionService = get_sdk(
+            ResourceType.MGMT_STORAGE, 'EncryptionServices', 'EncryptionService', mod='models')
+        services = {service: EncryptionService(True) for service in namespace.encryption_services}
+
+        namespace.encryption_services = EncryptionServices(**services)
+
+
+def validate_encryption_source(namespace):
+    ns = vars(namespace)
+    if namespace.encryption_key_source:
+        allowed_options = ['Microsoft.Storage', 'Microsoft.Keyvault']
+        if namespace.encryption_key_source not in allowed_options:
+            raise ValueError('--encryption-key-source allows to values: {}'.format(', '.join(allowed_options)))
+
+    key_name = ns.pop('encryption_key_name', None)
+    key_version = ns.pop('encryption_key_version', None)
+    key_vault_uri = ns.pop('encryption_key_vault', None)
+
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_version and key_vault_uri):
+        raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are required '
+                         'when --encryption-key-source=Microsoft.Keyvault is specified.')
+
+    if key_name or key_version or key_vault_uri:
+        if namespace.encryption_key_source != 'Microsoft.Keyvault':
+            raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
+                             'applicable when --encryption-key-source=Microsoft.Keyvault is not specified.')
+        KeyVaultProperties = get_sdk(ResourceType.MGMT_STORAGE, 'KeyVaultProperties', mod='models')
+        if not KeyVaultProperties:
+            return
+
+        kv_prop = KeyVaultProperties(key_name, key_version, key_vault_uri)
+        namespace.encryption_key_vault_properties = kv_prop
 
 
 def validate_entity(namespace):

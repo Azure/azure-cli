@@ -19,7 +19,7 @@ from azure.cli.core.commands import (register_cli_argument, register_extra_cli_a
 
 from azure.common import AzureMissingResourceHttpError
 
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
 from ._factory import get_storage_data_service_client
 from ._validators import \
@@ -30,8 +30,8 @@ from ._validators import \
      validate_custom_domain, validate_public_access,
      process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
-     get_content_setting_validator, validate_encryption, validate_accept,
-     validate_key, storage_account_key_options,
+     get_content_setting_validator, validate_encryption_services, validate_accept,
+     validate_key, storage_account_key_options, validate_encryption_source,
      process_file_download_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri,
@@ -112,7 +112,6 @@ class CommandContext(object):
         max_api = kwargs.pop('max_api', None)
         min_api = kwargs.pop('min_api', None)
         if resource_type and (max_api or min_api):
-            from azure.cli.core.profiles import supported_api_version
             return supported_api_version(resource_type, min_api=min_api, max_api=max_api)
         return True
 
@@ -286,7 +285,6 @@ register_cli_argument('storage', 'if_match', arg_group='Pre-condition')
 register_cli_argument('storage', 'if_none_match', arg_group='Pre-condition')
 
 register_cli_argument('storage', 'container_name', container_name_type)
-
 for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
     register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
 
@@ -300,21 +298,35 @@ for item in ['blob', 'file', 'queue', 'table']:
 def register_common_storage_account_options(context):
     context.reg_arg('https_only', help='Allows https traffic only to storage service.', **three_state_flag())
     context.reg_arg('sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
-    context.reg_arg('assign_identity', help='Generate and assign a new Storage Account Identity for this storage '
-                                            'account for use with key management services like Azure KeyVault.',
-                    action='store_true', resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     context.reg_arg('access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for '
                                         'StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. It is '
                                         'required for StandardBlob accounts during creation',
                     **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
 
-    encryption_services_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
-    if encryption_services_model:
-        encryption_choices = list(encryption_services_model._attribute_map.keys())  # pylint: disable=protected-access
-        context.reg_arg('encryption', nargs='+', help='Specifies which service(s) to encrypt.',
-                        validator=validate_encryption,
-                        resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01',
-                        **enum_choice_list(encryption_choices))
+    # after API 2016-12-01
+    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
+        encryption_services_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
+        if encryption_services_model:
+
+            encryption_choices = []
+            for attribute in encryption_services_model._attribute_map.keys():  # pylint: disable=protected-access
+                if not encryption_services_model._validation.get(attribute, {}).get('readonly'):  # pylint: disable=protected-access
+                    # skip readonly attributes, which are not for input
+                    encryption_choices.append(attribute)
+
+            context.reg_arg('encryption_services', nargs='+', help='Specifies which service(s) to encrypt.',
+                            validator=validate_encryption_services, **enum_choice_list(encryption_choices))
+
+    # after API 2017-06-01
+    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01'):
+        context.reg_arg('assign_identity', action='store_true',
+                        help='Generate and assign a new Storage Account Identity for this storage account for use with '
+                             'key management services like Azure KeyVault.')
+
+        # the options of encryption key sources are hardcoded since there isn't a enum represents them in the SDK.
+        context.reg_arg('encryption_key_source', help='The encryption keySource (provider). Default: Microsoft.Storage',
+                        validator=validate_encryption_source,
+                        **enum_choice_list(['Microsoft.Storage', 'Microsoft.Keyvault']))
 
 
 with CommandContext('storage account create') as c:
@@ -337,6 +349,15 @@ with CommandContext('storage account update') as c:
     c.reg_arg('use_subdomain', help='Specify whether to use indirect CNAME validation.',
               **enum_choice_list(['true', 'false']))
     c.reg_arg('tags', tags_type, default=None)
+
+    # after API 2017-06-01
+    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01'):
+        c.reg_arg('encryption_key_vault_properties', ignore_type)
+
+        with c.arg_group('Customer managed key') as g:
+            g.reg_extra_arg('encryption_key_name', help='The name of the KeyVault key.')
+            g.reg_extra_arg('encryption_key_vault', help='The Uri of the KeyVault')
+            g.reg_extra_arg('encryption_key_version', help='The version of the KeyVault key')
 
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
