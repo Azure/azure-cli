@@ -7,8 +7,6 @@ import os
 import traceback
 import json
 
-from wheel.install import WHEEL_INFO_RE
-
 import azure.cli.core.azlogging as azlogging
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
@@ -93,6 +91,7 @@ class WheelExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
+        from wheel.install import WHEEL_INFO_RE
         if not extension_exists(self.name):
             return None
         metadata = {}
