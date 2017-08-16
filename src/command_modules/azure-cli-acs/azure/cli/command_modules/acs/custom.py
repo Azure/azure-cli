@@ -22,6 +22,7 @@ import webbrowser
 import stat
 import ssl
 import yaml
+import re
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
@@ -483,7 +484,11 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     subscription_id = _get_subscription_id()
     if not dns_name_prefix:
         # Use subscription id to provide uniqueness and prevent DNS name clashes
-        dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
+        name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
+        if not name_part[0].isalpha():
+            name_part = ('a' + name_part)[0:10]
+        resource_group_part = re.sub('[^A-Za-z0-9-]', '', resource_group_name)[0:16]
+        dns_name_prefix = '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
 
     register_providers()
     groups = _resource_client_factory().resource_groups
