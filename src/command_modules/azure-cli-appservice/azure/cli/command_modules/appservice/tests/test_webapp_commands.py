@@ -465,7 +465,11 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('webapp config show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("phpVersion", test_php_version),
         ])
-        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2), checks=[
+            JMESPathCheck("[?name=='s4']|[0].slotSetting", True),
+            JMESPathCheck("[?name=='s3']|[0].slotSetting", False),
+        ])
+
         self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
