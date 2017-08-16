@@ -6,6 +6,10 @@ Release History
 +++++++++++++++++++
 * minor fixes
 
+unreleased
++++++++++++++++++++
+* `group deployment create`: Fixes issue where templates which lacked "parameters" or "resources" failed to deploy.
+
 2.0.11 (2017-07-27)
 +++++++++++++++++++
 * minor fixes
