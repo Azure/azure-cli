@@ -27,7 +27,7 @@ helps['container create'] = """
         - name: Create a container group using container image from Azure Container Registry.
           text: az container create -g MyResourceGroup --name myalpine --image myAcrRegistry.azurecr.io/alpine:latest --registry-password password
         - name: Create a container group using container image from other private container image registry.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1.5 --registry-server myregistry.com --registry-username username --registry-password password
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1.5 --registry-login-server myregistry.com --registry-username username --registry-password password
 """
 
 helps['container delete'] = """
