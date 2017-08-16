@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.2 (2017-08-15)
+++++++++++++++++++
+
+* Fix Debian release script failing due to double quotes in printing the status url after the build.
 
 0.1.1 (2017-07-31)
 ++++++++++++++++++
