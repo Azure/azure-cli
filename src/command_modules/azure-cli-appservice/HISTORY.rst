@@ -11,7 +11,7 @@ webapp: expose new arguments from 'az webapp delete' to retain app service plan,
 webapp: detect a slot setting correctly 
 
 0.1.13 (2017-08-15)
-=======
+++++++++++++++++++
 webapp: fix an exception when create a new git based linux webapp
 
 0.1.12 (2017-08-11)

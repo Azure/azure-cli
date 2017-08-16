@@ -199,6 +199,16 @@ helps['webapp deployment list-publishing-profiles'] = """
     short-summary: get publishing endpoints, credentials, database connection strings, etc
 """
 
+helps['webapp deployment container'] = """
+    type: group
+    short-summary: Manage container based continuous deployment.
+"""
+
+helps['webapp deployment container config'] = """
+    type: command
+    short-summary: configure continuous deployment.
+"""
+
 helps['webapp deployment container show-cd-url'] = """
     type: command
     short-summary: get the webhook url of the linux webapp you can use to configure the container repository for continuous deployment

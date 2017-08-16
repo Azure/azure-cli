@@ -168,11 +168,7 @@ def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
     slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
-    slot_app_setting_names = slot_app_setting_names or []
-    result = [{'name': p,
-               'value': result.properties[p],
-               'slotSetting': p in slot_app_setting_names} for p in _mask_creds_related_appsettings(result.properties)]
-    return result
+    return _build_app_settings_output(result.properties, slot_app_setting_names)
 
 
 def get_connection_strings(resource_group_name, name, slot=None):
