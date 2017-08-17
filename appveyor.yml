@@ -58,10 +58,10 @@ on_success:
   - git config --global user.name "%GIT_USER_NAME%"
   - git clone --depth 5 -q --branch=%TARGET_BRANCH% %GIT_CONTENT_REPO_URL% %TEMP%\azure-cli-content
   - ps: |
-      $folders = Get-ChildItem -Path "%TEMP%\azure-cli-content" -Directory
+      $folders = Get-ChildItem -Path "$env:TEMP\azure-cli-content" -Directory
       ForEach($folder in $folders)
       {
-          $folderPath = [System.IO.Path]::Combine("%TEMP%\azure-cli-content", $folder)
+          $folderPath = [System.IO.Path]::Combine("$env:TEMP\azure-cli-content", $folder)
           $subFolders = Get-ChildItem -Path $folderPath -Directory -Name
           if ($subFolders -contains "$env:YML_OUTPUT_FOLDER" -and $subFolders -contains "$env:CONCEPTUAL_DOC_FOLDER")
           {
