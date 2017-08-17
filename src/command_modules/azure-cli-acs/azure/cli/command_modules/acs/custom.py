@@ -21,6 +21,7 @@ import time
 import webbrowser
 import stat
 import ssl
+import re
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
@@ -370,6 +371,15 @@ def _get_subscription_id():
     return sub_id
 
 
+def _get_default_dns_prefix(name, resource_group_name, subscription_id):
+    # Use subscription id to provide uniqueness and prevent DNS name clashes
+    name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
+    if not name_part[0].isalpha():
+        name_part = (str('a') + name_part)[0:10]
+    resource_group_part = re.sub('[^A-Za-z0-9-]', '', resource_group_name)[0:16]
+    return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
+
+
 # pylint: disable=too-many-locals
 # pylint: disable-msg=too-many-arguments
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
@@ -482,8 +492,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
 
     subscription_id = _get_subscription_id()
     if not dns_name_prefix:
-        # Use subscription id to provide uniqueness and prevent DNS name clashes
-        dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
     register_providers()
     groups = _resource_client_factory().resource_groups
