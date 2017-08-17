@@ -221,7 +221,7 @@ class TestWheelExtension(TestExtensionsBase):
     def test_wheel_type(self):
         _install_test_extension1()
         ext = get_extension(EXT_NAME)
-        self.assertEqual(ext.ext_type, WheelExtension.EXT_TYPE)
+        self.assertEqual(ext.ext_type, 'whl')
 
     def test_wheel_metadata1(self):
         _install_test_extension1()

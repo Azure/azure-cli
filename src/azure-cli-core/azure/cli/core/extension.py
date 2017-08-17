@@ -82,10 +82,8 @@ class Extension(object):
 
 class WheelExtension(Extension):
 
-    EXT_TYPE = 'whl'
-
     def __init__(self, name):
-        super(WheelExtension, self).__init__(name, WheelExtension.EXT_TYPE)
+        super(WheelExtension, self).__init__(name, 'whl')
 
     def get_version(self):
         return self.metadata.get('version')
