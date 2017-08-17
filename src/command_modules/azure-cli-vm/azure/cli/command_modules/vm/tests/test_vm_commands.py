@@ -1901,6 +1901,14 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 
+class VMSSILBSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_with_ilb(self, resource_group):
+        vmss_name = 'vmss1'
+        result = self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image UbuntuLTS --instance-count 1 --public-ip-address ""'.format(resource_group, vmss_name))
+        pass
+
+
 class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
