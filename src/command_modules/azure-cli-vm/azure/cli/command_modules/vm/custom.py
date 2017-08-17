@@ -1487,7 +1487,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     lb = network_client.load_balancers.get(lb_rg, lb_name)
     if getattr(lb.frontend_ip_configurations[0], 'public_ip_address', None):
-        res_id = lb.frontend_ip_configurations[0].public_ip_address.id  # TODO: will this always work?
+        res_id = lb.frontend_ip_configurations[0].public_ip_address.id
         public_ip_info = parse_resource_id(res_id)
         public_ip_name = public_ip_info['name']
         public_ip_rg = public_ip_info['resource_group']
