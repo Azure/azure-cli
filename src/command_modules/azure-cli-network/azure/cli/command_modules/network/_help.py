@@ -1752,10 +1752,10 @@ helps['network vnet subnet create'] = """
     type: command
     short-summary: Create a subnet and associate an existing NSG and route table.
     parameters:
-        - name: --allow-tunneling
+        - name: --service-endpoints
           short-summary: Space separated list of services for which to allow tunneling to this subnet.
           populator-commands:
-            - az network vnet list-service-endpoints
+            - az network vnet list-endpoint-services
     examples:
         - name: Create new subnet attached to an NSG with a custom route table.
           text: >
@@ -1782,10 +1782,10 @@ helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
     parameters:
-        - name: --allow-tunneling
+        - name: --service-endpoints
           short-summary: Space separated list of services for which to allow tunneling to this subnet.
           populator-commands:
-            - az network vnet list-service-endpoints
+            - az network vnet list-endpoint-services
 """
 # endregion
 
