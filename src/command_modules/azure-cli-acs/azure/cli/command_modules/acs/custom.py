@@ -250,8 +250,8 @@ def _ssl_context():
 
 def _urlretrieve(url, filename):
     req = urlopen(url, context=_ssl_context())
-    with open(filename, "wb") as out:
-        out.write(req.read())
+    with open(filename, "wb") as f:
+        f.write(req.read())
 
 
 def dcos_install_cli(install_location=None, client_version='1.8'):
@@ -325,24 +325,30 @@ def _validate_service_principal(client, sp_id):
 
 
 def _build_service_principal(client, name, url, client_secret):
-    sys.stdout.write('creating service principal')
+    view = progress.IndeterminateStandardOut()
+    view.write({'message': 'Creating service principal'})
+    logger.info('Creating service principal')
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
+        view.write({'message': 'Creating service principal'})
         try:
             create_service_principal(service_principal, client=client)
-            break
+            view.write({'messsage': 'Finished service principal creation'})
+            logger.info('Finished service principal creation')
+            return service_principal
         # TODO figure out what exception AAD throws here sometimes.
         except Exception as ex:  # pylint: disable=broad-except
-            sys.stdout.write('.')
-            sys.stdout.flush()
             logger.info(ex)
-            time.sleep(2 + 2 * x)
-    print('done')
+            for _ in range(0, 2 + 2 * x):
+                time.sleep(1)
+                view.write({'message': 'Creating service principal'})
+    view.write({'message': 'Failed to create service principal'})
+    logger.info('Failed to create service principal')
     return service_principal
 
 
-def _add_role_assignment(role, service_principal, delay=1):
+def _add_role_assignment(role, service_principal, delay=2):
     # AAD can have delays in propagating data, so sleep and retry
     view = progress.IndeterminateStandardOut()
     view.write({'message': 'Starting AAD role propagation'})
@@ -359,8 +365,9 @@ def _add_role_assignment(role, service_principal, delay=1):
             logger.info("%s", ex.message)
         except:  # pylint: disable=bare-except
             pass
-        time.sleep(delay + delay * x)
-        view.write({'message': 'Waiting for AAD role to propagate'})
+        for _ in range(0, delay + delay * x):
+            time.sleep(1)
+            view.write({'message': 'Waiting for AAD role to propagate'})
     else:
         return False
     view.write({'message': 'AAD role propagation done'})
