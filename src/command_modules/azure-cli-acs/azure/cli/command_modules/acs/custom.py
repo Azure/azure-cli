@@ -31,6 +31,7 @@ from six.moves.urllib.error import URLError  # pylint: disable=import-error
 from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core.azlogging as azlogging
+import azure.cli.core.commands.progress as progress
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.acs._params import regionsInPreview
@@ -341,10 +342,11 @@ def _build_service_principal(client, name, url, client_secret):
     return service_principal
 
 
-def _add_role_assignment(role, service_principal, delay=2, output=True):
+def _add_role_assignment(role, service_principal, delay=1):
     # AAD can have delays in propagating data, so sleep and retry
-    if output:
-        sys.stdout.write('waiting for AAD role to propagate.')
+    view = progress.IndeterminateStandardOut()
+    view.write({'message': 'Starting AAD role propagation'})
+    logger.info('Starting AAD role propagation')
     for x in range(0, 10):
         try:
             # TODO: break this out into a shared utility library
@@ -353,16 +355,16 @@ def _add_role_assignment(role, service_principal, delay=2, output=True):
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
                 break
-            logger.info('%s', ex.message)
+            view.write({'message': ex.message})
+            logger.info("%s", ex.message)
         except:  # pylint: disable=bare-except
             pass
-        if output:
-            sys.stdout.write('.')
-            time.sleep(delay + delay * x)
+        time.sleep(delay + delay * x)
+        view.write({'message': 'Waiting for AAD role to propagate'})
     else:
         return False
-    if output:
-        print('done')
+    view.write({'message': 'AAD role propagation done'})
+    logger.info('AAD role propagation done')
     return True
 
 
