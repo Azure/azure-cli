@@ -60,10 +60,9 @@ cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key'
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
 
 with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
-    c.cli_command(__name__, 'storage account network-rule add', custom_path + 'add_network_acl_rule', factory)
-    c.cli_command(__name__, 'storage account network-rule remove', custom_path + 'remove_network_acl_rule', factory)
-    c.cli_command(__name__, 'storage account network-rule list', custom_path + 'list_network_acl_rules', factory)
-    c.cli_command(__name__, 'storage account network-rule show', custom_path + 'show_network_acl_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule add', custom_path + 'add_network_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule remove', custom_path + 'remove_network_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule list', custom_path + 'list_network_rules', factory)
 
 if supported_api_version(ResourceType.MGMT_STORAGE, max_api='2015-06-15'):
     cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')
