@@ -30,8 +30,8 @@ az_config = AzConfig()
 logger = azlogging.get_az_logger(__name__)
 
 
-def sf_create_compose_application(client, compose_file, application_id, repo_user=None, encrypted=False,
-                                  repo_pass=None, timeout=60):
+def sf_create_compose_application(client, compose_file, application_id, registry_user=None,
+                                  registry_pass=None, encrypted=False, timeout=60):
     # We need to read from a file which makes this a custom command
     # Encrypted param to indicate a password will be prompted
     """
@@ -43,40 +43,34 @@ def sf_create_compose_application(client, compose_file, application_id, repo_use
 
     :param str compose_file: Path to the Compose file to use
 
-    :param str repo_user: Container repository user name if needed for
-    authentication
+    :param str registry_user: Username for target container registry
 
-    :param bool encrypted: If true, indicate to use an encrypted password
-    rather than prompting for a plaintext one
+    :param bool encrypted: Indicates usage of encrypted password
 
-    :param str repo_pass: Encrypted container repository password
+    :param str registry_pass: Password for target container registry
     """
     from azure.cli.core.util import read_file_content
+    from azure.cli.core.prompting import prompt
     from azure.cli.core.prompting import prompt_pass
+
     # pylint: disable=line-too-long
     from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
     from azure.servicefabric.models.repository_credential import RepositoryCredential
 
-    if (any([encrypted, repo_pass]) and
-            not all([encrypted, repo_pass, repo_user])):
-        raise CLIError(
-            "Invalid arguments: [ --application_id --file | "
-            "--application_id --file --repo_user | --application_id --file "
-            "--repo_user --encrypted --repo_pass ])"
-        )
 
-    if repo_user:
-        plaintext_pass = prompt_pass("Container repository password: ", False,
-                                     "Password for container repository "
-                                     "containing container images")
-        repo_pass = plaintext_pass
+    if registry_user is None and registry_pass:
+        registry_user = prompt("Registry username: ",
+                               "Username for target container registry")
 
-    repo_cred = RepositoryCredential(repo_user, repo_pass, encrypted)
+    if registry_pass is None and registry_user:
+        registry_pass = prompt_pass("Registry password: ", False,
+                                    "Password for target container registry")
+
+    registry_cred = RepositoryCredential(registry_user, registry_pass, encrypted) if registry_user and registry_pass else None
 
     file_contents = read_file_content(compose_file)
 
-    model = CreateComposeApplicationDescription(application_id, file_contents,
-                                                repo_cred)
+    model = CreateComposeApplicationDescription(application_id, file_contents, registry_cred)
 
     client.create_compose_application(model, timeout)
 
