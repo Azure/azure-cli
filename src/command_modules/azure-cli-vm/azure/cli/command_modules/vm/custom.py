@@ -1486,21 +1486,24 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     # get public ip
     network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     lb = network_client.load_balancers.get(lb_rg, lb_name)
-    res_id = lb.frontend_ip_configurations[0].public_ip_address.id  # TODO: will this always work?
-    public_ip_info = parse_resource_id(res_id)
-    public_ip_name = public_ip_info['name']
-    public_ip_rg = public_ip_info['resource_group']
-    public_ip = network_client.public_ip_addresses.get(public_ip_rg, public_ip_name)
-    public_ip_address = public_ip.ip_address
+    if getattr(lb.frontend_ip_configurations[0], 'public_ip_address', None):
+        res_id = lb.frontend_ip_configurations[0].public_ip_address.id
+        public_ip_info = parse_resource_id(res_id)
+        public_ip_name = public_ip_info['name']
+        public_ip_rg = public_ip_info['resource_group']
+        public_ip = network_client.public_ip_addresses.get(public_ip_rg, public_ip_name)
+        public_ip_address = public_ip.ip_address
 
-    # loop around inboundnatrule
-    instance_addresses = {}
-    for rule in lb.inbound_nat_rules:
-        instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
-        instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
-                                                                       rule.frontend_port)
+        # loop around inboundnatrule
+        instance_addresses = {}
+        for rule in lb.inbound_nat_rules:
+            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
+            instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
+                                                                           rule.frontend_port)
 
-    return instance_addresses
+        return instance_addresses
+    else:
+        raise CLIError('The VM scale-set uses an internal load balancer, hence no connection information')
 
 
 def list_vmss_instance_public_ips(resource_group_name, vm_scale_set_name):
@@ -1813,6 +1816,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                          if app_gateway_type == 'new' else None)
 
     # public IP is used by either load balancer/application gateway
+    public_ip_address_id = None
     if public_ip_address:
         public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
                                 else '{}/publicIPAddresses/{}'.format(network_id_template,

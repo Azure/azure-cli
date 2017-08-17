@@ -2,11 +2,10 @@
 
 Release History
 ===============
-
 unreleased
 +++++++++++++++++++
+* `vmss create`: fix a crash when create a scaleset with an internal LB
 * `vm availability-set create`: Fix issue where --no-wait argument did not work.
-
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
