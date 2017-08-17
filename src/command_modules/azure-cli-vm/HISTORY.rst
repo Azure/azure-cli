@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+unreleased
++++++++++++++++++++
+* `vm availability-set create`: Fix issue where --no-wait argument did not work.
+
+
 2.0.12 (2017-08-11)
 +++++++++++++++++++
 * availability-set: expose fault domain count on convert
