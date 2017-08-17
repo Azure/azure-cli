@@ -2022,6 +2022,10 @@ def create_av_set(availability_set_name, resource_group_name,
     if validate:
         return client.validate(resource_group_name, deployment_name, properties)
 
+    if no_wait:
+        return client.create_or_update(
+            resource_group_name, deployment_name, properties, raw=no_wait)
+
     LongRunningOperation()(client.create_or_update(
         resource_group_name, deployment_name, properties, raw=no_wait))
     compute_client = _compute_client_factory()
