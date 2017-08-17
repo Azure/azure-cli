@@ -5,6 +5,7 @@ Release History
 unreleased
 +++++++++++++++++++
 * correct preview regions
+* format default dns_name_prefix properly
 
 2.0.13 (2017-08-15)
 +++++++++++++++++++
