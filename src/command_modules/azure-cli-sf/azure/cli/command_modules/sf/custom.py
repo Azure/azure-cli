@@ -57,7 +57,6 @@ def sf_create_compose_application(client, compose_file, application_id, registry
     from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
     from azure.servicefabric.models.repository_credential import RepositoryCredential
 
-
     if registry_user is None and registry_pass:
         registry_user = prompt("Registry username: ",
                                "Username for target container registry")
