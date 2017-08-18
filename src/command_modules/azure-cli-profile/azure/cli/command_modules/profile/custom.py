@@ -91,6 +91,14 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
     profile = Profile()
 
+    if os.environ.get('ACC_CLOUD', None):
+        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
+        if console_tokens:
+            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
+        else:
+            raise CLIError("Executing the 'login' command inside the Azure Cloud Console is unnecessary as"
+                           " your accounts have been pre-configured")
+
     if username:
         if not password:
             # in a VM with managed service identity?
@@ -102,11 +110,6 @@ def login(username=None, password=None, service_principal=None, tenant=None,
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
-        # in a cloud console?
-        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
-        if console_tokens:
-            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
-
         interactive = True
 
     try:
