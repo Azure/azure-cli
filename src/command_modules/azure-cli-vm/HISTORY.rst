@@ -1,6 +1,10 @@
 .. :changelog:
 
 Release History
+(unreleased)
++++++++++++++++++++
+* `vm/vmss create`: fix a bug that the storage sku is not applied on data disks coming with an image
+
 ===============
 2.0.13 (2017-08-28)
 +++++++++++++++++++
