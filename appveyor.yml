@@ -41,7 +41,7 @@ build_script:
       }
       $fileCommitMap | ConvertTo-Json | Out-File "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\doc_commit_map.json"
   - cd doc\sphinx 
-  - make xml
+  - make xmlwithversion
   - mkdir %TEMP%\azure-cli-xml2yml
   - cd %TEMP%\azure-cli-xml2yml
   - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-docs-cli-pre-process
