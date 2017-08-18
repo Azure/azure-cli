@@ -36,7 +36,12 @@ helps['webapp config appsettings'] = """
     short-summary: Configure web app settings.
 """
 
-helps['webapp config appsettings show'] = """
+helps['webapp config appsettings delete'] = """
+    type: command
+    short-summary: Delete web app settings.
+"""
+
+helps['webapp config appsettings list'] = """
     type: command
     short-summary: Show web app settings.
 """
@@ -167,6 +172,11 @@ helps['webapp log config'] = """
     short-summary: Configure web app logs.
 """
 
+helps['webapp log show'] = """
+    type: command
+    short-summary: Show web app log configurations.
+"""
+
 helps['webapp log download'] = """
     type: command
     short-summary: Download historical logs as a zip file
@@ -187,6 +197,16 @@ helps['webapp deployment'] = """
 helps['webapp deployment list-publishing-profiles'] = """
     type: command
     short-summary: get publishing endpoints, credentials, database connection strings, etc
+"""
+
+helps['webapp deployment container'] = """
+    type: group
+    short-summary: Manage container based continuous deployment.
+"""
+
+helps['webapp deployment container config'] = """
+    type: command
+    short-summary: configure continuous deployment.
 """
 
 helps['webapp deployment container show-cd-url'] = """
