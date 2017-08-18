@@ -150,7 +150,8 @@ def iot_hub_policy_create(client, hub_name, policy_name, permissions, resource_g
 def iot_hub_policy_delete(client, hub_name, policy_name, resource_group_name=None):
     hub = iot_hub_get(client, hub_name, resource_group_name)
     policies = iot_hub_policy_list(client, hub_name, hub.resourcegroup)
-    if not _is_policy_existed(policies, policy_name):
+    import copy
+    if not _is_policy_existed(copy.deepcopy(policies), policy_name):
         raise CLIError('Policy {0} not found.'.format(policy_name))
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     hub.properties.authorization_policies = updated_policies
