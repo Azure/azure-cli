@@ -82,7 +82,7 @@ def validate_accept(namespace):
 
 def validate_bypass(namespace):
     if namespace.bypass:
-        namespace.bypass = ', '.join(namespace.bypass)
+        namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
 def validate_client_parameters(namespace):
@@ -783,6 +783,51 @@ def process_metric_update_namespace(namespace):
     if (namespace.hour or namespace.minute) and namespace.api is None:
         raise argparse.ArgumentError(
             None, 'incorrect usage: specify --api when hour or minute metrics are enabled')
+
+
+def process_network_rule_add_namespace(namespace):
+    from azure.cli.core.commands.arm import parse_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subnet_parts = parse_resource_id(namespace.subnet)
+    vnet_parts = parse_resource_id(namespace.vnet)
+
+    # vnet name only will be fine, but subnet name only needs to be rejiggered
+    if len(subnet_parts) == 1:
+        if not vnet_parts:
+            raise CLIError('incorrect usage: --subnet NAME --vnet NAME_OR_ID | --subnet ID')
+        subnet_parts['child_name'] = subnet_parts['name']
+        del subnet_parts['name']
+
+    # these extra keys are used by the resource commands and will not match anyways
+    ignore_keys = ['resource_parent', 'resource_type', 'resource_namespace', 'resource_name']
+    common_keys = list(set(subnet_parts.keys()).intersection(vnet_parts.keys()))
+
+    common_keys = [key for key in common_keys if key not in ignore_keys]
+    for key in common_keys:
+        if subnet_parts[key] != vnet_parts[key]:
+            raise CLIError("Conflict: subnet {0} '{1}' does not match vnet {0} '{2}'".format(
+                key, subnet_parts[key], vnet_parts[key]))
+    combined_parts = subnet_parts.copy()
+    combined_parts.update(vnet_parts)
+    combined_parts = {k: v for k, v in combined_parts.items() if k not in ignore_keys}
+
+    # fill in holes
+    combined_parts['subscription'] = combined_parts.get('subscription', get_subscription_id())
+    combined_parts['resource_group'] = combined_parts.get('resource_group', namespace.resource_group_name)
+    combined_parts['namespace'] = combined_parts.get('namespace', 'Microsoft.Network')
+    combined_parts['type'] = combined_parts.get('type', 'virtualNetworks')
+
+    if 'child_name' in combined_parts:
+        combined_parts['child_type'] = combined_parts.get('child_type', 'subnets')
+        namespace.subnet = resource_id(**combined_parts)
+        namespace.vnet = None
+    elif 'name' in combined_parts:
+        namespace.vnet = resource_id(**combined_parts)
+        namespace.subnet = None
+    else:
+        namespace.vnet = None
+        namespace.subnet = None
 
 
 # endregion

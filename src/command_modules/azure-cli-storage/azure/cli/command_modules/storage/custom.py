@@ -39,10 +39,10 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, assign_identity=False, location=None, kind=None, tags=None,
+def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
                            custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
-                           bypass='AzureServices', default_action='Allow'):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
+                           bypass='AzureServices', default_action='Allow', assign_identity=False):
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
@@ -408,26 +408,31 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
         results[s.name] = s.get_metrics(interval, timeout)
     return results
 
-def list_network_rules(client, resource_group_name, storage_account_name, rule_type=None):
-    sa = client.get(resource_group_name, storage_account_name)
+
+def list_network_rules(client, resource_group_name, storage_account_name):
+    sa = client.get_properties(resource_group_name, storage_account_name)
     rules = sa.network_acls
-    if rule_type:
-        rules = getattr(rules, rule_type)
-    rules.pop('bypass')
-    rules.pop('defaultAction')
+    delattr(rules, 'bypass')
+    delattr(rules, 'default_action')
     return rules
 
-def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet_name=None,
+
+def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet=None,
                      ip_address=None):
-    sa = client.get(resource_group_name, storage_account_name)
+    sa = client.get_properties(resource_group_name, storage_account_name)
     rules = sa.network_acls
-    if subnet:
+    assert not (subnet and vnet)  # backstop for tests
+    if subnet or vnet:
+        from azure.cli.core.commands.arm import is_valid_resource_id
+        target_id = subnet or vnet
+        if not is_valid_resource_id(target_id):
+            raise CLIError("Expected fully qualified resource ID: got '{}'".format(target_id))
         VirtualNetworkRule = get_sdk(ResourceType.MGMT_STORAGE, 'VirtualNetworkRule', mod='models')
         if not rules.virtual_network_rules:
             rules.virtual_network_rules = []
-        rules.virtual_network_rules.append(VirtualNetworkRule(subnet, action=action))
+        rules.virtual_network_rules.append(VirtualNetworkRule(target_id, action=action))
     if ip_address:
-        IpRule = get_sdk(ResourceType.MGMT_STORAGE, 'IpRule', mod='models')
+        IpRule = get_sdk(ResourceType.MGMT_STORAGE, 'IPRule', mod='models')
         if not rules.ip_rules:
             rules.ip_rules = []
         rules.ip_rules.append(IpRule(ip_address, action=action))
@@ -436,16 +441,16 @@ def add_network_rule(client, resource_group_name, storage_account_name, action='
     params = StorageAccountUpdateParameters(network_acls=rules)
     return client.update(resource_group_name, storage_account_name, params)
 
-def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, name=None):
-    sa = client.get(resource_group_name, storage_account_name)
+
+def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, resource=None):
+    sa = client.get_properties(resource_group_name, storage_account_name)
     rules = sa.network_acls
-    if name:
-        rules.virtual_network_rules = [x for x in rules.virtual_network_rules \
-                                       if not x.virtual_network_resource_id.endswith(name)]
+    if resource:
+        rules.virtual_network_rules = [x for x in rules.virtual_network_rules
+                                       if not x.virtual_network_resource_id.endswith(resource)]
     if ip_address:
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
 
     StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
     params = StorageAccountUpdateParameters(network_acls=rules)
     return client.update(resource_group_name, storage_account_name, params)
-

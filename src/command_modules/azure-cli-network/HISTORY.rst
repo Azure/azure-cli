@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++
+* BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
+* BC `vnet subnet create/update`: renamed `--private-access-services` to `--service-endpoints`
+
 2.0.12 (2017-08-11)
 +++++++++++++++++++
 * `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted
