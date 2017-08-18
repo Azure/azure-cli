@@ -734,6 +734,16 @@ helps['network express-route'] = """
 helps['network express-route create'] = """
     type: command
     short-summary: Create an ExpressRoute circuit.
+    parameters:
+        - name: --bandwidth
+          populator-commands:
+          - az network express-route list-service-providers
+        - name: --peering-location
+          populator-commands:
+          - az network express-route list-service-providers
+        - name: --provider
+          populator-commands:
+          - az network express-route list-service-providers
 """
 
 helps['network express-route delete'] = """

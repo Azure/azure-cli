@@ -574,6 +574,36 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('network public-ip list -g {}'.format(rg), checks=JMESPathCheck("length[?name == '{}']".format(public_ip_dns), None))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkRouteFilterScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
+    def test_network_route_filter(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'filter': 'filter1'
+        }
+        self.cmd('network route-filter create -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter update -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter show -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter list -g {rg}'.format(**kwargs))
+
+        self.cmd('network route-filter rule list-service-communities')
+        try:
+            self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow'.format(**kwargs))
+        except CLIError:
+            pass
+        try:
+            self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny'.format(**kwargs))
+        except Exception:
+            pass
+        self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
+        self.cmd('network route-filter rule list -g {rg} --filter-name {filter}'.format(**kwargs))
+        self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
+
+        self.cmd('network route-filter delete -g {rg} -n {filter}'.format(**kwargs))
+
+
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_express_route')
