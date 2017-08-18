@@ -325,24 +325,22 @@ def _validate_service_principal(client, sp_id):
 
 
 def _build_service_principal(client, name, url, client_secret):
-    view = progress.IndeterminateStandardOut()
-    view.write({'message': 'Creating service principal'})
+    view = progress.DeterminateStandardOut()
+    view.write({'message': 'Creating service principal', 'percent': 0})
     logger.info('Creating service principal')
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
-        view.write({'message': 'Creating service principal'})
+        view.write({'percent': 0.09 * x})
         try:
             create_service_principal(service_principal, client=client)
-            view.write({'messsage': 'Finished service principal creation'})
+            view.write({'messsage': 'Finished service principal creation', 'percent': 1.0})
             logger.info('Finished service principal creation')
             return service_principal
         # TODO figure out what exception AAD throws here sometimes.
         except Exception as ex:  # pylint: disable=broad-except
             logger.info(ex)
-            for _ in range(0, 2 + 2 * x):
-                time.sleep(1)
-                view.write({'message': 'Creating service principal'})
+            time.sleep(2 + 2 * x)
     view.write({'message': 'Failed to create service principal'})
     logger.info('Failed to create service principal')
     return service_principal
@@ -350,10 +348,11 @@ def _build_service_principal(client, name, url, client_secret):
 
 def _add_role_assignment(role, service_principal, delay=2):
     # AAD can have delays in propagating data, so sleep and retry
-    view = progress.IndeterminateStandardOut()
-    view.write({'message': 'Starting AAD role propagation'})
-    logger.info('Starting AAD role propagation')
+    view = progress.DeterminateStandardOut()
+    view.write({'message': 'Waiting for AAD role to propagate', 'percent': 0})
+    logger.info('Waiting for AAD role to propagate')
     for x in range(0, 10):
+        view.write({'percent': 0.09 * x})
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
@@ -362,15 +361,13 @@ def _add_role_assignment(role, service_principal, delay=2):
             if ex.message == 'The role assignment already exists.':
                 break
             view.write({'message': ex.message})
-            logger.info("%s", ex.message)
+            logger.info(ex.message)
         except:  # pylint: disable=bare-except
             pass
-        for _ in range(0, delay + delay * x):
-            time.sleep(1)
-            view.write({'message': 'Waiting for AAD role to propagate'})
+        time.sleep(delay + delay * x)
     else:
         return False
-    view.write({'message': 'AAD role propagation done'})
+    view.write({'message': 'AAD role propagation done', 'percent': 1.0})
     logger.info('AAD role propagation done')
     return True
 
