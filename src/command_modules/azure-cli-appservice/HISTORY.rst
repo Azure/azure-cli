@@ -4,7 +4,7 @@ Release History
 ===============
 Unreleased
 ++++++++++++++++++
-BC:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
+Breaking Change:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
 webapp: add a new alias of '-i' for "az webapp config container set --docker-custom-image-name"
 webapp: expose 'az webapp log show'
 webapp: expose new arguments from 'az webapp delete' to retain app service plan, metrics or dns registration. 
