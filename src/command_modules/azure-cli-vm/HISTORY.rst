@@ -4,6 +4,7 @@ Release History
 ===============
 unreleased
 +++++++++++++++++++
+* `vm/vmss create`: don't throw when failed to retrieve the image to extract out the plan information 
 * `vmss create`: fix a crash when create a scaleset with an internal LB
 * `vm availability-set create`: Fix issue where --no-wait argument did not work.
 
