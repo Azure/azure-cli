@@ -331,7 +331,7 @@ def _build_service_principal(client, name, url, client_secret):
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
-        view.write({'message': 'Creating service principal', 'percent': 0.09 * x})
+        view.write({'message': 'Creating service principal', 'percent': 0.1 * x})
         try:
             create_service_principal(service_principal, client=client)
             break
@@ -341,7 +341,7 @@ def _build_service_principal(client, name, url, client_secret):
             time.sleep(2 + 2 * x)
     else:
         return False
-    view.write({'messsage': 'Finished service principal creation', 'percent': 1.0})
+    view.write({'message': 'Finished service principal creation', 'percent': 1.0})
     logger.info('Finished service principal creation')
     return service_principal
 
@@ -352,10 +352,12 @@ def _add_role_assignment(role, service_principal, delay=2):
     view.write({'message': 'Waiting for AAD role to propagate', 'percent': 0})
     logger.info('Waiting for AAD role to propagate')
     for x in range(0, 10):
-        view.write({'message': 'Waiting for AAD role to propagate', 'percent': 0.09 * x})
+        view.write({'message': 'Waiting for AAD role to propagate', 'percent': 0.1 * x})
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
+            # Sleep for a while to get role assignment propagated
+            time.sleep(delay + delay * x)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
