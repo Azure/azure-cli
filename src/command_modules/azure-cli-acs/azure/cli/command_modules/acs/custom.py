@@ -331,18 +331,18 @@ def _build_service_principal(client, name, url, client_secret):
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
-        view.write({'percent': 0.09 * x})
+        view.write({'message': 'Creating service principal', 'percent': 0.09 * x})
         try:
             create_service_principal(service_principal, client=client)
-            view.write({'messsage': 'Finished service principal creation', 'percent': 1.0})
-            logger.info('Finished service principal creation')
-            return service_principal
+            break
         # TODO figure out what exception AAD throws here sometimes.
         except Exception as ex:  # pylint: disable=broad-except
             logger.info(ex)
             time.sleep(2 + 2 * x)
-    view.write({'message': 'Failed to create service principal'})
-    logger.info('Failed to create service principal')
+    else:
+        return False
+    view.write({'messsage': 'Finished service principal creation', 'percent': 1.0})
+    logger.info('Finished service principal creation')
     return service_principal
 
 
@@ -352,7 +352,7 @@ def _add_role_assignment(role, service_principal, delay=2):
     view.write({'message': 'Waiting for AAD role to propagate', 'percent': 0})
     logger.info('Waiting for AAD role to propagate')
     for x in range(0, 10):
-        view.write({'percent': 0.09 * x})
+        view.write({'message': 'Waiting for AAD role to propagate', 'percent': 0.09 * x})
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
@@ -360,7 +360,6 @@ def _add_role_assignment(role, service_principal, delay=2):
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
                 break
-            view.write({'message': ex.message})
             logger.info(ex.message)
         except:  # pylint: disable=bare-except
             pass
@@ -535,6 +534,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
                 service_principal = _build_service_principal(client, name, url, client_secret)
+                if not service_principal:
+                    raise CLIError('Could not create a service principal with the right permissions. '
+                                   'Are you an Owner on this project?')
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
