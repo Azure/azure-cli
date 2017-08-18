@@ -2,7 +2,7 @@
 
 Release History
 ===============
-0.1.11 (2017-08-18)
+unreleased
 +++++++++++++++++++
 * revisit of bug 3934 -- policy creation no longer clears existing policies.
 
