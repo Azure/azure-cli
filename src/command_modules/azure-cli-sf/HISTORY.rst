@@ -2,7 +2,7 @@
 
 Release History
 ===============
-1.0.7 (2017-08-17)
+unreleased
 ++++++++++++++++++
 * Simplified registry user/pass rules for command.
 * Fixed password prompt for user even after passing in the param.
