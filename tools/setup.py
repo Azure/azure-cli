@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -25,6 +23,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'autopep8>=1.2.4',
+    'pylint>=1.7.1'
     'coverage>=4.2',
     'flake8>=3.2.1',
     'pycodestyle>=2.2.0',
@@ -35,9 +34,9 @@ DEPENDENCIES = [
 ]
 
 setup(
-    name='azure-cli-utility-automation',
+    name='azure-cli-dev-tools',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools - Automation Utility',
+    description='Microsoft Azure Command-Line - Development Tools',
     long_description='',
     license='MIT',
     author='Microsoft Corporation',
@@ -46,10 +45,12 @@ setup(
     namespace_packages=[
     ],
     scripts=[
-        "check_style",
-        "check_style.bat",
-        "run_tests",
-        "run_tests.bat"
+        "scripts/check_style",
+        "scripts/check_style.bat",
+        "scripts/run_tests",
+        "scripts/run_tests.bat",
+        'scripts/azdev',
+        'scripts/azdev.bat'
     ],
     packages=[
         'automation',

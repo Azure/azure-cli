@@ -7,7 +7,6 @@
 
 from __future__ import print_function
 
-
 import os
 import sys
 import argparse
@@ -19,6 +18,7 @@ from ..utilities.display import print_heading
 
 HISTORY_NAME = 'HISTORY.rst'
 RELEASE_HISTORY_TITLE = 'Release History'
+
 
 def exec_command(command, cwd=None, stdout=None, env=None):
     """Returns True in the command was executed successfully"""
@@ -42,15 +42,15 @@ def check_history_headings(mod_path):
     with open(history_path, 'r') as f:
         input_string = f.read()
         _, pub = core.publish_programmatically(
-                source_class=io.StringInput, source=input_string,
-                source_path=source_path,
-                destination_class=io.NullOutput, destination=None,
-                destination_path=destination_path,
-                reader=None, reader_name='standalone',
-                parser=None, parser_name='restructuredtext',
-                writer=None, writer_name='null',
-                settings=None, settings_spec=None, settings_overrides={},
-                config_section=None, enable_exit_status=None)
+            source_class=io.StringInput, source=input_string,
+            source_path=source_path,
+            destination_class=io.NullOutput, destination=None,
+            destination_path=destination_path,
+            reader=None, reader_name='standalone',
+            parser=None, parser_name='restructuredtext',
+            writer=None, writer_name='null',
+            settings=None, settings_spec=None, settings_overrides={},
+            config_section=None, enable_exit_status=None)
         if pub.writer.document.children[0].rawsource == RELEASE_HISTORY_TITLE:
             return True
         else:
@@ -63,6 +63,7 @@ def check_readme_render(mod_path):
     checks.append(exec_command('python setup.py check -r -s', cwd=mod_path))
     checks.append(check_history_headings(mod_path))
     return all(checks)
+
 
 def verify_all():
     all_paths = get_all_module_paths()
@@ -84,6 +85,7 @@ def verify_all():
     else:
         print('Verified READMEs of all modules successfully.', file=sys.stderr)
 
+
 def verify_one(mod_name):
     p = [path for name, path in get_all_module_paths() if name == mod_name]
     assert p, 'Module not found.'
@@ -93,6 +95,7 @@ def verify_one(mod_name):
         print('See above for the full warning/errors.')
         print('note: Line numbers in the errors map to the long_description of your setup.py.')
         sys.exit(1)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

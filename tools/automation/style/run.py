@@ -80,8 +80,8 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(1)
 
-    if not args.suites or not any(args.suites):
-        return_code_sum = run_pylint(selected_modules)
+    if not args.suites:
+        return_code_sum = run_pylint(selected_modules) + run_pep8(selected_modules)
     else:
         return_code_sum = 0
         if 'pep8' in args.suites:

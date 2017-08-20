@@ -31,6 +31,8 @@ Does the package have a setup.cfg file?
 Does setup.py include 'cmdclass=cmdclass'?
 """
 
+EXCLUDE_MODULES = set(['azure-cli-taskhelp'])
+
 
 def exec_command(command, cwd=None, stdout=None, env=None):
     """Returns True in the command was executed successfully"""
@@ -55,27 +57,6 @@ def set_version(path_to_setup):
         sys.stdout.write(line.replace('version=VERSION', "version='1000.0.0'"))
 
 
-def build_package(path_to_package, dist_dir):
-    print_heading('Building {}'.format(path_to_package))
-    path_to_setup = os.path.join(path_to_package, 'setup.py')
-    set_version(path_to_setup)
-    cmd_success = exec_command('python setup.py bdist_wheel -d {0}'.format(dist_dir), cwd=path_to_package)
-    if not cmd_success:
-        print_heading('Error building {}!'.format(path_to_package), f=sys.stderr)
-        sys.exit(1)
-    print_heading('Built {}'.format(path_to_package))
-
-
-def install_package(path_to_package, package_name, dist_dir):
-    print_heading('Installing {}'.format(path_to_package))
-    cmd = 'python -m pip install --upgrade {} --find-links file://{}'.format(package_name, dist_dir)
-    cmd_success = exec_command(cmd)
-    if not cmd_success:
-        print_heading('Error installing {}!'.format(path_to_package), f=sys.stderr)
-        sys.exit(1)
-    print_heading('Installed {}'.format(path_to_package))
-
-
 def _valid_wheel(wheel_path):
     # these files shouldn't exist in the wheel
     print('Verifying {}'.format(wheel_path))
@@ -88,20 +69,23 @@ def _valid_wheel(wheel_path):
 
 
 def run_help_on_command_without_err(command_str):
-    try:
-        subprocess.check_output(['az'] + command_str.split() + ['--help'], stderr=subprocess.STDOUT,
-                                universal_newlines=True)
-        return True
-    except subprocess.CalledProcessError as err:
-        print(err.output, file=sys.stderr)
-        print(err, file=sys.stderr)
-        return False
+    for i in range(3):  # retry the command 3 times
+        try:
+            command = 'az {} --help'.format(command_str).split()
+            subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
+
+            return True
+        except subprocess.CalledProcessError as error:
+            execution_error = error
+            continue
+
+    print(execution_error.output, file=sys.stderr)
+    print(execution_error, file=sys.stderr)
+
+    return False
 
 
-def verify_packages():
-    # tmp dir to store all the built packages
-    built_packages_dir = tempfile.mkdtemp()
-
+def verify_packages(built_packages_dir):
     all_modules = automation_path.get_all_module_paths()
     all_command_modules = automation_path.get_command_modules_paths(include_prefix=True)
 
@@ -111,19 +95,7 @@ def verify_packages():
         print(modules_missing_manifest_in)
         sys.exit(1)
 
-    # STEP 1:: Build the packages
-    for name, path in all_modules:
-        build_package(path, built_packages_dir)
-
-    # STEP 2:: Install the CLI and dependencies
-    azure_cli_modules_path = next(path for name, path in all_modules if name == 'azure-cli')
-    install_package(azure_cli_modules_path, 'azure-cli', built_packages_dir)
-
-    # Install the remaining command modules
-    for name, fullpath in all_command_modules:
-        install_package(fullpath, name, built_packages_dir)
-
-    # STEP 3:: Validate the installation
+    # STEP 1:: Validate the installation
     try:
         az_output = subprocess.check_output(['az', '--debug'], stderr=subprocess.STDOUT,
                                             universal_newlines=True)
@@ -137,23 +109,18 @@ def verify_packages():
         print_heading('Error running the CLI!', f=sys.stderr)
         sys.exit(1)
 
-    # STEP 4:: Run -h on each command
+    # STEP 2:: Run -h on each command
     print('Running --help on all commands.')
     from azure.cli.core.application import Configuration
     config = Configuration()
 
     all_commands = list(config.get_command_table())
-    pool_size = 5
-    chunk_size = 10
     command_results = []
-    p = multiprocessing.Pool(pool_size)
-    prev_percent = 0
-    for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, chunk_size), 1):
+    p = multiprocessing.Pool(multiprocessing.cpu_count())
+    for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, 10), 1):
+        sys.stderr.write('{}/{}'.format(i, len(all_commands)))
         command_results.append(res)
-        cur_percent = int((i/len(all_commands))*100)
-        if cur_percent != prev_percent:
-            print('{}% complete'.format(cur_percent), file=sys.stderr)
-        prev_percent = cur_percent
+
     p.close()
     p.join()
     if not all(command_results):
@@ -161,7 +128,7 @@ def verify_packages():
         sys.exit(1)
     print('OK.')
 
-    # STEP 5:: Determine if any modules failed to install
+    # STEP 3:: Determine if any modules failed to install
 
     pip.utils.pkg_resources = imp.reload(pip.utils.pkg_resources)
     installed_command_modules = [dist.key for dist in
@@ -170,15 +137,15 @@ def verify_packages():
 
     print('Installed command modules', installed_command_modules)
 
-    missing_modules = \
-        set([name for name, fullpath in all_command_modules]) - set(installed_command_modules)
+    missing_modules = set([name for name, fullpath in all_command_modules]) - set(installed_command_modules) - \
+                      EXCLUDE_MODULES
 
     if missing_modules:
         print_heading('Error: The following modules were not installed successfully', f=sys.stderr)
         print(missing_modules, file=sys.stderr)
         sys.exit(1)
 
-    # STEP 6:: Verify the wheels that get produced
+    # STEP 4:: Verify the wheels that get produced
     print_heading('Verifying wheels...')
     invalid_wheels = []
     for wheel_path in glob.glob(os.path.join(built_packages_dir, '*.whl')):
@@ -196,4 +163,9 @@ def verify_packages():
 
 
 if __name__ == '__main__':
-    verify_packages()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('build_folder', help='The path to the folder contains all wheel files.')
+
+    args = parser.parse_args()
+    verify_packages(args.build_folder)
