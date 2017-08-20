@@ -20,10 +20,12 @@ DOC_MAP_NAME = 'doc_source_map.json'
 HELP_FILE_NAME = '_help.py'
 DOC_SOURCE_MAP_PATH = os.path.join('doc', 'sphinx', 'azhelpgen', DOC_MAP_NAME)
 
+
 def _get_help_files_in_map(map_path):
     with open(map_path) as json_file:
         json_data = json.load(json_file)
         return list(json_data.values())
+
 
 def _map_help_files_not_found(help_files_in_map):
     none_existent_files = []
@@ -31,6 +33,7 @@ def _map_help_files_not_found(help_files_in_map):
         if not os.path.isfile(os.path.join(REPO_ROOT, f)):
             none_existent_files.append(f)
     return none_existent_files
+
 
 def _help_files_not_in_map(help_files_in_map):
     found_files = []
@@ -46,15 +49,13 @@ def _help_files_not_in_map(help_files_in_map):
             not_in_map.append(f_path)
     return not_in_map
 
-def verify_doc_source_map():
+
+def verify_doc_source_map(*args):
     map_path = os.path.join(REPO_ROOT, DOC_SOURCE_MAP_PATH)
     help_files_in_map = _get_help_files_in_map(map_path)
-    none_existent_files = _map_help_files_not_found(help_files_in_map)
-    not_in_map = _help_files_not_in_map(help_files_in_map)
-    return none_existent_files, not_in_map
+    help_files_not_found = _map_help_files_not_found(help_files_in_map)
+    hep_files_to_add_to_map = _help_files_not_in_map(help_files_in_map)
 
-if __name__ == '__main__':
-    help_files_not_found, hep_files_to_add_to_map = verify_doc_source_map()
     if help_files_not_found or hep_files_to_add_to_map:
         print_heading('Errors whilst verifying {}!'.format(DOC_MAP_NAME))
         if help_files_not_found:
@@ -66,4 +67,3 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         print('Verified {} successfully.'.format(DOC_MAP_NAME), file=sys.stderr)
-

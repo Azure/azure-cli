@@ -80,16 +80,21 @@ if __name__ == '__main__':
                        help='The specific test to run in the given module. The string can represent a test class or a '
                             'test class and a test method name. Multiple tests can be given, but they should all '
                             'belong to one command modules.')
+    parse.add_argument('--ci', dest='ci', action='store_true', help='Run the tests in CI mode.')
     args = parse.parse_args()
 
-    if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
-        print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
-        args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
+    if args.ci:
+        print('Run tests in CI mode')
+        selected_modules = [('CI mode', 'azure.cli', 'azure.cli')]
+    else:
+        if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
+            print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
+            args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
 
-    selected_modules = filter_user_selected_modules_with_tests(args.modules)
-    if not selected_modules:
-        parse.print_help()
-        sys.exit(1)
+        selected_modules = filter_user_selected_modules_with_tests(args.modules)
+        if not selected_modules:
+            parse.print_help()
+            sys.exit(1)
 
     success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
 
