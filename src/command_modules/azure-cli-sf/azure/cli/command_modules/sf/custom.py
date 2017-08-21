@@ -57,15 +57,15 @@ def sf_create_compose_application(client, compose_file, application_id, registry
     from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
     from azure.servicefabric.models.repository_credential import RepositoryCredential
 
-    if registry_user is None and registry_pass:
-        registry_user = prompt("Registry username: ",
-                               "Username for target container registry")
+    if not registry_user and registry_pass:
+        registry_user = prompt("Registry username: ", "Username for target container registry")
 
-    if registry_pass is None and registry_user:
+    if not registry_pass and registry_user:
         registry_pass = prompt_pass("Registry password: ", False,
                                     "Password for target container registry")
 
-    registry_cred = RepositoryCredential(registry_user, registry_pass, encrypted) if registry_user and registry_pass else None
+    registry_cred = RepositoryCredential(
+        registry_user, registry_pass, encrypted) if registry_user and registry_pass else None
 
     file_contents = read_file_content(compose_file)
 
