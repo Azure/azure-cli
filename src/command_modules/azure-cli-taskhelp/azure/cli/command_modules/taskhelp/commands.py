@@ -4,5 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import cli_command
+from azure.cli.testsdk import get_active_api_profile
 
-cli_command(__name__, 'taskhelp deploy-arm-template', 'azure.cli.command_modules.taskhelp.custom#deploy_arm_template')
+if get_active_api_profile() == 'latest':
+    cli_command(__name__, 'taskhelp deploy-arm-template',
+                'azure.cli.command_modules.taskhelp.custom#deploy_arm_template')
