@@ -16,7 +16,7 @@ from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
+     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, model_choice_list, ignore_type)
 from azure.cli.command_modules.vm._actions import \
     (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
@@ -276,6 +276,8 @@ register_cli_argument('vmss create', 'disable_overprovision', help='Overprovisio
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
 register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
+    c.register_cli_argument('vmss create', 'load_balancer_sku', help='SKU when creating a new Load Balancer.', arg_group='Network Balancer', options_list=['--lb-sku'], **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
 
 with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
     c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')

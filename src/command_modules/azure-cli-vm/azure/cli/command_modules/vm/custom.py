@@ -1737,7 +1737,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 admin_username=DefaultStr(getpass.getuser()), admin_password=None, authentication_type=None,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
-                load_balancer=None, application_gateway=None,
+                load_balancer=None, load_balancer_sku=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
                 app_gateway_sku=DefaultStr('Standard_Large'), app_gateway_capacity=DefaultInt(10),
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
@@ -1846,7 +1846,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         lb_resource = build_load_balancer_resource(
             load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
             'loadBalancerFrontEnd', public_ip_address_id, subnet_id,
-            private_ip_address='', private_ip_allocation='Dynamic')
+            private_ip_address='', private_ip_allocation='Dynamic', sku=load_balancer_sku)
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 

@@ -7,6 +7,9 @@ unreleased
 +++++++++++++++++++
 * BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
 * BC `vnet subnet create/update`: renamed `--private-access-services` to `--service-endpoints`
+* `lb create`: Added support for SKU.
+* `public-ip create`: Added support for SKU.
+
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++

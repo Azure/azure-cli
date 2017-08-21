@@ -207,7 +207,8 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
 
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation):
+                                 private_ip_address, private_ip_allocation, sku):
+    from azure.cli.core.profiles import ResourceType, get_api_version
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation)
 
@@ -219,16 +220,17 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, fronte
         ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
-
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
         'dependsOn': [],
         'properties': lb_properties
     }
+    if sku:
+        lb['sku'] = {'name': sku}
     return lb
 
 

@@ -556,6 +556,9 @@ register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', *
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
 register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
 
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
+    c.register_cli_argument('network lb', 'sku', help='Load balancer SKU', **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
+
 for item in ['backend_pool_name', 'backend_address_pool_name']:
     register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
