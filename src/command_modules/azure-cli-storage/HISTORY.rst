@@ -3,6 +3,12 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+* Enable service encryption by customer managed key
+* Breaking change: rename --encryption option to --encryption-services for az storage account create and az storage account update command.
+* Fix #4220: az storage account update encryption - syntax mismatch
+
 2.0.12 (2017-08-11)
 +++++++++++++++++++
 * Enable create storage account with system assigned identity

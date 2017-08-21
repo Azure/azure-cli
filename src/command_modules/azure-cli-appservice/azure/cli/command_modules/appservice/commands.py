@@ -116,6 +116,7 @@ cli_command(__name__, 'webapp deployment source update-token', custom_path + 'up
 cli_command(__name__, 'webapp log tail', custom_path + 'get_streaming_log')
 cli_command(__name__, 'webapp log download', custom_path + 'download_historical_logs')
 cli_command(__name__, 'webapp log config', custom_path + 'config_diagnostics')
+cli_command(__name__, 'webapp log show', custom_path + 'show_diagnostic_settings')
 cli_command(__name__, 'webapp browse', custom_path + 'view_in_browser')
 
 cli_command(__name__, 'webapp deployment slot list', custom_path + 'list_slots', table_transformer=output_slots_in_table)
@@ -140,15 +141,15 @@ if get_active_api_profile() == 'latest':
     cli_command(__name__, 'appservice plan list', custom_path + 'list_app_service_plans')
     cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', cf_plans, exception_handler=empty_on_404)
     cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get',
-                               'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.create_or_update',
-                               custom_function_op=custom_path + 'update_app_service_plan',
-                               setter_arg_name='app_service_plan', factory=cf_plans)
+                            'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.create_or_update',
+                            custom_function_op=custom_path + 'update_app_service_plan',
+                            setter_arg_name='app_service_plan', factory=cf_plans)
     cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', cf_web_client, transform=transform_list_location_output)
 
     cli_command(__name__, 'functionapp create', custom_path + 'create_function')
     cli_command(__name__, 'functionapp list', custom_path + 'list_function_app', table_transformer=transform_web_list_output)
     cli_command(__name__, 'functionapp show', custom_path + 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
-    cli_command(__name__, 'functionapp delete', custom_path + 'delete_webapp')
+    cli_command(__name__, 'functionapp delete', custom_path + 'delete_function_app')
     cli_command(__name__, 'functionapp stop', custom_path + 'stop_webapp')
     cli_command(__name__, 'functionapp start', custom_path + 'start_webapp')
     cli_command(__name__, 'functionapp restart', custom_path + 'restart_webapp')
