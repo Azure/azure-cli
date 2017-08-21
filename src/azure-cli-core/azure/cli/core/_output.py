@@ -7,218 +7,100 @@ from __future__ import print_function, unicode_literals
 
 import errno
 import sys
-import platform
-import json
 import traceback
-from collections import OrderedDict
-from six import StringIO, text_type, u, string_types
-import colorama
-from tabulate import tabulate
+from collections import OrderedDict, namedtuple
+from six import StringIO, string_types
 
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core import get_az_logger, CLIError
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_az_logger(__name__)
 
-
-def _decode_str(output):
-    if not isinstance(output, text_type):
-        output = u(str(output))
-    return output
+CommandResultItem = namedtuple('CommandResultItem', ['result', 'table_transformer', 'is_query_active'])
 
 
-class ComplexEncoder(json.JSONEncoder):
-    def default(self, o):  # pylint: disable=method-hidden
-        if isinstance(o, bytes) and not isinstance(o, str):
-            return o.decode()
-        return json.JSONEncoder.default(self, o)
+def format_json(result, *_):
+    import json
 
+    class ComplexEncoder(json.JSONEncoder):
+        def default(self, o):  # pylint: disable=method-hidden
+            if isinstance(o, bytes) and not isinstance(o, str):
+                return o.decode()
+            return json.JSONEncoder.default(self, o)
 
-def format_json(obj):
-    result = obj.result
     # OrderedDict.__dict__ is always '{}', to persist the data, convert to dict first.
     input_dict = dict(result) if hasattr(result, '__dict__') else result
-    return json.dumps(input_dict, indent=2, sort_keys=True, cls=ComplexEncoder,
-                      separators=(',', ': ')) + '\n'
+    return json.dumps(input_dict, indent=2, sort_keys=True, cls=ComplexEncoder, separators=(',', ': ')) + '\n'
 
 
-def format_json_color(obj):
+def format_json_color(result, *args):
     from pygments import highlight, lexers, formatters
-    return highlight(format_json(obj), lexers.JsonLexer(), formatters.TerminalFormatter())  # pylint: disable=no-member
+    return highlight(format_json(result, *args),
+                     lexers.JsonLexer(), formatters.TerminalFormatter())  # pylint: disable=no-member
 
 
-def format_text(obj):
-    result = obj.result
-    result_list = result if isinstance(result, list) else [result]
-    to = TextOutput()
+def format_table(result, table_transformer, is_query_active):
+    from tabulate import tabulate
     try:
-        for item in result_list:
-            for item_key in sorted(item):
-                to.add(item_key, item[item_key])
-        return to.dump()
-    except TypeError:
-        return ''
+        def _transform_result_for_table(data):
+            if table_transformer and not is_query_active:
+                if isinstance(table_transformer, str):
+                    from jmespath import compile as compile_jmes, Options
+                    return compile_jmes(table_transformer).search(data, Options(OrderedDict))
+                return table_transformer(data)
+            return data
 
+        def _capitalize_first_char(x):
+            return x[0].upper() + x[1:] if x else x
 
-def format_table(obj):
-    result = obj.result
-    try:
-        if obj.table_transformer and not obj.is_query_active:
-            if isinstance(obj.table_transformer, str):
-                from jmespath import compile as compile_jmes, Options
-                result = compile_jmes(obj.table_transformer).search(result, Options(OrderedDict))
-            else:
-                result = obj.table_transformer(result)
-        result_list = result if isinstance(result, list) else [result]
-        should_sort_keys = not obj.is_query_active and not obj.table_transformer
-        to = TableOutput(should_sort_keys)
-        return to.dump(result_list)
-    except:
-        logger.debug(traceback.format_exc())
-        raise CLIError("Table output unavailable. "
-                       "Use the --query option to specify an appropriate query. "
-                       "Use --debug for more info.")
+        def _get_row(item):
+            should_sort_keys = not is_query_active and not table_transformer
+            row = OrderedDict()
+            try:
+                keys = sorted(item) if should_sort_keys and isinstance(item, dict) else item.keys()
+                for k in keys:
+                    if k in ('id', 'type', 'etag'):
+                        continue
+                    if item[k] and not isinstance(item[k], (list, dict, set)):
+                        row[_capitalize_first_char(k)] = item[k]
+            except AttributeError:
+                # handles odd cases where a string/bool/etc. is returned
+                if isinstance(item, list):
+                    for col, val in enumerate(item):
+                        row['Column{}'.format(col + 1)] = val
+                else:
+                    row['Result'] = item
+            return row
 
-
-def format_tsv(obj):
-    result = obj.result
-    result_list = result if isinstance(result, list) else [result]
-    return TsvOutput.dump(result_list)
-
-
-class CommandResultItem(object):  # pylint: disable=too-few-public-methods
-
-    def __init__(self, result, table_transformer=None, is_query_active=False):
-        self.result = result
-        self.table_transformer = table_transformer
-        self.is_query_active = is_query_active
-
-
-class OutputProducer(object):  # pylint: disable=too-few-public-methods
-
-    format_dict = {
-        'json': format_json,
-        'jsonc': format_json_color,
-        'table': format_table,
-        'text': format_text,
-        'tsv': format_tsv,
-    }
-
-    def __init__(self, formatter, file=sys.stdout):  # pylint: disable=redefined-builtin
-        self.formatter = formatter
-        self.file = file
-
-    def out(self, obj):
-        if platform.system() == 'Windows':
-            self.file = colorama.AnsiToWin32(self.file).stream
-        output = self.formatter(obj)
-        try:
-            print(output, file=self.file, end='')
-        except IOError as ex:
-            if ex.errno == errno.EPIPE:
-                pass
-            else:
-                raise
-        except UnicodeEncodeError:
-            print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'),
-                  file=self.file, end='')
-
-    @staticmethod
-    def get_formatter(format_type):
-        return OutputProducer.format_dict.get(format_type)
-
-
-class TableOutput(object):  # pylint: disable=too-few-public-methods
-
-    SKIP_KEYS = ['id', 'type', 'etag']
-
-    def __init__(self, should_sort_keys=False):
-        self.should_sort_keys = should_sort_keys
-
-    @staticmethod
-    def _capitalize_first_char(x):
-        return x[0].upper() + x[1:] if x else x
-
-    def _auto_table_item(self, item):
-        new_entry = OrderedDict()
-        try:
-            keys = sorted(item) if self.should_sort_keys and isinstance(item, dict) else item.keys()
-            for k in keys:
-                if k in TableOutput.SKIP_KEYS:
-                    continue
-                if item[k] and not isinstance(item[k], (list, dict, set)):
-                    new_entry[TableOutput._capitalize_first_char(k)] = item[k]
-        except AttributeError:
-            # handles odd cases where a string/bool/etc. is returned
-            if isinstance(item, list):
-                for col, val in enumerate(item):
-                    new_entry['Column{}'.format(col + 1)] = val
-            else:
-                new_entry['Result'] = item
-        return new_entry
-
-    def _auto_table(self, result):
-        if isinstance(result, list):
-            new_result = []
-            for item in result:
-                new_result.append(self._auto_table_item(item))
-            return new_result
-        return self._auto_table_item(result)
-
-    def dump(self, data):
-        table_data = self._auto_table(data)
+        result = _transform_result_for_table(result)
+        result = result if isinstance(result, list) else [result]
+        table_data = [_get_row(each) for each in result]
         table_str = tabulate(table_data, headers="keys", tablefmt="simple") if table_data else ''
         if table_str == '\n':
             raise ValueError('Unable to extract fields for table.')
         return table_str + '\n'
+    except:
+        logger.debug(traceback.format_exc())
+        raise CLIError("Table output unavailable. Use the --query option to specify an appropriate query. Use --debug "
+                       "for more info.")
 
 
-class TextOutput(object):
+def format_tsv(result, *_):
+    import contextlib
 
-    def __init__(self):
-        self.identifiers = {}
+    result_list = result if isinstance(result, list) else [result]
 
-    def add(self, identifier, value):
-        if identifier in self.identifiers:
-            self.identifiers[identifier].append(value)
-        else:
-            self.identifiers[identifier] = [value]
-
-    def dump(self):
-        io = StringIO()
-        for identifier in sorted(self.identifiers):
-            io.write(identifier.upper())
-            io.write('\t')
-            for col in self.identifiers[identifier]:
-                if isinstance(col, (list, dict)):
-                    # TODO: Need to handle complex objects
-                    io.write("null")
-                else:
-                    io.write(str(col))
-                io.write('\t')
-            io.write('\n')
-        result = io.getvalue()
-        io.close()
-        return result
-
-
-class TsvOutput(object):  # pylint: disable=too-few-public-methods
-
-    @staticmethod
-    def _dump_obj(data, stream):
+    def _get_column(data, stream):
         if isinstance(data, list):
             stream.write(str(len(data)))
         elif isinstance(data, dict):
-            # We need to print something to avoid mismatching
-            # number of columns if the value is None for some instances
+            # We need to print something to avoid mismatching number of columns if the value is None for some instances
             # and a dictionary value in other...
             stream.write('')
         else:
             to_write = data if isinstance(data, string_types) else str(data)
             stream.write(to_write)
 
-    @staticmethod
-    def _dump_row(data, stream):
+    def _get_row(data, stream):
         separator = ''
         if isinstance(data, (dict, list)):
             if isinstance(data, OrderedDict):
@@ -228,30 +110,82 @@ class TsvOutput(object):  # pylint: disable=too-few-public-methods
             else:
                 values = data
 
-            # Iterate through the items either sorted by key value (if dict) or in the order
-            # they were added (in the cases of an ordered dict) in order to make the output
-            # stable
+            # Iterate through the items either sorted by key value (if dict) or in the order they were added (in the
+            # cases of an ordered dict) in order to make the output stable
             for value in values:
                 stream.write(separator)
-                TsvOutput._dump_obj(value, stream)
+                _get_column(value, stream)
                 separator = '\t'
         elif isinstance(data, list):
             for value in data:
                 stream.write(separator)
-                TsvOutput._dump_obj(value, stream)
+                _get_column(value, stream)
                 separator = '\t'
         elif isinstance(data, bool):
-            TsvOutput._dump_obj(str(data).lower(), stream)
+            _get_column(str(data).lower(), stream)
         else:
-            TsvOutput._dump_obj(data, stream)
+            _get_column(data, stream)
         stream.write('\n')
 
-    @staticmethod
-    def dump(data):
-        io = StringIO()
-        for item in data:
-            TsvOutput._dump_row(item, io)
+    @contextlib.contextmanager
+    def _get_string_io():
+        buffer = StringIO()
+        yield buffer
+        buffer.close()
 
-        result = io.getvalue()
-        io.close()
-        return result
+    with _get_string_io() as buf:
+        for item in result_list:
+            _get_row(item, buf)
+
+        return buf.getvalue()
+
+
+def get_output_producer(formatter, output_stream=sys.stdout):
+    """
+    Returns a function which transform a command result with specified formatter and print to the given stream.
+
+    :param formatter: The formatter transforms the command result data.
+    :type formatter: callable
+    :param output_stream: The stream where the result is printed.
+    :type output_stream: a file-like object (stream)
+    :return: The output function.
+    """
+
+    def _output_producer(command_result):
+        """
+        The output function transforms the data with given formatter and sent to specified stream.
+
+        :param command_result: The command result of which its data is to be print.
+        :type command_result: CommandResultItem
+        """
+        import colorama
+        import platform
+
+        stream = colorama.AnsiToWin32(output_stream).stream if platform.system() == 'Windows' else output_stream
+        output = formatter(*command_result)
+        try:
+            print(output, file=stream, end='')
+        except IOError as ex:
+            if ex.errno == errno.EPIPE:
+                pass
+            else:
+                raise
+        except UnicodeEncodeError:
+            print(output.encode('ascii', 'ignore').decode('utf-8', 'ignore'), file=stream, end='')
+
+    return _output_producer
+
+
+def get_formatter(format_type):
+    if format_type == 'json':
+        formatter = format_json
+    elif format_type == 'jsonc':
+        formatter = format_json_color
+    elif format_type == 'table':
+        formatter = format_table
+    elif format_type == 'tsv':
+        formatter = format_tsv
+    else:
+        raise ValueError('Unknown formatter type: {}.'.format(format_type))
+
+    return formatter

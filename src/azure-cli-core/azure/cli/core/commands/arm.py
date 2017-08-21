@@ -18,7 +18,7 @@ from azure.cli.core.application import APPLICATION, IterateValue
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
+from azure.cli.core.util import CLIError, convert_elements_to_dict, shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
@@ -584,7 +584,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, excepti
 
 def verify_property(instance, condition):
     from jmespath import compile as compile_jmespath
-    result = todict(instance)
+    result = convert_elements_to_dict(instance)
     jmes_query = compile_jmespath(condition)
     value = jmes_query.search(result)
     return value

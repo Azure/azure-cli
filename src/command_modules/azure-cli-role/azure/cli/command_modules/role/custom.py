@@ -12,7 +12,7 @@ import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
-from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
+from azure.cli.core.util import CLIError, convert_elements_to_dict, get_file_json, shell_safe_json_parse
 from azure.cli.core import get_az_logger
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
@@ -173,7 +173,7 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,
     # fill in logic names to get things understandable.
     # it's possible that associated roles and principals were deleted, and we just do nothing.
 
-    results = todict(assignments)
+    results = convert_elements_to_dict(assignments)
 
     # fill in role names
     role_defs = list(definitions_client.list(
@@ -333,7 +333,7 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters))
 
 
 def create_user(client, user_principal_name, display_name, password,

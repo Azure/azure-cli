@@ -9,7 +9,7 @@ import unittest
 import tempfile
 
 from azure.cli.core.util import \
-    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex,
+    (get_file_json, convert_elements_to_dict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex,
      hash_string, random_string)
 
 
@@ -17,32 +17,32 @@ class TestUtils(unittest.TestCase):
 
     def test_application_todict_none(self):
         the_input = None
-        actual = todict(the_input)
+        actual = convert_elements_to_dict(the_input)
         expected = None
         self.assertEqual(actual, expected)
 
     def test_application_todict_dict_empty(self):
         the_input = {}
-        actual = todict(the_input)
+        actual = convert_elements_to_dict(the_input)
         expected = {}
         self.assertEqual(actual, expected)
 
     def test_application_todict_dict(self):
         the_input = {'a': 'b'}
-        actual = todict(the_input)
+        actual = convert_elements_to_dict(the_input)
         expected = {'a': 'b'}
         self.assertEqual(actual, expected)
 
     def test_application_todict_list(self):
         the_input = [{'a': 'b'}]
-        actual = todict(the_input)
+        actual = convert_elements_to_dict(the_input)
         expected = [{'a': 'b'}]
         self.assertEqual(actual, expected)
 
     def test_application_todict_obj(self):
         MyObject = namedtuple('MyObject', 'a b')
         the_input = MyObject('x', 'y')
-        actual = todict(the_input)
+        actual = convert_elements_to_dict(the_input)
         expected = {'a': 'x', 'b': 'y'}
         self.assertEqual(actual, expected)
 
@@ -50,7 +50,7 @@ class TestUtils(unittest.TestCase):
         MyObject = namedtuple('MyObject', 'a b')
         mo = MyObject('x', 'y')
         the_input = {'a': mo}
-        actual = todict(the_input)
+        actual = convert_elements_to_dict(the_input)
         expected = {'a': {'a': 'x', 'b': 'y'}}
         self.assertEqual(actual, expected)
 
