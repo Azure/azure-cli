@@ -21,6 +21,7 @@ import time
 import webbrowser
 import stat
 import ssl
+import re
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
@@ -38,7 +39,8 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core.profiles import ResourceType
-from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -369,6 +371,15 @@ def _get_subscription_id():
     return sub_id
 
 
+def _get_default_dns_prefix(name, resource_group_name, subscription_id):
+    # Use subscription id to provide uniqueness and prevent DNS name clashes
+    name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
+    if not name_part[0].isalpha():
+        name_part = (str('a') + name_part)[0:10]
+    resource_group_part = re.sub('[^A-Za-z0-9-]', '', resource_group_name)[0:16]
+    return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
+
+
 # pylint: disable=too-many-locals
 # pylint: disable-msg=too-many-arguments
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
@@ -481,8 +492,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
 
     subscription_id = _get_subscription_id()
     if not dns_name_prefix:
-        # Use subscription id to provide uniqueness and prevent DNS name clashes
-        dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
     register_providers()
     groups = _resource_client_factory().resource_groups
@@ -681,13 +691,18 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
         },
         "sshMaster0": {
             "type": "string",
-            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
+            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 22')]".format(admin_username, name)  # pylint: disable=line-too-long
         },
     }
     if orchestrator_type.lower() != "kubernetes":
         outputs["agentFQDN"] = {
             "type": "string",
             "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
+        }
+        # override sshMaster0 for non-kubernetes scenarios
+        outputs["sshMaster0"] = {
+            "type": "string",
+            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
         }
     properties = {
         "orchestratorProfile": {
@@ -894,7 +909,7 @@ def _get_acs_info(name, resource_group_name):
     :param resource_group_name: Resource group name
     :type resource_group_name: String
     """
-    mgmt_client = get_mgmt_service_client(ResourceType.MGMT_CONTAINER_SERVICE)
+    mgmt_client = get_mgmt_service_client(ContainerServiceClient)
     return mgmt_client.container_services.get(resource_group_name, name)
 
 

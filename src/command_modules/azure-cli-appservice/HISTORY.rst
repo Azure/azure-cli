@@ -2,8 +2,25 @@
 
 Release History
 ===============
+Unreleased
+++++++++++++++++++
+Breaking Change:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
+webapp: add a new alias of '-i' for "az webapp config container set --docker-custom-image-name"
+webapp: expose 'az webapp log show'
+webapp: expose new arguments from 'az webapp delete' to retain app service plan, metrics or dns registration. 
+webapp: detect a slot setting correctly 
+
+0.1.13 (2017-08-15)
++++++++++++++++++++
+webapp: fix an exception when create a new git based linux webapp
+
+0.1.12 (2017-08-11)
++++++++++++++++++++
+* minor fixes
+
 0.1.11 (2017-07-27)
 +++++++++++++++++++
+* webapp: Add generate container CI URL for Web App
 * webapp: fix the bug that listing linux webapp returns nothing
 * webapp: setting runtime is mandatory for linux
 * webapp: use only linux-fx-version instead of CUSTOM_DOCKER_IMAGE_NAME

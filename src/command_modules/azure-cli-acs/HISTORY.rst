@@ -4,6 +4,15 @@ Release History
 ===============
 unreleased
 +++++++++++++++++++
+* correct preview regions
+* format default dns_name_prefix properly
+
+2.0.13 (2017-08-15)
++++++++++++++++++++
+* correct sshMaster0 port number for kubernetes
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
 * add preview regions
 
 2.0.11 (2017-07-27)

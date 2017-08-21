@@ -1901,6 +1901,17 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 
+class VMSSILBSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_with_ilb(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd('vmss create -g {} -n {} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""'.format(resource_group, vmss_name))
+        # list connection information should fail
+        with self.assertRaises(CLIError) as err:
+            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
+        self.assertTrue('internal load balancer' in str(err.exception))
+
+
 class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()

@@ -159,7 +159,7 @@ cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wa
 cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'), no_wait_param='no_wait')
 
 # # VM Availability Set
-cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
+cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format, no_wait_param='no_wait')
 
 op_var = 'availability_sets_operations'
 op_class = 'AvailabilitySetsOperations'
@@ -267,11 +267,11 @@ cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'), no_wait_para
 cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss start', custom_path.format('start_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_instances'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wait_param='no_wait')
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vmss list-instance-public-ips', custom_path.format('list_vmss_instance_public_ips'))
+cli_command(__name__, 'vmss list-instance-public-ips', custom_path.format('list_vmss_instance_public_ips'))
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)

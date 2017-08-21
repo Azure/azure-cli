@@ -4,6 +4,11 @@ Release History
 ===============
 
 unreleased
+++++++++++
+
+* Add legal note to --version
+
+2.0.13 (2017-08-11)
 +++++++++++++++++++
 * fixes issue where `three_state_flag` would not work correctly if custom labels were used.
 

@@ -301,6 +301,19 @@ class ProviderOperationTest(VCRTestBase):
 
 class DeploymentTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_lite')
+    def test_group_deployment_lite(self, resource_group):
+        # ensures that a template that is missing "parameters" or "resources" still deploys
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\')
+        deployment_name = 'azure-cli-deployment'
+
+        self.cmd('group deployment create -g {} -n {} --template-file {}'.format(
+            resource_group, deployment_name, template_file), checks=[
+            JCheck('properties.provisioningState', 'Succeeded'),
+            JCheck('resourceGroup', resource_group),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_deployment')
     def test_group_deployment(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))

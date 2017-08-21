@@ -2,7 +2,13 @@
 
 Release History
 ===============
-(unreleased)
+unreleased
++++++++++++++++++++
+* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image. 
+* `vmss create`: fix a crash when create a scaleset with an internal LB
+* `vm availability-set create`: Fix issue where --no-wait argument did not work.
+
+2.0.12 (2017-08-11)
 +++++++++++++++++++
 * availability-set: expose fault domain count on convert
 * vm: expose 'az vm list-skus' command

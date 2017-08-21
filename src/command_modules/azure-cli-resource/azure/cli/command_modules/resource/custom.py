@@ -421,6 +421,7 @@ def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-a
         template_obj = template
 
     template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
     parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
 

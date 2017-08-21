@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.3 (2017-08-18)
+++++++++++++++++++
+
+* Fix 'packaged release archive' creation step. We now clone the repo again after pushing tags so we can use the new tags.
+
+0.1.2 (2017-08-15)
+++++++++++++++++++
+
+* Fix Debian release script failing due to double quotes in printing the status url after the build.
 
 0.1.1 (2017-07-31)
 ++++++++++++++++++

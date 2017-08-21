@@ -14,14 +14,26 @@ import yaml
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
-                                                  _acs_browse_internal, _add_role_assignment)
-from azure.mgmt.compute.containerservice.models import (ContainerServiceOrchestratorTypes,
-                                                        ContainerService,
-                                                        ContainerServiceOrchestratorProfile)
+                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix)
+from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
+                                                ContainerService,
+                                                ContainerServiceOrchestratorProfile)
 from azure.cli.core.util import CLIError
 
 
 class AcsCustomCommandTest(unittest.TestCase):
+    def test_get_default_dns_prefix(self):
+        name = 'test5678910'
+        resource_group_name = 'resource_group_with_underscore'
+        sub_id = '123456789'
+
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
+        self.assertEqual(dns_name_prefix, "test567891-resourcegroupwit-123456")
+
+        name = '1test5678910'
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
+        self.assertEqual(dns_name_prefix, "a1test5678-resourcegroupwit-123456")
+
     def test_add_role_assignment_basic(self):
         role = 'Owner'
         sp = '1234567'

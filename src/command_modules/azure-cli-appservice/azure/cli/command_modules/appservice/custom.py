@@ -134,8 +134,18 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def delete_webapp(resource_group_name, name, slot=None):
+def delete_function_app(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'delete', slot)
+
+
+def delete_webapp(resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
+                  keep_dns_registration=None, slot=None):
+    client = web_client_factory()
+    delete_method = getattr(client.web_apps, 'delete' if slot is None else 'delete_slot')
+    delete_method(resource_group_name, name,
+                  delete_metrics=False if keep_metrics else None,
+                  delete_empty_server_farm=False if keep_empty_plan else None,
+                  skip_dns_registration=False if keep_dns_registration else None)
 
 
 def stop_webapp(resource_group_name, name, slot=None):
@@ -157,12 +167,8 @@ def get_site_configs(resource_group_name, name, slot=None):
 def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
-    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
-                              .connection_string_names or []
-    result = [{'name': p,
-               'value': result.properties[p],
-               'slotSetting': p in slot_constr_names} for p in _mask_creds_related_appsettings(result.properties)]
-    return result
+    slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
+    return _build_app_settings_output(result.properties, slot_app_setting_names)
 
 
 def get_connection_strings(resource_group_name, name, slot=None):
@@ -251,16 +257,17 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
 
     result = _generic_site_operation(resource_group_name, name, 'update_application_settings',
                                      slot, app_settings)
-
+    app_settings_slot_cfg_names = []
     if slot_settings:
         client = web_client_factory()
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
+        app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _mask_creds_related_appsettings(result.properties)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
@@ -277,9 +284,16 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _mask_creds_related_appsettings(_generic_site_operation(resource_group_name, name,
-                                                                   'update_application_settings',
-                                                                   slot, app_settings).properties)
+    result = _generic_site_operation(resource_group_name, name,
+                                     'update_application_settings', slot, app_settings)
+    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+
+
+def _build_app_settings_output(app_settings, slot_cfg_names):
+    slot_cfg_names = slot_cfg_names or []
+    return [{'name': p,
+             'value': app_settings[p],
+             'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
@@ -874,6 +888,40 @@ def list_publish_profiles(resource_group_name, name, slot=None):
     return converted
 
 
+def enable_cd(resource_group_name, name, enable, slot=None):
+    settings = []
+    settings.append("DOCKER_ENABLE_CI=" + enable)
+
+    update_app_settings(resource_group_name, name, settings, slot)
+
+    return show_container_cd_url(resource_group_name, name, slot)
+
+
+def show_container_cd_url(resource_group_name, name, slot=None):
+    settings = get_app_settings(resource_group_name, name, slot)
+    docker_enabled = False
+    for setting in settings:
+        if setting['name'] == 'DOCKER_ENABLE_CI' and setting['value'] == 'true':
+            docker_enabled = True
+            break
+
+    cd_settings = {}
+    cd_settings['DOCKER_ENABLE_CI'] = docker_enabled
+
+    if docker_enabled:
+        profiles = list_publish_profiles(resource_group_name, name, slot)
+        for profile in profiles:
+            if profile['publishMethod'] == 'MSDeploy':
+                scmUrl = profile['publishUrl'].replace(":443", "")
+                cd_url = 'https://' + profile['userName'] + ':' + profile['userPWD'] + '@' + scmUrl + '/docker/hook'
+                cd_settings['CI_CD_URL'] = cd_url
+                break
+    else:
+        cd_settings['CI_CD_URL'] = ''
+
+    return cd_settings
+
+
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)
     url = site.default_host_name
@@ -940,6 +988,10 @@ def config_diagnostics(resource_group_name, name, level=None,
 
     return _generic_site_operation(resource_group_name, name, 'update_diagnostic_logs_config',
                                    slot, site_log_config)
+
+
+def show_diagnostic_settings(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
 def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
@@ -1320,9 +1372,8 @@ def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_sourc
     if deployment_source_url:
         logger.warning("Linking to git repository '%s'", deployment_source_url)
         try:
-            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
-                                           deployment_source_branch, manual_integration=True)
-            LongRunningOperation()(poller)
+            config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                  deployment_source_branch, manual_integration=True)
         except Exception as ex:  # pylint: disable=broad-except
             ex = ex_handler_factory(no_throw=True)(ex)
             logger.warning("Link to git repository failed due to error '%s'", ex)

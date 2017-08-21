@@ -365,5 +365,8 @@ if __name__ == "__main__":
     give_chance_to_cancel('Create GitHub releases and tags')
     run_create_github_release(release_commitish_list, release_assets_dir_map)
     give_chance_to_cancel('Create Packaged Release archive')
+    # We need to clone the repo again as we've now pushed the git tags and we need them to create the packaged release.
+    # (we could do 'git pull' but this is easier and uses a clean directory just to be safe)
+    cli_repo_dir = set_up_cli_repo_dir()
     run_create_packaged_release(cli_repo_dir)
     print_status('Done.')
