@@ -64,7 +64,7 @@ def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
     conf.parse(open(ssh_config_file))
     host_config = conf.lookup(host)
     if 'proxycommand' not in host_config:
-        #print "Proxy definition for %s is not found in ~/.ssh/config." %host 
+    #print "Proxy definition for %s is not found in ~/.ssh/config." %host 
     #print "Proxy definition for %s is found in %s showing \n%s." %(host, ssh_config_file, host_config)
     proxy = paramiko.ProxyCommand(host_config['proxycommand'])
     # end of addition 
