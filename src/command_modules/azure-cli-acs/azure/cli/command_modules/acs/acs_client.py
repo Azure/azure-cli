@@ -58,19 +58,14 @@ def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
     keys = _load_keys(key_filename, allow_agent)
     pkey = keys[0]
     ssh = paramiko.SSHClient()
-    # adding proxy command from .ssh/config
     conf = paramiko.SSHConfig()
     ssh_config_file = os.path.expanduser("~/.ssh/config")
     conf.parse(open(ssh_config_file))
     host_config = conf.lookup(host)
-    if 'proxycommand' not in host_config:
-    #print "Proxy definition for %s is not found in ~/.ssh/config." %host 
-    #print "Proxy definition for %s is found in %s showing \n%s." %(host, ssh_config_file, host_config)
     proxy = paramiko.ProxyCommand(host_config['proxycommand'])
-    # end of addition 
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, username=user, pkey=pkey,sock=proxy) # added sock
+    ssh.connect(host, username=user, pkey=pkey, sock=proxy)
     scp = SCPClient(ssh.get_transport())
     scp.get(src, dest)
     scp.close()
