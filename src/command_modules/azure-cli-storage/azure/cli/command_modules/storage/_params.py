@@ -35,7 +35,7 @@ from ._validators import \
      process_file_download_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri,
-     get_char_options_validator, validate_bypass, process_network_rule_add_namespace)
+     get_char_options_validator, validate_bypass, validate_subnet)
 
 
 DeleteSnapshot, BlockBlobService, \
@@ -366,8 +366,8 @@ with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
 
     register_cli_argument('storage account network-rule', 'storage_account_name', account_name_type)
     register_cli_argument('storage account network-rule', 'ip_address', help='IPv4 address or CIDR range.')
-    register_cli_argument('storage account network-rule', 'subnet', help='Name or ID of subnet. If name is supplied, `--vnet` must be supplied.')
-    register_cli_argument('storage account network-rule', 'vnet', help='Name or ID of a virtual network.', validator=process_network_rule_add_namespace)
+    register_cli_argument('storage account network-rule', 'subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+    register_cli_argument('storage account network-rule', 'vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)

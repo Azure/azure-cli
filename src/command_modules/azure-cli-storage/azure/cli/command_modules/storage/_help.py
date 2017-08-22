@@ -550,13 +550,10 @@ helps['storage account network-rule add'] = """
     type: command
     short-summary: Add a network rule.
     long-summary: >
-        Rules can be created for an IPv4 address, address range (CIDR format), an entire virtual network, or a virtual
-        network subnet.
+        Rules can be created for an IPv4 address, address range (CIDR format), or a virtual network subnet.
     examples:
         - name: Create a rule to allow a specific address-range.
           text: az storage account network-rule add -g myRg --account-name mystorageaccount --ip-address 23.45.1.0/24
-        - name: Create a rule to allow access for an entire virtual network (VNET).
-          text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet myvnet
         - name: Create a rule to allow access for a subnet.
           text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet myvnet --subnet mysubnet
 """
@@ -569,8 +566,4 @@ helps['storage account network-rule list'] = """
 helps['storage account network-rule remove'] = """
     type: command
     short-summary: Remove a network rule.
-    parameters:
-        - name: --resource
-          short-summary: Name or ID of the resource (subnet or vnet) to remove.
-          long-summary: If name is supplied, both vnets and subnets with the supplied name will be removed.
 """

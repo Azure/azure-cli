@@ -42,7 +42,7 @@ def _update_progress(current, total):
 def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
                            custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            bypass='AzureServices', default_action='Allow', assign_identity=False):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, NetworkRuleSet = get_sdk(
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
@@ -84,8 +84,8 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None, encryption_services=None,
-                           encryption_key_source=None, encryption_key_vault_properties=None,
+def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
+                           encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
@@ -417,20 +417,18 @@ def list_network_rules(client, resource_group_name, storage_account_name):
     return rules
 
 
-def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet=None,
+def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet_name=None,  # pylint: disable=unused-argument
                      ip_address=None):
     sa = client.get_properties(resource_group_name, storage_account_name)
     rules = sa.network_acls
-    assert not (subnet and vnet)  # backstop for tests
-    if subnet or vnet:
+    if subnet:
         from azure.cli.core.commands.arm import is_valid_resource_id
-        target_id = subnet or vnet
-        if not is_valid_resource_id(target_id):
-            raise CLIError("Expected fully qualified resource ID: got '{}'".format(target_id))
+        if not is_valid_resource_id(subnet):
+            raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = get_sdk(ResourceType.MGMT_STORAGE, 'VirtualNetworkRule', mod='models')
         if not rules.virtual_network_rules:
             rules.virtual_network_rules = []
-        rules.virtual_network_rules.append(VirtualNetworkRule(target_id, action=action))
+        rules.virtual_network_rules.append(VirtualNetworkRule(subnet, action=action))
     if ip_address:
         IpRule = get_sdk(ResourceType.MGMT_STORAGE, 'IPRule', mod='models')
         if not rules.ip_rules:
@@ -442,12 +440,13 @@ def add_network_rule(client, resource_group_name, storage_account_name, action='
     return client.update(resource_group_name, storage_account_name, params)
 
 
-def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, resource=None):
+def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
+                        vnet_name=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, storage_account_name)
     rules = sa.network_acls
-    if resource:
+    if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
-                                       if not x.virtual_network_resource_id.endswith(resource)]
+                                       if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
 
