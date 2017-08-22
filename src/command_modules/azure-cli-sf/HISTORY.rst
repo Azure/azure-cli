@@ -2,6 +2,12 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++
+* Simplified registry user/pass rules for command.
+* Fixed password prompt for user even after passing in the param.
+* Supports None registry_cred.
+
 1.0.6 (2017-08-11)
 ++++++++++++++++++
 * minor fixes
