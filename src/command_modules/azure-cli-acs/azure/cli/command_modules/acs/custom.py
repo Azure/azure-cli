@@ -326,13 +326,13 @@ def _validate_service_principal(client, sp_id):
 
 def _build_service_principal(client, name, url, client_secret):
     # use get_progress_controller
-    HOOK = APPLICATION.get_progress_controller(True)
-    HOOK.add(messsage='Creating service principal', value=0, total_val=1.0)
+    hook = APPLICATION.get_progress_controller(True)
+    hook.add(messsage='Creating service principal', value=0, total_val=1.0)
     logger.info('Creating service principal')
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
-        HOOK.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
+        hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
         try:
             create_service_principal(service_principal, client=client)
             break
@@ -342,18 +342,18 @@ def _build_service_principal(client, name, url, client_secret):
             time.sleep(2 + 2 * x)
     else:
         return False
-    HOOK.add(message='Finished service principal creation', value=1.0, total_val=1.0)
+    hook.add(message='Finished service principal creation', value=1.0, total_val=1.0)
     logger.info('Finished service principal creation')
     return service_principal
 
 
 def _add_role_assignment(role, service_principal, delay=2):
     # AAD can have delays in propagating data, so sleep and retry
-    HOOK = APPLICATION.get_progress_controller(True)
-    HOOK.add(message='Waiting for AAD role to propagate', value=0, total_val=1.0)
+    hook = APPLICATION.get_progress_controller(True)
+    hook.add(message='Waiting for AAD role to propagate', value=0, total_val=1.0)
     logger.info('Waiting for AAD role to propagate')
     for x in range(0, 10):
-        HOOK.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
+        hook.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
@@ -369,7 +369,7 @@ def _add_role_assignment(role, service_principal, delay=2):
         time.sleep(delay + delay * x)
     else:
         return False
-    HOOK.add(message='AAD role propagation done', value=1.0, total_val=1.0)
+    hook.add(message='AAD role propagation done', value=1.0, total_val=1.0)
     logger.info('AAD role propagation done')
     return True
 
