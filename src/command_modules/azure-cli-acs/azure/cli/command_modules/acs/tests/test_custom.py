@@ -38,9 +38,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = mock.Mock()
+            resp = mock.create_autospec(requests.Response)
             resp.status_code = 409
-            resp.content = 'Conflict'
+            resp.text = 'Conflict'
             err = CloudError(resp)
             err.message = 'The role assignment already exists.'
             create_role_assignment.side_effect = err
@@ -55,9 +55,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = mock.Mock()
+            resp = mock.create_autospec(requests.Response)
             resp.status_code = 500
-            resp.content = 'Internal Error'
+            resp.text = 'Internal Error'
             err = CloudError(resp)
             err.message = 'Internal Error'
             create_role_assignment.side_effect = err
