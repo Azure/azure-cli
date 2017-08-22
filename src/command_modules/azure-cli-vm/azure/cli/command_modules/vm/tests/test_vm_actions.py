@@ -92,30 +92,30 @@ class TestActions(unittest.TestCase):
         err_invalid_char = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
 
         self._verify_username_with_ex('!@#', 'linux', err_invalid_char)
-        self._verify_username_with_ex('dav[', 'linux', err_invalid_char)
-        self._verify_username_with_ex('Adavid', 'linux', err_invalid_char)
-        self._verify_username_with_ex('-ddavid', 'linux', err_invalid_char)
+        self._verify_username_with_ex('gue[', 'linux', err_invalid_char)
+        self._verify_username_with_ex('Aguest', 'linux', err_invalid_char)
+        self._verify_username_with_ex('-gguest', 'linux', err_invalid_char)
         self._verify_username_with_ex('', 'linux', 'admin user name can not be empty')
-        self._verify_username_with_ex('david', 'linux',
-                                      "This user name 'david' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        self._verify_username_with_ex('guest', 'linux',
+                                      "This user name 'guest' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('d-avid1', 'linux')
-        _validate_admin_username('david1', 'linux')
-        _validate_admin_username('david1.', 'linux')
+        _validate_admin_username('g-uest1', 'linux')
+        _validate_admin_username('guest1', 'linux')
+        _validate_admin_username('guest1.', 'linux')
 
     def test_validate_admin_username_windows(self):
         # pylint: disable=line-too-long
         err_invalid_char = r'admin user name cannot contain special characters \/"[]:|<>+=;,?*@# or ends with .'
 
         self._verify_username_with_ex('!@#', 'windows', err_invalid_char)
-        self._verify_username_with_ex('dav[', 'windows', err_invalid_char)
+        self._verify_username_with_ex('gue[', 'windows', err_invalid_char)
         self._verify_username_with_ex('dddivid.', 'windows', err_invalid_char)
-        self._verify_username_with_ex('john', 'windows',
-                                      "This user name 'john' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        self._verify_username_with_ex('backup', 'windows',
+                                      "This user name 'backup' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('ADAVID', 'windows')
-        _validate_admin_username('d-avid1', 'windows')
-        _validate_admin_username('david1', 'windows')
+        _validate_admin_username('AGUEST', 'windows')
+        _validate_admin_username('g-uest1', 'windows')
+        _validate_admin_username('guest1', 'windows')
 
     def test_validate_admin_password_linux(self):
         # pylint: disable=line-too-long
