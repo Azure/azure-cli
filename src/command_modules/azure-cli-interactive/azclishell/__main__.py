@@ -25,6 +25,10 @@ from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
 
 
 def main(style=None):
+    if APPLICATION.session["interactive"]:
+        print("You're in the interactive shell already!!\n")
+        return
+
     os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
 
     azure_folder = cli_config_dir()
@@ -70,4 +74,6 @@ def main(style=None):
         styles=style_obj,
         user_feedback=ask_feedback
     )
+    shell_app.app.session["interactive"] = True
     shell_app.run()
+    shell_app.app.session["interactive"] = False
