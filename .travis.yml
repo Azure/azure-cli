@@ -8,6 +8,7 @@ env:
   - CODE_COVERAGE="True"
 install:
   - pip install -qqq virtualenv # used by package_verify script
+  - pip install git+https://github.com/Azure/msrestazure-for-python.git@master#egg=msrestazure
   - python scripts/dev_setup.py
 script:
   - ./scripts/build.sh
