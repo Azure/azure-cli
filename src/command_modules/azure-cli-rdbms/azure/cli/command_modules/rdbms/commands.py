@@ -15,7 +15,6 @@ from ._util import (
 if get_active_api_profile() == 'latest':
     custom_path = 'azure.cli.command_modules.rdbms.custom#{}'
 
-
     def load_commands_from_factory(server_type, command_group_name, management_client):
         # server
         server_sa = create_service_adapter(
@@ -97,7 +96,6 @@ if get_active_api_profile() == 'latest':
                 # c.command('delete', 'delete', confirmation=True)
                 # c.command('show', 'get')
                 c.command('list', 'list_by_server')
-
 
     load_commands_from_factory('mysql', 'mysql', get_mysql_management_client)
     load_commands_from_factory('postgresql', 'postgres', get_postgresql_management_client)

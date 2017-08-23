@@ -16,19 +16,15 @@ if get_active_api_profile() == 'latest':
     mgmt_path = 'azure.mgmt.documentdb.operations.database_accounts_operations#'
     custome_path = 'azure.cli.command_modules.cosmosdb.custom#'
 
-
     def deprecate(argv):
         if argv[0] == 'documentdb':
             from azure.cli.core.util import CLIError
             raise CLIError('All documentdb commands have been renamed to cosmosdb')
 
-
     APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSING, deprecate)
-
 
     def db_accounts_factory(_):
         return cf_documentdb().database_accounts
-
 
     cli_command(__name__, 'cosmosdb show', mgmt_path + 'DatabaseAccountsOperations.get', db_accounts_factory)
     cli_command(__name__, 'cosmosdb list-keys', mgmt_path + 'DatabaseAccountsOperations.list_keys', db_accounts_factory)
@@ -41,7 +37,6 @@ if get_active_api_profile() == 'latest':
     cli_command(__name__, 'cosmosdb create', custome_path + 'cli_cosmosdb_create', db_accounts_factory)
     cli_command(__name__, 'cosmosdb update', custome_path + 'cli_cosmosdb_update', db_accounts_factory)
     cli_command(__name__, 'cosmosdb list', custome_path + 'cli_cosmosdb_list', db_accounts_factory)
-
 
     # # database operations
     cli_cosmosdb_data_plane_command('cosmosdb database show', custome_path + 'cli_cosmosdb_database_show', get_document_client_factory)

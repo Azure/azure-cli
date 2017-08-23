@@ -141,9 +141,9 @@ if get_active_api_profile() == 'latest':
     cli_command(__name__, 'appservice plan list', custom_path + 'list_app_service_plans')
     cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', cf_plans, exception_handler=empty_on_404)
     cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get',
-                            'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.create_or_update',
-                            custom_function_op=custom_path + 'update_app_service_plan',
-                            setter_arg_name='app_service_plan', factory=cf_plans)
+                               'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.create_or_update',
+                               custom_function_op=custom_path + 'update_app_service_plan',
+                               setter_arg_name='app_service_plan', factory=cf_plans)
     cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', cf_web_client, transform=transform_list_location_output)
 
     cli_command(__name__, 'functionapp create', custom_path + 'create_function')

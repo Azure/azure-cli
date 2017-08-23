@@ -21,10 +21,8 @@ if get_active_api_profile() == 'latest':
     billing_periods_path = 'azure.mgmt.billing.operations.billing_periods_operations#'
     custom_path = 'azure.cli.command_modules.billing.custom#'
 
-
     def billing_command(*args, **kwargs):
         cli_command(*args, exception_handler=billing_exception_handler, **kwargs)
-
 
     billing_command(__name__, 'billing invoice list', custom_path + 'cli_billing_list_invoices', invoices_mgmt_client_factory, transform=transform_invoice_list_output)
     billing_command(__name__, 'billing invoice show', custom_path + 'cli_billing_get_invoice', invoices_mgmt_client_factory, transform=transform_invoice_output)

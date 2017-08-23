@@ -22,7 +22,6 @@ if get_active_api_profile() == 'latest':
     custom_path = 'azure.cli.command_modules.lab.custom'
     mgmt_operations_path = 'azure.mgmt.devtestlabs.operations.{}'
 
-
     def _export_artifacts(formula):
         """ Exports artifacts from the given formula. This method removes some of the properties of the
             artifact model as they do not play important part for users in create or read context.
@@ -37,10 +36,8 @@ if get_active_api_profile() == 'latest':
                 del artifact.install_time
         return artifacts
 
-
     def transform_artifact_source_list(artifact_source_list):
         return [transform_artifact_source(v) for v in artifact_source_list]
-
 
     def transform_artifact_source(result):
         return OrderedDict([('name', result['name']),
@@ -48,26 +45,21 @@ if get_active_api_profile() == 'latest':
                             ('status', result.get('status')),
                             ('uri', result.get('uri'))])
 
-
     def transform_arm_template_list(arm_template_list):
         return [transform_arm_template(v) for v in arm_template_list]
-
 
     def transform_arm_template(result):
         return OrderedDict([('name', result['name']),
                             ('resourceGroup', result['resourceGroup']),
                             ('publisher', result.get('publisher'))])
 
-
     def transform_vm_list(vm_list):
         return [transform_vm(v) for v in vm_list]
-
 
     def transform_vm(result):
         return OrderedDict([('name', result['name']),
                             ('location', result['location']),
                             ('osType', result['osType'])])
-
 
     # Custom Command's service adapter
     custom_operations = create_service_adapter(custom_path)

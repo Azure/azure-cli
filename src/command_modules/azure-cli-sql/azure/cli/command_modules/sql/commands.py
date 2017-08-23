@@ -33,7 +33,6 @@ if get_active_api_profile() == 'latest':
         with s.group('sql elastic-pool') as c:
             c.custom_command('list-editions', 'elastic_pool_list_capabilities')
 
-
     ###############################################
     #                sql db                       #
     ###############################################

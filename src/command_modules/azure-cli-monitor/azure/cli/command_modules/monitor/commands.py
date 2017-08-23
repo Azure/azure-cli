@@ -17,7 +17,6 @@ if get_active_api_profile() == 'latest':
     def monitor_command(*args, **kwargs):
         cli_command(*args, exception_handler=monitor_exception_handler, **kwargs)
 
-
     # MANAGEMENT COMMANDS
 
     custom_path = 'azure.cli.command_modules.monitor.custom#'
@@ -71,7 +70,6 @@ if get_active_api_profile() == 'latest':
                                exception_handler=monitor_exception_handler)
 
     # endregion
-
 
     # region Autoscale
 

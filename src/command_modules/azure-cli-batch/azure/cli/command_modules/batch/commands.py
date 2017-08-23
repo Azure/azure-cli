@@ -77,16 +77,16 @@ if get_active_api_profile() == 'latest':
     cli_batch_data_plane_command('batch pool usage-metrics list', data_path.format('pool', 'PoolOperations.list_usage_metrics'), pool_client_factory)
     cli_batch_data_plane_command('batch pool all-statistics show', data_path.format('pool', 'PoolOperations.get_all_lifetime_statistics'), pool_client_factory)
     cli_batch_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), pool_client_factory, validator=validate_pool_settings,
-                                ignore=['pool.cloud_service_configuration.current_os_version', 'pool.virtual_machine_configuration.windows_configuration',
-                                        'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.network_configuration',
-                                        'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy', 'pool.virtual_machine_configuration.os_disk',
-                                        'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings', 'pool.start_task.user_identity'],
-                                silent=['pool.virtual_machine_configuration.image_reference'])
+                                 ignore=['pool.cloud_service_configuration.current_os_version', 'pool.virtual_machine_configuration.windows_configuration',
+                                         'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.network_configuration',
+                                         'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy', 'pool.virtual_machine_configuration.os_disk',
+                                         'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings', 'pool.start_task.user_identity'],
+                                 silent=['pool.virtual_machine_configuration.image_reference'])
     cli_batch_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), pool_client_factory)
     cli_batch_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), pool_client_factory)
     cli_batch_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), pool_client_factory)
     cli_batch_data_plane_command('batch pool set', data_path.format('pool', 'PoolOperations.patch'), pool_client_factory,
-                                ignore=['pool_patch_parameter.start_task.user_identity'])
+                                 ignore=['pool_patch_parameter.start_task.user_identity'])
     cli_command(__name__, 'batch pool reset', custom_path.format('update_pool'), pool_client_factory)
     cli_batch_data_plane_command('batch pool autoscale disable', data_path.format('pool', 'PoolOperations.disable_auto_scale'), pool_client_factory)
     cli_batch_data_plane_command('batch pool autoscale enable', data_path.format('pool', 'PoolOperations.enable_auto_scale'), pool_client_factory)
@@ -97,10 +97,10 @@ if get_active_api_profile() == 'latest':
 
     cli_batch_data_plane_command('batch job all-statistics show', data_path.format('job', 'JobOperations.get_all_lifetime_statistics'), job_client_factory)
     cli_batch_data_plane_command('batch job create', data_path.format('job', 'JobOperations.add'), job_client_factory,
-                                ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.on_task_failure',
-                                        'job.job_manager_task.kill_job_on_completion', 'job.common_environment_settings', 'job.on_all_tasks_complete',
-                                        'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references',
-                                        'job.job_manager_task.user_identity', 'job.job_manager_task.allow_low_priority_node'])
+                                 ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.on_task_failure',
+                                         'job.job_manager_task.kill_job_on_completion', 'job.common_environment_settings', 'job.on_all_tasks_complete',
+                                         'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references',
+                                         'job.job_manager_task.user_identity', 'job.job_manager_task.allow_low_priority_node'])
     cli_batch_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), job_client_factory)
     cli_batch_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), job_client_factory)
     cli_batch_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), job_client_factory, flatten=2)
@@ -113,33 +113,33 @@ if get_active_api_profile() == 'latest':
     cli_batch_data_plane_command('batch job task-counts show', data_path.format('job', 'JobOperations.get_task_counts'), job_client_factory)
 
     cli_batch_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), job_schedule_client_factory,
-                                ignore=['cloud_job_schedule.job_specification.job_preparation_task', 'cloud_job_schedule.job_specification.on_task_failure',
-                                        'cloud_job_schedule.job_specification.job_release_task', 'cloud_job_schedule.job_specification.metadata',
-                                        'cloud_job_schedule.job_specification.job_manager_task.kill_job_on_completion',
-                                        'cloud_job_schedule.job_specification.job_manager_task.run_exclusive',
-                                        'cloud_job_schedule.job_specification.job_manager_task.application_package_references',
-                                        'cloud_job_schedule.job_specification.job_manager_task.environment_settings',
-                                        'cloud_job_schedule.job_specification.job_manager_task.allow_low_priority_node'])
+                                 ignore=['cloud_job_schedule.job_specification.job_preparation_task', 'cloud_job_schedule.job_specification.on_task_failure',
+                                         'cloud_job_schedule.job_specification.job_release_task', 'cloud_job_schedule.job_specification.metadata',
+                                         'cloud_job_schedule.job_specification.job_manager_task.kill_job_on_completion',
+                                         'cloud_job_schedule.job_specification.job_manager_task.run_exclusive',
+                                         'cloud_job_schedule.job_specification.job_manager_task.application_package_references',
+                                         'cloud_job_schedule.job_specification.job_manager_task.environment_settings',
+                                         'cloud_job_schedule.job_specification.job_manager_task.allow_low_priority_node'])
     cli_batch_data_plane_command('batch job-schedule delete', data_path.format('job_schedule', 'JobScheduleOperations.delete'), job_schedule_client_factory)
     cli_batch_data_plane_command('batch job-schedule show', data_path.format('job_schedule', 'JobScheduleOperations.get'), job_schedule_client_factory)
     cli_batch_data_plane_command('batch job-schedule set', data_path.format('job_schedule', 'JobScheduleOperations.patch'), job_schedule_client_factory,
-                                ignore=['job_schedule_patch_parameter.job_specification.job_preparation_task',
-                                        'job_schedule_patch_parameter.job_specification.job_release_task',
-                                        'job_schedule_patch_parameter.job_specification.constraints',
-                                        'job_schedule_patch_parameter.job_specification.on_task_failure',
-                                        'job_schedule_patch_parameter.job_specification.job_manager_task.kill_job_on_completion',
-                                        'job_schedule_patch_parameter.job_specification.job_manager_task.run_exclusive',
-                                        'job_schedule_patch_parameter.job_specification.job_manager_task.constraints',
-                                        'job_schedule_patch_parameter.job_specification.job_manager_task.allow_low_priority_node'])
+                                 ignore=['job_schedule_patch_parameter.job_specification.job_preparation_task',
+                                         'job_schedule_patch_parameter.job_specification.job_release_task',
+                                         'job_schedule_patch_parameter.job_specification.constraints',
+                                         'job_schedule_patch_parameter.job_specification.on_task_failure',
+                                         'job_schedule_patch_parameter.job_specification.job_manager_task.kill_job_on_completion',
+                                         'job_schedule_patch_parameter.job_specification.job_manager_task.run_exclusive',
+                                         'job_schedule_patch_parameter.job_specification.job_manager_task.constraints',
+                                         'job_schedule_patch_parameter.job_specification.job_manager_task.allow_low_priority_node'])
     cli_batch_data_plane_command('batch job-schedule reset', data_path.format('job_schedule', 'JobScheduleOperations.update'), job_schedule_client_factory,
-                                ignore=['job_schedule_update_parameter.job_specification.job_preparation_task',
-                                        'job_schedule_update_parameter.job_specification.job_release_task',
-                                        'job_schedule_update_parameter.job_specification.constraints',
-                                        'job_schedule_update_parameter.job_specification.on_task_failure',
-                                        'job_schedule_update_parameter.job_specification.job_manager_task.kill_job_on_completion',
-                                        'job_schedule_update_parameter.job_specification.job_manager_task.run_exclusive',
-                                        'job_schedule_update_parameter.job_specification.job_manager_task.constraints',
-                                        'job_schedule_update_parameter.job_specification.job_manager_task.allow_low_priority_node'])
+                                 ignore=['job_schedule_update_parameter.job_specification.job_preparation_task',
+                                         'job_schedule_update_parameter.job_specification.job_release_task',
+                                         'job_schedule_update_parameter.job_specification.constraints',
+                                         'job_schedule_update_parameter.job_specification.on_task_failure',
+                                         'job_schedule_update_parameter.job_specification.job_manager_task.kill_job_on_completion',
+                                         'job_schedule_update_parameter.job_specification.job_manager_task.run_exclusive',
+                                         'job_schedule_update_parameter.job_specification.job_manager_task.constraints',
+                                         'job_schedule_update_parameter.job_specification.job_manager_task.allow_low_priority_node'])
     cli_batch_data_plane_command('batch job-schedule disable', data_path.format('job_schedule', 'JobScheduleOperations.disable'), job_schedule_client_factory)
     cli_batch_data_plane_command('batch job-schedule enable', data_path.format('job_schedule', 'JobScheduleOperations.enable'), job_schedule_client_factory)
     cli_batch_data_plane_command('batch job-schedule stop', data_path.format('job_schedule', 'JobScheduleOperations.terminate'), job_schedule_client_factory)

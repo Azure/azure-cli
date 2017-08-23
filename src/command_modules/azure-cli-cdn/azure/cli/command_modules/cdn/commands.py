@@ -20,7 +20,6 @@ if get_active_api_profile() == 'latest':
             raise ex
         return _inner_not_found
 
-
     not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's parent resources " \
                     "exist."
     profile_not_found_msg = not_found_msg.format('Profile')
