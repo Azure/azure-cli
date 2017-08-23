@@ -562,7 +562,6 @@ class Profile(object):
         import time
         request_uri = 'http://localhost:{}/oauth2/token'.format(port)
         payload = {
-            'authority': '{}/{}'.format(aad_endpoint, tenant_id),
             'resource': resource
         }
 
