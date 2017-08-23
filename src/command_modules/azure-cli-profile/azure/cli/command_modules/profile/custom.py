@@ -13,6 +13,9 @@ from azure.cli.core.cloud import get_active_cloud
 
 logger = get_az_logger(__name__)
 
+_CLOUD_CONSOLE_ERR_TEMPLATE = ("Azure Cloud Shell relies on the user account it was initially launched under, "
+                               "as a result 'az {}' is disabled.")
+
 
 def load_subscriptions(all_clouds=False, refresh=False):
     profile = Profile()
@@ -91,13 +94,12 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
     profile = Profile()
 
-    if os.environ.get('ACC_CLOUD', None):
+    if _in_cloud_console():
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
         if console_tokens:
             return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
         else:
-            raise CLIError("Azure Cloud Shell relies on the user account it was initially launched under, "
-                           "as a result 'az login' is disabled.")
+            raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('login'))
 
     if username:
         if not password:
@@ -140,6 +142,9 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
 def logout(username=None):
     """Log out to remove access to Azure subscriptions"""
+    if _in_cloud_console():
+        raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('logout'))
+
     profile = Profile()
     if not username:
         username = profile.get_current_account_user()
@@ -149,3 +154,8 @@ def logout(username=None):
 def list_locations():
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations()
+
+
+def _in_cloud_console():
+    import os
+    return os.environ.get('ACC_CLOUD', None)
