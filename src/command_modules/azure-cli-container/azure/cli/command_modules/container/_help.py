@@ -22,8 +22,8 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name myalpine --image alpine:latest --ip-address public
         - name: Create a container group with starting command line.
           text: az container create -g MyResourceGroup --name myalpine --image alpine:latest --command-line "/bin/sh -c '/path to/myscript.sh'"
-        - name: Create a container group with envrionment variables.
-          text: az contanier create -g MyResourceGroup --name myalpine --image alpine:latest -e key1=value1 key2=value2
+        - name: Create a container group with environment variables.
+          text: az container create -g MyResourceGroup --name myalpine --image alpine:latest -e key1=value1 key2=value2
         - name: Create a container group using container image from Azure Container Registry.
           text: az container create -g MyResourceGroup --name myalpine --image myAcrRegistry.azurecr.io/alpine:latest --registry-password password
         - name: Create a container group using container image from other private container image registry.
