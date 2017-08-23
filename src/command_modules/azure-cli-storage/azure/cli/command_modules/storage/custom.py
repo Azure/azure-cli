@@ -51,7 +51,7 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
         'AccessTier',
         'Identity',
         'Encryption',
-        'NetworkRuleSet',
+        'StorageNetworkAcls',
         mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
@@ -95,7 +95,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         'AccessTier',
         'Identity',
         'Encryption',
-        'NetworkRuleSet',
+        'StorageNetworkAcls',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
