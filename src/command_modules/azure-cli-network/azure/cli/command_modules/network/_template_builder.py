@@ -228,7 +228,7 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, fronte
         'dependsOn': [],
         'properties': lb_properties
     }
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         lb['sku'] = {'name': sku}
     return lb
 
@@ -248,7 +248,7 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name,
         'dependsOn': [],
         'properties': public_ip_properties
     }
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
 

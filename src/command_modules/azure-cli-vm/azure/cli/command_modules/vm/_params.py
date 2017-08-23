@@ -277,7 +277,7 @@ register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_ch
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
 register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
-    c.register_cli_argument('vmss create', 'load_balancer_sku', help='SKU when creating a new Load Balancer.', arg_group='Network Balancer', options_list=['--lb-sku'], **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
+    c.register_cli_argument('vmss create', 'load_balancer_sku', help='SKU when creating a new Load Balancer.', arg_group='Network Balancer', options_list=['--lb-sku'], default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
 
 with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
     c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')

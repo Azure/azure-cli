@@ -475,7 +475,7 @@ for item in ['create', 'update']:
     else:
         register_cli_argument('network public-ip {}'.format(item), 'version', ignore_type)
     with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
-        c.register_cli_argument('network public-ip {}'.format(item), 'sku', help='Public IP SKU', **model_choice_list(ResourceType.MGMT_NETWORK, 'PublicIPAddressSkuName'))
+        c.register_cli_argument('network public-ip {}'.format(item), 'sku', help='Public IP SKU', default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'PublicIPAddressSkuName'))
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
@@ -559,7 +559,7 @@ register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minute
 register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
-    c.register_cli_argument('network lb', 'sku', help='Load balancer SKU', **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
+    c.register_cli_argument('network lb', 'sku', help='Load balancer SKU', default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
 
 for item in ['backend_pool_name', 'backend_address_pool_name']:
     register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
