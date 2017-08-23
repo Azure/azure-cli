@@ -40,7 +40,7 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            ok = _add_role_assignment(role, sp, delay=0)
             create_role_assignment.assert_called_with(role, sp)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
@@ -56,7 +56,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             err = CloudError(resp)
             err.message = 'The role assignment already exists.'
             create_role_assignment.side_effect = err
-            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            ok = _add_role_assignment(role, sp, delay=0)
 
             create_role_assignment.assert_called_with(role, sp)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
@@ -73,7 +73,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             err = CloudError(resp)
             err.message = 'Internal Error'
             create_role_assignment.side_effect = err
-            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            ok = _add_role_assignment(role, sp, delay=0)
 
             create_role_assignment.assert_called_with(role, sp)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
