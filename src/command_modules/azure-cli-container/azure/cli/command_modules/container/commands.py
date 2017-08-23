@@ -73,4 +73,3 @@ if get_active_api_profile() == 'latest':
     cli_command(__name__, 'container show', custom_path.format('get_container'), _container_instance_client_factory, exception_handler=empty_on_404, table_transformer=transform_container_group)
     cli_command(__name__, 'container delete', custom_path.format('delete_container'), _container_instance_client_factory, confirmation=True)
     cli_command(__name__, 'container logs', custom_path.format('container_logs'), _container_instance_client_factory, transform=transform_log_output)
-    
