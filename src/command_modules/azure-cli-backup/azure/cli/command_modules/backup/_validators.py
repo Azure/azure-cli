@@ -9,7 +9,7 @@ from datetime import datetime
 
 def datetime_type(string):
     """ Validates UTC datettime in accepted format. Examples: 31-12-2017 """
-    accepted_date_formats = ['%d-%m-%Y', '%I:%M:%S', '%I:%M:%S.%f']
+    accepted_date_formats = ['%d-%m-%Y']
     for form in accepted_date_formats:
         try:
             return datetime.strptime(string, form)

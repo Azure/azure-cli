@@ -95,4 +95,3 @@ def recovery_points_cf():
 
 def restores_cf():
     return _backup_client_factory().restores
-

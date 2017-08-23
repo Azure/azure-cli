@@ -12,8 +12,10 @@ from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer
 from azure.cli.testsdk.base import execute
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name', resource_group_location_parameter_name='resource_group_location',
-                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME'):
+    def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
+                 resource_group_location_parameter_name='resource_group_location',
+                 resource_group_parameter_name='resource_group',
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME'):
         super(VaultPreparer, self).__init__(name_prefix, 24)
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -35,16 +37,13 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
     def remove_resource(self, name, **kwargs):
         #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
-        #if not self.dev_setting_value:
-            #cmd = 'az backup vault delete -n {} -g {} -y'.format(name, self.resource_group)
-            #execute(cmd)
 
     def _get_resource_group(self, **kwargs):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
             template = 'To create a vault, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Vault preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -53,12 +52,13 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.resource_group_location_parameter_name)
         except KeyError:
             template = 'To create a vault, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Vault preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name', resource_group_location_parameter_name='resource_group_location',
+    def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
+                 resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
         super(VMPreparer, self).__init__(name_prefix, 15)
         self.parameter_name = parameter_name
@@ -66,31 +66,27 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.location = None
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
-        self.dev_setting_value = os.environ.get(dev_setting_name, None) 
+        self.dev_setting_value = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            cmd = 'az vm create -n {} -g {} --image Win2012R2Datacenter --admin-password %j^VYw9Q3Z@Cu$*h'.format(name, self.resource_group)
-
-            execute(cmd)
+            cmd = 'az vm create -n {} -g {} --image Win2012R2Datacenter --admin-password %j^VYw9Q3Z@Cu$*h'
+            execute(cmd.format(name, self.resource_group))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
         #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
-        #if not self.dev_setting_value:
-        #    cmd = 'az vm delete -n {} -g {} -y'.format(name, self.resource_group)
-        #    execute(cmd)
 
     def _get_resource_group(self, **kwargs):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
             template = 'To create a vm, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this VM preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -99,60 +95,52 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.resource_group_location_parameter_name)
         except KeyError:
             template = 'To create a vm, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this VM preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
 class ItemPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-item', parameter_name='item_name', vm_parameter_name='vm_name', vault_parameter_name='vault_name', 
-                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME'):
+    def __init__(self, name_prefix='clitest-item', parameter_name='item_name', vm_parameter_name='vm_name',
+                 vault_parameter_name='vault_name',
+                 resource_group_parameter_name='resource_group',
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME'):
         super().__init__(name_prefix, 24)
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
-        self.vault = None
-        self.vault_json = None
         self.vault_parameter_name = vault_parameter_name
-        self.vm = None
-        self.vm_parameter_name = vm_parameter_name
-        self.dev_setting_value = os.environ.get(dev_setting_name, None) 
+        self.dev_setting_value = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
-            self.vault = self._get_vault(**kwargs)
-            self.vm = self._get_vm(**kwargs)
-            
-            self.vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
-                                                 .format(self.vault, self.resource_group)).get_output_in_json())
+            vault = self._get_vault(**kwargs)
+            vm = self._get_vm(**kwargs)
+
+            vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
+                                            .format(vault, self.resource_group)).get_output_in_json())
             policy_json = json.dumps(execute('az backup policy show --policy-name {} --vault \'{}\''
-                                             .format('DefaultPolicy', self.vault_json)).get_output_in_json())
-            vm_json = json.dumps(execute('az vm show -n {} -g {}'.format(self.vm, self.resource_group)).get_output_in_json())
-            enable_protection_job_json = json.dumps(execute('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
-                                                            .format(policy_json, self.vault_json, vm_json)).get_output_in_json())
-            execute('az backup job wait --job \'{}\''.format(enable_protection_job_json, self.vault_json))
+                                             .format('DefaultPolicy', vault_json)).get_output_in_json())
+            vm_json = json.dumps(execute('az vm show -n {} -g {}'
+                                         .format(vm, self.resource_group)).get_output_in_json())
+            enable_protection_job_json = json.dumps(
+                execute('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
+                        .format(policy_json, vault_json, vm_json)).get_output_in_json())
+            execute('az backup job wait --job \'{}\''.format(enable_protection_job_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
         #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
-        #if not self.dev_setting_value:
-        #    container_json = json.dumps(execute('az backup container show --container-name \'{}\' --vault \'{}\''
-        #                                        .format(self.vm, self.vault_json)).get_output_in_json())
-        #    item_json = json.dumps(execute('az backup item show --name \'{}\' --container \'{}\' --vault \'{}\''
-        #                                   .format(self.vm, container_json, self.vault_json)).get_output_in_json())
-        #    disable_protection_job_json = json.dumps(execute('az backup protection disable --backup-item \'{}\' --vault \'{}\''
-        #                                                     .format(item_json, self.vault_json)).get_output_in_json())
-        #    execute('az backup job wait --job \'{}\' --vault \'{}\''.format(disable_protection_job_json, self.vault_json))
 
     def _get_resource_group(self, **kwargs):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
             template = 'To create an item, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Item preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -161,7 +149,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
             template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Item preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
 
@@ -170,13 +158,14 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.vm_parameter_name)
         except KeyError:
             template = 'To create an item, a vm is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Item preparer.'
             raise CliTestError(template.format(VMPreparer.__name__,
                                                self.vm_parameter_name))
 
 class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name', 
-                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME'):
+    def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
+                 resource_group_parameter_name='resource_group',
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME'):
         super().__init__(name_prefix, 24)
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -184,7 +173,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         self.vault = None
         self.vault_json = None
         self.vault_parameter_name = vault_parameter_name
-        self.dev_setting_value = os.environ.get(dev_setting_name, None) 
+        self.dev_setting_value = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
@@ -198,23 +187,20 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
             policy_json['name'] = name
             policy_json = json.dumps(policy_json)
 
-            execute('az backup policy update --policy \'{}\''
-                    .format(policy_json, self.vault_json))
+            execute('az backup policy update --policy \'{}\''.format(policy_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
         #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
-        #execute('az backup policy delete --policy-name {} --vault \'{}\''
-        #        .format(name, self.vault_json))
 
     def _get_resource_group(self, **kwargs):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
             template = 'To create an item, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -223,39 +209,38 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
             template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
 
 class RPPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-rp', parameter_name='rp_name', vm_parameter_name='vm_name', vault_parameter_name='vault_name',
+    def __init__(self, name_prefix='clitest-rp', parameter_name='rp_name', vm_parameter_name='vm_name',
+                 vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
         super().__init__(name_prefix, 24)
         self.parameter_name = parameter_name
-        self.vm = None
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
-        self.vault = None
-        self.vault_json = None
         self.vault_parameter_name = vault_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
-            self.vault = self._get_vault(**kwargs)
-            self.vm = self._get_vm(**kwargs)
-            
-            self.vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
-                                                 .format(self.vault, self.resource_group)).get_output_in_json())
+            vault = self._get_vault(**kwargs)
+            vm = self._get_vm(**kwargs)
+
+            vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
+                                            .format(vault, self.resource_group)).get_output_in_json())
             container_json = json.dumps(execute('az backup container show --container-name \'{}\' --vault \'{}\''
-                                                .format(self.vm, self.vault_json)).get_output_in_json())
+                                                .format(vm, vault_json)).get_output_in_json())
             item_json = json.dumps(execute('az backup item show --item-name \'{}\' --container \'{}\''
-                                           .format(self.vm, container_json)).get_output_in_json())
+                                           .format(vm, container_json)).get_output_in_json())
             retain_date = datetime.utcnow() + timedelta(days=30)
-            backup_job_json = json.dumps(execute('az backup protection backup-now --backup-item \'{}\' --retain-until {}'
-                                                 .format(item_json, retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
+            backup_job_json = json.dumps(execute(
+                'az backup protection backup-now --backup-item \'{}\' --retain-until {}'
+                .format(item_json, retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
             execute('az backup job wait --job \'{}\''.format(backup_job_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -268,7 +253,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
             template = 'To create an item, a resource group is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
@@ -277,7 +262,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             return kwargs.get(self.vault_parameter_name)
         except KeyError:
             template = 'To create an item, a vault is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
+                       'decorator @{} in front of this RP preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
 
@@ -285,7 +270,6 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.vm_parameter_name)
         except KeyError:
-            template = 'To create an rp, an item is required. Please add ' \
-                       'decorator @{} in front of this batch account preparer.'
-            raise CliTestError(template.format(ItemPreparer.__name__,
-                                               self.item_parameter_name))
+            template = 'To create an rp, a VM is required. Please add ' \
+                       'decorator @{} in front of this RP preparer.'
+            raise CliTestError(template.format(ItemPreparer.__name__, self.vm_parameter_name))
