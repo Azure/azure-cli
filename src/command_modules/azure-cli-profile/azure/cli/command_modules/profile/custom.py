@@ -96,8 +96,8 @@ def login(username=None, password=None, service_principal=None, tenant=None,
         if console_tokens:
             return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
         else:
-            raise CLIError("Executing the 'login' command inside the Azure Cloud Console is unnecessary as"
-                           " your accounts have been pre-configured")
+            raise CLIError("Azure Cloud Shell relies on the user account it was initially launched under, "
+                           "as a result 'az login' is disabled.")
 
     if username:
         if not password:
