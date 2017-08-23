@@ -61,8 +61,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag1 --exists'.format(rg))
         self.cmd('network application-gateway update -g {} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo'.format(rg))
-        self.cmd('network application-gateway wait -g {} -n ag1 --created'.format(rg))
-        self.cmd('network application-gateway list')
+        self.cmd('network application-gateway wait -g {} -n ag1 --updated'.format(rg))
 
         ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
             JMESPathCheckV2('type(@)', 'array'),
