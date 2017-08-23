@@ -111,7 +111,7 @@ class Application(object):
             'command': 'unknown',
             'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
             'query_active': False,
-            'interactive': False
+            'az_interactive_active': False
         }
 
         # Register presence of and handlers for global parameters

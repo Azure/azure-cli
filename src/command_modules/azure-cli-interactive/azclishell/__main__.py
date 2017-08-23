@@ -22,11 +22,13 @@ from azure.cli.core.application import APPLICATION
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 from azure.cli.core._environment import get_config_dir as cli_config_dir
 from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
+import azure.cli.core.azlogging as azlogging
 
+logger = azlogging.get_az_logger(__name__)
 
 def main(style=None):
     if APPLICATION.session["interactive"]:
-        print("You're in the interactive shell already!!\n")
+        logger.warning("You're in the interactive shell already.\n")
         return
 
     os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
