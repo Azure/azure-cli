@@ -509,6 +509,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     if location is None:
         location = rg.location  # pylint:disable=no-member
 
+    # normalize location, such as "West US" -> "westus"
+    location = location.replace(" ", "").lower()
+
     # if api-version is not specified, or specified in a version not supported
     # override based on location
     if api_version is None or api_version not in ["2017-01-31", "2017-07-01"]:
