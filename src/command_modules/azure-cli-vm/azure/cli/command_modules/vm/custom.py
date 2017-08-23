@@ -1628,7 +1628,8 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                                   tags,
                                                                   public_ip_address_allocation,
-                                                                  public_ip_address_dns_name))
+                                                                  public_ip_address_dns_name,
+                                                                  None))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
@@ -1834,7 +1835,8 @@ def create_vmss(vmss_name, resource_group_name, image,
             master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                                   tags,
                                                                   public_ip_address_allocation,
-                                                                  public_ip_address_dns_name))
+                                                                  public_ip_address_dns_name,
+                                                                  load_balancer_sku))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 
@@ -1863,7 +1865,8 @@ def create_vmss(vmss_name, resource_group_name, image,
             master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                                   tags,
                                                                   public_ip_address_allocation,
-                                                                  public_ip_address_dns_name))
+                                                                  public_ip_address_dns_name,
+                                                                  None))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 

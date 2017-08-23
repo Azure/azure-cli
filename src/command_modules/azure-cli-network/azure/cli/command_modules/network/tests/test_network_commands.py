@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -18,6 +18,25 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'lb': 'lb1',
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip} --public-ip-address-allocation static'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs))
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
 
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):

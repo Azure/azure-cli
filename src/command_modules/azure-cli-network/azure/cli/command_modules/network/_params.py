@@ -474,6 +474,8 @@ for item in ['create', 'update']:
         register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', default=IPVersion.ipv4.value, **enum_choice_list(IPVersion))
     else:
         register_cli_argument('network public-ip {}'.format(item), 'version', ignore_type)
+    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
+        c.register_cli_argument('network public-ip {}'.format(item), 'sku', help='Public IP SKU', **model_choice_list(ResourceType.MGMT_NETWORK, 'PublicIPAddressSkuName'))
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
