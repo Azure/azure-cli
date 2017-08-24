@@ -249,7 +249,7 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def find_subscriptions_in_vm_with_identity(self, msi_port):
+    def find_subscriptions_in_vm_with_msi(self, msi_port):
         import jwt
         _, token, _ = Profile.get_msi_token(CLOUD.endpoints.active_directory_resource_id, msi_port)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
@@ -258,7 +258,7 @@ class Profile(object):
 
         subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
-        consolidated = Profile._normalize_properties(str(msi_port), subscriptions, is_service_principal=False)
+        consolidated = Profile._normalize_properties(msi_port, subscriptions, is_service_principal=False)
         for s in consolidated:
             s[_SUBSCRIPTION_NAME] = _MSI_ACCOUNT_NAME  # use a special name to trigger a special token acquisition
         self._set_subscriptions(consolidated)

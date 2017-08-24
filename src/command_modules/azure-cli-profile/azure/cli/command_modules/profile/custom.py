@@ -10,6 +10,8 @@ from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import CLIError
 from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.commands.validators import DefaultStr
+
 
 logger = get_az_logger(__name__)
 
@@ -84,12 +86,18 @@ def account_clear():
 
 
 def login(username=None, password=None, service_principal=None, tenant=None,
-          allow_no_subscriptions=False, msi_port=None):
+          allow_no_subscriptions=False, msi=False, msi_port=DefaultStr(50342)):
     """Log in to access Azure subscriptions"""
     import os
     import re
     from adal.adal_error import AdalError
     import requests
+
+    # quick argument usage check
+    if (any([username, password, service_principal, tenant, allow_no_subscriptions])
+            and any([msi, not getattr(msi_port, 'is_default', None)])):
+        raise CLIError("usage error: '--msi/--msi-port' are not applicable with other arguments")
+
     interactive = False
 
     profile = Profile()
@@ -101,17 +109,11 @@ def login(username=None, password=None, service_principal=None, tenant=None,
         else:
             raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('login'))
 
-    if msi_port:
-        if username or password or service_principal or tenant or allow_no_subscriptions:
-            raise CLIError("usage error: '--msi-port' doesn't use with other arguments")
-        return profile.find_subscriptions_in_vm_with_identity(msi_port)
+    if msi:
+        return profile.find_subscriptions_in_vm_with_msi(msi_port)
 
     if username:
         if not password:
-            # in a VM with managed service identity?
-            result = profile.init_if_in_msi_env(username)
-            if result:
-                return result
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
