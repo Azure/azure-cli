@@ -80,6 +80,11 @@ def validate_accept(namespace):
         namespace.accept = formats[namespace.accept.lower()]
 
 
+def validate_bypass(namespace):
+    if namespace.bypass:
+        namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
+
+
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
     connection string into account name and key """
@@ -779,6 +784,28 @@ def process_metric_update_namespace(namespace):
         raise argparse.ArgumentError(
             None, 'incorrect usage: specify --api when hour or minute metrics are enabled')
 
+
+def validate_subnet(namespace):
+    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subnet = namespace.subnet
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        return
+    elif subnet and not subnet_is_id and vnet:
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type='subnets',
+            child_name=subnet)
+    else:
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 # endregion
 

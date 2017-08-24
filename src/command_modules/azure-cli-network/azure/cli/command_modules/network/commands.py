@@ -21,7 +21,7 @@ from ._client_factory import (cf_application_gateways, cf_express_route_circuit_
                               cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
                               cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
                               cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-                              cf_public_ip_addresses, cf_private_access)
+                              cf_public_ip_addresses, cf_endpoint_service)
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
                     delete_network_resource_property_entry)
@@ -431,8 +431,8 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
     cli_generic_update_command(__name__, 'network vnet peering update', vnet_peering_path + 'get', vnet_peering_path + 'create_or_update', cf_virtual_network_peerings, setter_arg_name='virtual_network_peering_parameters')
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
-    private_access_path = 'azure.mgmt.network.operations.available_private_access_services_operations#AvailablePrivateAccessServicesOperations.'
-    cli_command(__name__, 'network list-private-access-services', private_access_path + 'list', cf_private_access)
+    endpoint_service_path = 'azure.mgmt.network.operations.available_endpoint_services_operations#AvailableEndpointServicesOperations.'
+    cli_command(__name__, 'network vnet list-endpoint-services', endpoint_service_path + 'list', cf_endpoint_service)
 
 # Traffic Manager ProfileOperations
 tm_profile_path = 'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.'
