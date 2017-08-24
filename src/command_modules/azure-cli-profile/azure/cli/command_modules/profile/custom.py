@@ -84,7 +84,7 @@ def account_clear():
 
 
 def login(username=None, password=None, service_principal=None, tenant=None,
-          allow_no_subscriptions=False):
+          allow_no_subscriptions=False, msi_port=None):
     """Log in to access Azure subscriptions"""
     import os
     import re
@@ -100,6 +100,11 @@ def login(username=None, password=None, service_principal=None, tenant=None,
             return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
         else:
             raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('login'))
+
+    if msi_port:
+        if username or password or service_principal or tenant or allow_no_subscriptions:
+            raise CLIError("usage error: '--msi-port' doesn't use with other arguments")
+        return profile.find_subscriptions_in_vm_with_identity(msi_port)
 
     if username:
         if not password:
