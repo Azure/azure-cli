@@ -509,11 +509,11 @@ class PolicyScenarioTest(ScenarioTest):
         # create a policy
         self.cmd('policy definition create -n {} --rules {} --params {} --display-name {} --description {}'.format(
             policy_name, rules_file, params_def_file, policy_display_name, policy_description),
-            checks=[
-                JCheck('name', policy_name),
-                JCheck('displayName', policy_display_name),
-                JCheck('description', policy_description)
-            ]
+            checks= [
+                        JCheck('name', policy_name),
+                        JCheck('displayName', policy_display_name),
+                        JCheck('description', policy_description)
+                    ]
         )
 
         # update it
