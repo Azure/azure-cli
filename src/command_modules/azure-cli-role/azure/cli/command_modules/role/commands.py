@@ -7,8 +7,8 @@
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.util import empty_on_404
-from azure.cli.testsdk import get_active_api_profile
 
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
@@ -67,7 +67,7 @@ cli_command(__name__, 'role assignment list',
 cli_command(__name__, 'role assignment create',
             'azure.cli.command_modules.role.custom#create_role_assignment')
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'ad app create', 'azure.cli.command_modules.role.custom#create_application',
                 get_graph_client_applications)
     cli_command(__name__, 'ad app delete', 'azure.cli.command_modules.role.custom#delete_application',

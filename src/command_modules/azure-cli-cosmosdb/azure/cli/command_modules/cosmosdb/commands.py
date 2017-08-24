@@ -7,12 +7,12 @@
 
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands import cli_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.cosmosdb._client_factory import (cf_documentdb)
-from azure.cli.testsdk import get_active_api_profile
 from ._client_factory import get_document_client_factory
 from ._command_type import cli_cosmosdb_data_plane_command
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     mgmt_path = 'azure.mgmt.documentdb.operations.database_accounts_operations#'
     custome_path = 'azure.cli.command_modules.cosmosdb.custom#'
 

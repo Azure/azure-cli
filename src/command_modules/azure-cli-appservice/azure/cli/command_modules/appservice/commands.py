@@ -8,7 +8,7 @@ from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
 from ._client_factory import cf_web_client, cf_plans
 
@@ -135,7 +135,7 @@ cli_command(__name__, 'webapp deployment container show-cd-url',
 cli_command(__name__, 'webapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
 cli_command(__name__, 'webapp list-runtimes', custom_path + 'list_runtimes')
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'appservice plan create', custom_path + 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
     cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.delete', cf_plans, confirmation=True)
     cli_command(__name__, 'appservice plan list', custom_path + 'list_app_service_plans')

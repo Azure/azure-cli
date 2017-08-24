@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.billing._client_factory import \
     (invoices_mgmt_client_factory,
      billing_periods_mgmt_client_factory)
@@ -14,10 +15,9 @@ from azure.cli.command_modules.billing._transformers import \
      transform_invoice_output,
      transform_billing_period_output,
      transform_billing_period_list_output)
-from azure.cli.testsdk import get_active_api_profile
 from ._exception_handler import billing_exception_handler
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     billing_periods_path = 'azure.mgmt.billing.operations.billing_periods_operations#'
     custom_path = 'azure.cli.command_modules.billing.custom#'
 

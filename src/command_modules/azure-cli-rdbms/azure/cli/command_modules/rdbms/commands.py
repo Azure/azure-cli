@@ -4,15 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup)
-from azure.cli.testsdk import get_active_api_profile
 from ._util import (
     get_mysql_management_client,
     get_postgresql_management_client)
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.rdbms.custom#{}'
 
     def load_commands_from_factory(server_type, command_group_name, management_client):

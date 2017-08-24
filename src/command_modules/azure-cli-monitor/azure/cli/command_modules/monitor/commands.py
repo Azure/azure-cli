@@ -7,13 +7,13 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._client_factory import \
     (cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles,
      cf_autoscale, cf_diagnostics, cf_activity_log)
 from ._exception_handler import monitor_exception_handler
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     def monitor_command(*args, **kwargs):
         cli_command(*args, exception_handler=monitor_exception_handler, **kwargs)
 

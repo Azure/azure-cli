@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import ServiceGroup, create_service_adapter
-from azure.cli.testsdk import get_active_api_profile
 from ._client_factory import cf_cdn
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     def _not_found(message):
         def _inner_not_found(ex):
             from azure.mgmt.cdn.models.error_response import ErrorResponseException

@@ -5,11 +5,11 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.redis._client_factory import (cf_redis, cf_patch_schedules)
 from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_exception_handler
-from azure.cli.testsdk import get_active_api_profile
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     redis_operation = 'azure.mgmt.redis.operations.redis_operations#RedisOperations.'
     redis_custom = 'azure.cli.command_modules.redis.custom#'
     redis_patch_operation = \

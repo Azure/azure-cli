@@ -6,13 +6,13 @@
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
 from ._constants import WEBHOOK_API_VERSION
 from ._format import output_format
 from ._factory import get_acr_service_client
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'acr credential show',
                 'azure.cli.command_modules.acr.credential#acr_credential_show',
                 table_transformer=output_format, exception_handler=empty_on_404)

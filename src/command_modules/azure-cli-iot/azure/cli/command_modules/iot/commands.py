@@ -7,10 +7,10 @@
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._factory import iot_hub_service_factory as factory
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.iot.custom#{0}'
 
     class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods

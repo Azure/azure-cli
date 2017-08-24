@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup)
-from azure.cli.testsdk import get_active_api_profile
 from ._util import (
     get_sql_servers_operations,
     get_sql_firewall_rules_operations,
@@ -15,7 +15,7 @@ from ._util import (
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations)
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
     ###############################################

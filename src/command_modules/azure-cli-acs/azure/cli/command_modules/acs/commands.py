@@ -9,10 +9,10 @@ from azure.cli.core.commands import cli_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.commands.arm import \
     (cli_generic_wait_command, handle_long_running_operation_exception, deployment_validate_table_format)
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._client_factory import _acs_client_factory
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'acs show', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory, exception_handler=empty_on_404)
     cli_command(__name__, 'acs delete', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.delete', _acs_client_factory)
 

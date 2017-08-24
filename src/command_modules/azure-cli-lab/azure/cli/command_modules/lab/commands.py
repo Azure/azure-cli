@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
-from azure.cli.testsdk import get_active_api_profile
 from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_custom_image_operation,
                               get_devtestlabs_gallery_image_operation,
@@ -18,7 +18,7 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_environment_operation,
                               get_devtestlabs_arm_template_operation)
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.lab.custom'
     mgmt_operations_path = 'azure.mgmt.devtestlabs.operations.{}'
 

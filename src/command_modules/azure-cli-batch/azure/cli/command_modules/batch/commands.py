@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import cli_command
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
 from azure.cli.command_modules.batch._command_type import cli_batch_data_plane_command
 from azure.cli.command_modules.batch._validators import (
@@ -31,7 +31,7 @@ from azure.cli.command_modules.batch._format import (
     application_list_table_format,
     account_keys_renew_table_format)
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     data_path = 'azure.batch.operations.{}_operations#{}'
     custom_path = 'azure.cli.command_modules.batch.custom#{}'
     mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}'

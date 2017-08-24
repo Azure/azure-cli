@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.sf._factory import cf_sf_client
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup
 )
-from azure.cli.testsdk import get_active_api_profile
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = "azure.cli.command_modules.sf.custom#{}"
     cluster_operations = create_service_adapter("azure.servicefabric",
                                                 "ServiceFabricClientAPIs")

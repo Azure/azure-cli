@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import cli_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.dla._client_factory import (cf_dla_account,
                                                            cf_dla_account_firewall,
                                                            cf_dla_account_adls,
@@ -14,9 +15,8 @@ from azure.cli.command_modules.dla._client_factory import (cf_dla_account,
                                                            cf_dla_job_pipeline,
                                                            cf_dla_job_recurrence,
                                                            cf_dla_account_compute_policy)
-from azure.cli.testsdk import get_active_api_profile
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{}'
     adla_custom_format_path = 'azure.cli.command_modules.dla.custom#{}'
 

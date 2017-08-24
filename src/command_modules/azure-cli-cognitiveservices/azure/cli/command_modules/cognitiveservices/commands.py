@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands import cli_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.cognitiveservices._client_factory import (
     get_cognitiveservices_account_operations,
     get_cognitiveservices_operations)
-from azure.cli.testsdk import get_active_api_profile
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     mgmt_path = 'azure.mgmt.cognitiveservices.operations.cognitive_services_accounts_operations#'\
         'CognitiveServicesAccountsOperations.{}'
     custom_path = 'azure.cli.command_modules.cognitiveservices.custom#{}'

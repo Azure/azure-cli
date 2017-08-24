@@ -6,10 +6,10 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
-from azure.cli.testsdk import get_active_api_profile
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._client_factory import (topics_factory, event_subscriptions_factory, topic_types_factory)
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     topics_mgmt_path = 'azure.cli.command_modules.eventgrid.sdk.operations.topics_operations#'
     topic_types_mgmt_path = 'azure.cli.command_modules.eventgrid.sdk.operations.topic_types_operations#'
     custom_path = 'azure.cli.command_modules.eventgrid.custom#'

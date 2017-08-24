@@ -5,12 +5,12 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import cli_command
+from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.dls._client_factory import (cf_dls_account,
                                                            cf_dls_account_firewall,
                                                            cf_dls_account_trusted_provider)
-from azure.cli.testsdk import get_active_api_profile
 
-if get_active_api_profile() == 'latest':
+if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{}'
     adls_custom_format_path = 'azure.cli.command_modules.dls.custom#{}'
 
