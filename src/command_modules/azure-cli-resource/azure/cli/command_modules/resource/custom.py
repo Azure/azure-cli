@@ -663,14 +663,21 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy, name=None, display_name=None,
+def create_policy_assignment(policy, name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_id = _resolve_policy_id(policy, policy_client)
+
+    if params:
+        if os.path.exists(params):
+            params = get_file_json(params)
+        else:
+            params = shell_safe_json_parse(params)
+
     PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
-    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment = PolicyAssignment(display_name, policy_id, scope, params if params else None)
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
                                                    assignment)
@@ -748,26 +755,38 @@ def _resolve_policy_id(policy, client):
     return policy_id
 
 
-def create_policy_definition(name, rules, display_name=None, description=None):
+def create_policy_definition(name, rules, params=None, display_name=None, description=None):
     if os.path.exists(rules):
         rules = get_file_json(rules)
     else:
         rules = shell_safe_json_parse(rules)
 
+    if params:
+        if os.path.exists(params):
+            params = get_file_json(params)
+        else:
+            params = shell_safe_json_parse(params)
+
     policy_client = _resource_policy_client_factory()
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
-    parameters = PolicyDefinition(policy_rule=rules, description=description,
+    parameters = PolicyDefinition(policy_rule=rules, parameters=params, description=description,
                                   display_name=display_name)
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
-def update_policy_definition(policy_definition_name, rules=None,
+def update_policy_definition(policy_definition_name, rules=None, params=None,
                              display_name=None, description=None):
-    if rules is not None:
+    if rules:
         if os.path.exists(rules):
             rules = get_file_json(rules)
         else:
             rules = shell_safe_json_parse(rules)
+
+    if params:
+        if os.path.exists(params):
+            params = get_file_json(params)
+        else:
+            params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
     definition = policy_client.policy_definitions.get(policy_definition_name)
@@ -776,7 +795,8 @@ def update_policy_definition(policy_definition_name, rules=None,
     parameters = PolicyDefinition(
         policy_rule=rules if rules is not None else definition.policy_rule,
         description=description if description is not None else definition.description,
-        display_name=display_name if display_name is not None else definition.display_name)
+        display_name=display_name if display_name is not None else definition.display_name,
+        parameters=params if params is not None else definition.parameters)
     return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
 
 

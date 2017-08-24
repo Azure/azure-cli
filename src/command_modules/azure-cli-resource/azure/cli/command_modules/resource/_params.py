@@ -62,10 +62,15 @@ register_cli_argument('policy', 'resource_group_name', arg_type=resource_group_n
 register_cli_argument('policy definition', 'policy_definition_name', arg_type=existing_policy_definition_name_type)
 register_cli_argument('policy definition create', 'name', options_list=('--name', '-n'), help='name of the new policy definition')
 register_cli_argument('policy definition', 'rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
+register_cli_argument('policy definition', 'params',
+                      help='JSON formatted string or a path to a file with parameter definitions',
+                      type=file_type, completer=FilesCompleter())
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
 register_cli_argument('policy assignment create', 'name', options_list=('--name', '-n'), help='name of the new assignment')
+register_cli_argument('policy assignment create', 'params', options_list=('--params', '-p'),
+                      help='JSON formatted string or path to file with values of specified parameters in policy rule')
 register_cli_argument('policy assignment', 'scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('policy assignment', 'disable_scope_strict_match', action='store_true', help='include assignment either inhertied from parent scope or at child scope')
 register_cli_argument('policy assignment', 'display_name', help='display name of the assignment')
