@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 from collections import OrderedDict
 import json
+
+from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
 
 
 class ArmTemplateBuilder(object):
@@ -90,7 +91,6 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout):
-    from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -207,7 +207,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
 
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation):
+                                 private_ip_address, private_ip_allocation, sku):
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation)
 
@@ -219,27 +219,28 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, fronte
         ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
-
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
         'dependsOn': [],
         'properties': lb_properties
     }
+    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+        lb['sku'] = {'name': sku}
     return lb
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None):
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': '2015-06-15',
+        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -247,6 +248,8 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
         'dependsOn': [],
         'properties': public_ip_properties
     }
+    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+        public_ip['sku'] = {'name': sku}
     return public_ip
 
 
@@ -278,7 +281,6 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None, sub
 
 def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type, authorization_key, enable_bgp,
                                   routing_weight, shared_key, use_policy_based_traffic_selectors):
-    from azure.cli.core.profiles import ResourceType, supported_api_version
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'authorizationKey': authorization_key,

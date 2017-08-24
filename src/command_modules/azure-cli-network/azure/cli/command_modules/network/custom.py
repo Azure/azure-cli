@@ -200,6 +200,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
+                                                              None,
                                                               None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
@@ -855,11 +856,11 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
                          private_ip_address=None, public_ip_address=None,
-                         public_ip_address_allocation=IPAllocationMethod.dynamic.value,
+                         public_ip_address_allocation=None,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False):
+                         no_wait=False, sku=None):
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
@@ -870,6 +871,9 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
+    if not public_ip_address_allocation:
+        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+            else IPAllocationMethod.dynamic.value
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -898,13 +902,14 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              public_ip_dns_name))
+                                                              public_ip_dns_name,
+                                                              sku))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
         load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
-        public_ip_id, subnet_id, private_ip_address, private_ip_allocation)
+        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -1404,9 +1409,12 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 # region Public IP commands
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None):
+                     allocation_method=None, dns_name=None,
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None):
     client = _network_client_factory().public_ip_addresses
+    if not allocation_method:
+        allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+            else IPAllocationMethod.dynamic.value
 
     public_ip_args = {
         'location': location,
@@ -1417,6 +1425,8 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
     }
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
+    if sku:
+        public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
 
     if dns_name or reverse_fqdn:
@@ -1427,7 +1437,7 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
 
 
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None):
+                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None):
     if dns_name is not None or reverse_fqdn is not None:
         if instance.dns_settings:
             if dns_name is not None:
@@ -1444,6 +1454,8 @@ def update_public_ip(instance, dns_name=None, allocation_method=None, version=No
         instance.idle_timeout_in_minutes = idle_timeout
     if tags is not None:
         instance.tags = tags
+    if sku is not None:
+        instance.sku.name = sku
     return instance
 
 

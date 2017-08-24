@@ -14,12 +14,13 @@ import mock
 import uuid
 
 import six
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck, MOCKED_SUBSCRIPTION_ID)
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
@@ -1910,6 +1911,31 @@ class VMSSILBSceanrioTest(ScenarioTest):
         with self.assertRaises(CLIError) as err:
             self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
         self.assertTrue('internal load balancer' in str(err.exception))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class VMSSLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
+    def test_vmss_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vmss': 'vmss1',
+            'lb': 'lb1',
+            'ip': 'pubip1',
+            'sku': 'standard',
+            'location': 'eastus2'
+        }
+
+        self.cmd('vmss create -g {rg} -l {location} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
 
 
 class MSIScenarioTest(ScenarioTest):
