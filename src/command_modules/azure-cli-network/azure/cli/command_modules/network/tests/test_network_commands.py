@@ -61,8 +61,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag1 --exists'.format(rg))
         self.cmd('network application-gateway update -g {} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo'.format(rg))
-        self.cmd('network application-gateway wait -g {} -n ag1 --created'.format(rg))
-        self.cmd('network application-gateway list')
+        self.cmd('network application-gateway wait -g {} -n ag1 --updated'.format(rg))
 
         ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
             JMESPathCheckV2('type(@)', 'array'),
@@ -1313,20 +1312,24 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 
 
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
-class NetworkSubnetPrivateAccessScenarioTest(ScenarioTest):
+class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_subnet_private_access_test', location='westcentralus')
-    def test_network_subnet_private_access(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
+    def test_network_subnet_endpoint_service(self, resource_group):
         kwargs = {
             'rg': resource_group,
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
+        self.cmd('network vnet list-endpoint-services -l westus', checks=[
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('@[0].name', 'Microsoft.Storage')
+        ])
         self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --private-access-services Microsoft.Storage'.format(**kwargs),
-                 checks=JMESPathCheckV2('privateAccessServices[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --private-access-services ""'.format(**kwargs),
-                 checks=JMESPathCheckV2('privateAccessServices', None))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Storage'))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints', None))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes

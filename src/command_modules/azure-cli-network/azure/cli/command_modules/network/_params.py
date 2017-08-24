@@ -531,7 +531,7 @@ register_cli_argument('network vnet subnet', 'network_security_group', validator
 register_cli_argument('network vnet subnet', 'route_table', help='Name or ID of a route table to associate with the subnet.')
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    c.register_cli_argument('network vnet subnet', 'private_access_services', nargs='+')
+    c.register_cli_argument('network vnet subnet', 'service_endpoints', nargs='+')
 
 lb_subresources = [
     {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},

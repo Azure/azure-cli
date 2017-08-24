@@ -39,9 +39,10 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, assign_identity=False, location=None, kind=None,
-                           encryption_services=None, tags=None, custom_domain=None, access_tier=None, https_only=None):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption = get_sdk(
+def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
+                           custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
+                           bypass='AzureServices', default_action='Allow', assign_identity=False):
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
@@ -50,6 +51,7 @@ def create_storage_account(resource_group_name, account_name, sku, assign_identi
         'AccessTier',
         'Identity',
         'Encryption',
+        'StorageNetworkAcls',
         mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
@@ -63,6 +65,10 @@ def create_storage_account(resource_group_name, account_name, sku, assign_identi
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
+
+    if NetworkRuleSet:
+        params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
+                                             virtual_network_rules=None)
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -80,8 +86,8 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
 
 def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
-                           access_tier=None, https_only=None, assign_identity=False):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption = get_sdk(
+                           access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
         'Sku',
@@ -89,6 +95,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         'AccessTier',
         'Identity',
         'Encryption',
+        'StorageNetworkAcls',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -114,6 +121,15 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
     )
     if assign_identity:
         params.identity = Identity()
+
+    if NetworkRuleSet and (bypass or default_action):
+        acl = instance.network_acls or NetworkRuleSet(
+            bypass=bypass, virtual_network_rules=None, ip_rules=None, default_action=default_action)
+        if bypass:
+            acl.bypass = bypass
+        if default_action:
+            acl.default_action = default_action
+        params.network_acls = acl
 
     return params
 
@@ -391,3 +407,49 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
     for s in services:
         results[s.name] = s.get_metrics(interval, timeout)
     return results
+
+
+def list_network_rules(client, resource_group_name, storage_account_name):
+    sa = client.get_properties(resource_group_name, storage_account_name)
+    rules = sa.network_acls
+    delattr(rules, 'bypass')
+    delattr(rules, 'default_action')
+    return rules
+
+
+def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet_name=None,  # pylint: disable=unused-argument
+                     ip_address=None):
+    sa = client.get_properties(resource_group_name, storage_account_name)
+    rules = sa.network_acls
+    if subnet:
+        from azure.cli.core.commands.arm import is_valid_resource_id
+        if not is_valid_resource_id(subnet):
+            raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
+        VirtualNetworkRule = get_sdk(ResourceType.MGMT_STORAGE, 'VirtualNetworkRule', mod='models')
+        if not rules.virtual_network_rules:
+            rules.virtual_network_rules = []
+        rules.virtual_network_rules.append(VirtualNetworkRule(subnet, action=action))
+    if ip_address:
+        IpRule = get_sdk(ResourceType.MGMT_STORAGE, 'IPRule', mod='models')
+        if not rules.ip_rules:
+            rules.ip_rules = []
+        rules.ip_rules.append(IpRule(ip_address, action=action))
+
+    StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
+    params = StorageAccountUpdateParameters(network_acls=rules)
+    return client.update(resource_group_name, storage_account_name, params)
+
+
+def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
+                        vnet_name=None):  # pylint: disable=unused-argument
+    sa = client.get_properties(resource_group_name, storage_account_name)
+    rules = sa.network_acls
+    if subnet:
+        rules.virtual_network_rules = [x for x in rules.virtual_network_rules
+                                       if not x.virtual_network_resource_id.endswith(subnet)]
+    if ip_address:
+        rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
+
+    StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
+    params = StorageAccountUpdateParameters(network_acls=rules)
+    return client.update(resource_group_name, storage_account_name, params)
