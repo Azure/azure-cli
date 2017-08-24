@@ -1742,7 +1742,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 app_gateway_subnet_address_prefix=None,
                 app_gateway_sku=DefaultStr('Standard_Large'), app_gateway_capacity=DefaultInt(10),
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
-                public_ip_address=None, public_ip_address_allocation=DefaultStr('dynamic'),
+                public_ip_address=None, public_ip_address_allocation=None,
                 public_ip_address_dns_name=None,
                 public_ip_per_vm=False, vm_domain_name=None, dns_servers=None, nsg=None,
                 os_caching=DefaultStr(CachingTypes.read_write.value), data_caching=None,
@@ -1823,6 +1823,13 @@ def create_vmss(vmss_name, resource_group_name, image,
                                 else '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                       public_ip_address))
 
+    def _get_public_ip_address_allocation(value, sku):
+        IPAllocationMethod = get_sdk(ResourceType.MGMT_NETWORK, 'IPAllocationMethod', mod='models')
+        if not value:
+            value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+                else IPAllocationMethod.dynamic.value
+        return value
+
     # Handle load balancer creation
     if load_balancer_type == 'new':
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
@@ -1832,11 +1839,10 @@ def create_vmss(vmss_name, resource_group_name, image,
             public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
             lb_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(public_ip_address, location,
-                                                                  tags,
-                                                                  public_ip_address_allocation,
-                                                                  public_ip_address_dns_name,
-                                                                  load_balancer_sku))
+            master_template.add_resource(build_public_ip_resource(
+                public_ip_address, location, tags,
+                _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
+                public_ip_address_dns_name, load_balancer_sku))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 
@@ -1862,11 +1868,10 @@ def create_vmss(vmss_name, resource_group_name, image,
             public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
             ag_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(public_ip_address, location,
-                                                                  tags,
-                                                                  public_ip_address_allocation,
-                                                                  public_ip_address_dns_name,
-                                                                  None))
+            master_template.add_resource(build_public_ip_resource(
+                public_ip_address, location, tags,
+                _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
+                None))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 

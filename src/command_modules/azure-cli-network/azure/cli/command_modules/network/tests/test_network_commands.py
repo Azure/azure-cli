@@ -34,8 +34,25 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
             'ip': 'pubip1'
         }
 
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip} --public-ip-address-allocation static'.format(**kwargs))
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip}'.format(**kwargs))
         self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs))
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkPublicIpWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku}'.format(**kwargs))
         self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
 
 

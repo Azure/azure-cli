@@ -1928,7 +1928,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
             'location': 'eastus2'
         }
 
-        self.cmd('vmss create -g {rg} -l {location} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --public-ip-address-allocation static --image UbuntuLTS'.format(**kwargs))
+        self.cmd('vmss create -g {rg} -l {location} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!'.format(**kwargs))
         self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs))
         self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
 

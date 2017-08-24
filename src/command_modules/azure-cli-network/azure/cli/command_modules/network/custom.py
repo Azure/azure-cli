@@ -856,7 +856,7 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
                          backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
                          private_ip_address=None, public_ip_address=None,
-                         public_ip_address_allocation=DefaultStr(IPAllocationMethod.dynamic.value),
+                         public_ip_address_allocation=None,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
@@ -871,6 +871,9 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
+    if not public_ip_address_allocation:
+        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+            else IPAllocationMethod.dynamic.value
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1406,9 +1409,12 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 # region Public IP commands
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=DefaultStr(IPAllocationMethod.dynamic.value), dns_name=None,
+                     allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None):
     client = _network_client_factory().public_ip_addresses
+    if not allocation_method:
+        allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+            else IPAllocationMethod.dynamic.value
 
     public_ip_args = {
         'location': location,
