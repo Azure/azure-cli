@@ -86,7 +86,7 @@ def sort_completions(completions_gen):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 
-    return sorted(list(completions_gen), key=_get_weight)
+    return sorted(completions_gen, key=_get_weight)
 
 
 # pylint: disable=too-many-instance-attributes
