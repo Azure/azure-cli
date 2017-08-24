@@ -4,8 +4,8 @@ Release History
 ===============
 unreleased
 +++++++++++++++
-* Allows passing in resource policy parameter definitions in 'policy definition create',
-and 'policy definition update'. Then allows passing in parameter values for 'policy assignment create'.
+* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'. 
+* Allows passing in parameter values for 'policy assignment create'.
 * In all cases params can be provided either via json or file.
 * Incremented API version.
 
