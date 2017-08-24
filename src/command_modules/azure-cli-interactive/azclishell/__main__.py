@@ -26,8 +26,9 @@ import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 
+
 def main(style=None):
-    if APPLICATION.session["interactive"]:
+    if APPLICATION.session["az_interactive_active"]:
         logger.warning("You're in the interactive shell already.\n")
         return
 
@@ -76,6 +77,6 @@ def main(style=None):
         styles=style_obj,
         user_feedback=ask_feedback
     )
-    shell_app.app.session["interactive"] = True
+    shell_app.app.session["az_interactive_active"] = True
     shell_app.run()
-    shell_app.app.session["interactive"] = False
+    shell_app.app.session["az_interactive_active"] = False
