@@ -18,8 +18,6 @@ from azure.cli.core.parser import AzCliCommandParser
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
-BLACKLISTED_COMPLETIONS = ['interactive']
-
 
 def initialize_command_table_attributes(completer):
     completer.cmdtab = FRESH_TABLE.command_table
@@ -90,8 +88,7 @@ def sort_completions(gen):
 
     completions = []
     for comp in gen:
-        if comp.text not in BLACKLISTED_COMPLETIONS:
-            completions.append(comp)
+        completions.append(comp)
     return sorted(completions, key=_get_weight)
 
 
