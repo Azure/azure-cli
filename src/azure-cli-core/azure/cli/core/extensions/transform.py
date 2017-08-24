@@ -16,7 +16,7 @@ def register(application):
 def _parse_id(strid):
     parsed = {}
     parts = re.split('/', strid)
-    if parts[3] != 'resourceGroups':
+    if not re.match('resourcegroups', parts[3], re.IGNORECASE):
         raise KeyError()
 
     parsed['resource-group'] = parts[4]
