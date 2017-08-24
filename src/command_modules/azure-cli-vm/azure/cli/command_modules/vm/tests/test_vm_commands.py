@@ -1929,8 +1929,13 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         }
 
         self.cmd('vmss create -g {rg} -l {location} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!'.format(**kwargs))
-        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs))
-        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
 
 
 class MSIScenarioTest(ScenarioTest):

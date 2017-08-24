@@ -35,8 +35,13 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         }
 
         self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip}'.format(**kwargs))
-        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs))
-        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
 
 
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
@@ -53,7 +58,10 @@ class NetworkPublicIpWithSku(ScenarioTest):
         }
 
         self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku}'.format(**kwargs))
-        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs))
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
 
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
