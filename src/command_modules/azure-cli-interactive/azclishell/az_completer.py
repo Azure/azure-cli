@@ -76,7 +76,7 @@ def gen_dyn_completion(comp, started_param, prefix, text):
         yield Completion(completion, -len(prefix))
 
 
-def sort_completions(gen):
+def sort_completions(completions_gen):
     """ sorts the completions """
 
     def _get_weight(val):
@@ -86,10 +86,7 @@ def sort_completions(gen):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 
-    completions = []
-    for comp in gen:
-        completions.append(comp)
-    return sorted(completions, key=_get_weight)
+    return sorted(list(completions_gen), key=_get_weight)
 
 
 # pylint: disable=too-many-instance-attributes
