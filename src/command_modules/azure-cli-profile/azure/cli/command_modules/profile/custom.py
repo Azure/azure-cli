@@ -94,8 +94,8 @@ def login(username=None, password=None, service_principal=None, tenant=None,
     import requests
 
     # quick argument usage check
-    if (any([username, password, service_principal, tenant, allow_no_subscriptions])
-            and any([msi, not getattr(msi_port, 'is_default', None)])):
+    if (any([username, password, service_principal, tenant, allow_no_subscriptions]) and
+            any([msi, not getattr(msi_port, 'is_default', None)])):
         raise CLIError("usage error: '--msi/--msi-port' are not applicable with other arguments")
 
     interactive = False

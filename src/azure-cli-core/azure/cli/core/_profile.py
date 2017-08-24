@@ -541,7 +541,7 @@ class Profile(object):
         while True:
             err = None
             try:
-                result = requests.post(request_uri, data=payload, headers={'Metadata':'true'})
+                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
                 logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
                 if result.status_code != 200:
                     err = result.text
