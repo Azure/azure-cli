@@ -103,13 +103,19 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         if use_subdomain is not None:
             domain.name = use_subdomain == 'true'
 
-    encryption = instance.encryption or Encryption()
+    encryption = instance.encryption
     if encryption_services:
-        encryption.services = encryption_services
-    if encryption_key_source:
-        encryption.key_source = encryption_key_source
-    if encryption_key_vault_properties:
-        encryption.key_vault_properties = encryption_key_vault_properties
+        if not encryption:
+            encryption = Encryption(services=encryption_services)
+        else:
+            encryption.services = encryption_services
+
+    if encryption_key_source or encryption_key_vault_properties:
+        if encryption:
+            encryption.key_source = encryption_key_source
+            encryption.key_vault_properties = encryption_key_vault_properties
+        else:
+            raise ValueError('--encryption-services is required when configure encryption key source')
 
     params = StorageAccountUpdateParameters(
         sku=Sku(sku) if sku is not None else instance.sku,
