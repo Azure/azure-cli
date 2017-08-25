@@ -32,7 +32,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-authorization==0.30.0',
-    'azure-graphrbac==0.30.0rc6',
+    'azure-graphrbac==0.31.0',
     'azure-keyvault==0.3.4',
     'pytz'
 ]
