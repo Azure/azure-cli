@@ -23,19 +23,18 @@ def cli_redis_import_method(client, resource_group_name, name, file_format, file
 
 
 def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
-    from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
+    from azure.mgmt.redis.models import RedisCreateParameters
     logger.warning('This command is getting deprecated. Please use "redis update" command')
 
     existing = client.get(resource_group_name, name)
     existing.redis_configuration.update(redis_configuration)
 
     # Due to swagger/mgmt SDK quirkiness, we have to manually copy over
-    # the resource retrieved to a create_or_update_parameters object
-    update_params = RedisCreateOrUpdateParameters(
+    # the resource retrieved to a create_parameters object
+    update_params = RedisCreateParameters(
         existing.location,
         existing.sku,
         existing.tags,
-        existing.redis_version,
         existing.redis_configuration,
         existing.enable_non_ssl_port,
         existing.tenant_settings,
@@ -43,11 +42,11 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
         existing.subnet_id,
         existing.static_ip,
     )
-    return client.create_or_update(resource_group_name, name, parameters=update_params)
+    return client.create(resource_group_name, name, parameters=update_params)
 
 
 def cli_redis_update(instance, sku=None, vm_size=None):
-    from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
+    from azure.mgmt.redis.models import RedisCreateParameters
     if sku is not None:
         instance.sku.name = sku
 
@@ -55,11 +54,10 @@ def cli_redis_update(instance, sku=None, vm_size=None):
         instance.sku.family = vm_size[0]
         instance.sku.capacity = vm_size[1:]
 
-    update_params = RedisCreateOrUpdateParameters(
+    update_params = RedisCreateParameters(
         instance.location,
         instance.sku,
         instance.tags,
-        instance.redis_version,
         instance.redis_configuration,
         instance.enable_non_ssl_port,
         instance.tenant_settings,
@@ -103,12 +101,11 @@ def cli_redis_create(client,
     :param subnet_id: The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1
     :param static_ip: Required when deploying a redis cache inside an existing Azure Virtual Network.
     """
-    from azure.mgmt.redis.models import RedisCreateOrUpdateParameters, Sku
-    params = RedisCreateOrUpdateParameters(
+    from azure.mgmt.redis.models import RedisCreateParameters, Sku
+    params = RedisCreateParameters(
         location,
         Sku(sku, vm_size[0], vm_size[1:]),
         tags,
-        None,  # Version is deprecated and ignored
         redis_configuration,
         enable_non_ssl_port,
         tenant_settings,
@@ -116,4 +113,4 @@ def cli_redis_create(client,
         subnet_id,
         static_ip)
 
-    return client.create_or_update(resource_group_name, name, params)
+    return client.create(resource_group_name, name, params)

@@ -264,7 +264,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 
     # pylint: disable=line-too-long
     msi_rp_api_version = '2015-08-31-PREVIEW'
-    authorization_api_version = get_mgmt_service_client(AuthorizationManagementClient).config.api_version
+    authorization_api_version = get_mgmt_service_client(AuthorizationManagementClient).api_version
     return {
         'name': name,
         'type': assignment_type,
