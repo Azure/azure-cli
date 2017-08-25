@@ -1498,8 +1498,9 @@ def sf_service_package_upload(client, node_name,
 def sfctl_info():
     """Information about new Service Fabric CLI module"""
 
-    info_string = ( 
+    info_string = (
         "The `az sf` module has been migrated to a new Service Fabric CLI. To install this module, run `pip install "
         "sfctl`. More information on the CLI can be found on Microsoft Docs: "
-        "https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cli" )
+        "https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cli"
+    )
     logger.warning(info_string)
