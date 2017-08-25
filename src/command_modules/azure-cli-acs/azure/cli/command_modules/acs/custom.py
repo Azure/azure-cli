@@ -399,7 +399,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                master_osdisk_size=0,
                master_count=1,
                master_vnet_subnet_id="",
-               master_first_consecutive_static_ip="",
+               master_first_consecutive_static_ip="10.240.255.5",
                master_storage_profile="",
                agent_profiles=None,
                agent_vm_size="Standard_D2_v2",
@@ -450,9 +450,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type master_storage_profile: str
     :param agent_profiles: AgentPoolProfiles used to describe agent pools
     :type agent_profiles: dict
-    :param agent_count: The number of agents for the cluster.  Note, for
-     DC/OS clusters you will also get 1 or 2 public agents in addition to
-     these selected masters.
+    :param agent_count: the default number of agents for the agent pools.
     :type agent_count: int
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
