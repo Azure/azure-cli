@@ -23,7 +23,7 @@ def cli_redis_import_method(client, resource_group_name, name, file_format, file
 
 
 def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
-    from azure.mgmt.redis.models import RedisCreateParameters
+    from azure.mgmt.redis.models import RedisUpdateParameters
     logger.warning('This command is getting deprecated. Please use "redis update" command')
 
     existing = client.get(resource_group_name, name)
@@ -31,22 +31,21 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
 
     # Due to swagger/mgmt SDK quirkiness, we have to manually copy over
     # the resource retrieved to a create_parameters object
-    update_params = RedisCreateParameters(
-        existing.location,
-        existing.sku,
-        existing.tags,
+    update_params = RedisUpdateParameters(
         existing.redis_configuration,
         existing.enable_non_ssl_port,
         existing.tenant_settings,
         existing.shard_count,
         existing.subnet_id,
         existing.static_ip,
+        existing.sku,
+        existing.tags
     )
     return client.update(resource_group_name, name, parameters=update_params)
 
 
 def cli_redis_update(instance, sku=None, vm_size=None):
-    from azure.mgmt.redis.models import RedisCreateParameters
+    from azure.mgmt.redis.models import RedisUpdateParameters
     if sku is not None:
         instance.sku.name = sku
 
@@ -54,16 +53,15 @@ def cli_redis_update(instance, sku=None, vm_size=None):
         instance.sku.family = vm_size[0]
         instance.sku.capacity = vm_size[1:]
 
-    update_params = RedisCreateParameters(
-        instance.location,
-        instance.sku,
-        instance.tags,
+    update_params = RedisUpdateParameters(
         instance.redis_configuration,
         instance.enable_non_ssl_port,
         instance.tenant_settings,
         instance.shard_count,
         instance.subnet_id,
         instance.static_ip,
+        instance.sku,
+        instance.tags
     )
 
     return update_params
