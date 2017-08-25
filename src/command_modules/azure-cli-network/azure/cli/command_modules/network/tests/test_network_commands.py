@@ -1308,54 +1308,95 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         # Expecting the vnet we deleted to not be listed after delete
         self.cmd('network vnet list --resource-group {}'.format(self.resource_group), NoneCheck())
 
-# TODO: Troubleshoot issue with VNET gateway and re-enable
-# class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
-#    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
-#    def test_network_vnet_peering(self, resource_group):
-#        rg = resource_group
-#        # create two vnets with non-overlapping prefixes
-#        self.cmd('network vnet create -g {} -n vnet1'.format(rg))
-#        self.cmd('network vnet create -g {} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24'.format(rg))
-#        # create supporting resources for gateway
-#        self.cmd('network public-ip create -g {} -n ip1'.format(rg))
-#        ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg)).get_output_in_json()
-#        vnet_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
-#        # create the gateway on vnet2
-#        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --vnet {}'.format(rg, ip_id, vnet_id))
+class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
-#        vnet1_id = self.cmd('network vnet show -g {} -n vnet1 --query id'.format(rg)).get_output_in_json()
-#        vnet2_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
-#        # set up gateway sharing from vnet1 to vnet2
-#        self.cmd('network vnet peering create -g {} -n peering2 --vnet-name vnet2 --remote-vnet-id {} --allow-gateway-transit'.format(rg, vnet1_id), checks=[
-#            JMESPathCheckV2('allowGatewayTransit', True),
-#            JMESPathCheckV2('remoteVirtualNetwork.id', vnet1_id),
-#            JMESPathCheckV2('peeringState', 'Initiated')
-#        ])
-#        self.cmd('network vnet peering create -g {} -n peering1 --vnet-name vnet1 --remote-vnet-id {} --use-remote-gateways --allow-forwarded-traffic'.format(rg, vnet2_id), checks=[
-#            JMESPathCheckV2('useRemoteGateways', True),
-#            JMESPathCheckV2('remoteVirtualNetwork.id', vnet2_id),
-#            JMESPathCheckV2('peeringState', 'Connected'),
-#            JMESPathCheckV2('allowVirtualNetworkAccess', False)
-#        ])
-#        self.cmd('network vnet peering show -g {} -n peering1 --vnet-name vnet1'.format(rg),
-#                 checks=JMESPathCheckV2('name', 'peering1'))
-#        self.cmd('network vnet peering list -g {} --vnet-name vnet2'.format(rg), checks=[
-#            JMESPathCheckV2('[0].name', 'peering2'),
-#            JMESPathCheckV2('length(@)', 1)
-#        ])
-#        with self.assertRaises(Exception):
-#            # TODO: Server-side regression results in this failing. Verify the error.  When this fails (i.e. no more error)
-#            # then this can be reverted.
-#            self.cmd('network vnet peering update -g {} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false'.format(rg), checks=[
-#                JMESPathCheckV2('useRemoteGateways', False),
-#                JMESPathCheckV2('allowForwardedTraffic', True)
-#            ])
-#        self.cmd('network vnet peering delete -g {} -n peering1 --vnet-name vnet1'.format(rg))
-#        self.cmd('network vnet peering list -g {} --vnet-name vnet1'.format(rg), checks=NoneCheck())
-#        # must delete the second peering and the gateway or the resource group delete will fail
-#        self.cmd('network vnet peering delete -g {} -n peering2 --vnet-name vnet2'.format(rg))
-#        self.cmd('network vnet-gateway delete -g {} -n gateway1'.format(rg))
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
+    def test_network_vnet_peering(self, resource_group):
+        rg = resource_group
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {} -n vnet1'.format(rg))
+        self.cmd('network vnet create -g {} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24'.format(rg))
+        # create supporting resources for gateway
+        self.cmd('network public-ip create -g {} -n ip1'.format(rg))
+        ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg)).get_output_in_json()
+        vnet_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
+        # create the gateway on vnet2
+        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --vnet {}'.format(rg, ip_id, vnet_id))
+
+        vnet1_id = self.cmd('network vnet show -g {} -n vnet1 --query id'.format(rg)).get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
+        # set up gateway sharing from vnet1 to vnet2
+        self.cmd('network vnet peering create -g {} -n peering2 --vnet-name vnet2 --remote-vnet-id {} --allow-gateway-transit'.format(rg, vnet1_id), checks=[
+            JMESPathCheckV2('allowGatewayTransit', True),
+            JMESPathCheckV2('remoteVirtualNetwork.id', vnet1_id),
+            JMESPathCheckV2('peeringState', 'Initiated')
+        ])
+        self.cmd('network vnet peering create -g {} -n peering1 --vnet-name vnet1 --remote-vnet-id {} --use-remote-gateways --allow-forwarded-traffic'.format(rg, vnet2_id), checks=[
+            JMESPathCheckV2('useRemoteGateways', True),
+            JMESPathCheckV2('remoteVirtualNetwork.id', vnet2_id),
+            JMESPathCheckV2('peeringState', 'Connected'),
+            JMESPathCheckV2('allowVirtualNetworkAccess', False)
+        ])
+        self.cmd('network vnet peering show -g {} -n peering1 --vnet-name vnet1'.format(rg),
+                 checks=JMESPathCheckV2('name', 'peering1'))
+        self.cmd('network vnet peering list -g {} --vnet-name vnet2'.format(rg), checks=[
+            JMESPathCheckV2('[0].name', 'peering2'),
+            JMESPathCheckV2('length(@)', 1)
+        ])
+        self.cmd('network vnet peering update -g {} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false'.format(rg), checks=[
+            JMESPathCheckV2('useRemoteGateways', False),
+            JMESPathCheckV2('allowForwardedTraffic', True)
+        ])
+        self.cmd('network vnet peering delete -g {} -n peering1 --vnet-name vnet1'.format(rg))
+        self.cmd('network vnet peering list -g {} --vnet-name vnet1'.format(rg), checks=NoneCheck())
+        # must delete the second peering and the gateway or the resource group delete will fail
+        self.cmd('network vnet peering delete -g {} -n peering2 --vnet-name vnet2'.format(rg))
+        self.cmd('network vnet-gateway delete -g {} -n gateway1'.format(rg))
+
+
+class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_connection_ipsec')
+    def test_network_vpn_connection_ipsec(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vnet1': 'vnet1',
+            'vnet_prefix1': '10.11.0.0/16',
+            'vnet_prefix2': '10.12.0.0/16',
+            'fe_sub1': 'FrontEnd',
+            'fe_sub_prefix1': '10.11.0.0/24',
+            'be_sub1': 'BackEnd',
+            'be_sub_prefix1': '10.12.0.0/24',
+            'gw_sub1': 'GatewaySubnet',
+            'gw_sub_prefix1': '10.12.255.0/27',
+            'gw1ip': 'pip1',
+            'gw1': 'gw1',
+            'gw1_sku': 'Standard',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1'
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1}'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {gw1ip}'.format(**kwargs))
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}'.format(**kwargs))
+        self.cmd('network local-gateway create -g {rg} -n {lgw1} --gateway-ip-address {lgw1ip} --local-address-prefixes {lgw1_prefix1} {lgw1_prefix2}'.format(**kwargs))
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3'.format(**kwargs))
+
+        self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048'.format(**kwargs))
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}'.format(**kwargs))
+        self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}'.format(**kwargs))
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}'.format(**kwargs))
+
+        # TODO: Continue with the VNET-to-VNET scenario... >_>
 
 
 class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
