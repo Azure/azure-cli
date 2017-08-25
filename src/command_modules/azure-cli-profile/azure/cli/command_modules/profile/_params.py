@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import register_cli_argument
+from azure.cli.core.commands.parameters import ignore_type
 from .custom import load_subscriptions
 
 
@@ -23,7 +24,6 @@ register_cli_argument('login', 'username', options_list=('--username', '-u'), he
 register_cli_argument('login', 'tenant', options_list=('--tenant', '-t'), help='The AAD tenant, must provide when using service principals.')
 register_cli_argument('login', 'allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
 
-from azure.cli.core.commands.parameters import ignore_type
 register_cli_argument('login', 'msi', ignore_type)
 register_cli_argument('login', 'msi_port', ignore_type)
 # register_cli_argument('login', 'msi', action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')
