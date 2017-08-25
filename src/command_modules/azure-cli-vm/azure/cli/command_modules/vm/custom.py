@@ -1368,8 +1368,9 @@ def get_vmss_instance_view(resource_group_name, vm_scale_set_name, instance_id=N
     client = _compute_client_factory()
     if instance_id:
         if instance_id == '*':
-            return client.virtual_machine_scale_set_vms.list(resource_group_name, vm_scale_set_name,
-                                                             select='instanceView', expand='instanceView')
+
+            return [x.instance_view for x in (client.virtual_machine_scale_set_vms.list(
+                resource_group_name, vm_scale_set_name, select='instanceView', expand='instanceView'))]
 
         return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name, vm_scale_set_name,
                                                                       instance_id)
