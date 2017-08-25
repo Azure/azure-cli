@@ -1979,6 +1979,7 @@ class MSIScenarioTest(ScenarioTest):
 
             self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
                 JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -1994,6 +1995,7 @@ class MSIScenarioTest(ScenarioTest):
 
             self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm3), checks=[
                 JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50343)
             ])
 
@@ -2022,6 +2024,7 @@ class MSIScenarioTest(ScenarioTest):
 
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -2034,6 +2037,7 @@ class MSIScenarioTest(ScenarioTest):
             ])
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 

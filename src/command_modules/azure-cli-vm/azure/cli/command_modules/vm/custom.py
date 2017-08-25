@@ -1971,7 +1971,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile']["extensions"].append({
             'name': 'MSIExtension',
             'properties': {
-                'publisher': 'Microsoft.ManagedIdentity.Edp',
+                'publisher': 'Microsoft.ManagedIdentity',
                 'type': 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux'),
                 "typeHandlerVersion": _MSI_EXTENSION_VERSION,
                 'autoUpgradeMinorVersion': True,
@@ -2107,7 +2107,7 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
     poller = set_extension(resource_group_name, vm_name,
-                           publisher='Microsoft.ManagedIdentity.Edp',
+                           publisher='Microsoft.ManagedIdentity',
                            vm_extension_name=ext_name,
                            version=_MSI_EXTENSION_VERSION,
                            settings={'port': port})
@@ -2140,7 +2140,7 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultSt
                                                 else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
     poller = set_vmss_extension(resource_group_name, vmss_name,
-                                publisher='Microsoft.ManagedIdentity.Edp',
+                                publisher='Microsoft.ManagedIdentity',
                                 extension_name=ext_name,
                                 version=_MSI_EXTENSION_VERSION,
                                 settings={'port': port})

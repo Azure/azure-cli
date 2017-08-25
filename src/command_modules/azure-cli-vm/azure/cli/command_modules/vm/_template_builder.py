@@ -289,7 +289,7 @@ def build_vm_msi_extension(vm_name, location, role_assignment_guid, port, is_lin
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
-            'publisher': "Microsoft.ManagedIdentity.Edp",
+            'publisher': "Microsoft.ManagedIdentity",
             'type': 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows'),
             'typeHandlerVersion': extension_version,
             'autoUpgradeMinorVersion': True,
