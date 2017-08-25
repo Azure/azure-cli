@@ -249,19 +249,19 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def init_if_in_msi_env(self, user):
-        _, subscription_id = Profile.split_msi_user_info(user)
-        if subscription_id is None:
-            return None
-        logger.info('MSI: environment was detected. Now trying to initialize a local account...')
-        tenant_id = Profile.get_msi_tenant_id(CLOUD.endpoints.resource_manager, subscription_id)
-        s = Profile._new_account()
-        s.id = '/subscriptions/' + subscription_id
-        s.tenant_id = tenant_id
-        s.display_name = _MSI_ACCOUNT_NAME
-        consolidated = Profile._normalize_properties(user, [s], False)
+    def find_subscriptions_in_vm_with_msi(self, msi_port):
+        import jwt
+        _, token, _ = Profile.get_msi_token(CLOUD.endpoints.active_directory_resource_id, msi_port)
+        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        tenant = decode['tid']
+
+        subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
+        consolidated = Profile._normalize_properties(msi_port, subscriptions, is_service_principal=False)
+        for s in consolidated:
+            s[_SUBSCRIPTION_NAME] = _MSI_ACCOUNT_NAME  # use a special name to trigger a special token acquisition
         self._set_subscriptions(consolidated)
-        # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
     def _set_subscriptions(self, new_subscriptions, merge=True):
@@ -384,8 +384,7 @@ class Profile(object):
 
         def _retrieve_token():
             if account[_SUBSCRIPTION_NAME] == _MSI_ACCOUNT_NAME:
-                port, _ = Profile.split_msi_user_info(username_or_sp_id)
-                return Profile.get_msi_token(resource, CLOUD.endpoints.active_directory, account[_TENANT_ID], port)
+                return Profile.get_msi_token(resource, account[_USER_ENTITY][_USER_NAME])
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -529,40 +528,11 @@ class Profile(object):
         return installation_id
 
     @staticmethod
-    def split_msi_user_info(user):
-        import uuid
-        parts = user.split('@')
-        if len(parts) == 2:
-            try:
-                uuid.UUID(parts[0])  # valid subscription id?
-                int(parts[1])  # valid port?
-                return parts[1], parts[0]
-            except ValueError:
-                pass
-        return None, None
-
-    @staticmethod
-    def get_msi_tenant_id(arm_endpoint, subscription_id):
-        import re
-        import requests
-        url = '{}/subscriptions/{}?api-version=2014-04-01'.format(arm_endpoint.rstrip('/'), subscription_id)
-        logger.debug('MSI: Retrieving tenant id by invoking GET from %s', url)
-        result = requests.get(url)
-        if result.status_code != 401:
-            raise CLIError('Failed to retrieve the tenant id of subscription {}'.format(subscription_id))
-        exp = r'.+authorization_uri="(.*?)".+'
-        r = re.match(exp, result.headers['www-authenticate'])
-        tenant_id = r.group(1).split('/')[-1]
-        logger.debug('MSI: Got tenant id: %s', tenant_id)
-        return tenant_id
-
-    @staticmethod
-    def get_msi_token(resource, aad_endpoint, tenant_id, port):
+    def get_msi_token(resource, port):
         import requests
         import time
         request_uri = 'http://localhost:{}/oauth2/token'.format(port)
         payload = {
-            'authority': '{}/{}'.format(aad_endpoint, tenant_id),
             'resource': resource
         }
 
@@ -571,7 +541,7 @@ class Profile(object):
         while True:
             err = None
             try:
-                result = requests.post(request_uri, data=payload)
+                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
                 logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
                 if result.status_code != 200:
                     err = result.text
@@ -650,7 +620,7 @@ class SubscriptionFinder(object):
         self.tenants = [tenant]
         return result
 
-    #  only occur inside cloud console
+    #  only occur inside cloud console or VM with identity
     def find_from_raw_token(self, tenant, token):
         # decode the token, so we know the tenant
         result = self._find_using_specific_tenant(tenant, token)
