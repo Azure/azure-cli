@@ -11,7 +11,6 @@ import subprocess
 import sys
 
 ALLOWED_ERRORS = [
-    "has requirement azure-common[autorest]==1.1.4, but you have azure-common 1.1.",
 ]
 
 def verify_dependencies():
