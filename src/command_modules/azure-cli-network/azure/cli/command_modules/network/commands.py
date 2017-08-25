@@ -357,10 +357,17 @@ sr_path = 'azure.mgmt.network.operations.security_rules_operations#SecurityRules
 cli_command(__name__, 'network nsg rule delete', sr_path + 'delete', cf_security_rules)
 cli_command(__name__, 'network nsg rule show', sr_path + 'get', cf_security_rules, exception_handler=empty_on_404)
 cli_command(__name__, 'network nsg rule list', sr_path + 'list', cf_security_rules)
-cli_command(__name__, 'network nsg rule create', custom_path + 'create_nsg_rule')
-cli_generic_update_command(__name__, 'network nsg rule update',
-                           sr_path + 'get', sr_path + 'create_or_update', cf_security_rules,
-                           setter_arg_name='security_rule_parameters', custom_function_op=custom_path + 'update_nsg_rule')
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    cli_command(__name__, 'network nsg rule create', custom_path + 'create_nsg_rule_2017_06_01')
+    cli_generic_update_command(__name__, 'network nsg rule update',
+                               sr_path + 'get', sr_path + 'create_or_update', cf_security_rules,
+                               setter_arg_name='security_rule_parameters', custom_function_op=custom_path + 'update_nsg_rule_2017_06_01')
+else:
+    cli_command(__name__, 'network nsg rule create', custom_path + 'create_nsg_rule_2017_03_01')
+    cli_generic_update_command(__name__, 'network nsg rule update',
+                               sr_path + 'get', sr_path + 'create_or_update', cf_security_rules,
+                               setter_arg_name='security_rule_parameters', custom_function_op=custom_path + 'update_nsg_rule_2017_03_01')
 
 # SubnetsOperations
 subnet_path = 'azure.mgmt.network.operations.subnets_operations#SubnetsOperations.'

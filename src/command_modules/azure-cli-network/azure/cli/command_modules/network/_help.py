@@ -1361,10 +1361,10 @@ helps['network nsg rule create'] = """
             --nsg-name MyNsg
             -n MyNsgRule
             --priority 4096
-            --source-address-prefix 208.130.28/24
-            --source-port-range 80
-            --destination-address-prefix *
-            --destination-port-range 80
+            --source-address-prefixes 208.130.28/24
+            --source-port-ranges 80
+            --destination-address-prefixes *
+            --destination-port-ranges 80
             --access Deny
             --protocol Tcp
             --description "Deny from specific IP address range on 80."
