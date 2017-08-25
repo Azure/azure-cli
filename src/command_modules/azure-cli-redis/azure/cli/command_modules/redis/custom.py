@@ -42,7 +42,7 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
         existing.subnet_id,
         existing.static_ip,
     )
-    return client.create(resource_group_name, name, parameters=update_params)
+    return client.update(resource_group_name, name, parameters=update_params)
 
 
 def cli_redis_update(instance, sku=None, vm_size=None):
