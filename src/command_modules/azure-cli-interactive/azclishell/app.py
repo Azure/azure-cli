@@ -484,8 +484,8 @@ class Shell(object):
                 print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
-            elif validate_contains_query(args_no_quotes, SELECT_SYMBOL['query']) and self.last and self.last.result:
-                continue_flag = self.handle_jmespath_query(args_no_quotes, continue_flag)
+            elif validate_contains_query(args, SELECT_SYMBOL['query']) and self.last and self.last.result:
+                continue_flag = self.handle_jmespath_query(args, continue_flag)
                 telemetry.track_ssg('query', '')
 
             elif args[0] == '--version' or args[0] == '-v':
