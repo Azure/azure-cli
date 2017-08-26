@@ -1361,29 +1361,118 @@ def create_nsg(resource_group_name, network_security_group_name, location=None, 
     return client.create_or_update(resource_group_name, network_security_group_name, nsg)
 
 
-def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
-                    priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
-                    access=SecurityRuleAccess.allow.value,
-                    direction=SecurityRuleDirection.inbound.value,
-                    source_port_range='*', source_address_prefix='*',
-                    destination_port_range=80, destination_address_prefix='*'):
+def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name):
+
+    if not val:
+        return
+    if not isinstance(val, list):
+        val = [val]
+    if len(val) > 1:
+        kwargs[plural_name] = val
+        kwargs[singular_name] = None
+    else:
+        kwargs[singular_name] = val[0]
+        kwargs[plural_name] = None
+
+
+def create_nsg_rule_2017_06_01(resource_group_name, network_security_group_name, security_rule_name,
+                               priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
+                               access=SecurityRuleAccess.allow.value,
+                               direction=SecurityRuleDirection.inbound.value,
+                               source_port_ranges='*', source_address_prefixes='*',
+                               destination_port_ranges=80, destination_address_prefixes='*'):
+    kwargs = {
+        'protocol': protocol,
+        'direction': direction,
+        'description': description,
+        'priority': priority,
+        'access': access,
+        'name': security_rule_name
+    }
+    _create_singular_or_plural_property(kwargs, source_address_prefixes,
+                                        'source_address_prefix', 'source_address_prefixes')
+    _create_singular_or_plural_property(kwargs, destination_address_prefixes,
+                                        'destination_address_prefix', 'destination_address_prefixes')
+    _create_singular_or_plural_property(kwargs, source_port_ranges,
+                                        'source_port_range', 'source_port_ranges')
+    _create_singular_or_plural_property(kwargs, destination_port_ranges,
+                                        'destination_port_range', 'destination_port_ranges')
+
+    # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
+    kwargs['source_address_prefix'] = kwargs['source_address_prefix'] or ''
+    kwargs['destination_address_prefix'] = kwargs['destination_address_prefix'] or ''
+
+    settings = SecurityRule(**kwargs)
+    ncf = _network_client_factory()
+    return ncf.security_rules.create_or_update(
+        resource_group_name, network_security_group_name, security_rule_name, settings)
+
+
+def create_nsg_rule_2017_03_01(resource_group_name, network_security_group_name, security_rule_name,
+                               priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
+                               access=SecurityRuleAccess.allow.value,
+                               direction=SecurityRuleDirection.inbound.value,
+                               source_port_range='*', source_address_prefix='*',
+                               destination_port_range=80, destination_address_prefix='*'):
     settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
                             destination_address_prefix=destination_address_prefix, access=access,
                             direction=direction,
                             description=description, source_port_range=source_port_range,
                             destination_port_range=destination_port_range, priority=priority,
                             name=security_rule_name)
+
     ncf = _network_client_factory()
     return ncf.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
 
 
-create_nsg_rule.__doc__ = SecurityRule.__doc__
+create_nsg_rule_2017_03_01.__doc__ = SecurityRule.__doc__
+create_nsg_rule_2017_06_01.__doc__ = SecurityRule.__doc__
 
 
-def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
-                    destination_address_prefix=None, access=None, direction=None, description=None,
-                    source_port_range=None, destination_port_range=None, priority=None):
+def _update_singular_or_plural_property(instance, val, singular_name, plural_name):
+
+    if val is None:
+        return
+    if not isinstance(val, list):
+        val = [val]
+    if len(val) > 1:
+        setattr(instance, plural_name, val)
+        setattr(instance, singular_name, None)
+    else:
+        setattr(instance, plural_name, None)
+        setattr(instance, singular_name, val[0])
+
+
+def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=None,
+                               destination_address_prefixes=None, access=None, direction=None, description=None,
+                               source_port_ranges=None, destination_port_ranges=None, priority=None):
+    # No client validation as server side returns pretty good errors
+    instance.protocol = protocol if protocol is not None else instance.protocol
+    instance.access = access if access is not None else instance.access
+    instance.direction = direction if direction is not None else instance.direction
+    instance.description = description if description is not None else instance.description
+    instance.priority = priority if priority is not None else instance.priority
+
+    _update_singular_or_plural_property(instance, source_address_prefixes,
+                                        'source_address_prefix', 'source_address_prefixes')
+    _update_singular_or_plural_property(instance, destination_address_prefixes,
+                                        'destination_address_prefix', 'destination_address_prefixes')
+    _update_singular_or_plural_property(instance, source_port_ranges,
+                                        'source_port_range', 'source_port_ranges')
+    _update_singular_or_plural_property(instance, destination_port_ranges,
+                                        'destination_port_range', 'destination_port_ranges')
+
+    # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
+    instance.source_address_prefix = instance.source_address_prefix or ''
+    instance.destination_address_prefix = instance.destination_address_prefix or ''
+
+    return instance
+
+
+def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=None,
+                               destination_address_prefix=None, access=None, direction=None, description=None,
+                               source_port_range=None, destination_port_range=None, priority=None):
     # No client validation as server side returns pretty good errors
     instance.protocol = protocol if protocol is not None else instance.protocol
     instance.source_address_prefix = (source_address_prefix if source_address_prefix is not None
@@ -1401,7 +1490,8 @@ def update_nsg_rule(instance, protocol=None, source_address_prefix=None,
     return instance
 
 
-update_nsg_rule.__doc__ = SecurityRule.__doc__
+update_nsg_rule_2017_06_01.__doc__ = SecurityRule.__doc__
+update_nsg_rule_2017_03_01.__doc__ = SecurityRule.__doc__
 
 
 # endregion
@@ -1584,9 +1674,6 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
             instance.service_endpoints.append(ServiceEndpoint(service=service))
 
     return instance
-
-
-update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 
 # endregion
