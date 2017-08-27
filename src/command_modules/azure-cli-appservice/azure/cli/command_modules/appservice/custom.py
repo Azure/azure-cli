@@ -121,7 +121,8 @@ def list_runtimes(linux=False):
         logger.warning('You are viewing an offline list of runtimes. For up to date list, '
                        'check out https://aka.ms/linux-stacks')
         return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9', 'node|6.10',
-                'php|5.6', 'php|7.0', 'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
+                'node|6.11', 'node|8.0', 'node|8.1', 'php|5.6', 'php|7.0',
+                'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
 
     runtime_helper = _StackRuntimeHelper(client)
     return [s['displayName'] for s in runtime_helper.stacks]
@@ -812,7 +813,7 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
+    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUM'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
@@ -950,8 +951,8 @@ def _open_page_in_browser(url):
 # TODO: expose new blob suport
 def config_diagnostics(resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
-                       detailed_error_messages=None, failed_request_tracing=None,
-                       slot=None):
+                       docker_container_logging=None, detailed_error_messages=None,
+                       failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
                                        SiteLogsConfig, HttpLogsConfig,
                                        FileSystemHttpLogsConfig, EnabledConfig)
@@ -970,8 +971,8 @@ def config_diagnostics(resource_group_name, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    if web_server_logging is not None:
-        enabled = web_server_logging
+    enabled = web_server_logging or docker_container_logging
+    if enabled is not None:
         # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
         fs_server_log = FileSystemHttpLogsConfig(100, 3, enabled)
         http_logs = HttpLogsConfig(fs_server_log)

@@ -40,8 +40,8 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pyli
 # pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
-                               **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
+sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), P1V2(Premium V2 small) etc',
+                               **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']))
 webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('--name', '-n'), metavar='NAME',
                                        completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                        help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
@@ -134,8 +134,8 @@ register_cli_argument('webapp log config', 'application_logging', help='configur
 register_cli_argument('webapp log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
-server_log_switch_options = ['off', 'storage', 'filesystem']
-register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
+register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(['off', 'storage', 'filesystem']))
+register_cli_argument('webapp log config', 'docker_container_logging', help='configure gathering STDOUT and STDERR output from container', **enum_choice_list(['off', 'filesystem']))
 
 register_cli_argument('webapp log tail', 'provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
 register_cli_argument('webapp log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
