@@ -1320,14 +1320,31 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
+    # Create two vnets using cloudnet's cli cmdlets
+    def get_network_subnet_endpoint_service(self, resource_group, vnet, subnet):
+
+        self.cmd('network vnet create -g {rg} -n {vnet}'.format(resource_group, vnet))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(resource_group, vnet, subnet),
+                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        return self.cmd('network vnet subnet show ')
+
+    def test_network_subnet_endpoint_service(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'vnet': 'vnet2',
+            'subnet': 'subnet1'
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
     @SqlServerPreparer()
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         rg = resource_group
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
-        # Create two vnets using cloudnet's cli cmdlets
-        vnet_id_1 = ''
-        vnet_id_2 = ''
 
         # test sql server vnet-rule create
         self.cmd('sql server vnet-rule create --name {} -g {} --server {} --vnet-subnet-id {}'

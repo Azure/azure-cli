@@ -19,7 +19,7 @@ from azure.cli.core.commands import (register_cli_argument, register_extra_cli_a
 
 from azure.common import AzureMissingResourceHttpError
 
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
 from ._factory import get_storage_data_service_client
 from ._validators import \
@@ -30,12 +30,12 @@ from ._validators import \
      validate_custom_domain, validate_public_access,
      process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
-     get_content_setting_validator, validate_encryption, validate_accept,
-     validate_key, storage_account_key_options,
+     get_content_setting_validator, validate_encryption_services, validate_accept,
+     validate_key, storage_account_key_options, validate_encryption_source,
      process_file_download_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri,
-     get_char_options_validator)
+     get_char_options_validator, validate_bypass, validate_subnet, page_blob_tier_validator, blob_tier_validator)
 
 
 DeleteSnapshot, BlockBlobService, \
@@ -112,7 +112,6 @@ class CommandContext(object):
         max_api = kwargs.pop('max_api', None)
         min_api = kwargs.pop('min_api', None)
         if resource_type and (max_api or min_api):
-            from azure.cli.core.profiles import supported_api_version
             return supported_api_version(resource_type, min_api=min_api, max_api=max_api)
         return True
 
@@ -286,7 +285,6 @@ register_cli_argument('storage', 'if_match', arg_group='Pre-condition')
 register_cli_argument('storage', 'if_none_match', arg_group='Pre-condition')
 
 register_cli_argument('storage', 'container_name', container_name_type)
-
 for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
     register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
 
@@ -300,21 +298,35 @@ for item in ['blob', 'file', 'queue', 'table']:
 def register_common_storage_account_options(context):
     context.reg_arg('https_only', help='Allows https traffic only to storage service.', **three_state_flag())
     context.reg_arg('sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
-    context.reg_arg('assign_identity', help='Generate and assign a new Storage Account Identity for this storage '
-                                            'account for use with key management services like Azure KeyVault.',
-                    action='store_true', resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     context.reg_arg('access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for '
                                         'StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. It is '
                                         'required for StandardBlob accounts during creation',
                     **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
 
-    encryption_services_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
-    if encryption_services_model:
-        encryption_choices = list(encryption_services_model._attribute_map.keys())  # pylint: disable=protected-access
-        context.reg_arg('encryption', nargs='+', help='Specifies which service(s) to encrypt.',
-                        validator=validate_encryption,
-                        resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01',
-                        **enum_choice_list(encryption_choices))
+    # after API 2016-12-01
+    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
+        encryption_services_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
+        if encryption_services_model:
+
+            encryption_choices = []
+            for attribute in encryption_services_model._attribute_map.keys():  # pylint: disable=protected-access
+                if not encryption_services_model._validation.get(attribute, {}).get('readonly'):  # pylint: disable=protected-access
+                    # skip readonly attributes, which are not for input
+                    encryption_choices.append(attribute)
+
+            context.reg_arg('encryption_services', nargs='+', help='Specifies which service(s) to encrypt.',
+                            validator=validate_encryption_services, **enum_choice_list(encryption_choices))
+
+    # after API 2017-06-01
+    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01'):
+        context.reg_arg('assign_identity', action='store_true',
+                        help='Generate and assign a new Storage Account Identity for this storage account for use with '
+                             'key management services like Azure KeyVault.')
+
+        # the options of encryption key sources are hardcoded since there isn't a enum represents them in the SDK.
+        context.reg_arg('encryption_key_source', help='The encryption keySource (provider). Default: Microsoft.Storage',
+                        validator=validate_encryption_source,
+                        **enum_choice_list(['Microsoft.Storage', 'Microsoft.Keyvault']))
 
 
 with CommandContext('storage account create') as c:
@@ -338,6 +350,24 @@ with CommandContext('storage account update') as c:
               **enum_choice_list(['true', 'false']))
     c.reg_arg('tags', tags_type, default=None)
 
+    # after API 2017-06-01
+    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01'):
+        c.reg_arg('encryption_key_vault_properties', ignore_type)
+
+        with c.arg_group('Customer managed key') as g:
+            g.reg_extra_arg('encryption_key_name', help='The name of the KeyVault key.')
+            g.reg_extra_arg('encryption_key_vault', help='The Uri of the KeyVault')
+            g.reg_extra_arg('encryption_key_version', help='The version of the KeyVault key')
+
+with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
+    for item in ['create', 'update']:
+        register_cli_argument('storage account {}'.format(item), 'bypass', nargs='+', validator=validate_bypass, arg_group='Network Rule', help='Bypass traffic for space-separated uses.', **model_choice_list(ResourceType.MGMT_STORAGE, 'Bypass'))
+        register_cli_argument('storage account {}'.format(item), 'default_action', arg_group='Network Rule', help='Default action to apply when no rule matches.', **model_choice_list(ResourceType.MGMT_STORAGE, 'DefaultAction'))
+
+    register_cli_argument('storage account network-rule', 'storage_account_name', account_name_type)
+    register_cli_argument('storage account network-rule', 'ip_address', help='IPv4 address or CIDR range.')
+    register_cli_argument('storage account network-rule', 'subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+    register_cli_argument('storage account network-rule', 'vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
@@ -390,10 +420,32 @@ for item in ['download', 'upload']:
 for item in ['update', 'upload', 'upload-batch']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
-register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
-register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
-with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
-    c.register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+with CommandContext('storage blob upload') as c:
+    c.reg_arg('blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.",
+              options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
+    c.reg_arg('maxsize_condition', help='The max length in bytes permitted for an append blob.')
+    c.reg_arg('validate_content',
+              help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the '
+                   'service when the chunk has arrived.',
+              resource_type=ResourceType.DATA_STORAGE,
+              min_api='2016-05-31')
+
+    from azure.cli.command_modules.storage.util import get_blob_tier_names
+    c.reg_arg('tier',
+              help='A page blob tier value to set the blob to. The tier correlates to the size of the blob and number '
+                   'of allowed IOPS. This is only applicable to page blobs on premium storage accounts.',
+              resource_type=ResourceType.DATA_STORAGE,
+              min_api='2017-04-17',
+              validator=page_blob_tier_validator,
+              **enum_choice_list(get_blob_tier_names('PremiumPageBlobTier')))
+
+with CommandContext('storage blob set-tier') as c:
+    c.reg_arg('blob_type', help="The blob's type", options_list=('--type', '-t'), **enum_choice_list(['block', 'page']))
+    c.reg_arg('tier', help='The tier value to set the blob to.', validator=blob_tier_validator)
+    c.reg_arg('timeout', help='The timeout parameter is expressed in seconds. This method may make multiple calls to '
+                              'the Azure service and the timeout will apply to each call individually.',
+              type=int)
+
 
 # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
 register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)

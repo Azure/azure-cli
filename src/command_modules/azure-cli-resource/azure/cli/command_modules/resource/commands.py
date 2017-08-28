@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 from collections import OrderedDict
 
+from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
@@ -67,10 +68,12 @@ cli_command(__name__, 'provider register', 'azure.cli.command_modules.resource.c
 cli_command(__name__, 'provider unregister', 'azure.cli.command_modules.resource.custom#unregister_provider')
 cli_command(__name__, 'provider operation list', 'azure.cli.command_modules.resource.custom#list_provider_operations')
 cli_command(__name__, 'provider operation show', 'azure.cli.command_modules.resource.custom#show_provider_operations')
-# Resource feature commands
-cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
-cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
-cli_command(__name__, 'feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
+
+if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
+    # Resource feature commands
+    cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
+    cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
+    cli_command(__name__, 'feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
 
 # Tag commands
 cli_command(__name__, 'tag list', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.list', cf_tags)
@@ -88,7 +91,10 @@ def transform_deployments_list(result):
 
 cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception)
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
-cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
+if supported_api_version(resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
+    cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
+else:
+    cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
 cli_command(__name__, 'group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments, exception_handler=empty_on_404)
 cli_command(__name__, 'group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
 cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template', table_transformer=deployment_validate_table_format)
@@ -130,12 +136,13 @@ cli_command(__name__, 'resource link show', 'azure.mgmt.resource.links.operation
 cli_command(__name__, 'resource link list', 'azure.cli.command_modules.resource.custom#list_resource_links')
 cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resource.custom#update_resource_link')
 
-cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_appliance')
-cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#AppliancesOperations.delete', cf_resource_managedapplications)
-cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
-cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_appliances')
+if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
+    cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_appliance')
+    cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#AppliancesOperations.delete', cf_resource_managedapplications)
+    cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
+    cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_appliances')
 
-cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
-cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedappdefinitions)
-cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
-cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)
+    cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
+    cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedappdefinitions)
+    cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
+    cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)

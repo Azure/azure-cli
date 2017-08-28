@@ -24,7 +24,8 @@ class TestResourceGroupTransform(unittest.TestCase):
     def tearDown(self):
         self.io.close()
 
-    CORRECT_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"  # pylint: disable=line-too-long
+    # CORRECT_ID should match 'resourceGroups' in the path in a case insensitive way
+    CORRECT_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/resOurcegroUps/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"  # pylint: disable=line-too-long
     NON_RG_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/somethingElse/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"  # pylint: disable=line-too-long
     BOGUS_ID = "|completely-bogus-id|"
     DICT_ID = {'value': "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"}  # pylint: disable=line-too-long

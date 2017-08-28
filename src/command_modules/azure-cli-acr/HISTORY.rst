@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.0.11 (2017-08-28)
++++++++++++++++++++
+* minor fixes
+
+2.0.10 (2017-08-11)
++++++++++++++++++++
+* minor fixes
+
 2.0.9 (2017-07-27)
 ++++++++++++++++++
 * Add show-usage command for managed registries.

@@ -518,20 +518,24 @@ helps['network application-gateway waf-config set'] = """
         - name: --rule-set-type
           short-summary: Rule set type.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
         - name: --rule-set-version
           short-summary: Rule set version.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rule-groups
           short-summary: Space separated list of rule groups to disable. This disables the entire group.
-            To disable specifc rules, use '--disabled-rule-ids'.
+            To disable specifc rules, use '--disabled-rules'.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rules
           short-summary: Space separated list of rule IDs to disable.
           populator-commands:
-          - az application-gateway waf-config list-rule-sets
+          - az network application-gateway waf-config list-rule-sets
+    examples:
+        - name: Disable two rules for validation of request body parsing and SQL Injection
+          text: >
+            az network application-gateway waf-config set -g MyResourceGroup -n MyGatewayName --enabled true --rule-set-type OWASP --rule-set-version 3.0 --disabled-rules 920130 920140 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI
 """
 
 helps['network application-gateway waf-config show'] = """
@@ -1357,10 +1361,10 @@ helps['network nsg rule create'] = """
             --nsg-name MyNsg
             -n MyNsgRule
             --priority 4096
-            --source-address-prefix 208.130.28/24
-            --source-port-range 80
-            --destination-address-prefix *
-            --destination-port-range 80
+            --source-address-prefixes 208.130.28/24
+            --source-port-ranges 80
+            --destination-address-prefixes *
+            --destination-port-ranges 80
             --access Deny
             --protocol Tcp
             --description "Deny from specific IP address range on 80."
@@ -1748,10 +1752,10 @@ helps['network vnet subnet create'] = """
     type: command
     short-summary: Create a subnet and associate an existing NSG and route table.
     parameters:
-        - name: --private-access-services
-          short-summary: Space separated list of services for which to allow private access to this subnet.
+        - name: --service-endpoints
+          short-summary: Space separated list of services for which to allow tunneling to this subnet.
           populator-commands:
-            - az network list-private-access-services
+            - az network vnet list-endpoint-services
     examples:
         - name: Create new subnet attached to an NSG with a custom route table.
           text: >
@@ -1778,10 +1782,10 @@ helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
     parameters:
-        - name: --private-access-services
-          short-summary: Space separated list of services for which to allow private access to this subnet.
+        - name: --service-endpoints
+          short-summary: Space separated list of services for which to allow tunneling to this subnet.
           populator-commands:
-            - az network list-private-access-services
+            - az network vnet list-endpoint-services
 """
 # endregion
 
@@ -2155,7 +2159,7 @@ helps['network watcher flow-log show'] = """
 
 # endregion
 
-helps['network list-private-access-services'] = """
+helps['network vnet list-service-endpoints'] = """
     type: command
-    short-summary: List which services support private access for a given region.
+    short-summary: List which services support VNET service tunneling for a given region.
 """

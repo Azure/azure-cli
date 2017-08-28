@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import os
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
@@ -23,12 +24,9 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        import time
         webapp_name = 'webapp-e2e'
         plan = 'webapp-e2e-plan'
         self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
-        time.sleep(60)
-
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -36,17 +34,10 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].sku.name', 'B1')
         ])
         self.cmd('appservice plan list', checks=[
-            JMESPathCheck("length([?name=='{}'])".format(plan), 1)
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, self.resource_group), 1)
         ])
         self.cmd('appservice plan show -g {} -n {}'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan)
-        ])
-        time.sleep(60)
-        # scale up
-        self.cmd('appservice plan update -g {} -n {} --sku S1'.format(self.resource_group, plan), checks=[
-            JMESPathCheck('name', plan),
-            JMESPathCheck('sku.tier', 'Standard'),
-            JMESPathCheck('sku.name', 'S1')
         ])
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
             JMESPathCheck('state', 'Running'),
@@ -71,6 +62,10 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
                     '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
+        self.cmd('webapp log show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('detailedErrorMessages.enabled', True),
+            JMESPathCheck('failedRequestsTracing.enabled', True)
+        ])
         self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorLoggingEnabled', True),
             JMESPathCheck('httpLoggingEnabled', True),
@@ -90,11 +85,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         self.cmd('webapp show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name)
-        ])
-        self.cmd('webapp delete -g {} -n {}'.format(self.resource_group, webapp_name))
-        # test empty service plan should be automatically deleted.
-        self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
-            JMESPathCheck('length(@)', 0)
         ])
 
 
@@ -134,6 +124,50 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+
+    @ResourceGroupPreparer(location='westus')
+    def test_linux_webapp_quick_create_cd(self, resource_group):
+        webapp_name = 'webapp-quick-linux-cd'
+        plan = 'plan-quick-linux-cd'
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
+        import requests
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+        # verify the web page
+        self.assertTrue('Hello world' in str(r.content))
+
+
+class AppServicePlanSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_retain_plan(self, resource_group):
+        webapp_name = 'webapp-quick'
+        plan = 'plan-quick'
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp delete -g {} -n {} --keep-dns-registration --keep-empty-plan --keep-metrics'.format(resource_group, webapp_name))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('[0].name', plan)
+        ])
+
+    @ResourceGroupPreparer()
+    def test_auto_delete_plan(self, resource_group):
+        webapp_name = 'webapp-delete2'
+        plan = 'webapp-delete-plan2'
+        self.cmd('appservice plan create -g {} -n {} -l westus'.format(resource_group, plan))
+
+        self.cmd('appservice plan update -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
+             JMESPathCheckV2('name', plan),
+             JMESPathCheckV2('sku.tier', 'Standard'),
+             JMESPathCheckV2('sku.name', 'S1')
+        ])
+
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+
+        self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
+        # test empty service plan should be automatically deleted.
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length(@)', 0)
+        ])
 
 
 class WebappConfigureTest(ResourceGroupVCRTestBase):
@@ -178,9 +212,12 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         # site appsettings testing
         # update
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('s1', 'foo'),
-            JMESPathCheck('s2', 'bar'),
-            JMESPathCheck('s3', 'bar2')
+            JMESPathCheck("length([?name=='s1'])", 1),
+            JMESPathCheck("length([?name=='s2'])", 1),
+            JMESPathCheck("length([?name=='s3'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1),
+            JMESPathCheck("length([?value=='bar'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1)
         ])
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
@@ -190,7 +227,9 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.assertEqual(s2['value'], 'bar')
         self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
         # delete
-        self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name))
+        self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name), checks=[
+            JMESPathCheck("length([?name=='s3'])", 1)
+        ])
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
         self.assertEqual(set([x['name'] for x in result]), set(['s3', 'WEBSITE_NODE_DEFAULT_VERSION']))
         # hostnames
@@ -293,8 +332,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
         runtime = 'node|6.4'
-        plan = 'webapp-linux-plan'
-        webapp = 'webapp-linux1'
+        plan = 'webapp-linux-plan2'
+        webapp = 'webapp-linux2'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
@@ -309,6 +348,12 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
             JMESPathCheckV2('appCommandLine', 'process.json')
         ])
+
+        result = self.cmd('webapp deployment container config -g {} -n {} --enable-cd true'.format(resource_group, webapp)).get_output_in_json()
+
+        self.assertTrue(result['CI_CD_URL'].startswith('https://'))
+        self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
+
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
             resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
@@ -406,7 +451,11 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('webapp config show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("phpVersion", test_php_version),
         ])
-        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2), checks=[
+            JMESPathCheck("[?name=='s4']|[0].slotSetting", True),
+            JMESPathCheck("[?name=='s3']|[0].slotSetting", False),
+        ])
+
         self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())

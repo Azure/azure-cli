@@ -155,7 +155,7 @@ for scope in ['vm diagnostics', 'vmss diagnostics']:
 
 for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
-    register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', arg_group='Authentication')
+    register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory', arg_group='Authentication')
     register_cli_argument('{} extension'.format(scope), 'settings', type=validate_file_or_dict)
     register_cli_argument('{} extension'.format(scope), 'protected_settings', type=validate_file_or_dict)
 
@@ -276,6 +276,8 @@ register_cli_argument('vmss create', 'disable_overprovision', help='Overprovisio
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
 register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
+    c.register_cli_argument('vmss create', 'load_balancer_sku', help='SKU when creating a new Load Balancer.', arg_group='Network Balancer', options_list=['--lb-sku'], default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
 
 with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
     c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')

@@ -1,6 +1,117 @@
 Release History
 ===============
 
+
+2.0.14 (2017-08-15)
+-------------------
+
+* See the `HISTORY.rst` files in each module for a changelog.  
+
+Source download:
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0.14.tar.gz
+b811562bff46685c1850704aabde794c66468457e20fbf10258784f9891a2f5f
+
+<details>
+  <summary>List of component versions in this release (click to expand)</summary><p>
+
+$ az --version
+
+azure-cli (2.0.14)  
+
+acr (2.0.10)  
+acs (2.0.13)  
+appservice (0.1.13)  
+batch (3.1.1)  
+billing (0.1.3)  
+cdn (0.0.6)  
+cloud (2.0.7)  
+cognitiveservices (0.1.6)  
+command-modules-nspkg (2.0.1)  
+component (2.0.7)  
+configure (2.0.10)  
+consumption (0.1.3)  
+container (0.1.8)  
+core (2.0.13)  
+cosmosdb (0.1.11)  
+dla (0.0.10)  
+dls (0.0.12)  
+eventgrid (0.1.2)  
+feedback (2.0.6)  
+find (0.2.6)  
+interactive (0.3.7)  
+iot (0.1.10)  
+keyvault (2.0.8)  
+lab (0.0.9)  
+monitor (0.0.8)  
+network (2.0.12)  
+nspkg (3.0.1)  
+profile (2.0.10)  
+rdbms (0.0.5)  
+redis (0.2.7)  
+resource (2.0.12)  
+role (2.0.10)  
+sf (1.0.6)  
+sql (2.0.9)  
+storage (2.0.12)  
+vm (2.0.12)  
+</p></details>
+
+2.0.13 (2017-08-11)
+-------------------
+
+* See the `HISTORY.rst` files in each module for a changelog.  
+
+Source download:
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0.13.tar.gz
+1438acf572b3c33e822603a89871f2c98d54898f4880c80ded46ad45530b4124
+
+<details>
+  <summary>List of component versions in this release (click to expand)</summary><p>
+
+$ az --version
+
+azure-cli (2.0.13)  
+
+acr (2.0.10)  
+acs (2.0.12)  
+appservice (0.1.12)  
+batch (3.1.1)  
+billing (0.1.3)  
+cdn (0.0.6)  
+cloud (2.0.7)  
+cognitiveservices (0.1.6)  
+command-modules-nspkg (2.0.1)  
+component (2.0.7)  
+configure (2.0.10)  
+consumption (0.1.3)  
+container (0.1.8)  
+core (2.0.13)  
+cosmosdb (0.1.11)  
+dla (0.0.10)  
+dls (0.0.12)  
+eventgrid (0.1.1)  
+feedback (2.0.6)  
+find (0.2.6)  
+interactive (0.3.7)  
+iot (0.1.10)  
+keyvault (2.0.8)  
+lab (0.0.9)  
+monitor (0.0.8)  
+network (2.0.12)  
+nspkg (3.0.1)  
+profile (2.0.10)  
+rdbms (0.0.5)  
+redis (0.2.7)  
+resource (2.0.12)  
+role (2.0.10)  
+sf (1.0.6)  
+sql (2.0.9)  
+storage (2.0.12)  
+vm (2.0.12)  
+
+
+</p></details>
+
 2.0.12 (2017-07-27)
 -------------------
 

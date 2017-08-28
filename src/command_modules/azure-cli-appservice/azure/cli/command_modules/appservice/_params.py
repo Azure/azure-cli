@@ -86,6 +86,9 @@ register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), co
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('webapp browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
+register_cli_argument('webapp delete', 'keep_empty_plan', action='store_true', help='keep empty app service plan')
+register_cli_argument('webapp delete', 'keep_metrics', action='store_true', help='keep app metrics')
+register_cli_argument('webapp delete', 'keep_dns_registration', action='store_true', help='keep DNS registration')
 
 for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
@@ -114,6 +117,9 @@ register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 
+two_states_switch = ['true', 'false']
+
+register_cli_argument('webapp deployment container config', 'enable', options_list=('--enable-cd', '-e'), help='enable/disable continuous deployment', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp deployment slot', 'slot', help='the name of the slot')
 register_cli_argument('webapp deployment slot', 'webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                       help='Name of the webapp', id_part='name')
@@ -123,9 +129,6 @@ register_cli_argument('webapp deployment slot', 'target_slot', help="target slot
 register_cli_argument('webapp deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
 register_cli_argument('webapp deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                       **enum_choice_list(['swap', 'preview', 'reset']))
-
-
-two_states_switch = ['true', 'false']
 
 register_cli_argument('webapp log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
@@ -145,7 +148,7 @@ register_cli_argument('webapp config connection-string', 'connection_string_type
                       options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
 
 register_cli_argument('webapp config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
-register_cli_argument('webapp config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')
+register_cli_argument('webapp config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c', '-i'), help='the container custom image name and optionally the tag name')
 register_cli_argument('webapp config container', 'docker_registry_server_user', options_list=('--docker-registry-server-user', '-u'), help='the container registry server username')
 register_cli_argument('webapp config container', 'docker_registry_server_password', options_list=('--docker-registry-server-password', '-p'), help='the container registry server password')
 

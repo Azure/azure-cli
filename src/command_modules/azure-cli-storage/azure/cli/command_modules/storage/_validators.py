@@ -80,6 +80,11 @@ def validate_accept(namespace):
         namespace.accept = formats[namespace.accept.lower()]
 
 
+def validate_bypass(namespace):
+    if namespace.bypass:
+        namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
+
+
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
     connection string into account name and key """
@@ -371,17 +376,43 @@ def validate_custom_domain(namespace):
         raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
 
 
-def validate_encryption(namespace):
-    ''' Builds up the encryption object for storage account operations based on the
-    list of services passed in. '''
-    if namespace.encryption:
-        Encryption, EncryptionServices, EncryptionService = get_sdk(ResourceType.MGMT_STORAGE,
-                                                                    'Encryption',
-                                                                    'EncryptionServices',
-                                                                    'EncryptionService',
-                                                                    mod='models')
-        services = {service: EncryptionService(True) for service in namespace.encryption}
-        namespace.encryption = Encryption(EncryptionServices(**services))
+def validate_encryption_services(namespace):
+    """
+    Builds up the encryption services object for storage account operations based on the list of services passed in.
+    """
+    if namespace.encryption_services:
+        EncryptionServices, EncryptionService = get_sdk(
+            ResourceType.MGMT_STORAGE, 'EncryptionServices', 'EncryptionService', mod='models')
+        services = {service: EncryptionService(True) for service in namespace.encryption_services}
+
+        namespace.encryption_services = EncryptionServices(**services)
+
+
+def validate_encryption_source(namespace):
+    ns = vars(namespace)
+    if namespace.encryption_key_source:
+        allowed_options = ['Microsoft.Storage', 'Microsoft.Keyvault']
+        if namespace.encryption_key_source not in allowed_options:
+            raise ValueError('--encryption-key-source allows to values: {}'.format(', '.join(allowed_options)))
+
+    key_name = ns.pop('encryption_key_name', None)
+    key_version = ns.pop('encryption_key_version', None)
+    key_vault_uri = ns.pop('encryption_key_vault', None)
+
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_version and key_vault_uri):
+        raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are required '
+                         'when --encryption-key-source=Microsoft.Keyvault is specified.')
+
+    if key_name or key_version or key_vault_uri:
+        if namespace.encryption_key_source != 'Microsoft.Keyvault':
+            raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
+                             'applicable when --encryption-key-source=Microsoft.Keyvault is not specified.')
+        KeyVaultProperties = get_sdk(ResourceType.MGMT_STORAGE, 'KeyVaultProperties', mod='models')
+        if not KeyVaultProperties:
+            return
+
+        kv_prop = KeyVaultProperties(key_name, key_version, key_vault_uri)
+        namespace.encryption_key_vault_properties = kv_prop
 
 
 def validate_entity(namespace):
@@ -754,6 +785,28 @@ def process_metric_update_namespace(namespace):
             None, 'incorrect usage: specify --api when hour or minute metrics are enabled')
 
 
+def validate_subnet(namespace):
+    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subnet = namespace.subnet
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        return
+    elif subnet and not subnet_is_id and vnet:
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type='subnets',
+            child_name=subnet)
+    else:
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+
 # endregion
 
 # region TYPES
@@ -824,3 +877,42 @@ def get_char_options_validator(types, property_name):
 
         setattr(namespace, property_name, service_types)
     return _validator
+
+
+def page_blob_tier_validator(namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'page' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
+
+    try:
+        namespace.tier = getattr(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#PremiumPageBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.util import get_blob_tier_names
+        raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(
+            get_blob_tier_names('PremiumPageBlobTier'))))
+
+
+def block_blob_tier_validator(namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'block' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
+
+    try:
+        namespace.tier = getattr(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#StandardBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.util import get_blob_tier_names
+        raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(
+            get_blob_tier_names('StandardBlobTier'))))
+
+
+def blob_tier_validator(namespace):
+    if namespace.blob_type == 'page':
+        page_blob_tier_validator(namespace)
+    elif namespace.blob_type == 'block':
+        block_blob_tier_validator(namespace)
+    else:
+        raise ValueError('Blob tier is only applicable to block or page blob.')

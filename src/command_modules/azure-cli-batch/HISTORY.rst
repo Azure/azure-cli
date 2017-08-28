@@ -2,8 +2,11 @@
 
 Release History
 ===============
+3.1.2 (2017-08-28)
+++++++++++++++++++
+* minor fixes
 
-3.1.0 (unreleased)
+3.1.1 (2017-08-11)
 ++++++++++++++++++
 
 * Updated to Batch SDK 3.1.0 and Batch Management SDK 4.1.0.

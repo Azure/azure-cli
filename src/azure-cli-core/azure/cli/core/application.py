@@ -110,7 +110,8 @@ class Application(object):
             'headers': {},  # the x-ms-client-request-id is generated before a command is to execute
             'command': 'unknown',
             'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
-            'query_active': False
+            'query_active': False,
+            'az_interactive_active': False
         }
 
         # Register presence of and handlers for global parameters

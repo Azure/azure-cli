@@ -39,9 +39,10 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, assign_identity=False, location=None, kind=None,
-                           tags=None, custom_domain=None, encryption=None, access_tier=None, https_only=None):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity = get_sdk(
+def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
+                           custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
+                           bypass='AzureServices', default_action='Allow', assign_identity=False):
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
@@ -49,19 +50,25 @@ def create_storage_account(resource_group_name, account_name, sku, assign_identi
         'CustomDomain',
         'AccessTier',
         'Identity',
+        'Encryption',
+        'StorageNetworkAcls',
         mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
     if custom_domain:
         params.custom_domain = CustomDomain(custom_domain, None)
-    if encryption:
-        params.encryption = encryption
+    if encryption_services:
+        params.encryption = Encryption(services=encryption_services)
     if access_tier:
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
+
+    if NetworkRuleSet:
+        params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
+                                             virtual_network_rules=None)
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -77,15 +84,18 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None, encryption=None,
-                           access_tier=None, https_only=None, assign_identity=False):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity = get_sdk(
+def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
+                           encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
+                           access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
         'Sku',
         'CustomDomain',
         'AccessTier',
         'Identity',
+        'Encryption',
+        'StorageNetworkAcls',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -93,16 +103,39 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         if use_subdomain is not None:
             domain.name = use_subdomain == 'true'
 
+    encryption = instance.encryption
+    if encryption_services:
+        if not encryption:
+            encryption = Encryption(services=encryption_services)
+        else:
+            encryption.services = encryption_services
+
+    if encryption_key_source or encryption_key_vault_properties:
+        if encryption:
+            encryption.key_source = encryption_key_source
+            encryption.key_vault_properties = encryption_key_vault_properties
+        else:
+            raise ValueError('--encryption-services is required when configure encryption key source')
+
     params = StorageAccountUpdateParameters(
         sku=Sku(sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
         custom_domain=domain,
-        encryption=encryption if encryption is not None else instance.encryption,
+        encryption=encryption,
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
     if assign_identity:
         params.identity = Identity()
+
+    if NetworkRuleSet and (bypass or default_action):
+        acl = instance.network_acls or NetworkRuleSet(
+            bypass=bypass, virtual_network_rules=None, ip_rules=None, default_action=default_action)
+        if bypass:
+            acl.bypass = bypass
+        if default_action:
+            acl.default_action = default_action
+        params.network_acls = acl
 
     return params
 
@@ -172,12 +205,10 @@ def show_storage_account_connection_string(
 
 
 @transfer_doc(BlockBlobService.create_blob_from_path)
-def upload_blob(  # pylint: disable=too-many-locals
-        client, container_name, blob_name, file_path, blob_type=None,
-        content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
-        max_connections=2, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
-    '''Upload a blob to a container.'''
+def upload_blob(client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
+                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
+                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+    """Upload a blob to a container."""
 
     def upload_append_blob():
         if not client.exists(container_name, blob_name):
@@ -231,6 +262,9 @@ def upload_blob(  # pylint: disable=too-many-locals
             'timeout': timeout
         }
 
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17') and tier:
+            create_blob_args['premium_page_blob_tier'] = tier
+
         if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
             create_blob_args['validate_content'] = validate_content
 
@@ -242,6 +276,17 @@ def upload_blob(  # pylint: disable=too-many-locals
         'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
+
+
+def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
+    if blob_type == 'block':
+        return client.set_standard_blob_tier(container_name=container_name, blob_name=blob_name,
+                                             standard_blob_tier=tier, timeout=timeout)
+    elif blob_type == 'page':
+        return client.set_premium_page_blob_tier(container_name=container_name, blob_name=blob_name,
+                                                 premium_page_blob_tier=tier, timeout=timeout)
+    else:
+        raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
 def _get_service_container_type(client):
@@ -321,7 +366,7 @@ def set_acl_policy(client, container_name, policy_name, start=None, expiry=None,
 
 
 def delete_acl_policy(client, container_name, policy_name, **kwargs):
-    ''' Delete a stored access policy on a containing object '''
+    """ Delete a stored access policy on a containing object """
     acl = _get_acl(client, container_name, **kwargs)
     del acl[policy_name]
     if hasattr(acl, 'public_access'):
@@ -380,3 +425,49 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
     for s in services:
         results[s.name] = s.get_metrics(interval, timeout)
     return results
+
+
+def list_network_rules(client, resource_group_name, storage_account_name):
+    sa = client.get_properties(resource_group_name, storage_account_name)
+    rules = sa.network_acls
+    delattr(rules, 'bypass')
+    delattr(rules, 'default_action')
+    return rules
+
+
+def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet_name=None,  # pylint: disable=unused-argument
+                     ip_address=None):
+    sa = client.get_properties(resource_group_name, storage_account_name)
+    rules = sa.network_acls
+    if subnet:
+        from azure.cli.core.commands.arm import is_valid_resource_id
+        if not is_valid_resource_id(subnet):
+            raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
+        VirtualNetworkRule = get_sdk(ResourceType.MGMT_STORAGE, 'VirtualNetworkRule', mod='models')
+        if not rules.virtual_network_rules:
+            rules.virtual_network_rules = []
+        rules.virtual_network_rules.append(VirtualNetworkRule(subnet, action=action))
+    if ip_address:
+        IpRule = get_sdk(ResourceType.MGMT_STORAGE, 'IPRule', mod='models')
+        if not rules.ip_rules:
+            rules.ip_rules = []
+        rules.ip_rules.append(IpRule(ip_address, action=action))
+
+    StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
+    params = StorageAccountUpdateParameters(network_acls=rules)
+    return client.update(resource_group_name, storage_account_name, params)
+
+
+def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
+                        vnet_name=None):  # pylint: disable=unused-argument
+    sa = client.get_properties(resource_group_name, storage_account_name)
+    rules = sa.network_acls
+    if subnet:
+        rules.virtual_network_rules = [x for x in rules.virtual_network_rules
+                                       if not x.virtual_network_resource_id.endswith(subnet)]
+    if ip_address:
+        rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
+
+    StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
+    params = StorageAccountUpdateParameters(network_acls=rules)
+    return client.update(resource_group_name, storage_account_name, params)

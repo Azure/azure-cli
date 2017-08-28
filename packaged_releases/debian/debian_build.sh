@@ -55,6 +55,9 @@ $source_dir/python_env/bin/pip3 install wheel
 for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; do cd $d; $source_dir/python_env/bin/python3 setup.py bdist_wheel -d $tmp_pkg_dir; cd -; done;
 $source_dir/python_env/bin/pip3 install azure-cli --find-links $tmp_pkg_dir
 $source_dir/python_env/bin/pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
+# WORKAROUND: Newer versions of cryptography do not work on Bash on Windows / WSL - see https://github.com/Azure/azure-cli/issues/4154
+# If you *have* to use a newer version of cryptography in the future, verify that it works on WSL also.
+$source_dir/python_env/bin/pip3 install cryptography==2.0
 # Add the debian files
 mkdir $source_dir/debian
 # Create temp dir for the debian/ directory used for CLI build.

@@ -2,9 +2,12 @@
 
 Release History
 ===============
+0.1.9 (2017-08-28)
+++++++++++++++++++
+* minor fixes
 
-unreleased
-++++++++++
+0.1.8 (2017-08-11)
+++++++++++++++++++
 
 * container create: Fixes issue where equals sign was not allowed inside an environment variable.
 

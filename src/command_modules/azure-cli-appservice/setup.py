@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.11+dev"
+VERSION = "0.1.14+dev"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -37,7 +37,7 @@ DEPENDENCIES = [
     'urllib3[secure]>=1.18',
     'xmltodict',
     'pyOpenSSL',
-    'vsts-cd-manager',
+    'vsts-cd-manager<1.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

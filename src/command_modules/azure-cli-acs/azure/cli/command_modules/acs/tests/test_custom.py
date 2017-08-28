@@ -14,21 +14,33 @@ import yaml
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
-                                                  _acs_browse_internal, _add_role_assignment)
-from azure.mgmt.compute.containerservice.models import (ContainerServiceOrchestratorTypes,
-                                                        ContainerService,
-                                                        ContainerServiceOrchestratorProfile)
+                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix)
+from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
+                                                ContainerService,
+                                                ContainerServiceOrchestratorProfile)
 from azure.cli.core.util import CLIError
 
 
 class AcsCustomCommandTest(unittest.TestCase):
+    def test_get_default_dns_prefix(self):
+        name = 'test5678910'
+        resource_group_name = 'resource_group_with_underscore'
+        sub_id = '123456789'
+
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
+        self.assertEqual(dns_name_prefix, "test567891-resourcegroupwit-123456")
+
+        name = '1test5678910'
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
+        self.assertEqual(dns_name_prefix, "a1test5678-resourcegroupwit-123456")
+
     def test_add_role_assignment_basic(self):
         role = 'Owner'
         sp = '1234567'
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            ok = _add_role_assignment(role, sp, delay=0)
             create_role_assignment.assert_called_with(role, sp)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
@@ -38,13 +50,13 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = mock.Mock()
+            resp = mock.create_autospec(requests.Response)
             resp.status_code = 409
-            resp.content = 'Conflict'
+            resp.text = 'Conflict'
             err = CloudError(resp)
             err.message = 'The role assignment already exists.'
             create_role_assignment.side_effect = err
-            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            ok = _add_role_assignment(role, sp, delay=0)
 
             create_role_assignment.assert_called_with(role, sp)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
@@ -55,13 +67,13 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = mock.Mock()
+            resp = mock.create_autospec(requests.Response)
             resp.status_code = 500
-            resp.content = 'Internal Error'
+            resp.text = 'Internal Error'
             err = CloudError(resp)
             err.message = 'Internal Error'
             create_role_assignment.side_effect = err
-            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            ok = _add_role_assignment(role, sp, delay=0)
 
             create_role_assignment.assert_called_with(role, sp)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')

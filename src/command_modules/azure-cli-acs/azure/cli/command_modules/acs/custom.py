@@ -21,6 +21,7 @@ import time
 import webbrowser
 import stat
 import ssl
+import re
 import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
@@ -30,6 +31,7 @@ from six.moves.urllib.error import URLError  # pylint: disable=import-error
 from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.application import APPLICATION
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.acs._params import regionsInPreview
@@ -38,7 +40,8 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core.profiles import ResourceType
-from azure.mgmt.compute.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -247,8 +250,8 @@ def _ssl_context():
 
 def _urlretrieve(url, filename):
     req = urlopen(url, context=_ssl_context())
-    with open(filename, "wb") as out:
-        out.write(req.read())
+    with open(filename, "wb") as f:
+        f.write(req.read())
 
 
 def dcos_install_cli(install_location=None, client_version='1.8'):
@@ -322,51 +325,67 @@ def _validate_service_principal(client, sp_id):
 
 
 def _build_service_principal(client, name, url, client_secret):
-    sys.stdout.write('creating service principal')
+    # use get_progress_controller
+    hook = APPLICATION.get_progress_controller(True)
+    hook.add(messsage='Creating service principal', value=0, total_val=1.0)
+    logger.info('Creating service principal')
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
+        hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
         try:
             create_service_principal(service_principal, client=client)
             break
         # TODO figure out what exception AAD throws here sometimes.
         except Exception as ex:  # pylint: disable=broad-except
-            sys.stdout.write('.')
-            sys.stdout.flush()
             logger.info(ex)
             time.sleep(2 + 2 * x)
-    print('done')
+    else:
+        return False
+    hook.add(message='Finished service principal creation', value=1.0, total_val=1.0)
+    logger.info('Finished service principal creation')
     return service_principal
 
 
-def _add_role_assignment(role, service_principal, delay=2, output=True):
+def _add_role_assignment(role, service_principal, delay=2):
     # AAD can have delays in propagating data, so sleep and retry
-    if output:
-        sys.stdout.write('waiting for AAD role to propagate.')
+    hook = APPLICATION.get_progress_controller(True)
+    hook.add(message='Waiting for AAD role to propagate', value=0, total_val=1.0)
+    logger.info('Waiting for AAD role to propagate')
     for x in range(0, 10):
+        hook.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
+            # Sleep for a while to get role assignment propagated
+            time.sleep(delay + delay * x)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
                 break
-            logger.info('%s', ex.message)
+            logger.info(ex.message)
         except:  # pylint: disable=bare-except
             pass
-        if output:
-            sys.stdout.write('.')
-            time.sleep(delay + delay * x)
+        time.sleep(delay + delay * x)
     else:
         return False
-    if output:
-        print('done')
+    hook.add(message='AAD role propagation done', value=1.0, total_val=1.0)
+    logger.info('AAD role propagation done')
     return True
 
 
 def _get_subscription_id():
     _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
     return sub_id
+
+
+def _get_default_dns_prefix(name, resource_group_name, subscription_id):
+    # Use subscription id to provide uniqueness and prevent DNS name clashes
+    name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
+    if not name_part[0].isalpha():
+        name_part = (str('a') + name_part)[0:10]
+    resource_group_part = re.sub('[^A-Za-z0-9-]', '', resource_group_name)[0:16]
+    return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
 
 
 # pylint: disable=too-many-locals
@@ -380,7 +399,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                master_osdisk_size=0,
                master_count=1,
                master_vnet_subnet_id="",
-               master_first_consecutive_static_ip="",
+               master_first_consecutive_static_ip="10.240.255.5",
                master_storage_profile="",
                agent_profiles=None,
                agent_vm_size="Standard_D2_v2",
@@ -431,9 +450,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type master_storage_profile: str
     :param agent_profiles: AgentPoolProfiles used to describe agent pools
     :type agent_profiles: dict
-    :param agent_count: The number of agents for the cluster.  Note, for
-     DC/OS clusters you will also get 1 or 2 public agents in addition to
-     these selected masters.
+    :param agent_count: the default number of agents for the agent pools.
     :type agent_count: int
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
@@ -481,8 +498,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
 
     subscription_id = _get_subscription_id()
     if not dns_name_prefix:
-        # Use subscription id to provide uniqueness and prevent DNS name clashes
-        dns_name_prefix = '{}-{}-{}'.format(name, resource_group_name, subscription_id[0:6])
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
     register_providers()
     groups = _resource_client_factory().resource_groups
@@ -519,6 +535,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
                 service_principal = _build_service_principal(client, name, url, client_secret)
+                if not service_principal:
+                    raise CLIError('Could not create a service principal with the right permissions. '
+                                   'Are you an Owner on this project?')
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
@@ -681,13 +700,18 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
         },
         "sshMaster0": {
             "type": "string",
-            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
+            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 22')]".format(admin_username, name)  # pylint: disable=line-too-long
         },
     }
     if orchestrator_type.lower() != "kubernetes":
         outputs["agentFQDN"] = {
             "type": "string",
             "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
+        }
+        # override sshMaster0 for non-kubernetes scenarios
+        outputs["sshMaster0"] = {
+            "type": "string",
+            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
         }
     properties = {
         "orchestratorProfile": {
@@ -894,7 +918,7 @@ def _get_acs_info(name, resource_group_name):
     :param resource_group_name: Resource group name
     :type resource_group_name: String
     """
-    mgmt_client = get_mgmt_service_client(ResourceType.MGMT_CONTAINER_SERVICE)
+    mgmt_client = get_mgmt_service_client(ContainerServiceClient)
     return mgmt_client.container_services.get(resource_group_name, name)
 
 

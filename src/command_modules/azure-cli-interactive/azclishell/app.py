@@ -448,6 +448,7 @@ class Shell(object):
         continue_flag = False
         args = parse_quotes(text)
         args_no_quotes = []
+        text_stripped = text.strip()
         for arg in args:
             args_no_quotes.append(arg.strip("/'").strip('/"'))
 
@@ -457,27 +458,27 @@ class Shell(object):
         if self.default_command:
             cmd = self.default_command + " " + cmd
 
-        if text.strip() == "quit" or text.strip() == "exit":
+        if text_stripped == "quit" or text_stripped == "exit":
             break_flag = True
-        elif text.strip() == "clear-history":  # clears the history, but only when you restart
+        elif text_stripped == "clear-history":  # clears the history, but only when you restart
             outside = True
             cmd = 'echo -n "" >' +\
                 os.path.join(
                     SHELL_CONFIG_DIR(),
                     SHELL_CONFIGURATION.get_history())
-        elif text.strip() == CLEAR_WORD:
+        elif text_stripped == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
-        if text:
-            if text[0] == SELECT_SYMBOL['outside']:
-                cmd = text[1:]
+        if text_stripped:
+            if text_stripped[0] == SELECT_SYMBOL['outside']:
+                cmd = text_stripped[1:]
                 outside = True
                 if cmd.strip() and cmd.split()[0] == 'cd':
                     self.handle_cd(parse_quotes(cmd))
                     continue_flag = True
                 telemetry.track_ssg('outside', '')
 
-            elif text[0] == SELECT_SYMBOL['exit_code']:
+            elif text_stripped[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
 
                 print(meaning + ": " + str(self.last_exit), file=self.output)
@@ -487,7 +488,7 @@ class Shell(object):
                 continue_flag = self.handle_jmespath_query(args_no_quotes, continue_flag)
                 telemetry.track_ssg('query', '')
 
-            elif text[0] == '--version' or text[0] == '-v':
+            elif args[0] == '--version' or args[0] == '-v':
                 try:
                     continue_flag = True
                     show_version_info_exit(self.output)
@@ -500,8 +501,8 @@ class Shell(object):
             elif SELECT_SYMBOL['example'] in text:
                 cmd, continue_flag = self.handle_example(cmd, continue_flag)
                 telemetry.track_ssg('tutorial', text)
-            elif len(text) > 2 and SELECT_SYMBOL['scope'] == text[0:2]:
-                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text)
+            elif len(text_stripped) > 2 and SELECT_SYMBOL['scope'] == text_stripped[0:2]:
+                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text_stripped)
 
         return break_flag, continue_flag, outside, cmd
 
