@@ -7,53 +7,48 @@
 Commands for storage file share operations
 """
 
-
 import os.path
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.util import CLIError
 from azure.common import AzureException, AzureHttpError
-from azure.cli.core.profiles import supported_api_version, ResourceType
+from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas,
-                                                    create_short_lived_share_sas)
+                                                    create_short_lived_share_sas, guess_content_type)
 
 
-def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False,
-                              validate_content=False, content_settings=None, max_connections=1,
-                              metadata=None):
-    """
-    Upload local files to Azure Storage File Share in batch
-    """
+def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False, validate_content=False,
+                              content_settings=None, max_connections=1, metadata=None):
+    """ Upload local files to Azure Storage File Share in batch """
 
     from .util import glob_files_locally
     source_files = [c for c in glob_files_locally(source, pattern)]
+    logger = get_az_logger(__name__)
+    settings_class = get_sdk(ResourceType.DATA_STORAGE, 'file.models#ContentSettings')
 
     if dryrun:
-        logger = get_az_logger(__name__)
-        logger.warning('upload files to file share')
-        logger.warning('    account %s', client.account_name)
-        logger.warning('      share %s', destination)
-        logger.warning('      total %d', len(source_files or []))
-        logger.warning(' operations')
-        for f in source_files or []:
-            logger.warning('  - %s => %s', *f)
-
-        return []
+        logger.info('upload files to file share')
+        logger.info('    account %s', client.account_name)
+        logger.info('      share %s', destination)
+        logger.info('      total %d', len(source_files or []))
+        return [{'File': client.make_file_url(destination, os.path.dirname(src), os.path.basename(dst)),
+                 'Type': guess_content_type(src, content_settings, settings_class).content_type}
+                for src, dst in source_files]
 
     # TODO: Performance improvement
     # 1. Upload files in parallel
-    def _upload_action(source_pair):
-        dir_name = os.path.dirname(source_pair[1])
-        file_name = os.path.basename(source_pair[1])
+    def _upload_action(src, dst):
+        dir_name = os.path.dirname(dst)
+        file_name = os.path.basename(dst)
 
         _make_directory_in_files_share(client, destination, dir_name)
         create_file_args = {
             'share_name': destination,
             'directory_name': dir_name,
             'file_name': file_name,
-            'local_file_path': source_pair[0],
-            'content_settings': content_settings,
+            'local_file_path': src,
+            'content_settings': guess_content_type(src, content_settings, settings_class),
             'metadata': metadata,
             'max_connections': max_connections,
         }
@@ -61,11 +56,12 @@ def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=
         if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
             create_file_args['validate_content'] = validate_content
 
+        logger.warning('uploading %s', src)
         client.create_file_from_path(**create_file_args)
 
         return client.make_file_url(destination, dir_name, file_name)
 
-    return list(_upload_action(f) for f in source_files)
+    return list(_upload_action(src, dst) for src, dst in source_files)
 
 
 def storage_file_download_batch(client, source, destination, pattern=None, dryrun=False,

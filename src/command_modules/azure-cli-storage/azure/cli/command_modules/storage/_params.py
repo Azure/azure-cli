@@ -220,8 +220,8 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
 # EXTRA PARAMETER SET REGISTRATION
 
 
-def register_content_settings_argument(scope, settings_class, update, arg_group=None):
-    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update), arg_group=arg_group)
+def register_content_settings_argument(scope, settings_class, update, arg_group=None, guess_from_file=None):
+    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file), arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.', arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.', arg_group=arg_group)
@@ -607,8 +607,8 @@ register_path_argument('storage file resize')
 
 register_path_argument('storage file show')
 
-for item in ['update', 'upload']:
-    register_content_settings_argument('storage file {}'.format(item), FileContentSettings, item == 'update')
+register_content_settings_argument('storage file update', FileContentSettings, update=True)
+register_content_settings_argument('storage file upload', FileContentSettings, update=False, guess_from_file='local_file_path')
 
 register_path_argument('storage file update')
 
