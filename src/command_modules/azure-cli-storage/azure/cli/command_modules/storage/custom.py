@@ -12,6 +12,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.command_modules.storage.util import guess_content_type
 from azure.cli.core.application import APPLICATION
 
 Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
@@ -209,6 +210,9 @@ def upload_blob(client, container_name, blob_name, file_path, blob_type=None, co
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
     """Upload a blob to a container."""
+
+    settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
+    content_settings = guess_content_type(file_path, content_settings, settings_class)
 
     def upload_append_blob():
         if not client.exists(container_name, blob_name):
