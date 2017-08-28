@@ -2,7 +2,7 @@
 
 Release History
 ===============
-unreleased
+2.0.13 (2017-08-28)
 +++++++++++++++++++
 * `vmss get-instance-view`: Fix issue where extra, erroneous information was displayed when using `--instance-id *`
 * `vmss create`: Added support for `--lb-sku`
