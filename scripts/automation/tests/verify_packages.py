@@ -143,7 +143,7 @@ def verify_packages():
     p = multiprocessing.Pool(pool_size)
     for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, chunk_size), 1):
         command_results.append(res)
-        # print('Running --help on all commands {0:%}'.format(i/len(all_commands)), file=sys.stderr)
+        print('{0:%} complete'.format(i/len(all_commands)), file=sys.stderr)
     p.close()
     p.join()
     if not all(command_results):
