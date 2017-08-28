@@ -113,15 +113,6 @@ def space_toolbar(settings_items, empty_space):
     return settings, empty_space
 
 
-def validate_contains_query(args, symbol):
-    """ validates that the query symbol is used as a shell specific gesture """
-    for arg in args:
-        group = re.search(r'\-.*\=\%s.*' % symbol, arg)
-        if arg.startswith(symbol) or group is not None:
-            return True
-    return False
-
-
 def restart_completer(shell):
     shell.completer = AzCompleter(GatherCommands())
     shell.refresh_cli = True
@@ -443,49 +434,45 @@ class Shell(object):
         return cmd, continue_flag
 
     # pylint: disable=too-many-branches
-    def _special_cases(self, text, cmd, outside):
+    def _special_cases(self, cmd, outside):
         break_flag = False
         continue_flag = False
-        args = parse_quotes(text)
-        args_no_quotes = []
-        text_stripped = text.strip()
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
-
-        if text and len(text.split()) > 0 and text.split()[0].lower() == 'az':
-            telemetry.track_ssg('az', text)
-            cmd = ' '.join(text.split()[1:])
+        args = parse_quotes(cmd)
+        cmd_stripped = cmd.strip()
+        if cmd and len(cmd.split()) > 0 and cmd.split()[0].lower() == 'az':
+            telemetry.track_ssg('az', cmd)
+            cmd = ' '.join(cmd.split()[1:])
         if self.default_command:
             cmd = self.default_command + " " + cmd
 
-        if text_stripped == "quit" or text_stripped == "exit":
+        if cmd_stripped == "quit" or cmd_stripped == "exit":
             break_flag = True
-        elif text_stripped == "clear-history":  # clears the history, but only when you restart
+        elif cmd_stripped == "clear-history":  # clears the history, but only when you restart
             outside = True
             cmd = 'echo -n "" >' +\
                 os.path.join(
                     SHELL_CONFIG_DIR(),
                     SHELL_CONFIGURATION.get_history())
-        elif text_stripped == CLEAR_WORD:
+        elif cmd_stripped == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
-        if text_stripped:
-            if text_stripped[0] == SELECT_SYMBOL['outside']:
-                cmd = text_stripped[1:]
+        if cmd_stripped:
+            if cmd_stripped[0] == SELECT_SYMBOL['outside']:
+                cmd = cmd_stripped[1:]
                 outside = True
                 if cmd.strip() and cmd.split()[0] == 'cd':
                     self.handle_cd(parse_quotes(cmd))
                     continue_flag = True
                 telemetry.track_ssg('outside', '')
 
-            elif text_stripped[0] == SELECT_SYMBOL['exit_code']:
+            elif cmd_stripped[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
 
                 print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
-            elif validate_contains_query(args, SELECT_SYMBOL['query']) and self.last and self.last.result:
-                continue_flag = self.handle_jmespath_query(args, continue_flag)
+            elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
+                continue_flag = self.handle_jmespath_query(args, cmd_stripped)
                 telemetry.track_ssg('query', '')
 
             elif args[0] == '--version' or args[0] == '-v':
@@ -494,89 +481,75 @@ class Shell(object):
                     show_version_info_exit(self.output)
                 except SystemExit:
                     pass
-            elif "|" in text or ">" in text:  # anything I don't parse, send off
+            elif "|" in cmd or ">" in cmd:  # anything I don't parse, send off
                 outside = True
                 cmd = "az " + cmd
 
-            elif SELECT_SYMBOL['example'] in text:
+            elif SELECT_SYMBOL['example'] in cmd:
                 cmd, continue_flag = self.handle_example(cmd, continue_flag)
-                telemetry.track_ssg('tutorial', text)
-            elif len(text_stripped) > 2 and SELECT_SYMBOL['scope'] == text_stripped[0:2]:
-                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, text_stripped)
+                telemetry.track_ssg('tutorial', cmd)
+            elif len(cmd_stripped) > 2 and SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
+                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
 
         return break_flag, continue_flag, outside, cmd
 
-    def handle_jmespath_query(self, args, continue_flag):
+    def handle_jmespath_query(self, args, cmd):
         """ handles the jmespath query for injection or printing """
+        continue_flag = True
+
         if hasattr(self.last.result, '__dict__'):
             input_dict = dict(self.last.result)
         else:
             input_dict = self.last.result
         try:
-            queries = []
-            results = []
-            injected_command = []
-            for arg in args:
-                if arg.startswith(SELECT_SYMBOL['query']):
-                    query = arg[len(SELECT_SYMBOL['query']):]
-                    queries.append(query)
-                    results.append(jmespath.search(query, input_dict))
-                    injected_command.append(SELECT_SYMBOL['query'])
-                elif re.search(r'\-.*\=\%s.*' % SELECT_SYMBOL['query'], arg) is not None:
-                    parition = arg.partition(SELECT_SYMBOL['query'])
-                    base = parition[0]
-                    query = parition[2]
-                    queries.append(query)
-                    results.append(jmespath.search(query, input_dict))
-                    injected_command.append(base + SELECT_SYMBOL['query'])
-                else:
-                    injected_command.append(arg)
-
-            if len(args) > 0 and args[0].startswith(SELECT_SYMBOL['query']):
-                # then push out the query
-                print(json.dumps(results[0], sort_keys=True, indent=2), file=self.output)
+            if cmd == SELECT_SYMBOL['query']:
+                print(json.dumps(self.last.result, sort_keys=True, indent=2), file=self.output)
                 continue_flag = True
-            else:  # inject into cmd
-                cmd_base = ' '.join(injected_command)
-                if all(isinstance(result, (six.text_type, six.string_types)) for result in results):
-                    for result in results:
-                        cmd_base = cmd_base.replace(SELECT_SYMBOL['query'], result, 1)
-                    self.cli_execute(cmd_base)
-                    continue_flag = True
-                elif all(isinstance(result, list) for result in results):
-                    if len(results) > 1:
-                        for res_counter, _ in enumerate(results[0]):
-                            base = cmd_base
-                            skip = False
+            elif len(args) == 1 and args[0].startswith(SELECT_SYMBOL['query']):
+                query = args[0][len(SELECT_SYMBOL['query']):]
+                print(json.dumps(jmespath.search(query, input_dict), sort_keys=True, indent=2), file=self.output)
+                continue_flag = True
+            else: #inject into cmd
+                def sub_result(arg):
+                    escaped_symbol = re.escape(SELECT_SYMBOL['query'])
+                    return re.sub(r'%s\S*' % escaped_symbol, lambda x: jmespath.search(x, input_dict), arg)
+                cmd_base = ' '.join(map(sub_result, args))
+                self.cli_execute(cmd_base)
+                continue_flag = True
+                # elif all(isinstance(result, list) for result in results):
+                #     if len(results) > 1:
+                #         for res_counter, _ in enumerate(results[0]):
+                #             base = cmd_base
+                #             skip = False
 
-                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                                if counter < len(results) and res_counter < len(results[counter]):
-                                    try:
-                                        base = base.replace(
-                                            SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                                    except TypeError:  # because of bad input
-                                        pass
-                                else:  # if there aren't an even number of results, skip it
-                                    skip = True
-                            if not skip:
-                                self.cli_execute(base)
-                    else:
-                        for res_counter, _ in enumerate(results[0]):
-                            base = cmd_base
-                            skip = False
+                #             for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                #                 if counter < len(results) and res_counter < len(results[counter]):
+                #                     try:
+                #                         base = base.replace(
+                #                             SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                #                     except TypeError:  # because of bad input
+                #                         pass
+                #                 else:  # if there aren't an even number of results, skip it
+                #                     skip = True
+                #             if not skip:
+                #                 self.cli_execute(base)
+                #     else:
+                #         for res_counter, _ in enumerate(results[0]):
+                #             base = cmd_base
+                #             skip = False
 
-                            for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                                if counter < len(results) and res_counter < len(results[counter]):
-                                    try:
-                                        base = base.replace(
-                                            SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                                    except TypeError:  # because of bad input
-                                        pass
-                                else:  # if there aren't an even number of results, skip it
-                                    skip = True
-                            if not skip:
-                                self.cli_execute(base)
-                    continue_flag = True
+                #             for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
+                #                 if counter < len(results) and res_counter < len(results[counter]):
+                #                     try:
+                #                         base = base.replace(
+                #                             SELECT_SYMBOL['query'], results[counter][res_counter], 1)
+                #                     except TypeError:  # because of bad input
+                #                         pass
+                #                 else:  # if there aren't an even number of results, skip it
+                #                     skip = True
+                #             if not skip:
+                #                 self.cli_execute(base)
+                #     continue_flag = True
 
         except (jmespath.exceptions.ParseError, CLIError):
             print("Invalid Query", file=self.output)
@@ -719,7 +692,7 @@ class Shell(object):
                 except AttributeError:  # when the user pressed Control D
                     break
                 else:
-                    b_flag, c_flag, outside, cmd = self._special_cases(text, cmd, outside)
+                    b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
 
                     if not self.default_command:
                         self.history.append(text)

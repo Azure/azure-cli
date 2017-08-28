@@ -13,7 +13,7 @@ from six.moves import configparser
 
 SELECT_SYMBOL = {
     'outside': '#',
-    'query': '?',
+    'query': '??',
     'example': '::',
     'exit_code': '$',
     'scope': '%%',
