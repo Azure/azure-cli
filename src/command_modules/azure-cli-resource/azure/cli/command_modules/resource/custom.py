@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 from collections import OrderedDict
+import codecs
 import json
 import os
 import re
@@ -15,6 +16,7 @@ import sys
 import uuid
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -748,11 +750,25 @@ def _resolve_policy_id(policy, client):
     return policy_id
 
 
-def create_policy_definition(name, rules, display_name=None, description=None):
-    if os.path.exists(rules):
-        rules = get_file_json(rules)
-    else:
-        rules = shell_safe_json_parse(rules)
+def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
+    if file_or_string_or_uri is None:
+        if required:
+            raise CLIError('One of --{} or --{}-uri is required'.format(name, name))
+        return None
+    url = urlparse(file_or_string_or_uri)
+    if url.scheme == 'http' or url.scheme == 'https' or url.scheme == 'file':
+        response = urlopen(file_or_string_or_uri)
+        reader = codecs.getreader('utf-8')
+        result = json.load(reader(response))
+        response.close()
+        return result
+    if os.path.exists(file_or_string_or_uri):
+        return get_file_json(file_or_string_or_uri)
+    return shell_safe_json_parse(file_or_string_or_uri)
+
+
+def create_policy_definition(name, rules=None, display_name=None, description=None):
+    rules = _load_file_string_or_uri(rules, 'rules')
 
     policy_client = _resource_policy_client_factory()
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
