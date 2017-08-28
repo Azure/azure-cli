@@ -1,13 +1,27 @@
 sudo: false
 language: python
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-env:
-  - CODE_COVERAGE="True"
-install:
-  - pip install -qqq virtualenv # used by package_verify script
-  - python scripts/dev_setup.py
-script:
-  - ./scripts/build.sh
+jobs:
+  include:
+   - stage: all
+     env: CODE_COVERAGE="True"
+     python: 2.7
+     install: python scripts/dev_setup.py
+     script: scripts/build.sh
+   -
+     env: CODE_COVERAGE="True"
+     python: 3.5
+     install: python scripts/dev_setup.py
+     script: scripts/build.sh
+   -
+     env: CODE_COVERAGE="True"
+     python: 3.6
+     install: python scripts/dev_setup.py
+     script: scripts/build.sh
+   -
+     python: 2.7
+     install: pip install -qqq virtualenv
+     script: scripts/package_verify.sh
+   -
+     python: 3.6
+     install: pip install -qqq virtualenv
+     script: scripts/package_verify.sh
