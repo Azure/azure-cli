@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.0.11 (2017-08-28)
++++++++++++++++++++
+* minor fixes
+
 0.0.10 (2017-07-07)
 +++++++++++++++++++
 * Add commands for compute policy management under the `dla account compute-policy` heading
