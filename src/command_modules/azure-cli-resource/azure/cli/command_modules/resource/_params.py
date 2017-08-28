@@ -61,7 +61,7 @@ existing_policy_definition_name_type = CliArgumentType(options_list=('--name', '
 register_cli_argument('policy', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 register_cli_argument('policy definition', 'policy_definition_name', arg_type=existing_policy_definition_name_type)
 register_cli_argument('policy definition create', 'name', options_list=('--name', '-n'), help='name of the new policy definition')
-register_cli_argument('policy definition', 'rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
+register_cli_argument('policy definition', 'rules', help='JSON formatted string or a path to a file or uri with such content', type=file_type, completer=FilesCompleter())
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
