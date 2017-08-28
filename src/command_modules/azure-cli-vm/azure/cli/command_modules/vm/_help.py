@@ -777,9 +777,9 @@ deallocate_generalize_capture = """        - name: Process to deallocate, genera
         - name: The process to deallocate, generalize, and capture multiple stopped virtual machines.
           text: >
             vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)\n\r
-            az vm deallocate --ids ${vms_ids}\n\r
-            az vm generalize --ids ${vms_ids}\n\r
-            az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix\n\r
+            az vm deallocate --ids $(vms_ids)\n\r
+            az vm generalize --ids $(vms_ids)\n\r
+            az vm capture --ids $(vms_ids) --vhd-name-prefix MyPrefix\n\r
 """
 
 helps['vm capture'] = """
