@@ -34,7 +34,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,too-many-lines, too-many-locals
+# pylint:disable=no-member,too-many-lines,too-many-locals
 
 
 def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
