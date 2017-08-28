@@ -379,6 +379,8 @@ def get_command_table(module_name=None):
     '''
     loaded = False
     if module_name and module_name not in BLACKLISTED_MODS:
+    # TODO remove module_name != 'sf' once old sf module is deprecated from the repo
+    if module_name and module_name not in BLACKLISTED_MODS and module_name != 'sf':
         try:
             import_module('azure.cli.command_modules.' + module_name).load_commands()
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
