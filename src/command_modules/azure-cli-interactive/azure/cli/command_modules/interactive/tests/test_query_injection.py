@@ -57,9 +57,6 @@ class QueryInjection(unittest.TestCase):
         # tests that the query replaces the values in the command
         args = 'vm show -g "??group" -n "??name"'
         args = parse_quotes(args)
-        args_no_quotes = []
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = {
             'group': 'mygroup',
             'name': 'myname'
@@ -72,9 +69,6 @@ class QueryInjection(unittest.TestCase):
         # tests that the query replaces the values in the command
         args = 'vm show -g "??[].group" -n "??[].name"'
         args = parse_quotes(args)
-        args_no_quotes = []
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = [
             {
                 'group': 'mygroup',
@@ -112,9 +106,6 @@ class QueryInjection(unittest.TestCase):
         # tests invalid query
         args = 'vm show -g "??[].group" -n "??[].name"'
         args = parse_quotes(args)
-        args_no_quotes = []
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = [
             {
                 'group': 'mygroup',
@@ -134,9 +125,6 @@ class QueryInjection(unittest.TestCase):
         # tests a singleton example
         args = 'vm show -g "?group" -n "?name"'
         args = parse_quotes(args)
-        args_no_quotes = []
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = {
             'group': 'mygroup',
             'name': 'myname'
