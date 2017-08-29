@@ -17,7 +17,7 @@ from .utilities import get_active_api_profile
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest.rg',
                  parameter_name='resource_group',
-                 parameter_name_for_location='resource_group_location', location='eastus2euap',
+                 parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
                  random_name_length=75):
