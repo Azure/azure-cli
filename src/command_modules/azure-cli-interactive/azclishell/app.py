@@ -521,7 +521,7 @@ class Shell(object):
                             return query_result
                         else: # query result is not a string or list, return invalid query message
                             raise CLIError
-                    return re.sub(r'%s\S*' % escaped_symbol, jmespath_query, arg)
+                    return re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg)
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
             continue_flag = True

@@ -86,10 +86,8 @@ class QueryInjection(unittest.TestCase):
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         results = self.stream.getvalue().strip().split('\n')
-        self.assertTrue(len(results) == 3)
-        self.assertEqual(results[0], 'vm show -g mygroup -n myname')
-        self.assertEqual(results[1], 'vm show -g mygroup2 -n myname2')
-        self.assertEqual(results[2], 'vm show -g mygroup3 -n myname3')
+        self.assertTrue(len(results) == 1)
+        self.assertEqual(results[0], 'vm show -g mygroup mygroup2 mygroup3 -n myname myname2 myname3')
 
     def test_quotes(self):
         # tests that it parses correctly with quotes in the command
@@ -123,7 +121,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_singleton(self):
         # tests a singleton example
-        args = 'vm show -g "?group" -n "?name"'
+        args = 'vm show -g "??group" -n "??name"'
         args = parse_quotes(args)
         self.shell.last.result = {
             'group': 'mygroup',
@@ -137,11 +135,8 @@ class QueryInjection(unittest.TestCase):
 
     def test_spaces(self):
         # tests quotes with spaces
-        args = 'vm show -g "?[?group == \'mygroup\'].name"'
+        args = 'vm show -g "??[?group == \'mygroup\'].name"'
         args = parse_quotes(args)
-        args_no_quotes = []
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = [
             {
                 'group': 'mygroup',
@@ -153,17 +148,14 @@ class QueryInjection(unittest.TestCase):
             }
         ]
 
-        self.shell.handle_jmespath_query(args_no_quotes)
+        self.shell.handle_jmespath_query(args)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g fred')
 
     def test_spaces_with_equal(self):
         # tests quotes with spaces
-        args = 'vm show -g="?[?group == \'myg roup\'].name"'
+        args = 'vm show -g="??[?group == \'myg roup\'].name"'
         args = parse_quotes(args)
-        args_no_quotes = []
-        for arg in args:
-            args_no_quotes.append(arg.strip("/'").strip('/"'))
         self.shell.last.result = [
             {
                 'group': 'myg roup',
@@ -175,6 +167,6 @@ class QueryInjection(unittest.TestCase):
             }
         ]
 
-        self.shell.handle_jmespath_query(args_no_quotes)
+        self.shell.handle_jmespath_query(args)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g=fred')
