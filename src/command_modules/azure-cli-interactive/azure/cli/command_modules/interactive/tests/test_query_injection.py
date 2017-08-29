@@ -45,7 +45,6 @@ class QueryInjection(unittest.TestCase):
         self.assertTrue(flag)
         self.assertEqual(self.stream.getvalue(), '\n')
 
-
     def test_print_last_command(self):
         # tests getting last command result
         args = ['??']
@@ -55,7 +54,6 @@ class QueryInjection(unittest.TestCase):
         print(repr(self.stream.getvalue()))
         self.assertEqual(self.stream.getvalue(), '{\n  \"x\": \"result\"\n}\n')
 
-
     def test_print_just_query(self):
         # tests flushing just the query
         args = ['??x']
@@ -64,7 +62,6 @@ class QueryInjection(unittest.TestCase):
         self.assertTrue(flag)
         self.assertEqual(self.stream.getvalue(), '"result"\n')
 
-    
     def test_print_list_replacement(self):
         # tests that the query replaces the values in the command
         args = '??[].group'
@@ -87,7 +84,6 @@ class QueryInjection(unittest.TestCase):
         self.assertTrue(flag)
         print(repr(self.stream.getvalue()))
         self.assertEqual(self.stream.getvalue(), '[\n  \"mygroup\",\n  \"mygroup2\",\n  \"mygroup3\"\n]\n')
-
 
     def test_string_replacement(self):
         # tests that the query replaces the values in the command
