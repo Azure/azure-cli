@@ -501,7 +501,6 @@ class Shell(object):
             input_last = dict(self.last.result)
         else:  # list or string
             input_last = self.last.result
-            print("not dict")
         query_symbol = SELECT_SYMBOL['query']
         symbol_len = len(query_symbol)
         try:
@@ -520,7 +519,7 @@ class Shell(object):
                             return str(input_last)
                         query_result = jmespath.search(match.group(0)[symbol_len:], input_last)
                         return str(query_result)
-                    return re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg)
+                    return json.dumps(re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg))
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
             continue_flag = True

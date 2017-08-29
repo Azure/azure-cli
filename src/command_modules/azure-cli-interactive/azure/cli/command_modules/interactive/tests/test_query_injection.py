@@ -43,15 +43,51 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {}
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual('\n', self.stream.getvalue())
+        self.assertEqual(self.stream.getvalue(), '\n')
 
-    def test_just_query(self):
+
+    def test_print_last_command(self):
+        # tests getting last command result
+        args = ['??']
+        self.shell.last.result = {'x': 'result'}
+        flag = self.shell.handle_jmespath_query(args)
+        self.assertTrue(flag)
+        print(repr(self.stream.getvalue()))
+        self.assertEqual(self.stream.getvalue(), '{\n  \"x\": \"result\"\n}\n')
+
+
+    def test_print_just_query(self):
         # tests flushing just the query
         args = ['??x']
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual('"result"\n', self.stream.getvalue())
+        self.assertEqual(self.stream.getvalue(), '"result"\n')
+
+    
+    def test_print_list_replacement(self):
+        # tests that the query replaces the values in the command
+        args = '??[].group'
+        args = parse_quotes(args)
+        self.shell.last.result = [
+            {
+                'group': 'mygroup',
+                'name': 'myname'
+            },
+            {
+                'group': 'mygroup2',
+                'name': 'myname2'
+            },
+            {
+                'group': 'mygroup3',
+                'name': 'myname3'
+            }
+        ]
+        flag = self.shell.handle_jmespath_query(args)
+        self.assertTrue(flag)
+        print(repr(self.stream.getvalue()))
+        self.assertEqual(self.stream.getvalue(), '[\n  \"mygroup\",\n  \"mygroup2\",\n  \"mygroup3\"\n]\n')
+
 
     def test_string_replacement(self):
         # tests that the query replaces the values in the command
@@ -63,11 +99,12 @@ class QueryInjection(unittest.TestCase):
         }
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual(u"vm show -g mygroup -n myname\n", self.stream.getvalue())
+        results = self.stream.getvalue().split('\n')
+        self.assertEqual(results[0], u'"vm" "show" "-g" "mygroup" "-n" "myname"')
 
     def test_list_replacement(self):
         # tests that the query replaces the values in the command
-        args = 'vm show -g "??[].group" -n "??[].name"'
+        args = 'foo update --set blah=??[].group'
         args = parse_quotes(args)
         self.shell.last.result = [
             {
@@ -87,7 +124,7 @@ class QueryInjection(unittest.TestCase):
         self.assertTrue(flag)
         results = self.stream.getvalue().strip().split('\n')
         self.assertTrue(len(results) == 1)
-        self.assertEqual(results[0], 'vm show -g mygroup mygroup2 mygroup3 -n myname myname2 myname3')
+        self.assertEqual(results[0], '"foo" "update" "--set" "blah=[\'mygroup\', \'mygroup2\', \'mygroup3\']"')
 
     def test_quotes(self):
         # tests that it parses correctly with quotes in the command
@@ -102,7 +139,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_errors(self):
         # tests invalid query
-        args = 'vm show -g "??[].group" -n "??[].name"'
+        args = 'vm show -g "??[0].group" -n "??[1].name"'
         args = parse_quotes(args)
         self.shell.last.result = [
             {
@@ -114,28 +151,26 @@ class QueryInjection(unittest.TestCase):
             }
         ]
         flag = self.shell.handle_jmespath_query(args)
-        results = self.stream.getvalue().split('\n')
         self.assertTrue(flag)
-        self.assertEqual(results[0], 'vm show -g mygroup mygroup3 -n myname')
-        self.assertEqual(len(results), 2)
+        results = self.stream.getvalue().split('\n')
+        self.assertEqual(results[0], '"vm" "show" "-g" "mygroup" "-n" "None"')
 
-    def test_singleton(self):
+    def test_query_result_spaces(self):
         # tests a singleton example
         args = 'vm show -g "??group" -n "??name"'
         args = parse_quotes(args)
         self.shell.last.result = {
             'group': 'mygroup',
-            'name': 'myname'
+            'name': 'my name'
         }
-
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'vm show -g mygroup -n myname')
+        self.assertEqual(results[0], u'"vm" "show" "-g" "mygroup" "-n" "my name"')
 
     def test_spaces(self):
         # tests quotes with spaces
-        args = 'vm show -g "??[?group == \'mygroup\'].name"'
+        args = 'foo update --set "bar=??[?group == \'mygroup\'].name"'
         args = parse_quotes(args)
         self.shell.last.result = [
             {
@@ -150,11 +185,11 @@ class QueryInjection(unittest.TestCase):
 
         self.shell.handle_jmespath_query(args)
         results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'vm show -g fred')
+        self.assertEqual(results[0], u'"foo" "update" "--set" "bar=[\'fred\']"')
 
     def test_spaces_with_equal(self):
         # tests quotes with spaces
-        args = 'vm show -g="??[?group == \'myg roup\'].name"'
+        args = 'foo doo -bar="??[?group == \'myg roup\'].name"'
         args = parse_quotes(args)
         self.shell.last.result = [
             {
@@ -169,4 +204,4 @@ class QueryInjection(unittest.TestCase):
 
         self.shell.handle_jmespath_query(args)
         results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'vm show -g=fred')
+        self.assertEqual(results[0], u'"foo" "doo" "-bar=[\'fred\']"')
