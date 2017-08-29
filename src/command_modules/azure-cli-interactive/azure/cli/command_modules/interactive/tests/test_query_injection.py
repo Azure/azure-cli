@@ -51,7 +51,6 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        print(repr(self.stream.getvalue()))
         self.assertEqual(self.stream.getvalue(), '{\n  \"x\": \"result\"\n}\n')
 
     def test_print_just_query(self):
@@ -82,7 +81,6 @@ class QueryInjection(unittest.TestCase):
         ]
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        print(repr(self.stream.getvalue()))
         self.assertEqual(self.stream.getvalue(), '[\n  \"mygroup\",\n  \"mygroup2\",\n  \"mygroup3\"\n]\n')
 
     def test_string_replacement(self):
