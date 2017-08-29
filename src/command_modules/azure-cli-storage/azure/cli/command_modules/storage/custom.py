@@ -103,13 +103,19 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         if use_subdomain is not None:
             domain.name = use_subdomain == 'true'
 
-    encryption = instance.encryption or Encryption()
+    encryption = instance.encryption
     if encryption_services:
-        encryption.services = encryption_services
-    if encryption_key_source:
-        encryption.key_source = encryption_key_source
-    if encryption_key_vault_properties:
-        encryption.key_vault_properties = encryption_key_vault_properties
+        if not encryption:
+            encryption = Encryption(services=encryption_services)
+        else:
+            encryption.services = encryption_services
+
+    if encryption_key_source or encryption_key_vault_properties:
+        if encryption:
+            encryption.key_source = encryption_key_source
+            encryption.key_vault_properties = encryption_key_vault_properties
+        else:
+            raise ValueError('--encryption-services is required when configure encryption key source')
 
     params = StorageAccountUpdateParameters(
         sku=Sku(sku) if sku is not None else instance.sku,
@@ -199,12 +205,10 @@ def show_storage_account_connection_string(
 
 
 @transfer_doc(BlockBlobService.create_blob_from_path)
-def upload_blob(  # pylint: disable=too-many-locals
-        client, container_name, blob_name, file_path, blob_type=None,
-        content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
-        max_connections=2, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
-    '''Upload a blob to a container.'''
+def upload_blob(client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
+                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
+                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+    """Upload a blob to a container."""
 
     def upload_append_blob():
         if not client.exists(container_name, blob_name):
@@ -258,6 +262,9 @@ def upload_blob(  # pylint: disable=too-many-locals
             'timeout': timeout
         }
 
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17') and tier:
+            create_blob_args['premium_page_blob_tier'] = tier
+
         if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
             create_blob_args['validate_content'] = validate_content
 
@@ -269,6 +276,17 @@ def upload_blob(  # pylint: disable=too-many-locals
         'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
+
+
+def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
+    if blob_type == 'block':
+        return client.set_standard_blob_tier(container_name=container_name, blob_name=blob_name,
+                                             standard_blob_tier=tier, timeout=timeout)
+    elif blob_type == 'page':
+        return client.set_premium_page_blob_tier(container_name=container_name, blob_name=blob_name,
+                                                 premium_page_blob_tier=tier, timeout=timeout)
+    else:
+        raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
 def _get_service_container_type(client):
@@ -348,7 +366,7 @@ def set_acl_policy(client, container_name, policy_name, start=None, expiry=None,
 
 
 def delete_acl_policy(client, container_name, policy_name, **kwargs):
-    ''' Delete a stored access policy on a containing object '''
+    """ Delete a stored access policy on a containing object """
     acl = _get_acl(client, container_name, **kwargs)
     del acl[policy_name]
     if hasattr(acl, 'public_access'):

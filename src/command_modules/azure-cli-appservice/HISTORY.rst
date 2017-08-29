@@ -2,8 +2,8 @@
 
 Release History
 ===============
-Unreleased
-++++++++++++++++++
+0.1.14 (2017-08-28)
++++++++++++++++++++
 Breaking Change:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
 webapp: add a new alias of '-i' for "az webapp config container set --docker-custom-image-name"
 webapp: expose 'az webapp log show'

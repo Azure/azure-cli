@@ -450,10 +450,17 @@ for item in ['create', 'update']:
     register_cli_argument('network nsg rule {}'.format(item), 'access', help=None, **enum_choice_list(SecurityRuleAccess))
     register_cli_argument('network nsg rule {}'.format(item), 'protocol', help='Network protocol this rule applies to.', **enum_choice_list(SecurityRuleProtocol))
     register_cli_argument('network nsg rule {}'.format(item), 'direction', help=None, **enum_choice_list(SecurityRuleDirection))
-    register_cli_argument('network nsg rule {}'.format(item), 'source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
-    register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
-    register_cli_argument('network nsg rule {}'.format(item), 'destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-    register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        register_cli_argument('network nsg rule {}'.format(item), 'source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
+        register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Source')
+        register_cli_argument('network nsg rule {}'.format(item), 'destination_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Destination')
+        register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Destination')
+    else:
+        register_cli_argument('network nsg rule {}'.format(item), 'source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
+        register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
+        register_cli_argument('network nsg rule {}'.format(item), 'destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
+        register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
 
 register_cli_argument('network nsg rule create', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
 
@@ -474,6 +481,8 @@ for item in ['create', 'update']:
         register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', default=IPVersion.ipv4.value, **enum_choice_list(IPVersion))
     else:
         register_cli_argument('network public-ip {}'.format(item), 'version', ignore_type)
+    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
+        c.register_cli_argument('network public-ip {}'.format(item), 'sku', help='Public IP SKU', default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'PublicIPAddressSkuName'))
 
 # Route table
 register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
@@ -555,6 +564,9 @@ register_cli_argument('network lb', 'frontend_ip_name', help='The name of the fr
 register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', **enum_choice_list(['true', 'false']))
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
 register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
+    c.register_cli_argument('network lb', 'sku', help='Load balancer SKU', default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
 
 for item in ['backend_pool_name', 'backend_address_pool_name']:
     register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))

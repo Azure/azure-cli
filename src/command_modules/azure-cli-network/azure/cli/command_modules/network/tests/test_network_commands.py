@@ -20,6 +20,50 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBa
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'lb': 'lb1',
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip}'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkPublicIpWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku}'.format(**kwargs))
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkMultiIdsShowScenarioTest, self).__init__(__file__, test_method, resource_group='test_multi_id')
@@ -1103,6 +1147,40 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue(len(result['value']) > 0)
         result = self.cmd('network nic show-effective-route-table --ids {}'.format(nic_id))
         self.assertTrue(len(result['value']) > 0)
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkExtendedNSGScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
+    def test_network_extended_nsg(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'nsg': 'nsg1',
+            'rule': 'rule1'
+        }
+        self.cmd('network nsg create --name {nsg} -g {rg}'.format(**kwargs))
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(destinationAddressPrefixes)', 2),
+            JMESPathCheckV2('destinationAddressPrefix', ''),
+            JMESPathCheckV2('length(sourceAddressPrefixes)', 0),
+            JMESPathCheckV2('sourceAddressPrefix', '*'),
+            JMESPathCheckV2('length(sourcePortRanges)', 2),
+            JMESPathCheckV2('sourcePortRange', None),
+            JMESPathCheckV2('length(destinationPortRanges)', 0),
+            JMESPathCheckV2('destinationPortRange', '4444')
+        ])
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000 2000 3000'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(destinationAddressPrefixes)', 0),
+            JMESPathCheckV2('destinationAddressPrefix', 'Internet'),
+            JMESPathCheckV2('length(sourceAddressPrefixes)', 2),
+            JMESPathCheckV2('sourceAddressPrefix', ''),
+            JMESPathCheckV2('length(sourcePortRanges)', 0),
+            JMESPathCheckV2('sourcePortRange', '*'),
+            JMESPathCheckV2('length(destinationPortRanges)', 3),
+            JMESPathCheckV2('destinationPortRange', None)
+        ])
 
 
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):

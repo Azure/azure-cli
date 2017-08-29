@@ -1368,8 +1368,9 @@ def get_vmss_instance_view(resource_group_name, vm_scale_set_name, instance_id=N
     client = _compute_client_factory()
     if instance_id:
         if instance_id == '*':
-            return client.virtual_machine_scale_set_vms.list(resource_group_name, vm_scale_set_name,
-                                                             select='instanceView', expand='instanceView')
+
+            return [x.instance_view for x in (client.virtual_machine_scale_set_vms.list(
+                resource_group_name, vm_scale_set_name, select='instanceView', expand='instanceView'))]
 
         return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name, vm_scale_set_name,
                                                                       instance_id)
@@ -1628,7 +1629,8 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                                   tags,
                                                                   public_ip_address_allocation,
-                                                                  public_ip_address_dns_name))
+                                                                  public_ip_address_dns_name,
+                                                                  None))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
@@ -1737,11 +1739,11 @@ def create_vmss(vmss_name, resource_group_name, image,
                 admin_username=DefaultStr(getpass.getuser()), admin_password=None, authentication_type=None,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
-                load_balancer=None, application_gateway=None,
+                load_balancer=None, load_balancer_sku=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
                 app_gateway_sku=DefaultStr('Standard_Large'), app_gateway_capacity=DefaultInt(10),
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
-                public_ip_address=None, public_ip_address_allocation='dynamic',
+                public_ip_address=None, public_ip_address_allocation=None,
                 public_ip_address_dns_name=None,
                 public_ip_per_vm=False, vm_domain_name=None, dns_servers=None, nsg=None,
                 os_caching=DefaultStr(CachingTypes.read_write.value), data_caching=None,
@@ -1822,6 +1824,13 @@ def create_vmss(vmss_name, resource_group_name, image,
                                 else '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                       public_ip_address))
 
+    def _get_public_ip_address_allocation(value, sku):
+        IPAllocationMethod = get_sdk(ResourceType.MGMT_NETWORK, 'IPAllocationMethod', mod='models')
+        if not value:
+            value = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+                else IPAllocationMethod.dynamic.value
+        return value
+
     # Handle load balancer creation
     if load_balancer_type == 'new':
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
@@ -1831,10 +1840,10 @@ def create_vmss(vmss_name, resource_group_name, image,
             public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
             lb_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(public_ip_address, location,
-                                                                  tags,
-                                                                  public_ip_address_allocation,
-                                                                  public_ip_address_dns_name))
+            master_template.add_resource(build_public_ip_resource(
+                public_ip_address, location, tags,
+                _get_public_ip_address_allocation(public_ip_address_allocation, load_balancer_sku),
+                public_ip_address_dns_name, load_balancer_sku))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 
@@ -1846,7 +1855,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         lb_resource = build_load_balancer_resource(
             load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
             'loadBalancerFrontEnd', public_ip_address_id, subnet_id,
-            private_ip_address='', private_ip_allocation='Dynamic')
+            private_ip_address='', private_ip_allocation='Dynamic', sku=load_balancer_sku)
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
@@ -1860,10 +1869,10 @@ def create_vmss(vmss_name, resource_group_name, image,
             public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
             ag_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
-            master_template.add_resource(build_public_ip_resource(public_ip_address, location,
-                                                                  tags,
-                                                                  public_ip_address_allocation,
-                                                                  public_ip_address_dns_name))
+            master_template.add_resource(build_public_ip_resource(
+                public_ip_address, location, tags,
+                _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
+                None))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 

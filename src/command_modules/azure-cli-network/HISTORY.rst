@@ -3,10 +3,14 @@
 Release History
 ===============
 
-unreleased
+2.0.13 (2017-08-28)
 +++++++++++++++++++
 * BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
 * BC `vnet subnet create/update`: renamed `--private-access-services` to `--service-endpoints`
+* `nsg rule create/update`: Add support for multiple IP ranges and port ranges.
+* `lb create`: Added support for SKU.
+* `public-ip create`: Added support for SKU.
+
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
