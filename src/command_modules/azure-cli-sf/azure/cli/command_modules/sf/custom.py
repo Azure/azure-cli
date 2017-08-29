@@ -1495,6 +1495,7 @@ def sf_service_package_upload(client, node_name,
                                                  node_name, list_psps)
     client.deployed_service_package_to_node(node_name, desc, timeout)
 
+
 def sfctl_info():
     """Information about new Service Fabric CLI module"""
 
