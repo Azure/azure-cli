@@ -1,5 +1,9 @@
 .. :changelog:
 
+Unreleased
+===============
+* Added az sql server vnet-rule commands.
+
 Release History
 ===============
 2.0.10 (2017-08-28)
