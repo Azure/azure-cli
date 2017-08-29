@@ -439,7 +439,7 @@ class Shell(object):
         continue_flag = False
         args = parse_quotes(cmd)
         cmd_stripped = cmd.strip()
-        if cmd and len(cmd.split()) > 0 and cmd.split()[0].lower() == 'az':
+        if cmd_stripped and cmd.split(' ', 1)[0].lower() == 'az':
             telemetry.track_ssg('az', cmd)
             cmd = ' '.join(cmd.split()[1:])
         if self.default_command:
@@ -506,19 +506,19 @@ class Shell(object):
         try:
             if len(args) == 1:  # if arguments start with query_symbol, just print query result
                 if args[0] == query_symbol:
-                    print(json.dumps(self.last.result, sort_keys=True, indent=2), file=self.output)
+                    result = self.last.result
                 elif args[0].startswith(query_symbol):
-                    query = args[0][symbol_len:]
-                    print(json.dumps(jmespath.search(query, input_last), sort_keys=True, indent=2), file=self.output)
+                    result = jmespath.search(args[0][symbol_len:], input_last)
+                print(json.dumps(result, sort_keys=True, indent=2), file=self.output)
             else:  # query, inject into cmd
-                def sub_result(arg):
-                    escaped_symbol = re.escape(query_symbol)
-
-                    def jmespath_query(match):
+                def jmespath_query(match):
                         if match.group(0) == query_symbol:
                             return str(input_last)
                         query_result = jmespath.search(match.group(0)[symbol_len:], input_last)
                         return str(query_result)
+
+                def sub_result(arg):
+                    escaped_symbol = re.escape(query_symbol)
                     return json.dumps(re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg))
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
