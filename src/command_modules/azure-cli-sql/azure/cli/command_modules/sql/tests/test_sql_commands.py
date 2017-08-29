@@ -1319,32 +1319,34 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer()
-    # Create two vnets using cloudnet's cli cmdlets
-    def get_network_subnet_endpoint_service(self, resource_group, vnet, subnet):
-
-        self.cmd('network vnet create -g {rg} -n {vnet}'.format(resource_group, vnet))
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(resource_group, vnet, subnet),
-                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Sql'))
-
-        return self.cmd('network vnet subnet show ')
-
-    def test_network_subnet_endpoint_service(self, resource_group):
-        kwargs = {
-            'rg': resource_group,
-            'vnet': 'vnet2',
-            'subnet': 'subnet1'
-        }
-
-        self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(**kwargs),
-                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Sql'))
-
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         rg = resource_group
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
+
+        # Create vnet's - vnet1 and vnet2
+
+        vnetName1 = 'vnet1'
+        vnetName2 = 'vnet2'
+        subnetName = 'subnet1'
+
+        # Vnet 1
+        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(rg, vnetName1, subnetName),
+                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'.format(subnetName, vnetName1, rg)).get_output_in_json()
+        vnet_id_1 = vnet1['id']
+
+        # Vnet 2
+        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName2))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(rg, vnetName2, subnetName),
+                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        vnet2 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'.format(subnetName, vnetName2, rg)).get_output_in_json()
+        vnet_id_2 = vnet2['id']
 
         # test sql server vnet-rule create
         self.cmd('sql server vnet-rule create --name {} -g {} --server {} --vnet-subnet-id {}'
@@ -1352,14 +1354,14 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1))
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
 
         # test sql server vnet-rule show
         self.cmd('sql server vnet-rule show --name {} -g {} --server {}'
                  .format(vnet_rule_1, rg, server),
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
-                     JMESPathCheck('resourceGroup', rg))
+                     JMESPathCheck('resourceGroup', rg)])
 
         # test sql server vnet-rule update
         self.cmd('sql server vnet-rule update --name {} -g {} --server {} --vnet-subnet-id {}'
@@ -1368,7 +1370,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2))
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
 
 
         # test sql server vnet-rule list

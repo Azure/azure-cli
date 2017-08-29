@@ -184,9 +184,9 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
 
     with ServiceGroup(__name__, get_sql_virtual_network_rules_operations, virtual_network_rules_operations,
                   custom_path) as s:
-    with s.group('sql server vnet-rule') as c:
-        c.command('create', 'create_or_update')
-        c.command('show', 'get')
-        c.command('list', 'list_by_server')
-        c.command('delete', 'delete')
-        c.generic_update_command('update', 'get', 'create_or_update')
+        with s.group('sql server vnet-rule') as c:
+            c.command('create', 'create_or_update')
+            c.command('show', 'get')
+            c.command('list', 'list_by_server')
+            c.command('delete', 'delete')
+            c.generic_update_command('update', 'get', 'create_or_update')
