@@ -11,6 +11,7 @@ from azure.cli.testsdk import CliTestError, ResourceGroupPreparer
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer
 from azure.cli.testsdk.base import execute
 
+
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
                  resource_group_location_parameter_name='resource_group_location',
@@ -35,7 +36,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -55,6 +56,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this Vault preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
+
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
@@ -78,7 +80,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -98,6 +100,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this VM preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
+
 
 class ItemPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='item_name', vm_parameter_name='vm_name',
@@ -132,7 +135,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -161,6 +164,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this Item preparer.'
             raise CliTestError(template.format(VMPreparer.__name__,
                                                self.vm_parameter_name))
+
 
 class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
@@ -192,7 +196,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        #TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
+        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
 
     def _get_resource_group(self, **kwargs):
@@ -212,6 +216,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this Policy preparer.'
             raise CliTestError(template.format(VaultPreparer.__name__,
                                                self.vault_parameter_name))
+
 
 class RPPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-rp', parameter_name='rp_name', vm_parameter_name='vm_name',

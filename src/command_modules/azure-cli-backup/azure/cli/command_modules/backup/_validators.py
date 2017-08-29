@@ -7,6 +7,7 @@ from datetime import datetime
 
 # Argument types
 
+
 def datetime_type(string):
     """ Validates UTC datettime in accepted format. Examples: 31-12-2017 """
     accepted_date_formats = ['%d-%m-%Y']

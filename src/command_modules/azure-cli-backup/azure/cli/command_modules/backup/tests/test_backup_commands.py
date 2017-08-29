@@ -12,11 +12,13 @@ from azure.mgmt.recoveryservices.models import StorageModelType
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
+
 def _get_vm_version(vm_type):
     if vm_type == 'Microsoft.Compute/virtualMachines':
         return 'Compute'
     elif vm_type == 'Microsoft.ClassicCompute/virtualMachines':
         return 'Classic'
+
 
 class BackupTests(ScenarioTest):
     @ResourceGroupPreparer()
@@ -381,7 +383,7 @@ class BackupTests(ScenarioTest):
                                                    JMESPathCheck("properties.entityFriendlyName", vm_name),
                                                    JMESPathCheck("properties.operation", "Restore"),
                                                    JMESPathCheck("properties.status", "Completed"),
-                                                   JMESPathCheck("resourceGroup", resource_group)]) \
+                                                   JMESPathCheck("resourceGroup", resource_group)])\
                                                    .get_output_in_json()
 
         property_bag = trigger_restore_job_details['properties']['extendedInfo']['propertyBag']

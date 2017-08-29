@@ -29,7 +29,7 @@ register_cli_argument('backup vault create', 'region', location_type, help='The 
 
 register_cli_argument('backup vault list', 'resource_group_name', resource_group_name_type, help='The name of the Azure resource group in which to create or from which to retrieve this vault', completer=None, validator=None)
 
-register_cli_argument('backup vault set-backup-properties', 'backup_storage_redundancy', help='sets backup storage properties for a Recovery Services vault. Allowed values are GeoRedundant, LocallyRedundant')
+register_cli_argument('backup vault set-backup-properties', 'backup_storage_redundancy', help='sets backup storage properties for a Recovery Services vault.', **enum_choice_list(['GeoRedundant', 'LocallyRedundant']))
 
 # Container
 for command in ['list', 'show']:
