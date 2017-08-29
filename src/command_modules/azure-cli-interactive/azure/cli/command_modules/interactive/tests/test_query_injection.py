@@ -26,13 +26,12 @@ class QueryInjection(unittest.TestCase):
     """ tests using the query gesture for the interactive mode """
     def __init__(self, *args, **kwargs):
         super(QueryInjection, self).__init__(*args, **kwargs)
-        from azclishell.app import Shell, validate_contains_query
+        from azclishell.app import Shell
 
         self.stream = six.StringIO()
         self.shell = Shell(output_custom=self.stream)
         self.shell.cli_execute = self._mock_execute
         self.shell.last = MockValues()
-        self.validation_func = validate_contains_query
 
     def _mock_execute(self, cmd):
         self.stream.write(cmd)
@@ -42,21 +41,21 @@ class QueryInjection(unittest.TestCase):
         # tests empty case
         args = []
         self.shell.last.result = {}
-        flag = self.shell.handle_jmespath_query(args, False)
+        flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         self.assertEqual('\n', self.stream.getvalue())
 
     def test_just_query(self):
         # tests flushing just the query
-        args = ['?x']
+        args = ['??x']
         self.shell.last.result = {'x': 'result'}
-        flag = self.shell.handle_jmespath_query(args, False)
+        flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         self.assertEqual('"result"\n', self.stream.getvalue())
 
     def test_string_replacement(self):
         # tests that the query replaces the values in the command
-        args = 'vm show -g "?group" -n "?name"'
+        args = 'vm show -g "??group" -n "??name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -65,13 +64,13 @@ class QueryInjection(unittest.TestCase):
             'group': 'mygroup',
             'name': 'myname'
         }
-        flag = self.shell.handle_jmespath_query(args, False)
+        flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         self.assertEqual(u"vm show -g mygroup -n myname\n", self.stream.getvalue())
 
     def test_list_replacement(self):
         # tests that the query replaces the values in the command
-        args = 'vm show -g "?[].group" -n "?[].name"'
+        args = 'vm show -g "??[].group" -n "??[].name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -90,7 +89,7 @@ class QueryInjection(unittest.TestCase):
                 'name': 'myname3'
             }
         ]
-        flag = self.shell.handle_jmespath_query(args, False)
+        flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         results = self.stream.getvalue().strip().split('\n')
         self.assertTrue(len(results) == 3)
@@ -103,7 +102,7 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {'x': 'result'}
         # pylint: disable=protected-access
         b_flag, c_flag, out, cmd = self.shell._special_cases(
-            "this is 'url?what' negative", "this is 'url?what' negative", False)
+            "this is 'url?what' negative", False)
         self.assertFalse(b_flag)
         self.assertFalse(c_flag)
         self.assertFalse(out)
@@ -111,7 +110,7 @@ class QueryInjection(unittest.TestCase):
 
     def test_errors(self):
         # tests invalid query
-        args = 'vm show -g "?[].group" -n "?[].name"'
+        args = 'vm show -g "??[].group" -n "??[].name"'
         args = parse_quotes(args)
         args_no_quotes = []
         for arg in args:
@@ -125,10 +124,10 @@ class QueryInjection(unittest.TestCase):
                 'group': 'mygroup3',
             }
         ]
-        flag = self.shell.handle_jmespath_query(args, False)
+        flag = self.shell.handle_jmespath_query(args)
         results = self.stream.getvalue().split('\n')
         self.assertTrue(flag)
-        self.assertEqual(results[0], 'vm show -g mygroup -n myname')
+        self.assertEqual(results[0], 'vm show -g mygroup mygroup3 -n myname')
         self.assertEqual(len(results), 2)
 
     def test_singleton(self):
@@ -143,7 +142,7 @@ class QueryInjection(unittest.TestCase):
             'name': 'myname'
         }
 
-        flag = self.shell.handle_jmespath_query(args, False)
+        flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g mygroup -n myname')
@@ -166,7 +165,7 @@ class QueryInjection(unittest.TestCase):
             }
         ]
 
-        self.shell.handle_jmespath_query(args_no_quotes, False)
+        self.shell.handle_jmespath_query(args_no_quotes)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g fred')
 
@@ -188,33 +187,6 @@ class QueryInjection(unittest.TestCase):
             }
         ]
 
-        self.shell.handle_jmespath_query(args_no_quotes, False)
+        self.shell.handle_jmespath_query(args_no_quotes)
         results = self.stream.getvalue().split('\n')
         self.assertEqual(results[0], u'vm show -g=fred')
-
-    def test_validation(self):
-        # tests line validation that the command is an injection
-        args = 'foo bar --foo=?bar'
-        self.assertTrue(self.validation_func(args.split(), '?'))
-
-        args = 'foo bar --is fun -g ?bar '
-        self.assertTrue(self.validation_func(args.split(), '?'))
-
-        args = 'foo bar --is fun -g bar '
-        self.assertFalse(self.validation_func(args.split(), '?'))
-
-        args = 'foo bar --isfun=bar '
-        self.assertFalse(self.validation_func(args.split(), '?'))
-
-        args = 'foo bar --is ?[?group == \'word\'].name '
-        self.assertTrue(self.validation_func(parse_quotes(args), '?'))
-
-        args = 'foo bar --query [?group == \'word\'].name '
-        self.assertFalse(self.validation_func(parse_quotes(args), '?'))
-
-        args = 'foo bar --query=[?group == \'w or =?d\'].name '
-        self.assertFalse(self.validation_func(parse_quotes(args), '?'))
-
-
-if __name__ == '__main__':
-    unittest.main()
