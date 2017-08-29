@@ -498,36 +498,34 @@ class Shell(object):
         continue_flag = False
 
         if hasattr(self.last.result, '__dict__'):
-            input_dict = dict(self.last.result)
-        else:
-            input_dict = self.last.result
+            input_last = dict(self.last.result)
+        else:  # list or string
+            input_last = self.last.result
+            print("not dict")
         query_symbol = SELECT_SYMBOL['query']
         symbol_len = len(query_symbol)
         try:
             if len(args) == 1:  # if arguments start with query_symbol, just print query result
                 if args[0] == query_symbol:
                     print(json.dumps(self.last.result, sort_keys=True, indent=2), file=self.output)
-                elif len(args) == 1 and args[0].startswith(query_symbol):
+                elif args[0].startswith(query_symbol):
                     query = args[0][symbol_len:]
-                    print(json.dumps(jmespath.search(query, input_dict), sort_keys=True, indent=2), file=self.output)
+                    print(json.dumps(jmespath.search(query, input_last), sort_keys=True, indent=2), file=self.output)
             else:  # query, inject into cmd
                 def sub_result(arg):
                     escaped_symbol = re.escape(query_symbol)
 
                     def jmespath_query(match):
-                        query_result = jmespath.search(match.group(0)[symbol_len:], input_dict)
-                        if isinstance(query_result, list):
-                            return ' '.join(query_result)
-                        elif isinstance(query_result, (six.text_type, six.string_types)):
-                            return query_result
-                        else:  # query result is not a string or list, return invalid query message
-                            raise CLIError
+                        if match.group(0) == query_symbol:
+                            return str(input_last)
+                        query_result = jmespath.search(match.group(0)[symbol_len:], input_last)
+                        return str(query_result)
                     return re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg)
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
             continue_flag = True
-        except (jmespath.exceptions.ParseError, CLIError):
-            print("Invalid Query Input", file=self.output)
+        except (jmespath.exceptions.ParseError, CLIError) as e:
+            print("Invalid Query Input:" + str(e), file=self.output)
             continue_flag = True
         return continue_flag
 
@@ -668,7 +666,6 @@ class Shell(object):
                     break
                 else:
                     b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
-
                     if not self.default_command:
                         self.history.append(text)
                     if b_flag:
