@@ -504,22 +504,23 @@ class Shell(object):
         query_symbol = SELECT_SYMBOL['query']
         symbol_len = len(query_symbol)
         try:
-            if len(args) == 1: #if arguments start with query_symbol, just print query result
+            if len(args) == 1:  # if arguments start with query_symbol, just print query result
                 if args[0] == query_symbol:
                     print(json.dumps(self.last.result, sort_keys=True, indent=2), file=self.output)
                 elif len(args) == 1 and args[0].startswith(query_symbol):
                     query = args[0][symbol_len:]
                     print(json.dumps(jmespath.search(query, input_dict), sort_keys=True, indent=2), file=self.output)
-            else: #query, inject into cmd
+            else:  # query, inject into cmd
                 def sub_result(arg):
                     escaped_symbol = re.escape(query_symbol)
+
                     def jmespath_query(match):
                         query_result = jmespath.search(match.group(0)[symbol_len:], input_dict)
                         if isinstance(query_result, list):
                             return ' '.join(query_result)
                         elif isinstance(query_result, (six.text_type, six.string_types)):
                             return query_result
-                        else: # query result is not a string or list, return invalid query message
+                        else:  # query result is not a string or list, return invalid query message
                             raise CLIError
                     return re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg)
                 cmd_base = ' '.join(map(sub_result, args))
