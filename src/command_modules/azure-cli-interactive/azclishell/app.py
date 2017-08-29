@@ -472,7 +472,7 @@ class Shell(object):
                 continue_flag = True
                 telemetry.track_ssg('exit code', '')
             elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
-                continue_flag = self.handle_jmespath_query(args, cmd_stripped)
+                continue_flag = self.handle_jmespath_query(args)
                 telemetry.track_ssg('query', '')
 
             elif args[0] == '--version' or args[0] == '-v':
@@ -493,66 +493,40 @@ class Shell(object):
 
         return break_flag, continue_flag, outside, cmd
 
-    def handle_jmespath_query(self, args, cmd):
+    def handle_jmespath_query(self, args):
         """ handles the jmespath query for injection or printing """
-        continue_flag = True
+        continue_flag = False
 
         if hasattr(self.last.result, '__dict__'):
             input_dict = dict(self.last.result)
         else:
             input_dict = self.last.result
+        query_symbol = SELECT_SYMBOL['query']
+        symbol_len = len(query_symbol)
         try:
-            if cmd == SELECT_SYMBOL['query']:
-                print(json.dumps(self.last.result, sort_keys=True, indent=2), file=self.output)
-                continue_flag = True
-            elif len(args) == 1 and args[0].startswith(SELECT_SYMBOL['query']):
-                query = args[0][len(SELECT_SYMBOL['query']):]
-                print(json.dumps(jmespath.search(query, input_dict), sort_keys=True, indent=2), file=self.output)
-                continue_flag = True
-            else: #inject into cmd
+            if len(args) == 1: #if arguments start with query_symbol, just print query result
+                if args[0] == query_symbol:
+                    print(json.dumps(self.last.result, sort_keys=True, indent=2), file=self.output)
+                elif len(args) == 1 and args[0].startswith(query_symbol):
+                    query = args[0][symbol_len:]
+                    print(json.dumps(jmespath.search(query, input_dict), sort_keys=True, indent=2), file=self.output)
+            else: #query, inject into cmd
                 def sub_result(arg):
-                    escaped_symbol = re.escape(SELECT_SYMBOL['query'])
-                    return re.sub(r'%s\S*' % escaped_symbol, lambda x: jmespath.search(x, input_dict), arg)
+                    escaped_symbol = re.escape(query_symbol)
+                    def jmespath_query(match):
+                        query_result = jmespath.search(match.group(0)[symbol_len:], input_dict)
+                        if isinstance(query_result, list):
+                            return ' '.join(query_result)
+                        elif isinstance(query_result, (six.text_type, six.string_types)):
+                            return query_result
+                        else: # query result is not a string or list, return invalid query message
+                            raise CLIError
+                    return re.sub(r'%s\S*' % escaped_symbol, jmespath_query, arg)
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
-                continue_flag = True
-                # elif all(isinstance(result, list) for result in results):
-                #     if len(results) > 1:
-                #         for res_counter, _ in enumerate(results[0]):
-                #             base = cmd_base
-                #             skip = False
-
-                #             for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                #                 if counter < len(results) and res_counter < len(results[counter]):
-                #                     try:
-                #                         base = base.replace(
-                #                             SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                #                     except TypeError:  # because of bad input
-                #                         pass
-                #                 else:  # if there aren't an even number of results, skip it
-                #                     skip = True
-                #             if not skip:
-                #                 self.cli_execute(base)
-                #     else:
-                #         for res_counter, _ in enumerate(results[0]):
-                #             base = cmd_base
-                #             skip = False
-
-                #             for counter in range(cmd_base.count(SELECT_SYMBOL['query'])):
-                #                 if counter < len(results) and res_counter < len(results[counter]):
-                #                     try:
-                #                         base = base.replace(
-                #                             SELECT_SYMBOL['query'], results[counter][res_counter], 1)
-                #                     except TypeError:  # because of bad input
-                #                         pass
-                #                 else:  # if there aren't an even number of results, skip it
-                #                     skip = True
-                #             if not skip:
-                #                 self.cli_execute(base)
-                #     continue_flag = True
-
+            continue_flag = True
         except (jmespath.exceptions.ParseError, CLIError):
-            print("Invalid Query", file=self.output)
+            print("Invalid Query Input", file=self.output)
             continue_flag = True
         return continue_flag
 
