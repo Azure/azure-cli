@@ -513,7 +513,8 @@ def cli_command(module_name, name, operation,
 
     # Set the command source as we have the current command table and are about to add the command
     if module_name and module_name.startswith(EXTENSIONS_MOD_PREFIX):
-        cmd.command_source = ExtensionCommandSource(extension_name=mod_to_ext_map.get(module_name, None))
+        ext_mod = module_name.split('.')[0]
+        cmd.command_source = ExtensionCommandSource(extension_name=mod_to_ext_map.get(ext_mod, None))
         if name in command_table:
             cmd.command_source.overrides_command = True
 
