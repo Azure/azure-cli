@@ -5,6 +5,7 @@
 
 import unittest
 import six
+import os
 from azclishell.util import parse_quotes
 from azclishell.gather_commands import GatherCommands
 
@@ -93,8 +94,11 @@ class QueryInjection(unittest.TestCase):
         }
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'"vm" "show" "-g" "mygroup" "-n" "myname"')
+        results = self.stream.getvalue().split(os.linesep)
+        
+        print(repr(results[0]))
+        print(repr(os.linesep))
+        self.assertEqual(results[0], '"vm" "show" "-g" "mygroup" "-n" "myname"')
 
     def test_list_replacement(self):
         # tests that the query replaces the values in the command
@@ -197,5 +201,5 @@ class QueryInjection(unittest.TestCase):
         ]
 
         self.shell.handle_jmespath_query(args)
-        results = self.stream.getvalue().split('\n')
+        results = self.stream.getvalue().split(os.linesep)
         self.assertEqual(results[0], u'"foo" "doo" "-bar=[\'fred\']"')
