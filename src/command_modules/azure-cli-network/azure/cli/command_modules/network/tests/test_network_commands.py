@@ -1575,6 +1575,7 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase):  # pyli
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2015-06-15')
 class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
@@ -1638,6 +1639,78 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, gateway2_name))
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
                  checks=JMESPathCheckV2('routingWeight', 25))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01')
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
+    def test_network_vpn_gateway(self, resource_group):
+        vnet1_name = 'myvnet1'
+        vnet2_name = 'myvnet2'
+        vnet3_name = 'myvnet3'
+        gateway1_name = 'gateway1'
+        gateway2_name = 'gateway2'
+        gateway3_name = 'gateway3'
+        ip1_name = 'pubip1'
+        ip2_name = 'pubip2'
+        ip3_name = 'pubip3'
+        rg = resource_group
+
+        self.cmd('network public-ip create -n {} -g {}'.format(ip1_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip2_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip3_name, rg))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24'.format(rg, vnet1_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16'.format(rg, vnet2_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16'.format(rg, vnet3_name))
+
+        subscription_id = MOCKED_SUBSCRIPTION_ID if not self.in_recording \
+            else self.cmd('account list --query "[?isDefault].id"').get_output_in_json()[0]
+
+        vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, vnet1_name)
+        vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, vnet2_name)
+
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, gateway1_name, vnet1_id, ip1_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, gateway2_name, vnet2_id, ip2_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50'.format(rg, gateway3_name, vnet3_name, ip3_name))
+
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway2_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway3_name))
+
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway1_name), checks=[
+            JMESPathCheckV2('gatewayType', 'Vpn'),
+            JMESPathCheckV2('sku.capacity', 2),
+            JMESPathCheckV2('sku.name', 'Basic'),
+            JMESPathCheckV2('vpnType', 'RouteBased'),
+            JMESPathCheckV2('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway2_name), checks=[
+            JMESPathCheckV2('gatewayType', 'Vpn'),
+            JMESPathCheckV2('sku.capacity', 2),
+            JMESPathCheckV2('sku.name', 'Basic'),
+            JMESPathCheckV2('vpnType', 'RouteBased'),
+            JMESPathCheckV2('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway3_name), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('enableBgp', True),
+            JMESPathCheckV2('bgpSettings.asn', 12345),
+            JMESPathCheckV2('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            JMESPathCheckV2('bgpSettings.peerWeight', 50)
+        ])
+
+        conn12 = 'conn1to2'
+        conn21 = 'conn2to1'
+        gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, gateway1_name)
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, gateway2_name))
+        self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
+                 checks=JMESPathCheckV2('routingWeight', 25))
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway2 {} --vnet-gateway1 {}'.format(conn21, rg, gateway1_id, gateway2_name))
+
+        self.cmd('network vnet-gateway list-learned-routes -g {} -n {}'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway list-advertised-routes -g {} -n {} --peer 10.1.1.1'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway list-bgp-peer-status -g {} -n {} --peer 10.1.1.1'.format(rg, gateway1_name))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):

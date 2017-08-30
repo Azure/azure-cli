@@ -5,6 +5,11 @@ Release History
 
 2.0.13 (2017-08-28)
 +++++++++++++++++++
+* `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
+
+
+unreleased
++++++++++++++++++++
 * BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
 * BC `vnet subnet create/update`: renamed `--private-access-services` to `--service-endpoints`
 * `nsg rule create/update`: Add support for multiple IP ranges and port ranges.
