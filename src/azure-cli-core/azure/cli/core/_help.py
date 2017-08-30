@@ -184,11 +184,7 @@ def _print_extensions_msg(help_file):
     if help_file.type != 'command':
         return
     if help_file.command_source and isinstance(help_file.command_source, ExtensionCommandSource):
-        if help_file.command_source.overrides_command:
-            logger.warning(help_file.command_source.get_command_override_msg())
-        else:
-            logger.warning("This command is from the following extension: "
-                           "{}".format(help_file.command_source.extension_name))
+        logger.warning(help_file.command_source.get_command_warn_msg())
 
 
 def _print_header(help_file):
