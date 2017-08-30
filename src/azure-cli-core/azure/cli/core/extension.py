@@ -25,8 +25,6 @@ EXT_METADATA_MAXCLIVERSION = 'azext.maxCliVersion'
 
 logger = azlogging.get_az_logger(__name__)
 
-logger.debug("Extension directory: '%s'", EXTENSIONS_DIR)
-
 
 class ExtensionNotInstalledException(Exception):
     def __init__(self, extension_name):
@@ -167,6 +165,7 @@ def get_extension_path(ext_name):
 
 
 def get_extensions():
+    logger.debug("Extensions directory: '%s'", EXTENSIONS_DIR)
     extensions = []
     for ext_type in EXTENSION_TYPES:
         extensions.extend([ext for ext in ext_type.get_all()])
