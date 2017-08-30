@@ -8,16 +8,16 @@ from azure.cli.core.help_files import helps
 # pylint: disable=line-too-long, too-many-lines
 
 helps['monitor'] = """
-            type: group
-            short-summary: Commands to manage Azure Monitor service.
-            """
+    type: group
+    short-summary: Manage the Azure Monitor Service.
+"""
 
 # region Alerts
 
 helps['monitor alert'] = """
     type: group
-    short-summary: Commands to manage metric-based alert rules.
-    """
+    short-summary: Manage metric-based alert rules.
+"""
 
 helps['monitor alert create'] = """
     type: command
@@ -30,7 +30,7 @@ helps['monitor alert create'] = """
             Email:   --action email bob@contoso.com ann@contoso.com
             Webhook: --action webhook https://www.contoso.com/alert apiKey=value
             Webhook: --action webhook https://www.contoso.com/alert?apiKey=value
-            To specify multiple actions, add multiple --add-action ARGS entries.
+            To specify multiple actions, use multiple --action args.
         - name: --description
           short-summary: Free-text description of the rule. Defaults to the condition expression.
         - name: --disabled
@@ -43,10 +43,10 @@ helps['monitor alert create'] = """
         - name: --email-service-owners
           short-summary: Email the service owners if an alert is triggered.
     examples:
-        - name: Create a High CPU-based alert on a VM with no actions.
+        - name: Create a high CPU usage alert on a VM with no actions.
           text: >
             az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition "Percentage CPU > 90 avg 5m"
-        - name: Create a High CPU-based alert on a VM with email and webhook actions.
+        - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
             az vm alert rule create -n rule1 -g <RG> --target <VM ID> \\
                 --condition "Percentage CPU > 90 avg 5m" \\
@@ -58,16 +58,13 @@ helps['monitor alert create'] = """
 helps['monitor alert update'] = """
     type: command
     short-summary: Update a metric-based alert rule.
-    long-summary: |
-        To specify the condition:
-            --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD
     parameters:
         - name: --target
           short-summary: ID of the resource to target for the alert rule.
         - name: --description
-          short-summary: Free-text description of the rule.
+          short-summary: Description of the rule.
         - name: --condition
-          short-summary: The condition expression upon which to trigger the rule.
+          short-summary: The condition expression which triggers the rule.
           long-summary: |
             Usage:   --condition "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD"
             Example: --condition "Percentage CPU > 60 avg 1h30m"
@@ -78,7 +75,7 @@ helps['monitor alert update'] = """
             Email:   --add-action email bob@contoso.com ann@contoso.com
             Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
             Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
-            To specify multiple actions, add multiple --add-action ARGS entries.
+            To specify multiple actions, add multiple --add-action args.
         - name: --remove-action -r
           short-summary: Remove one or more actions.
           long-summary: |
@@ -133,7 +130,7 @@ helps['monitor alert list-incidents'] = """
 
 helps['monitor metrics'] = """
     type: group
-    short-summary: Commands to view Azure resource metrics.
+    short-summary: View Azure resource metrics.
 """
 
 helps['monitor metrics list'] = """
@@ -150,15 +147,15 @@ helps['monitor metrics list-definitions'] = """
 
 helps['monitor log-profiles'] = """
             type: group
-            short-summary: Commands to manage the log profiles assigned to Azure subscription.
+            short-summary: Manage the log profiles.
             """
 helps['monitor log-profiles update'] = """
             type: command
-            short-summary: Update a log profile assigned to Azure subscription.
+            short-summary: Update a log profile.
             """
 helps['monitor diagnostic-settings'] = """
             type: group
-            short-summary: Commands to manage service diagnostic settings.
+            short-summary: Manage service diagnostic settings.
             """
 helps['monitor diagnostic-settings create'] = """
             type: command
@@ -166,38 +163,38 @@ helps['monitor diagnostic-settings create'] = """
             parameters:
                 - name: --resource-id
                   type: string
-                  short-summary: The identifier of the resource
+                  short-summary: The identifier of the resource.
                 - name: --resource-group -g
                   type: string
-                  short-summary: Name of the resource group
+                  short-summary: Name of the resource group.
                 - name: --logs
                   type: string
-                  short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
+                  short-summary: JSON encoded list of logs settings. Use @file to load from a file.
                 - name: --metrics
                   type: string
-                  short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
+                  short-summary: JSON encoded list of metric settings. Use @file to load from a file.
                 - name: --storage-account
                   type: string
-                  short-summary: Name or ID of the storage account to which you would like to send Diagnostic Logs
+                  short-summary: Name or ID of the storage account to send diagnostic logs to.
                 - name: --namespace
                   type: string
-                  short-summary: Name or ID of the Service Bus namespace
+                  short-summary: Name or ID of the Service Bus namespace.
                 - name: --rule-name
                   type: string
-                  short-summary: Name of the Service Bus authorization rule
+                  short-summary: Name of the Service Bus authorization rule.
                 - name: --workspace
                   type: string
-                  short-summary: Name or ID of the Log Analytics workspace to which you would like to send Diagnostic Logs
+                  short-summary: Name or ID of the Log Analytics workspace to send diagnostic logs to.
                 - name: --tags
                   short-summary: Space separated tags in 'key[=value]' format. Use '' to clear existing tags
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
-            short-summary: Update diagnostic settings for the specified resource.
+            short-summary: Update diagnostic settings.
             """
 helps['monitor autoscale-settings'] = """
             type: group
-            short-summary: Commands to manage autoscale settings.
+            short-summary: Manage autoscale settings.
             """
 helps['monitor autoscale-settings update'] = """
             type: command
@@ -206,5 +203,5 @@ helps['monitor autoscale-settings update'] = """
 
 helps['monitor activity-log'] = """
     type: group
-    short-summary: Commands to manage activity log.
+    short-summary: Manage activity logs.
 """

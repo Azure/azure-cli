@@ -7,27 +7,29 @@
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 helps['login'] = """
-            examples:
-                - name: Log in interactively.
-                  text: >
-                    az login
-                - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled.
-                  text: >
-                    az login -u johndoe@contoso.com -p VerySecret
-                - name: Log in with a service principal using client secret.
-                  text: >
-                    az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
-                - name: Log in with a service principal using client certificate.
-                  text: >
-                    az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
-                - name: Log in using the VM's Managed Service Identity
-                  text: >
-                    az login --msi
-            """
+    type: command
+    short-summary: Log in to Azure.
+    examples:
+        - name: Log in interactively.
+          text: >
+            az login
+        - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled.
+          text: >
+            az login -u johndoe@contoso.com -p VerySecret
+        - name: Log in with a service principal using client secret.
+          text: >
+            az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
+        - name: Log in with a service principal using client certificate.
+          text: >
+            az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+        - name: Log in using a VM's managed service identity (MSI)
+          text: >
+            az login -msi
+    """
 
 helps['account'] = """
     type: group
-    short-summary: Manage subscriptions.
+    short-summary: Manage Azure subscription information.
 """
 
 helps['account clear'] = """
@@ -65,5 +67,6 @@ helps['account show'] = """
 
 helps['account get-access-token'] = """
     type: command
-    long-summary: provides the token for trusted utils to access your Azure subscriptions. The token will be valid for at least 5 minutes with the maximum at 60 minutes. If the subscription argument isn't specified, the current account is used.
+    short-summary: Provides a token for utlilities to access Azure.
+    long-summary: The token will be valid for at least 5 minutes with the maximum at 60 minutes. If the subscription argument isn't specified, the current account is used.
 """

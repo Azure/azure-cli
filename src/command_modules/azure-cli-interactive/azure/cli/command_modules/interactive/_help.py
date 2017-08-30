@@ -7,8 +7,8 @@ from azure.cli.core.help_files import helps
 
 helps['interactive'] = """
             type: command
-            short-summary: Start the interactive experience.
+            short-summary: Start interactive mode.
             long-summary: >
                 An interactive environment that makes it easier to learn and use Azure CLI commands.
-                see https://azure.microsoft.com/en-us/blog/welcome-to-azure-cli-shell/
+                See https://azure.microsoft.com/en-us/blog/welcome-to-azure-cli-shell/
             """

@@ -8,5 +8,5 @@ from azure.cli.core.help_files import helps
 
 helps['configure'] = """
             type: command
-            short-summary: Configure Azure CLI 2.0 or view your configuration. The command is interactive, so just type `az configure` and respond to the prompts.
+            short-summary: Manage and view the Azure CLI 2.0 configuration. This command is interactive.
 """

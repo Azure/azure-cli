@@ -8,20 +8,20 @@ from azure.cli.core.help_files import helps
 
 helps['cognitiveservices'] = """
     type: group
-    short-summary: Manage Cognitive Services accounts in Azure Resource Manager
+    short-summary: Manage Cognitive Services accounts.
 """
 
 helps['cognitiveservices list'] = """
     type: command
-    short-summary: list all the existing cognitive services accounts under a resource group or current azure subscription
+    short-summary: List all the existing cognitive services accounts under a resource group or current Azure subscription.
     examples:
-        - name: list all the cognitive services accounts in a resource group
+        - name: List all the cognitive services accounts in a resource group.
           text: az cognitiveservices list -g MyResourceGroup
 """
 
 helps['cognitiveservices account'] = """
     type: group
-    short-summary: Manage and update cognitive services accounts
+    short-summary: Manage and update cognitive services accounts.
 """
 
 helps['cognitiveservices account delete'] = """
@@ -33,7 +33,7 @@ helps['cognitiveservices account create'] = """
     type: command
     short-summary: Create a cognitive services account.
     examples:
-        - name: create a S0 face Api cognitive services account in West Europe without confirmation required
+        - name: Create a S0 face API cognitive services account in West Europe without confirmation required.
           text: az cognitiveservices create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
 """
 
@@ -49,7 +49,7 @@ helps['cognitiveservices account update'] = """
 
 helps['cognitiveservices account list-skus'] = """
     type: command
-    short-summary: List the avaiable skus of a cognitive services account.
+    short-summary: List the SKUs avaiable for a cognitive services account.
 """
 
 

@@ -8,13 +8,13 @@ from azure.cli.core.help_files import helps
 
 helps['dls'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store accounts, and filesystems.
-    long-summary: If you don't have the Data Lake Store component installed, add it with `az component update --add dls`. These commands are in preview.
+    short-summary: Manage Data Lake Store accounts and filesystems.
+    long-summary: These commands are in preview.
 """
 
 helps['dls account'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store accounts.
+    short-summary: Manage Data Lake Store accounts.
     long-summary: These commands are in preview.
 """
 
@@ -27,13 +27,13 @@ helps['dls account create'] = """
           short-summary: 'Name of the default group to give permissions to for freshly created files and folders in the Data Lake Store account.'
         - name: --key-vault-id
           type: string
-          short-summary: 'If the encryption type is User assigned, this is the key vault the user wishes to use.'
+          short-summary: 'Key vault for the user-assigned encryption type.'
         - name: --key-name
           type: string
-          short-summary: 'If the encryption type is User assigned, this is the key name in the key vault the user wishes to use.'
+          short-summary: 'Key name for the user-assigned encryption type.'
         - name: --key-version
           type: string
-          short-summary: 'If the encryption type is User assigned, this is the key version of the key the user wishes to use.'
+          short-summary: 'Key version for the user-assigned encryption type.'
 """
 
 helps['dls account update'] = """
@@ -43,39 +43,39 @@ helps['dls account update'] = """
 
 helps['dls account show'] = """
     type: command
-    short-summary: Retrieves the Data Lake Store account.
+    short-summary: Retrieves a Data Lake Store account.
 """
 
 helps['dls account list'] = """
     type: command
-    short-summary: Lists Data Lake Store accounts in a subscription or a specific resource group.
+    short-summary: Lists Data Lake Store accounts in a subscription or resource group.
 """
 
 helps['dls account enable-key-vault'] = """
     type: command
-    short-summary: Attempts to enable a user managed Key Vault for encryption of the specified Data Lake Store account.
+    short-summary: Attempts to enable a user-managed Key Vault for encryption of a Data Lake Store account.
 """
 
 helps['dls account delete'] = """
     type: command
-    short-summary: Deletes the Data Lake Store account.
+    short-summary: Deletes a Data Lake Store account.
 """
 
 helps['dls account trusted-provider'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store account trusted identity providers.
+    short-summary: Manage Data Lake Store account trusted identity providers.
     long-summary: These commands are in preview.
 """
 
 helps['dls account firewall'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store account firewall rules.
+    short-summary: Manage Data Lake Store account firewall rules.
     long-summary: These commands are in preview.
 """
 
 helps['dls account firewall create'] = """
     type: command
-    short-summary: Creates a firewall rule in the Data Lake Store account.
+    short-summary: Creates a firewall rule in a Data Lake Store account.
     parameters:
         - name: --end-ip-address
           type: string
@@ -90,52 +90,52 @@ helps['dls account firewall create'] = """
 
 helps['dls account firewall update'] = """
     type: command
-    short-summary: Updates a firewall rule in the Data Lake Store account.
+    short-summary: Updates a firewall rule in a Data Lake Store account.
 """
 
 helps['dls account firewall show'] = """
     type: command
-    short-summary: Retrieves a firewall rule in the Data Lake Store account.
+    short-summary: Retrieves a firewall rule in a Data Lake Store account.
 """
 
 helps['dls account firewall list'] = """
     type: command
-    short-summary: Lists firewall rules in the Data Lake Store account.
+    short-summary: Lists firewall rules in a Data Lake Store account.
 """
 
 helps['dls account firewall delete'] = """
     type: command
-    short-summary: Deletes a firewall rule in the Data Lake Store account.
+    short-summary: Deletes a firewall rule in a Data Lake Store account.
 """
 
 helps['dls fs'] = """
     type: group
-    short-summary: Commands to manage a Data Lake Store filesystem.
+    short-summary: Manage a Data Lake Store filesystem.
     long-summary: These commands are in preview.
 """
 
 helps['dls fs create'] = """
     type: command
-    short-summary: Creates a file or folder in the Data Lake Store account at the path.
+    short-summary: Creates a file or folder in a Data Lake Store account.
     parameters:
         - name: --content
           type: string
-          short-summary: 'Optional content for the file to contain upon creation.'
+          short-summary: 'Content for the file to contain upon creation.'
 """
 
 helps['dls fs show'] = """
     type: command
-    short-summary: displays file or folder information in the Data Lake Store account at the path.
+    short-summary: Displays file or folder information in a Data Lake Store account.
 """
 
 helps['dls fs list'] = """
     type: command
-    short-summary: displays the list of files and folder information under the folder in the Data Lake Store account.
+    short-summary: Displays the list of files and folders in a Data Lake Store account.
 """
 
 helps['dls fs append'] = """
     type: command
-    short-summary: Appends content to a file in the Data Lake Store account at the path.
+    short-summary: Appends content to a file in a Data Lake Store account.
     parameters:
         - name: --content
           type: string
@@ -144,157 +144,166 @@ helps['dls fs append'] = """
 
 helps['dls fs delete'] = """
     type: command
-    short-summary: Deletes the file or folder in the Data Lake Store account at the path.
+    short-summary: Deletes a file or folder in a Data Lake Store account.
 """
 
 helps['dls fs upload'] = """
     type: command
-    short-summary: Uploads a file or folder to the Data Lake Store account at the destination path.
+    short-summary: Uploads a file or folder to a Data Lake Store account.
     parameters:
         - name: --source-path
           type: string
-          short-summary: 'The full path to the file or folder to upload'
+          short-summary: 'The path to the file or folder to upload.'
         - name: --destination-path
           type: string
-          short-summary: 'The full path in the Data Lake Store filesystem to upload the file or folder to in the format /path/file.txt'
+          short-summary: 'The full path in the Data Lake Store filesystem to upload the file or folder to, in the format /path/file.txt'
         - name: --thread-count
           type: int
-          short-summary: 'Optionally specify the parallelism of the upload. Default is the number of cores in the local machine.'
+          short-summary: 'Parallelism of the upload. The default is the number of cores in the local machine.'
         - name: --chunk-size
           type: int
-          short-summary: 'Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.'
+          short-summary: 'Number of bytes for a chunk.'
+          long-summary: 'Large files are split into chunks. Files smaller than this size will always be transferred in a single thread.'
         - name: --buffer-size
           type: int
-          short-summary: 'Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.'
+          short-summary: 'Number of bytes for internal buffer.'
+          long-summary: 'A buffer cannot be bigger than a chunk and cannot be smaller than a block.'
         - name: --block-size
           type: int
-          short-summary: 'Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk.'
+          short-summary: 'Number of bytes for a block.'
+          long-summary: 'Within each chunk, a smaller block is written for each API call. A block cannot be bigger than a chunk and must be bigger than a buffer.'
 
 """
 
 helps['dls fs download'] = """
     type: command
-    short-summary: Downloads a file or folder from the Data Lake Store account to the local destination path.
+    short-summary: Downloads a file or folder from a Data Lake Store account to the local machine.
     parameters:
         - name: --source-path
           type: string
-          short-summary: 'The full path in the Data Lake Store filesystem to download the file or folder from in the format /path/file.txt'
+          short-summary: 'The full path in the Data Lake Store filesystem to download the file or folder from, in the format /path/file.txt'
         - name: --destination-path
           type: string
-          short-summary: 'The full local path where the file or folder will be downloaded to'
+          short-summary: 'The local path where the file or folder will be downloaded to.'
         - name: --thread-count
           type: int
-          short-summary: 'Optionally specify the parallelism of the download. Default is the number of cores in the local machine.'
+          short-summary: 'Parallelism of the download. The default is the number of cores in the local machine.'
         - name: --chunk-size
           type: int
-          short-summary: 'Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.'
+          short-summary: 'Number of bytes for a chunk.'
+          long-summary: 'Large files are split into chunks. Files smaller than this size will always be transferred in a single thread.'
         - name: --buffer-size
           type: int
-          short-summary: 'Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.'
+          short-summary: 'Number of bytes for internal buffer.'
+          long-summary: 'A buffer cannot be bigger than a chunk and cannot be smaller than a block.'
         - name: --block-size
           type: int
-          short-summary: 'Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk.'
+          short-summary: 'Number of bytes for a block.'
+          long-summary: 'Within each chunk, a smaller block is written for each API call. A block cannot be bigger than a chunk and must be bigger than a buffer.'
 
 """
 
 helps['dls fs test'] = """
     type: command
-    short-summary: Tests the existence of the file or folder in the Data Lake Store account at the path.
+    short-summary: Tests for the existence of a file or folder in a Data Lake Store account.
 """
 
 helps['dls fs preview'] = """
     type: command
-    short-summary: Previews the content of the file in the Data Lake Store account at the path.
+    short-summary: Previews the content of a file in a Data Lake Store account.
     parameters:
         - name: --length
           type: long
-          short-summary: 'The optional amount of data to preview in bytes as a long. If not specified, will attempt to preview the full file. If the file is > 1MB --force must be specified'
+          short-summary: 'The amount of data to preview in bytes as a long. If not specified, will attempt to preview the full file. If the file is > 1MB --force must be specified.'
         - name: --offset
           type: long
-          short-summary: 'The optional position in bytes as a long in the file to start the preview from'
+          short-summary: 'The position in bytes in the file to start the preview from.'
 """
 
 helps['dls fs join'] = """
     type: command
-    short-summary: Joins the list of files in the Data Lake Store account into one file at the destination path.
+    short-summary: Joins a list of files in a Data Lake Store account into one file.
     parameters:
         - name: --source-paths
           type: list
           short-summary: 'The list of files in the Data Lake Store account to join.'
         - name: --destination-path
           type: string
-          short-summary: 'The destination path in the Data Lake Store account where the resulting joined files should be placed.'
+          short-summary: 'The destination path in the Data Lake Store account where the result should be placed.'
 """
 
 helps['dls fs move'] = """
     type: command
-    short-summary: Moves the file or folder in the Data Lake Store account to the destination path.
+    short-summary: Moves a file or folder in a Data Lake Store account.
     parameters:
         - name: --source-path
           type: list
-          short-summary: 'The file or folder to move'
+          short-summary: 'The file or folder to move.'
         - name: --destination-path
           type: string
-          short-summary: 'The destination path in the Data Lake Store account where the file or folder should be moved to.'
+          short-summary: 'The destination path in the Data Lake Store account.'
 """
 
 helps['dls fs set-expiry'] = """
     type: command
-    short-summary: Sets the absolute expiration time of the file.
+    short-summary: Sets the absolute expiration time for a file.
 """
 
 helps['dls fs remove-expiry'] = """
     type: command
-    short-summary: Removes the expiration time on a file, if any.
+    short-summary: Removes the expiration time for a file.
 """
 
 helps['dls fs access'] = """
     type: group
-    short-summary: Commands to manage a Data Lake Store filesystem access and permissions.
+    short-summary: Manage Data Lake Store filesystem access and permissions.
 """
 
 helps['dls fs access show'] = """
     type: command
-    short-summary: Displays the ACL for a given file or folder
+    short-summary: Displays the access control list (ACL).
 """
 
 helps['dls fs access set-owner'] = """
     type: command
-    short-summary: Sets the owner and or owning group for the file or folder in the Data Lake Store account.
+    short-summary: Sets the owner information for a file or folder in a Data Lake Store account.
     parameters:
         - name: --owner
           type: string
-          short-summary: 'The user AAD object ID or UPN to set as the owner. If not specified the owner remains unchanged'
+          short-summary: 'The user Azure Active Directory object ID or user principal name to set as the owner.'
         - name: --group
           type: string
-          short-summary: 'The group AAD object ID or UPN to set as the owning group. If not specified the owning group remains unchanged'
+          short-summary: 'The group Azure Active Directory object ID or user principal name to set as the owning group.'
 """
 
 helps['dls fs access set-permission'] = """
     type: command
-    short-summary: Sets the permission octal for the file or folder in the Data Lake Store account.
+    short-summary: Sets the permissions for a file or folder in a Data Lake Store account.
     parameters:
         - name: --permission
           type: int
-          short-summary: 'The octal representation of the permissions for user, group and mask (for example: 777 is full rwx for all entities)'
+          short-summary: 'The octal representation of the permissions for user, group and mask.'
+    example:
+        - name: Set full permissions for a user, read-execute permissions for a group, and execute permissions for all.
+          text: az fs access set-permission --path /path/to/file.txt --permission 751
 """
 
 helps['dls fs access set-entry'] = """
     type: command
-    short-summary: updates the existing ACL on the file or folder to include or update the entries specified
+    short-summary: Updates the access control list for a file or folder.
 """
 
 helps['dls fs access set'] = """
     type: command
-    short-summary: replaces the existing ACL on the file or folder with the specified ACL, which must contain all unnamed entries
+    short-summary: Replaces the existing access control list for a file or folder.
 """
 
 helps['dls fs access remove-entry'] = """
     type: command
-    short-summary: updates the existing ACL on the file or folder to remove the entries specified if they exist
+    short-summary: Removes entries for an existing access control list of a file or folder.
 """
 
 helps['dls fs access remove-all'] = """
     type: command
-    short-summary: completely removes the existing ACL or default ACL on the file or folder
+    short-summary: Completely removes the access control list for a file or folder.
 """

@@ -9,73 +9,76 @@ from azure.cli.core.help_files import helps
 
 helps['storage entity insert'] = """
     type: command
-    short-summary: Insert an entity into the table.
-    long-summary: Inserts an entity into the table. When inserting an entity into a table, you must specify values for the PartitionKey and RowKey system properties. Together, these properties form the primary key and must be unique within the table. Both the PartitionKey and RowKey values may be up to 64 KB in size. If you are using an integer value as a key, you should convert the integer to a fixed-width string, because they are canonically sorted. For example, you should convert the value 1 to 0000001 to ensure proper sorting.
+    short-summary: Insert an entity into a table.
     parameters:
         - name: --table-name -t
           type: string
-          short-summary: 'The name of the table to insert the entity into.'
+          short-summary: The name of the table to insert the entity into.
         - name: --entity -e
           type: list
-          short-summary: 'A space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.'
+          short-summary: A space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
+          long-summary: The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key,
+                        convert it to a fixed-width string which can be canonically sorted.
+                        For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
         - name: --if-exists
           type: string
-          short-summary: 'Specify what should happen if an entity already exists for the specified PartitionKey and RowKey.'
+          short-summary: Specify what should happen if an entity already exists for the specified PartitionKey and RowKey.
         - name: --timeout
           short-summary: The server timeout, expressed in seconds.
 """
 
 helps['storage blob upload'] = """
     type: command
-    short-summary: Upload a specified file to a storage blob.
-    long-summary: Creates a new blob from a file path, or updates the content of an existing blob, with automatic chunking and progress notifications.
+    short-summary: Upload a file to a storage blob.
+    long-summary: Creates a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
     examples:
-        - name: Upload to a blob with all required fields.
+        - name: Upload to a blob.
           text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
 """
 
 helps['storage file upload'] = """
     type: command
-    short-summary: Upload a specified file to a file share that uses the standard SMB 3.0 protocol
-    long-summary: Creates or updates an azure file from a source path with automatic chunking and progress notifications.
+    short-summary: Upload a file to a share that uses the SMB 3.0 protocol.
+    long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
     examples:
-        - name: Upload to a file share with all required fields.
+        - name: Upload to a local file to a share.
           text: az storage file upload -s MyShare -source /path/to/file
 """
 
 helps['storage blob show'] = """
     type: command
-    short-summary: Returns properties for a named blob in a container in a storage account.
-    long-summary: Blob properties only.  To show contents of a blob, use az storage blob list
+    short-summary: Show properties for a blob in a container.
+    long-summary: To show the contents of a blob, use 'az storage blob list'.
     examples:
-        - name: Show properties of a blob with all required fields.
+        - name: Show all properties of a blob.
           text: az storage blob show -c MyContainer -n MyBlob
 """
 
 helps['storage blob delete'] = """
     type: command
-    short-summary: Marks the specified blob or snapshot for deletion.
-    long-summary: The blob is marked for later deletion during garbage collection.  Note that in order to delete a blob, you must delete all of its snapshots. You can delete both at the same time with the Delete Blob operation.
+    short-summary: Mark a blob or snapshot for deletion.
+    long-summary: The blob is marked for later deletion during garbage collection.  In order to delete a blob, all of its snapshots must also be deleted.
+                  Both can be removed at the same time at the same time.
     examples:
-        - name: Delete a blob with all required fields.
+        - name: Delete a blob.
           text: az storage blob delete -c MyContainer -n MyBlob
 """
 
 helps['storage account create'] = """
     type: command
-    short-summary: Creates a storage account.
+    short-summary: Create a storage account.
     examples:
-        - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
+        - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
           min_profile: latest
-        - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
+        - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
           max_profile: 2017-03-09-profile
 """
 
 helps['storage container create'] = """
     type: command
-    short-summary: Creates a container in a storage account.
+    short-summary: Create a container in a storage account.
     examples:
         - name: Create a storage container in a storage account.
           text: az storage container create -n MyStorageContainer
@@ -85,7 +88,7 @@ helps['storage container create'] = """
 
 helps['storage account list'] = """
     type: command
-    short-summary: Lists storage accounts
+    short-summary: List storage accounts.
     examples:
         - name: List all storage accounts in a subscription.
           text: az storage account list
@@ -95,7 +98,7 @@ helps['storage account list'] = """
 
 helps['storage account show'] = """
     type: command
-    short-summary: Returns storage account properties
+    short-summary: Show storage account properties.
     examples:
         - name: Show properties for a storage account using one or more resource ID.
           text: az storage account show --ids $(storage_account_resource_id)
@@ -105,7 +108,7 @@ helps['storage account show'] = """
 
 helps['storage blob list'] = """
     type: command
-    short-summary: Lists storage blobs in a container.
+    short-summary: List storage blobs in a container.
     examples:
         - name: List all storage blobs in a container.
           text: az storage blob list -c MyContainer
@@ -113,10 +116,10 @@ helps['storage blob list'] = """
 
 helps['storage account delete'] = """
     type: command
-    short-summary: Deletes a storage account.
+    short-summary: Delete a storage account.
     examples:
-        - name: Delete a storage account using one or more resource ID.
-          text: az storage account delete --ids $(storage_account_resource_id)
+        - name: Delete a storage account using a resource ID.
+          text: az storage account delete --ids ${storage_account_resource_id}
         - name: Delete a storage account using an account name and resource group.
           text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
@@ -124,7 +127,7 @@ helps['storage account delete'] = """
 
 helps['storage account show-connection-string'] = """
     type: command
-    short-summary: Returns the properties for the specified storage account.
+    short-summary: Get the connection string for a storage account.
     examples:
         - name: Get a connection string for a storage account.
           text: az storage account show-connection-string -g MyResourceGroup -n MyStorageAccount
@@ -132,7 +135,7 @@ helps['storage account show-connection-string'] = """
 
 helps['storage'] = """
     type: group
-    short-summary: Durable, highly available, and massively scalable cloud storage.
+    short-summary: Manage Azure Cloud Storage resources.
 """
 
 helps['storage account'] = """
@@ -152,7 +155,7 @@ helps['storage account keys'] = """
 
 helps['storage account keys list'] = """
     type: command
-    short-summary: Lists the primary and secondary keys for a storage account.
+    short-summary: List the primary and secondary keys for a storage account.
     examples:
         - name: List the primary and secondary keys for a storage account.
           text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
@@ -165,7 +168,7 @@ helps['storage blob'] = """
 
 helps['storage blob exists'] = """
     type: command
-    short-summary: Indicates whether the blob exists.
+    short-summary: Check for the existance of a blob in a container.
 """
 
 helps['storage blob list'] = """
@@ -209,7 +212,7 @@ helps['storage blob copy start-batch'] = """
     parameters:
         - name: --destination-container
           type: string
-          short-summary: The blob container where the selected source files or blobs to be copied to.
+          short-summary: The blob container where the selected source files or blobs will be copied to.
         - name: --pattern
           type: string
           short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
@@ -218,19 +221,20 @@ helps['storage blob copy start-batch'] = """
           short-summary: List of files or blobs to be uploaded. No actual data transfer will occur.
         - name: --source-account-name
           type: string
-          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
+          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the source account is used.
         - name: --source-account-key
           type: string
           short-summary: The account key for the source storage account.
         - name: --source-container
           type: string
-          short-summary: The source container from which the blobs are copied to the destination.
+          short-summary: The source container from which blobs are copied.
         - name: --source-share
           type: string
-          short-summary: The source share from which the files are copied to the destination.
+          short-summary: The source share from which files are copied.
         - name: --source-uri
           type: string
-          short-summary: A URI specifies an file share or blob container from which the files or blobs are copied to the destination. If the source is in another account, the source must either be public or must be authenticated by using a shared access signature. If the source is public, no authentication is required.
+          short-summary: A URI specifying a file share or blob container from which the files or blobs are copied.
+          long-summary: If the source is in another account, the source must either be public or must be authenticated by using a shared access signature.
         - name: --source-sas
           type: string
           short-summary: The shared access signature for the source storage account.
@@ -242,7 +246,7 @@ helps['storage container'] = """
 
 helps['storage container exists'] = """
     type: command
-    short-summary: Indicates whether the container exists.
+    short-summary: Inspect whether or not a container exists.
 """
 
 helps['storage container list'] = """
@@ -267,7 +271,7 @@ helps['storage container policy'] = """
 
 helps['storage cors'] = """
     type: group
-    short-summary: Manage Storage service Cross-Origin Resource Sharing (CORS).
+    short-summary: Manage storage service Cross-Origin Resource Sharing (CORS).
 """
 
 helps['storage cors add'] = """
@@ -275,10 +279,11 @@ helps['storage cors add'] = """
     short-summary: Add a CORS rule to a storage account.
     parameters:
         - name: --services
-          short-summary: The storage service(s) for which to add the CORS rules. Allowed options are (b)lob (f)ile
-                         (q)ueue (t)able. Can be combined.
+          short-summary: >
+            The storage service(s) to add rules to. Allowed options are: (b)lob, (f)ile,
+            (q)ueue, (t)able. Can be combined.
         - name: --max-age
-          short-summary: The number of seconds the client/browser should cache a preflight response.
+          short-summary: The maximum number of seconds the client/browser should cache a preflight response.
         - name: --origins
           short-summary: List of origin domains that will be allowed via CORS, or "*" to allow all domains.
         - name: --methods
@@ -294,8 +299,9 @@ helps['storage cors clear'] = """
     short-summary: Remove all CORS rules from a storage account.
     parameters:
         - name: --services
-          short-summary: The storage service(s) for which to add the CORS rules. Allowed options are (b)lob (f)ile
-                         (q)ueue (t)able. Can be combined.
+          short-summary: >
+            The storage service(s) to remove rules from. Allowed options are: (b)lob, (f)ile,
+            (q)ueue, (t)able. Can be combined.
 """
 
 helps['storage cors list'] = """
@@ -303,8 +309,9 @@ helps['storage cors list'] = """
     short-summary: List all CORS rules for a storage account.
     parameters:
         - name: --services
-          short-summary: The storage service(s) for which to add the CORS rules. Allowed options are (b)lob (f)ile
-                         (q)ueue (t)able. Can be combined.
+          short-summary: >
+            The storage service(s) to list rules for. Allowed options are: (b)lob, (f)ile,
+            (q)ueue, (t)able. Can be combined.
 """
 
 helps['storage directory'] = """
@@ -314,7 +321,7 @@ helps['storage directory'] = """
 
 helps['storage directory exists'] = """
     type: command
-    short-summary: Indicates whether the directory exists.
+    short-summary: Determines if a directory exists.
 """
 
 helps['storage directory metadata'] = """
@@ -337,24 +344,23 @@ helps['storage entity query'] = """
     short-summary: List entities which satisfy a given query.
 """
 
-
 helps['storage file'] = """
     type: group
-    short-summary: File shares that use the standard SMB 3.0 protocol.
+    short-summary: Manage file shares that use the SMB 3.0 protocol.
 """
 
 helps['storage file exists'] = """
     type: command
-    short-summary: Indicates whether the file exists.
+    short-summary: Determine if a file exists.
 """
 
 helps['storage file list'] = """
     type: command
-    short-summary: List files and directories in the specified share.
+    short-summary: List files and directories in a share.
     parameters:
         - name: --exclude-dir
           type: bool
-          short-summary: List only files in the specified share.
+          short-summary: List only files in the given share.
 """
 
 helps['storage file copy'] = """
@@ -373,10 +379,11 @@ helps['storage file upload-batch'] = """
     parameters:
         - name: --source -s
           type: string
-          short-summary: The directory from which the files should be uploaded.
+          short-summary: The directory to upload files from.
         - name: --destination -d
           type: string
-          short-summary: The destination of the upload operation. The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
+          short-summary: The destination of the upload operation.
+          long-summary: The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
         - name: --pattern
           type: string
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
@@ -421,32 +428,32 @@ helps['storage file copy start-batch'] = """
     parameters:
         - name: --destination-share
           type: string
-          short-summary: The file share where the specified source files or blobs are to be copied to.
+          short-summary: The file share where the source data is copied to.
         - name: --destination-path
           type: string
-          short-summary: The directory where the specified source files or blobs are to be copied to. If omitted, the files or blobs are copied to the root directory.
+          short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
         - name: --pattern
           type: string
-          short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-
-          short-summary: The list of files or blobs to be uploaded. No actual data transfer occurs.
+          short-summary: Perform a dry run, listing the data which would be uploaded. No data transfer occurs.
         - name: --source-account-name
           type: string
-          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
+          short-summary: The source storage account to copy the data from. If omitted, the destination account is used.
         - name: --source-account-key
           type: string
-          short-summary: The account key for the source storage account. If it is omitted, the command will try to query the key using the current log in.
+          short-summary: The account key for the source storage account. If omitted, the active login is used to determine the account key.
         - name: --source-container
           type: string
-          short-summary: The source container from which the blobs are copied to the destination.
+          short-summary: The source container blobs are copied from.
         - name: --source-share
           type: string
-          short-summary: The source share from which the files are copied to the destination.
+          short-summary: The source share files are copied from.
         - name: --source-uri
           type: string
-          short-summary: A URI that specifies a file share or blob container from which files or blobs are copied to the destination. If the source is in another account, the source must either be public or must be authenticated via a shared access signature. If the source is public, no authentication is required.
+          short-summary: A URI that specifies a the source file share or blob container.
+          long-summary: If the source is in another account, the source must either be public or authenticated via a shared access signature.
         - name: --source-sas
           type: string
           short-summary: The shared access signature for the source storage account.
@@ -474,7 +481,7 @@ helps['storage message'] = """
 
 helps['storage metrics'] = """
     type: group
-    short-summary: Manage Storage service metrics.
+    short-summary: Manage storage service metrics.
 """
 
 helps['storage metrics show'] = """
@@ -489,7 +496,7 @@ helps['storage metrics update'] = """
 
 helps['storage queue'] = """
     type: group
-    short-summary: Use queues to effectively scale applications according to traffic.
+    short-summary: Manage scaling and traffic routing for storage queues.
 """
 
 helps['storage queue list'] = """
@@ -514,12 +521,12 @@ helps['storage share'] = """
 
 helps['storage share exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the share exists.
+    short-summary: Determine if a share exists.
 """
 
 helps['storage share list'] = """
     type: command
-    short-summary: List file shares in a storage account.
+    short-summary: List file shares.
 """
 
 helps['storage share metadata'] = """
@@ -534,7 +541,7 @@ helps['storage share policy'] = """
 
 helps['storage table'] = """
     type: group
-    short-summary: NoSQL key-value storage using semi-structured datasets.
+    short-summary: Manage NoSQL key-value storage.
 """
 
 helps['storage table list'] = """
