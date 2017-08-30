@@ -10,13 +10,13 @@ from azure.common import AzureException
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.azlogging import get_az_logger
-from azure.cli.core.profiles import supported_api_version, ResourceType
+from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
-                                                    mkdir_p)
+                                                    mkdir_p, guess_content_type)
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -88,8 +88,7 @@ def storage_blob_copy_batch(client, source_client,
 
 
 # pylint: disable=unused-argument
-def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None,
-                                dryrun=False):
+def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False):
     """
     Download blobs in a container recursively
 
@@ -125,7 +124,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     return list(_download_blob(client, source_container_name, destination, blob) for blob in source_blobs)
 
 
-def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,
+def storage_blob_upload_batch(client, source, destination, pattern=None, source_files=None,  # pylint: disable=too-many-locals
                               destination_container_name=None, blob_type=None,
                               content_settings=None, metadata=None, validate_content=False,
                               maxsize_condition=None, max_connections=2, lease_id=None,
@@ -159,12 +158,13 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
         wildcard character (*) to perform the operation only if the resource does not exist,
         and fail the operation if it does exist.
     """
-    def _append_blob(file_path, blob_name):
+
+    def _append_blob(file_path, blob_name, blob_content_settings):
         if not client.exists(destination_container_name, blob_name):
             client.create_blob(
                 container_name=destination_container_name,
                 blob_name=blob_name,
-                content_settings=content_settings,
+                content_settings=blob_content_settings,
                 metadata=metadata,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
@@ -187,14 +187,13 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
 
         return client.append_blob_from_path(**append_blob_args)
 
-    def _upload_blob(file_path, blob_name):
-
+    def _upload_blob(file_path, blob_name, blob_content_settings):
         create_blob_args = {
             'container_name': destination_container_name,
             'blob_name': blob_name,
             'file_path': file_path,
             'progress_callback': lambda c, t: None,
-            'content_settings': content_settings,
+            'content_settings': blob_content_settings,
             'metadata': metadata,
             'max_connections': max_connections,
             'lease_id': lease_id,
@@ -210,22 +209,35 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
 
         return client.create_blob_from_path(**create_blob_args)
 
-    upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
+    def _create_return_result(blob_name, blob_content_settings, upload_result=None):
+        return {
+            'Blob': client.make_blob_url(destination_container_name, blob_name),
+            'Type': blob_content_settings.content_type,
+            'Last Modified': upload_result.last_modified if upload_result else None,
+            'eTag': upload_result.etag if upload_result else None}
 
+    upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
+    logger = get_az_logger(__name__)
+    settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
+
+    results = []
     if dryrun:
-        logger = get_az_logger(__name__)
-        logger.warning('upload action: from %s to %s', source, destination)
-        logger.warning('    pattern %s', pattern)
-        logger.warning('  container %s', destination_container_name)
-        logger.warning('       type %s', blob_type)
-        logger.warning('      total %d', len(source_files))
-        logger.warning(' operations')
-        for f in source_files or []:
-            logger.warning('  - %s => %s', *f)
+        logger.info('upload action: from %s to %s', source, destination)
+        logger.info('    pattern %s', pattern)
+        logger.info('  container %s', destination_container_name)
+        logger.info('       type %s', blob_type)
+        logger.info('      total %d', len(source_files))
+        results = []
+        for src, dst in source_files or []:
+            results.append(_create_return_result(dst, guess_content_type(src, content_settings, settings_class)))
     else:
-        for f in source_files or []:
-            print('uploading {}'.format(f[0]))
-            upload_action(*f)
+        for src, dst in source_files or []:
+            logger.warning('uploading {}'.format(src))
+            guessed_content_settings = guess_content_type(src, content_settings, settings_class)
+            results.append(
+                _create_return_result(dst, guessed_content_settings, upload_action(src, dst, guessed_content_settings)))
+
+    return results
 
 
 def _download_blob(blob_service, container, destination_folder, blob_name):

@@ -197,6 +197,12 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
+helps['storage blob set-tier'] = """
+    type: command
+    short-summary: Sets the block or page blob tiers on the blob.
+    long-summary:  For block blob this command only supports block blob on standard storage accounts.
+                   For page blob, this command only supports for page blobs on premium accounts.
+"""
 helps['storage blob copy start-batch'] = """
     type: command
     short-summary: Copy multiple blobs or files to a blob container.
@@ -539,4 +545,31 @@ helps['storage table list'] = """
 helps['storage table policy'] = """
     type: group
     short-summary: Manage shared access policies of a storage table.
+"""
+
+helps['storage account network-rule'] = """
+    type: group
+    short-summary: Manage network rules.
+"""
+
+helps['storage account network-rule add'] = """
+    type: command
+    short-summary: Add a network rule.
+    long-summary: >
+        Rules can be created for an IPv4 address, address range (CIDR format), or a virtual network subnet.
+    examples:
+        - name: Create a rule to allow a specific address-range.
+          text: az storage account network-rule add -g myRg --account-name mystorageaccount --ip-address 23.45.1.0/24
+        - name: Create a rule to allow access for a subnet.
+          text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet myvnet --subnet mysubnet
+"""
+
+helps['storage account network-rule list'] = """
+    type: command
+    short-summary: List network rules.
+"""
+
+helps['storage account network-rule remove'] = """
+    type: command
+    short-summary: Remove a network rule.
 """

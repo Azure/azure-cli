@@ -35,7 +35,7 @@ from ._validators import \
      process_file_download_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri,
-     get_char_options_validator)
+     get_char_options_validator, validate_bypass, validate_subnet, page_blob_tier_validator, blob_tier_validator)
 
 
 DeleteSnapshot, BlockBlobService, \
@@ -220,8 +220,8 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
 # EXTRA PARAMETER SET REGISTRATION
 
 
-def register_content_settings_argument(scope, settings_class, update, arg_group=None):
-    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update), arg_group=arg_group)
+def register_content_settings_argument(scope, settings_class, update, arg_group=None, guess_from_file=None):
+    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file), arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.', arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.', arg_group=arg_group)
@@ -359,6 +359,15 @@ with CommandContext('storage account update') as c:
             g.reg_extra_arg('encryption_key_vault', help='The Uri of the KeyVault')
             g.reg_extra_arg('encryption_key_version', help='The version of the KeyVault key')
 
+with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
+    for item in ['create', 'update']:
+        register_cli_argument('storage account {}'.format(item), 'bypass', nargs='+', validator=validate_bypass, arg_group='Network Rule', help='Bypass traffic for space-separated uses.', **model_choice_list(ResourceType.MGMT_STORAGE, 'Bypass'))
+        register_cli_argument('storage account {}'.format(item), 'default_action', arg_group='Network Rule', help='Default action to apply when no rule matches.', **model_choice_list(ResourceType.MGMT_STORAGE, 'DefaultAction'))
+
+    register_cli_argument('storage account network-rule', 'storage_account_name', account_name_type)
+    register_cli_argument('storage account network-rule', 'ip_address', help='IPv4 address or CIDR range.')
+    register_cli_argument('storage account network-rule', 'subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+    register_cli_argument('storage account network-rule', 'vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
@@ -411,10 +420,32 @@ for item in ['download', 'upload']:
 for item in ['update', 'upload', 'upload-batch']:
     register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
 
-register_cli_argument('storage blob upload', 'blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.", options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
-register_cli_argument('storage blob upload', 'maxsize_condition', help='The max length in bytes permitted for an append blob.')
-with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
-    c.register_cli_argument('storage blob upload', 'validate_content', help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.')
+with CommandContext('storage blob upload') as c:
+    c.reg_arg('blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.",
+              options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
+    c.reg_arg('maxsize_condition', help='The max length in bytes permitted for an append blob.')
+    c.reg_arg('validate_content',
+              help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the '
+                   'service when the chunk has arrived.',
+              resource_type=ResourceType.DATA_STORAGE,
+              min_api='2016-05-31')
+
+    from azure.cli.command_modules.storage.util import get_blob_tier_names
+    c.reg_arg('tier',
+              help='A page blob tier value to set the blob to. The tier correlates to the size of the blob and number '
+                   'of allowed IOPS. This is only applicable to page blobs on premium storage accounts.',
+              resource_type=ResourceType.DATA_STORAGE,
+              min_api='2017-04-17',
+              validator=page_blob_tier_validator,
+              **enum_choice_list(get_blob_tier_names('PremiumPageBlobTier')))
+
+with CommandContext('storage blob set-tier') as c:
+    c.reg_arg('blob_type', help="The blob's type", options_list=('--type', '-t'), **enum_choice_list(['block', 'page']))
+    c.reg_arg('tier', help='The tier value to set the blob to.', validator=blob_tier_validator)
+    c.reg_arg('timeout', help='The timeout parameter is expressed in seconds. This method may make multiple calls to '
+                              'the Azure service and the timeout will apply to each call individually.',
+              type=int)
+
 
 # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
 register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)
@@ -576,8 +607,8 @@ register_path_argument('storage file resize')
 
 register_path_argument('storage file show')
 
-for item in ['update', 'upload']:
-    register_content_settings_argument('storage file {}'.format(item), FileContentSettings, item == 'update')
+register_content_settings_argument('storage file update', FileContentSettings, update=True)
+register_content_settings_argument('storage file upload', FileContentSettings, update=False, guess_from_file='local_file_path')
 
 register_path_argument('storage file update')
 

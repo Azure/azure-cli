@@ -24,7 +24,7 @@ from azure.cli.command_modules.storage._transformers import \
      transform_logging_list_output, transform_metrics_list_output,
      transform_url, transform_storage_list_output, transform_container_permission_output,
      create_boolean_result_output_transformer)
-from azure.cli.core.commands import cli_command
+from azure.cli.core.commands import cli_command, VersionConstraint
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, get_sdk, ResourceType
@@ -58,8 +58,16 @@ cli_command(__name__, 'storage account show-usage', custom_path + 'show_storage_
 cli_command(__name__, 'storage account show-connection-string', custom_path + 'show_storage_account_connection_string')
 cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
-cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type', resource_type=ResourceType.MGMT_STORAGE, max_api='2015-06-15')
-cli_command(__name__, 'storage account create', custom_path + 'create_storage_account', resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
+
+with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
+    c.cli_command(__name__, 'storage account network-rule add', custom_path + 'add_network_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule remove', custom_path + 'remove_network_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule list', custom_path + 'list_network_rules', factory)
+
+if supported_api_version(ResourceType.MGMT_STORAGE, max_api='2015-06-15'):
+    cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')
+else:
+    cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
 
 if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
     cli_generic_update_command(__name__, 'storage account update',
@@ -90,7 +98,8 @@ cli_storage_data_plane_command('storage container policy create', custom_path + 
 cli_storage_data_plane_command('storage container policy delete', custom_path + 'delete_acl_policy', factory)
 cli_storage_data_plane_command('storage container policy show', custom_path + 'get_acl_policy', factory, exception_handler=_dont_fail_not_exist)
 cli_storage_data_plane_command('storage container policy list', custom_path + 'list_acl_policies', factory, table_transformer=transform_acl_list_output)
-cli_storage_data_plane_command('storage container policy update', custom_path + 'set_acl_policy', factory)
+cli_storage_data_plane_command('storage container policy update', custom_path + 'set_acl_policy', factory,
+                               resource_type=ResourceType.DATA_STORAGE, min_api='2017-04-17')
 
 # blob commands
 cli_storage_data_plane_command('storage blob list', block_blob_path + 'list_blobs', factory, transform=transform_storage_list_output, table_transformer=transform_blob_output)
@@ -116,6 +125,7 @@ cli_storage_data_plane_command('storage blob copy start-batch', 'azure.cli.comma
 cli_storage_data_plane_command('storage blob copy cancel', block_blob_path + 'abort_copy_blob', factory)
 cli_storage_data_plane_command('storage blob upload-batch', 'azure.cli.command_modules.storage.blob#storage_blob_upload_batch', factory)
 cli_storage_data_plane_command('storage blob download-batch', 'azure.cli.command_modules.storage.blob#storage_blob_download_batch', factory)
+cli_storage_data_plane_command('storage blob set-tier', custom_path + 'set_blob_tier', factory)
 
 # page blob commands
 cli_storage_data_plane_command('storage blob incremental-copy start',

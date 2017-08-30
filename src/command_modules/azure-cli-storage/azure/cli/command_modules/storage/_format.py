@@ -53,6 +53,7 @@ def transform_blob_output(result):
     return build_table_output(result, [
         ('Name', 'name'),
         ('Blob Type', 'properties.blobType'),
+        ('Blob Tier', 'properties.blobTier'),
         ('Length', 'properties.contentLength'),
         ('Content Type', 'properties.contentSettings.contentType'),
         ('Last Modified', 'properties.lastModified')

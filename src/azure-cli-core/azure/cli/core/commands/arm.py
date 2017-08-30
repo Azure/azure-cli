@@ -165,6 +165,9 @@ def parse_resource_id(rid):
         - resource_type         Type of the target resource (not the parent)
         - resource_name         Name of the target resource (not the parent)
     '''
+    if not rid:
+        return {}
+
     m = regex.match(rid)
     if m:
         result = m.groupdict()

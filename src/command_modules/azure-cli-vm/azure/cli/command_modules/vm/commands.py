@@ -193,12 +193,13 @@ cli_command(__name__, 'vm diagnostics get-default-config', custom_path.format('s
 cli_command(__name__, 'vmss diagnostics set', custom_path.format('set_vmss_diagnostics_extension'))
 cli_command(__name__, 'vmss diagnostics get-default-config', custom_path.format('show_default_diagnostics_configuration'))
 
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vm disk attach', custom_path.format('attach_managed_data_disk'))
+    cli_command(__name__, 'vm disk detach', custom_path.format('detach_data_disk'))
 
-cli_command(__name__, 'vm disk attach', custom_path.format('attach_managed_data_disk'))
-cli_command(__name__, 'vm disk detach', custom_path.format('detach_data_disk'))
-
-cli_command(__name__, 'vmss disk attach', custom_path.format('attach_managed_data_disk_to_vmss'))
-cli_command(__name__, 'vmss disk detach', custom_path.format('detach_disk_from_vmss'))
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vmss disk attach', custom_path.format('attach_managed_data_disk_to_vmss'))
+    cli_command(__name__, 'vmss disk detach', custom_path.format('detach_disk_from_vmss'))
 
 cli_command(__name__, 'vm unmanaged-disk attach', custom_path.format('attach_unmanaged_data_disk'))
 cli_command(__name__, 'vm unmanaged-disk detach', custom_path.format('detach_data_disk'))
@@ -276,7 +277,7 @@ cli_command(__name__, 'vmss list-instance-public-ips', custom_path.format('list_
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     # VM Disk
     op_var = 'disks_operations'
     op_class = 'DisksOperations'
@@ -305,12 +306,12 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'
                                custom_function_op=custom_path.format('update_snapshot'),
                                setter_arg_name='snapshot', factory=cf_snapshots)
 
-    op_var = 'images_operations'
-    op_class = 'ImagesOperations'
-    cli_command(__name__, 'image create', custom_path.format('create_image'))
-    cli_command(__name__, 'image list', custom_path.format('list_images'))
-    cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
-    cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
+op_var = 'images_operations'
+op_class = 'ImagesOperations'
+cli_command(__name__, 'image create', custom_path.format('create_image'))
+cli_command(__name__, 'image list', custom_path.format('list_images'))
+cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
+cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     cli_command(__name__, 'vm list-skus', custom_path.format('list_skus'), table_transformer=transform_sku_for_table_output)
