@@ -34,7 +34,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,too-many-lines
+# pylint:disable=no-member,too-many-lines,too-many-locals
 
 
 def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
@@ -349,7 +349,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
-                              'DOCKER_REGISTRY_SERVER_PASSWORD']
+                              'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
