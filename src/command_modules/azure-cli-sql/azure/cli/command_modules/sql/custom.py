@@ -910,3 +910,31 @@ def firewall_rule_update(
         resource_group_name=resource_group_name,
         start_ip_address=start_ip_address or instance.start_ip_address,
         end_ip_address=end_ip_address or instance.end_ip_address)
+
+#####
+#           sql server vnet-rule validate
+#####
+
+# Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
+# If subnet name is given, vnet name is required and the subscription id and resource group of the vnet is assumed to be the same as the sql server.
+def validate_subnet(namespace):
+    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+
+    subnet = namespace.subnet
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        return
+    elif subnet and not subnet_is_id and vnet:
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type='subnets',
+            child_name=subnet)
+    else:
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]') 
+    delattr(namespace, 'vnet-name')

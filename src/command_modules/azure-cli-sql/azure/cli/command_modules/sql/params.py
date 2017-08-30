@@ -5,10 +5,11 @@
 
 import itertools
 from enum import Enum
-from azure.cli.core.commands import CliArgumentType
+from azure.cli.core.commands import CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
-    ignore_type)
+    ignore_type,
+    get_resource_name_completion_list)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
@@ -27,6 +28,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
+    validate_subnet
 )
 
 #####
@@ -641,15 +643,18 @@ with ParametersContext(command='sql server firewall-rule') as c:
 #           sql server vnet-rule
 #####
 
-
 with ParametersContext(command='sql server vnet-rule') as c:
-    # Help text needs to be specified because 'sql server firewall-rule update' is a custom
+    # Help text needs to be specified because 'sql server vnet-rule create' is a custom
     # command.
     c.argument('server_name',
-               options_list=('--server', '-s'))
+               options_list=('--server', '-s'), completer=get_resource_name_completion_list('Microsoft.SQL/servers'))
 
     c.argument('virtual_network_rule_name',
                options_list=('--name', '-n'))
 
     c.argument('virtual_network_subnet_id',
-               options_list=('--vnet-subnet-id', '-v'))
+               options_list=('--subnet'))
+
+register_extra_cli_argument('sql server vnet-rule', 'vnet-name', options_list=('--vnet-name'),
+                            validator=validate_subnet)
+
