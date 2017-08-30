@@ -77,9 +77,9 @@ helps['lock create'] = """
           type: string
           short-summary: 'Notes about this lock'
     examples:
-        - name: Update a subscription level lock with new notes
+        - name: Create a new Read-Only lock
           text: >
-            az lock update --name lockName --resource-group group --notes newNotesHere
+            az lock create --name lockName --lock-type ReadOnly
     """
 helps['lock update'] = """
     type: command
