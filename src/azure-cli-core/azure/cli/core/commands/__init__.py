@@ -295,6 +295,14 @@ class ExtensionCommandSource(object):
         self.overrides_command = overrides_command
         self.extension_name = extension_name
 
+    def get_command_override_msg(self):
+        if not self.overrides_command:
+            return None
+        if self.extension_name:
+            return "The behavior of this command has been altered by the following extension: " \
+                   "{}".format(self.extension_name)
+        return "The behavior of this command has been altered by an extension."
+
 
 class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
@@ -357,8 +365,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
     def __call__(self, *args, **kwargs):
         if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
            self.command_source.overrides_command:
-            logger.warning("The behavior of this command has been altered by the following extension:"
-                           " {}".format(self.command_source.extension_name))
+            logger.warning(self.command_source.get_command_override_msg())
         if self.deprecate_info is not None:
             text = 'This command is deprecating and will be removed in future releases.'
             if self.deprecate_info:
