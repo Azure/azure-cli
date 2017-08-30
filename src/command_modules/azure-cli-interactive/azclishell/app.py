@@ -510,6 +510,14 @@ class Shell(object):
                 elif args[0].startswith(query_symbol):
                     result = jmespath.search(args[0][symbol_len:], self.last.result)
                 print(json.dumps(result, sort_keys=True, indent=2), file=self.output)
+            elif args[0].startswith(query_symbol):
+                # print error message, user unsure of query shortcut usage
+                print(("Usage Error: " + os.linesep +
+                       "1. Use {0} stand-alone to display previous result with optional filtering "
+                       "(Ex: {0}[jmespath query])" +
+                       os.linesep + "OR:" + os.linesep +
+                       "2. Use {0} to query the previous result for argument values "
+                       "(Ex: group show --name {0}[jmespath query])").format(query_symbol), file=self.output)
             else:
                 # query, inject into cmd
                 def jmespath_query(match):
@@ -520,12 +528,13 @@ class Shell(object):
 
                 def sub_result(arg):
                     escaped_symbol = re.escape(query_symbol)
+                    # regex captures query symbol and all characters following it in the agument
                     return json.dumps(re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg))
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
             continue_flag = True
         except (jmespath.exceptions.ParseError, CLIError) as e:
-            print("Invalid Query Input:" + str(e), file=self.output)
+            print("Invalid Query Input: " + str(e), file=self.output)
             continue_flag = True
         return continue_flag
 
@@ -625,8 +634,7 @@ class Shell(object):
                     OutputProducer(formatter=formatter).out(result)
                     self.last = result
 
-        except Exception as ex:
-            # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             self.last_exit = handle_exception(ex)
         except SystemExit as ex:
             self.last_exit = int(ex.code)

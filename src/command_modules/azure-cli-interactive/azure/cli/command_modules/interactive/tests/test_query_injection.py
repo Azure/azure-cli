@@ -39,14 +39,6 @@ class QueryInjection(unittest.TestCase):
         self.stream.write(cmd)
         self.stream.write(os.linesep)
 
-    def test_null(self):
-        # tests empty case
-        args = []
-        self.shell.last.result = {}
-        flag = self.shell.handle_jmespath_query(args)
-        self.assertTrue(flag)
-        self.assertEqual(self.stream.getvalue(), os.linesep)
-
     def test_print_last_command(self):
         # tests getting last command result
         args = ['??']
@@ -84,6 +76,24 @@ class QueryInjection(unittest.TestCase):
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         self.assertEqual(json.loads(self.stream.getvalue()), ['mygroup', 'mygroup2', 'mygroup3'])
+
+    def test_usage_error(self):
+        # tests case when multiple args but first arg starts with query
+        args = '??[].group foo bar'
+        args = parse_quotes(args)
+        self.shell.last.result = {
+            'group': 'mygroup',
+            'name': 'myname'
+        }
+        flag = self.shell.handle_jmespath_query(args)
+        self.assertTrue(flag)
+        self.assertEqual(self.stream.getvalue().strip(),
+                         "Usage Error: " + os.linesep +
+                         "1. Use ?? stand-alone to display previous result with optional filtering "
+                         "(Ex: ??[jmespath query])" +
+                         os.linesep + "OR:" + os.linesep +
+                         "2. Use ?? to query the previous result for argument values "
+                         "(Ex: group show --name ??[jmespath query])")
 
     def test_string_replacement(self):
         # tests that the query replaces the values in the command
