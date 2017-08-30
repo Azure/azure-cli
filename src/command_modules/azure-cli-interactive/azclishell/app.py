@@ -528,7 +528,7 @@ class Shell(object):
 
                 def sub_result(arg):
                     escaped_symbol = re.escape(query_symbol)
-                    # regex captures query symbol and all characters following it in the agument
+                    # regex captures query symbol and all characters following it in the argument
                     return json.dumps(re.sub(r'%s.*' % escaped_symbol, jmespath_query, arg))
                 cmd_base = ' '.join(map(sub_result, args))
                 self.cli_execute(cmd_base)
