@@ -1324,28 +1324,33 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         rg = resource_group
         vnet_rule_1 = 'rule1'
-        vnet_rule_2 = 'rule2'
 
         # Create vnet's - vnet1 and vnet2
 
         vnetName1 = 'vnet1'
         vnetName2 = 'vnet2'
         subnetName = 'subnet1'
+        addressPrefix = '10.0.1.0/24'
+        endpoint = 'Microsoft.Sql'
 
         # Vnet 1
         self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(rg, vnetName1, subnetName),
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+                 .format(rg, vnetName1, subnetName, addressPrefix, endpoint),
                  checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
 
-        vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'.format(subnetName, vnetName1, rg)).get_output_in_json()
+        vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
+                         .format(subnetName, vnetName1, rg)).get_output_in_json()
         vnet_id_1 = vnet1['id']
 
         # Vnet 2
         self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName2))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Sql'.format(rg, vnetName2, subnetName),
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+                 .format(rg, vnetName2, subnetName, addressPrefix, endpoint),
                  checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
 
-        vnet2 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'.format(subnetName, vnetName2, rg)).get_output_in_json()
+        vnet2 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
+                         .format(subnetName, vnetName2, rg)).get_output_in_json()
         vnet_id_2 = vnet2['id']
 
         # test sql server vnet-rule create
@@ -1371,7 +1376,6 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', vnet_rule_1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
-
 
         # test sql server vnet-rule list
         self.cmd('sql server vnet-rule list -g {} --server {}'
