@@ -86,7 +86,8 @@ def space_examples(list_examples, rows, section_value):
 
         if end < num_newline:
             example = '\n'.join(group[begin:end]) + "\n"
-        else:  # default chops top off
+        else:
+            # default chops top off
             example = '\n'.join(group[begin:]) + "\n"
             while ((section_value - 1) * len_of_excerpt) > num_newline:
                 sub_section()
@@ -151,8 +152,8 @@ class Shell(object):
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
-        self.intermediate_sleep = intermediate_sleep  # in seconds
-        self.final_sleep = final_sleep  # in seconds
+        self.intermediate_sleep = intermediate_sleep
+        self.final_sleep = final_sleep
 
     @property
     def cli(self):
@@ -258,7 +259,8 @@ class Shell(object):
             return param_descrip, example
 
         for word in text.split():
-            if word.startswith("-"):  # any parameter
+            if word.startswith("-"):
+                # any parameter
                 is_command = False
             if is_command:
                 command += str(word) + " "
@@ -447,7 +449,8 @@ class Shell(object):
 
         if cmd_stripped == "quit" or cmd_stripped == "exit":
             break_flag = True
-        elif cmd_stripped == "clear-history":  # clears the history, but only when you restart
+        elif cmd_stripped == "clear-history":
+            # clears the history, but only when you restart
             outside = True
             cmd = 'echo -n "" >' +\
                 os.path.join(
@@ -481,7 +484,8 @@ class Shell(object):
                     show_version_info_exit(self.output)
                 except SystemExit:
                     pass
-            elif "|" in cmd or ">" in cmd:  # anything I don't parse, send off
+            elif "|" in cmd or ">" in cmd:
+                # anything I don't parse, send off
                 outside = True
                 cmd = "az " + cmd
 
@@ -496,25 +500,22 @@ class Shell(object):
     def handle_jmespath_query(self, args):
         """ handles the jmespath query for injection or printing """
         continue_flag = False
-
-        if hasattr(self.last.result, '__dict__'):
-            input_last = dict(self.last.result)
-        else:  # list or string
-            input_last = self.last.result
         query_symbol = SELECT_SYMBOL['query']
         symbol_len = len(query_symbol)
         try:
-            if len(args) == 1:  # if arguments start with query_symbol, just print query result
+            if len(args) == 1:
+                # if arguments start with query_symbol, just print query result
                 if args[0] == query_symbol:
                     result = self.last.result
                 elif args[0].startswith(query_symbol):
-                    result = jmespath.search(args[0][symbol_len:], input_last)
+                    result = jmespath.search(args[0][symbol_len:], self.last.result)
                 print(json.dumps(result, sort_keys=True, indent=2), file=self.output)
-            else:  # query, inject into cmd
+            else:
+                # query, inject into cmd
                 def jmespath_query(match):
                         if match.group(0) == query_symbol:
-                            return str(input_last)
-                        query_result = jmespath.search(match.group(0)[symbol_len:], input_last)
+                            return str(self.last.result)
+                        query_result = jmespath.search(match.group(0)[symbol_len:], self.last.result)
                         return str(query_result)
 
                 def sub_result(arg):
@@ -624,7 +625,8 @@ class Shell(object):
                     OutputProducer(formatter=formatter).out(result)
                     self.last = result
 
-        except Exception as ex:  # pylint: disable=broad-except
+        except Exception as ex:
+            # pylint: disable=broad-except
             self.last_exit = handle_exception(ex)
         except SystemExit as ex:
             self.last_exit = int(ex.code)
@@ -655,13 +657,15 @@ class Shell(object):
                 try:
                     document = self.cli.run(reset_current_buffer=True)
                     text = document.text
-                    if not text:  # not input
+                    if not text:
+                        # not input
                         self.set_prompt()
                         continue
                     cmd = text
                     outside = False
 
-                except AttributeError:  # when the user pressed Control D
+                except AttributeError:
+                    # when the user pressed Control D
                     break
                 else:
                     b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
@@ -679,9 +683,11 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
-                        cli_telemetry.conclude()  # because I catch the sys exit, I have to push out
+                        # because I catch the sys exit, I have to push out
+                        cli_telemetry.conclude()
 
-            except (KeyboardInterrupt, ValueError):  # CTRL C
+            except (KeyboardInterrupt, ValueError):
+                # CTRL C
                 self.set_prompt()
                 continue
 
