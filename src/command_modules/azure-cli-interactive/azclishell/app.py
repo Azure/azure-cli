@@ -516,7 +516,6 @@ class Shell(object):
                     if match.group(0) == query_symbol:
                         return str(self.last.result)
                     query_result = jmespath.search(match.group(0)[symbol_len:], self.last.result)
-                    print("query_result:", query_result)
                     return str(query_result)
 
                 def sub_result(arg):

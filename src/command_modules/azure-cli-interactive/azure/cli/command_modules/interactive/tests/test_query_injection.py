@@ -6,6 +6,7 @@
 import unittest
 import six
 import os
+import json
 from azclishell.util import parse_quotes
 from azclishell.gather_commands import GatherCommands
 
@@ -36,7 +37,7 @@ class QueryInjection(unittest.TestCase):
 
     def _mock_execute(self, cmd):
         self.stream.write(cmd)
-        self.stream.write('\n')
+        self.stream.write(os.linesep)
 
     def test_null(self):
         # tests empty case
@@ -44,7 +45,7 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {}
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual(self.stream.getvalue(), '\n')
+        self.assertEqual(self.stream.getvalue(), os.linesep)
 
     def test_print_last_command(self):
         # tests getting last command result
@@ -52,7 +53,7 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual(self.stream.getvalue(), '{\n  \"x\": \"result\"\n}\n')
+        self.assertEqual(json.loads(self.stream.getvalue()), {'x': 'result'})
 
     def test_print_just_query(self):
         # tests flushing just the query
@@ -60,7 +61,7 @@ class QueryInjection(unittest.TestCase):
         self.shell.last.result = {'x': 'result'}
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual(self.stream.getvalue(), '"result"\n')
+        self.assertEqual(json.loads(self.stream.getvalue()), 'result')
 
     def test_print_list_replacement(self):
         # tests that the query replaces the values in the command
@@ -82,7 +83,7 @@ class QueryInjection(unittest.TestCase):
         ]
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        self.assertEqual(self.stream.getvalue(), '[\n  \"mygroup\",\n  \"mygroup2\",\n  \"mygroup3\"\n]\n')
+        self.assertEqual(json.loads(self.stream.getvalue()), ['mygroup', 'mygroup2', 'mygroup3'])
 
     def test_string_replacement(self):
         # tests that the query replaces the values in the command
@@ -95,9 +96,6 @@ class QueryInjection(unittest.TestCase):
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
         results = self.stream.getvalue().split(os.linesep)
-        
-        print(repr(results[0]))
-        print(repr(os.linesep))
         self.assertEqual(results[0], '"vm" "show" "-g" "mygroup" "-n" "myname"')
 
     def test_list_replacement(self):
@@ -120,7 +118,7 @@ class QueryInjection(unittest.TestCase):
         ]
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        results = self.stream.getvalue().strip().split('\n')
+        results = self.stream.getvalue().strip().split(os.linesep)
         self.assertTrue(len(results) == 1)
         self.assertEqual(results[0], '"foo" "update" "--set" "blah=[\'mygroup\', \'mygroup2\', \'mygroup3\']"')
 
@@ -150,7 +148,7 @@ class QueryInjection(unittest.TestCase):
         ]
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        results = self.stream.getvalue().split('\n')
+        results = self.stream.getvalue().split(os.linesep)
         self.assertEqual(results[0], '"vm" "show" "-g" "mygroup" "-n" "None"')
 
     def test_query_result_spaces(self):
@@ -163,8 +161,8 @@ class QueryInjection(unittest.TestCase):
         }
         flag = self.shell.handle_jmespath_query(args)
         self.assertTrue(flag)
-        results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'"vm" "show" "-g" "mygroup" "-n" "my name"')
+        results = self.stream.getvalue().split(os.linesep)
+        self.assertEqual(results[0], '"vm" "show" "-g" "mygroup" "-n" "my name"')
 
     def test_spaces(self):
         # tests quotes with spaces
@@ -182,8 +180,8 @@ class QueryInjection(unittest.TestCase):
         ]
 
         self.shell.handle_jmespath_query(args)
-        results = self.stream.getvalue().split('\n')
-        self.assertEqual(results[0], u'"foo" "update" "--set" "bar=[\'fred\']"')
+        results = self.stream.getvalue().split(os.linesep)
+        self.assertEqual(results[0], '"foo" "update" "--set" "bar=[\'fred\']"')
 
     def test_spaces_with_equal(self):
         # tests quotes with spaces
@@ -202,4 +200,4 @@ class QueryInjection(unittest.TestCase):
 
         self.shell.handle_jmespath_query(args)
         results = self.stream.getvalue().split(os.linesep)
-        self.assertEqual(results[0], u'"foo" "doo" "-bar=[\'fred\']"')
+        self.assertEqual(results[0], '"foo" "doo" "-bar=[\'fred\']"')
