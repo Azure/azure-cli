@@ -63,18 +63,17 @@ class ResourceLockTests(ScenarioTest):
         self._sleep_for_lock_operation()
 
     def _lock_operation_with_resource(self, lock_type, resource_group):
-        rsrc_name1 = self.create_random_name('cli.lock.rsrc', 30)
-        rsrc_name2 = self.create_random_name('cli.lock.rsrc', 30)
+        rsrc_name = self.create_random_name('cli.lock.rsrc', 30)
         rsrc_type = 'Microsoft.Network/virtualNetworks'
         lock_name = self.create_random_name('cli-test-lock', 74)
 
-        self.cmd('az network vnet create -n {} -g {}'.format(rsrc_name1, resource_group))
+        self.cmd('az network vnet create -n {} -g {}'.format(rsrc_name, resource_group))
         self.cmd('az lock create -n {} --resource-type {} -g {} --resource-name {} --lock-type {}'
-                 .format(lock_name, rsrc_type, resource_group, rsrc_name1, lock_type))
+                 .format(lock_name, rsrc_type, resource_group, rsrc_name, lock_type))
         self._sleep_for_lock_operation()
 
         self.cmd('az lock show --name {} -g {} --resource-type {} --resource-name {}'
-                 .format(lock_name, resource_group, rsrc_type, rsrc_name1)).assert_with_checks([
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name)).assert_with_checks([
                      JMESPathCheck('name', lock_name),
                      JMESPathCheck('level', lock_type)])
 
@@ -83,7 +82,7 @@ class ResourceLockTests(ScenarioTest):
         self.assertIn(lock_name, locks_list)
 
         self.cmd('az lock delete --name {} -g {} --resource-name {} --resource-type {}'
-                 .format(lock_name, resource_group, rsrc_name1, rsrc_type))
+                 .format(lock_name, resource_group, rsrc_name, rsrc_type))
         self._sleep_for_lock_operation()
 
     def _sleep_for_lock_operation(self):
