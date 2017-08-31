@@ -1354,7 +1354,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         vnet_id_2 = vnet2['id']
 
         # test sql server vnet-rule create
-        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --vnet-subnet-id {}'
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
                  .format(vnet_rule_1, rg, server, vnet_id_1),
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
@@ -1369,7 +1369,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg)])
 
         # test sql server vnet-rule update
-        self.cmd('sql server vnet-rule update --name {} -g {} --server {} --vnet-subnet-id {}'
+        self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {}'
                  .format(vnet_rule_1, rg, server, vnet_id_2),
 
                  checks=[

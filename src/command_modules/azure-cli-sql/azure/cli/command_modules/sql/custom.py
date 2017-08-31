@@ -920,14 +920,14 @@ def firewall_rule_update(
 def validate_subnet(namespace):
     from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 
-    subnet = namespace.subnet
+    subnet = namespace.virtual_network_subnet_id
     subnet_is_id = is_valid_resource_id(subnet)
     vnet = namespace.vnet_name
 
     if (subnet_is_id and not vnet) or (not subnet and not vnet):
-        return
+        pass
     elif subnet and not subnet_is_id and vnet:
-        namespace.subnet = resource_id(
+        namespace.virtual_network_subnet_id = resource_id(
             subscription=get_subscription_id(),
             resource_group=namespace.resource_group_name,
             namespace='Microsoft.Network',
@@ -936,5 +936,5 @@ def validate_subnet(namespace):
             child_type='subnets',
             child_name=subnet)
     else:
-        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]') 
-    delattr(namespace, 'vnet-name')
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+    delattr(namespace, 'vnet_name')

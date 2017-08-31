@@ -655,6 +655,5 @@ with ParametersContext(command='sql server vnet-rule') as c:
     c.argument('virtual_network_subnet_id',
                options_list=('--subnet'))
 
-register_extra_cli_argument('sql server vnet-rule', 'vnet-name', options_list=('--vnet-name'),
-                            validator=validate_subnet)
-
+register_extra_cli_argument('sql server vnet-rule create', 'vnet_name', options_list=('--vnet-name'),
+                            help='The virtual network name', validator=validate_subnet)
