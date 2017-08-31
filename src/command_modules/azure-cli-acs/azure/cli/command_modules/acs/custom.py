@@ -389,10 +389,9 @@ def _get_default_dns_prefix(name, resource_group_name, subscription_id):
     return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
 
 
-
 def list_acs_locations():
     regions = {
-        "Production Regions" : regionsInProd,
+        "Production Regions": regionsInProd,
         "Preview Regions": regionsInPreview
     }
     return regions
