@@ -1713,6 +1713,31 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway list-bgp-peer-status -g {} -n {} --peer 10.1.1.1'.format(rg, gateway1_name))
 
 
+
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        }
+        
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
+        self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} -a X86'.format(**kwargs))
+        self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} -a Amd64'.format(**kwargs))
+
+
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkTrafficManagerScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_traffic_manager')

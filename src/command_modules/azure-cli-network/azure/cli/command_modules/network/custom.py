@@ -1903,11 +1903,12 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
 
 def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, public_ip_address,
-                        virtual_network, location=None, tags=None, address_prefixes=None,
+                        virtual_network, location=None, tags=None,
                         no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
                         sku=VirtualNetworkGatewaySkuName.basic.value,
                         vpn_type=VpnType.route_based.value,
-                        asn=None, bgp_peering_address=None, peer_weight=None):
+                        asn=None, bgp_peering_address=None, peer_weight=None,
+                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None):
     VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku = get_sdk(
         ResourceType.MGMT_NETWORK,
         'VirtualNetworkGateway',
@@ -1934,31 +1935,46 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-    if address_prefixes:
+    
+    if any((address_prefixes, radius_secret, radius_server, client_protocol)):
         vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
-        vnet_gateway.vpn_client_configuration.address_prefixes = address_prefixes
+        vnet_gateway.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
+        vnet_gateway.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
+        if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+            vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
+            vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
+            vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
+
     return client.create_or_update(
         resource_group_name, virtual_network_gateway_name, vnet_gateway, raw=no_wait)
 
 
-def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
+def update_vnet_gateway(instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
-                        tags=None):
+                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None):
     VirtualNetworkGatewayIPConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'VirtualNetworkGatewayIPConfiguration', mod='models')
 
-    if address_prefixes is not None:
-        if not instance.vpn_client_configuration:
-            instance.vpn_client_configuration = VpnClientConfiguration()
-        config = instance.vpn_client_configuration
+    if any((address_prefixes, radius_server, radius_secret, client_protocol)) and not instance.vpn_client_configuration:
+        instance.vpn_client_configuration = VpnClientConfiguration()
 
-        if not config.vpn_client_address_pool:
-            config.vpn_client_address_pool = AddressSpace()
-        if not config.vpn_client_address_pool.address_prefixes:
-            config.vpn_client_address_pool.address_prefixes = []
-        config.vpn_client_address_pool.address_prefixes = address_prefixes
+    if address_prefixes is not None:
+        if not instance.vpn_client_configuration.vpn_client_address_pool:
+            instance.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
+        if not instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes:
+            instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = []
+        instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
+
+    if client_protocol is not None:
+        instance.vpn_client_configuration.vpn_client_protocols = client_protocol
+
+    if radius_server is not None:
+        instance.vpn_client_configuration.radius_server_address = radius_server
+
+    if radius_secret is not None:
+        instance.vpn_client_configuration.radius_server_secret = radius_secret
 
     if sku is not None:
         instance.sku.name = sku
@@ -2003,6 +2019,20 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 
     return instance
 
+
+def generate_vpn_client(client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
+                        authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
+                        use_legacy=False):
+    params = get_sdk(ResourceType.MGMT_NETWORK, 'VpnClientParameters', mod='models')(
+        processor_architecture=processor_architecture,
+        authentication_method=authentication_method,
+        radius_server_auth_certificate=radius_server_auth_certificate,
+        client_root_certificates=client_root_certificates
+    )
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and not use_legacy:
+        return client.generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
+    else:
+        return client.generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
 
 # endregion
 
