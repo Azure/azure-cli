@@ -29,20 +29,20 @@ class ResourceLockTests(ScenarioTest):
             self.cmd('az lock delete -n {}'.format(lock_name))
             self._sleep_for_lock_operation()
 
-    @ResourceGroupPreparer(name_prefix='cli_test_readonly_lock_create_list_delete_resource_group')
-    def test_readonly_lock_create_list_delete_resource_group(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_group_lock')
+    def test_readonly_resource_group_lock(self, resource_group):
         self._lock_operation_with_resource_group('ReadOnly', resource_group)
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_lock_create_list_delete_resource_group')
-    def test_cannotdelete_lock_create_list_delete_resource_group(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_group_lock')
+    def test_cannotdelete_resource_group_lock(self, resource_group):
         self._lock_operation_with_resource_group('CanNotDelete', resource_group)
 
-    @ResourceGroupPreparer(name_prefix='cli_test_readonly_lock_create_list_delete_resource')
-    def test_readonly_lock_create_list_delete_resource(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_lock')
+    def test_readonly_resource_lock(self, resource_group):
         self._lock_operation_with_resource('ReadOnly', resource_group)
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_lock_create_list_delete_resource')
-    def test_cannotdelete_lock_create_list_delete_resource(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_lock')
+    def test_cannotdelete_resource_lock(self, resource_group):
         self._lock_operation_with_resource('CanNotDelete', resource_group)
 
     def _lock_operation_with_resource_group(self, lock_type, resource_group):
