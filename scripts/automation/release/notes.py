@@ -60,7 +60,7 @@ def generate_release_notes(date_after):
             note_content = get_note_content(history_path, date_after)
             if note_content:
                 # Only add note if there where actually changes.
-                notes.append({'title': comp_name.upper(), 'content': note_content})
+                notes.append({'title': comp_name.replace('azure-cli-', '').title(), 'content': note_content})
     return notes
 
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     all_notes = generate_release_notes(args.date)
     for n in all_notes:
-        print(n['title'])
-        print('-'*len(n['title']))
+        print('### {}'.format(n['title']))
+        print()
         print(n['content'])
         print()
