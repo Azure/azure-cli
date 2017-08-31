@@ -26,8 +26,8 @@ from azure.cli.core.util import CLIError
 class AcsCustomCommandTest(unittest.TestCase):
     def test_list_acs_locations(self):
         regions = list_acs_locations()
-        prodregions = regions["Production Regions"]
-        previewregions = regions["Preview Regions"]
+        prodregions = regions["productionRegions"]
+        previewregions = regions["previewRegions"]
         self.assertListEqual(prodregions, regionsInProd, "Production regions doesn't match")
         self.assertListEqual(previewregions, regionsInPreview, "Preview regions doesn't match")
 

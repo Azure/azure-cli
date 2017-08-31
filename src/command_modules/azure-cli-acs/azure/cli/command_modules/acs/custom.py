@@ -390,8 +390,8 @@ def _get_default_dns_prefix(name, resource_group_name, subscription_id):
 
 def list_acs_locations():
     return {
-        "Production Regions": regionsInProd,
-        "Preview Regions": regionsInPreview
+        "productionRegions": regionsInProd,
+        "previewRegions": regionsInPreview
     }
 
 
