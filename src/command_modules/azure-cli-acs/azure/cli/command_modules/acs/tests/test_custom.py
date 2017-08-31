@@ -13,7 +13,9 @@ import yaml
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
+from azure.cli.command_modules.acs._params import (regionsInPreview,
+                                                   regionsInProd)
+from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
@@ -22,6 +24,13 @@ from azure.cli.core.util import CLIError
 
 
 class AcsCustomCommandTest(unittest.TestCase):
+    def test_list_acs_locations(self):
+        regions = list_acs_locations()
+        prodregions = regions["Production Regions"]
+        previewregions = regions["Preview Regions"]
+        self.assertListEqual(prodregions, regionsInProd, "Production regions doesn't match")
+        self.assertListEqual(previewregions, regionsInPreview, "Preview regions doesn't match")
+
     def test_get_default_dns_prefix(self):
         name = 'test5678910'
         resource_group_name = 'resource_group_with_underscore'
