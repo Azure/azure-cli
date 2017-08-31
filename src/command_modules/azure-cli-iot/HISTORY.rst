@@ -2,6 +2,16 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++
+* Added collection of new commands most of which use IoT SDK as the provider.
+* Show and update device twin
+* Invoke device method
+* Device simulation
+* Hub message send (Cloud-to-device) 
+* New device message send (supports http, amqp, mqtt)
+* Get SAS token
+
 0.1.11 (2017-08-28)
 +++++++++++++++++++
 * revisit of bug 3934 -- policy creation no longer clears existing policies.

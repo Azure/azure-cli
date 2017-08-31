@@ -7,21 +7,42 @@ jobs:
      python: 2.7
      install: python scripts/dev_setup.py
      script: scripts/build.sh
+     addons:
+      apt:
+        packages:
+         - libboost-python-dev
    -
      env: CODE_COVERAGE="True"
      python: 3.5
      install: python scripts/dev_setup.py
      script: scripts/build.sh
+     addons:
+      apt:
+        packages:
+         - libboost-python-dev
    -
      env: CODE_COVERAGE="True"
      python: 3.6
      install: python scripts/dev_setup.py
      script: scripts/build.sh
+     addons:
+      apt:
+        packages:
+         - libboost-python-dev
    -
      python: 2.7
      install: pip install -qqq virtualenv
      script: scripts/package_verify.sh
+     addons:
+      apt:
+        packages:
+         - libboost-python-dev
+
    -
      python: 3.6
      install: pip install -qqq virtualenv
      script: scripts/package_verify.sh
+     addons:
+      apt:
+        packages:
+         - libboost-python-dev
