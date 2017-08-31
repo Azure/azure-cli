@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.9 (2017-08-31)
 ++++++++++++++++++
 * `keyvault secret download`: Fix bug when trying to automatically resolve secret encoding.
 
