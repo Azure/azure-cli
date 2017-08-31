@@ -63,6 +63,8 @@ def _get_feature_in_preview_message():
 
 regionsInPreview = ["ukwest", "uksouth", "westcentralus", "westus2", "canadaeast", "canadacentral", "westindia", "southindia", "centralindia"]
 
+regionsInProd = ["australiasoutheast", "northeurope", "brazilsouth", "australiaeast", "japaneast", "northcentralus", "westus", "eastasia", "eastus2", "southcentralus", "southeastasia", "eastus", "westeurope", "centralus", "japanwest"]
+
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]

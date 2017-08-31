@@ -34,7 +34,8 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import APPLICATION
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.acs._params import regionsInPreview
+from azure.cli.command_modules.acs._params import (regionsInPreview,
+                                                   regionsInProd)
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -386,6 +387,15 @@ def _get_default_dns_prefix(name, resource_group_name, subscription_id):
         name_part = (str('a') + name_part)[0:10]
     resource_group_part = re.sub('[^A-Za-z0-9-]', '', resource_group_name)[0:16]
     return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
+
+
+
+def list_acs_locations():
+    regions = {
+        "Production Regions" : regionsInProd,
+        "Preview Regions": regionsInPreview
+    }
+    return regions
 
 
 # pylint: disable=too-many-locals
