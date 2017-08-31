@@ -42,7 +42,7 @@ def _update_progress(current, total):
 
 def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
                            custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
-                           bypass='AzureServices', default_action='Allow', assign_identity=False):
+                           bypass=None, default_action=None, assign_identity=False):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
@@ -67,7 +67,9 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
     if https_only:
         params.enable_https_traffic_only = https_only
 
-    if NetworkRuleSet:
+    if NetworkRuleSet and (bypass or default_action):
+        if bypass and not default_action:
+            raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                              virtual_network_rules=None)
 
@@ -130,12 +132,17 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         params.identity = Identity()
 
     if NetworkRuleSet and (bypass or default_action):
-        acl = instance.network_acls or NetworkRuleSet(
-            bypass=bypass, virtual_network_rules=None, ip_rules=None, default_action=default_action)
-        if bypass:
-            acl.bypass = bypass
-        if default_action:
-            acl.default_action = default_action
+        acl = instance.network_acls
+        if not acl:
+            if bypass and not default_action:
+                raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
+            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
+                                 default_action=default_action)
+        else:
+            if bypass:
+                acl.bypass = bypass
+            if default_action:
+                acl.default_action = default_action
         params.network_acls = acl
 
     return params

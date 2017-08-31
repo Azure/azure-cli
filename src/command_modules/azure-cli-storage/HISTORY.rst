@@ -5,6 +5,8 @@ Release History
 
 unreleased
 ++++++++++
+* `storage account create`: Fix issue where storage accounts could not be created in regions that don't
+  support the NetworkACLs feature.
 * Deduce content type and content encoding during blob and file upload if neither content type and content encoding are specified.
 
 2.0.13 (2017-08-28)

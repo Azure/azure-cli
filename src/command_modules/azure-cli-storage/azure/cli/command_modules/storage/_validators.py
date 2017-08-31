@@ -81,6 +81,7 @@ def validate_accept(namespace):
 
 
 def validate_bypass(namespace):
+
     if namespace.bypass:
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
