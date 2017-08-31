@@ -68,8 +68,11 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
         params.enable_https_traffic_only = https_only
 
     if NetworkRuleSet:
-        params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
-                                             virtual_network_rules=None)
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
+        if 'Microsoft.Storage' in network_client.available_endpoint_services.list(location):
+            params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
+                                                 virtual_network_rules=None)
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
