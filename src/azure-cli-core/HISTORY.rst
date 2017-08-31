@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+2.0.14 (2017-08-28)
++++++++++++++++++++
 
 * Add legal note to --version
 

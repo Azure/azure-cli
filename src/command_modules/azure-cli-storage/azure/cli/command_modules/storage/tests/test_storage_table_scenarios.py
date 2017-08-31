@@ -13,12 +13,6 @@ from .storage_test_util import StorageScenarioMixin
 class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
-    def test_storage_table_stats(self, storage_account):
-        self.cmd('storage table stats --account-name {}'.format(storage_account),
-                 checks=JMESPathCheck('geoReplication.status', 'live'))
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
     def test_storage_table_main_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         table_name = self.create_random_name('table', 24)
@@ -45,6 +39,19 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage table exists -n {}', account_info, table_name) \
             .assert_with_checks(JMESPathCheck('exists', False))
+
+        # status may not be available immediately after the storage account is created in live testing. so retry a few
+        # times
+        for _ in range(3):
+            status = self.cmd('storage table stats --account-name {}'.format(storage_account)).get_output_in_json()[
+                'geoReplication']['status']
+            if status == 'live':
+                break
+            elif self.is_live:
+                import time
+                time.sleep(20)
+        else:
+            self.assertFalse(True, 'After 3 retry, the table stats is still not active.')
 
     def verify_entity_operations(self, account_info, table_name):
         self.storage_cmd(

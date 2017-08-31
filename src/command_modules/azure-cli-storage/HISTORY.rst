@@ -5,6 +5,10 @@ Release History
 
 unreleased
 ++++++++++
+* Deduce content type and content encoding during blob and file upload if neither content type and content encoding are specified.
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
 * Enable set blob tier
 * `storage account create/update`: Add `--bypass` and `--default-action` arguments to support service tunneling.
 * `storage account network-rule`: Added commands to add VNET rules and IP based rules.
