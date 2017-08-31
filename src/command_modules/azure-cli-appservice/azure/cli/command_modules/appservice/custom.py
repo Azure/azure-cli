@@ -812,7 +812,7 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
+    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUM'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
