@@ -916,7 +916,8 @@ def firewall_rule_update(
 #####
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
-# If subnet name is given, vnet name is required and the subscription id and resource group of the vnet is assumed to be the same as the sql server.
+
+
 def validate_subnet(namespace):
     from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 

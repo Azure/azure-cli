@@ -653,7 +653,9 @@ with ParametersContext(command='sql server vnet-rule') as c:
                options_list=('--name', '-n'))
 
     c.argument('virtual_network_subnet_id',
-               options_list=('--subnet'))
+               options_list=('--subnet'),
+               help='Name or ID of the subnet that allows access to an Azure Sql Server. '
+               'If subnet name is provided, --vnet-name must be provided.')
 
 register_extra_cli_argument('sql server vnet-rule create', 'vnet_name', options_list=('--vnet-name'),
                             help='The virtual network name', validator=validate_subnet)
