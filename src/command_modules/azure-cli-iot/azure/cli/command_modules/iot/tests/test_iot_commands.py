@@ -99,12 +99,6 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathCheck('rights', 'RegistryWrite, ServiceConnect, DeviceConnect')
         ])
 
-        # Test 'az iot hub policy delete'
-        self.cmd('iot hub policy delete --hub-name {0} -n {1}'.format(hub, policy_name), checks=NoneCheck())
-        self.cmd('iot hub policy list --hub-name {0}'.format(hub), checks=[
-            JMESPathCheck('length([*])', 5)
-        ])
-
         # Test 'az iot hub consumer-group create'
         consumer_group_name = 'cg1'
         self.cmd('iot hub consumer-group create --hub-name {0} -n {1}'.format(hub, consumer_group_name), checks=[
@@ -219,8 +213,9 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathPatternCheck('[1].deviceId', device_id_pattern)
         ])
 
+        # device message send is now using the IoT SDK which is not recorder friendly
         # Test 'az iot device message send'
-        self.cmd('iot device message send --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
+        # self.cmd('iot device message send --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
 
         # Test 'az iot device message receive'
         self.cmd('iot device message receive --hub-name {0} -d {1}'.format(hub, device_1), checks=NoneCheck())
@@ -254,6 +249,16 @@ class IoTHubTest(ResourceGroupVCRTestBase):
             JMESPathPatternCheck('disabledDeviceCount', device_count_pattern),
             JMESPathPatternCheck('enabledDeviceCount', device_count_pattern),
             JMESPathPatternCheck('totalDeviceCount', device_count_pattern)
+        ])
+
+        # Test 'az iot device sas'
+        # There are other tests that assert the value returned
+        self.cmd('iot sas --hub-name {0} --device-id {1} --policy-name {2}'.format(hub, device_1, policy_name))
+
+        # Test 'az iot hub policy delete'
+        self.cmd('iot hub policy delete --hub-name {0} -n {1}'.format(hub, policy_name), checks=NoneCheck())
+        self.cmd('iot hub policy list --hub-name {0}'.format(hub), checks=[
+            JMESPathCheck('length([*])', 5)
         ])
 
         # Test 'az iot device delete'

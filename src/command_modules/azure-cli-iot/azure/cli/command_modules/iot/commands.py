@@ -10,6 +10,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._factory import iot_hub_service_factory as factory
 
+
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.iot.custom#{0}'
 
@@ -72,8 +73,6 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_generic_update_command(__name__, 'iot device update', custom_path.format('iot_device_get'),
                                custom_path.format('iot_device_update'), factory)
     cli_command(__name__, 'iot device delete', custom_path.format('iot_device_delete'), factory)
-    cli_command(__name__, 'iot device message send', custom_path.format('iot_device_send_message'),
-                factory)
     cli_command(__name__, 'iot device message receive',
                 custom_path.format('iot_device_receive_message'), factory)
     cli_command(__name__, 'iot device message complete',
@@ -84,3 +83,12 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                 custom_path.format('iot_device_abandon_message'), factory)
     cli_command(__name__, 'iot device export', custom_path.format('iot_device_export'), factory)
     cli_command(__name__, 'iot device import', custom_path.format('iot_device_import'), factory)
+
+    # IoT SDK extension commands
+    cli_command(__name__, 'iot device twin show', custom_path.format('iot_twin_show'), factory)
+    cli_command(__name__, 'iot device twin update', custom_path.format('iot_twin_update'), factory)
+    cli_command(__name__, 'iot device method', custom_path.format('iot_device_method'), factory)
+    cli_command(__name__, 'iot sas', custom_path.format('iot_get_sas_token'), factory)
+    cli_command(__name__, 'iot device simulate', custom_path.format('iot_simulate_device'), factory)
+    cli_command(__name__, 'iot hub message send', custom_path.format('iot_hub_message_send'), factory)
+    cli_command(__name__, 'iot device message send', custom_path.format('iot_device_send_message_ext'), factory)

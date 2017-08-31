@@ -8,7 +8,7 @@ from azure.cli.core.commands.parameters import (location_type, enum_choice_list,
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
-from .custom import iot_device_list, KeyType, SimpleAccessRights
+from .custom import iot_device_list, KeyType, SimpleAccessRights, ProtocolType, SettleType
 from ._validators import validate_policy_permissions
 
 
@@ -112,17 +112,6 @@ register_cli_argument('iot device show-connection-string', 'key_type', options_l
 # Arguments for 'iot device message' group
 register_cli_argument('iot device message', 'lock_token', help='Message lock token.')
 
-# Arguments for 'iot device message send'
-register_cli_argument('iot device message send', 'data', help='Device-to-cloud message body.',
-                      arg_group='Messaging')
-register_cli_argument('iot device message send', 'message_id', help='Device-to-cloud message Id.',
-                      arg_group='Messaging')
-register_cli_argument('iot device message send', 'correlation_id',
-                      help='Device-to-cloud message correlation Id.',
-                      arg_group='Messaging')
-register_cli_argument('iot device message send', 'user_id', help='Device-to-cloud message user Id.',
-                      arg_group='Messaging')
-
 # Arguments for 'iot device message receive'
 register_cli_argument('iot device message receive', 'lock_timeout', type=int,
                       help='In case a message returned to this call, this specifies the amount of '
@@ -144,3 +133,66 @@ register_cli_argument('iot device import', 'input_blob_container_uri',
 register_cli_argument('iot device import', 'output_blob_container_uri',
                       help='Blob Shared Access Signature URI with write access to a blob container.'
                            'This is used to output the status of the job and the results.')
+# IoT Extensions
+# Arguments for 'iot twin update'
+register_cli_argument('iot device twin update', 'update_json', options_list=('--json', '-j'),
+                      arg_group="twin", help='Json to update device twin with. Provide file path or raw json.')
+register_cli_argument('iot device twin', 'hub_name', hub_name_type)
+
+# Arguments for 'iot device method'
+register_cli_argument('iot device method', 'hub_name', hub_name_type)
+register_cli_argument('iot device method', 'method_name', help="Method to be invoked on device.",
+                      arg_group="method")
+register_cli_argument('iot device method', 'method_payload', help="Payload to be passed to method.",
+                      arg_group="method")
+
+# Arguments for 'iot device sas'
+register_cli_argument('iot sas', 'hub_name', hub_name_type)
+register_cli_argument('iot sas', 'duration',
+                      help="Token duration in seconds. Default is 1 hour.")
+register_cli_argument('iot sas', 'policy_name',
+                      help='Shared access policy to use.')
+
+# Arguments for 'iot simulation'
+register_cli_argument('iot device simulate', 'hub_name', hub_name_type)
+register_cli_argument('iot device simulate', 'protocol',
+                      help='Protocol used to send and receive messages.',
+                      arg_group="simulation", **enum_choice_list(ProtocolType))
+register_cli_argument('iot device simulate', 'settle',
+                      help='Indicate how the received messages should be settled.',
+                      arg_group="simulation", **enum_choice_list(SettleType))
+register_cli_argument('iot device simulate', 'receive_count', options_list=('--receive_count, -rc'),
+                      arg_group="simulation", help="Number of messages to receive as device.", type=int)
+register_cli_argument('iot device simulate', 'message_count', options_list=('--message-count, -mc'),
+                      arg_group="simulation", help="Number of messages to send as device.", type=int)
+register_cli_argument('iot device simulate', 'message_interval', options_list=('--message-interval, -mi'),
+                      arg_group="simulation", help="Delay between each message sent.", type=int)
+register_cli_argument('iot device simulate', 'file_path', options_list=('--upload-file-path'),
+                      arg_group="simulation", help='Upload a file from simulated device')
+
+# Arguments for new 'iot device message send'
+register_cli_argument('iot device message send', 'data', help='Device-to-cloud message body.',
+                      arg_group='Messaging')
+register_cli_argument('iot device message send', 'message_id', help='Device-to-cloud message Id.',
+                      arg_group='Messaging')
+register_cli_argument('iot device message send', 'correlation_id',
+                      help='Device-to-cloud message correlation Id.',
+                      arg_group='Messaging')
+register_cli_argument('iot device message send', 'protocol',
+                      help='Device-to-cloud message send protocol.',
+                      arg_group='Messaging', **enum_choice_list(ProtocolType))
+register_cli_argument('iot device message send', 'user_id',
+                      help='Device-to-cloud message user Id appended as property.',
+                      arg_group='Messaging')
+
+# Arguments for 'iot device message push'
+register_cli_argument('iot hub message send', 'message_id', help='Cloud-to-device message Id.',
+                      arg_group='Messaging')
+register_cli_argument('iot hub message send', 'correlation_id',
+                      help='Cloud-to-device message correlation Id.',
+                      arg_group='Messaging')
+register_cli_argument('iot hub message send', 'wait_feedback',
+                      help='Await device feedback.',
+                      arg_group='Messaging')
+register_cli_argument('iot hub message send', 'data', help='Cloud-to-device message body.',
+                      arg_group='Messaging')

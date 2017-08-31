@@ -32,9 +32,12 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-iothub-device-client',
+    'azure-iothub-service-client',
+    'six',
     'azure-mgmt-iothub==0.2.2',
     'pyOpenSSL',
-    'azure-cli-core',
+    'azure-cli-core'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
