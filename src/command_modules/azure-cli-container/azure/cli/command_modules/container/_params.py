@@ -22,8 +22,8 @@ def environment_variables_format(value):
     try:
         env_name, env_value = value.split('=', 1)
     except ValueError:
-        message = ("Incorrectly formatted enviroment settings. "
-                   "Argmuent values should be in the format a=b c=d")
+        message = ("Incorrectly formatted environment settings. "
+                   "Argument values should be in the format a=b c=d")
         raise CLIError(message)
     return {'name': env_name, 'value': env_value}
 
