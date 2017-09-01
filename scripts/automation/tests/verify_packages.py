@@ -151,7 +151,7 @@ def verify_packages():
     for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, chunk_size), 1):
         command_results.append(res)
         cur_percent = int((i/len(all_commands))*100)
-        if cur_percent - prev_percent >= 10:
+        if cur_percent != prev_percent:
             print('{}% complete'.format(cur_percent), file=sys.stderr)
         prev_percent = cur_percent
     p.close()
