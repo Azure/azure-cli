@@ -29,21 +29,21 @@ class ResourceLockTests(ScenarioTest):
             self.cmd('az lock delete -n {}'.format(lock_name))
             self._sleep_for_lock_operation()
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_group_lock')
-    # def test_readonly_resource_group_lock(self, resource_group):
-    #    self._lock_operation_with_resource_group('ReadOnly', resource_group)
+    @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_group_lock')
+    def test_readonly_resource_group_lock(self, resource_group):
+        self._lock_operation_with_resource_group('ReadOnly', resource_group)
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_group_lock')
-    # def test_cannotdelete_resource_group_lock(self, resource_group):
-    #    self._lock_operation_with_resource_group('CanNotDelete', resource_group)
+    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_group_lock')
+    def test_cannotdelete_resource_group_lock(self, resource_group):
+        self._lock_operation_with_resource_group('CanNotDelete', resource_group)
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_lock')
-    # def test_readonly_resource_lock(self, resource_group):
-    #    self._lock_operation_with_resource('ReadOnly', resource_group)
+    @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_lock')
+    def test_readonly_resource_lock(self, resource_group):
+        self._lock_operation_with_resource('ReadOnly', resource_group)
 
-    #@ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_lock')
-    def test_cannotdelete_resource_lock(self):
-        self._lock_operation_with_resource('CanNotDelete', 'resource_group')
+    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_lock')
+    def test_cannotdelete_resource_lock(self, resource_group):
+        self._lock_operation_with_resource('CanNotDelete', resource_group)
 
     def _lock_operation_with_resource_group(self, lock_type, resource_group):
         lock_name = self.create_random_name('cli-test-lock', 48)
@@ -63,16 +63,11 @@ class ResourceLockTests(ScenarioTest):
         self._sleep_for_lock_operation()
 
     def _lock_operation_with_resource(self, lock_type, resource_group):
-        self.cmd('az group create --location {} --name {} --tag use=az-test'.format('southcentralus', resource_group))
-        self.addCleanup(lambda: self.cmd('az group delete -n {} --yes --no-wait'.format(resource_group)))
-        
         rsrc_name = self.create_random_name('cli.lock.rsrc', 30)
         rsrc_type = 'Microsoft.Network/virtualNetworks'
         lock_name = self.create_random_name('cli-test-lock', 74)
 
         self.cmd('az network vnet create -n {} -g {}'.format(rsrc_name, resource_group))
-        # print(repr('az lock create -n {} --resource-type {} -g {} --resource-name {} --lock-type {}'
-        #          .format(lock_name, rsrc_type, resource_group, rsrc_name, lock_type)))
         self.cmd('az lock create -n {} --resource-type {} -g {} --resource-name {} --lock-type {}'
                  .format(lock_name, rsrc_type, resource_group, rsrc_name, lock_type))
         self._sleep_for_lock_operation()
