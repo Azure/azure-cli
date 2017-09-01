@@ -143,7 +143,7 @@ def verify_packages():
     config = Configuration()
 
     all_commands = list(config.get_command_table())
-    pool_size = 10
+    pool_size = 5
     chunk_size = 10
     command_results = []
     p = multiprocessing.Pool(pool_size)
