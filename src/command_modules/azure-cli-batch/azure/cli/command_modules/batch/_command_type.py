@@ -893,9 +893,9 @@ def validate_client_parameters(namespace):
                 raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
     else:
         if not namespace.account_name:
-            raise ValueError("Specify batch account in command line or enviroment variable.")
+            raise ValueError("Specify batch account in command line or environment variable.")
         if not namespace.account_endpoint:
-            raise ValueError("Specify batch endpoint in command line or enviroment variable.")
+            raise ValueError("Specify batch endpoint in command line or environment variable.")
 
     if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None
