@@ -33,11 +33,11 @@ register_cli_argument('backup vault set-backup-properties', 'backup_storage_redu
 
 # Container
 for command in ['list', 'show']:
-    register_cli_argument('backup container {}'.format(command), 'vault', type=file_type, help='The file containing vault specification in JSON format.', completer=FilesCompleter())
-    register_cli_argument('backup container {}'.format(command), 'container_type', help='Container type.', **enum_choice_list(allowed_container_types))
-    register_cli_argument('backup container {}'.format(command), 'status', help='Registration status.', **enum_choice_list(['Registered']))
+    register_cli_argument('backup container {}'.format(command), 'vault', type=file_type, help='JSON encoded vault definition. Use the show command of the vault to obtain the relevant vault object', completer=FilesCompleter())
+    register_cli_argument('backup container {}'.format(command), 'container_type', help='The type of container.', **enum_choice_list(allowed_container_types))
+    register_cli_argument('backup container {}'.format(command), 'status', help='The registration status of this container to the vault.', **enum_choice_list(['Registered']))
 
-register_cli_argument('backup container show', 'container_name', help='Container name.')
+register_cli_argument('backup container show', 'container_name', help='The name of the container or resource which has items to be protected')
 
 # Item
 for command in ['list', 'show']:

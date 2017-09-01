@@ -31,7 +31,7 @@ class BackupTests(ScenarioTest):
 
         # Enable Protection
         policy_json = json.dumps(self.cmd(
-            'az backup policy show -n DefaultPolicy --vault \'{}\''.format(vault_json)).get_output_in_json())
+            'az backup policy show --policy-name DefaultPolicy --vault \'{}\''.format(vault_json)).get_output_in_json())
         vm_json = self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json()
         vm_json = json.dumps(vm_json)
         self.cmd('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''

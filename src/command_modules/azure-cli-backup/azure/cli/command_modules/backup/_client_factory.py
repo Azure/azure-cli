@@ -48,7 +48,7 @@ def vaults_cf(_):
     return _common_client_factory().vaults
 
 
-def backup_storage_configs_cf():
+def backup_storage_configs_cf(_):
     return _common_client_factory().backup_storage_configs
 
 # Protection Client Factories
