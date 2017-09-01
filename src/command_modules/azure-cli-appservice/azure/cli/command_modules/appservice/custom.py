@@ -48,6 +48,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
+    linux_storage_default = False
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(server_farm_id=plan, location=location, site_config=site_config)
 
@@ -61,6 +62,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
+            linux_storage_default = True
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -82,6 +84,10 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
                              deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
+
+    if linux_storage_default:
+        update_app_settings(resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
+
     return webapp
 
 
