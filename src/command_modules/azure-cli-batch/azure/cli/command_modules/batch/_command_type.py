@@ -308,7 +308,7 @@ class BatchArgumentTree(object):
                 return []
         siblings = self._get_siblings(path)
         if not siblings:
-            raise ValueError("Invalid argmuent dependency tree")  # TODO
+            raise ValueError("Invalid argument dependency tree")  # TODO
         dependencies = self._arg_tree[siblings[0]]['dependencies']
         for child_arg in children:
             if child_arg in required_args:
