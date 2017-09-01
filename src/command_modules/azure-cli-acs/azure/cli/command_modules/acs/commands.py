@@ -21,7 +21,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     # cli_generic_update_command(__name__, 'acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
 
     # custom commands
-
+    cli_command(__name__, 'acs list-locations', 'azure.cli.command_modules.acs.custom#list_acs_locations')
     cli_command(__name__, 'acs scale', 'azure.cli.command_modules.acs.custom#update_acs', _acs_client_factory)
     cli_command(__name__, 'acs list', 'azure.cli.command_modules.acs.custom#list_container_services', _acs_client_factory)
     cli_command(__name__, 'acs browse', 'azure.cli.command_modules.acs.custom#acs_browse')

@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++
+* add acs list-locations command
+
 2.0.14 (2017-08-28)
 +++++++++++++++++++
 * correct preview regions
