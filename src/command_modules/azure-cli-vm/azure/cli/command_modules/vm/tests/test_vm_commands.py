@@ -1977,7 +1977,6 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),
                 JMESPathCheckV2('identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
-                JMESPathCheckV2('identity.subscription', subscription_id),
                 JMESPathCheckV2('identity.port', 50342)
             ])
 
@@ -1990,7 +1989,6 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm create -g {} -n {} --image Win2016Datacenter --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2, vm1_id), checks=[
                 JMESPathCheckV2('identity.role', 'reader'),
                 JMESPathCheckV2('identity.scope', vm1_id),
-                JMESPathCheckV2('identity.subscription', subscription_id),
                 JMESPathCheckV2('identity.port', 50342)
             ])
 
@@ -2006,7 +2004,6 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm assign-identity -g {} -n {} --scope {} --role reader --port 50343'.format(resource_group, vm3, vm1_id), checks=[
                 JMESPathCheckV2('role', 'reader'),
                 JMESPathCheckV2('scope', vm1_id),
-                JMESPathCheckV2('subscription', subscription_id),
                 JMESPathCheckV2('port', 50343)
             ])
 
@@ -2035,7 +2032,6 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'Contributor'),
                 JMESPathCheckV2('vmss.identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
-                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
                 JMESPathCheckV2('vmss.identity.port', 50342)
             ])
 
@@ -2049,7 +2045,6 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss create -g {} -n {} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2, vmss1_id), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'reader'),
                 JMESPathCheckV2('vmss.identity.scope', vmss1_id),
-                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
                 JMESPathCheckV2('vmss.identity.port', 50342)
             ])
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
@@ -2067,7 +2062,6 @@ class MSIScenarioTest(ScenarioTest):
                 self.cmd('vmss assign-identity -g {} -n {} --scope "{}" --role reader --port 50343'.format(resource_group, vmss3, vmss1_id), checks=[
                     JMESPathCheckV2('role', 'reader'),
                     JMESPathCheckV2('scope', vmss1_id),
-                    JMESPathCheckV2('subscription', subscription_id),
                     JMESPathCheckV2('port', 50343)
                 ])
 
@@ -2078,8 +2072,6 @@ class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_msi_no_scope(self, resource_group):
-        subscription_id = self.get_subscription_id()
-
         vm1 = 'vm1'
         vmss1 = 'vmss1'
         vm2 = 'vm2'
@@ -2087,7 +2079,6 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a linux vm with identity but w/o a role assignment (--scope "")
         self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vm1), checks=[
-            JMESPathCheckV2('identity.subscription', subscription_id),
             JMESPathCheckV2('identity.scope', ''),
             JMESPathCheckV2('identity.port', 50342)
         ])
@@ -2099,7 +2090,6 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a vmss with identity but w/o a role assignment (--scope "")
         self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vmss1), checks=[
-            JMESPathCheckV2('vmss.identity.subscription', subscription_id),
             JMESPathCheckV2('vmss.identity.scope', ''),
             JMESPathCheckV2('vmss.identity.port', 50342)
         ])
@@ -2115,7 +2105,6 @@ class MSIScenarioTest(ScenarioTest):
         # assign identity but w/o a role assignment
         self.cmd('vm assign-identity -g {} -n {} --scope ""'.format(resource_group, vm2), checks=[
             JMESPathCheckV2('scope', ''),
-            JMESPathCheckV2('subscription', subscription_id),
             JMESPathCheckV2('port', 50342)
         ])
         # the extension should still get provisioned
@@ -2129,7 +2118,6 @@ class MSIScenarioTest(ScenarioTest):
         if self.is_live:
             self.cmd('vmss assign-identity -g {} -n {} --scope ""'.format(resource_group, vmss2), checks=[
                 JMESPathCheckV2('scope', ''),
-                JMESPathCheckV2('subscription', subscription_id),
                 JMESPathCheckV2('port', 50342)
             ])
 
