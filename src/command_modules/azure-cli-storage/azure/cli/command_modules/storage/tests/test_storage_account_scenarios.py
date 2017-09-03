@@ -10,6 +10,36 @@ from .storage_test_util import StorageScenarioMixin
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_service_endpoints')
+    @StorageAccountPreparer()
+    def test_storage_account_service_endpoints(self, resource_group, storage_account):
+
+        kwargs = {
+            'rg': resource_group,
+            'acc': storage_account,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'.format(**kwargs))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(**kwargs))
+
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(**kwargs))
+        self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(virtualNetworkRules)', 1)
+        ])
+        self.cmd('storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(**kwargs))
+        self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
+            JMESPathCheck('length(ipRules)', 1),
+            JMESPathCheck('length(virtualNetworkRules)', 0)
+        ])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(location='southcentralus')
     def test_create_storage_account_with_assigned_identity(self, resource_group):

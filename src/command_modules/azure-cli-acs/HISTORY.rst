@@ -4,8 +4,13 @@ Release History
 ===============
 unreleased
 +++++++++++++++++++
+* add acs list-locations command
+
+2.0.14 (2017-08-28)
++++++++++++++++++++
 * correct preview regions
 * format default dns_name_prefix properly
+* optimize acs command output
 
 2.0.13 (2017-08-15)
 +++++++++++++++++++

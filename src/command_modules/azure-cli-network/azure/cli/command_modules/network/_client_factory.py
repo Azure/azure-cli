@@ -60,8 +60,8 @@ def cf_packet_capture(_):
     return _network_client_factory().packet_captures
 
 
-def cf_private_access(_):
-    return _network_client_factory().available_private_access_services
+def cf_endpoint_service(_):
+    return _network_client_factory().available_endpoint_services
 
 
 def cf_public_ip_addresses(_):
