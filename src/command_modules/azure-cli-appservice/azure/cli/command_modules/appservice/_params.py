@@ -151,6 +151,7 @@ register_cli_argument('webapp config container', 'docker_registry_server_url', o
 register_cli_argument('webapp config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c', '-i'), help='the container custom image name and optionally the tag name')
 register_cli_argument('webapp config container', 'docker_registry_server_user', options_list=('--docker-registry-server-user', '-u'), help='the container registry server username')
 register_cli_argument('webapp config container', 'docker_registry_server_password', options_list=('--docker-registry-server-password', '-p'), help='the container registry server password')
+register_cli_argument('webapp config container', 'websites_enable_app_service_storage', options_list=('--websites-enable-appservice-storage', '-t'), help='enables platform storage (custom container only)', **enum_choice_list(two_states_switch))
 
 register_cli_argument('webapp config set', 'remote_debugging_enabled', help='enable or disable remote debugging', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config set', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))

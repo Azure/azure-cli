@@ -61,6 +61,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
+            #site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', "false"))
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -349,12 +350,12 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
-                              'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
+                              'DOCKER_REGISTRY_SERVER_PASSWORD', "WEBSITES_ENABLE_APP_SERVICE_STORAGE"]
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
 def update_container_settings(resource_group_name, name, docker_registry_server_url=None,
-                              docker_custom_image_name=None, docker_registry_server_user=None,
+                              docker_custom_image_name=None, docker_registry_server_user=None, websites_enable_app_service_storage=None,
                               docker_registry_server_password=None, slot=None):
     settings = []
     if docker_registry_server_url is not None:
@@ -374,6 +375,8 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
+    if websites_enable_app_service_storage is not None:
+        settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
     if docker_custom_image_name is not None:
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name, slot)
 
