@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,53 +8,51 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.14 msrest_azure/0.4.13 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
+          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.14+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 29 Aug 2017 18:25:41 GMT']
+      date: ['Thu, 31 Aug 2017 17:11:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
-    body: !!python/unicode '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "properties":
-      {"supportsHttpsTrafficOnly": false, "networkAcls": {"defaultAction": "Allow",
-      "bypass": "AzureServices"}}, "location": "westus"}'
+    body: '{"kind": "Storage", "sku": {"name": "Standard_LRS"}, "properties": {"supportsHttpsTrafficOnly":
+      false}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Length: ['195']
+      Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.14 msrest_azure/0.4.13 storagemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
+          msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.14+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-06-01
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 29 Aug 2017 18:25:42 GMT']
+      date: ['Thu, 31 Aug 2017 17:11:51 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/1f91fa9f-b9aa-4a9f-b620-f9f306537ff5?monitor=true&api-version=2017-06-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/db9f5416-cf86-4718-8d71-59dcd3a66208?monitor=true&api-version=2017-06-01']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -64,21 +62,20 @@ interactions:
       CommandName: [storage account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.14 msrest_azure/0.4.13 storagemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
+          msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.14+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/1f91fa9f-b9aa-4a9f-b620-f9f306537ff5?monitor=true&api-version=2017-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/operations/db9f5416-cf86-4718-8d71-59dcd3a66208?monitor=true&api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"westus","name":"clitest000002","properties":{"creationTime":"2017-08-29T18:25:42.1734424Z","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"westus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"westus","name":"clitest000002","properties":{"creationTime":"2017-08-31T17:11:51.5802777Z","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"westus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['964']
       content-type: [application/json]
-      date: ['Tue, 29 Aug 2017 18:25:59 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -95,28 +92,25 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.14 msrest_azure/0.4.13 storagemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
+          msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.14+dev]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"Vvf47n0+UCDq99s7CucjltlNOex1S8stRqWutikin5KWKyBN2A22V54AF0W4y4PGqZWLjByU1okgxgNVFKH0lQ=="},{"keyName":"key2","permissions":"Full","value":"95RKFQNTLIZPsWuZSR9uAt0GVeH4I893EzzvwDcpP8cd7QXU7v/Bc/aA8TLe2LV80iNZlVmQGRN/ADMAZFBDJg=="}]}
+    body: {string: '{"keys":[{"keyName":"key1","permissions":"Full","value":"MON3RRQrI78BhviEnatuGc5xyyMqF9oLyrKk9fmpxZgKbJgGleKMnN/oWrhgwdTvWzJvN7Bduu6vMOpsysUidw=="},{"keyName":"key2","permissions":"Full","value":"TfqlaF54tOt1xSFhFahGMIBIfDwBPyfexjaKEUabMgkuH+9YOqxz7QBJvBOKRcuvGjdcZ4yL9KINF7iGelNenw=="}]}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -127,45 +121,44 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.14 msrest_azure/0.4.13 storagemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
+          msrest_azure/0.4.11 storagemanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.14+dev]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-06-01
   response:
-    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"Vvf47n0+UCDq99s7CucjltlNOex1S8stRqWutikin5KWKyBN2A22V54AF0W4y4PGqZWLjByU1okgxgNVFKH0lQ=="},{"keyName":"key2","permissions":"Full","value":"95RKFQNTLIZPsWuZSR9uAt0GVeH4I893EzzvwDcpP8cd7QXU7v/Bc/aA8TLe2LV80iNZlVmQGRN/ADMAZFBDJg=="}]}
+    body: {string: '{"keys":[{"keyName":"key1","permissions":"Full","value":"MON3RRQrI78BhviEnatuGc5xyyMqF9oLyrKk9fmpxZgKbJgGleKMnN/oWrhgwdTvWzJvN7Bduu6vMOpsysUidw=="},{"keyName":"key2","permissions":"Full","value":"TfqlaF54tOt1xSFhFahGMIBIfDwBPyfexjaKEUabMgkuH+9YOqxz7QBJvBOKRcuvGjdcZ4yL9KINF7iGelNenw=="}]}
 
 '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:10 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28B9D"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:10 GMT']
+      etag: ['"0x8D4F0936ABBCA26"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:10 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -174,8 +167,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
@@ -184,9 +177,9 @@ interactions:
         />"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28B9D"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:10 GMT']
+      etag: ['"0x8D4F0936ABBCA26"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:10 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -195,8 +188,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
@@ -205,31 +198,31 @@ interactions:
         />"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28B9D"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:10 GMT']
+      etag: ['"0x8D4F0936ABBCA26"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:10 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
       <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['184']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28B9E"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:10 GMT']
+      etag: ['"0x8D4F0936AF98353"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -238,8 +231,8 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
@@ -247,31 +240,31 @@ interactions:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28B9E"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936AF98353"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['296']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:26:01 GMT']
-      etag: ['"0x8D4EF0B66F28B9F"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B1B1B4A"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -280,40 +273,40 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28B9F"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B1B1B4A"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['413']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28BA0"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B3C16E8"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -322,40 +315,40 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:11 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:25:59 GMT']
-      etag: ['"0x8D4EF0B66F28BA0"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B3C16E8"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['591']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:12 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:25:59 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -364,18 +357,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:12 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:01 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -384,18 +377,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:12 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:01 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -404,18 +397,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:12 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:01 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -424,18 +417,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:12 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:00 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:12 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -444,18 +437,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:12 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:02 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:11 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -464,40 +457,40 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:02 GMT']
-      etag: ['"0x8D4EF0B66F28BA1"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:01 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:12 GMT']
+      etag: ['"0x8D4F0936B604766"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:11 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['597']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:26:02 GMT']
-      etag: ['"0x8D4EF0B674BBCB0"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:12 GMT']
+      etag: ['"0x8D4F0936C0B25F2"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:12 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -506,18 +499,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:06 GMT']
-      etag: ['"0x8D4EF0B674BBCB0"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:12 GMT']
+      etag: ['"0x8D4F0936C0B25F2"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:12 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -526,40 +519,40 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:02 GMT']
-      etag: ['"0x8D4EF0B674BBCB0"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:12 GMT']
+      etag: ['"0x8D4F0936C0B25F2"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:12 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['491']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Tue, 29 Aug 2017 18:26:02 GMT']
-      etag: ['"0x8D4EF0B678217E6"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:12 GMT']
+      etag: ['"0x8D4F0936C494BE1"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:13 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -568,18 +561,18 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.13; Darwin 16.7.0) AZURECLI/2.0.13+dev]
-      x-ms-date: ['Tue, 29 Aug 2017 18:26:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Windows 10) AZURECLI/2.0.14+dev]
+      x-ms-date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://clitest000002.blob.core.windows.net/cont000003?comp=acl&restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Tue, 29 Aug 2017 18:26:03 GMT']
-      etag: ['"0x8D4EF0B678217E6"']
-      last-modified: ['Tue, 29 Aug 2017 18:26:02 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:13 GMT']
+      etag: ['"0x8D4F0936C494BE1"']
+      last-modified: ['Thu, 31 Aug 2017 17:12:13 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
@@ -593,22 +586,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.13 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.9.1
-          msrest/0.4.14 msrest_azure/0.4.13 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
+          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.14+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 29 Aug 2017 18:26:04 GMT']
+      date: ['Thu, 31 Aug 2017 17:12:13 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdIQllMR0gzTFMyQkVQQTZYVldGSk5ZWjJDUUZOSVhEM0NFR3xCNTA4NUU4QkZBNUMxNjdCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdCRjM3WllEWEFXRUlBREdVUllUV1pBMzVDSzZXU1JYSEtOQ3w4RjI4MDJDQTU2RDJGQ0U3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 version: 1

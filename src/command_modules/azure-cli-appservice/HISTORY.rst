@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.15 (2017-08-31)
++++++++++++++++++++
+* minor fixes
+
 0.1.14 (2017-08-28)
 +++++++++++++++++++
 Breaking Change:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
