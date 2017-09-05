@@ -126,8 +126,8 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
         # verify app settings
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
-        JMESPathCheckV2('[0].name', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'),
-        JMESPathCheckV2('[0].value', 'false'),
+            JMESPathCheckV2('[0].name', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'),
+            JMESPathCheckV2('[0].value', 'false'),
         ]))
 
     @ResourceGroupPreparer(location='westus')
