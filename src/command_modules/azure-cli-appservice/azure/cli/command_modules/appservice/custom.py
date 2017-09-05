@@ -44,8 +44,11 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     client = web_client_factory()
     if is_valid_resource_id(plan):
-        plan = parse_resource_id(plan)['name']
-    plan_info = client.app_service_plans.get(resource_group_name, plan)
+        parse_result = parse_resource_id(plan)
+        plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+    else:
+        plan_info = client.app_service_plans.get(resource_group_name, plan)
+    plan = plan_info.id
     is_linux = plan_info.reserved
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])

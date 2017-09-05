@@ -136,6 +136,17 @@ class WebappQuickCreateTest(ScenarioTest):
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
 
+    @ResourceGroupPreparer()
+    def test_create_in_different_group(self, resource_group, resource_group_location):
+        resource_group2 = resource_group + '2'
+        plan = 'planInOneRG'
+        self.cmd('group create -n {} -l {}'.format(resource_group2, resource_group_location))
+        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('webapp create -g {} -n webInOtherRG --plan {}'.format(resource_group2, plan_id), checks=[
+            JMESPathCheckV2('name', 'webInOtherRG')
+        ])
+        self.cmd('group delete -n {} --no-wait -y'.format(resource_group2))
+
 
 class AppServicePlanSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
