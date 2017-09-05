@@ -112,7 +112,7 @@ register_cli_argument('acs', 'disable_browser', help='Do not open browser after 
 register_cli_argument('acs dcos browse', 'name', name_arg_type)
 register_cli_argument('acs dcos browse', 'ssh_key_file',
                       required=False,
-                      help='SSH key file value or key file path.',
+                      help='Path to an SSH key file to use.',
                       type=file_type,
                       default=os.path.join('~', '.ssh', 'id_rsa'),
                       completer=FilesCompleter())
@@ -133,7 +133,7 @@ register_cli_argument('acs kubernetes get-credentials', 'path',
                       completer=FilesCompleter())
 register_cli_argument('acs kubernetes get-credentials', 'ssh_key_file',
                       required=False,
-                      help='SSH key file value or key file path.',
+                      help='Path to an SSH key file to use.',
                       type=file_type,
                       default=os.path.join('~', '.ssh', 'id_rsa'),
                       completer=FilesCompleter())
