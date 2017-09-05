@@ -48,11 +48,10 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
-    plan = plan_info.id
     is_linux = plan_info.reserved
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    webapp_def = Site(server_farm_id=plan, location=location, site_config=site_config)
+    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
         if runtime and deployment_container_image_name:
