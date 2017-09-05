@@ -5,6 +5,7 @@ Release History
 unreleased
 +++++++++++++++++++
 * add acs list-locations command
+* make ssh-key-file come with expected default value
 
 2.0.14 (2017-08-28)
 +++++++++++++++++++
