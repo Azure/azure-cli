@@ -6,6 +6,7 @@ Release History
 2.0.13 (2017-08-28)
 +++++++++++++++++++
 * `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
+* `vnet-gateway`: Added command `vpn-client generate`.
 
 
 unreleased

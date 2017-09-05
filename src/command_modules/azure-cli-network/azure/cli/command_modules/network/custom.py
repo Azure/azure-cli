@@ -5,6 +5,8 @@
 from __future__ import print_function
 
 from collections import Counter, OrderedDict
+import mock
+
 from msrestazure.azure_exceptions import CloudError
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
@@ -1935,7 +1937,7 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-    
+
     if any((address_prefixes, radius_secret, radius_server, client_protocol)):
         vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
         vnet_gateway.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
@@ -2019,22 +2021,152 @@ def update_vnet_gateway(instance, sku=None, vpn_type=None, tags=None,
 
     return instance
 
+# region VPN CLIENT WORKAROUND
+
+
+# This is needed due to NRP doing exactly the opposite of what the specification says they should do.
+# pylint: disable=line-too-long, protected-access, mixed-line-endings
+def _poll(self, update_cmd):
+    from msrestazure.azure_operation import finished, failed, BadResponse, OperationFailed
+    initial_url = self._response.request.url
+
+    while not finished(self.status()):
+        self._delay()
+        headers = self._polling_cookie()
+
+        if self._operation.location_url:
+            self._response = update_cmd(
+                self._operation.location_url, headers)
+            self._operation.set_async_url_if_present(self._response)
+            self._operation.get_status_from_location(
+                self._response)
+        elif self._operation.method == "PUT":
+            self._response = update_cmd(initial_url, headers)
+            self._operation.set_async_url_if_present(self._response)
+            self._operation.get_status_from_resource(
+                self._response)
+        else:
+            raise BadResponse(
+                'Location header is missing from long running operation.')
+
+    if failed(self._operation.status):
+        raise OperationFailed("Operation failed or cancelled")
+    elif self._operation.should_do_final_get():
+        self._response = update_cmd(initial_url)
+        self._operation.get_status_from_resource(
+            self._response)
+
+
+# This is needed due to a bug in autorest code generation. It adds 202 as a valid status code.
+def _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
+    import uuid
+    from msrest.pipeline import ClientRawResponse
+    from msrestazure.azure_operation import AzureOperationPoller
+    path_format_arguments = {
+        'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+        'virtualNetworkGatewayName': self._serialize.url("virtual_network_gateway_name", virtual_network_gateway_name, 'str'),
+        'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str')
+    }
+    url = self._client.format_url(url, **path_format_arguments)
+
+    # Construct parameters
+    query_parameters = {}
+    query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+    # Construct headers
+    header_parameters = {}
+    header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+    if self.config.generate_client_request_id:
+        header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+    if custom_headers:
+        header_parameters.update(custom_headers)
+    if self.config.accept_language is not None:
+        header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+    # Construct body
+    body_content = self._serialize.body(parameters, 'VpnClientParameters')
+
+    # Construct and send request
+    def long_running_send():
+
+        request = self._client.post(url, query_parameters)
+        return self._client.send(
+            request, header_parameters, body_content, **operation_config)
+
+    def get_long_running_status(status_link, headers=None):
+
+        request = self._client.get(status_link)
+        if headers:
+            request.headers.update(headers)
+        return self._client.send(
+            request, header_parameters, **operation_config)
+
+    def get_long_running_output(response):
+
+        if response.status_code not in [200, 202]:
+            exp = CloudError(response)
+            exp.request_id = response.headers.get('x-ms-request-id')
+            raise exp
+
+        deserialized = None
+
+        if response.status_code in [200, 202]:
+            deserialized = self._deserialize('str', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+
+    if raw:
+        response = long_running_send()
+        return get_long_running_output(response)
+
+    long_running_operation_timeout = operation_config.get(
+        'long_running_operation_timeout',
+        self.config.long_running_operation_timeout)
+    return AzureOperationPoller(
+        long_running_send, get_long_running_output,
+        get_long_running_status, long_running_operation_timeout)
+
+
+@mock.patch('msrestazure.azure_operation.AzureOperationPoller._poll', _poll)
+def _generate_vpn_profile(
+        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
+    # Construct URL
+    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnprofile'
+    return _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers, raw, **operation_config)
+
+
+@mock.patch('msrestazure.azure_operation.AzureOperationPoller._poll', _poll)
+def _generatevpnclientpackage(
+        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
+    # Construct URL
+    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnclientpackage'
+    return _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers, raw, **operation_config)
+
+# endregion VPN CLIENT WORKAROUND`
+
 
 def generate_vpn_client(client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
     params = get_sdk(ResourceType.MGMT_NETWORK, 'VpnClientParameters', mod='models')(
-        processor_architecture=processor_architecture,
-        authentication_method=authentication_method,
-        radius_server_auth_certificate=radius_server_auth_certificate,
-        client_root_certificates=client_root_certificates
+        processor_architecture=processor_architecture
     )
+
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and not use_legacy:
-        return client.generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
-    else:
-        return client.generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
+        params.authentication_method = authentication_method
+        params.radius_server_auth_certificate = radius_server_auth_certificate
+        params.client_root_certificates = client_root_certificates
+        return _generate_vpn_profile(client, resource_group_name, virtual_network_gateway_name, params)
+
+    # legacy implementation
+    return _generatevpnclientpackage(client, resource_group_name, virtual_network_gateway_name, params)
 
 # endregion
+
 
 # region Express Route commands
 

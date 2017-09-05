@@ -1713,7 +1713,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway list-bgp-peer-status -g {} -n {} --peer 10.1.1.1'.format(rg, gateway1_name))
 
 
-
+@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2017-06-01')
 class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer('cli_test_vpn_client_package')
@@ -1728,14 +1728,39 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
             'cert': 'cert1',
             'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
         }
-        
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet'.format(**kwargs))
         self.cmd('network public-ip create -g {rg} -n {public_ip}'.format(**kwargs))
         self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}'.format(**kwargs))
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
-        self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} -a X86'.format(**kwargs))
-        self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} -a Amd64'.format(**kwargs))
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} --processor-architecture X86'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.exe' in output, 'Expected EXE file in output.\nActual: {}'.format(output))
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} --processor-architecture Amd64'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.exe' in output, 'Expected EXE file in output.\nActual: {}'.format(output))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
