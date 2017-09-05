@@ -118,3 +118,7 @@ def recovery_points_cf(_):
 
 def restores_cf(_):
     return _backup_client_factory().restores
+
+
+def item_level_recovery_connections_cf(_):
+    return _backup_client_factory().item_level_recovery_connections

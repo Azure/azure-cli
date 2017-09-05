@@ -83,6 +83,8 @@ register_cli_argument('backup protection disable', 'delete_backup_data', help='O
 register_cli_argument('backup restore disks', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object', completer=FilesCompleter())
 register_cli_argument('backup restore disks', 'destination_storage_account', help='The name of the storge accout to which the disks are restored')
 register_cli_argument('backup restore disks', 'destination_storage_account_resource_group', help='The name of the resource group of the storge accout to which the disks are restored')
+register_cli_argument('backup restore files mount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object', completer=FilesCompleter())
+register_cli_argument('backup restore files unmount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object', completer=FilesCompleter())
 
 # Job
 for command in ['list', 'show']:

@@ -10,7 +10,8 @@ from collections import OrderedDict
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_protected_items_cf, \
-    backup_jobs_cf, job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf
+    backup_jobs_cf, job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
+    item_level_recovery_connections_cf
 
 def transform_container(result):
     return OrderedDict([('name', result['properties']['friendlyName']),
@@ -53,3 +54,5 @@ cli_command(__name__, 'backup recoverypoint show', 'azure.cli.command_modules.ba
 cli_command(__name__, 'backup recoverypoint list', 'azure.cli.command_modules.backup.custom#list_recovery_points', recovery_points_cf)
 
 cli_command(__name__, 'backup restore disks', 'azure.cli.command_modules.backup.custom#restore_disks', restores_cf)
+cli_command(__name__, 'backup restore files mount-rp', 'azure.cli.command_modules.backup.custom#restore_files_mount_rp', item_level_recovery_connections_cf)
+cli_command(__name__, 'backup restore files unmount-rp', 'azure.cli.command_modules.backup.custom#restore_files_unmount_rp', item_level_recovery_connections_cf)
