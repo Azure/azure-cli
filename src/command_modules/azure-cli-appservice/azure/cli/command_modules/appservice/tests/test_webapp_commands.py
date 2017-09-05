@@ -124,6 +124,11 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+        # verify app settings
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
+        JMESPathCheckV2('[0].name', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'),
+        JMESPathCheckV2('[0].value', 'false'),
+        ]))
 
     @ResourceGroupPreparer(location='westus')
     def test_linux_webapp_quick_create_cd(self, resource_group):
