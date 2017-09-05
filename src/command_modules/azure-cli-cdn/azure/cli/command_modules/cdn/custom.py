@@ -98,16 +98,12 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
 create_endpoint.__doc__ = Endpoint.__doc__
 
 
-def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, name, hostname,
-                         location=None, tags=None):
-    from azure.mgmt.cdn.models import (CustomDomain)
-    custom_domain = CustomDomain(location, hostname, tags=tags)
+def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, name, hostname):
     return client.custom_domains.create(resource_group_name,
                                         profile_name,
                                         endpoint_name,
                                         name,
-                                        hostname,
-                                        custom_domain)
+                                        hostname)
 
 
 def update_profile(instance, tags=None):
