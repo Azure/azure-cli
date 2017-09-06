@@ -383,8 +383,8 @@ class BackupTests(ScenarioTest):
                                                    JMESPathCheck("properties.entityFriendlyName", vm_name),
                                                    JMESPathCheck("properties.operation", "Restore"),
                                                    JMESPathCheck("properties.status", "Completed"),
-                                                   JMESPathCheck("resourceGroup", resource_group)])\
-                                                   .get_output_in_json()
+                                                   JMESPathCheck("resourceGroup", resource_group)
+                                               ]).get_output_in_json()
 
         property_bag = trigger_restore_job_details['properties']['extendedInfo']['propertyBag']
         assert property_bag['Target Storage Account Name'] == storage_account
@@ -445,16 +445,4 @@ class BackupTests(ScenarioTest):
                  .format(vault_json), checks=[
                      JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_id), 1)])
 
-        self.cmd('az backup job wait --job \'{}\' --timeout 60'.format(trigger_restore_job_json))
-        self.cmd('az backup job show --job-id {} --vault \'{}\''
-                 .format(trigger_restore_job_id, vault_json), checks=[
-                     JMESPathCheck("properties.status", "InProgress")])
-
         self.cmd('az backup job stop --job \'{}\''.format(trigger_restore_job_json))
-
-        canceled_job = self.cmd('az backup job show --job-id {} --vault \'{}\''
-                                .format(trigger_restore_job_id, vault_json)).get_output_in_json()
-
-        canceled_job_status = canceled_job['properties']['status']
-
-        assert canceled_job_status == 'Cancelling' or canceled_job_status == 'Cancelled'

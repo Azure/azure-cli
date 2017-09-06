@@ -37,7 +37,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
-        pass
+        self._cleanup(name, self.resource_group)
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -56,6 +56,16 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this Vault preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
+
+    def _cleanup(self, vault_name, resource_group):
+        vault = execute('az backup vault show -n {} -g {}'.format(vault_name, resource_group)).get_output_in_json()
+        containers = execute('az backup container list --vault \'{}\''.format(json.dumps(vault))).get_output_in_json()
+        for container in containers:
+            items = execute('az backup item list --container \'{}\''.format(json.dumps(container))).get_output_in_json()
+            for item in items:
+                execute('az backup protection disable --backup-item \'{}\' --delete-backup-data true --yes'
+                        .format(json.dumps(item)))
+        execute('az backup vault delete -n {} -g {} --yes'.format(vault['name'], resource_group))
 
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
@@ -107,7 +117,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME'):
-        super().__init__(name_prefix, 24)
+        super(ItemPreparer, self).__init__(name_prefix, 24)
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
@@ -170,7 +180,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME'):
-        super().__init__(name_prefix, 24)
+        super(PolicyPreparer, self).__init__(name_prefix, 24)
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -222,7 +232,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-rp', parameter_name='rp_name', vm_parameter_name='vm_name',
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
-        super().__init__(name_prefix, 24)
+        super(RPPreparer, self).__init__(name_prefix, 24)
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
@@ -251,6 +261,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
+        # TODO: Preparer deletion order should be reversed - https://github.com/Azure/azure-python-devtools/issues/29
         pass
 
     def _get_resource_group(self, **kwargs):
