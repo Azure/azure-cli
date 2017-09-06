@@ -116,6 +116,7 @@ register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
                       completer=get_resource_types_completion_list,)
 register_cli_argument('lock', 'resource_name', options_list=('--resource-name'))
+register_cli_argument('lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
 
 register_cli_argument('managedapp', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
 register_cli_argument('managedapp', 'appliance_name', options_list=('--name', '-n'), id_part='name')
