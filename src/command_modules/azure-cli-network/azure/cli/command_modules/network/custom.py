@@ -2220,7 +2220,7 @@ def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
-        route_filter=None):
+        route_filter=None, use_legacy=False):
     """
     :param str peer_asn: Autonomous system number of the customer/connectivity provider.
     :param str vlan_id: Identifier used to identify the customer.
@@ -2260,6 +2260,9 @@ def create_express_route_peering(
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
         if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and use_legacy:
+        peering_config.legacy_mode = use_legacy
+
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
@@ -2276,7 +2279,7 @@ def create_express_route_peering(
 def update_express_route_peering(instance, peer_asn=None, primary_peer_address_prefix=None,
                                  secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
                                  advertised_public_prefixes=None, customer_asn=None,
-                                 routing_registry_name=None):
+                                 routing_registry_name=None, route_filter=None, use_legacy=None):
     if peer_asn is not None:
         instance.peer_asn = peer_asn
 
@@ -2292,6 +2295,10 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
     if shared_key is not None:
         instance.shared_key = shared_key
 
+    if route_filter is not None:
+        RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+        instance.route_filter = RouteFilter(id=route_filter)
+
     try:
         if advertised_public_prefixes is not None:
             instance.microsoft_peering_config.advertised_public_prefixes = \
@@ -2301,10 +2308,13 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
             instance.microsoft_peering_config.customer_asn = customer_asn
 
         if routing_registry_name is not None:
-            instance.routing_registry_name = routing_registry_name
+            instance.microsoft_peering_config.routing_registry_name = routing_registry_name
+
+        if use_legacy is not None:
+            instance.microsoft_peering_config.legacy_mode = use_legacy
     except AttributeError:
-        raise CLIError("--advertised-public-prefixes, --customer-asn and "
-                       "--routing-registry-name are only applicable for 'MicrosoftPeering'")
+        raise CLIError("--advertised-public-prefixes, --customer-asn --routing-registry-name "
+                       "and --use-legacy are only applicable for 'MicrosoftPeering'")
 
     return instance
 

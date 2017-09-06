@@ -358,14 +358,16 @@ register_cli_argument('network express-route peering', 'peering_name', name_arg_
 register_cli_argument('network express-route peering', 'peering_type', validator=validate_peering_type, **enum_choice_list(ExpressRouteCircuitPeeringType))
 register_cli_argument('network express-route peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
 register_cli_argument('network express-route peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route peering', 'advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+')
 register_cli_argument('network express-route peering', 'primary_peer_address_prefix', options_list=('--primary-peer-subnet',))
 register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
+
+register_cli_argument('network express-route peering', 'advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+')
 register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
 register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
-
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
-    c.register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter, arg_group='Microsoft Peering')
+    c.register_cli_argument('network express-route peering', 'route_filter', arg_group='Microsoft Peering', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network express-route peering', 'use_legacy', help='Enable legacy mode.', arg_group='Microsoft Peering', **three_state_flag())
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')

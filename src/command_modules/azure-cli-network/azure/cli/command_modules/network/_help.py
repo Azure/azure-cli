@@ -785,6 +785,12 @@ helps['network express-route list-service-providers'] = """
     type: command
     short-summary: List available ExpressRoute service providers.
 """
+
+helps['network express-route wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the ExpressRoute is met.
+"""
+
 # endregion
 
 # region Express Route auth
