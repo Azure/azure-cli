@@ -234,3 +234,8 @@ def hash_string(value, length=16, force_lower=False):
     while len(digest) < length:
         digest = digest + digest
     return digest[:length]
+
+
+def in_cloud_console():
+    import os
+    return os.environ.get('ACC_CLOUD', None)
