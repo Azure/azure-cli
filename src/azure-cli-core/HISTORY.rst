@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+unreleased
+++++++++++
+* Enable command module to set its own correlation ID in telemetry
+
 2.0.15 (2017-08-31)
 +++++++++++++++++++
 * minor fixes
