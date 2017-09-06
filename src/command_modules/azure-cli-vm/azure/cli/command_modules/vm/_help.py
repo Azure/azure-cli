@@ -955,6 +955,21 @@ helps['vm assign-identity'] = """
           text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
 """
 
+helps['vm run-command'] = """
+    type: group
+    short-summary: (PREVIEW) Manage run commands on a Virtual Machine
+"""
+
+helps['vm run-command invoke'] = """
+    type: command
+    short-summary: run command on a vm
+    examples:
+        - name: install nginx on a vm
+          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
+        - name: invoke command with parameters
+          text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
+"""
+
 helps['vmss assign-identity'] = """
     type: command
     short-summary: Enable managed service identity on a VMSS

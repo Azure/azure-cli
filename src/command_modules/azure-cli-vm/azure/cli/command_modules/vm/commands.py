@@ -10,7 +10,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
-                                                          cf_images)
+                                                          cf_images, cf_run_commands)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
@@ -315,6 +315,11 @@ cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     cli_command(__name__, 'vm list-skus', custom_path.format('list_skus'), table_transformer=transform_sku_for_table_output)
+    op_var = 'virtual_machine_run_commands_operations'
+    op_class = 'VirtualMachineRunCommandsOperations'
+    cli_command(__name__, 'vm run-command show', mgmt_path.format(op_var, op_class, 'get'), cf_run_commands)
+    cli_command(__name__, 'vm run-command list', mgmt_path.format(op_var, op_class, 'list'), cf_run_commands)
+    cli_command(__name__, 'vm run-command invoke', custom_path.format('run_command_invoke'))
 
 # MSI
 cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))

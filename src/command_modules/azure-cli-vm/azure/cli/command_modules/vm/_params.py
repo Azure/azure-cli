@@ -40,6 +40,16 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
     return [r.name for r in result]
 
 
+def get_vm_run_command_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    from ._client_factory import _compute_client_factory
+    try:
+        location = parsed_args.location
+    except AttributeError:
+        location = get_one_of_subscription_locations()
+    result = _compute_client_factory().virtual_machine_run_commands.list(location)
+    return [r.id for r in result]
+
+
 # REUSABLE ARGUMENT DEFINITIONS
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
@@ -327,3 +337,7 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+
+register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of 'name=value' or just 'value'")
+register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @<file> to load from a file")
+register_cli_argument('vm run-command', 'command_id', completer=get_vm_run_command_completion_list, help="The run command id")
