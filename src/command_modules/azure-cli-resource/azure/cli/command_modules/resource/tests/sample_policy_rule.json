@@ -1,9 +1,11 @@
 {
 	"if": {
-		"source": "action",
-		"equals": "Microsoft.Storage/storageAccounts/write"
-	},
-	"then": {
+		"not": {
+		  "field": "location",
+		  "in": "[parameters('allowedLocations')]"
+		}
+	  },
+	  "then": {
 		"effect": "deny"
-	}
+	  }
 }
