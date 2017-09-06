@@ -358,8 +358,8 @@ register_cli_argument('network express-route peering', 'peering_name', name_arg_
 register_cli_argument('network express-route peering', 'peering_type', validator=validate_peering_type, **enum_choice_list(ExpressRouteCircuitPeeringType))
 register_cli_argument('network express-route peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
 register_cli_argument('network express-route peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route peering', 'primary_peer_address_prefix', options_list=('--primary-peer-subnet',))
-register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
+register_cli_argument('network express-route peering', 'primary_peer_address_prefix', options_list=['--primary-peer-subnet'])
+register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'])
 
 register_cli_argument('network express-route peering', 'advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+')
 register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')

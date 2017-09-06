@@ -2216,6 +2216,13 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
+def _validate_ipv6_address_prefixes(primary_subnet, secondary_subnet):
+    from ipaddress import ip_network, IPv4Network, IPv6Network
+    primary = ip_network(primary_subnet)
+    secondary = ip_network(secondary_subnet)
+    return isinstance(primary, IPv6Network) and isinstance(primary, IPv6Network)        
+
+
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
@@ -2235,11 +2242,14 @@ def create_express_route_peering(
     :param str customer_asn: Autonomous system number of the customer.
     :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
     """
-    ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType = get_sdk(
+    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType,
+     Ipv6ExpressRouteCircuitPeeringConfig, RouteFilter) = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ExpressRouteCircuitPeering',
         'ExpressRouteCircuitPeeringConfig',
         'ExpressRouteCircuitPeeringType',
+        'Ipv6ExpressRouteCircuitPeeringConfig',
+        'RouteFilter',
         mod='models')
 
     # TODO: Remove workaround when issue #1574 is fixed in the service
@@ -2255,23 +2265,37 @@ def create_express_route_peering(
                 "VLAN ID '{}' already in use by peering '{}'".format(vlan_id, peering.name))
     # endregion
 
-    peering_config = ExpressRouteCircuitPeeringConfig(
-        advertised_public_prefixes=advertised_public_prefixes,
-        customer_asn=customer_asn,
-        routing_registry_name=routing_registry_name) \
-        if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and use_legacy:
-        peering_config.legacy_mode = use_legacy
-
+    peering_config = None
+    ipv6_peering_config = None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
         secondary_peer_address_prefix=secondary_peer_address_prefix,
-        shared_key=shared_key,
-        microsoft_peering_config=peering_config)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
-        RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
-        peering.route_filter = RouteFilter(id=route_filter)
+        shared_key=shared_key)
+
+    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value:
+        peering_config = ExpressRouteCircuitPeeringConfig(
+            advertised_public_prefixes=advertised_public_prefixes,
+            customer_asn=customer_asn,
+            routing_registry_name=routing_registry_name)
+        if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and use_legacy:
+            peering_config.legacy_mode = use_legacy
+
+    if peering_config and _validate_ipv6_address_prefixes(primary_peer_address_prefix, secondary_peer_address_prefix):
+        # Special case for IPv6 MicrosoftPeering
+        peering.primary_peer_address_prefix = None
+        peering.secondary_peer_address_prefix = None
+        ipv6_peering_config = Ipv6ExpressRouteCircuitPeeringConfig(
+            primary_peer_address_prefix=primary_peer_address_prefix,
+            secondary_peer_address_prefix=secondary_peer_address_prefix,
+            microsoft_peering_config=peering_config,
+            route_filter=RouteFilter(id=route_filter))
+        peering.ipv6_peering_config = ipv6_peering_config
+    else:
+        if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
+            peering.route_filter = RouteFilter(id=route_filter)
+        peering.microsoft_peering_config = peering_config
+
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
 
