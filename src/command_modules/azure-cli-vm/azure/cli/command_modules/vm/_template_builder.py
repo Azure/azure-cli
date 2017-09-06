@@ -444,14 +444,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
-    if data_disk_sizes_gb is not None:
+    if image_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': data_caching
+                'caching': data_caching,
+                'managedDisk': {'storageAccountType': storage_sku}
             })
+            lun = lun + 1
+
+    if data_disk_sizes_gb:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
             profile['dataDisks'].append({

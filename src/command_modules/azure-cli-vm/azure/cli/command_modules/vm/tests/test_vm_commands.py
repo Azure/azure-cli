@@ -320,6 +320,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image2, prepared_vm), checks=[
             JMESPathCheckV2('name', image2)
         ])
+
         self.cmd('vm create -g {} -n vm2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image2), checks=[
                 JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
@@ -328,14 +329,27 @@ class VMCustomImageTest(ScenarioTest):
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
             JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage')
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
+
+        self.cmd('vm create -g {} -n vm3 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku Premium_LRS'.format(
+            resource_group, image2))
+        self.cmd('vm show -g {} -n vm3'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
+        ])
+
         self.cmd('vmss create -g {} -n vmss2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image2), checks=[
             JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
             JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage')
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage'),
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
 
@@ -424,7 +438,8 @@ class VMAttachDisksOnCreate(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
-            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3)
+            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
     @ResourceGroupPreparer()
@@ -1469,7 +1484,9 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
             JMESPathCheck('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
             JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
-            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3)
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
         self.cmd('vmss disk detach -g {} -n {} --lun 1'.format(self.resource_group, vmss_name))
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
