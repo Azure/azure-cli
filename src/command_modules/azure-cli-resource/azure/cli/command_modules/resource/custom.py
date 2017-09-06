@@ -919,10 +919,14 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
     :param name: The name of the lock.
     :type name: str
     """
+    print(['name', name, 'resource_group_name',resource_group_name, 'resource_provider_namespace',resource_provider_namespace,
+                'parent_resource_path',parent_resource_path, 'resource_type',resource_type, 'resource_name', resource_name])
     if ids:
         output_return = []
         for id_arg in ids:
-            _parse_lock_id(id_arg)
+            kwargs = _parse_lock_id(id_arg)
+            output_return.append(get_lock(**kwargs))
+        return
     lock_client = _resource_lock_client_factory()
 
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -1045,14 +1049,15 @@ def create_lock(name,
 
 def _parse_lock_id(id_arg):
     regex = re.compile(
-        '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-        '((/providers/(?P<resource_namespace>[^/]*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?'
-        '(/providers/(?P<namespace>[^/]*))/(?P<type>[^/]*)/(?P<name>[^/]*)')
+        '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
+        '(/providers/(?P<resource_provider_namespace>[^/]*)'
+        '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
+        '/providers/Microsoft.Authorization/locks/(?P<name>[^/]*)')
 
     try:
         return regex.match(id_arg).groupdict()
     except Exception:
-        raise Exception('invalid ResourceId value: \'%s\'' % id)
+        raise Exception('invalid ResourceId value: \'%s\'' % id_arg)
 
 def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
     if level is not None:
