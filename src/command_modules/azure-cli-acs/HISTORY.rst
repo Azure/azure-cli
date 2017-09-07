@@ -2,6 +2,21 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++
+* add acs list-locations command
+* make ssh-key-file come with expected default value
+
+2.0.14 (2017-08-28)
++++++++++++++++++++
+* correct preview regions
+* format default dns_name_prefix properly
+* optimize acs command output
+
+2.0.13 (2017-08-15)
++++++++++++++++++++
+* correct sshMaster0 port number for kubernetes
+
 2.0.12 (2017-08-11)
 +++++++++++++++++++
 * add preview regions

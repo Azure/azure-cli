@@ -4,16 +4,21 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import tempfile
 import unittest
+
+from six.moves.urllib.request import pathname2url  # pylint: disable=import-error
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
+
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
 
-from azure.cli.core.util import get_file_json
+from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import \
     (_get_missing_parameters, _extract_lock_params, _process_parameters, _find_missing_parameters,
-     _prompt_for_parameters)
+     _prompt_for_parameters, _load_file_string_or_uri)
 
 
 def _simulate_no_tty():
@@ -23,6 +28,26 @@ def _simulate_no_tty():
 
 @mock.patch('azure.cli.core.prompting._verify_is_a_tty', _simulate_no_tty)
 class TestCustom(unittest.TestCase):
+    def test_file_string_or_uri(self):
+        data = '{ "some": "data here"}'
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(data.encode('utf-8'))
+            tmp.close()
+
+            output = _load_file_string_or_uri(tmp.name, 'test')
+            self.assertEqual(get_file_json(tmp.name), output)
+
+            uri = urljoin('file:', pathname2url(tmp.name))
+            output = _load_file_string_or_uri(uri, 'test')
+            self.assertEqual(get_file_json(tmp.name), output)
+
+            os.unlink(tmp.name)
+
+        output = _load_file_string_or_uri(data, 'test')
+        self.assertEqual(shell_safe_json_parse(data), output)
+
+        self.assertEqual(None, _load_file_string_or_uri(None, 'test', required=False))
+        self.assertRaises(CLIError, _load_file_string_or_uri, None, 'test')
 
     def test_extract_parameters(self):
         tests = [

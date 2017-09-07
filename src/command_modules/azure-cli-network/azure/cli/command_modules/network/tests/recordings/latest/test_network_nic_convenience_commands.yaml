@@ -6,23 +6,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.12
+          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.13+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [dfbf39c8-5dff-11e7-83ff-64510658e3b3]
+      x-ms-client-request-id: [c27c3e6c-8786-11e7-a3f6-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Compute/virtualMachines/conveniencevm1?api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"f21710be-f111-4862-bde9-292284d47740\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"1529b4fb-8357-4b5f-a8ba-54976826949a\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
         \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
         \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
         \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"osdisk_4e4bd9dca4\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n\
-        \          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Compute/disks/osdisk_4e4bd9dca4\"\
+        \     \"name\": \"conveniencevm1_OsDisk_1_808b1469b08144da80a38533ad49dc40\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Compute/disks/conveniencevm1_OsDisk_1_808b1469b08144da80a38533ad49dc40\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"conveniencevm1\"\
         ,\r\n      \"adminUsername\": \"myusername\",\r\n      \"linuxConfiguration\"\
@@ -36,14 +36,14 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 01 Jul 2017 01:52:00 GMT']
+      Date: ['Tue, 22 Aug 2017 22:10:51 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['1579']
+      content-length: ['1657']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -53,12 +53,13 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 networkmanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.12
+          msrest_azure/0.4.11 networkmanagementclient/1.4.0a1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.13+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3003d04c-5e00-11e7-a948-64510658e3b3]
+      x-ms-client-request-id: [c2c15fe2-8786-11e7-b9b3-a0b3ccf7272a]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveNetworkSecurityGroups?api-version=2017-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveNetworkSecurityGroups?api-version=2017-08-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"networkSecurityGroup\"\
         : {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG\"\
@@ -67,50 +68,78 @@ interactions:
         \r\n        }\r\n      },\r\n      \"effectiveSecurityRules\": [\r\n     \
         \   {\r\n          \"name\": \"securityRules/default-allow-ssh\",\r\n    \
         \      \"protocol\": \"Tcp\",\r\n          \"sourcePortRange\": \"0-65535\"\
-        ,\r\n          \"destinationPortRange\": \"22-22\",\r\n          \"sourceAddressPrefix\"\
+        ,\r\n          \"destinationPortRange\": \"22-22\",\r\n          \"sourcePortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\"\
+        : [\r\n            \"22-22\"\r\n          ],\r\n          \"sourceAddressPrefix\"\
         : \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\": \"0.0.0.0/0\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 1000,\r\n\
-        \          \"direction\": \"Inbound\"\r\n        },\r\n        {\r\n     \
-        \     \"name\": \"defaultSecurityRules/AllowVnetInBound\",\r\n          \"\
-        protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n  \
-        \        \"destinationPortRange\": \"0-65535\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"expandedSourceAddressPrefix\": [\r\n\
-        \            \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n    \
-        \      ],\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\
-        \n          \"expandedDestinationAddressPrefix\": [\r\n            \"10.0.0.0/16\"\
-        ,\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"access\"\
-        : \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\"\
-        : \"Inbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowAzureLoadBalancerInBound\"\
+        ,\r\n          \"sourceAddressPrefixes\": [\r\n            \"0.0.0.0/0\"\r\
+        \n          ],\r\n          \"destinationAddressPrefixes\": [\r\n        \
+        \    \"0.0.0.0/0\"\r\n          ],\r\n          \"access\": \"Allow\",\r\n\
+        \          \"priority\": 1000,\r\n          \"direction\": \"Inbound\"\r\n\
+        \        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowVnetInBound\"\
         ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
         0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
-        \   \"sourceAddressPrefix\": \"AzureLoadBalancer\",\r\n          \"expandedSourceAddressPrefix\"\
-        : [\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"destinationAddressPrefix\"\
-        : \"0.0.0.0/0\",\r\n          \"access\": \"Allow\",\r\n          \"priority\"\
-        : 65001,\r\n          \"direction\": \"Inbound\"\r\n        },\r\n       \
-        \ {\r\n          \"name\": \"defaultSecurityRules/DenyAllInBound\",\r\n  \
-        \        \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\"\
-        ,\r\n          \"destinationPortRange\": \"0-65535\",\r\n          \"sourceAddressPrefix\"\
-        : \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\": \"0.0.0.0/0\"\
-        ,\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n\
-        \          \"direction\": \"Inbound\"\r\n        },\r\n        {\r\n     \
-        \     \"name\": \"defaultSecurityRules/AllowVnetOutBound\",\r\n          \"\
-        protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n  \
-        \        \"destinationPortRange\": \"0-65535\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"expandedSourceAddressPrefix\": [\r\n\
-        \            \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n    \
-        \      ],\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\
-        \n          \"expandedDestinationAddressPrefix\": [\r\n            \"10.0.0.0/16\"\
-        ,\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"access\"\
-        : \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\"\
-        : \"Outbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowInternetOutBound\"\
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"VirtualNetwork\",\r\n \
+        \         \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n          \"\
+        sourceAddressPrefixes\": [\r\n            \"VirtualNetwork\"\r\n         \
+        \ ],\r\n          \"destinationAddressPrefixes\": [\r\n            \"VirtualNetwork\"\
+        \r\n          ],\r\n          \"expandedSourceAddressPrefix\": [\r\n     \
+        \       \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n         \
+        \ ],\r\n          \"expandedDestinationAddressPrefix\": [\r\n            \"\
+        10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n          ],\r\n   \
+        \       \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n     \
+        \     \"direction\": \"Inbound\"\r\n        },\r\n        {\r\n          \"\
+        name\": \"defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n      \
+        \    \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\"\
+        ,\r\n          \"destinationPortRange\": \"0-65535\",\r\n          \"sourcePortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"sourceAddressPrefix\"\
+        : \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"0.0.0.0/0\"\
+        ,\r\n          \"sourceAddressPrefixes\": [\r\n            \"AzureLoadBalancer\"\
+        \r\n          ],\r\n          \"destinationAddressPrefixes\": [\r\n      \
+        \      \"0.0.0.0/0\"\r\n          ],\r\n          \"expandedSourceAddressPrefix\"\
+        : [\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"access\"\
+        : \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\"\
+        : \"Inbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/DenyAllInBound\"\
         ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
         0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
-        \   \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\"\
-        : \"Internet\",\r\n          \"expandedDestinationAddressPrefix\": [\r\n \
-        \           \"1.0.0.0/8\",\r\n            \"2.0.0.0/7\",\r\n            \"\
-        4.0.0.0/6\",\r\n            \"8.0.0.0/7\",\r\n            \"11.0.0.0/8\",\r\
-        \n            \"12.0.0.0/6\",\r\n            \"16.0.0.0/5\",\r\n         \
-        \   \"24.0.0.0/8\",\r\n            \"26.0.0.0/7\",\r\n            \"28.0.0.0/6\"\
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n      \
+        \    \"destinationAddressPrefix\": \"0.0.0.0/0\",\r\n          \"sourceAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"destinationAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"access\":\
+        \ \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\":\
+        \ \"Inbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowVnetOutBound\"\
+        ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
+        0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"VirtualNetwork\",\r\n \
+        \         \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n          \"\
+        sourceAddressPrefixes\": [\r\n            \"VirtualNetwork\"\r\n         \
+        \ ],\r\n          \"destinationAddressPrefixes\": [\r\n            \"VirtualNetwork\"\
+        \r\n          ],\r\n          \"expandedSourceAddressPrefix\": [\r\n     \
+        \       \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n         \
+        \ ],\r\n          \"expandedDestinationAddressPrefix\": [\r\n            \"\
+        10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n          ],\r\n   \
+        \       \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n     \
+        \     \"direction\": \"Outbound\"\r\n        },\r\n        {\r\n         \
+        \ \"name\": \"defaultSecurityRules/AllowInternetOutBound\",\r\n          \"\
+        protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n  \
+        \        \"destinationPortRange\": \"0-65535\",\r\n          \"sourcePortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"sourceAddressPrefix\"\
+        : \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\
+        \n          \"sourceAddressPrefixes\": [\r\n            \"0.0.0.0/0\"\r\n\
+        \          ],\r\n          \"destinationAddressPrefixes\": [\r\n         \
+        \   \"Internet\"\r\n          ],\r\n          \"expandedDestinationAddressPrefix\"\
+        : [\r\n            \"1.0.0.0/8\",\r\n            \"2.0.0.0/7\",\r\n      \
+        \      \"4.0.0.0/6\",\r\n            \"8.0.0.0/7\",\r\n            \"11.0.0.0/8\"\
+        ,\r\n            \"12.0.0.0/6\",\r\n            \"16.0.0.0/5\",\r\n      \
+        \      \"24.0.0.0/8\",\r\n            \"26.0.0.0/7\",\r\n            \"28.0.0.0/6\"\
         ,\r\n            \"32.0.0.0/3\",\r\n            \"64.0.0.0/3\",\r\n      \
         \      \"96.0.0.0/6\",\r\n            \"100.0.0.0/10\",\r\n            \"\
         100.128.0.0/9\",\r\n            \"101.0.0.0/8\",\r\n            \"102.0.0.0/7\"\
@@ -145,23 +174,61 @@ interactions:
         : \"Outbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/DenyAllOutBound\"\
         ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
         0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
-        \   \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\"\
-        : \"0.0.0.0/0\",\r\n          \"access\": \"Deny\",\r\n          \"priority\"\
-        : 65500,\r\n          \"direction\": \"Outbound\"\r\n        }\r\n      ]\r\
-        \n    }\r\n  ]\r\n}"}
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n      \
+        \    \"destinationAddressPrefix\": \"0.0.0.0/0\",\r\n          \"sourceAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"destinationAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"access\":\
+        \ \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\":\
+        \ \"Outbound\"\r\n        }\r\n      ],\r\n      \"tagMap\": {\r\n       \
+        \ \"VirtualNetwork\": [\r\n          \"10.0.0.0/16\",\r\n          \"168.63.129.16/32\"\
+        \r\n        ],\r\n        \"AzureLoadBalancer\": [\r\n          \"168.63.129.16/32\"\
+        \r\n        ],\r\n        \"Internet\": [\r\n          \"1.0.0.0/8\",\r\n\
+        \          \"2.0.0.0/7\",\r\n          \"4.0.0.0/6\",\r\n          \"8.0.0.0/7\"\
+        ,\r\n          \"11.0.0.0/8\",\r\n          \"12.0.0.0/6\",\r\n          \"\
+        16.0.0.0/5\",\r\n          \"24.0.0.0/8\",\r\n          \"26.0.0.0/7\",\r\n\
+        \          \"28.0.0.0/6\",\r\n          \"32.0.0.0/3\",\r\n          \"64.0.0.0/3\"\
+        ,\r\n          \"96.0.0.0/6\",\r\n          \"100.0.0.0/10\",\r\n        \
+        \  \"100.128.0.0/9\",\r\n          \"101.0.0.0/8\",\r\n          \"102.0.0.0/7\"\
+        ,\r\n          \"104.0.0.0/5\",\r\n          \"112.0.0.0/5\",\r\n        \
+        \  \"120.0.0.0/6\",\r\n          \"124.0.0.0/7\",\r\n          \"126.0.0.0/8\"\
+        ,\r\n          \"128.0.0.0/3\",\r\n          \"160.0.0.0/5\",\r\n        \
+        \  \"168.0.0.0/8\",\r\n          \"169.0.0.0/9\",\r\n          \"169.128.0.0/10\"\
+        ,\r\n          \"169.192.0.0/11\",\r\n          \"169.224.0.0/12\",\r\n  \
+        \        \"169.240.0.0/13\",\r\n          \"169.248.0.0/14\",\r\n        \
+        \  \"169.252.0.0/15\",\r\n          \"169.255.0.0/16\",\r\n          \"170.0.0.0/7\"\
+        ,\r\n          \"172.0.0.0/12\",\r\n          \"172.32.0.0/11\",\r\n     \
+        \     \"172.64.0.0/10\",\r\n          \"172.128.0.0/9\",\r\n          \"173.0.0.0/8\"\
+        ,\r\n          \"174.0.0.0/7\",\r\n          \"176.0.0.0/4\",\r\n        \
+        \  \"192.0.0.0/23\",\r\n          \"192.0.3.0/24\",\r\n          \"192.0.4.0/22\"\
+        ,\r\n          \"192.0.8.0/21\",\r\n          \"192.0.16.0/20\",\r\n     \
+        \     \"192.0.32.0/19\",\r\n          \"192.0.64.0/18\",\r\n          \"192.0.128.0/17\"\
+        ,\r\n          \"192.1.0.0/16\",\r\n          \"192.2.0.0/15\",\r\n      \
+        \    \"192.4.0.0/14\",\r\n          \"192.8.0.0/13\",\r\n          \"192.16.0.0/12\"\
+        ,\r\n          \"192.32.0.0/11\",\r\n          \"192.64.0.0/10\",\r\n    \
+        \      \"192.128.0.0/11\",\r\n          \"192.160.0.0/13\",\r\n          \"\
+        192.169.0.0/16\",\r\n          \"192.170.0.0/15\",\r\n          \"192.172.0.0/14\"\
+        ,\r\n          \"192.176.0.0/12\",\r\n          \"192.192.0.0/10\",\r\n  \
+        \        \"193.0.0.0/8\",\r\n          \"194.0.0.0/7\",\r\n          \"196.0.0.0/7\"\
+        ,\r\n          \"198.0.0.0/12\",\r\n          \"198.16.0.0/15\",\r\n     \
+        \     \"198.20.0.0/14\",\r\n          \"198.24.0.0/13\",\r\n          \"198.32.0.0/11\"\
+        ,\r\n          \"198.64.0.0/10\",\r\n          \"198.128.0.0/9\",\r\n    \
+        \      \"199.0.0.0/8\",\r\n          \"200.0.0.0/5\",\r\n          \"208.0.0.0/4\"\
+        \r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 01 Jul 2017 01:54:21 GMT']
+      Date: ['Tue, 22 Aug 2017 22:10:59 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/f01dd5d5-04a4-4605-ab27-fca5290f6fd2?api-version=2017-06-01']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/d4675000-db23-4a56-928d-07280b7cd8c7?api-version=2017-08-01']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['6184']
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      content-length: ['10617']
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -170,12 +237,13 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 networkmanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.12
+          msrest_azure/0.4.11 networkmanagementclient/1.4.0a1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.13+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3003d04c-5e00-11e7-a948-64510658e3b3]
+      x-ms-client-request-id: [c2c15fe2-8786-11e7-b9b3-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f01dd5d5-04a4-4605-ab27-fca5290f6fd2?api-version=2017-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d4675000-db23-4a56-928d-07280b7cd8c7?api-version=2017-08-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"networkSecurityGroup\"\
         : {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG\"\
@@ -184,50 +252,78 @@ interactions:
         \r\n        }\r\n      },\r\n      \"effectiveSecurityRules\": [\r\n     \
         \   {\r\n          \"name\": \"securityRules/default-allow-ssh\",\r\n    \
         \      \"protocol\": \"Tcp\",\r\n          \"sourcePortRange\": \"0-65535\"\
-        ,\r\n          \"destinationPortRange\": \"22-22\",\r\n          \"sourceAddressPrefix\"\
+        ,\r\n          \"destinationPortRange\": \"22-22\",\r\n          \"sourcePortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\"\
+        : [\r\n            \"22-22\"\r\n          ],\r\n          \"sourceAddressPrefix\"\
         : \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\": \"0.0.0.0/0\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 1000,\r\n\
-        \          \"direction\": \"Inbound\"\r\n        },\r\n        {\r\n     \
-        \     \"name\": \"defaultSecurityRules/AllowVnetInBound\",\r\n          \"\
-        protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n  \
-        \        \"destinationPortRange\": \"0-65535\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"expandedSourceAddressPrefix\": [\r\n\
-        \            \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n    \
-        \      ],\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\
-        \n          \"expandedDestinationAddressPrefix\": [\r\n            \"10.0.0.0/16\"\
-        ,\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"access\"\
-        : \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\"\
-        : \"Inbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowAzureLoadBalancerInBound\"\
+        ,\r\n          \"sourceAddressPrefixes\": [\r\n            \"0.0.0.0/0\"\r\
+        \n          ],\r\n          \"destinationAddressPrefixes\": [\r\n        \
+        \    \"0.0.0.0/0\"\r\n          ],\r\n          \"access\": \"Allow\",\r\n\
+        \          \"priority\": 1000,\r\n          \"direction\": \"Inbound\"\r\n\
+        \        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowVnetInBound\"\
         ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
         0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
-        \   \"sourceAddressPrefix\": \"AzureLoadBalancer\",\r\n          \"expandedSourceAddressPrefix\"\
-        : [\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"destinationAddressPrefix\"\
-        : \"0.0.0.0/0\",\r\n          \"access\": \"Allow\",\r\n          \"priority\"\
-        : 65001,\r\n          \"direction\": \"Inbound\"\r\n        },\r\n       \
-        \ {\r\n          \"name\": \"defaultSecurityRules/DenyAllInBound\",\r\n  \
-        \        \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\"\
-        ,\r\n          \"destinationPortRange\": \"0-65535\",\r\n          \"sourceAddressPrefix\"\
-        : \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\": \"0.0.0.0/0\"\
-        ,\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n\
-        \          \"direction\": \"Inbound\"\r\n        },\r\n        {\r\n     \
-        \     \"name\": \"defaultSecurityRules/AllowVnetOutBound\",\r\n          \"\
-        protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n  \
-        \        \"destinationPortRange\": \"0-65535\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"expandedSourceAddressPrefix\": [\r\n\
-        \            \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n    \
-        \      ],\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\
-        \n          \"expandedDestinationAddressPrefix\": [\r\n            \"10.0.0.0/16\"\
-        ,\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"access\"\
-        : \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\"\
-        : \"Outbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowInternetOutBound\"\
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"VirtualNetwork\",\r\n \
+        \         \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n          \"\
+        sourceAddressPrefixes\": [\r\n            \"VirtualNetwork\"\r\n         \
+        \ ],\r\n          \"destinationAddressPrefixes\": [\r\n            \"VirtualNetwork\"\
+        \r\n          ],\r\n          \"expandedSourceAddressPrefix\": [\r\n     \
+        \       \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n         \
+        \ ],\r\n          \"expandedDestinationAddressPrefix\": [\r\n            \"\
+        10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n          ],\r\n   \
+        \       \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n     \
+        \     \"direction\": \"Inbound\"\r\n        },\r\n        {\r\n          \"\
+        name\": \"defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n      \
+        \    \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\"\
+        ,\r\n          \"destinationPortRange\": \"0-65535\",\r\n          \"sourcePortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"sourceAddressPrefix\"\
+        : \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"0.0.0.0/0\"\
+        ,\r\n          \"sourceAddressPrefixes\": [\r\n            \"AzureLoadBalancer\"\
+        \r\n          ],\r\n          \"destinationAddressPrefixes\": [\r\n      \
+        \      \"0.0.0.0/0\"\r\n          ],\r\n          \"expandedSourceAddressPrefix\"\
+        : [\r\n            \"168.63.129.16/32\"\r\n          ],\r\n          \"access\"\
+        : \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\"\
+        : \"Inbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/DenyAllInBound\"\
         ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
         0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
-        \   \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\"\
-        : \"Internet\",\r\n          \"expandedDestinationAddressPrefix\": [\r\n \
-        \           \"1.0.0.0/8\",\r\n            \"2.0.0.0/7\",\r\n            \"\
-        4.0.0.0/6\",\r\n            \"8.0.0.0/7\",\r\n            \"11.0.0.0/8\",\r\
-        \n            \"12.0.0.0/6\",\r\n            \"16.0.0.0/5\",\r\n         \
-        \   \"24.0.0.0/8\",\r\n            \"26.0.0.0/7\",\r\n            \"28.0.0.0/6\"\
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n      \
+        \    \"destinationAddressPrefix\": \"0.0.0.0/0\",\r\n          \"sourceAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"destinationAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"access\":\
+        \ \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\":\
+        \ \"Inbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/AllowVnetOutBound\"\
+        ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
+        0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"VirtualNetwork\",\r\n \
+        \         \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n          \"\
+        sourceAddressPrefixes\": [\r\n            \"VirtualNetwork\"\r\n         \
+        \ ],\r\n          \"destinationAddressPrefixes\": [\r\n            \"VirtualNetwork\"\
+        \r\n          ],\r\n          \"expandedSourceAddressPrefix\": [\r\n     \
+        \       \"10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n         \
+        \ ],\r\n          \"expandedDestinationAddressPrefix\": [\r\n            \"\
+        10.0.0.0/16\",\r\n            \"168.63.129.16/32\"\r\n          ],\r\n   \
+        \       \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n     \
+        \     \"direction\": \"Outbound\"\r\n        },\r\n        {\r\n         \
+        \ \"name\": \"defaultSecurityRules/AllowInternetOutBound\",\r\n          \"\
+        protocol\": \"All\",\r\n          \"sourcePortRange\": \"0-65535\",\r\n  \
+        \        \"destinationPortRange\": \"0-65535\",\r\n          \"sourcePortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"destinationPortRanges\"\
+        : [\r\n            \"0-65535\"\r\n          ],\r\n          \"sourceAddressPrefix\"\
+        : \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\
+        \n          \"sourceAddressPrefixes\": [\r\n            \"0.0.0.0/0\"\r\n\
+        \          ],\r\n          \"destinationAddressPrefixes\": [\r\n         \
+        \   \"Internet\"\r\n          ],\r\n          \"expandedDestinationAddressPrefix\"\
+        : [\r\n            \"1.0.0.0/8\",\r\n            \"2.0.0.0/7\",\r\n      \
+        \      \"4.0.0.0/6\",\r\n            \"8.0.0.0/7\",\r\n            \"11.0.0.0/8\"\
+        ,\r\n            \"12.0.0.0/6\",\r\n            \"16.0.0.0/5\",\r\n      \
+        \      \"24.0.0.0/8\",\r\n            \"26.0.0.0/7\",\r\n            \"28.0.0.0/6\"\
         ,\r\n            \"32.0.0.0/3\",\r\n            \"64.0.0.0/3\",\r\n      \
         \      \"96.0.0.0/6\",\r\n            \"100.0.0.0/10\",\r\n            \"\
         100.128.0.0/9\",\r\n            \"101.0.0.0/8\",\r\n            \"102.0.0.0/7\"\
@@ -262,22 +358,60 @@ interactions:
         : \"Outbound\"\r\n        },\r\n        {\r\n          \"name\": \"defaultSecurityRules/DenyAllOutBound\"\
         ,\r\n          \"protocol\": \"All\",\r\n          \"sourcePortRange\": \"\
         0-65535\",\r\n          \"destinationPortRange\": \"0-65535\",\r\n       \
-        \   \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n          \"destinationAddressPrefix\"\
-        : \"0.0.0.0/0\",\r\n          \"access\": \"Deny\",\r\n          \"priority\"\
-        : 65500,\r\n          \"direction\": \"Outbound\"\r\n        }\r\n      ]\r\
-        \n    }\r\n  ]\r\n}"}
+        \   \"sourcePortRanges\": [\r\n            \"0-65535\"\r\n          ],\r\n\
+        \          \"destinationPortRanges\": [\r\n            \"0-65535\"\r\n   \
+        \       ],\r\n          \"sourceAddressPrefix\": \"0.0.0.0/0\",\r\n      \
+        \    \"destinationAddressPrefix\": \"0.0.0.0/0\",\r\n          \"sourceAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"destinationAddressPrefixes\"\
+        : [\r\n            \"0.0.0.0/0\"\r\n          ],\r\n          \"access\":\
+        \ \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\":\
+        \ \"Outbound\"\r\n        }\r\n      ],\r\n      \"tagMap\": {\r\n       \
+        \ \"VirtualNetwork\": [\r\n          \"10.0.0.0/16\",\r\n          \"168.63.129.16/32\"\
+        \r\n        ],\r\n        \"AzureLoadBalancer\": [\r\n          \"168.63.129.16/32\"\
+        \r\n        ],\r\n        \"Internet\": [\r\n          \"1.0.0.0/8\",\r\n\
+        \          \"2.0.0.0/7\",\r\n          \"4.0.0.0/6\",\r\n          \"8.0.0.0/7\"\
+        ,\r\n          \"11.0.0.0/8\",\r\n          \"12.0.0.0/6\",\r\n          \"\
+        16.0.0.0/5\",\r\n          \"24.0.0.0/8\",\r\n          \"26.0.0.0/7\",\r\n\
+        \          \"28.0.0.0/6\",\r\n          \"32.0.0.0/3\",\r\n          \"64.0.0.0/3\"\
+        ,\r\n          \"96.0.0.0/6\",\r\n          \"100.0.0.0/10\",\r\n        \
+        \  \"100.128.0.0/9\",\r\n          \"101.0.0.0/8\",\r\n          \"102.0.0.0/7\"\
+        ,\r\n          \"104.0.0.0/5\",\r\n          \"112.0.0.0/5\",\r\n        \
+        \  \"120.0.0.0/6\",\r\n          \"124.0.0.0/7\",\r\n          \"126.0.0.0/8\"\
+        ,\r\n          \"128.0.0.0/3\",\r\n          \"160.0.0.0/5\",\r\n        \
+        \  \"168.0.0.0/8\",\r\n          \"169.0.0.0/9\",\r\n          \"169.128.0.0/10\"\
+        ,\r\n          \"169.192.0.0/11\",\r\n          \"169.224.0.0/12\",\r\n  \
+        \        \"169.240.0.0/13\",\r\n          \"169.248.0.0/14\",\r\n        \
+        \  \"169.252.0.0/15\",\r\n          \"169.255.0.0/16\",\r\n          \"170.0.0.0/7\"\
+        ,\r\n          \"172.0.0.0/12\",\r\n          \"172.32.0.0/11\",\r\n     \
+        \     \"172.64.0.0/10\",\r\n          \"172.128.0.0/9\",\r\n          \"173.0.0.0/8\"\
+        ,\r\n          \"174.0.0.0/7\",\r\n          \"176.0.0.0/4\",\r\n        \
+        \  \"192.0.0.0/23\",\r\n          \"192.0.3.0/24\",\r\n          \"192.0.4.0/22\"\
+        ,\r\n          \"192.0.8.0/21\",\r\n          \"192.0.16.0/20\",\r\n     \
+        \     \"192.0.32.0/19\",\r\n          \"192.0.64.0/18\",\r\n          \"192.0.128.0/17\"\
+        ,\r\n          \"192.1.0.0/16\",\r\n          \"192.2.0.0/15\",\r\n      \
+        \    \"192.4.0.0/14\",\r\n          \"192.8.0.0/13\",\r\n          \"192.16.0.0/12\"\
+        ,\r\n          \"192.32.0.0/11\",\r\n          \"192.64.0.0/10\",\r\n    \
+        \      \"192.128.0.0/11\",\r\n          \"192.160.0.0/13\",\r\n          \"\
+        192.169.0.0/16\",\r\n          \"192.170.0.0/15\",\r\n          \"192.172.0.0/14\"\
+        ,\r\n          \"192.176.0.0/12\",\r\n          \"192.192.0.0/10\",\r\n  \
+        \        \"193.0.0.0/8\",\r\n          \"194.0.0.0/7\",\r\n          \"196.0.0.0/7\"\
+        ,\r\n          \"198.0.0.0/12\",\r\n          \"198.16.0.0/15\",\r\n     \
+        \     \"198.20.0.0/14\",\r\n          \"198.24.0.0/13\",\r\n          \"198.32.0.0/11\"\
+        ,\r\n          \"198.64.0.0/10\",\r\n          \"198.128.0.0/9\",\r\n    \
+        \      \"199.0.0.0/8\",\r\n          \"200.0.0.0/5\",\r\n          \"208.0.0.0/4\"\
+        \r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 01 Jul 2017 01:54:51 GMT']
+      Date: ['Tue, 22 Aug 2017 22:11:29 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/f01dd5d5-04a4-4605-ab27-fca5290f6fd2?api-version=2017-06-01']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/d4675000-db23-4a56-928d-07280b7cd8c7?api-version=2017-08-01']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['6184']
+      content-length: ['10617']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -287,12 +421,13 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 networkmanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.12
+          msrest_azure/0.4.11 networkmanagementclient/1.4.0a1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.13+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4c797436-5e00-11e7-9d1a-64510658e3b3]
+      x-ms-client-request-id: [d9dc81f4-8786-11e7-8df6-a0b3ccf7272a]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveRouteTable?api-version=2017-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveRouteTable?api-version=2017-08-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"source\": \"Default\"\
         ,\r\n      \"state\": \"Active\",\r\n      \"addressPrefix\": [\r\n      \
@@ -316,16 +451,16 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 01 Jul 2017 01:55:12 GMT']
+      Date: ['Tue, 22 Aug 2017 22:11:37 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/31654dce-6e1b-423a-94fb-1aae60cf77e3?api-version=2017-06-01']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/13a03956-de5e-4bcd-956f-b8efff5c8039?api-version=2017-08-01']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['1163']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -334,12 +469,13 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 networkmanagementclient/1.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.10+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.12
+          msrest_azure/0.4.11 networkmanagementclient/1.4.0a1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.13+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4c797436-5e00-11e7-9d1a-64510658e3b3]
+      x-ms-client-request-id: [d9dc81f4-8786-11e7-8df6-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/31654dce-6e1b-423a-94fb-1aae60cf77e3?api-version=2017-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/13a03956-de5e-4bcd-956f-b8efff5c8039?api-version=2017-08-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"source\": \"Default\"\
         ,\r\n      \"state\": \"Active\",\r\n      \"addressPrefix\": [\r\n      \
@@ -363,9 +499,9 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 01 Jul 2017 01:55:42 GMT']
+      Date: ['Tue, 22 Aug 2017 22:12:08 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/31654dce-6e1b-423a-94fb-1aae60cf77e3?api-version=2017-06-01']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Network/locations/westus/operationResults/13a03956-de5e-4bcd-956f-b8efff5c8039?api-version=2017-08-01']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]

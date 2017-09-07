@@ -88,6 +88,8 @@ def show_version_info_exit(out_file):
     print(file=out_file)
     print("Python location '{}'".format(sys.executable), file=out_file)
     print(file=out_file)
+    print('Legal docs and information: aka.ms/AzureCliLegal', file=out_file)
+    print(file=out_file)
     sys.exit(0)
 
 
@@ -232,3 +234,8 @@ def hash_string(value, length=16, force_lower=False):
     while len(digest) < length:
         digest = digest + digest
     return digest[:length]
+
+
+def in_cloud_console():
+    import os
+    return os.environ.get('ACC_CLOUD', None)

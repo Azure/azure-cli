@@ -27,8 +27,8 @@ print('Running dev setup...')
 print('Root directory \'{}\'\n'.format(root_dir))
 
 # Get rid of the following when merge back to the public repository
-exec_command('pip install privates/azure_mgmt_compute-2.9999.0-py2.py3-none-any.whl')
-exec_command('pip install privates/azure_mgmt_network-1.9999.0-py2.py3-none-any.whl')
+exec_command('pip install privates/azure_mgmt_compute-3.0.0-py2.py3-none-any.whl')
+exec_command('pip install privates/azure_mgmt_network-1.5.0a1-py2.py3-none-any.whl')
 
 # install general requirements
 exec_command('pip install -r requirements.txt')

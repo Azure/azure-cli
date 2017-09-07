@@ -128,15 +128,15 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None, zone=None):
 
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': '2016-11-01' if zone else '2015-06-15',
+        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -146,7 +146,8 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
     }
     if zone:
         public_ip['zones'] = zone
-
+    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+        public_ip['sku'] = {'name': sku}
     return public_ip
 
 
@@ -266,7 +267,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 
     # pylint: disable=line-too-long
     msi_rp_api_version = '2015-08-31-PREVIEW'
-    authorization_api_version = get_mgmt_service_client(AuthorizationManagementClient).config.api_version
+    authorization_api_version = get_mgmt_service_client(AuthorizationManagementClient).api_version
     return {
         'name': name,
         'type': assignment_type,
@@ -284,15 +285,16 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 
 
 def build_vm_msi_extension(vm_name, location, role_assignment_guid, port, is_linux, extension_version):
+    ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
     return {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'name': vm_name + '/MSIExtension',
+        'name': vm_name + '/' + ext_type_name,
         'apiVersion': get_api_version(ResourceType.MGMT_COMPUTE),
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
             'publisher': "Microsoft.ManagedIdentity",
-            'type': 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows'),
+            'type': ext_type_name,
             'typeHandlerVersion': extension_version,
             'autoUpgradeMinorVersion': True,
             'settings': {'port': port}
@@ -448,14 +450,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
-    if data_disk_sizes_gb is not None:
+    if image_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': data_caching
+                'caching': data_caching,
+                'managedDisk': {'storageAccountType': storage_sku}
             })
+            lun = lun + 1
+
+    if data_disk_sizes_gb:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
             profile['dataDisks'].append({
@@ -607,7 +614,7 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
                                  backend_port, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation):
+                                 private_ip_address, private_ip_allocation, sku):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -637,16 +644,17 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
         ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
-
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
         'dependsOn': [],
         'properties': lb_properties
     }
+    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+        lb['sku'] = {'name': sku}
     return lb
 
 

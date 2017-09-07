@@ -8,6 +8,7 @@ import tempfile
 import unittest
 import mock
 
+from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import DefaultStr
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -91,30 +92,30 @@ class TestActions(unittest.TestCase):
         err_invalid_char = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
 
         self._verify_username_with_ex('!@#', 'linux', err_invalid_char)
-        self._verify_username_with_ex('dav[', 'linux', err_invalid_char)
-        self._verify_username_with_ex('Adavid', 'linux', err_invalid_char)
-        self._verify_username_with_ex('-ddavid', 'linux', err_invalid_char)
+        self._verify_username_with_ex('gue[', 'linux', err_invalid_char)
+        self._verify_username_with_ex('Aguest', 'linux', err_invalid_char)
+        self._verify_username_with_ex('-gguest', 'linux', err_invalid_char)
         self._verify_username_with_ex('', 'linux', 'admin user name can not be empty')
-        self._verify_username_with_ex('david', 'linux',
-                                      "This user name 'david' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        self._verify_username_with_ex('guest', 'linux',
+                                      "This user name 'guest' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('d-avid1', 'linux')
-        _validate_admin_username('david1', 'linux')
-        _validate_admin_username('david1.', 'linux')
+        _validate_admin_username('g-uest1', 'linux')
+        _validate_admin_username('guest1', 'linux')
+        _validate_admin_username('guest1.', 'linux')
 
     def test_validate_admin_username_windows(self):
         # pylint: disable=line-too-long
         err_invalid_char = r'admin user name cannot contain special characters \/"[]:|<>+=;,?*@# or ends with .'
 
         self._verify_username_with_ex('!@#', 'windows', err_invalid_char)
-        self._verify_username_with_ex('dav[', 'windows', err_invalid_char)
+        self._verify_username_with_ex('gue[', 'windows', err_invalid_char)
         self._verify_username_with_ex('dddivid.', 'windows', err_invalid_char)
-        self._verify_username_with_ex('john', 'windows',
-                                      "This user name 'john' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        self._verify_username_with_ex('backup', 'windows',
+                                      "This user name 'backup' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('ADAVID', 'windows')
-        _validate_admin_username('d-avid1', 'windows')
-        _validate_admin_username('david1', 'windows')
+        _validate_admin_username('AGUEST', 'windows')
+        _validate_admin_username('g-uest1', 'windows')
+        _validate_admin_username('guest1', 'windows')
 
     def test_validate_admin_password_linux(self):
         # pylint: disable=line-too-long
@@ -171,6 +172,29 @@ class TestActions(unittest.TestCase):
         self.assertEqual('plan1', np.plan_name)
         self.assertEqual('product1', np.plan_product)
         self.assertEqual('publisher1', np.plan_publisher)
+
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
+    def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
+        compute_client = mock.MagicMock()
+        resp = mock.MagicMock()
+        resp.status_code = 404
+        resp.text = '{"Message": "Not Found"}'
+
+        compute_client.virtual_machine_images.get.side_effect = CloudError(resp, error='image not found')
+        client_factory_mock.return_value = compute_client
+
+        np = mock.MagicMock()
+        np.location = 'some region'
+        np.image = 'publisher1:offer1:sku1:1.0.0'
+
+        # action
+        _parse_image_argument(np)
+
+        # assert
+        logger_mock.assert_called_with("Querying the image of '%s' failed for an error '%s'. "
+                                       "Configuring plan settings will be skipped", 'publisher1:offer1:sku1:1.0.0',
+                                       'image not found')
 
     def test_get_next_subnet_addr_suffix(self):
         result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)

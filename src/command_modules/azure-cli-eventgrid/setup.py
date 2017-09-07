@@ -13,7 +13,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.1+dev"
+VERSION = "0.1.3+dev"
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -54,7 +54,10 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.eventgrid'
+        'azure.cli.command_modules.eventgrid',
+        'azure.cli.command_modules.eventgrid.sdk',
+        'azure.cli.command_modules.eventgrid.sdk.models',
+        'azure.cli.command_modules.eventgrid.sdk.operations'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

@@ -20,6 +20,50 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBa
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'lb': 'lb1',
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip}'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkPublicIpWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku}'.format(**kwargs))
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkMultiIdsShowScenarioTest, self).__init__(__file__, test_method, resource_group='test_multi_id')
@@ -61,8 +105,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag1 --exists'.format(rg))
         self.cmd('network application-gateway update -g {} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo'.format(rg))
-        self.cmd('network application-gateway wait -g {} -n ag1 --created'.format(rg))
-        self.cmd('network application-gateway list')
+        self.cmd('network application-gateway wait -g {} -n ag1 --updated'.format(rg))
 
         ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
             JMESPathCheckV2('type(@)', 'array'),
@@ -1122,6 +1165,40 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue(len(result['value']) > 0)
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkExtendedNSGScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
+    def test_network_extended_nsg(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'nsg': 'nsg1',
+            'rule': 'rule1'
+        }
+        self.cmd('network nsg create --name {nsg} -g {rg}'.format(**kwargs))
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(destinationAddressPrefixes)', 2),
+            JMESPathCheckV2('destinationAddressPrefix', ''),
+            JMESPathCheckV2('length(sourceAddressPrefixes)', 0),
+            JMESPathCheckV2('sourceAddressPrefix', '*'),
+            JMESPathCheckV2('length(sourcePortRanges)', 2),
+            JMESPathCheckV2('sourcePortRange', None),
+            JMESPathCheckV2('length(destinationPortRanges)', 0),
+            JMESPathCheckV2('destinationPortRange', '4444')
+        ])
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000 2000 3000'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(destinationAddressPrefixes)', 0),
+            JMESPathCheckV2('destinationAddressPrefix', 'Internet'),
+            JMESPathCheckV2('length(sourceAddressPrefixes)', 2),
+            JMESPathCheckV2('sourceAddressPrefix', ''),
+            JMESPathCheckV2('length(sourcePortRanges)', 0),
+            JMESPathCheckV2('sourcePortRange', '*'),
+            JMESPathCheckV2('length(destinationPortRanges)', 3),
+            JMESPathCheckV2('destinationPortRange', None)
+        ])
+
+
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_nsg')
@@ -1329,20 +1406,24 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 
 
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
-class NetworkSubnetPrivateAccessScenarioTest(ScenarioTest):
+class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_subnet_private_access_test', location='westcentralus')
-    def test_network_subnet_private_access(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
+    def test_network_subnet_endpoint_service(self, resource_group):
         kwargs = {
             'rg': resource_group,
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
+        self.cmd('network vnet list-endpoint-services -l westus', checks=[
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('@[0].name', 'Microsoft.Storage')
+        ])
         self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --private-access-services Microsoft.Storage'.format(**kwargs),
-                 checks=JMESPathCheckV2('privateAccessServices[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --private-access-services ""'.format(**kwargs),
-                 checks=JMESPathCheckV2('privateAccessServices', None))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Storage'))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints', None))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes

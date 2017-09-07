@@ -301,6 +301,19 @@ class ProviderOperationTest(VCRTestBase):
 
 class DeploymentTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_lite')
+    def test_group_deployment_lite(self, resource_group):
+        # ensures that a template that is missing "parameters" or "resources" still deploys
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\')
+        deployment_name = 'azure-cli-deployment'
+
+        self.cmd('group deployment create -g {} -n {} --template-file {}'.format(
+            resource_group, deployment_name, template_file), checks=[
+            JCheck('properties.provisioningState', 'Succeeded'),
+            JCheck('resourceGroup', resource_group),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_deployment')
     def test_group_deployment(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -487,16 +500,21 @@ class PolicyScenarioTest(ScenarioTest):
     def test_resource_policy(self, resource_group):
         policy_name = 'azure-cli-test-policy'
         policy_display_name = 'test_policy_123'
-        policy_description = 'test_policy_123'
+        policy_description = 'desc_for_test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
+        params_def_file = os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+        params_file = os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
 
         # create a policy
-        self.cmd('policy definition create -n {} --rules {} --display-name {} --description {}'.format(policy_name, rules_file, policy_display_name, policy_description), checks=[
-            JCheck('name', policy_name),
-            JCheck('displayName', policy_display_name),
-            JCheck('description', policy_description)
-        ])
+        self.cmd('policy definition create -n {} --rules {} --params {} --display-name {} --description {}'.format(
+            policy_name, rules_file, params_def_file, policy_display_name, policy_description),
+            checks=[
+                        JCheck('name', policy_name),
+                        JCheck('displayName', policy_display_name),
+                        JCheck('description', policy_description)
+                   ]
+        )
 
         # update it
         new_policy_description = policy_description + '_new'
@@ -513,10 +531,12 @@ class PolicyScenarioTest(ScenarioTest):
         # create a policy assignment on a resource group
         policy_assignment_name = 'azurecli-test-policy-assignment'
         policy_assignment_display_name = 'test_assignment_123'
-        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(policy_name, policy_assignment_name, policy_assignment_display_name, resource_group), checks=[
-            JCheck('name', policy_assignment_name),
-            JCheck('displayName', policy_assignment_display_name),
-        ])
+        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --params {}'.format(
+                 policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
+                 checks=[
+                    JCheck('name', policy_assignment_name),
+                    JCheck('displayName', policy_assignment_display_name)
+                 ])
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath

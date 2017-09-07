@@ -5,7 +5,7 @@
 
 """Verify the command modules by install them using PIP"""
 
-from __future__ import print_function
+from __future__ import print_function, division
 
 import os.path
 import tempfile
@@ -16,6 +16,7 @@ import imp
 import fileinput
 import glob
 import zipfile
+import multiprocessing
 
 import automation.utilities.path as automation_path
 from automation.utilities.display import print_heading
@@ -86,12 +87,29 @@ def _valid_wheel(wheel_path):
     return True
 
 
+def run_help_on_command_without_err(command_str):
+    try:
+        subprocess.check_output(['az'] + command_str.split() + ['--help'], stderr=subprocess.STDOUT,
+                                universal_newlines=True)
+        return True
+    except subprocess.CalledProcessError as err:
+        print(err.output, file=sys.stderr)
+        print(err, file=sys.stderr)
+        return False
+
+
 def verify_packages():
     # tmp dir to store all the built packages
     built_packages_dir = tempfile.mkdtemp()
 
     all_modules = automation_path.get_all_module_paths()
     all_command_modules = automation_path.get_command_modules_paths(include_prefix=True)
+
+    modules_missing_manifest_in = [name for name, path in all_modules if not os.path.isfile(os.path.join(path, 'MANIFEST.in'))]
+    if modules_missing_manifest_in:
+        print_heading('Error: The following modules are missing the MANIFEST.in file.')
+        print(modules_missing_manifest_in)
+        sys.exit(1)
 
     # STEP 1:: Build the packages
     for name, path in all_modules:
@@ -119,6 +137,32 @@ def verify_packages():
         print_heading('Error running the CLI!', f=sys.stderr)
         sys.exit(1)
 
+    # STEP 4:: Run -h on each command
+    print('Running --help on all commands.')
+    from azure.cli.core.application import Configuration
+    config = Configuration()
+
+    all_commands = list(config.get_command_table())
+    pool_size = 5
+    chunk_size = 10
+    command_results = []
+    p = multiprocessing.Pool(pool_size)
+    prev_percent = 0
+    for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, chunk_size), 1):
+        command_results.append(res)
+        cur_percent = int((i/len(all_commands))*100)
+        if cur_percent != prev_percent:
+            print('{}% complete'.format(cur_percent), file=sys.stderr)
+        prev_percent = cur_percent
+    p.close()
+    p.join()
+    if not all(command_results):
+        print_heading('Error running --help on commands in the CLI!', f=sys.stderr)
+        sys.exit(1)
+    print('OK.')
+
+    # STEP 5:: Determine if any modules failed to install
+
     pip.utils.pkg_resources = imp.reload(pip.utils.pkg_resources)
     installed_command_modules = [dist.key for dist in
                                  pip.get_installed_distributions(local_only=True)
@@ -134,7 +178,7 @@ def verify_packages():
         print(missing_modules, file=sys.stderr)
         sys.exit(1)
 
-    # STEP 4:: Verify the wheels that get produced
+    # STEP 6:: Verify the wheels that get produced
     print_heading('Verifying wheels...')
     invalid_wheels = []
     for wheel_path in glob.glob(os.path.join(built_packages_dir, '*.whl')):
