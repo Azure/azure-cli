@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from time import sleep
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 import unittest
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
+
 
 class ResourceLockTests(ScenarioTest):
     def test_list_locks(self):
@@ -88,6 +89,7 @@ class ResourceLockTests(ScenarioTest):
     def _sleep_for_lock_operation(self):
         if self.is_live:
             sleep(5)
+
 
 if __name__ == '__main__':
     unittest.main()
