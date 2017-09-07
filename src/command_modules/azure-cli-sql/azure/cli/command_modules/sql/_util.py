@@ -32,10 +32,6 @@ def get_sql_capabilities_operations(kwargs):
     return get_sql_management_client(kwargs).capabilities
 
 
-def get_sql_firewall_rules_operations(kwargs):
-    return get_sql_management_client(kwargs).firewall_rules
-
-
 def get_sql_databases_operations(kwargs):
     return get_sql_management_client(kwargs).databases
 
@@ -54,6 +50,10 @@ def get_sql_database_usages_operations(kwargs):
 
 def get_sql_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).elastic_pools
+
+
+def get_sql_firewall_rules_operations(kwargs):
+    return get_sql_management_client(kwargs).firewall_rules
 
 
 def get_sql_recommended_elastic_pools_operations(kwargs):
