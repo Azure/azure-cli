@@ -15,7 +15,7 @@ from enum import Enum
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import CLIError, get_file_json
+from azure.cli.core.util import CLIError, get_file_json, in_cloud_console
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
 
 logger = azlogging.get_az_logger(__name__)
@@ -714,7 +714,8 @@ class CredsCache(object):
         context = self._auth_ctx_factory(tenant, cache=self.adal_token_cache)
         token_entry = context.acquire_token(resource, username, _CLIENT_ID)
         if not token_entry:
-            raise CLIError("Could not retrieve token from local cache, please run 'az login'.")
+            raise CLIError("Could not retrieve token from local cache.{}".format(
+                " Please run 'az login'." if not in_cloud_console() else ''))
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
