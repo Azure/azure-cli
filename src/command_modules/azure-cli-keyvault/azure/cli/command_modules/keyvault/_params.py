@@ -24,7 +24,7 @@ from azure.cli.command_modules.keyvault._validators import \
     (datetime_type, certificate_type,
      get_attribute_validator,
      vault_base_url_type, validate_key_import_source,
-     validate_key_type, validate_key_ops, validate_policy_permissions,
+     validate_key_type, validate_policy_permissions,
      validate_principal, validate_resource_group_name,
      validate_x509_certificate_chain,
      process_certificate_cancel_namespace,
@@ -71,10 +71,6 @@ def get_keyvault_version_completion_list(resource_name):
 
 # CUSTOM CHOICE LISTS
 
-key_permission_values = ', '.join([x.value for x in KeyPermissions])
-secret_permission_values = ', '.join([x.value for x in SecretPermissions])
-certificate_permission_values = ', '.join([x.value for x in CertificatePermissions])
-json_web_key_op_values = ', '.join([x.value for x in JsonWebKeyOperation])
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
 certificate_format_values = ['PEM', 'DER']
 
@@ -157,15 +153,14 @@ register_cli_argument('keyvault list', 'resource_group_name', resource_group_nam
 
 register_cli_argument('keyvault delete-policy', 'object_id', validator=validate_principal)
 register_cli_argument('keyvault set-policy', 'key_permissions', metavar='PERM', nargs='*',
-                      help='Space separated list. Possible values: {}'.format(
-                          key_permission_values), arg_group='Permission',
-                      validator=validate_policy_permissions)
+                      help='Space separated list of key permissions to assign.', arg_group='Permission',
+                      validator=validate_policy_permissions, **enum_choice_list(KeyPermissions))
 register_cli_argument('keyvault set-policy', 'secret_permissions', metavar='PERM', nargs='*',
-                      help='Space separated list. Possible values: {}'.format(
-                          secret_permission_values), arg_group='Permission')
+                      help='Space separated list of secret permissions to assign.', arg_group='Permission',
+                      **enum_choice_list(SecretPermissions))
 register_cli_argument('keyvault set-policy', 'certificate_permissions', metavar='PERM', nargs='*',
-                      help='Space separated list. Possible values: {}'.format(
-                          certificate_permission_values), arg_group='Permission')
+                      help='Space separated list of certificate permissions to assign.', arg_group='Permission',
+                      **enum_choice_list(CertificatePermissions))
 
 
 for item in ['key', 'secret', 'certificate']:
@@ -180,9 +175,8 @@ register_cli_argument('keyvault certificate pending', 'certificate_name',
                       id_part='child_name', completer=None)
 
 register_cli_argument('keyvault key', 'key_ops', options_list=('--ops'), nargs='*',
-                      help='Space separated list of permitted JSON web key operations. Possible '
-                           'values: {}'.format(json_web_key_op_values),
-                      validator=validate_key_ops, type=str.lower)
+                      help='Space separated list of permitted JSON web key operations.',
+                      **enum_choice_list(JsonWebKeyOperation))
 register_cli_argument('keyvault key', 'key_version', options_list=('--version', '-v'),
                       help='The key version. If omitted, uses the latest version.', default='',
                       required=False, completer=get_keyvault_version_completion_list('key'))
@@ -241,7 +235,7 @@ register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('-
                             completer=FilesCompleter(), arg_group='Content Source')
 register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'),
                             help='Source file encoding. The value is saved as a tag '
-                                 '(`file-encoding=<val>`) and used during download to automtically '
+                                 '(`file-encoding=<val>`) and used during download to automatically '
                                  'encode the resulting file.',
                             default='utf-8', validator=process_secret_set_namespace,
                             arg_group='Content Source', **enum_choice_list(secret_encoding_values))

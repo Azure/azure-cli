@@ -601,7 +601,7 @@ class KeyVaultSoftDeleteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(KeyVaultSoftDeleteScenarioTest, self).__init__(__file__, test_method,
                                                              resource_group='cli-test-kv-sd')
-        self.keyvault_name = 'cli-kv-test-softdelete'
+        self.keyvault_name = 'cli-kv-test-softdelete1'
         self.location = 'westus'
 
     def test_keyvault_softdelete(self):
