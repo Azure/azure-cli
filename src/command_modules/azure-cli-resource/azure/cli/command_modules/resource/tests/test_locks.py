@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from time import sleep
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck
+import unittest
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 
 
 class ResourceLockTests(ScenarioTest):
@@ -29,23 +30,29 @@ class ResourceLockTests(ScenarioTest):
             self.cmd('az lock delete -n {}'.format(lock_name))
             self._sleep_for_lock_operation()
 
-    def test_readonly_lock_create_list_delete_resource_group(self):
-        self._lock_operation_with_resource_group('ReadOnly')
+    @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_group_lock')
+    def test_readonly_resource_group_lock(self, resource_group):
+        self._lock_operation_with_resource_group('ReadOnly', resource_group)
 
-    def test_cannotdelete_lock_create_list_delete_resource_group(self):
-        self._lock_operation_with_resource_group('CanNotDelete')
+    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_group_lock')
+    def test_cannotdelete_resource_group_lock(self, resource_group):
+        self._lock_operation_with_resource_group('CanNotDelete', resource_group)
 
-    def _lock_operation_with_resource_group(self, lock_type):
-        rg_name = self.create_random_name('cli.lock.rg', 75)
+    @ResourceGroupPreparer(name_prefix='cli_test_readonly_resource_lock')
+    def test_readonly_resource_lock(self, resource_group):
+        self._lock_operation_with_resource('ReadOnly', resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cannotdelete_resource_lock')
+    def test_cannotdelete_resource_lock(self, resource_group):
+        self._lock_operation_with_resource('CanNotDelete', resource_group)
+
+    def _lock_operation_with_resource_group(self, lock_type, resource_group):
         lock_name = self.create_random_name('cli-test-lock', 48)
 
-        self.cmd('az group create --location {} --name {} --tag use=az-test'.format('southcentralus', rg_name))
-        self.addCleanup(lambda: self.cmd('az group delete -n {} --yes --no-wait'.format(rg_name)))
-
-        self.cmd('az lock create -n {} -g {} --lock-type {}'.format(lock_name, rg_name, lock_type))
+        self.cmd('az lock create -n {} -g {} --lock-type {}'.format(lock_name, resource_group, lock_type))
         self._sleep_for_lock_operation()
 
-        self.cmd('az lock show -g {} -n {}'.format(rg_name, lock_name)).assert_with_checks([
+        self.cmd('az lock show -g {} -n {}'.format(resource_group, lock_name)).assert_with_checks([
             JMESPathCheck('name', lock_name),
             JMESPathCheck('level', lock_type)])
 
@@ -53,9 +60,36 @@ class ResourceLockTests(ScenarioTest):
         self.assertTrue(locks_list)
         self.assertIn(lock_name, locks_list)
 
-        self.cmd('az lock delete -g {} -n {}'.format(rg_name, lock_name))
+        self.cmd('az lock delete -g {} -n {}'.format(resource_group, lock_name))
+        self._sleep_for_lock_operation()
+
+    def _lock_operation_with_resource(self, lock_type, resource_group):
+        rsrc_name = self.create_random_name('cli.lock.rsrc', 30)
+        rsrc_type = 'Microsoft.Network/virtualNetworks'
+        lock_name = self.create_random_name('cli-test-lock', 74)
+
+        self.cmd('az network vnet create -n {} -g {}'.format(rsrc_name, resource_group))
+        self.cmd('az lock create -n {} --resource-type {} -g {} --resource-name {} --lock-type {}'
+                 .format(lock_name, rsrc_type, resource_group, rsrc_name, lock_type))
+        self._sleep_for_lock_operation()
+
+        self.cmd('az lock show --name {} -g {} --resource-type {} --resource-name {}'
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name)).assert_with_checks([
+                     JMESPathCheck('name', lock_name),
+                     JMESPathCheck('level', lock_type)])
+
+        locks_list = self.cmd("az lock list --query '[].name' -ojson").get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        self.cmd('az lock delete --name {} -g {} --resource-name {} --resource-type {}'
+                 .format(lock_name, resource_group, rsrc_name, rsrc_type))
         self._sleep_for_lock_operation()
 
     def _sleep_for_lock_operation(self):
         if self.is_live:
             sleep(5)
+
+
+if __name__ == '__main__':
+    unittest.main()
