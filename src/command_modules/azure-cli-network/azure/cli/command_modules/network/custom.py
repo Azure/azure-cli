@@ -2252,19 +2252,6 @@ def create_express_route_peering(
         'RouteFilter',
         mod='models')
 
-    # TODO: Remove workaround when issue #1574 is fixed in the service
-    # region Issue #1574 workaround
-    circuit = _network_client_factory().express_route_circuits.get(
-        resource_group_name, circuit_name)
-    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
-       circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
-        raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
-    for peering in circuit.peerings:
-        if peering.vlan_id == vlan_id:
-            raise CLIError(
-                "VLAN ID '{}' already in use by peering '{}'".format(vlan_id, peering.name))
-    # endregion
-
     peering_config = None
     ipv6_peering_config = None
     peering = ExpressRouteCircuitPeering(
