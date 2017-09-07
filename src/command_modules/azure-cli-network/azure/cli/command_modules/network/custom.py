@@ -2216,11 +2216,21 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
-def _validate_ipv6_address_prefixes(primary_subnet, secondary_subnet):
+def _validate_ipv6_address_prefixes(prefixes):
     from ipaddress import ip_network, IPv4Network, IPv6Network
-    primary = ip_network(primary_subnet)
-    secondary = ip_network(secondary_subnet)
-    return isinstance(primary, IPv6Network) and isinstance(primary, IPv6Network)        
+    prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
+    version = None
+    for prefix in prefixes:
+        try:
+            network = ip_network(prefix)
+            if version is None:
+                version = type(network)
+            else:
+                if type(network) != version:
+                    raise CLIError("usage error: '{}' incompatible mix of IPv4 and IPv6 address prefixes.".format(prefixes))
+        except ValueError:
+            raise CLIError("usage error: prefix '{}' is not recognized as an IPv4 or IPv6 address prefix.".format(prefix))
+    return version == IPv6Network
 
 
 def create_express_route_peering(
@@ -2268,7 +2278,8 @@ def create_express_route_peering(
         if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and use_legacy:
             peering_config.legacy_mode = use_legacy
 
-    if peering_config and _validate_ipv6_address_prefixes(primary_peer_address_prefix, secondary_peer_address_prefix):
+    prefixes = [primary_peer_address_prefix, secondary_peer_address_prefix] + advertised_public_prefixes
+    if peering_config and _validate_ipv6_address_prefixes(prefixes):
         # Special case for IPv6 MicrosoftPeering
         peering.primary_peer_address_prefix = None
         peering.secondary_peer_address_prefix = None
