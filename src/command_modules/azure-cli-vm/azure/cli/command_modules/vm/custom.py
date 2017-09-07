@@ -1554,7 +1554,7 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
         logger.warning('Availability set {} is already configured for managed disks.'.format(availability_set_name))
 
 
-# pylint: disable=too-many-locals, unused-argument, too-many-statements
+# pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
 def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None, no_wait=False,
               authentication_type=None, admin_password=None, admin_username=DefaultStr(getpass.getuser()),
               ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
@@ -1728,8 +1728,19 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             resource_group_name, deployment_name, properties, raw=no_wait))
     vm = get_vm_details(resource_group_name, vm_name)
     if assign_identity:
+        if not identity_scope:
+            _show_missing_access_warning(resource_group_name, vm_name, 'vm')
         setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT))
     return vm
+
+
+def _show_missing_access_warning(resource_group, name, command):
+    warn = ("No access was given yet to the '{1}', because '--scope' was not provided. "
+            "You should setup by creating a role assignment, e.g. "
+            "'az role assignment create --assignee <principal-id> --role contributor -g {0}' "
+            "would let it access the current resource group. To get the pricipal id, run "
+            "'az {2} show -g {0} -n {1} --query \"identity.principalId\" -otsv'".format(resource_group, name, command))
+    logger.warning(warn)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -2001,6 +2012,8 @@ def create_vmss(vmss_name, resource_group_name, image,
     deployment_result = DeploymentOutputLongRunningOperation()(
         client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
     if assign_identity:
+        if not identity_scope:
+            _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
                                                                          _MSI_PORT)
     return deployment_result
@@ -2152,7 +2165,7 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultSt
 
 def _construct_identity_info(identity_scope, identity_role, port):
     return {
-        'scope': identity_scope,
+        'scope': identity_scope or '',
         'role': str(identity_role),  # could be DefaultStr, so convert to string
         'port': port
     }

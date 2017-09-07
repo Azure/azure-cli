@@ -56,7 +56,7 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
-_MSI_ACCOUNT_NAME = 'MSI'
+_MSI_ACCOUNT_NAME = 'MSI@'
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 
@@ -258,9 +258,12 @@ class Profile(object):
 
         subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
-        consolidated = Profile._normalize_properties(msi_port, subscriptions, is_service_principal=False)
+        if not subscriptions:
+            raise CLIError('No access was configured for the VM, hence no subscriptions were found')
+        consolidated = Profile._normalize_properties('VM', subscriptions, is_service_principal=True)
         for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = _MSI_ACCOUNT_NAME  # use a special name to trigger a special token acquisition
+            # use a special name to trigger a special token acquisition
+            s[_SUBSCRIPTION_NAME] = "{}{}".format(_MSI_ACCOUNT_NAME, msi_port)
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
@@ -383,8 +386,8 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 
         def _retrieve_token():
-            if account[_SUBSCRIPTION_NAME] == _MSI_ACCOUNT_NAME:
-                return Profile.get_msi_token(resource, account[_USER_ENTITY][_USER_NAME])
+            if account[_SUBSCRIPTION_NAME].startswith(_MSI_ACCOUNT_NAME):
+                return Profile.get_msi_token(resource, account[_SUBSCRIPTION_NAME][len(_MSI_ACCOUNT_NAME):])
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -428,7 +431,7 @@ class Profile(object):
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()
-        to_refresh = [s for s in subscriptions if s[_SUBSCRIPTION_NAME] != _MSI_ACCOUNT_NAME]
+        to_refresh = [s for s in subscriptions if not s[_SUBSCRIPTION_NAME].startswith(_MSI_ACCOUNT_NAME)]
         not_to_refresh = [s for s in subscriptions if s not in to_refresh]
 
         from azure.cli.core._debug import allow_debug_adal_connection
