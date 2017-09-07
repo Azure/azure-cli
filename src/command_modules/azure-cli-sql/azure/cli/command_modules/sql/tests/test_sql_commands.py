@@ -1357,7 +1357,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         # test sql server vnet-rule create using subnet name and vnet name
         self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {}'
                  .format(vnet_rule_1, rg, server, subnetName, vnetName1))
-       
+
         # test sql server vnet-rule show rule 1
         self.cmd('sql server vnet-rule show --name {} -g {} --server {}'
                  .format(vnet_rule_1, rg, server),
