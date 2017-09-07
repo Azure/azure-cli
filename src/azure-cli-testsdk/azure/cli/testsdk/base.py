@@ -12,8 +12,8 @@ import inspect
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
                                            OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
-                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, live_only,
-                                           DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
+                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
+                                           live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
@@ -39,11 +39,13 @@ class ScenarioTest(ReplayableTest):
                 LargeRequestBodyProcessor(),
                 LargeResponseBodyProcessor(),
                 DeploymentNameReplacer(),
+                RequestUrlNormalizer(),
                 self.name_replacer,
             ],
             replay_processors=replay_processors or [
                 LargeResponseBodyReplacer(),
                 DeploymentNameReplacer(),
+                RequestUrlNormalizer(),
             ],
             recording_patches=recording_patches or [patch_main_exception_handler],
             replay_patches=replay_patches or [
