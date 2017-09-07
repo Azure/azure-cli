@@ -282,15 +282,16 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 
 
 def build_vm_msi_extension(vm_name, location, role_assignment_guid, port, is_linux, extension_version):
+    ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
     return {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'name': vm_name + '/MSIExtension',
+        'name': vm_name + '/' + ext_type_name,
         'apiVersion': get_api_version(ResourceType.MGMT_COMPUTE),
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
             'publisher': "Microsoft.ManagedIdentity",
-            'type': 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows'),
+            'type': ext_type_name,
             'typeHandlerVersion': extension_version,
             'autoUpgradeMinorVersion': True,
             'settings': {'port': port}
@@ -444,14 +445,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
-    if data_disk_sizes_gb is not None:
+    if image_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': data_caching
+                'caching': data_caching,
+                'managedDisk': {'storageAccountType': storage_sku}
             })
+            lun = lun + 1
+
+    if data_disk_sizes_gb:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
             profile['dataDisks'].append({
