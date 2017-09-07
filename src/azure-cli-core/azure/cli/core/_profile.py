@@ -258,6 +258,8 @@ class Profile(object):
 
         subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
+        if not subscriptions:
+            raise CLIError('No access was configured for the VM, hence no subscriptions were found')
         consolidated = Profile._normalize_properties(msi_port, subscriptions, is_service_principal=False)
         for s in consolidated:
             s[_SUBSCRIPTION_NAME] = _MSI_ACCOUNT_NAME  # use a special name to trigger a special token acquisition
