@@ -116,8 +116,8 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japaneast')
     def test_linux_webapp_quick_create(self, resource_group):
-        webapp_name = 'webapp-quick-linux'
-        plan = 'plan-quick-linux'
+        webapp_name = 'webapp-quick-linux4'
+        plan = 'plan-quick-linux4'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
         import requests
@@ -132,8 +132,8 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='westus')
     def test_linux_webapp_quick_create_cd(self, resource_group):
-        webapp_name = 'webapp-quick-linux-cd'
-        plan = 'plan-quick-linux-cd'
+        webapp_name = 'webapp-quick-linux-cd3'
+        plan = 'plan-quick-linux-cd3'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
         import requests
@@ -337,8 +337,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
         runtime = 'node|6.4'
-        plan = 'webapp-linux-plan2'
-        webapp = 'webapp-linux2'
+        plan = 'webapp-linux-plan7'
+        webapp = 'webapp-linux7'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
@@ -359,15 +359,17 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.assertTrue(result['CI_CD_URL'].startswith('https://'))
         self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
 
-        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
-            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url')).get_output_in_json()
+        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'true')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
 
         result = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
-        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE']))
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
         self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
+        sample = next((x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+        self.assertEqual(sample, {'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
         self.cmd('webapp config container delete -g {} -n {}'.format(resource_group, webapp))
         result2 = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
         self.assertEqual(result2, [])

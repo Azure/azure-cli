@@ -229,6 +229,13 @@ def update_site_configs(resource_group_name, name, slot=None,
                         use32_bit_worker_process=None,  # pylint: disable=unused-argument
                         app_command_line=None):  # pylint: disable=unused-argument
     configs = get_site_configs(resource_group_name, name, slot)
+    if linux_fx_version:
+        linux_fx_version_lower = linux_fx_version.strip().lower()
+        if linux_fx_version_lower.startswith('docker|'):
+            update_app_settings(resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
+        else:
+            delete_app_settings(resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
+
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
@@ -356,8 +363,9 @@ APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
 def update_container_settings(resource_group_name, name, docker_registry_server_url=None,
-                              docker_custom_image_name=None, docker_registry_server_user=None, websites_enable_app_service_storage=None,
-                              docker_registry_server_password=None, slot=None):
+                              docker_custom_image_name=None, docker_registry_server_user=None,
+                              websites_enable_app_service_storage=None, docker_registry_server_password=None,
+                              slot=None):
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
@@ -381,7 +389,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
     if docker_custom_image_name is not None:
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name, slot)
 
-    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url:
+    if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage: # pylint: disable=line-too-long
         update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
 
