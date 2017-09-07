@@ -1324,6 +1324,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         rg = resource_group
         vnet_rule_1 = 'rule1'
+        vnet_rule_2 = 'rule2'
 
         # Create vnet's - vnet1 and vnet2
 
@@ -1353,22 +1354,26 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                          .format(subnetName, vnetName2, rg)).get_output_in_json()
         vnet_id_2 = vnet2['id']
 
-        # test sql server vnet-rule create
-        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
-                 .format(vnet_rule_1, rg, server, vnet_id_1),
-                 checks=[
-                     JMESPathCheck('name', vnet_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
-
-        # test sql server vnet-rule show
+        # test sql server vnet-rule create using subnet name and vnet name
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {}'
+                 .format(vnet_rule_1, rg, server, subnetName, vnetName1))
+       
+        # test sql server vnet-rule show rule 1
         self.cmd('sql server vnet-rule show --name {} -g {} --server {}'
                  .format(vnet_rule_1, rg, server),
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
                      JMESPathCheck('resourceGroup', rg)])
 
-        # test sql server vnet-rule update
+        # test sql server vnet-rule create using subnet id
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
+                 .format(vnet_rule_2, rg, server, vnet_id_1),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_2),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+
+        # test sql server vnet-rule update rule 1 with vnet 2
         self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {}'
                  .format(vnet_rule_1, rg, server, vnet_id_2),
 
@@ -1379,8 +1384,12 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # test sql server vnet-rule list
         self.cmd('sql server vnet-rule list -g {} --server {}'
-                 .format(rg, server), checks=[JMESPathCheck('length(@)', 1)])
+                 .format(rg, server), checks=[JMESPathCheck('length(@)', 2)])
 
-        # test sql server vnet-rule delete
+        # test sql server vnet-rule delete rule 1
         self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
                  .format(vnet_rule_1, rg, server), checks=NoneCheck())
+
+        # test sql server vnet-rule delete rule 2
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
+                 .format(vnet_rule_2, rg, server), checks=NoneCheck())
