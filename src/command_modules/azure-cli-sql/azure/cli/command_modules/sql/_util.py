@@ -24,8 +24,8 @@ def get_sql_management_client(_):
     return get_mgmt_service_client(SqlManagementClient)
 
 
-def get_sql_servers_operations(kwargs):
-    return get_sql_management_client(kwargs).servers
+def get_sql_server_azure_ad_administrators_operations(kwargs):
+    return get_sql_management_client(kwargs).server_azure_ad_administrators
 
 
 def get_sql_capabilities_operations(kwargs):
@@ -40,6 +40,18 @@ def get_sql_databases_operations(kwargs):
     return get_sql_management_client(kwargs).databases
 
 
+def get_sql_database_blob_auditing_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).database_blob_auditing_policies
+
+
+def get_sql_database_threat_detection_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).database_threat_detection_policies
+
+
+def get_sql_database_usages_operations(kwargs):
+    return get_sql_management_client(kwargs).database_usages
+
+
 def get_sql_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).elastic_pools
 
@@ -48,5 +60,14 @@ def get_sql_recommended_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).recommended_elastic_pools
 
 
-def get_sql_server_azure_ad_administrators_operations(kwargs):
-    return get_sql_management_client(kwargs).server_azure_ad_administrators
+def get_sql_replication_links_operations(kwargs):
+    return get_sql_management_client(kwargs).replication_links
+
+
+def get_sql_servers_operations(kwargs):
+    return get_sql_management_client(kwargs).servers
+
+
+def get_sql_server_usages_operations(kwargs):
+    return get_sql_management_client(kwargs).server_usages
+

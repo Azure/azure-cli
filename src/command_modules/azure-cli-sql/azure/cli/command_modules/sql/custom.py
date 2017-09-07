@@ -212,7 +212,7 @@ def db_failover(
         allow_data_loss=False):
 
     # List replication links
-    links = list(client.list_replication_links(
+    links = list(client.list_by_database(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name))
@@ -229,9 +229,9 @@ def db_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.failover_replication_link_allow_data_loss
+        failover_func = client.failover_allow_data_loss
     else:
-        failover_func = client.failover_replication_link
+        failover_func = client.failover
 
     # Execute failover from the primary to this database
     return failover_func(
@@ -304,7 +304,7 @@ def db_delete_replica_link(
     partner_resource_group_name = partner_resource_group_name or resource_group_name
 
     # Find the replication link
-    links = list(client.list_replication_links(
+    links = list(client.list_by_database(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name))
@@ -316,7 +316,7 @@ def db_delete_replica_link(
         # No link exists, nothing to be done
         return
 
-    return client.delete_replication_link(
+    return client.delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -387,8 +387,7 @@ def db_list(
 
     if elastic_pool_name:
         # List all databases in the elastic pool
-        pool_client = get_sql_elastic_pools_operations(None)
-        return pool_client.list_databases(
+        return client.list_by_elastic_pool(
             server_name=server_name,
             resource_group_name=resource_group_name,
             elastic_pool_name=elastic_pool_name,
