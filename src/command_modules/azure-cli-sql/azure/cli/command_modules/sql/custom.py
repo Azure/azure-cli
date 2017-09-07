@@ -25,8 +25,7 @@ from azure.mgmt.storage import StorageManagementClient
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
 from ._util import (
-    get_sql_servers_operations,
-    get_sql_elastic_pools_operations
+    get_sql_servers_operations
 )
 
 ###############################################

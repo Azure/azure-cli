@@ -70,4 +70,3 @@ def get_sql_servers_operations(kwargs):
 
 def get_sql_server_usages_operations(kwargs):
     return get_sql_management_client(kwargs).server_usages
-

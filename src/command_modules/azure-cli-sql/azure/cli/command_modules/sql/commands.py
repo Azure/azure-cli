@@ -7,7 +7,7 @@ from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup)
-from ._util import *
+import _util
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.sql.custom#{}'
@@ -20,7 +20,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
         'azure.mgmt.sql.operations.capabilities_operations',
         'CapabilitiesOperations')
 
-    with ServiceGroup(__name__, get_sql_capabilities_operations, capabilities_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_capabilities_operations, capabilities_operations, custom_path) as s:
         with s.group('sql db') as c:
             c.custom_command('list-editions', 'db_list_capabilities')
 
@@ -34,7 +34,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
                                                  'DatabasesOperations')
 
-    with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_databases_operations, database_operations, custom_path) as s:
         with s.group('sql db') as c:
             c.custom_command('create', 'db_create')
             c.custom_command('copy', 'db_copy')
@@ -78,24 +78,29 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
 
     replication_links_operations = create_service_adapter('azure.mgmt.sql.operations.replication_links_operations',
                                                           'ReplicationLinksOperations')
-    with ServiceGroup(__name__, get_sql_replication_links_operations, replication_links_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_replication_links_operations,
+                      replication_links_operations, custom_path) as s:
         with s.group('sql db replica') as c:
             c.command('list-links', 'list_by_database')
             c.custom_command('delete-link', 'db_delete_replica_link', confirmation=True)
             c.custom_command('set-primary', 'db_failover')
 
-    database_blob_auditing_policies_operations = create_service_adapter('azure.mgmt.sql.operations.database_blob_auditing_policies_operations',
-                                                                        'DatabaseBlobAuditingPoliciesOperations')
-    with ServiceGroup(__name__, get_sql_database_blob_auditing_policies_operations, database_blob_auditing_policies_operations, custom_path) as s:
+    database_blob_auditing_policies_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.database_blob_auditing_policies_operations',
+        'DatabaseBlobAuditingPoliciesOperations')
+    with ServiceGroup(__name__, _util.get_sql_database_blob_auditing_policies_operations,
+                      database_blob_auditing_policies_operations, custom_path) as s:
         with s.group('sql db audit-policy') as c:
             c.command('show', 'get')
             c.generic_update_command(
                 'update', 'get', 'create_or_update',
                 custom_func_name='db_audit_policy_update')
 
-    database_threat_detection_policies_operations = create_service_adapter('azure.mgmt.sql.operations.database_threat_detection_policies_operations',
-                                                                           'DatabaseThreatDetectionPoliciesOperations')
-    with ServiceGroup(__name__, get_sql_database_threat_detection_policies_operations, database_threat_detection_policies_operations, custom_path) as s:
+    database_threat_detection_policies_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.database_threat_detection_policies_operations',
+        'DatabaseThreatDetectionPoliciesOperations')
+    with ServiceGroup(__name__, _util.get_sql_database_threat_detection_policies_operations,
+                      database_threat_detection_policies_operations, custom_path) as s:
         with s.group('sql db threat-policy') as c:
             c.command('show', 'get')
             c.generic_update_command('update', 'get',
@@ -105,7 +110,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     database_usages_operations = create_service_adapter('azure.mgmt.sql.operations.database_usages_operations',
                                                         'DatabaseUsagesOperations')
 
-    with ServiceGroup(__name__, get_sql_database_usages_operations, database_usages_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_database_usages_operations, database_usages_operations, custom_path) as s:
         with s.group('sql db') as c:
             c.command('list-usages', 'list_by_database')
 
@@ -116,7 +121,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     elastic_pools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_pools_operations',
                                                'ElasticPoolsOperations')
 
-    with ServiceGroup(__name__, get_sql_elastic_pools_operations, elastic_pools_ops, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_elastic_pools_operations, elastic_pools_ops, custom_path) as s:
         with s.group('sql elastic-pool') as c:
             c.custom_command('create', 'elastic_pool_create')
             c.command('delete', 'delete')
@@ -126,7 +131,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                 'update', 'get', 'create_or_update',
                 custom_func_name='elastic_pool_update')
 
-    with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_databases_operations, database_operations, custom_path) as s:
         with s.group('sql elastic-pool') as c:
             c.command('list-dbs', 'list_by_elastic_pool')
 
@@ -153,7 +158,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     servers_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
                                                 'ServersOperations')
 
-    with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_servers_operations, servers_operations, custom_path) as s:
         with s.group('sql server') as c:
             c.command('create', 'create_or_update')
             c.command('delete', 'delete', confirmation=True)
@@ -165,7 +170,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     server_usages_operations = create_service_adapter('azure.mgmt.sql.operations.server_usages_operations',
                                                       'ServerUsagesOperations')
 
-    with ServiceGroup(__name__, get_sql_server_usages_operations, server_usages_operations, custom_path) as s:
+    with ServiceGroup(__name__, _util.get_sql_server_usages_operations, server_usages_operations, custom_path) as s:
         with s.group('sql server') as c:
             c.command('list-usages', 'list_by_server')
 
@@ -173,7 +178,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
         'azure.mgmt.sql.operations.firewall_rules_operations',
         'FirewallRulesOperations')
 
-    with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_operations,
+    with ServiceGroup(__name__, _util.get_sql_firewall_rules_operations, firewall_rules_operations,
                       custom_path) as s:
         with s.group('sql server firewall-rule') as c:
             c.command('create', 'create_or_update')
@@ -188,7 +193,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     aadadmin_operations = create_service_adapter('azure.mgmt.sql.operations.server_azure_ad_administrators_operations',
                                                  'ServerAzureADAdministratorsOperations')
 
-    with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations,
+    with ServiceGroup(__name__, _util.get_sql_server_azure_ad_administrators_operations,
                       aadadmin_operations, custom_path) as s:
         with s.group('sql server ad-admin') as c:
             c.custom_command('create', 'server_ad_admin_set')
