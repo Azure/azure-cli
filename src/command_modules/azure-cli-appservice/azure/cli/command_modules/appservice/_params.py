@@ -165,6 +165,7 @@ register_cli_argument('webapp config set', 'java_version', help="The version use
 register_cli_argument('webapp config set', 'java_container', help="The java container, e.g., Tomcat, Jetty")
 register_cli_argument('webapp config set', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('webapp config set', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
+register_cli_argument('webapp config set', 'arr_affinity', help='the performance of your stateless applications can be improved by turning off the affinity cookie, stateful applications should keep the affinity cookie turned on for increased compatibility', **enum_choice_list(two_states_switch))
 
 register_cli_argument('webapp config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('webapp config backup', 'webapp_name', help='The name of the webapp')
