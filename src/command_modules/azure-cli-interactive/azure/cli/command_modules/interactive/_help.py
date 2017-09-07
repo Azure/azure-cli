@@ -9,6 +9,5 @@ helps['interactive'] = """
             type: command
             short-summary: Start interactive mode.
             long-summary: >
-                An interactive environment that makes it easier to learn and use Azure CLI commands.
-                See https://azure.microsoft.com/en-us/blog/welcome-to-azure-cli-shell/
+                For more information on interactive mode, see: https://azure.microsoft.com/en-us/blog/welcome-to-azure-cli-shell/
             """

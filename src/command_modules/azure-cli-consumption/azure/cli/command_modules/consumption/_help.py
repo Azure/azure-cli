@@ -12,11 +12,10 @@ helps['consumption'] = """
 
 helps['consumption usage'] = """
     type: group
-    short-summary: Inspect consumption usage.
+    short-summary: Inspect the usage of Azure resources.
 """
 
 helps['consumption usage list'] = """
     type: command
-    short-summary: List consumption usage details.
-    long-summary: List usage details of the subscription, as an invoice or within a billing period.
+    short-summary: Show the details of Azure resource consumption, either as an invoice or within a billing period.
 """

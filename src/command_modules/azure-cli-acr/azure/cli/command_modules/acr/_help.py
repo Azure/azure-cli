@@ -13,22 +13,22 @@ helps['acr'] = """
 
 helps['acr credential'] = """
     type: group
-    short-summary: Manage login credentials for Azure container registries.
+    short-summary: Manage login credentials for Azure Container Registries.
     """
 
 helps['acr repository'] = """
     type: group
-    short-summary: Manage repositories for Azure container registries.
+    short-summary: Manage repositories for Azure Container Registries.
     """
 
 helps['acr webhook'] = """
     type: group
-    short-summary: Manage webhooks for Azure container registries.
+    short-summary: Manage webhooks for Azure Container Registries.
     """
 
 helps['acr check-name'] = """
     type: command
-    short-summary: Checks whether the container registry name is available for use.
+    short-summary: Checks if a container registry name is available for use.
     examples:
         - name: Check if a registry name already exists.
           text: >
@@ -70,7 +70,7 @@ helps['acr delete'] = """
 
 helps['acr show'] = """
     type: command
-    short-summary: Gets the properties of a container registry.
+    short-summary: Get the details of a container registry.
     examples:
         - name: Get the login server for a container registry.
           text: >
@@ -79,7 +79,7 @@ helps['acr show'] = """
 
 helps['acr update'] = """
     type: command
-    short-summary: Updates a container registry.
+    short-summary: Update a container registry.
     examples:
         - name: Update tags for a container registry.
           text: >
@@ -103,7 +103,7 @@ helps['acr login'] = """
 
 helps['acr show-usage'] = """
     type: command
-    short-summary: Gets the quota usages for a container registry.
+    short-summary: Get the quota usages for a container registry.
     examples:
         - name: Get the quota usages for a container registry.
           text: >
@@ -112,7 +112,7 @@ helps['acr show-usage'] = """
 
 helps['acr credential show'] = """
     type: command
-    short-summary: Gets the login credentials for a container registry.
+    short-summary: Get the login credentials for a container registry.
     examples:
         - name: Get the login credentials for a container registry.
           text: >
@@ -127,7 +127,7 @@ helps['acr credential show'] = """
 
 helps['acr credential renew'] = """
     type: command
-    short-summary: Regenerates a login credential for a container registry.
+    short-summary: Regenerate login credentials for a container registry.
     examples:
         - name: Renew the second password for a container registry.
           text: >
@@ -136,7 +136,7 @@ helps['acr credential renew'] = """
 
 helps['acr repository list'] = """
     type: command
-    short-summary: Lists repositories in a container registry.
+    short-summary: List repositories in a container registry.
     examples:
         - name: List repositories in a given container registry.
           text:
@@ -145,43 +145,43 @@ helps['acr repository list'] = """
 
 helps['acr repository show-tags'] = """
     type: command
-    short-summary: Shows tags of a given repository in a container registry.
+    short-summary: Show tags for a repository in a container registry.
     examples:
-        - name: Show tags of a given repository in a given container registry.
+        - name: Show tags of a repository in a container registry.
           text:
             az acr repository show-tags -n MyRegistry --repository MyRepository
 """
 
 helps['acr repository show-manifests'] = """
     type: command
-    short-summary: Shows manifests of a given repository in a container registry.
+    short-summary: Show manifests of a repository in a container registry.
     examples:
-        - name: Show manifests of a given repository in a given container registry.
+        - name: Show manifests of a repository in a container registry.
           text:
             az acr repository show-manifests -n MyRegistry --repository MyRepository
 """
 
 helps['acr repository delete'] = """
     type: command
-    short-summary: Deletes a repository, manifest, or tag in a container registry.
+    short-summary: Delete a repository, manifest, or tag in a container registry.
     examples:
-        - name: Delete a repository from the given container registry.
+        - name: Delete a repository from a container registry.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository
-        - name: Delete a tag from the given repository. This operation does not delete the manifest referenced by the tag or associated layer data.
+        - name: Delete a tag from a repository. This does not delete the manifest referenced by the tag or any associated layer data.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag
-        - name: Delete the manifest referenced by a tag. This operation also deletes associated layer data and all other tags referencing the manifest.
+        - name: Delete the manifest referenced by a tag. This also deletes any associated layer data and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
-        - name: Delete a manfiest from the given repository. This operation also deletes associated layer data and all tags referencing the manifest.
+        - name: Delete a manfiest from a repository. This also deletes any associated layer data and all tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --manifest MyManifest
 """
 
 helps['acr webhook list'] = """
     type: command
-    short-summary: Lists all of the webhooks for a container registry.
+    short-summary: List all of the webhooks for a container registry.
     examples:
         - name: List webhooks and show the results in a table.
           text: >
@@ -190,19 +190,19 @@ helps['acr webhook list'] = """
 
 helps['acr webhook create'] = """
     type: command
-    short-summary: Creates a webhook for a container registry.
+    short-summary: Create a webhook for a container registry.
     examples:
-        - name: Create a webhook for a container registry that will deliver Docker push and delete events to the given service URI.
+        - name: Create a webhook for a container registry that will deliver Docker push and delete events to a service URI.
           text: >
             az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push delete
-        - name: Create a webhook for a container registry that will deliver Docker push events to the given service URI with Basic authentication header.
+        - name: Create a webhook for a container registry that will deliver Docker push events to a service URI with a basic authentication header.
           text: >
             az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
 """
 
 helps['acr webhook delete'] = """
     type: command
-    short-summary: Deletes a webhook from a container registry.
+    short-summary: Delete a webhook from a container registry.
     examples:
         - name: Delete a webhook from a container registry.
           text: >
@@ -211,16 +211,16 @@ helps['acr webhook delete'] = """
 
 helps['acr webhook show'] = """
     type: command
-    short-summary: Gets the properties of a webhook.
+    short-summary: Get the details of a webhook.
     examples:
-        - name: Get the properties of a webhook.
+        - name: Get the details of a webhook.
           text: >
             az acr webhook show -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook update'] = """
     type: command
-    short-summary: Updates a webhook.
+    short-summary: Update a webhook.
     examples:
         - name: Update headers for a webhook.
           text: >
@@ -235,25 +235,25 @@ helps['acr webhook update'] = """
 
 helps['acr webhook get-config'] = """
     type: command
-    short-summary: Gets the configuration of service URI and custom headers for the webhook.
+    short-summary: Get the service URI and custom headers for the webhook.
     examples:
-        - name: Get the service URI and headers for the webhook.
+        - name: Get the configuration information for a webhook. 
           text: >
             az acr webhook get-config -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook ping'] = """
     type: command
-    short-summary: Triggers a ping event to be sent to the webhook.
+    short-summary: Trigger a ping event for a webhook.
     examples:
-        - name: Triggers a ping event to be sent to the webhook.
+        - name: Trigger a ping even for a webhook.
           text: >
             az acr webhook ping -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook list-events'] = """
     type: command
-    short-summary: Lists recent events for a webhook.
+    short-summary: List recent events for a webhook.
     examples:
         - name: List recent events for a webhook.
           text: >

@@ -7,7 +7,7 @@ from azure.cli.core.help_files import helps
 
 helps['iot'] = """
     type: group
-    short-summary: Connect, monitor, and control IoT assets.
+    short-summary: Manage Internet of Things (IoT) assets.
     long-summary: These commands are in preview.
 """
 
@@ -38,7 +38,7 @@ helps['iot hub create'] = """
 
 helps['iot hub show'] = """
     type: command
-    short-summary: Show metadata for an IoT hub.
+    short-summary: Get the details of an IoT hub.
 """
 
 helps['iot hub update'] = """
@@ -64,7 +64,7 @@ helps['iot hub list'] = """
 
 helps['iot hub show-connection-string'] = """
     type: command
-    short-summary: Show the connection string for IoT hubs.
+    short-summary: Show the connection strings for an IoT hub.
     examples:
         - name: Show the connection string of an IoT hub using default policy and primary key.
           text: >
@@ -87,7 +87,7 @@ helps['iot hub delete'] = """
 
 helps['iot hub consumer-group'] = """
     type: group
-    short-summary: Manage event hub consumer groups of an IoT hub.
+    short-summary: Manage the event hub consumer groups of an IoT hub.
     long-summary: These commands are in preview.
 """
 
@@ -110,7 +110,7 @@ helps['iot hub consumer-group list'] = """
 
 helps['iot hub consumer-group show'] = """
     type: command
-    short-summary: Get an event hub consumer group.
+    short-summary: Get the details for an event hub consumer group.
 """
 
 helps['iot hub consumer-group delete'] = """
@@ -131,7 +131,7 @@ helps['iot hub policy list'] = """
 
 helps['iot hub policy show'] = """
     type: command
-    short-summary: Get a shared access policy of an IoT hub.
+    short-summary: Get the details of a shared access policy of an IoT hub.
 """
 
 helps['iot hub policy create'] = """
@@ -150,7 +150,7 @@ helps['iot hub policy delete'] = """
 
 helps['iot hub list-skus'] = """
     type: command
-    short-summary: List all pricing tiers.
+    short-summary: List available pricing tiers.
 """
 
 helps['iot hub job'] = """
@@ -161,12 +161,12 @@ helps['iot hub job'] = """
 
 helps['iot hub job list'] = """
     type: command
-    short-summary: List jobs in an IoT hub.
+    short-summary: List the jobs in an IoT hub.
 """
 
 helps['iot hub job show'] = """
     type: command
-    short-summary: Show a job in an IoT hub.
+    short-summary: Get the details of a job in an IoT hub.
 """
 
 helps['iot hub job cancel'] = """
@@ -176,43 +176,43 @@ helps['iot hub job cancel'] = """
 
 helps['iot hub show-quota-metrics'] = """
     type: command
-    short-summary: Show quota metrics for an IoT hub.
+    short-summary: Get the quota metrics for an IoT hub.
 """
 
 helps['iot hub show-stats'] = """
     type: command
-    short-summary: Show statistics of an IoT hub.
+    short-summary: Get the statistics for an IoT hub.
 """
 
 helps['iot device create'] = """
     type: command
-    short-summary: Register a device in an IoT hub.
+    short-summary: Register a device for an IoT hub.
     examples:
         - name: Create a device authenticating with symmetric key.
           text: >
             az iot device create --hub-name MyIotHub --device-id MyDevice
-        - name: Create a device authenticating with existing X.509 certificate.
+        - name: Create a device authenticating with an existing X.509 certificate.
           text: >
             az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --primary-thumbprint X.509_certificate_thumbprint
-        - name: Create a device authenticating with self-signed X.509 certificate, which is put into to the current directory.
+        - name: Create a device authenticating with a self-signed X.509 certificate, which is put into to the current directory.
           text: >
             az iot device create --hub-name MyIotHub --device-id MyDevice --x509
-        - name: Create a device authenticating with self-signed X.509 certificate that is valid for 100 days.
+        - name: Create a device authenticating with a self-signed X.509 certificate that is valid for 100 days.
           text: >
             az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --valid-days 100
-        - name: Create a device authenticating with self-signed X.509 certificate, and write the certificate to /path/to/output.
+        - name: Create a device authenticating with a self-signed X.509 certificate, and write the certificate to /path/to/output.
           text: >
             az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --output-dir /path/to/output
 """
 
 helps['iot device show'] = """
     type: command
-    short-summary: Show metadata of a device in an IoT hub.
+    short-summary: Get the details for a device in an IoT hub.
 """
 
 helps['iot device update'] = """
     type: command
-    short-summary: Update metadata of a device in an IoT hub.
+    short-summary: Update the metadata of a device in an IoT hub.
     examples:
         - name: Disable a device.
           text: >
@@ -231,8 +231,7 @@ helps['iot device delete'] = """
 
 helps['iot device show-connection-string'] = """
     type: command
-    short-summary: Show the connection string of devices in an IoT hub.
-    long-summary: If the device identifier is not provided, connection strings for all devices in your IoT Hub are returned. Otherwise, the connection string of the target device is returned.
+    short-summary: Show the connection strings for devices in an IoT hub.
     examples:
         - name: Show the connection string of a device in an IoT Hub using the primary key.
           text: >

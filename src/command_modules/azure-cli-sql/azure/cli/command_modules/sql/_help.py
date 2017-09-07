@@ -16,7 +16,7 @@ helps['sql db'] = """
     """
 helps['sql db copy'] = """
     type: command
-    short-summary: Create a copy of an existing database.
+    short-summary: Create a copy of a database.
     """
 helps['sql db create'] = """
     type: command
@@ -24,17 +24,16 @@ helps['sql db create'] = """
     """
 helps['sql db delete'] = """
     type: command
-    short-summary: Delete a database or data warehouse.
+    short-summary: Delete a database.
     """
 helps['sql db list'] = """
     type: command
-    short-summary: List all databases and data warehouses in a server, or all databases in an elastic pool.
+    short-summary: List databases a server or elastic pool.
     """
 helps['sql db list-editions'] = """
     type: command
-    short-summary: Show database editions that are available for your subscription.
-    long-summary: Includes available service objectives and storage limits. In order to reduce
-                  verbosity, settings to intentionally reduce storage limits are hidden by default.
+    short-summary: Show database editions available for the currently active subscription.
+    long-summary: Includes available service objectives and storage limits. In order to reduce verbosity, settings to intentionally reduce storage limits are hidden by default.
     examples:
         - name: Show all database editions in a location.
           text: az sql db list-editions -l westus
@@ -45,7 +44,7 @@ helps['sql db list-editions'] = """
     """
 helps['sql db show'] = """
     type: command
-    short-summary: Show a database or data warehouse.
+    short-summary: Get the details for a database.
     """
 helps['sql db update'] = """
     type: command
@@ -70,8 +69,7 @@ helps['sql server ad-admin update'] = """
 helps['sql db audit-policy update'] = """
     type: command
     short-summary: Update a database's auditing policy.
-    long-summary: If the policy is being enabled, storage_account or both storage_endpoint and
-                  storage_account_access_key must be specified.
+    long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
     examples:
         - name: Enable by storage account name.
           text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled --storage-account mystorage
@@ -102,15 +100,15 @@ helps['sql db replica create'] = """
     """
 helps['sql db replica set-primary'] = """
     type: command
-    short-summary: Sets which replica database is primary by failing over from the current primary replica database.
+    short-summary: Set the primary replica database by failing over from the current primary replica database.
     """
 helps['sql db replica list-links'] = """
     type: command
-    short-summary: List the replicas of a database and corresponding replication status.
+    short-summary: List the replicas of a database and their replication status.
     """
 helps['sql db replica delete-link'] = """
     type: command
-    short-summary: Permanently stops data replication between two database replicas.
+    short-summary: Permanently stop data replication between two database replicas.
     """
 helps['sql db export'] = """
     type: command
@@ -149,11 +147,11 @@ helps['sql db import'] = """
     """
 helps['sql db restore'] = """
     type: command
-    short-summary: Creates a new database by restoring from a database backup.
+    short-summary: Create a new database by restoring from a backup.
     """
 helps['sql db threat-policy'] = """
     type: group
-    short-summary: Manage a database's threat detection policy.
+    short-summary: Manage a database's threat detection policies.
     """
 helps['sql db threat-policy update'] = """
     type: command
@@ -192,15 +190,15 @@ helps['sql dw create'] = """
     """
 helps['sql dw delete'] = """
     type: command
-    short-summary: Delete a database or data warehouse.
+    short-summary: Delete a data warehouse.
     """
 helps['sql dw list'] = """
     type: command
-    short-summary: List all data warehouses in a server.
+    short-summary: List data warehouses for a server.
     """
 helps['sql dw show'] = """
     type: command
-    short-summary: Show information for a database or data warehouse.
+    short-summary: Get the details for a data warehouse.
     """
 helps['sql dw update'] = """
     type: command
@@ -208,7 +206,7 @@ helps['sql dw update'] = """
     """
 helps['sql elastic-pool'] = """
     type: group
-    short-summary: Manage elastic pools. An elastic pool is an allocation of CPU, IO, and memory resources. Databases inside the pool share these resources.
+    short-summary: Manage elastic pools. 
     """
 helps['sql elastic-pool create'] = """
     type: command
@@ -237,7 +235,7 @@ helps['sql elastic-pool update'] = """
     """
 helps['sql server'] = """
     type: group
-    short-summary: Manage SQL servers. Servers contain databases, data warehouses, and elastic pools.
+    short-summary: Manage SQL servers.
     """
 helps['sql server create'] = """
     type: command

@@ -13,7 +13,7 @@ helps['cdn'] = """
 
 helps['cdn profile'] = """
     type: group
-    short-summary: Manage CDN Profiles to define a edge network.
+    short-summary: Manage CDN profiles to define an edge network.
 """
 
 helps['cdn profile create'] = """
@@ -63,7 +63,7 @@ helps['cdn endpoint create'] = """
     type: command
     short-summary: Create a named endpoint to connect to a CDN.
     examples:
-        - name: Create an endpoint to service content for hostname over http or https.
+        - name: Create an endpoint to service content for hostname over HTTP or HTTPS.
           text: >
             az cdn endpoint create -g group -n endpoint --profile-name profile \\
                 --origin www.example.com
@@ -81,10 +81,10 @@ helps['cdn endpoint update'] = """
     type: command
     short-summary: Update a CDN endpoint to manage how content is delivered.
     examples:
-        - name: Turn off HTTP traffic for the endpoint.
+        - name: Turn off HTTP traffic for an endpoint.
           text: >
             az cdn endpoint update -g group -n endpoint --profile-name profile --no-http
-        - name: Enable content compression for the endpoint.
+        - name: Enable content compression for an endpoint.
           text: >
             az cdn endpoint update -g group -n endpoint --profile-name profile \\
                 --enable-compression
@@ -122,7 +122,7 @@ helps['cdn endpoint load'] = """
     type: command
     short-summary: Pre-load content for a CDN endpoint.
     examples:
-        - name: Pre-load content for Javascript and CSS styles.
+        - name: Pre-load Javascript and CSS content for an endpoint.
           text: >
             az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths \\
                 '/scripts/app.js' '/styles/main.css'
@@ -130,9 +130,9 @@ helps['cdn endpoint load'] = """
 
 helps['cdn endpoint purge'] = """
     type: comman
-    short-summary: Purge preloaded content for a CDN endpoint.
+    short-summary: Purge pre-loaded content for a CDN endpoint.
     examples:
-        - name: Purge content for Javascript and CSS styles.
+        - name: Purge pre-loaded Javascript and CSS content.
           text: >
             az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths \\
                 '/scripts/app.js' '/styles/*'
@@ -166,7 +166,7 @@ helps['cdn custom-domain show'] = """
     type: command
     short-summary: Show details for the custom domain of a CDN.
     examples:
-        - name: Show details of a custom domain.
+        - name: Get the details of a custom domain.
           text: >
             az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile \\
                 -n domain-name

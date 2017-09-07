@@ -40,33 +40,35 @@ helps['account clear'] = """
 
 helps['account list'] = """
     type: command
-    short-summary: Get a list of subscriptions for the account.
+    short-summary: Get a list of subscriptions for the logged in account.
 """
 
 helps['account list-locations'] = """
     type: command
-    short-summary: List supported regions of the current subscription.
+    short-summary: List supported regions for the current subscription.
 """
 
 helps['account show'] = """
     type: command
-    short-summary: Show the details of a subscription.
+    short-summary: Get the details of a subscription.
     long-summary: If no subscription is specified, shows the current subscription.
 """
 
 helps['account set'] = """
     type: command
-    short-summary: Set a subscription as the current subscription.
+    short-summary: Set a subscription to be the current active subscription.
 """
 
 helps['account show'] = """
     type: command
-    short-summary: Show the details of a subscription.
+    short-summary: Get the details of a subscription.
     long-summary: If the subscription isn't specified, shows the details of the default subscription.
 """
 
 helps['account get-access-token'] = """
     type: command
-    short-summary: Provides a token for utlilities to access Azure.
-    long-summary: The token will be valid for at least 5 minutes with the maximum at 60 minutes. If the subscription argument isn't specified, the current account is used.
+    short-summary: Get a token for utlilities to access Azure.
+    long-summary: >
+        The token will be valid for at least 5 minutes with the maximum at 60 minutes.
+        If the subscription argument isn't specified, the current account is used.
 """

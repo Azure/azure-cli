@@ -12,26 +12,26 @@ helps['managedapp'] = """
 """
 helps['managedapp definition'] = """
     type: group
-    short-summary: Create, delete, and manage applications and their definitions.
+    short-summary: Manage Azure Managed Applications.
 """
 helps['managedapp create'] = """
     type: command
-    short-summary: Creates a managed application.
+    short-summary: Create a managed application.
     examples:
-        - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition id.
-          text: >
+        - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition ID.
+          text: |
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog \\
-                -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" \\
-                -d "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Solutions/applianceDefinitions/myManagedAppDef"
+                -m "/subscriptions/{SubID}/resourceGroups/{ManagedRG}" \\
+                -d "/subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Solutions/applianceDefinitions/{ManagedAppDef}"
         - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product.
-          text: >
+          text: |
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace \\
-                -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" \\
+                -m "/subscriptions/{SubID}/resourceGroups/myManagedRG" \\
                 --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 helps['managedapp definition create'] = """
     type: command
-    short-summary: Creates a managed application definition.
+    short-summary: Create a managed application definition.
     examples:
         - name: Create a managed application defintion.
           text: >
@@ -61,8 +61,7 @@ helps['lock'] = """
     parameters:
         - name: --resource-type
           type: string
-          text: >
-            The name of the resource type. Optionally, may have a provider namespace.
+          text: The name of the resource type. May have a provider namespace.
         - name: --resource-provider-namespace
           type: string
           text: The name of the resource provider.
@@ -115,7 +114,7 @@ helps['lock show'] = """
     """
 helps['lock update'] = """
     type: command
-    short-summary: Update the properties of a lock.
+    short-summary: Update a lock.
     parameters:
         - name: --notes
           type: string
@@ -221,39 +220,39 @@ helps['resource list'] = """
     type: command
     short-summary: List resources.
     examples:
-        - name: List all resource in the West US region.
+        - name: List all resources in the West US region.
           text: >
             az resource list --location westus
-        - name: List a resource with the name 'resourceName'.
+        - name: List all resources with the name 'resourceName'.
           text: >
             az resource list --name 'resourceName'
-        - name: List resources with the tag 'test'.
+        - name: List all resources with the tag 'test'.
           text: >
              az resource list --tag test
-        - name: List resources with a tag that starts with 'test'.
+        - name: List all resources with a tag that starts with 'test'.
           text: >
             az resource list --tag test*
-        - name: List resources with the tag 'test' that have the value 'example'.
+        - name: List all resources with the tag 'test' that have the value 'example'.
           text: >
             az resource list --tag test=example
 """
 
 helps['resource show'] = """
     type: command
-    short-summary: Get information about a resource.
+    short-summary: Get the details of a resource.
     examples:
         - name: Show a virtual machine resource named 'MyVm'.
           text: >
             az vm show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Show a web app using a resource identifier.
           text: >
-            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
-        - name: Show a subnet in the 'microsoft.network' namespace which belongs to the virtual network 'MyVnet'.
+            az resource show --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Web/sites/{MyWebapp}
+        - name: Show a subnet in the 'Microsoft.Network' namespace which belongs to the virtual network 'MyVnet'.
           text: >
-            az resource show -g MyResourceGroup -n MySubnet --namespace microsoft.network --parent virtualnetworks/MyVnet --resource-type subnets
+            az resource show -g MyResourceGroup -n MySubnet --namespace Microsoft.Network --parent virtualnetworks/MyVnet --resource-type subnets
         - name: Show a subnet using a resource identifier.
           text: >
-            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
+            az resource show --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Network/virtualNetworks/{MyVnet}/subnets/{MySubnet}
         - name: Show an application gateway path rule.
           text: >
             az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
@@ -268,10 +267,10 @@ helps['resource delete'] = """
             az vm delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Delete a web app using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+            az resource delete --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Web/sites/{MyWebApp}
         - name: Delete a subnet using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
+            az resource delete --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Network/virtualNetworks/{MyVNET}/subnets/{MySubnet}
 """
 
 helps['resource tag'] = """
@@ -283,7 +282,7 @@ helps['resource tag'] = """
             az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
           text: >
-            az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+            az resource tag --tags vmlist=vm1 --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Web/sites/{MyWebApp}
 """
 
 helps['resource create'] = """
@@ -292,7 +291,14 @@ helps['resource create'] = """
     examples:
        - name: Create an API app by providing a full JSON configuration.
          text: |
-            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties "{\\"kind\\":\\"api\\", \\"location\\":\\"West US\\", \\"properties\\":{\\"serverFarmId\\":\\"/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/myRG/providers/Microsoft.Web/serverfarms/appServicePlan1\\"}}"
+            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties \\
+                    '{\\
+                        "kind": "api",\\
+                        "location": "West US",\\
+                        "properties": {\\
+                            "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{MyRG}/providers/Microsoft.Web/serverfarms/{MyServicePlan}"\\
+                        }\\
+                    }'
        - name: Create a resource by loading JSON configuration from a file.
          text: >
             az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile
@@ -300,7 +306,7 @@ helps['resource create'] = """
          text: |
             az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties \\
                 { \\
-                    "serverFarmId":"/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/myRG/providers/Microsoft.Web/serverfarms/appServicePlan1" \\
+                    "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{MyRG}/providers/Microsoft.Web/serverfarms/{MyServicePlan}" \\
                 }
 """
 
@@ -350,7 +356,7 @@ helps['group list'] = """
     type: command
     short-summary: List resource groups.
     examples:
-        - name: List all resource groups located in the  West US region.
+        - name: List all resource groups located in the West US region.
           text: >
             az group list --query "[?location=='westus']"
 """
@@ -374,7 +380,7 @@ helps['group deployment create'] = """
         - name: --parameters
           short-summary: Supply deployment parameter values.
           long-summary: >
-            Parameters may be supplied from a file using the '@<path>' syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
             It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
     examples:
         - name: Create a deployment from a remote template file, using parameters from a local JSON file.
@@ -403,7 +409,7 @@ helps['group deployment validate'] = """
         - name: --parameters
           short-summary: Supply deployment parameter values.
           long-summary: >
-            Parameters may be supplied from a file using the '@<path>' syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+            Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
             It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 """
 helps['group deployment wait'] = """
@@ -445,7 +451,10 @@ helps['tag'] = """
 helps['resource link'] = """
     type: group
     short-summary: Manage links between resources.
-    long-summary: Linking is a feature of the Resource Manager. It enables you to declare relationships between resources even if they do not reside in the same resource group. Linking has no impact on the runtime of your resources, no impact on billing, and no impact on role-based access. It's simply a mechanism you can use to represent relationships so that tools like the tile gallery can provide a rich management experience. Your tools can inspect the links using the links API and provide custom relationship management experiences as well.
+    long-summary: >
+        Linking is a feature of the Resource Manager. It enables declaring relationships between resources even if they do not reside in the same resource group.
+        Linking has no impact on resource usage, no impact on billing, and no impact on role-based access. It allows for managing multiple resources across groups
+        as a single unit.
 """
 helps['resource link create'] = """
     type: command
@@ -476,7 +485,7 @@ helps['resource link delete'] = """
 """
 helps['resource link list'] = """
     type: command
-    short-summary: List all resource links.
+    short-summary: List resource links.
     examples:
         - name: List links, filtering with <filter-string>
           text: >
@@ -487,7 +496,7 @@ helps['resource link list'] = """
 """
 helps['resource link show'] = """
     type: command
-    short-summary: Show a resource link.
+    short-summary: Get details for a resource link.
     long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
     examples:
         - name: Show the <link-id> resource link.

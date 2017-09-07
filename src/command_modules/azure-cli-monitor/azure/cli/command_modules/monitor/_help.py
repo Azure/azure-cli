@@ -30,16 +30,15 @@ helps['monitor alert create'] = """
             Email:   --action email bob@contoso.com ann@contoso.com
             Webhook: --action webhook https://www.contoso.com/alert apiKey=value
             Webhook: --action webhook https://www.contoso.com/alert?apiKey=value
-            To specify multiple actions, use multiple --action args.
+            Multiple actions can be specified by using more than one `--action` argument.
         - name: --description
           short-summary: Free-text description of the rule. Defaults to the condition expression.
         - name: --disabled
           short-summary: Create the rule in a disabled state.
         - name: --condition
-          short-summary: The condition expression upon which to trigger the rule.
+          short-summary: The condition which triggers the rule.
           long-summary: |
             Usage:   --condition "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD"
-            Example: --condition "Percentage CPU > 60 avg 1h30m"
         - name: --email-service-owners
           short-summary: Email the service owners if an alert is triggered.
     examples:
@@ -75,7 +74,7 @@ helps['monitor alert update'] = """
             Email:   --add-action email bob@contoso.com ann@contoso.com
             Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
             Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
-            To specify multiple actions, add multiple --add-action args.
+            Multiple actions can be specified by using more than one `--action` argument.
         - name: --remove-action -r
           short-summary: Remove one or more actions.
           long-summary: |
@@ -116,7 +115,7 @@ helps['monitor alert show'] = """
 
 helps['monitor alert show-incident'] = """
     type: command
-    short-summary: Show details of an alert rule incident.
+    short-summary: Get the details of an alert rule incident.
     """
 
 helps['monitor alert list-incidents'] = """
@@ -147,7 +146,7 @@ helps['monitor metrics list-definitions'] = """
 
 helps['monitor log-profiles'] = """
             type: group
-            short-summary: Manage the log profiles.
+            short-summary: Manage log profiles.
             """
 helps['monitor log-profiles update'] = """
             type: command
@@ -159,7 +158,7 @@ helps['monitor diagnostic-settings'] = """
             """
 helps['monitor diagnostic-settings create'] = """
             type: command
-            short-summary: Creates diagnostic settings for the specified resource.
+            short-summary: Create diagnostic settings for the specified resource.
             parameters:
                 - name: --resource-id
                   type: string
@@ -169,10 +168,10 @@ helps['monitor diagnostic-settings create'] = """
                   short-summary: Name of the resource group.
                 - name: --logs
                   type: string
-                  short-summary: JSON encoded list of logs settings. Use @file to load from a file.
+                  short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
                 - name: --metrics
                   type: string
-                  short-summary: JSON encoded list of metric settings. Use @file to load from a file.
+                  short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
                 - name: --storage-account
                   type: string
                   short-summary: Name or ID of the storage account to send diagnostic logs to.

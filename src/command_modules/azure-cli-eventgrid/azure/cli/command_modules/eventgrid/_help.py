@@ -28,11 +28,11 @@ helps['eventgrid topic delete'] = """
     """
 helps['eventgrid topic list'] = """
     type: command
-    short-summary: List topics in a subscription or resource group.
+    short-summary: List available topics.
     """
 helps['eventgrid topic show'] = """
     type: command
-    short-summary: Get properties of a topic.
+    short-summary: Get the details of a topic.
     """
 helps['eventgrid topic key'] = """
     type: group
@@ -55,11 +55,19 @@ helps['eventgrid topic event-subscription create'] = """
     short-summary: Create a new event subscription to a topic.
     examples:
         - name: Create a new event subscription with default filters.
-          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: |
+            az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription with a filter specifying a subject prefix.
-          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
+          text: |
+            az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> \\
+                --subject-begins-with mysubject_prefix
         - name: Create a new event subscription with default filters and additional labels.
-          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --labels Finance HR
+          text: |
+            az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> \\
+                --labels Finance HR
     """
 helps['eventgrid topic event-subscription delete'] = """
     type: command
@@ -71,7 +79,7 @@ helps['eventgrid topic event-subscription list'] = """
     """
 helps['eventgrid topic event-subscription show'] = """
     type: command
-    short-summary: Get the properties of an event subscription for a topic.
+    short-summary: Get the details of an event subscription for a topic.
     """
 helps['eventgrid topic event-subscription show-endpoint-url'] = """
     type: command
@@ -83,16 +91,26 @@ helps['eventgrid event-subscription'] = """
     """
 helps['eventgrid event-subscription create'] = """
     type: command
-    short-summary: Create a new event subscription for a subscription or resource group.
+    short-summary: Create a new event subscription for an Azure subscription or resource group.
     examples:
         - name: Create a new event subscription for a subscription, using default filters.
-          text: az eventgrid event-subscription create --name es2 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: |
+            az eventgrid event-subscription create --name es2 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription for a resource group, using default filters.
-          text: az eventgrid event-subscription create -g rg1 --name es3 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: |
+            az eventgrid event-subscription create -g rg1 --name es3 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription for a subscription, with a filter specifying a subject prefix.
-          text: az eventgrid event-subscription create --name es4 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
+          text: |
+            az eventgrid event-subscription create --name es4 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> \\
+                --subject-begins-with mysubject_prefix
         - name: Create a new event subscription for a resource group, with a filter specifying a subject suffix.
-          text: az eventgrid event-subscription create -g rg2 --name es5 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-ends-with mysubject_suffix
+          text: |
+            az eventgrid event-subscription create -g rg2 --name es5 \\
+                --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> \\
+                --subject-ends-with mysubject_suffix
 
     """
 helps['eventgrid event-subscription delete'] = """
@@ -105,7 +123,7 @@ helps['eventgrid event-subscription list'] = """
     """
 helps['eventgrid event-subscription show'] = """
     type: command
-    short-summary: Get properties of an event subscription.
+    short-summary: Get the details of an event subscription.
     """
 helps['eventgrid event-subscription show-endpoint-url'] = """
     type: command
@@ -113,7 +131,7 @@ helps['eventgrid event-subscription show-endpoint-url'] = """
     """
 helps['eventgrid resource'] = """
     type: group
-    short-summary: Manage event subscriptions for a resource.
+    short-summary: Manage Azure Event Grid resources.
     """
 helps['eventgrid resource event-subscription'] = """
     type: group
@@ -124,15 +142,19 @@ helps['eventgrid resource event-subscription create'] = """
     short-summary: Create a new event subscription for a resource.
     examples:
         - name: Create a new event subscription to subscribe to events from an Azure Event Hubs namespace, using default filters.
-          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: |
+            az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces \\
+                --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription to subscribe to events from an Azure Storage account, using a filter specifying a subject prefix.
-          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.Storage --resource-type storageAccounts --resource-name sa1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
+          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.Storage --resource-type storageAccounts \\
+                --resource-name sa1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
         - name: Create a new event subscription to subscribe to events from an Azure Event Hubs namespace, using default filters and additional labels.
-          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --labels Finance HR
+          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces \\
+                --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --labels Finance HR
     """
 helps['eventgrid resource event-subscription delete'] = """
     type: command
-    short-summary: Delete an event subscription for a resource.
+    short-summary: Delete an event subscription from a resource.
     """
 helps['eventgrid resource event-subscription list'] = """
     type: command
@@ -140,7 +162,7 @@ helps['eventgrid resource event-subscription list'] = """
     """
 helps['eventgrid resource event-subscription show'] = """
     type: command
-    short-summary: Get the properties of an event subscription for a resource.
+    short-summary: Get the details of an event subscription for a resource.
     """
 helps['eventgrid resource event-subscription show-endpoint-url'] = """
     type: command
@@ -148,15 +170,15 @@ helps['eventgrid resource event-subscription show-endpoint-url'] = """
     """
 helps['eventgrid topic-type'] = """
     type: group
-    short-summary: Get information about topic types.
+    short-summary: Get details for topic types.
     """
 helps['eventgrid topic-type list'] = """
     type: command
-    short-summary: List all registered topic types.
+    short-summary: List registered topic types.
     """
 helps['eventgrid topic-type show'] = """
     type: command
-    short-summary: Get the properties of a topic type.
+    short-summary: Get the details for a topic type.
     """
 helps['eventgrid topic-type list-event-types'] = """
     type: command

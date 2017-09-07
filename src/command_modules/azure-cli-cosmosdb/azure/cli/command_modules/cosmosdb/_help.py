@@ -23,7 +23,7 @@ helps['cosmosdb collection'] = """
 
 helps['cosmosdb check-name-exists'] = """
     type: command
-    short-summary: Checks to see if an Azure Cosmos DB account name already exists.
+    short-summary: Checks if an Azure Cosmos DB account name exists.
 """
 
 helps['cosmosdb create'] = """
@@ -33,7 +33,7 @@ helps['cosmosdb create'] = """
 
 helps['cosmosdb delete'] = """
     type: command
-    short-summary: Deletes an existing Azure Cosmos DB database account.
+    short-summary: Deletes an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb failover-priority-change'] = """
@@ -43,32 +43,32 @@ helps['cosmosdb failover-priority-change'] = """
 
 helps['cosmosdb list'] = """
     type: command
-    short-summary: Lists all Azure Cosmos DB database accounts within a given resource group or subscription.
+    short-summary: List Azure Cosmos DB database accounts.
 """
 
 helps['cosmosdb list-connection-strings'] = """
     type: command
-    short-summary: Lists the connection strings for a Azure Cosmos DB database account.
+    short-summary: List the connection strings for a Azure Cosmos DB database account.
 """
 
 helps['cosmosdb list-keys'] = """
     type: command
-    short-summary: Lists the access keys for a Azure Cosmos DB database account.
+    short-summary: List the access keys for a Azure Cosmos DB database account.
 """
 
 helps['cosmosdb list-read-only-keys'] = """
     type: command
-    short-summary: Lists the read-only access keys for a Azure Cosmos DB database account.
+    short-summary: List the read-only access keys for a Azure Cosmos DB database account.
 """
 
 helps['cosmosdb regenerate-key'] = """
     type: command
-    short-summary: Regenerates an access key for a Azure Cosmos DB database account.
+    short-summary: Regenerate an access key for a Azure Cosmos DB database account.
 """
 
 helps['cosmosdb show'] = """
     type: command
-    short-summary: Retrieves the properties for an Azure Cosmos DB database account.
+    short-summary: Get the details of an Azure Cosmos DB database account.
 """
 
 helps['cosmosdb update'] = """

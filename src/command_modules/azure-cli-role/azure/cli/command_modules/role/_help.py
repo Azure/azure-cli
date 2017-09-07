@@ -14,44 +14,47 @@ helps['ad sp create-for-rbac'] = """
           short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
         - name: --password -p
           short-summary: The password used to log in.
-          long-summary: If not present and --cert is not specified, a random password will be generated.
+          long-summary: If not present and `--cert` is not specified, a random password will be generated.
         - name: --cert
           short-summary: Certificate to use for credentials.
-          long-summary: When used with --keyvault, indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@<file path>` to
+          long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
-          long-summary: Use with --keyvault to create the certificate in Key Vault. Otherwise, a
+          long-summary: Use with `--keyvault` to create the certificate in Key Vault. Otherwise, a
             certificate will be created locally.
         - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
         - name: --years
-          short-summary: >
-            Number of years for which the credentials will be valid. Default: 1 year
+          short-summary: Number of years for which the credentials will be valid. Default: 1 year
         - name: --scopes
-          short-summary: Space-separated list of scopes the service principal's role assignment applies to.
+          short-summary: >
+            Space-separated list of scopes the service principal's role assignment applies to.
             Defaults to the root of the current subscription.
         - name: --role
           short-summary: Role of the service principal.
     examples:
         - name: Create with a default role assignment.
-          text: az ad sp create-for-rbac
+          text: >
+            az ad sp create-for-rbac
         - name: Create using a custom name, and with a default assignment.
-          text: az ad sp create-for-rbac -n "MyApp"
+          text: >
+            az ad sp create-for-rbac -n "MyApp"
         - name: Create without a default assignment.
-          text: az ad sp create-for-rbac --skip-assignment
+          text: >
+            az ad sp create-for-rbac --skip-assignment
         - name: Create with customized contributor assignments.
           text: |
             az ad sp create-for-rbac -n "MyApp" --role contributor \\
-                --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/MyResourceGroup \\
-                /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/MyAnotherResourceGroup
+                --scopes /subscriptions/{SubID}/resourceGroups/{MyRG1} \\
+                /subscriptions/{SubID}/resourceGroups/{MyRG2}
         - name: Create using a self-signed certificte.
           text: az ad sp create-for-rbac --create-cert
         - name: Create using a self-signed certificate, and store it within KeyVault.
-          text: az ad sp create-for-rbac --keyvault <vault name> --cert <name> --create-cert
+          text: az ad sp create-for-rbac --keyvault MyVault --cert CertName --create-cert
         - name: Create using existing certificate in KeyVault.
-          text: az ad sp create-for-rbac --keyvault <vault name> --cert <name>
+          text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
     """
 
 helps['ad sp reset-credentials'] = """
@@ -63,15 +66,15 @@ helps['ad sp reset-credentials'] = """
           short-summary: Name or app URI for the credential.
         - name: --password -p
           short-summary: The password used to log in.
-          long-summary: If not present and --cert is not specified, a random password will be generated.
+          long-summary: If not present and `--cert` is not specified, a random password will be generated.
         - name: --cert
           short-summary: Certificate to use for credentials.
-          long-summary: When using --keyvault, indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@<file path>` to
+          long-summary: When using `--keyvault,` indicates the name of the cert to use or create.
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
-          long-summary: Use with --keyvault to create the certificate in Key Vault. Otherwise, a
+          long-summary: Use with `--keyvault` to create the certificate in Key Vault. Otherwise, a
             certificate will be created locally.
         - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
@@ -92,7 +95,7 @@ helps['ad sp list'] = """
 """
 helps['ad sp show'] = """
     type: command
-    short-summary: Show information for a service principal.
+    short-summary: Get the details of a service principal.
 """
 helps['ad app delete'] = """
     type: command
@@ -108,7 +111,7 @@ helps['ad app list'] = """
 """
 helps['ad app show'] = """
     type: command
-    short-summary: Show information for an application.
+    short-summary: Get the details of an application.
 """
 helps['ad app update'] = """
     type: command
@@ -140,7 +143,7 @@ helps['role assignment delete'] = """
 helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
-    long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use --all.
+    long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use `--all`.
 """
 helps['role definition'] = """
     type: group
@@ -153,7 +156,7 @@ helps['role definition create'] = """
     parameters:
         - name: --role-definition
           type: string
-          short-summary: Description of a role as JSON, or an @<file> containing a JSON description.
+          short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
     examples:
         - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
           text: |

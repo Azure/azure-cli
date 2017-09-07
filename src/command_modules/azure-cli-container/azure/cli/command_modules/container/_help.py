@@ -7,7 +7,8 @@ from azure.cli.core.help_files import helps
 
 helps['container'] = """
     type: group
-    short-summary: (Preview) Manage Azure Container Instances.
+    short-summary: Manage Azure Container Instances.
+    long-summary: These commands are in preview.
 """
 
 helps['container create'] = """
@@ -42,10 +43,10 @@ helps['container list'] = """
 
 helps['container show'] = """
     type: command
-    short-summary: Show the details of a container group.
+    short-summary: Get the details of a container group.
 """
 
 helps['container logs'] = """
     type: command
-    short-summary: Examine the logs of a container group.
+    short-summary: Examine the logs for a container group.
 """

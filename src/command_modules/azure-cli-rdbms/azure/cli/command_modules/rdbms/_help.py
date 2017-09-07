@@ -13,7 +13,7 @@ def add_helps(command_group, server_type):
                 """.format(server_type)
     helps['{} server'.format(command_group)] = """
                 type: group
-                short-summary: Create, delete, restore, and manage {} servers.
+                short-summary: Manage {} servers.
                 """.format(server_type)
     helps['{} server create'.format(command_group)] = """
                 type: command
@@ -36,7 +36,10 @@ def add_helps(command_group, server_type):
                     - name: Restore 'testsvr' as 'testsvrnew'.
                       text: az {0} server restore -g testgroup -n testsvrnew --source-server testsvr --restore-point-in-time "2017-06-15T13:10:00Z"
                     - name: Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group than the backup.
-                      text: az {0} server restore -g testgroup -n testsvrnew -s "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/othergroup/providers/Microsoft.DBfor{1}/servers/testsvr2" --restore-point-in-time "2017-06-15T13:10:00Z"
+                      text: |
+                        az {0} server restore -g testgroup -n testsvrnew \\
+                            -s "/subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
+                            --restore-point-in-time "2017-06-15T13:10:00Z"
                 """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
                 type: command
@@ -53,7 +56,7 @@ def add_helps(command_group, server_type):
                 """
     helps['{} server show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details for a server.
+                short-summary: Get the details of a server.
                 """
     helps['{} server list'.format(command_group)] = """
                 type: command
@@ -90,7 +93,7 @@ def add_helps(command_group, server_type):
                 """
     helps['{} server firewall-rule show'.format(command_group)] = """
                 type: command
-                short-summary: Show the details of a firewall rule.
+                short-summary: Get the details of a firewall rule.
                 """
     helps['{} server firewall-rule list'.format(command_group)] = """
                 type: command
@@ -98,7 +101,7 @@ def add_helps(command_group, server_type):
                 """
     helps['{} server configuration'.format(command_group)] = """
                 type: group
-                short-summary: Inspect and set configuration values for a server.
+                short-summary: Manage configuration values for a server.
                 """
     helps['{} server configuration set'.format(command_group)] = """
                 type: command
@@ -111,7 +114,7 @@ def add_helps(command_group, server_type):
                 """.format(command_group)
     helps['{} server configuration show'.format(command_group)] = """
                 type: command
-                short-summary: Show the configuration for a server."
+                short-summary: Get the configuration for a server."
                 """
     helps['{} server configuration list'.format(command_group)] = """
                 type: command
@@ -119,7 +122,7 @@ def add_helps(command_group, server_type):
                 """
     helps['{} server-logs'.format(command_group)] = """
                 type: group
-                short-summary: Display, download, and manage server logs.
+                short-summary: Manage server logs.
                 """
     helps['{} server-logs list'.format(command_group)] = """
                 type: command
@@ -141,7 +144,7 @@ def add_helps(command_group, server_type):
                 """.format(command_group)
     helps['{} db'.format(command_group)] = """
                 type: group
-                short-summary: Create, delete, and manage {0} databases on a server.
+                short-summary: Manage {0} databases on a server.
                 """.format(server_type)
     helps['{} db create'.format(command_group)] = """
                 type: command

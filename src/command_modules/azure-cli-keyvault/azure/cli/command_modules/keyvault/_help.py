@@ -14,7 +14,7 @@ helps['keyvault'] = """
 helps['keyvault create'] = """
     type: command
     short-summary: Create a key vault.
-    long-summary: Default permissions are created for the current user or service principal unless the --no-self-perms flag is specified.
+    long-summary: Default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
 """
 
 helps['keyvault delete'] = """
@@ -59,15 +59,14 @@ helps['keyvault certificate'] = """
 """
 
 helps['keyvault certificate download'] = """
-    long-summary: >
-        Download the public portion of a Key Vault certificate formatted as either PEM or DER. PEM
-        formatting is the default.
+    short-summary: Download the public portion of a Key Vault certificate.
+    long-summary: The certificate formatted as either PEM or DER. PEM is the default.
     examples:
-        - name: Download a PEM and check its fingerprint in openssl.
+        - name: Download a certificate as PEM and check its fingerprint in openssl.
           text: >
             az keyvault certificate download --vault-name vault -n cert-name -f cert.pem && \\
             openssl x509 -in cert.pem -inform PEM  -noout -sha1 -fingerprint
-        - name: Download a DER and check its fingerprint in openssl.
+        - name: Download a certificate as DER and check its fingerprint in openssl.
           text: >
             az keyvault certificate download --vault-name vault -n cert-name -f cert.crt -e DER && \\
             openssl x509 -in cert.crt -inform DER  -noout -sha1 -fingerprint
@@ -75,12 +74,12 @@ helps['keyvault certificate download'] = """
 
 helps['keyvault certificate get-default-policy'] = """
     type: command
-    short-summary: Get the default policy for a self-signed certificate.
+    short-summary: Get the default policy for self-signed certificates.
     long-summary: >
         This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
         The default policy can also be used as a starting point to create derivative policies.\n
 
-        Also see: https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
+        For more details, see: https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
     examples:
         - name: Create a self-signed certificate with the default policy
           text: >
@@ -90,8 +89,8 @@ helps['keyvault certificate get-default-policy'] = """
 
 helps['keyvault certificate create'] = """
     type: command
-    short-summary: >
-        Create a Key Vault certificate. Certificates can also be used as a secrets in provisioned virtual machines.
+    short-summary: Create a Key Vault certificate.
+    long-summary: Certificates can be used as a secrets for provisioned virtual machines.
     examples:
         - name: Create a self-signed certificate with the default policy and add it to a virtual machine.
           text: >

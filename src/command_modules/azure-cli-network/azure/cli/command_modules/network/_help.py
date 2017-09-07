@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps
 
 helps['network'] = """
     type: group
-    short-summary: Manages Azure Network resources.
+    short-summary: Manage Azure Network resources.
 """
 
 helps['network dns'] = """
@@ -41,7 +41,7 @@ helps['network application-gateway list'] = """
 
 helps['network application-gateway show'] = """
     type: command
-    short-summary: Show details of an application gateway.
+    short-summary: Get the details of an application gateway.
 """
 
 helps['network application-gateway start'] = """
@@ -61,7 +61,7 @@ helps['network application-gateway update'] = """
 
 helps['network application-gateway show-backend-health'] = """
     type: command
-    short-summary: Show details about the backend health of an application gateway.
+    short-summary: Get information on the backend health of an application gateway.
 """
 
 helps['network application-gateway wait'] = """
@@ -82,10 +82,10 @@ helps['network application-gateway address-pool create'] = """
     short-summary: Create a backend address pool.
     examples:
         - name: Create an address pool with two endpoints.
-          text: >
+          text: |
             az network application-gateway address-pool create \\
-                    -g MyResourceGroup --gateway-name MyApplicationGateway \\
-                    -n MyAddressPool --servers 10.0.0.4 10.0.0.5
+                -g MyResourceGroup --gateway-name MyApplicationGateway \\
+                -n MyAddressPool --servers 10.0.0.4 10.0.0.5
 """
 
 helps['network application-gateway address-pool delete'] = """
@@ -100,7 +100,7 @@ helps['network application-gateway address-pool list'] = """
 
 helps['network application-gateway address-pool show'] = """
     type: command
-    short-summary: Show details of a backend address pool.
+    short-summary: Get the details for a backend address pool.
 """
 
 helps['network application-gateway address-pool update'] = """
@@ -132,7 +132,7 @@ helps['network application-gateway auth-cert list'] = """
 
 helps['network application-gateway auth-cert show'] = """
     type: command
-    short-summary: Show details of an authorization certificate.
+    short-summary: Get the details of an authorization certificate.
 """
 
 helps['network application-gateway auth-cert update'] = """
@@ -165,7 +165,7 @@ helps['network application-gateway frontend-ip list'] = """
 
 helps['network application-gateway frontend-ip show'] = """
     type: command
-    short-summary: Show details of a frontend IP address.
+    short-summary: Get the details of a frontend IP address.
 """
 
 helps['network application-gateway frontend-ip update'] = """
@@ -198,7 +198,7 @@ helps['network application-gateway frontend-port list'] = """
 
 helps['network application-gateway frontend-port show'] = """
     type: command
-    short-summary: Show details of a frontend port.
+    short-summary: Get the details for a frontend port.
 """
 
 helps['network application-gateway frontend-port update'] = """
@@ -231,7 +231,7 @@ helps['network application-gateway http-listener list'] = """
 
 helps['network application-gateway http-listener show'] = """
     type: command
-    short-summary: Show details of an HTTP listener.
+    short-summary: Get the details for an HTTP listener.
 """
 
 helps['network application-gateway http-listener update'] = """
@@ -264,7 +264,7 @@ helps['network application-gateway http-settings list'] = """
 
 helps['network application-gateway http-settings show'] = """
     type: command
-    short-summary: Show details of HTTP settings.
+    short-summary: Get the details of a gateway's HTTP settings.
 """
 
 helps['network application-gateway http-settings update'] = """
@@ -277,7 +277,7 @@ helps['network application-gateway http-settings update'] = """
 
 helps['network application-gateway probe'] = """
     type: group
-    short-summary: Use probes to gather information from a gateway and evaluate it using rules.
+    short-summary: Manage probes to gather and evaluate information on a gateway.
 """
 helps['network application-gateway probe create'] = """
     type: command
@@ -302,7 +302,7 @@ helps['network application-gateway probe list'] = """
 
 helps['network application-gateway probe show'] = """
     type: command
-    short-summary: Show details of a probe.
+    short-summary: Get the details of a probe.
 """
 
 helps['network application-gateway probe update'] = """
@@ -335,7 +335,7 @@ helps['network application-gateway redirect-config list'] = """
 
 helps['network application-gateway redirect-config show'] = """
     type: command
-    short-summary: Show details of a redirect configuration.
+    short-summary: Get the details of a redirect configuration.
 """
 
 helps['network application-gateway redirect-config update'] = """
@@ -369,7 +369,7 @@ helps['network application-gateway rule list'] = """
 
 helps['network application-gateway rule show'] = """
     type: command
-    short-summary: Show details of a rule.
+    short-summary: Get the details of a rule.
 """
 
 helps['network application-gateway rule update'] = """
@@ -401,7 +401,7 @@ helps['network application-gateway ssl-cert list'] = """
 
 helps['network application-gateway ssl-cert show'] = """
     type: command
-    short-summary: Show details of an SSL certificate.
+    short-summary: Get the details of an SSL certificate.
 """
 
 helps['network application-gateway ssl-cert update'] = """
@@ -433,7 +433,7 @@ helps['network application-gateway ssl-policy set'] = """
 
 helps['network application-gateway ssl-policy show'] = """
     type: command
-    short-summary: Show the SSL policy settings.
+    short-summary: Get the details of a gateway's SSL policy settings.
 """
 
 helps['network application-gateway ssl-policy predefined'] = """
@@ -455,8 +455,8 @@ helps['network application-gateway url-path-map create'] = """
     long-summary: >
         The map must be created with at least one rule. This command requires the creation of the
         first rule at the time the map is created. To create additional rules using different
-        address pools or HTTP settings, use the 'url-path-map rule create' command. To update the
-        rule created using this command, use the 'url-path-map rule update' command.
+        address pools or HTTP settings, use the `url-path-map rule create` command. To update the
+        rule created using this command, use the `url-path-map rule update` command.
 """
 
 helps['network application-gateway url-path-map delete'] = """
@@ -471,7 +471,7 @@ helps['network application-gateway url-path-map list'] = """
 
 helps['network application-gateway url-path-map show'] = """
     type: command
-    short-summary: Show details of a URL path map.
+    short-summary: Get the details of a URL path map.
 """
 
 helps['network application-gateway url-path-map update'] = """
@@ -518,7 +518,7 @@ helps['network application-gateway waf-config set'] = """
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rule-groups
-          short-summary: Space separated list of rule groups to disable. To disable specifc rules, use '--disabled-rules'.
+          short-summary: Space separated list of rule groups to disable. To disable individual rules, use `--disabled-rules`.
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rules
@@ -536,12 +536,13 @@ helps['network application-gateway waf-config set'] = """
 
 helps['network application-gateway waf-config show'] = """
     type: command
-    short-summary: Show the firewall configuration of a web application.
+    short-summary: Get the firewall configuration of a web application.
 """
 
 helps['network application-gateway waf-config list-rule-sets'] = """
     type: command
-    short-summary: (Preview) Lookup information on available WAF rule sets, rule groups, and rule IDs.
+    short-summary: Get information on available WAF rule sets, rule groups, and rule IDs.
+    long-summary: This command is in preview.
     parameters:
         - name: --group
           short-summary: >
@@ -585,12 +586,12 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
 for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     indef_article = 'an' if record.startswith('a') else 'a'
 
-    helps['network dns record-set {} remove-record'.format(record)] = """
+    helps['network dns record-set {0} remove-record'.format(record)] = """
         type: command
-        short-summary: Remove {} record from its set.
+        short-summary: Remove {1} {0} record from its record set.
         long-summary: >
             By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
-    """.format(record.upper())
+    """.format(record.upper(), indef_article)
 
     helps['network dns record-set {} create'.format(record)] = """
         type: command
@@ -599,8 +600,8 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
 
     helps['network dns record-set {} delete'.format(record)] = """
         type: command
-        short-summary: Delete a {} record set and all associated records.
-    """.format(record.upper())
+        short-summary: Delete {1} {0} record set and all associated records.
+    """.format(record.upper(), indef_article)
 
     helps['network dns record-set {} list'.format(record)] = """
         type: command
@@ -609,23 +610,25 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
 
     helps['network dns record-set {} show'.format(record)] = """
         type: command
-        short-summary: Show details of {} record set.
+        short-summary: Get the details for {1} {0} record set.
         examples:
-        - name: Show information about {} {} record set.
+        - name: Show information about {1} {0} record set.
           text: >
-            az network dns record-set {} show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
-    """.format(record.upper(), indef_article, record.upper(), record)
+            az network dns record-set {2} show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
+    """.format(record.upper(), indef_article, record)
 
 for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    indef_article = 'an' if record.startswith('a') else 'a'
+    
     helps['network dns record-set {} update'.format(record)] = """
         type: command
-        short-summary: Update {} record set.
-    """.format(record.upper())
+        short-summary: Update  {} {} record set.
+    """.format(indef_article, record.upper())
 
     helps['network dns record-set {} add-record'.format(record)] = """
         type: command
-        short-summary: Add {} record.
-    """.format(record.upper())
+        short-summary: Add {} {} record.
+    """.format(indef_article, record.upper())
 
 helps['network dns record-set cname set-record'] = """
     type: command
@@ -639,7 +642,7 @@ helps['network dns record-set soa'] = """
 
 helps['network dns record-set soa show'] = """
     type: command
-    short-summary: Show details of a DNS zone's SOA record.
+    short-summary: Get the details of a DNS zone's SOA record.
 """
 
 helps['network dns record-set soa update'] = """
@@ -702,12 +705,12 @@ helps['network dns zone list'] = """
 
 helps['network dns zone show'] = """
     type: command
-    short-summary: Get DNS zone parameters. Does not show DNS records within the zone.
+    short-summary: Get a DNS zone's parameters. Does not show DNS records within the zone.
 """
 
 helps['network dns zone update'] = """
     type: command
-    short-summary: Update DNS zone properties. Does not modify DNS records within the zone.
+    short-summary: Update a DNS zone's properties. Does not modify DNS records within the zone.
     parameters:
         - name: --if-match
           short-summary: Update only if the resource with the same ETAG exists.
@@ -733,7 +736,7 @@ helps['network express-route delete'] = """
 
 helps['network express-route get-stats'] = """
     type: command
-    short-summary: Show statistics of an ExpressRoute circuit.
+    short-summary: Get the statistics for an ExpressRoute circuit.
 """
 
 helps['network express-route list'] = """
@@ -753,7 +756,7 @@ helps['network express-route list-route-tables'] = """
 
 helps['network express-route show'] = """
     type: command
-    short-summary: Show details of an ExpressRoute circuit.
+    short-summary: Get the details for an ExpressRoute circuit.
 """
 
 helps['network express-route update'] = """
@@ -791,7 +794,7 @@ helps['network express-route auth list'] = """
 
 helps['network express-route auth show'] = """
     type: command
-    short-summary: Show details for an authorization setting.
+    short-summary: Get the details of an authorization setting.
 """
 # endregion
 
@@ -819,7 +822,7 @@ helps['network express-route peering list'] = """
 
 helps['network express-route peering show'] = """
     type: command
-    short-summary: Show peering details.
+    short-summary: Get the details for an express route peering.
 """
 
 helps['network express-route peering update'] = """
@@ -859,7 +862,7 @@ helps['network lb list'] = """
 
 helps['network lb show'] = """
     type: command
-    short-summary: Show details of a load balancer.
+    short-summary: Get the details for a load balancer.
 """
 
 helps['network lb update'] = """
@@ -892,7 +895,7 @@ helps['network lb address-pool list'] = """
 
 helps['network lb address-pool show'] = """
     type: command
-    short-summary: Show details of a backend address pool.
+    short-summary: Get the details for a backend address pool.
 """
 # endregion
 
@@ -920,7 +923,7 @@ helps['network lb frontend-ip list'] = """
 
 helps['network lb frontend-ip show'] = """
     type: command
-    short-summary: Show details of a frontend IP address.
+    short-summary: Get the details of a frontend IP address.
 """
 
 helps['network lb frontend-ip update'] = """
@@ -953,7 +956,7 @@ helps['network lb inbound-nat-pool list'] = """
 
 helps['network lb inbound-nat-pool show'] = """
     type: command
-    short-summary: Show details of an inbound NAT address pool.
+    short-summary: Get the details for an inbound NAT address pool.
 """
 
 helps['network lb inbound-nat-pool update'] = """
@@ -991,7 +994,7 @@ helps['network lb inbound-nat-rule list'] = """
 
 helps['network lb inbound-nat-rule show'] = """
     type: command
-    short-summary: Show details of an inbound NAT rule.
+    short-summary: Get the details for an inbound NAT rule.
 """
 
 helps['network lb inbound-nat-rule update'] = """
@@ -1029,7 +1032,7 @@ helps['network lb probe list'] = """
 
 helps['network lb probe show'] = """
     type: command
-    short-summary: Show details for a probe.
+    short-summary: Get the details for a probe.
 """
 
 helps['network lb probe update'] = """
@@ -1049,8 +1052,9 @@ helps['network lb rule create'] = """
     type: command
     short-summary: Create a load balancing rule.
     examples:
-        - name: Create a basic load balancing rule that assigns a front-facing IP configuration
-                and port to a backend address pool and port.
+        - name: >
+            Create a basic load balancing rule that assigns a front-facing IP
+            configuration and port to a backend address pool and port.
           text: >
             az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule \\
             --protocol Tcp --frontend-port 80 --backend-port 80
@@ -1068,7 +1072,7 @@ helps['network lb rule list'] = """
 
 helps['network lb rule show'] = """
     type: command
-    short-summary: Show details of a load balancing rule.
+    short-summary: Get the details of a load balancing rule.
 """
 
 helps['network lb rule update'] = """
@@ -1099,7 +1103,7 @@ helps['network local-gateway list'] = """
 """
 helps['network local-gateway show'] = """
     type: command
-    short-summary: Show details of a local VPN gateway.
+    short-summary: Get the details for a local VPN gateway.
 """
 
 helps['network local-gateway update'] = """
@@ -1157,7 +1161,7 @@ helps['network nic list'] = """
 
 helps['network nic show'] = """
     type: command
-    short-summary: Show details of a network interface.
+    short-summary: Get the details of a network interface.
     examples:
         - name: Get the internal domain name suffix for a NIC.
           text: >
@@ -1186,7 +1190,7 @@ helps['network nic ip-config create'] = """
     short-summary: Create an IP configuration.
     long-summary: >
         You must have the Microsoft.Network/AllowMultipleIpConfigurationsPerNic feature enabled for your subscription.
-        Only one configuration may be designated as the primary IP configuration per NIC, using the --make-primary flag.
+        Only one configuration may be designated as the primary IP configuration per NIC, using the `--make-primary` flag.
 """
 
 helps['network nic ip-config delete'] = """
@@ -1202,7 +1206,7 @@ helps['network nic ip-config list'] = """
 
 helps['network nic ip-config show'] = """
     type: command
-    short-summary: Show details of an IP configuration.
+    short-summary: Get the details of an IP configuration.
 """
 
 helps['network nic ip-config update'] = """
@@ -1277,7 +1281,7 @@ helps['network nsg create'] = """
 
 helps['network nsg list'] = """
     type: command
-    short-summary: Lists information about network security groups.
+    short-summary: List network security groups.
     examples:
         - name: List all NSGs in the 'westus' region.
           text: >
@@ -1286,7 +1290,7 @@ helps['network nsg list'] = """
 
 helps['network nsg show'] = """
     type: command
-    short-summary: Retrieves information about the specified network security group.
+    short-summary: Get information about a network security group.
     examples:
         - name: Get basic information about an NSG.
           text: >
@@ -1299,7 +1303,6 @@ helps['network nsg show'] = """
 helps['network nsg rule create'] = """
     type: command
     short-summary: Create a network security group rule.
-    long-summary: By default, the source address and port are '*', and the destination address is '*:80'.
     examples:
         - name: Create a basic "Allow" NSG rule with the highest priority.
           text: >
@@ -1324,7 +1327,7 @@ helps['network nsg rule list'] = """
 
 helps['network nsg rule show'] = """
     type: command
-    short-summary: Show details of a network security group rule.
+    short-summary: Get the details for a network security group rule.
 """
 
 helps['network nsg rule update'] = """
@@ -1376,7 +1379,7 @@ helps['network public-ip list'] = """
 
 helps['network public-ip show'] = """
     type: command
-    short-summary: Show details of a public IP address.
+    short-summary: Get the details of a public IP address.
     examples:
         - name: Get information about a public IP resource.
           text: >
@@ -1420,7 +1423,7 @@ helps['network route-table list'] = """
 
 helps['network route-table show'] = """
     type: command
-    short-summary: Show details of a route table.
+    short-summary: Get the details for a route table.
 """
 
 helps['network route-table update'] = """
@@ -1450,7 +1453,7 @@ helps['network route-table route list'] = """
 
 helps['network route-table route show'] = """
     type: command
-    short-summary: Show details of a route in a route table.
+    short-summary: Get the details of a route in a route table.
 """
 
 helps['network route-table route update'] = """
@@ -1464,7 +1467,8 @@ helps['network route-table route update'] = """
 
 helps['network route-filter'] = """
     type: group
-    short-summary: (Preview) Manage route filters.
+    short-summary: Manage route filters.
+    long-summary: These commands are in preview.
 """
 
 helps['network route-filter create'] = """
@@ -1484,7 +1488,7 @@ helps['network route-filter list'] = """
 
 helps['network route-filter show'] = """
     type: command
-    short-summary: Show details of a route filter.
+    short-summary: Get the details of a route filter.
 """
 
 helps['network route-filter update'] = """
@@ -1494,7 +1498,8 @@ helps['network route-filter update'] = """
 
 helps['network route-filter rule'] = """
     type: group
-    short-summary: (Preview) Manage rules in a route filter.
+    short-summary: Manage rules in a route filter.
+    long-summary: These commands are in preview.
 """
 
 helps['network route-filter rule create'] = """
@@ -1503,9 +1508,11 @@ helps['network route-filter rule create'] = """
     parameters:
         - name: --communities
           short-summary: |
-                Space separated list of BGP community values to filter on.
+                Space separated list of border gateway protocol (BGP) community values to filter on.
           populator-commands:
             - az network route-filter rule list-service-communities
+    examples:
+        text: 
 """
 
 helps['network route-filter rule delete'] = """
@@ -1520,7 +1527,7 @@ helps['network route-filter rule list'] = """
 
 helps['network route-filter rule show'] = """
     type: command
-    short-summary: Show details of a rule in a route filter.
+    short-summary: Get the details of a rule in a route filter.
 """
 
 helps['network route-filter rule update'] = """
@@ -1569,7 +1576,7 @@ helps['network traffic-manager profile list'] = """
 
 helps['network traffic-manager profile show'] = """
     type: command
-    short-summary: Show details of a profile.
+    short-summary: Get the details for a profile.
 """
 
 helps['network traffic-manager profile update'] = """
@@ -1599,7 +1606,7 @@ helps['network traffic-manager endpoint list'] = """
 
 helps['network traffic-manager endpoint show'] = """
     type: command
-    short-summary: Show details of an endpoint.
+    short-summary: Get the details for an endpoint.
 """
 
 helps['network traffic-manager endpoint update'] = """
@@ -1617,7 +1624,7 @@ helps['network vnet'] = """
 
 helps['network vnet check-ip-address'] = """
     type: command
-    short-summary: Check whether a private IP address is available for use.
+    short-summary: Check if a private IP address is available for use.
 """
 
 helps['network vnet create'] = """
@@ -1649,7 +1656,7 @@ helps['network vnet list'] = """
 
 helps['network vnet show'] = """
     type: command
-    short-summary: Show details on a virtual network.
+    short-summary: Get the details of a virtual network.
 """
 
 helps['network vnet update'] = """
@@ -1730,7 +1737,7 @@ helps['network vnet peering list'] = """
 
 helps['network vnet peering show'] = """
     type: command
-    short-summary: Show details of a peering.
+    short-summary: Get the details of a peering.
 """
 
 helps['network vnet peering update'] = """
@@ -1763,7 +1770,7 @@ helps['network vpn-connection list'] = """
 
 helps['network vpn-connection show'] = """
     type: command
-    short-summary: Show details of a VPN connection.
+    short-summary: Get the details of a VPN connection.
 """
 
 helps['network vpn-connection update'] = """
@@ -1787,7 +1794,7 @@ helps['network vpn-connection shared-key reset'] = """
 
 helps['network vpn-connection shared-key show'] = """
     type: command
-    short-summary: Show a VPN connection shared key.
+    short-summary: Retrieve a VPN connection shared key.
 """
 
 helps['network vpn-connection shared-key update'] = """
@@ -1854,7 +1861,7 @@ helps['network vnet-gateway reset'] = """
 
 helps['network vnet-gateway show'] = """
     type: command
-    short-summary: Show details of a virtual network gateway.
+    short-summary: Get the details for a virtual network gateway.
 """
 
 helps['network vnet-gateway update'] = """
@@ -1921,7 +1928,8 @@ helps['network vnet-gateway root-cert delete'] = """
 # region Network Watcher
 helps['network watcher'] = """
     type: group
-    short-summary: (Preview) Commands to manage Network Watcher.
+    short-summary: Manage the Azure Network Watcher.
+    long-summary: These commands are in preview.
 """
 
 helps['network watcher list'] = """
@@ -1945,7 +1953,8 @@ helps['network watcher configure'] = """
 
 helps['network watcher troubleshooting'] = """
     type: group
-    short-summary: (Preview) Commands to manage Network Watcher troubleshooting sessions.
+    short-summary: Manage Network Watcher troubleshooting sessions.
+    long-summary: These commands are in preview.
 """
 
 helps['network watcher troubleshooting start'] = """
@@ -1962,7 +1971,7 @@ helps['network watcher troubleshooting start'] = """
 
 helps['network watcher troubleshooting show'] = """
     type: command
-    short-summary: Show results of the last troubleshooting operation.
+    short-summary: Get the results of the last troubleshooting operation.
 """
 
 helps['network watcher test-ip-flow'] = """
@@ -1984,8 +1993,7 @@ helps['network watcher test-ip-flow'] = """
 
 helps['network watcher test-connectivity'] = """
     type: command
-    short-summary: Test whether a direct TCP connection can be established between a Virtual
-        Machine and a given endpoint.
+    short-summary: Test if a direct TCP connection can be established between a Virtual Machine and a given endpoint.
     parameters:
         - name: --source-resource
           short-summary: Name or ID of the resource from which to originate traffic.
@@ -2003,18 +2011,18 @@ helps['network watcher test-connectivity'] = """
 
 helps['network watcher show-next-hop'] = """
     type: command
-    short-summary: Show information on the 'next hop' for a VM.
+    short-summary: Get information on the 'next hop' for a VM.
     long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
 """
 
 helps['network watcher show-security-group-view'] = """
     type: command
-    short-summary: Show detailed security information on a VM for the currently configured network security group.
+    short-summary: Get detailed security information on a VM for the currently configured network security group.
 """
 
 helps['network watcher show-topology'] = """
     type: command
-    short-summary: Show the network topology for a resource group.
+    short-summary: Get the network topology of a resource group.
     parameters:
         - name: --resource-group -g
           short-summary: The name of the target resource group to perform topology on.
@@ -2026,10 +2034,10 @@ helps['network watcher show-topology'] = """
 
 helps['network watcher packet-capture'] = """
     type: group
-    short-summary: (Preview) Commands to manage packet capture sessions on VMs.
+    short-summary: Manage packet capture sessions on VMs.
     long-summary: |
-        Requires that Network Watcher is enabled for the region in which the VM is located
-        and that the AzureNetworkWatcherExtension is enabled on the VM.
+        These commands are in preview, and require that both Azure Network Watcher is enabled for the
+        VM's region and that AzureNetworkWatcherExtension is enabled on the VM.
 """
 
 helps['network watcher packet-capture create'] = """
@@ -2060,7 +2068,8 @@ helps['network watcher packet-capture create'] = """
 
 helps['network watcher flow-log'] = """
     type: group
-    short-summary: (Preview) Commands to manage network security group flow logging.
+    short-summary: Manage network security group flow logging.
+    long-summary: These commands are in preview.
 """
 
 helps['network watcher flow-log configure'] = """
@@ -2079,7 +2088,7 @@ helps['network watcher flow-log configure'] = """
 
 helps['network watcher flow-log show'] = """
     type: command
-    short-summary: Show flow log configuration for a network security group.
+    short-summary: Get the flow log configuration for a network security group.
 """
 
 # endregion

@@ -69,7 +69,7 @@ helps['batch application package create'] = """
 helps['batch application package activate'] = """
     type: command
     short-summary: Activates a Batch application package.
-    long-summary: This step is unnecessary if the package has already been successfully activated by the 'create' command.
+    long-summary: This step is unnecessary if the package has already been successfully activated by the `create` command.
 """
 
 helps['batch application summary'] = """
@@ -282,12 +282,12 @@ helps['batch job-schedule create'] = """
 helps['batch job-schedule set'] = """
     type: command
     short-summary: Update the properties of a job schedule.
-    long-summary: You can independently update the 'schedule' and the 'job specification', but any change to either of these entities will reset all properties in that entity.
+    long-summary: You can independently update the schedule and the job specification, but any change to either of these entities will reset all properties in that entity.
 """
 
 helps['batch job-schedule reset'] = """
     type: command
-    short-summary: Update the properties of a job schedule.  Unspecified properties which can be updated are reset to their defaults. An updated job specification only applies to new jobs.
+    short-summary: Reset the properties of a job schedule.  An updated job specification only applies to new jobs.
 """
 
 helps['batch task create'] = """
@@ -297,5 +297,5 @@ helps['batch task create'] = """
 
 helps['batch task reset'] = """
     type: command
-    short-summary: Update the properties of a Batch task. Unspecified properties which can be updated are reset to their defaults.
+    short-summary: Reset the properties of a Batch task.
 """

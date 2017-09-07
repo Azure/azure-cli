@@ -8,62 +8,62 @@ from azure.cli.core.help_files import helps
 
 helps['cognitiveservices'] = """
     type: group
-    short-summary: Manage Cognitive Services accounts.
+    short-summary: Manage Azure Cognitive Services accounts.
 """
 
 helps['cognitiveservices list'] = """
     type: command
-    short-summary: List all the existing cognitive services accounts under a resource group or current Azure subscription.
+    short-summary: List available Azure Cognitive Services accounts.
     examples:
-        - name: List all the cognitive services accounts in a resource group.
+        - name: List all the Cognitive Services accounts in a resource group.
           text: az cognitiveservices list -g MyResourceGroup
 """
 
 helps['cognitiveservices account'] = """
     type: group
-    short-summary: Manage and update cognitive services accounts.
+    short-summary: Manage Azure Cognitive Services accounts.
 """
 
 helps['cognitiveservices account delete'] = """
     type: command
-    short-summary: Remove a cognitive services account.
+    short-summary: Delete an Azure Cognitive Services account.
 """
 
 helps['cognitiveservices account create'] = """
     type: command
-    short-summary: Create a cognitive services account.
+    short-summary: Create an Azure Cognitive Services account.
     examples:
-        - name: Create a S0 face API cognitive services account in West Europe without confirmation required.
+        - name: Create an S0 face API Cognitive Services account in West Europe without confirmation required.
           text: az cognitiveservices create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
 """
 
 helps['cognitiveservices account show'] = """
     type: command
-    short-summary: Get the details of a cognitive services account.
+    short-summary: Get the details of an Azure Cognitive Services account.
 """
 
 helps['cognitiveservices account update'] = """
     type: command
-    short-summary: Update the properties of a cognitive services account.
+    short-summary: Update the properties of an Azure Cognitive Services account.
 """
 
 helps['cognitiveservices account list-skus'] = """
     type: command
-    short-summary: List the SKUs avaiable for a cognitive services account.
+    short-summary: List the SKUs avaiable for an Azure Cognitive Services account.
 """
 
 
 helps['cognitiveservices account keys'] = """
     type: group
-    short-summary: Manage the keys of a cognitive services account.
+    short-summary: Manage the keys of an Azure Cognitive Services account.
 """
 
 helps['cognitiveservices account keys regenerate'] = """
     type: command
-    short-summary: Regenerate the keys of a cognitive services account.
+    short-summary: Regenerate the keys of an Azure Cognitive Services account.
 """
 
 helps['cognitiveservices account keys list'] = """
     type: command
-    short-summary: List the keys of a cognitive services account.
+    short-summary: List the keys of an Azure Cognitive Services account.
 """
