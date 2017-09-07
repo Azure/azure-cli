@@ -239,13 +239,13 @@ class TestActions(unittest.TestCase):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
         np_mock.assign_identity = True
-        np_mock.identity_scope = ''
+        np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
 
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
-                        str(err.exception))
+        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
+                        "not provided" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
@@ -273,17 +273,6 @@ class TestActions(unittest.TestCase):
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         self.assertEqual(np_mock.identity_role, 'reader')
         mock_resolve_role_id.assert_called_with('reader', 'foo-scope')
-
-        # check we set right default scope
-        np_mock = mock.MagicMock()
-        np_mock.assign_identity = True
-        np_mock.identity_scope = None
-        np_mock.identity_role = 'Reader'
-        np_mock.resource_group_name = 'foo-group'
-        mock_get_subscription.return_value = 'foo-subscription-id'
-        mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(np_mock)
-        self.assertEqual('/subscriptions/foo-subscription-id/resourceGroups/foo-group', np_mock.identity_scope)
 
     @mock.patch('azure.cli.command_modules.vm._validators._resolve_role_id', autospec=True)
     def test_validate_msi_on_assign_identity_command(self, mock_resolve_role_id):
