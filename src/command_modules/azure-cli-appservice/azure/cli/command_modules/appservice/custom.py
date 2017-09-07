@@ -230,8 +230,7 @@ def update_site_configs(resource_group_name, name, slot=None,
                         app_command_line=None):  # pylint: disable=unused-argument
     configs = get_site_configs(resource_group_name, name, slot)
     if linux_fx_version:
-        linux_fx_version_lower = linux_fx_version.strip().lower()
-        if linux_fx_version_lower.startswith('docker|'):
+        if linux_fx_version.strip().lower().startswith('docker|'):
             update_app_settings(resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
         else:
             delete_app_settings(resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
@@ -384,10 +383,10 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
-    if websites_enable_app_service_storage is not None:
-        settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
     if docker_custom_image_name is not None:
         _add_linux_fx_version(resource_group_name, name, docker_custom_image_name, slot)
+    if websites_enable_app_service_storage:
+        settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
 
     if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(resource_group_name, name, settings, slot)
