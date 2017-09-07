@@ -924,9 +924,16 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
     if ids:
         output_return = []
         for id_arg in ids:
-            kwargs = _parse_lock_id(id_arg)
-            output_return.append(get_lock(**kwargs))
-        return
+            try:
+                kwargs = _parse_lock_id(id_arg)
+                output_return.append(get_lock(**kwargs))
+            except AttributeError:
+                logger.error('az vm show: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        if len(output_return) == 1:
+            return output_return[0]
+        else:
+            return output_return
     lock_client = _resource_lock_client_factory()
 
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -950,9 +957,8 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
         parent_resource_path or '', resource_type, resource_name, name)
 
 
-def delete_lock(name,
-                resource_group_name=None, resource_provider_namespace=None,
-                parent_resource_path=None, resource_type=None, resource_name=None):
+def delete_lock(name=None, resource_group_name=None, resource_provider_namespace=None,
+                parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     print([name, resource_group_name, resource_provider_namespace,
                 parent_resource_path, resource_type, resource_name])
     """
@@ -967,6 +973,22 @@ def delete_lock(name,
     :param resource_name: Name of a resource that has a lock.
     :type resource_name: str
     """
+    print(['name', name, 'resource_group_name',resource_group_name, 'resource_provider_namespace',resource_provider_namespace,
+            'parent_resource_path',parent_resource_path, 'resource_type',resource_type, 'resource_name', resource_name])
+    # if ids:
+    #     output_return = []
+    #     for id_arg in ids:
+    #         try:
+    #             kwargs = _parse_lock_id(id_arg)
+    #             output_return.append(get_lock(**kwargs))
+    #         except AttributeError:
+    #             logger.error('az vm show: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+    #             return
+    #     if len(output_return) == 1:
+    #         return output_return[0]
+    #     else:
+    #         return output_return
+
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
                                          resource_type, resource_name)
@@ -1049,15 +1071,12 @@ def create_lock(name,
 
 def _parse_lock_id(id_arg):
     regex = re.compile(
-        '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
+        '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
         '(/providers/(?P<resource_provider_namespace>[^/]*)'
         '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
         '/providers/Microsoft.Authorization/locks/(?P<name>[^/]*)')
 
-    try:
-        return regex.match(id_arg).groupdict()
-    except Exception:
-        raise Exception('invalid ResourceId value: \'%s\'' % id_arg)
+    return regex.match(id_arg).groupdict()
 
 def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
     if level is not None:
