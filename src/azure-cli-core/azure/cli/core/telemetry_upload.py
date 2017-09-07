@@ -31,6 +31,7 @@ def upload(data_to_save):
 
     if in_diagnostic_mode():
         sys.stdout.write('Telemetry upload begins\n')
+        sys.stdout.write('Got data {}\n'.format(json.dumps(json.loads(data_to_save), indent=2)))
 
     try:
         data_to_save = json.loads(data_to_save.replace("'", '"'))
@@ -54,7 +55,7 @@ def upload(data_to_save):
 
         if in_diagnostic_mode():
             sys.stdout.write('\nTrack Event: {}\nProperties: {}\nMeasurements: {}'.format(
-                name, json.dumps(properties, indent='  '), json.dumps(measurements, indent='  ')))
+                name, json.dumps(properties, indent=2), json.dumps(measurements, indent=2)))
 
     client.flush()
 

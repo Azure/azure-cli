@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* webapp: able to create a webapp in a resource group other than the service plan's
+
 0.1.15 (2017-08-31)
 +++++++++++++++++++
 * minor fixes
