@@ -8,7 +8,7 @@ from __future__ import print_function
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, in_cloud_console
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands.validators import DefaultStr
 
@@ -102,7 +102,7 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
     profile = Profile()
 
-    if _in_cloud_console():
+    if in_cloud_console():
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
         if console_tokens:
             return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
@@ -149,7 +149,7 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
 def logout(username=None):
     """Log out to remove access to Azure subscriptions"""
-    if _in_cloud_console():
+    if in_cloud_console():
         raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('logout'))
 
     profile = Profile()
@@ -161,8 +161,3 @@ def logout(username=None):
 def list_locations():
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations()
-
-
-def _in_cloud_console():
-    import os
-    return os.environ.get('ACC_CLOUD', None)
