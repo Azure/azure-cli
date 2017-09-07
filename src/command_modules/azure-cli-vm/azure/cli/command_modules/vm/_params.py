@@ -245,7 +245,7 @@ for scope in ['vm create', 'vmss create']:
 for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
     arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
     register_cli_argument(scope, 'identity_scope', options_list='--scope', arg_group=arg_group,
-                          help="The scope the managed identity has access to, or specify "" for None. Default: VM/VMSS's resource group.")
+                          help='The scope the managed identity has access to, or specify "" for None. Default: VM/VMSS\'s resource group.')
     register_cli_argument(scope, 'identity_role', options_list='--role', arg_group=arg_group,
                           help="Role name or id the managed identity will be assigned")
     register_cli_argument(scope, 'identity_role_id', ignore_type)
