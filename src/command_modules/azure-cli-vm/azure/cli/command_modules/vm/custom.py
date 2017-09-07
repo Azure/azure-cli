@@ -1728,7 +1728,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             resource_group_name, deployment_name, properties, raw=no_wait))
     vm = get_vm_details(resource_group_name, vm_name)
     if assign_identity:
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT, subscription_id))
+        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT))
     return vm
 
 
@@ -1966,13 +1966,14 @@ def create_vmss(vmss_name, resource_group_name, image,
             master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope, False))
         # pylint: disable=line-too-long
+        msi_extention_type = 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux')
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile'] = vmss_resource['properties']['virtualMachineProfile'].get('extensionProfile') or {}
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile']["extensions"] = vmss_resource['properties']['virtualMachineProfile']['extensionProfile'].get('extensions') or []
         vmss_resource['properties']['virtualMachineProfile']['extensionProfile']["extensions"].append({
-            'name': 'MSIExtension',
+            'name': msi_extention_type,
             'properties': {
                 'publisher': 'Microsoft.ManagedIdentity',
-                'type': 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux'),
+                'type': msi_extention_type,
                 "typeHandlerVersion": _MSI_EXTENSION_VERSION,
                 'autoUpgradeMinorVersion': True,
                 'settings': {'port': _MSI_PORT}
@@ -2001,7 +2002,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
     if assign_identity:
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
-                                                                         _MSI_PORT, subscription_id)
+                                                                         _MSI_PORT)
     return deployment_result
 
 
@@ -2090,7 +2091,6 @@ def get_vm_format_secret(secrets, certificate_store=None):
 
 def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
                        identity_role_id=None, identity_scope=None, port=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models')
     vm = get_vm(resource_group_name, vm_name)
     if not vm.identity:
@@ -2112,12 +2112,11 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
                            version=_MSI_EXTENSION_VERSION,
                            settings={'port': port})
     LongRunningOperation()(poller)
-    return _construct_identity_info(identity_scope, identity_role, port, get_subscription_id())
+    return _construct_identity_info(identity_scope, identity_role, port)
 
 
 def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
                          identity_role_id=None, identity_scope=None, port=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     VirtualMachineIdentity, UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity',
                                                   'UpgradeMode', mod='models')
     client = _compute_client_factory()
@@ -2148,15 +2147,14 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultSt
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
-    return _construct_identity_info(identity_scope, identity_role, port, get_subscription_id())
+    return _construct_identity_info(identity_scope, identity_role, port)
 
 
-def _construct_identity_info(identity_scope, identity_role, port, subscription_id):
+def _construct_identity_info(identity_scope, identity_role, port):
     return {
         'scope': identity_scope,
         'role': str(identity_role),  # could be DefaultStr, so convert to string
-        'port': port,
-        'subscription': subscription_id
+        'port': port
     }
 
 

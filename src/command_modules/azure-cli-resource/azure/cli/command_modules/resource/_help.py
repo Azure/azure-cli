@@ -122,6 +122,19 @@ helps['policy definition create'] = """
                                 "effect": "deny"
                             }
                         }
+                - name: Create a policy parameter definition with the following example
+                  text: |
+                        {
+                            "allowedLocations": {
+                                "type": "array",
+                                "metadata": {
+                                    "description": "The list of locations that can be specified
+                                                    when deploying resources",
+                                    "strongType": "location",
+                                    "displayName": "Allowed locations"
+                                }
+                            }
+                        }
             """
 helps['policy definition delete'] = """
     type: command
@@ -142,6 +155,18 @@ helps['policy assignment'] = """
 helps['policy assignment create'] = """
     type: command
     short-summary: Create a resource policy assignment.
+    examples:
+        - name: Provide rule parameter values with the following example
+          text: |
+                {
+                    "allowedLocations": {
+                        "value": [
+                            "australiaeast",
+                            "eastus",
+                            "japaneast"
+                        ]
+                    }
+                }
 """
 helps['policy assignment delete'] = """
     type: command
