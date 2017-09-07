@@ -262,7 +262,8 @@ class Profile(object):
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
         consolidated = Profile._normalize_properties('VM', subscriptions, is_service_principal=True)
         for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = "{}{}".format(_MSI_ACCOUNT_NAME, msi_port) # use a special name to trigger a special token acquisition
+            # use a special name to trigger a special token acquisition
+            s[_SUBSCRIPTION_NAME] = "{}{}".format(_MSI_ACCOUNT_NAME, msi_port)
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
