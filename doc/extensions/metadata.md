@@ -34,20 +34,20 @@ This documents the known metadata entries.
 
 Note: You can optionally extend this with your own metadata by adding your own namespace. We use the `azext` namespace.
 
-### azext.minCliVersion
-Description: The minimum CLI version required (inclusive).
+### azext.minCliCoreVersion
+Description: The minimum CLI core version required (inclusive).
 Exclude to not specify a minimum.
 
 Type: `string`
 
-Example: `"azext.minCliVersion": "2.0.10"`
+Example: `"azext.minCliCoreVersion": "2.0.10"`
 
-### azext.maxCliVersion
-Description: The maximum CLI version required (inclusive).
+### azext.maxCliCoreVersion
+Description: The maximum CLI core version required (inclusive).
 Exclude to not specify a maximum.
 
 Type: `string`
 
-Example: `"azext.maxCliVersion": "2.0.15"`
+Example: `"azext.maxCliCoreVersion": "2.0.15"`
 
 
