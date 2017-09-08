@@ -218,9 +218,7 @@ def _print_groups(help_file):
         _print_indent('')
 
     indent = 1
-    max_name_length = max(len(c.name) for c in help_file.children) \
-        if help_file.children \
-        else 0
+    max_name_length = max(len(c.name) for c in help_file.children) if help_file.children else 0
     subgroups = [c for c in help_file.children if isinstance(c, GroupHelpFile)]
     subcommands = [c for c in help_file.children if c not in subgroups]
 

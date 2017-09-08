@@ -20,6 +20,60 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 # PARAMETER VALIDATORS
 
+def get_asg_validator(dest):
+
+    ApplicationSecurityGroup = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationSecurityGroup', mod='models')
+
+    def _validate_asg_name_or_id(namespace):
+        subscription_id = get_subscription_id()
+        resource_group = namespace.resource_group_name
+        names_or_ids = getattr(namespace, dest)
+        ids = []
+
+        if names_or_ids == [""] or not names_or_ids:
+            return
+
+        for val in names_or_ids:
+            if not is_valid_resource_id(val):
+                val = resource_id(
+                    subscription=subscription_id,
+                    resource_group=resource_group,
+                    namespace='Microsoft.Network', type='applicationSecurityGroups',
+                    name=val
+                )
+            ids.append(ApplicationSecurityGroup(id=val))
+        setattr(namespace, dest, ids)
+
+    return _validate_asg_name_or_id
+
+
+def get_vnet_validator(dest):
+
+    SubResource = get_sdk(ResourceType.MGMT_NETWORK, 'SubResource', mod='models')
+    subscription_id = get_subscription_id()
+
+    def _validate_vnet_name_or_id(namespace):
+        resource_group = namespace.resource_group_name
+        names_or_ids = getattr(namespace, dest)
+        ids = []
+
+        if names_or_ids == [""] or not names_or_ids:
+            return
+
+        for val in names_or_ids:
+            if not is_valid_resource_id(val):
+                val = resource_id(
+                    subscription=subscription_id,
+                    resource_group=resource_group,
+                    namespace='Microsoft.Network', type='virtualNetworks',
+                    name=val
+                )
+            ids.append(SubResource(id=val))
+        setattr(namespace, dest, ids)
+
+    return _validate_vnet_name_or_id
+
+
 def dns_zone_name_type(value):
     if value:
         return value[:-1] if value[-1] == '.' else value

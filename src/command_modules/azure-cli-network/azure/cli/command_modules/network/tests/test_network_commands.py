@@ -1811,6 +1811,8 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}'.format(**kwargs)).get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+        output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):

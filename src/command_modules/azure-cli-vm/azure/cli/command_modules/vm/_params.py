@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._actions import \
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk,
+     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
      process_disk_encryption_namespace, process_assign_identity_namespace)
 
 
@@ -271,6 +271,8 @@ register_cli_argument('vm create', 'attach_data_disks', nargs='+', help='Attach 
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
 register_cli_argument('vm create', 'nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
 register_cli_argument('vm create', 'nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', **enum_choice_list(['RDP', 'SSH']))
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
+    c.register_cli_argument('vm create', 'application_security_groups', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'], arg_group='Network Balancer')
