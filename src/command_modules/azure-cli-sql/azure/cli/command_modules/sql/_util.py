@@ -59,6 +59,7 @@ def get_sql_firewall_rules_operations(kwargs):
 def get_sql_recommended_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).recommended_elastic_pools
 
+
 def get_sql_replication_links_operations(kwargs):
     return get_sql_management_client(kwargs).replication_links
 
@@ -69,6 +70,7 @@ def get_sql_servers_operations(kwargs):
 
 def get_sql_server_usages_operations(kwargs):
     return get_sql_management_client(kwargs).server_usages
-  
+
+
 def get_sql_virtual_network_rules_operations(kwargs):
     return get_sql_management_client(kwargs).virtual_network_rules
