@@ -99,9 +99,9 @@ helps['vm create'] = """
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
-        - name: Create a VM with Managed Service Identity. The VM will have a 'Contributor' Role with access to the current resource group
+        - name: Create a VM with Managed Service Identity. The VM will have a 'Contributor' Role with access to a storage account
           text: >
-             az vm create -n MyVm -g MyResourceGroup --assign-identity --image centos
+             az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -144,6 +144,10 @@ helps['vmss create'] = """
 
             az vmss create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
+        - name: Create a VM scaleset with Managed Service Identity. The VM will have a 'Contributor' Role with access to a storage account
+          text: >
+             az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
