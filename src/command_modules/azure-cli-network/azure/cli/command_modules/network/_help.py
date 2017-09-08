@@ -831,6 +831,12 @@ helps['network express-route peering'] = """
 helps['network express-route peering create'] = """
     type: command
     short-summary: Create peering settings.
+    examples:
+        - name: Create Microsoft Peering settings with IPv4 configuration.
+          text: az network express-route peering create -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 101.0.0.0/30 --secondary-peer-subnet 102.0.0.0/30 --advertised-public-prefixes 101.0.0.0/30
+        - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
+          text: az network express-route peering update -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
+          min_profile: latest
 """
 
 helps['network express-route peering delete'] = """
@@ -851,6 +857,11 @@ helps['network express-route peering show'] = """
 helps['network express-route peering update'] = """
     type: command
     short-summary: Update peering settings.
+    examples:
+        - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
+          text: az network express-route peering update -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
+          min_profile: latest
+
 """
 # endregion
 

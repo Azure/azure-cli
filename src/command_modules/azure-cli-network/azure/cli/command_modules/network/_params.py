@@ -367,7 +367,7 @@ register_cli_argument('network express-route peering', 'routing_registry_name', 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
     c.register_cli_argument('network express-route peering', 'route_filter', arg_group='Microsoft Peering', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    c.register_cli_argument('network express-route peering', 'use_legacy', help='Enable legacy mode.', arg_group='Microsoft Peering', **three_state_flag())
+    register_cli_argument('network express-route peering', 'ip_version', help='The IP version to update Microsoft Peering settings for.', arg_group='Microsoft Peering', **enum_choice_list(['IPv4', 'IPv6']))
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
