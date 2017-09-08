@@ -46,6 +46,9 @@ if __name__ == '__main__':
     errors_list = []
     cli_deps = get_cli_dependencies()
     all_command_modules = get_command_modules_paths(include_prefix=True)
+    if not cli_deps:
+        print('Unable to get the CLI dependencies for {}'.format(AZURE_CLI_SETUP_PY), file=sys.stderr)
+        sys.exit(1)
     for modname, _ in all_command_modules:
         if modname in cli_deps and modname in MODULES_TO_EXCLUDE:
             errors_list.append("{} is a dependency of azure-cli BUT is marked as should be excluded.".format(modname))
