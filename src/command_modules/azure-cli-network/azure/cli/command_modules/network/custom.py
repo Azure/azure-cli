@@ -2237,7 +2237,7 @@ def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
-        route_filter=None, use_legacy=False):
+        route_filter=None):
     """
     :param str peer_asn: Autonomous system number of the customer/connectivity provider.
     :param str vlan_id: Identifier used to identify the customer.
@@ -2275,8 +2275,6 @@ def create_express_route_peering(
             advertised_public_prefixes=advertised_public_prefixes,
             customer_asn=customer_asn,
             routing_registry_name=routing_registry_name)
-        if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01') and use_legacy:
-            peering_config.legacy_mode = use_legacy
 
     prefixes = [primary_peer_address_prefix, secondary_peer_address_prefix] + advertised_public_prefixes
     if peering_config and _validate_ipv6_address_prefixes(prefixes):
@@ -2301,7 +2299,7 @@ def create_express_route_peering(
 def update_express_route_peering(instance, peer_asn=None, primary_peer_address_prefix=None,
                                  secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
                                  advertised_public_prefixes=None, customer_asn=None,
-                                 routing_registry_name=None, route_filter=None, use_legacy=None):
+                                 routing_registry_name=None, route_filter=None):
     if peer_asn is not None:
         instance.peer_asn = peer_asn
 
@@ -2332,11 +2330,9 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
         if routing_registry_name is not None:
             instance.microsoft_peering_config.routing_registry_name = routing_registry_name
 
-        if use_legacy is not None:
-            instance.microsoft_peering_config.legacy_mode = use_legacy
     except AttributeError:
-        raise CLIError("--advertised-public-prefixes, --customer-asn --routing-registry-name "
-                       "and --use-legacy are only applicable for 'MicrosoftPeering'")
+        raise CLIError("--advertised-public-prefixes, --customer-asn and --routing-registry-name "
+                       "are only applicable for 'MicrosoftPeering'")
 
     return instance
 
