@@ -138,7 +138,7 @@ class TestExtensions(TestExtensionsBase):
         # An extension that does not specify any version constraint on the CLI
         expected_cli_version = '0.0.1'
         azext_metadata = None
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, cli_version, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
             self.assertEqual(cli_version, expected_cli_version)
@@ -150,7 +150,7 @@ class TestExtensions(TestExtensionsBase):
         expected_max_required = '0.0.1'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required,
                           EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, cli_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
             self.assertEqual(cli_version, expected_cli_version)
@@ -161,7 +161,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.5'
         expected_min_required = '0.0.1'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
 
@@ -169,7 +169,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.5'
         expected_min_required = '0.0.7'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
@@ -177,7 +177,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.5'
         expected_min_required = '0.0.5+dev'
         azext_metadata = {EXT_METADATA_MINCLICOREVERSION: expected_min_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
@@ -185,7 +185,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.5'
         expected_max_required = '0.0.10'
         azext_metadata = {EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertTrue(is_compatible)
 
@@ -193,7 +193,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.5'
         expected_max_required = '0.0.3'
         azext_metadata = {EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
@@ -201,7 +201,7 @@ class TestExtensions(TestExtensionsBase):
         expected_cli_version = '0.0.5'
         expected_max_required = '0.0.5b1'
         azext_metadata = {EXT_METADATA_MAXCLICOREVERSION: expected_max_required}
-        with mock.patch('azure.cli.__version__', expected_cli_version):
+        with mock.patch('azure.cli.core.__version__', expected_cli_version):
             is_compatible, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
