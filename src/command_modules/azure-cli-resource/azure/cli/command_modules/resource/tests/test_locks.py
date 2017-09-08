@@ -5,7 +5,7 @@
 
 from time import sleep
 import unittest
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only
 
 
 class ResourceLockTests(ScenarioTest):
@@ -13,6 +13,7 @@ class ResourceLockTests(ScenarioTest):
         # just make sure this doesn't throw
         self.cmd('az lock list').get_output_in_json()
 
+    @record_only()
     def test_lock_create_list_delete(self):
         for lock_type in ['ReadOnly', 'CanNotDelete']:
             lock_name = self.create_random_name('cli-test-lock', 48)
