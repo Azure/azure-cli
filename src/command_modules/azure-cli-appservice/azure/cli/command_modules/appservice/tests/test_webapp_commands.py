@@ -124,6 +124,11 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+        # verify app settings
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('[0].name', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'),
+            JMESPathCheckV2('[0].value', 'false'),
+        ]))
 
     @ResourceGroupPreparer(location='westus')
     def test_linux_webapp_quick_create_cd(self, resource_group):
@@ -135,6 +140,16 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
+    def test_create_in_different_group(self, resource_group, resource_group_location, resource_group2, resource_group_location2):
+        plan = 'planInOneRG'
+        self.cmd('group create -n {} -l {}'.format(resource_group2, resource_group_location))
+        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('webapp create -g {} -n webInOtherRG --plan {}'.format(resource_group2, plan_id), checks=[
+            JMESPathCheckV2('name', 'webInOtherRG')
+        ])
 
 
 class AppServicePlanSceanrioTest(ScenarioTest):

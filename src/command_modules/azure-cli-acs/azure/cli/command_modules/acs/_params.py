@@ -63,6 +63,8 @@ def _get_feature_in_preview_message():
 
 regionsInPreview = ["ukwest", "uksouth", "westcentralus", "westus2", "canadaeast", "canadacentral", "westindia", "southindia", "centralindia"]
 
+regionsInProd = ["australiasoutheast", "northeurope", "brazilsouth", "australiaeast", "japaneast", "northcentralus", "westus", "eastasia", "eastus2", "southcentralus", "southeastasia", "eastus", "westeurope", "centralus", "japanwest"]
+
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
@@ -108,6 +110,12 @@ register_cli_argument('acs create', 'validate', action='store_true', help='Gener
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)
+register_cli_argument('acs dcos browse', 'ssh_key_file',
+                      required=False,
+                      help='Path to an SSH key file to use.',
+                      type=file_type,
+                      default=os.path.join('~', '.ssh', 'id_rsa'),
+                      completer=FilesCompleter())
 register_cli_argument('acs dcos install-cli', 'install_location',
                       options_list=('--install-location',),
                       default=_get_default_install_location('dcos'))
@@ -122,6 +130,12 @@ register_cli_argument('acs kubernetes get-credentials', 'path',
                       options_list=('--file', '-f',),
                       default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                       type=file_type,
+                      completer=FilesCompleter())
+register_cli_argument('acs kubernetes get-credentials', 'ssh_key_file',
+                      required=False,
+                      help='Path to an SSH key file to use.',
+                      type=file_type,
+                      default=os.path.join('~', '.ssh', 'id_rsa'),
                       completer=FilesCompleter())
 register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
 register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')

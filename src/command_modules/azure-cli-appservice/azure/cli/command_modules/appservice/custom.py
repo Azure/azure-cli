@@ -34,7 +34,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,too-many-lines
+# pylint:disable=no-member,too-many-lines,too-many-locals
 
 
 def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
@@ -44,12 +44,14 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     client = web_client_factory()
     if is_valid_resource_id(plan):
-        plan = parse_resource_id(plan)['name']
-    plan_info = client.app_service_plans.get(resource_group_name, plan)
+        parse_result = parse_resource_id(plan)
+        plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+    else:
+        plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    webapp_def = Site(server_farm_id=plan, location=location, site_config=site_config)
+    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
         if runtime and deployment_container_image_name:
@@ -61,6 +63,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
+            site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -82,6 +85,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
                              deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
+
     return webapp
 
 
@@ -349,7 +353,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
-                              'DOCKER_REGISTRY_SERVER_PASSWORD']
+                              'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
@@ -812,7 +816,7 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
+    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUM'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")

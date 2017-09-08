@@ -105,6 +105,12 @@ def verify_packages():
     all_modules = automation_path.get_all_module_paths()
     all_command_modules = automation_path.get_command_modules_paths(include_prefix=True)
 
+    modules_missing_manifest_in = [name for name, path in all_modules if not os.path.isfile(os.path.join(path, 'MANIFEST.in'))]
+    if modules_missing_manifest_in:
+        print_heading('Error: The following modules are missing the MANIFEST.in file.')
+        print(modules_missing_manifest_in)
+        sys.exit(1)
+
     # STEP 1:: Build the packages
     for name, path in all_modules:
         build_package(path, built_packages_dir)
@@ -137,13 +143,17 @@ def verify_packages():
     config = Configuration()
 
     all_commands = list(config.get_command_table())
-    pool_size = 10
+    pool_size = 5
     chunk_size = 10
     command_results = []
     p = multiprocessing.Pool(pool_size)
+    prev_percent = 0
     for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, chunk_size), 1):
         command_results.append(res)
-        print('{0:%} complete'.format(i/len(all_commands)), file=sys.stderr)
+        cur_percent = int((i/len(all_commands))*100)
+        if cur_percent != prev_percent:
+            print('{}% complete'.format(cur_percent), file=sys.stderr)
+        prev_percent = cur_percent
     p.close()
     p.join()
     if not all(command_results):

@@ -531,7 +531,10 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
     secret = client.get_secret(vault_base_url, secret_name, secret_version)
-    encoding = encoding or secret.tags.get('file-encoding', 'utf-8')
+
+    if not encoding:
+        encoding = secret.tags.get('file-encoding', 'utf-8') if secret.tags else 'utf-8'
+
     secret_value = secret.value
 
     try:

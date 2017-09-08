@@ -3,6 +3,15 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+* Enable command module to set its own correlation ID in telemetry
+* Fix json dump issue when telemetry is set to diagnostics mode
+
+2.0.15 (2017-08-31)
++++++++++++++++++++
+* minor fixes
+
 2.0.14 (2017-08-28)
 +++++++++++++++++++
 

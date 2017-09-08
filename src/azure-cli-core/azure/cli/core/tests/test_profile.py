@@ -424,11 +424,11 @@ class Test_Profile(unittest.TestCase):
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_port = '12345'
-        test_user = test_port
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI', self.state1, test_tenant_id)
+        test_user = 'VM'
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI@' + str(test_port), self.state1, test_tenant_id)
         consolidated = Profile._normalize_properties(test_user,
                                                      [msi_subscription],
-                                                     False)
+                                                     True)
         profile._set_subscriptions(consolidated)
 
         # setup a response for the token request
@@ -720,9 +720,9 @@ class Test_Profile(unittest.TestCase):
         # assert
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
-        self.assertEqual(s['user']['name'], '9999')
-        self.assertEqual(s['user']['type'], 'user')
-        self.assertEqual(s['name'], 'MSI')
+        self.assertEqual(s['user']['name'], 'VM')
+        self.assertEqual(s['user']['type'], 'servicePrincipal')
+        self.assertEqual(s['name'], 'MSI@9999')
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 

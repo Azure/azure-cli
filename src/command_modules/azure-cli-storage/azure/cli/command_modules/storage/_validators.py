@@ -16,7 +16,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
 from ._factory import get_storage_data_service_client
-from .util import glob_files_locally
+from .util import glob_files_locally, guess_content_type
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -81,6 +81,7 @@ def validate_accept(namespace):
 
 
 def validate_bypass(namespace):
+
     if namespace.bypass:
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
@@ -304,7 +305,7 @@ def validate_blob_type(namespace):
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
 
 
-def get_content_setting_validator(settings_class, update):
+def get_content_setting_validator(settings_class, update, guess_from_file=None):
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
@@ -364,9 +365,11 @@ def get_content_setting_validator(settings_class, update):
             new_props.content_language = new_props.content_language or props.content_language
             new_props.content_md5 = new_props.content_md5 or props.content_md5
             new_props.cache_control = new_props.cache_control or props.cache_control
+        else:
+            if guess_from_file:
+                new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
 
         ns['content_settings'] = new_props
-        namespace = argparse.Namespace(**ns)
 
     return validator
 

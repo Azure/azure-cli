@@ -98,7 +98,7 @@ helps['storage account show'] = """
     short-summary: Returns storage account properties
     examples:
         - name: Show properties for a storage account using one or more resource ID.
-          text: az storage account show --ids ${storage_account_resource_id}
+          text: az storage account show --ids $(storage_account_resource_id)
         - name: Show properties for a storage account using an account name and resource group.
           text: az storage account show -g MyResourceGroup -n MyStorageAccount
 """
@@ -116,7 +116,7 @@ helps['storage account delete'] = """
     short-summary: Deletes a storage account.
     examples:
         - name: Delete a storage account using one or more resource ID.
-          text: az storage account delete --ids ${storage_account_resource_id}
+          text: az storage account delete --ids $(storage_account_resource_id)
         - name: Delete a storage account using an account name and resource group.
           text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """

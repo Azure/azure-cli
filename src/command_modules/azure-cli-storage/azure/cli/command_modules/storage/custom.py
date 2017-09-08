@@ -12,6 +12,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.command_modules.storage.util import guess_content_type
 from azure.cli.core.application import APPLICATION
 
 Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
@@ -41,7 +42,7 @@ def _update_progress(current, total):
 
 def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
                            custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
-                           bypass='AzureServices', default_action='Allow', assign_identity=False):
+                           bypass=None, default_action=None, assign_identity=False):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
@@ -66,7 +67,9 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
     if https_only:
         params.enable_https_traffic_only = https_only
 
-    if NetworkRuleSet:
+    if NetworkRuleSet and (bypass or default_action):
+        if bypass and not default_action:
+            raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                              virtual_network_rules=None)
 
@@ -129,12 +132,17 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         params.identity = Identity()
 
     if NetworkRuleSet and (bypass or default_action):
-        acl = instance.network_acls or NetworkRuleSet(
-            bypass=bypass, virtual_network_rules=None, ip_rules=None, default_action=default_action)
-        if bypass:
-            acl.bypass = bypass
-        if default_action:
-            acl.default_action = default_action
+        acl = instance.network_acls
+        if not acl:
+            if bypass and not default_action:
+                raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
+            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
+                                 default_action=default_action)
+        else:
+            if bypass:
+                acl.bypass = bypass
+            if default_action:
+                acl.default_action = default_action
         params.network_acls = acl
 
     return params
@@ -209,6 +217,9 @@ def upload_blob(client, container_name, blob_name, file_path, blob_type=None, co
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
     """Upload a blob to a container."""
+
+    settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
+    content_settings = guess_content_type(file_path, content_settings, settings_class)
 
     def upload_append_blob():
         if not client.exists(container_name, blob_name):

@@ -135,3 +135,19 @@ def _match_path(pattern, *args):
 
 def get_blob_tier_names(model):
     return [v for v in dir(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#' + model)) if not v.startswith('_')]
+
+
+def guess_content_type(file_path, original, settings_class):
+    if original.content_encoding or original.content_type:
+        return original
+
+    import mimetypes
+
+    content_type, content_encoding = mimetypes.guess_type(file_path)
+    return settings_class(
+        content_type=content_type,
+        content_encoding=content_encoding,
+        content_disposition=original.content_disposition,
+        content_language=original.content_language,
+        content_md5=original.content_md5,
+        cache_control=original.cache_control)
