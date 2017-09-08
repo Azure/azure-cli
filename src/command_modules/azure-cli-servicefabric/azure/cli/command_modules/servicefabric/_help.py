@@ -54,20 +54,20 @@ helps["sf application certificate"] = """
 
 helps["sf cluster list"] = """
     type: command
-    short-summary: List cluster resources. 
+    short-summary: List cluster resources.
 """
 
 helps["sf cluster create"] = """
     type: command
     short-summary: Create a new Azure Service Fabric cluster.
     examples:
-        - name: Create a cluster with a given size and self-signed certificate that is downloaded locally. 
+        - name: Create a cluster with a given size and self-signed certificate that is downloaded locally.
           text: >
             az sf cluster create -g group-name -n cluster1 -l westus -size 4 --vm-password Password#1234 --certificate-output-folder MyCertificates
         - name: Use a keyvault certificate and custom template to deploy a cluster.
           text: >
-            az sf cluster create -g group-name -n cluster1 -l westus --template-file template.json --parameter-file parameter.json
-            --secret-identifier https://{MyKeyVault}.vault.azure.net:443/secrets/{MyCertificate}
+            az sf cluster create -g group-name -n cluster1 -l westus --template-file template.json \\
+                --parameter-file parameter.json --secret-identifier https://{MyKeyVault}.vault.azure.net:443/secrets/{MyCertificate}
 
 """
 
@@ -127,7 +127,7 @@ helps["sf cluster setting set"] = """
 
 helps["sf cluster setting remove"] = """
     type: command
-    short-summary: Remove settings from a cluster. 
+    short-summary: Remove settings from a cluster.
     examples:
         - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
           text: >

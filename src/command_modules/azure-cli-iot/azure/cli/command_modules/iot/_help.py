@@ -7,26 +7,23 @@ from azure.cli.core.help_files import helps
 
 helps['iot'] = """
     type: group
-    short-summary: Manage Internet of Things (IoT) assets.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Internet of Things (IoT) assets.
 """
 
 helps['iot device'] = """
     type: group
-    short-summary: Manage devices in your Azure IoT hub.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage devices in your Azure IoT hub.
 """
 
 helps['iot hub'] = """
     type: group
-    short-summary: Manage Azure IoT hubs.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Azure IoT hubs.
 """
 
 helps['iot hub create'] = """
     type: command
     short-summary: Create an Azure IoT hub.
-    long-summary: For an introduction to Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/.
+    long-summary: 'For an introduction to Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/'
     examples:
         - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
           text: >
@@ -87,8 +84,7 @@ helps['iot hub delete'] = """
 
 helps['iot hub consumer-group'] = """
     type: group
-    short-summary: Manage the event hub consumer groups of an IoT hub.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage the event hub consumer groups of an IoT hub.
 """
 
 helps['iot hub consumer-group create'] = """
@@ -120,8 +116,7 @@ helps['iot hub consumer-group delete'] = """
 
 helps['iot hub policy'] = """
     type: group
-    short-summary: Manage shared access policies of an IoT hub.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage shared access policies of an IoT hub.
 """
 
 helps['iot hub policy list'] = """
@@ -155,8 +150,7 @@ helps['iot hub list-skus'] = """
 
 helps['iot hub job'] = """
     type: group
-    short-summary: Manage jobs in an IoT hub.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage jobs in an IoT hub.
 """
 
 helps['iot hub job list'] = """
@@ -249,8 +243,7 @@ helps['iot device show-connection-string'] = """
 
 helps['iot device message'] = """
     type: group
-    short-summary: Manage IoT device messaging.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage IoT device messaging.
 """
 
 helps['iot device message send'] = """
@@ -295,11 +288,11 @@ helps['iot device message abandon'] = """
 helps['iot device export'] = """
     type: command
     short-summary: Export all the device identities in the IoT hub identity registry to an Azure Storage blob container.
-    long-summary: For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
+    long-summary: 'For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities'
 """
 
 helps['iot device import'] = """
     type: command
     short-summary: Import, update, or delete device identities in the IoT hub identity registry from a blob.
-    long-summary: For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
+    long-summary: 'For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities'
 """

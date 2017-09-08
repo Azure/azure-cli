@@ -260,7 +260,7 @@ helps['webapp deployment source config'] = """
 
 helps['webapp deployment source config-local-git'] = """
     type: command
-    short-summary: Get a URL for a git repository endpoint to clone and push to for web app deployment. 
+    short-summary: Get a URL for a git repository endpoint to clone and push to for web app deployment.
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
@@ -611,7 +611,7 @@ helps['functionapp deployment source config'] = """
 
 helps['functionapp deployment source config-local-git'] = """
     type: command
-    short-summary: Get a URL for a git repository endpoint to clone and push to for function app deployment. 
+    short-summary: Get a URL for a git repository endpoint to clone and push to for function app deployment.
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >

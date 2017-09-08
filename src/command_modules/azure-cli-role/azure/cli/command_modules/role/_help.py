@@ -27,7 +27,7 @@ helps['ad sp create-for-rbac'] = """
         - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
         - name: --years
-          short-summary: Number of years for which the credentials will be valid. Default: 1 year
+          short-summary: 'Number of years for which the credentials will be valid. Default: 1 year'
         - name: --scopes
           short-summary: >
             Space-separated list of scopes the service principal's role assignment applies to.

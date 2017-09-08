@@ -101,7 +101,7 @@ helps['storage account show'] = """
     short-summary: Show storage account properties.
     examples:
         - name: Show properties for a storage account by resource ID.
-          text: az storage account show --ids /subscriptions/{SubID}/resourceGroups/{MyResourceGroup}/providers/Microsoft.Storage/storageAccounts/{MyStorageAccount} 
+          text: az storage account show --ids /subscriptions/{SubID}/resourceGroups/{MyResourceGroup}/providers/Microsoft.Storage/storageAccounts/{MyStorageAccount}
         - name: Show properties for a storage account using an account name and resource group.
           text: az storage account show -g MyResourceGroup -n MyStorageAccount
 """

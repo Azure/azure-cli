@@ -8,14 +8,12 @@ from azure.cli.core.help_files import helps
 
 helps['dls'] = """
     type: group
-    short-summary: Manage Data Lake Store accounts and filesystems.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Data Lake Store accounts and filesystems.
 """
 
 helps['dls account'] = """
     type: group
-    short-summary: Manage Data Lake Store accounts.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Data Lake Store accounts.
 """
 
 helps['dls account create'] = """
@@ -63,14 +61,12 @@ helps['dls account delete'] = """
 
 helps['dls account trusted-provider'] = """
     type: group
-    short-summary: Manage Data Lake Store account trusted identity providers.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Data Lake Store account trusted identity providers.
 """
 
 helps['dls account firewall'] = """
     type: group
-    short-summary: Manage Data Lake Store account firewall rules.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Data Lake Store account firewall rules.
 """
 
 helps['dls account firewall create'] = """
@@ -110,8 +106,7 @@ helps['dls account firewall delete'] = """
 
 helps['dls fs'] = """
     type: group
-    short-summary: Manage a Data Lake Store filesystem.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage a Data Lake Store filesystem.
 """
 
 helps['dls fs create'] = """
@@ -159,7 +154,7 @@ helps['dls fs upload'] = """
           short-summary: The full path in the Data Lake Store filesystem to upload the file or folder to.
         - name: --thread-count
           type: int
-          short-summary: Parallelism of the upload. Default: The number of cores in the local machine.
+          short-summary: 'Parallelism of the upload. Default: The number of cores in the local machine.'
         - name: --chunk-size
           type: int
           short-summary: Size of a chunk, in bytes.
@@ -187,7 +182,7 @@ helps['dls fs download'] = """
           short-summary: The local path where the file or folder will be downloaded to.
         - name: --thread-count
           type: int
-          short-summary: Parallelism of the download. Default: The number of cores in the local machine.
+          short-summary: 'Parallelism of the download. Default: The number of cores in the local machine.'
         - name: --chunk-size
           type: int
           short-summary: Size of a chunk, in bytes.

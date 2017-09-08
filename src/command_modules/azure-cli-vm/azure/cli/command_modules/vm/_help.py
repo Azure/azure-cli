@@ -33,7 +33,7 @@ helps['vm format-secret'] = """
 helps['vm create'] = """
     type: command
     short-summary: Create an Azure Virtual Machine.
-    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-quick-create-cli.
+    long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-quick-create-cli.'
     parameters:
         - name: --image
           type: string
@@ -58,7 +58,7 @@ helps['vm create'] = """
         - name: Create a VM by attaching to a managed operating system disk.
           text: >
             az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
-        - name: Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.
+        - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.'
           text: >
             az vm create -g MyResourceGroup -n MyVm --image debian --custom_data MyCloudInitScript.yml
         - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
@@ -91,7 +91,7 @@ helps['vm create'] = """
 helps['vmss create'] = """
     type: command
     short-summary: Create an Azure Virtual Machine Scale Set.
-    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-linux-create-cli.
+    long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-linux-create-cli.'
     parameters:
         - name: --image
           type: string
@@ -112,7 +112,7 @@ helps['vmss create'] = """
           text: >
             az vmss create -n MyVmss -g MyResourceGroup --image centos \\
                 --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
-        - name: Create a Linux VM scale set using a cloud-init script for configuration (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
+        - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
           text: >
             az vmss create -g MyResourceGroup -n MyVmss --image debian --custom_data MyCloudInitScript.yml
         - name: Create a Debian VM scaleset using Key Vault secrets.
@@ -135,7 +135,7 @@ helps['vmss create'] = """
 helps['vm availability-set create'] = """
     type: command
     short-summary: Create an Azure Availability Set.
-    long-summary: For more information, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-manage-availability.
+    long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-manage-availability.'
     examples:
         - name: Create an availability set.
           text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
@@ -229,7 +229,7 @@ helps['vmss get-instance-view'] = """
     short-summary: View an instance of a VMSS.
     parameters:
         - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`. 
+          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
 """
 
 helps['vmss reimage'] = """
@@ -247,7 +247,7 @@ helps['vmss disk'] = """
 
 helps['vmss nic'] = """
     type: group
-    short-summary: Manage network interfaces of a VMSS. 
+    short-summary: Manage network interfaces of a VMSS.
 """
 
 helps['vmss show'] = """
@@ -339,7 +339,7 @@ helps[vm_boot_diagnostics_disable] = """
     short-summary: Disable the boot diagnostics on a VM.
     examples:
 {0}
-""".format( vm_ids_example.format('Disable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_disable))
+""".format(vm_ids_example.format('Disable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_disable))
 
 vm_boot_diagnostics_enable = 'vm boot-diagnostics enable'
 vm_boot_diagnostics_enable_cmd = "{0} --storage https://mystor.blob.core.windows.net/".format(vm_boot_diagnostics_enable)
@@ -441,9 +441,9 @@ helps['vm diagnostics set'] = """
 """
 
 disk_long_summary = """
-        Just like any other computer, virtual machines in Azure use disks as a place to store an operating system, applications, and data. 
-        All Azure virtual machines have at least two disks: An operating system disk, and a temporary disk. 
-        The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs) 
+        Just like any other computer, virtual machines in Azure use disks as a place to store an operating system, applications, and data.
+        All Azure virtual machines have at least two disks: An operating system disk, and a temporary disk.
+        The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
         stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
         Operating System Disk
@@ -788,7 +788,7 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
 helps['vm capture'] = """
     type: command
     short-summary: Capture information for a stopped VM.
-    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image.
+    long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
     examples:
 {0}
 """.format(deallocate_generalize_capture)
@@ -806,7 +806,7 @@ helps['vm delete'] = """
 helps['vm deallocate'] = """
     type: command
     short-summary: Deallocate a VM.
-    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image.
+    long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
     examples:
 {0}
 """.format(deallocate_generalize_capture)
@@ -814,7 +814,7 @@ helps['vm deallocate'] = """
 helps['vm generalize'] = """
     type: command
     short-summary: Mark a VM as generalized, allowing it to be imaged for multiple deployments.
-    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image.
+    long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
     examples:
 {0}
 """.format(deallocate_generalize_capture)
@@ -831,7 +831,7 @@ helps['vm get-instance-view'] = """
 helps['vm list'] = """
     type: command
     short-summary: List details of Virtual Machines.
-    long-summary: For more information on querying information about Virtual Machines, see https://docs.microsoft.com/en-us/cli/azure/query-az-cli2.
+    long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/en-us/cli/azure/query-az-cli2'
     examples:
         - name: List all VMs.
           text: az vm list
@@ -996,11 +996,14 @@ helps['disk create'] = """
     short-summary: Create a managed disk.
     examples:
         - name: Create a managed disk by importing from a blob uri.
-          text: az disk create -g MyResourceGroup -n MyDisk --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+          text: >
+            az disk create -g MyResourceGroup -n MyDisk --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
         - name: Create an empty managed disk.
-          text: az disk create -g MyResourceGroup -n MyDisk --size-gb 10
+          text: >
+            az disk create -g MyResourceGroup -n MyDisk --size-gb 10
         - name: Create a managed disk by copying an existing disk or snapshot.
-          text: az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
+          text: >
+            az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
 """
 
 helps['disk list'] = """
@@ -1039,7 +1042,8 @@ helps['snapshot create'] = """
     short-summary: Create a snapshot.
     examples:
         - name: Create a snapshot by importing from a blob uri.
-          text: az snapshot create -g MyResourceGroup -n MySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+          text: >
+            az snapshot create -g MyResourceGroup -n MySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
         - name: Create an empty snapshot.
           text: az snapshot create -g MyResourceGroup -n MySnapshot --size-gb 10
         - name: Create a snapshot by copying an existing disk in the same resource group.

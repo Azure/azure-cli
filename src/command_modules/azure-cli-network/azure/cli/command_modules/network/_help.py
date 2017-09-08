@@ -541,8 +541,7 @@ helps['network application-gateway waf-config show'] = """
 
 helps['network application-gateway waf-config list-rule-sets'] = """
     type: command
-    short-summary: Get information on available WAF rule sets, rule groups, and rule IDs.
-    long-summary: This command is in preview.
+    short-summary: (PREVIEW) Get information on available WAF rule sets, rule groups, and rule IDs.
     parameters:
         - name: --group
           short-summary: >
@@ -619,7 +618,7 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
 
 for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     indef_article = 'an' if record.startswith('a') else 'a'
-    
+
     helps['network dns record-set {} update'.format(record)] = """
         type: command
         short-summary: Update  {} {} record set.
@@ -1467,8 +1466,7 @@ helps['network route-table route update'] = """
 
 helps['network route-filter'] = """
     type: group
-    short-summary: Manage route filters.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage route filters.
 """
 
 helps['network route-filter create'] = """
@@ -1498,8 +1496,7 @@ helps['network route-filter update'] = """
 
 helps['network route-filter rule'] = """
     type: group
-    short-summary: Manage rules in a route filter.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage rules in a route filter.
 """
 
 helps['network route-filter rule create'] = """
@@ -1507,12 +1504,9 @@ helps['network route-filter rule create'] = """
     short-summary: Create a rule in a route filter.
     parameters:
         - name: --communities
-          short-summary: |
-                Space separated list of border gateway protocol (BGP) community values to filter on.
+          short-summary: Space separated list of border gateway protocol (BGP) community values to filter on.
           populator-commands:
             - az network route-filter rule list-service-communities
-    examples:
-        text: 
 """
 
 helps['network route-filter rule delete'] = """
@@ -1928,8 +1922,7 @@ helps['network vnet-gateway root-cert delete'] = """
 # region Network Watcher
 helps['network watcher'] = """
     type: group
-    short-summary: Manage the Azure Network Watcher.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage the Azure Network Watcher.
 """
 
 helps['network watcher list'] = """
@@ -1953,8 +1946,7 @@ helps['network watcher configure'] = """
 
 helps['network watcher troubleshooting'] = """
     type: group
-    short-summary: Manage Network Watcher troubleshooting sessions.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage Network Watcher troubleshooting sessions.
 """
 
 helps['network watcher troubleshooting start'] = """
@@ -2034,9 +2026,9 @@ helps['network watcher show-topology'] = """
 
 helps['network watcher packet-capture'] = """
     type: group
-    short-summary: Manage packet capture sessions on VMs.
+    short-summary: (PREVIEW) Manage packet capture sessions on VMs.
     long-summary: |
-        These commands are in preview, and require that both Azure Network Watcher is enabled for the
+        These commands require that both Azure Network Watcher is enabled for the
         VM's region and that AzureNetworkWatcherExtension is enabled on the VM.
 """
 
@@ -2068,8 +2060,7 @@ helps['network watcher packet-capture create'] = """
 
 helps['network watcher flow-log'] = """
     type: group
-    short-summary: Manage network security group flow logging.
-    long-summary: These commands are in preview.
+    short-summary: (PREVIEW) Manage network security group flow logging.
 """
 
 helps['network watcher flow-log configure'] = """

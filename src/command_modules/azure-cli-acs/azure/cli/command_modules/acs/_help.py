@@ -43,6 +43,6 @@ helps['acs create'] = """
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles "[{'name':'agentpool1'},{'name':'agentpool2'}]"
         - name: Create an ACS cluster where the second agent pool has a vmSize specified.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles "[{'name':'agentpool1'},{'name':'agentpool2','vmSize':'Standard_D2'}]"
-        - name: Create a ACS cluster with agent-profiles specified from a file.
+        - name: Create an ACS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
 """

@@ -237,7 +237,7 @@ helps['acr webhook get-config'] = """
     type: command
     short-summary: Get the service URI and custom headers for the webhook.
     examples:
-        - name: Get the configuration information for a webhook. 
+        - name: Get the configuration information for a webhook.
           text: >
             az acr webhook get-config -n MyWebhook -r MyRegistry
 """
@@ -246,7 +246,7 @@ helps['acr webhook ping'] = """
     type: command
     short-summary: Trigger a ping event for a webhook.
     examples:
-        - name: Trigger a ping even for a webhook.
+        - name: Trigger a ping event for a webhook.
           text: >
             az acr webhook ping -n MyWebhook -r MyRegistry
 """
