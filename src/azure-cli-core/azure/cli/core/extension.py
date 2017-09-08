@@ -20,8 +20,8 @@ EXTENSIONS_MOD_PREFIX = 'azext_'
 WHL_METADATA_FILENAME = 'metadata.json'
 AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 
-EXT_METADATA_MINCLIVERSION = 'azext.minCliVersion'
-EXT_METADATA_MAXCLIVERSION = 'azext.maxCliVersion'
+EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
+EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -134,20 +134,20 @@ EXTENSION_TYPES = [WheelExtension]
 
 
 def ext_compat_with_cli(azext_metadata):
-    from azure.cli import __version__ as cli_version  # pylint:disable=no-name-in-module
+    from azure.cli.core import __version__ as core_version
     from pkg_resources import parse_version
     is_compatible, min_required, max_required = (True, None, None)
     if azext_metadata:
-        min_required = azext_metadata.get(EXT_METADATA_MINCLIVERSION)
-        max_required = azext_metadata.get(EXT_METADATA_MAXCLIVERSION)
-        parsed_cli_version = parse_version(cli_version)
+        min_required = azext_metadata.get(EXT_METADATA_MINCLICOREVERSION)
+        max_required = azext_metadata.get(EXT_METADATA_MAXCLICOREVERSION)
+        parsed_cli_version = parse_version(core_version)
         if min_required and parsed_cli_version < parse_version(min_required):
             is_compatible = False
         elif max_required and parsed_cli_version > parse_version(max_required):
             is_compatible = False
         else:
             is_compatible = True
-    return is_compatible, cli_version, min_required, max_required
+    return is_compatible, core_version, min_required, max_required
 
 
 def get_extension_modname(ext_name=None, ext_dir=None):
