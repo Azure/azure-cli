@@ -306,7 +306,7 @@ class DeploymentTest(ScenarioTest):
         # ensures that a template that is missing "parameters" or "resources" still deploys
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\')
-        deployment_name = 'azure-cli-deployment'
+        deployment_name = self.create_random_name('azure-cli-deployment', 30)
 
         self.cmd('group deployment create -g {} -n {} --template-file {}'.format(
             resource_group, deployment_name, template_file), checks=[
@@ -498,8 +498,8 @@ class FeatureScenarioTest(VCRTestBase):
 class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
-        policy_name = 'azure-cli-test-policy'
-        policy_display_name = 'test_policy_123'
+        policy_name = self.create_random_name('azure-cli-test-policy', 30)
+        policy_display_name = self.create_random_name('test_policy', 20)
         policy_description = 'desc_for_test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
@@ -529,8 +529,8 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # create a policy assignment on a resource group
-        policy_assignment_name = 'azurecli-test-policy-assignment'
-        policy_assignment_display_name = 'test_assignment_123'
+        policy_assignment_name = self.create_random_name('azurecli-test-policy-assignment', 40)
+        policy_assignment_display_name = self.create_random_name('test_assignment', 20)
         self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --params {}'.format(
                  policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
                  checks=[
@@ -563,8 +563,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
         location = 'westcentralus'
-        appdef_name = 'testappdefname'
-        appdef_display_name = 'test_appdef_123'
+        appdef_name = self.create_random_name('testappdefname', 20)
+        appdef_display_name = self.create_random_name('test_appdef', 20)
         appdef_description = 'test_appdef_123'
         packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
         auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
@@ -612,8 +612,8 @@ class ManagedAppScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
         location = 'westcentralus'
-        appdef_name = 'testappdefname'
-        appdef_display_name = 'test_appdef_123'
+        appdef_name = self.create_random_name('testappdef', 20)
+        appdef_display_name = self.create_random_name('test_appdef', 20)
         appdef_description = 'test_appdef_123'
         packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
         auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
@@ -625,7 +625,7 @@ class ManagedAppScenarioTest(ScenarioTest):
                                                    appdef_description, location, auth, lock, resource_group)).get_output_in_json()
 
         # create a managedapp
-        managedapp_name = 'mymanagedapp'
+        managedapp_name = self.create_random_name('mymanagedapp', 20)
         managedapp_loc = 'westcentralus'
         managedapp_kind = 'servicecatalog'
         newrg = self.create_random_name('climanagedapp', 25)
@@ -666,7 +666,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
     def test_group_deployment_crossrg(self, resource_group, resource_group_cross):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\')
-        deployment_name = 'azure-cli-crossrgdeployment'
+        deployment_name = self.create_random_name('azure-cli-crossrgdeployment', 40)
         storage_account_1 = create_random_name(prefix='crossrg')
         storage_account_2 = create_random_name(prefix='crossrg')
 
