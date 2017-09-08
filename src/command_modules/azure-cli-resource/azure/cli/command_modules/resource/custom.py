@@ -943,14 +943,13 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
             except AttributeError:
                 logger.error('az lock show: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
                 return
-        if len(kwargs_list) == 1:
-            return get_lock(**kwargs_list[0])
-        return [get_lock(**kwargs) for kwargs in kwargs_list]
+        results = [get_lock(**kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
 
     lock_client = _resource_lock_client_factory()
 
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
-                                            resource_type, resource_name)
+                                         resource_type, resource_name)
 
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
@@ -958,16 +957,16 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
     resource_type = lock_resource[3]
 
     _validate_lock_params_match_lock(lock_client, name, resource_group_name,
-                                        resource_provider_namespace, parent_resource_path,
-                                        resource_type, resource_name)
+                                     resource_provider_namespace, parent_resource_path,
+                                     resource_type, resource_name)
 
     if resource_group_name is None:
         return _call_correct_subscription_get(lock_client, name)
     if resource_name is None:
         return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
     if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
-        lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path, 
-            resource_type, resource_name)
+        lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
+                               resource_type, resource_name)
         lock_list = [lock for lock in lock_list if lock.name == name]
         return lock_list[0] if lock_list else None
     return lock_client.management_locks.get_at_resource_level(
@@ -997,9 +996,8 @@ def delete_lock(name=None, resource_group_name=None, resource_provider_namespace
             except AttributeError:
                 logger.error('az lock delete: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
                 return
-        if len(kwargs_list) == 1:
-            return delete_lock(**kwargs_list[0])
-        return [delete_lock(**kwargs) for kwargs in kwargs_list]
+        results = [delete_lock(**kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
 
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -1099,9 +1097,8 @@ def update_lock(name=None, resource_group_name=None, resource_provider_namespace
             except AttributeError:
                 logger.error('az lock update: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
                 return
-        if len(kwargs_list) == 1:
-            return update_lock(level=level, notes=notes, **kwargs_list[0])
-        return [update_lock(level=level, notes=notes, **kwargs) for kwargs in kwargs_list]
+        results = [update_lock(level=level, notes=notes, **kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
 
     lock_client = _resource_lock_client_factory()
 
