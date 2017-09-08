@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from time import sleep
-import unittest, random, string
+import unittest, random
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only
 
 
@@ -115,7 +115,45 @@ class ResourceLockTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_lock_commands_with_ids')
     def test_lock_commands_with_ids(self, resource_group):
-        pass
+        vnet_name = self.create_random_name('cli-lock-vnet', 30)
+        subnet_name = self.create_random_name('cli-lock-subnet', 30)
+        address = '.'.join([str(random.randint(10,99)) for x in range(3)]) + '.0/24'
+        group_lock_name = self.create_random_name('cli-test-lock', 50)
+        vnet_lock_name = self.create_random_name('cli-test-lock', 50)
+        subnet_lock_name = self.create_random_name('cli-test-lock', 50)
+
+        self.cmd('az network vnet create -n {} -g {}'.format(vnet_name, resource_group))
+        self.cmd('az network vnet subnet create -n {} --address-prefix {} --vnet-name {} -g {}'
+                 .format(subnet_name, address, vnet_name, resource_group))
+        self.cmd('az lock create -n {} -g {} --lock-type CanNotDelete').format(group_lock_name,resource_group)
+        self.cmd('az lock create -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --resource-name {} --lock-type CanNotDelete'
+                 .format(vnet_lock_name, resource_group, vnet_name))
+        self.cmd('az lock create -n {} -g {} --resource-name {} --resource-type subnets '
+                 '--namespace Microsoft.Network --parent virtualNetworks/{} --lock-type CanNotDelete'
+                 .format(subnet_lock_name, resource_group, subnet_name, vnet_name))
+                 
+        self._sleep_for_lock_operation()
+
+        self.cmd('az lock show --name {} -g {} --resource-type {} --resource-name {}'
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name)).assert_with_checks([
+                     JMESPathCheck('name', lock_name),
+                     JMESPathCheck('level', lock_type)])
+
+        locks_list = self.cmd("az lock list --query '[].name' -ojson").get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        notes = self.create_random_name('notes', 20)
+        new_lvl = 'ReadOnly' if lock_type == 'CanNotDelete' else 'CanNotDelete'
+        lock = self.cmd('az lock update -n {} -g {} --resource-type {} --resource-name {} --notes {} --lock-type {}'
+                        .format(lock_name, resource_group, rsrc_type, rsrc_name, notes, new_lvl)).get_output_in_json()
+
+        self.assertEqual(lock.get('notes', None), notes)
+        self.assertEqual(lock.get('level', None), new_lvl)
+
+        self.cmd('az lock delete --name {} -g {} --resource-name {} --resource-type {}'
+                 .format(lock_name, resource_group, rsrc_name, rsrc_type))
+        self._sleep_for_lock_operation()
 
     def _sleep_for_lock_operation(self):
         if self.is_live:
