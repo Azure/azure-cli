@@ -11,10 +11,12 @@ from azure.cli.core.commands import _update_command_definitions
 from azure.cli.core.commands import (
     command_table,
     CliArgumentType,
+    ExtensionCommandSource,
     CliCommandArgument,
     cli_command,
     register_cli_argument,
     register_extra_cli_argument)
+from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 
 
 class Test_command_registration(unittest.TestCase):
@@ -108,6 +110,35 @@ class Test_command_registration(unittest.TestCase):
                                           command_metadata.arguments[existing].options)
         self.assertEqual(command_metadata.arguments['resource_group_name'].options_list,
                          ['--resource-group-name'])
+
+    def test_register_command_from_extension(self):
+        command_table.clear()
+
+        # A standard command
+        cli_command(None, 'hello world', 'dummy_operation', None)
+        self.assertEqual(len(command_table), 1)
+        self.assertEqual(command_table['hello world'].command_source, None)
+
+        command_table.clear()
+
+        # A command from an extension
+        cli_command('{}myextension'.format(EXTENSIONS_MOD_PREFIX), 'hello world', 'dummy_operation', None)
+        self.assertEqual(len(command_table), 1)
+        cmd_source = command_table['hello world'].command_source
+        self.assertTrue(isinstance(cmd_source, ExtensionCommandSource))
+        self.assertFalse(cmd_source.overrides_command)
+
+        command_table.clear()
+
+        # A command from an extension that overrides the original command
+        cli_command(None, 'hello world', 'dummy_operation', None)
+        cli_command('{}myextension'.format(EXTENSIONS_MOD_PREFIX), 'hello world', 'dummy_operation', None)
+        self.assertEqual(len(command_table), 1)
+        cmd_source = command_table['hello world'].command_source
+        self.assertTrue(isinstance(cmd_source, ExtensionCommandSource))
+        self.assertTrue(cmd_source.overrides_command)
+
+        command_table.clear()
 
     def test_register_cli_argument_with_overrides(self):
         command_table.clear()
