@@ -116,8 +116,9 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japaneast')
     def test_linux_webapp_quick_create(self, resource_group):
-        webapp_name = 'webapp-quick-linux4'
-        plan = 'plan-quick-linux4'
+        webapp_name = self.create_random_name(prefix='webapp-quick-linux', length=24)
+        plan = self.create_random_name(prefix='plan-quick-linux', length=24)
+
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
         import requests
@@ -140,16 +141,6 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
-
-    @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
-    @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
-    def test_create_in_different_group(self, resource_group, resource_group_location, resource_group2, resource_group_location2):
-        plan = 'planInOneRG'
-        self.cmd('group create -n {} -l {}'.format(resource_group2, resource_group_location))
-        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
-        self.cmd('webapp create -g {} -n webInOtherRG --plan {}'.format(resource_group2, plan_id), checks=[
-            JMESPathCheckV2('name', 'webInOtherRG')
-        ])
 
 
 class AppServicePlanSceanrioTest(ScenarioTest):
@@ -347,8 +338,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
         runtime = 'node|6.4'
-        plan = 'webapp-linux-plan7'
-        webapp = 'webapp-linux7'
+        plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
+        webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
@@ -370,7 +361,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
 
         result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
-            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'true')).get_output_in_json()
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'false')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
 
         result = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
@@ -379,7 +370,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
         self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         sample = next((x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
-        self.assertEqual(sample, {'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
+        self.assertEqual(sample, {'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
         self.cmd('webapp config container delete -g {} -n {}'.format(resource_group, webapp))
         result2 = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
         self.assertEqual(result2, [])
