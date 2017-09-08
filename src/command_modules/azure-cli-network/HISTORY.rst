@@ -3,12 +3,6 @@
 Release History
 ===============
 
-2.0.13 (2017-08-28)
-+++++++++++++++++++
-* `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
-* `vnet-gateway`: Added command `vpn-client generate`.
-
-
 unreleased
 +++++++++++++++++++
 * BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
@@ -17,6 +11,10 @@ unreleased
 * `lb create`: Added support for SKU.
 * `public-ip create`: Added support for SKU.
 
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
+* `vnet-gateway`: Added command `vpn-client generate`.
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
