@@ -19,11 +19,14 @@ from azure.cli.command_modules.vm.custom import \
 from azure.cli.command_modules.vm.disk_encryption import (enable,
                                                           disable,
                                                           _check_encrypt_is_supported)
-from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
-                                       OperatingSystemTypes, InstanceViewStatus,
-                                       VirtualMachineExtensionInstanceView,
-                                       VirtualMachineExtension, ImageReference,
-                                       DiskCreateOptionTypes, CachingTypes)
+from azure.cli.core.profiles import get_sdk, ResourceType
+
+NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
+    VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
+    CachingTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
+                           'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
+                           'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes', 'CachingTypes',
+                           mod='models')
 
 
 class Test_Vm_Custom(unittest.TestCase):

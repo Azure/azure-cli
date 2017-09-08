@@ -128,7 +128,6 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-
 def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 

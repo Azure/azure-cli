@@ -21,7 +21,7 @@ from azure.cli.core.profiles import supported_api_version, ResourceType
 # pylint: disable=line-too-long
 
 custom_path = 'azure.cli.command_modules.vm.custom#{}'
-mgmt_path = 'azure.mgmt.compute.compute.operations.{}#{}.{}'
+mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
 
 
 # VM
@@ -295,11 +295,11 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks, no_wait_param='raw', confirmation=True)
     cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
     cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
-    cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
-                               'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
+    cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class),
+                               'azure.mgmt.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
                                custom_function_op=custom_path.format('update_managed_disk'),
                                setter_arg_name='disk', factory=cf_disks, no_wait_param='raw')
-    cli_generic_wait_command(__name__, 'disk wait', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class), cf_disks)
+    cli_generic_wait_command(__name__, 'disk wait', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class), cf_disks)
 
     op_var = 'snapshots_operations'
     op_class = 'SnapshotsOperations'
@@ -309,8 +309,8 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     cli_command(__name__, 'snapshot delete', mgmt_path.format(op_var, op_class, 'delete'), cf_snapshots)
     cli_command(__name__, 'snapshot grant-access', custom_path.format('grant_snapshot_access'))
     cli_command(__name__, 'snapshot revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_snapshots)
-    cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
-                               'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
+    cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class),
+                               'azure.mgmt.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
                                custom_function_op=custom_path.format('update_snapshot'),
                                setter_arg_name='snapshot', factory=cf_snapshots)
 

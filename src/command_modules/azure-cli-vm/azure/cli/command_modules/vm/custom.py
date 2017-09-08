@@ -480,7 +480,7 @@ def grant_snapshot_access(resource_group_name, snapshot_name, duration_in_second
 
 
 def _grant_access(resource_group_name, name, duration_in_seconds, is_disk):
-    from azure.mgmt.compute.models import AccessLevel
+    AccessLevel = get_sdk(ResourceType.MGMT_COMPUTE, 'AccessLevel', mod='models')
     client = _compute_client_factory()
     op = client.disks if is_disk else client.snapshots
     return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
@@ -1875,7 +1875,7 @@ def create_vmss(vmss_name, resource_group_name, image,
             master_template.add_resource(build_public_ip_resource(
                 public_ip_address, location, tags,
                 _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
-                None))
+                None, zones))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                     public_ip_address)
 
