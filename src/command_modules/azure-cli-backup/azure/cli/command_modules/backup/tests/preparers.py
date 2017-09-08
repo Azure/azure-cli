@@ -57,7 +57,8 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
-    def _cleanup(self, vault_name, resource_group):
+    @staticmethod
+    def _cleanup(vault_name, resource_group):
         vault = execute('az backup vault show -n {} -g {}'.format(vault_name, resource_group)).get_output_in_json()
         containers = execute('az backup container list --vault \'{}\''.format(json.dumps(vault))).get_output_in_json()
         for container in containers:

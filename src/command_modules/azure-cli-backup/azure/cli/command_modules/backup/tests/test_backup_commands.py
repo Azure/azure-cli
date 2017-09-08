@@ -5,6 +5,7 @@
 
 import json
 from datetime import datetime, timedelta
+import unittest
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer
@@ -20,7 +21,7 @@ def _get_vm_version(vm_type):
         return 'Classic'
 
 
-class BackupTests(ScenarioTest):
+class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -143,10 +144,10 @@ class BackupTests(ScenarioTest):
 
         vm1_json = self.cmd('az vm show -n {} -g {}'.format(vm1, resource_group)).get_output_in_json()
 
-        assert vault_name.lower() in container_json['id'].lower()
-        assert vm1.lower() in container_json['name'].lower()
-        assert vm1.lower() in container_json['properties']['virtualMachineId'].lower()
-        assert container_json['properties']['virtualMachineVersion'] == _get_vm_version(vm1_json['type'])
+        self.assertIn(vault_name.lower(), container_json['id'].lower())
+        self.assertIn(vm1.lower(), container_json['name'].lower())
+        self.assertIn(vm1.lower(), container_json['properties']['virtualMachineId'].lower())
+        self.assertEqual(container_json['properties']['virtualMachineVersion'], _get_vm_version(vm1_json['type']))
 
         self.cmd('az backup container list --vault \'{}\''.format(vault_json), checks=[
             JMESPathCheck("length(@)", 2),
@@ -234,11 +235,11 @@ class BackupTests(ScenarioTest):
                                   JMESPathCheck('properties.protectionStatus', 'Healthy'),
                                   JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
 
-        assert vault_name.lower() in item1_json['id'].lower()
-        assert vm1.lower() in item1_json['name'].lower()
-        assert vm1.lower() in item1_json['properties']['sourceResourceId'].lower()
-        assert vm1.lower() in item1_json['properties']['virtualMachineId'].lower()
-        assert default_policy.lower() in item1_json['properties']['policyId'].lower()
+        self.assertIn(vault_name.lower(), item1_json['id'].lower())
+        self.assertIn(vm1.lower(), item1_json['name'].lower())
+        self.assertIn(vm1.lower(), item1_json['properties']['sourceResourceId'].lower())
+        self.assertIn(vm1.lower(), item1_json['properties']['virtualMachineId'].lower())
+        self.assertIn(default_policy.lower(), item1_json['properties']['policyId'].lower())
 
         self.cmd('az backup item list --container \'{}\''
                  .format(container1_json), checks=[
@@ -262,7 +263,7 @@ class BackupTests(ScenarioTest):
 
         item1_json = self.cmd('az backup item show --container \'{}\' --item-name {}'
                               .format(container1_json, vm1)).get_output_in_json()
-        assert policy_name.lower() in item1_json['properties']['policyId'].lower()
+        self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -286,16 +287,16 @@ class BackupTests(ScenarioTest):
                             .format(item_json, rp1_name), checks=[
                                 JMESPathCheck("name", rp1_name),
                                 JMESPathCheck("resourceGroup", resource_group)]).get_output_in_json()
-        assert vault_name.lower() in rp1_json['id'].lower()
-        assert vm_name.lower() in rp1_json['id'].lower()
+        self.assertIn(vault_name.lower(), rp1_json['id'].lower())
+        self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
         rp2_name = rps_json[1]['name']
         rp2_json = self.cmd('az backup recoverypoint show --backup-item \'{}\' --id {}'
                             .format(item_json, rp2_name), checks=[
                                 JMESPathCheck("name", rp2_name),
                                 JMESPathCheck("resourceGroup", resource_group)]).get_output_in_json()
-        assert vault_name.lower() in rp2_json['id'].lower()
-        assert vm_name.lower() in rp2_json['id'].lower()
+        self.assertIn(vault_name.lower(), rp2_json['id'].lower())
+        self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -387,7 +388,7 @@ class BackupTests(ScenarioTest):
                                                ]).get_output_in_json()
 
         property_bag = trigger_restore_job_details['properties']['extendedInfo']['propertyBag']
-        assert property_bag['Target Storage Account Name'] == storage_account
+        self.assertEqual(property_bag['Target Storage Account Name'], storage_account)
 
         restore_container = property_bag['Config Blob Container Name']
         restore_blob = property_bag['Config Blob Name']

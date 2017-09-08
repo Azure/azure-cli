@@ -50,6 +50,11 @@ helps['backup container list'] = """
             short-summary: Lists the containers registered to the vault.
             """
 
+helps['backup container list'] = """
+            type: command
+            short-summary: Lists the containers registered to the vault
+            """
+
 helps['backup item'] = """
             type: group
             short-summary: An item which is already protected or backed up to Azure with an associated policy.
@@ -63,6 +68,11 @@ helps['backup item list'] = """
 helps['backup item show'] = """
             type: command
             short-summary: Shows details of a particular backed up item.
+            """
+
+helps['backup item update-policy'] = """
+            type: command
+            short-summary: Update the policy associated with this item.
             """
 
 helps['backup item update-policy'] = """
