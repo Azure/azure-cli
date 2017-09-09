@@ -160,6 +160,21 @@ helps['backup restore disks'] = """
             short-summary: Restore the disks of the backed VM from the specified recovery point.
             """
 
+helps['backup restore files'] = """
+            type: group
+            short-summary: Gives access to all the files of the recovery point.
+            """
+
+helps['backup restore files mount-rp'] = """
+            type: command
+            short-summary: Downloads a script which mounts the files of a recovery point.
+            """
+
+helps['backup restore files unmount-rp'] = """
+            type: command
+            short-summary: Closes the access to the recovery point.
+            """
+
 helps['backup job'] = """
             type: group
             short-summary: Entity which contains the details of the job.

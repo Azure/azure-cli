@@ -382,7 +382,7 @@ def restore_files_unmount_rp(client, recovery_point):
         _track_backup_operation(resource_group, result, vault_name)
 
 
-def disable_protection(client, backup_item, delete_backup_data=False, yes=False):  # pylint: disable=unused-argument
+def disable_protection(client, backup_item, delete_backup_data=False, **kwargs):  # pylint: disable=unused-argument
     # Client factories
     backup_protected_items_client = backup_protected_items_cf(None)
 

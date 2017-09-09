@@ -2,6 +2,6 @@
 
 Release History
 ===============
-unreleased
-++++++++++
-* Initial release of module.
+0.0.1 (2017-05-09)
+++++++++++++++++++
+* Preview release.
