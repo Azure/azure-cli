@@ -8,7 +8,7 @@ FROM python:3.5.2-alpine
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
 
-RUN pip install --upgrade pip gunicorn Flask wheel twine requests uritemplate.py
+RUN pip install --no-cache-dir --upgrade pip gunicorn Flask wheel twine requests uritemplate.py
 
 ADD app.py /
 

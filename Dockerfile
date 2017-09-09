@@ -13,7 +13,7 @@ WORKDIR azure-cli
 COPY . /azure-cli
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
-RUN pip install --upgrade pip wheel jmespath-terminal
+RUN pip install --no-cache-dir --upgrade pip wheel jmespath-terminal
 # bash gcc make openssl-dev libffi-dev musl-dev - dependencies required for CLI
 # jq - we include jq as a useful tool
 # openssh - included for ssh-keygen
@@ -35,8 +35,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     for f in $TMP_PKG_DIR/*; \
     do MODULE_NAMES="$MODULE_NAMES $f"; \
     done; \
-    pip install $MODULE_NAMES; \
-    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
+    pip install --no-cache-dir $MODULE_NAMES; \
+    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
 
 # Tab completion
 RUN echo -e "\
