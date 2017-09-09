@@ -612,8 +612,8 @@ class ManagedAppScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
         location = 'westcentralus'
-        appdef_name = self.create_random_name('testappdef', 20)
-        appdef_display_name = self.create_random_name('test_appdef', 20)
+        appdef_name = 'testappdefname'
+        appdef_display_name = 'test_appdef_123'
         appdef_description = 'test_appdef_123'
         packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
         auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
@@ -625,7 +625,7 @@ class ManagedAppScenarioTest(ScenarioTest):
                                                    appdef_description, location, auth, lock, resource_group)).get_output_in_json()
 
         # create a managedapp
-        managedapp_name = self.create_random_name('mymanagedapp', 20)
+        managedapp_name = 'mymanagedapp'
         managedapp_loc = 'westcentralus'
         managedapp_kind = 'servicecatalog'
         newrg = self.create_random_name('climanagedapp', 25)
