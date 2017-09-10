@@ -714,18 +714,13 @@ def validate_ssh_key(namespace):
 
 def _validate_vm_vmss_msi(namespace, from_set_command=False):
     if from_set_command or namespace.assign_identity:
-        if namespace.identity_scope == "" and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is set to None".format(
+        if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
+            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
                 namespace.identity_role))
-        if namespace.identity_scope != "":
-            if namespace.identity_scope is None:
-                from azure.cli.core.commands.client_factory import get_subscription_id
-                subscription_id = get_subscription_id()
-                namespace.identity_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id,
-                                                                                        namespace.resource_group_name)
-            # keep 'identity_role' for output as logical name is more readable
+        # keep 'identity_role' for output as logical name is more readable
+        if namespace.identity_scope:
             setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
-    elif namespace.identity_scope is not None or getattr(namespace.identity_role, 'is_default', None) is None:
+    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
 
 
