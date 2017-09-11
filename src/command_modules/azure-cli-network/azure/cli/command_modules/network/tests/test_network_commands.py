@@ -676,6 +676,29 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network express-route list --resource-group {}'.format(rg), checks=NoneCheck())
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
+    def test_network_express_route_ipv6_peering(self, resource_group):
+
+        rg = resource_group
+        circuit = 'circuit1'
+
+        # Premium SKU required to create MicrosoftPeering settings
+        self.cmd('network express-route create -g {} -n {} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51 --sku-tier Premium'.format(rg, circuit))
+        self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit))
+        self.cmd('network express-route peering update -g {} --circuit-name {} -n MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2001:db00::/126 --secondary-peer-subnet 2002:db00::/126 --advertised-public-prefixes 2001:db00::/126 --customer-asn 100001 --routing-registry-name level3'.format(rg, circuit))
+        self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
+            JMESPathCheckV2('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
+            JMESPathCheckV2('microsoftPeeringConfig.customerAsn', 10000),
+            JMESPathCheckV2('microsoftPeeringConfig.routingRegistryName', 'LEVEL3'),
+            JMESPathCheckV2('ipv6PeeringConfig.microsoftPeeringConfig.advertisedPublicPrefixes[0]', '2001:db00::/126'),
+            JMESPathCheckV2('ipv6PeeringConfig.microsoftPeeringConfig.customerAsn', 100001),
+            JMESPathCheckV2('ipv6PeeringConfig.state', 'Enabled')
+        ])
+
+
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkLoadBalancerScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_load_balancer')
