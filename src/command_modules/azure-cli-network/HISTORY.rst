@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.14 (2017-09-11)
 +++++++++++++++++++
 * BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
 * BC `vnet subnet create/update`: renamed `--private-access-services` to `--service-endpoints`
