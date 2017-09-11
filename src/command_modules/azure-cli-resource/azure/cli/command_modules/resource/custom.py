@@ -489,9 +489,15 @@ def show_resource(resource_group_name=None,
     return res.get_resource()
 
 
-def delete_resource(resource_group_name=None,
+def delete_resource(idss=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                    resource_name=None, resource_id=None, api_version=None):
+                    resource_name=None, api_version=None):
+    args = locals()
+    print("args:", args)
+    if ids:
+        output = []
+        for id in ids:
+            output.append(delete_resource())
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)

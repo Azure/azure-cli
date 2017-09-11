@@ -49,6 +49,8 @@ register_cli_argument('resource create', 'properties', options_list=('--properti
 register_cli_argument('resource create', 'is_full_object', action='store_true',
                       help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
 
+register_cli_argument('resource delete', 'idss', nargs='+', options_list=['--idss'], help='OOne or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
+
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider register', 'wait', action='store_true', help='wait for the registration to finish')
 register_cli_argument('provider unregister', 'wait', action='store_true', help='wait for unregistration to finish')
