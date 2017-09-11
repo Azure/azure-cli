@@ -62,13 +62,13 @@ def _whl_download_from_url(url_parse_result, ext_file):
 
 
 def _validate_whl_cli_compat(azext_metadata):
-    is_compatible, cli_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_version, min_required, max_required)
+    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI version {} and this extension " \
-                          "requires ".format(cli_version)
+                          "You have CLI core version {} and this extension " \
+                          "requires ".format(cli_core_version)
         if min_required and max_required:
             min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
         elif min_required:
