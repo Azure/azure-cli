@@ -14,9 +14,9 @@ Verification
 ------------
 
 ```
-$ brew install --build-from-source azure-cli.rb
-$ brew test azure-cli.rb
-$ brew audit --strict --online azure-cli.rb
+brew install --build-from-source azure-cli.rb
+brew test azure-cli.rb
+brew audit --strict --online azure-cli.rb
 ```
 
 More Information
