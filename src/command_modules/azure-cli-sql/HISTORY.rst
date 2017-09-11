@@ -2,7 +2,7 @@
 
 Release History
 ===============
-Unreleased
+2.0.11 (2017-09-11)
 +++++++++++++++++++
 * Added az sql server vnet-rule commands.
 
