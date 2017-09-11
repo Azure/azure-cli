@@ -2,12 +2,13 @@
 
 Release History
 ===============
-(unreleased)
+2.0.14 (2017-09-11)
 +++++++++++++++++++
 * msi: don't assign access unless `--scope` is provided
 * msi: use the same extension naming as portal does
 * msi: remove the useless `subscription` from the `vm/vmss create` commands output
 * `vm/vmss create`: fix a bug that the storage sku is not applied on data disks coming with an image
+* `vm format-secret`: Fix issue where `--secrets` would not accept newline separated IDs.
 
 2.0.13 (2017-08-28)
 +++++++++++++++++++

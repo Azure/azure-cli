@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.12 (2017-09-11)
++++++++++++++++++++
+* minor fixes
+
 2.0.11 (2017-08-28)
 +++++++++++++++++++
 * login: expose `--msi` and `--msi-port` to login using Virtual machine's identity

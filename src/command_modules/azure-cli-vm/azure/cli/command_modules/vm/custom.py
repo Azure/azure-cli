@@ -2077,8 +2077,12 @@ def get_vm_format_secret(secrets, certificate_store=None):
     client = get_mgmt_service_client(KeyVaultManagementClient).vaults
     grouped_secrets = {}
 
+    merged_secrets = []
+    for s in secrets:
+        merged_secrets += s.splitlines()
+
     # group secrets by source vault
-    for secret in secrets:
+    for secret in merged_secrets:
         parsed = KeyVaultId.parse_secret_id(secret)
         match = re.search('://(.+?)\\.', parsed.vault)
         vault_name = match.group(1)

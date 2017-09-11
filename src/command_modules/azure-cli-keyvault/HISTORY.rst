@@ -3,10 +3,13 @@
 Release History
 ===============
 
+2.0.10 (2017-09-11)
++++++++++++++++++++
+* `keyvault set-policy`: Fix issue where permissions were case sensitive.
+
 2.0.9 (2017-08-31)
 ++++++++++++++++++
 * `keyvault secret download`: Fix bug when trying to automatically resolve secret encoding.
-
 
 2.0.8 (2017-07-07)
 ++++++++++++++++++

@@ -418,6 +418,13 @@ cli_command(__name__, 'network vnet-gateway root-cert delete', custom_path + 'de
 cli_command(__name__, 'network vnet-gateway revoked-cert create', custom_path + 'create_vnet_gateway_revoked_cert')
 cli_command(__name__, 'network vnet-gateway revoked-cert delete', custom_path + 'delete_vnet_gateway_revoked_cert')
 
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+    cli_command(__name__, 'network vnet-gateway list-bgp-peer-status', vgw_path + 'get_bgp_peer_status', cf_virtual_network_gateways)
+    cli_command(__name__, 'network vnet-gateway list-advertised-routes', vgw_path + 'get_advertised_routes', cf_virtual_network_gateways)
+    cli_command(__name__, 'network vnet-gateway list-learned-routes', vgw_path + 'get_learned_routes', cf_virtual_network_gateways)
+
+cli_command(__name__, 'network vnet-gateway vpn-client generate', custom_path + 'generate_vpn_client', cf_virtual_network_gateways)
+
 # VirtualNetworksOperations
 vnet_path = 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.'
 cli_command(__name__, 'network vnet delete', vnet_path + 'delete', cf_virtual_networks)

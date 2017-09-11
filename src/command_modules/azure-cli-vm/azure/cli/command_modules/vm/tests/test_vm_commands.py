@@ -1926,7 +1926,7 @@ class VMSSILBSceanrioTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""'.format(resource_group, vmss_name))
         # list connection information should fail
         with self.assertRaises(CLIError) as err:
-            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
+            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name))
         self.assertTrue('internal load balancer' in str(err.exception))
 
 

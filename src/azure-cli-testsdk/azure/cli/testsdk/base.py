@@ -93,7 +93,7 @@ class LiveScenarioTest(IntegrationTestBase):
 class ExecutionResult(object):
     def __init__(self, command, expect_failure=False, in_process=True):
         if in_process:
-            self._in_process_execute(command)
+            self._in_process_execute(command, expect_failure=expect_failure)
         else:
             self._out_of_process_execute(command)
 
@@ -135,7 +135,7 @@ class ExecutionResult(object):
 
         return self.json_value
 
-    def _in_process_execute(self, command):
+    def _in_process_execute(self, command, expect_failure=False):
         from azure.cli.main import main as cli_main
         from six import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
@@ -155,7 +155,11 @@ class ExecutionResult(object):
         except CannotOverwriteExistingCassetteException as ex:
             raise AssertionError(ex)
         except CliExecutionError as ex:
-            if ex.exception:
+            if expect_failure:
+                self.exit_code = 1
+                self.output = stdout_buf.getvalue()
+                self.applog = logging_buf.getvalue()
+            elif ex.exception:
                 raise ex.exception
             else:
                 raise ex
