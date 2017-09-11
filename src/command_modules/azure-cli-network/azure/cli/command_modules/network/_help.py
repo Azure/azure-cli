@@ -1954,6 +1954,18 @@ helps['network vnet-gateway wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
 """
 
+helps['network vnet-gateway vpn-client'] = """
+    type: group
+    short-summary: Download a configured client with which to connect to a VPN.
+"""
+
+helps['network vnet-gateway vpn-client generate'] = """
+    type: command
+    short-summary: Generates a binary client file that can be used to connect to a VPN.
+    long-summary: The legacy implementation returns an EXE, while the latest implementation returns a ZIP file.
+"""
+
+
 # endregion
 
 # region VNet Gateway Revoke Cert

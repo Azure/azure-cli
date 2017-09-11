@@ -612,8 +612,12 @@ register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway 
 register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(VirtualNetworkGatewaySkuName))
 register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type.', **enum_choice_list(VpnType))
 register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
-register_cli_argument('network vnet-gateway', 'address_prefixes', help='Space separated list of address prefixes to associate with the VNet gateway.', nargs='+')
 register_cli_argument('network vnet-gateway', 'public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+register_cli_argument('network vnet-gateway', 'address_prefixes', help='Space separated list of CIDR prefixes representing the address space for the P2S client.', nargs='+', arg_group='VPN Client')
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network vnet-gateway', 'radius_server', help='Radius server address to connect to.', arg_group='VPN Client')
+    c.register_cli_argument('network vnet-gateway', 'radius_secret', help='Radius secret to use for authentication.', arg_group='VPN Client')
+    c.register_cli_argument('network vnet-gateway', 'client_protocol', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', **model_choice_list(ResourceType.MGMT_NETWORK, 'VpnClientProtocol'))
 
 register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
 
@@ -631,6 +635,13 @@ register_cli_argument('network vnet-gateway revoked-cert create', 'thumbprint', 
 
 register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
 
+register_cli_argument('network vnet-gateway vpn-client', 'processor_architecture', **model_choice_list(ResourceType.MGMT_NETWORK, 'ProcessorArchitecture'))
+register_cli_argument('network vnet-gateway vpn-client', 'authentication_method', **model_choice_list(ResourceType.MGMT_NETWORK, 'AuthenticationMethod'))
+register_cli_argument('network vnet-gateway vpn-client', 'radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
+register_cli_argument('network vnet-gateway vpn-client', 'client_root_certificates', nargs='+', help='Space separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, '2017-06-01') as c:
+    c.register_cli_argument('network vnet-gateway vpn-client', 'use_legacy', help='Generate VPN client package using legacy implementation.', **three_state_flag())
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
