@@ -103,8 +103,8 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create_cd(self, resource_group):
-        webapp_name = 'webapp-quick-cd'
-        plan = 'plan-quick'
+        webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
+        plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
         import time
@@ -379,8 +379,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 class WebappACRSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_integration(self, resource_group):
-        plan = 'plan11'
-        webapp = 'webappacrtest11'
+        plan = self.create_random_name(prefix='acrtestplan', length=24)
+        webapp = self.create_random_name(prefix='webappacrtest', length=24)
         runtime = 'node|6.4'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
