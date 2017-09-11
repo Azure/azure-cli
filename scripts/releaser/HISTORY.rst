@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.5 (2017-09-11)
+++++++++++++++++++
+
+* Fix RPM script to print the Python upload script instead of automatically uploading as we need to sign first.
+
 0.1.4 (2017-09-07)
 ++++++++++++++++++
 

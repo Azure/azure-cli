@@ -132,8 +132,8 @@ def main():
                                                    repo_package_url=script_env.get('MS_REPO_URL'),
                                                    repo_user=script_env.get('MS_REPO_USERNAME'),
                                                    repo_pass=script_env.get('MS_REPO_PASSWORD'))
+    my_vm(['echo', '-e', '"{}"'.format(upload_script), '>>', 'repo_upload.py'], _out=sys.stdout, _err=sys.stdout)
     # Keeping this code commented for when we can automate the signing of RPM packages.
-    # my_vm(['echo', '-e', '"{}"'.format(upload_script), '>>', 'repo_upload.py'], _out=sys.stdout, _err=sys.stdout)
     # my_vm(['python', 'repo_upload.py'], _out=sys.stdout, _err=sys.stdout)
     print_status('PRINTING OUT REPO UPLOAD SCRIPT AS THE UNSIGNED RPM NEEDS TO BE FIRST SIGNED BEFORE UPLOADING...')
     my_vm(['cat', 'repo_upload.py'], _out=sys.stdout, _err=sys.stdout)
