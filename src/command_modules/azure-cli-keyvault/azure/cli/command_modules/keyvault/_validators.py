@@ -10,15 +10,11 @@ from datetime import datetime
 import re
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
-from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
-    (KeyPermissions, SecretPermissions, CertificatePermissions)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.util import CLIError
-
-from azure.keyvault.models import JsonWebKeyOperation
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
@@ -129,13 +125,6 @@ def validate_key_import_source(ns):
         raise ValueError('--pem-password must be used with --pem-file')
 
 
-def validate_key_ops(ns):
-    allowed = [x.value.lower() for x in JsonWebKeyOperation]
-    for p in ns.key_ops or []:
-        if p not in allowed:
-            raise ValueError("unrecognized key operation '{}'".format(p))
-
-
 def validate_key_type(ns):
     if ns.destination:
         dest_to_type_map = {
@@ -157,22 +146,6 @@ def validate_policy_permissions(ns):
             None,
             'specify at least one: --key-permissions, --secret-permissions, '
             '--certificate-permissions')
-
-    key_allowed = [x.value for x in KeyPermissions]
-    secret_allowed = [x.value for x in SecretPermissions]
-    cert_allowed = [x.value for x in CertificatePermissions]
-
-    for p in key_perms or []:
-        if p not in key_allowed:
-            raise ValueError("unrecognized key permission '{}'".format(p))
-
-    for p in secret_perms or []:
-        if p not in secret_allowed:
-            raise ValueError("unrecognized secret permission '{}'".format(p))
-
-    for p in cert_perms or []:
-        if p not in cert_allowed:
-            raise ValueError("unrecognized cert permission '{}'".format(p))
 
 
 def validate_principal(ns):
