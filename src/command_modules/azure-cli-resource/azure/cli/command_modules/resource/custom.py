@@ -480,7 +480,7 @@ def create_resource(properties,
     return res.create_resource(properties, location, is_full_object)
 
 
-def show_resource(resource_group_name=None,
+def show_resource(resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -489,7 +489,7 @@ def show_resource(resource_group_name=None,
     return res.get_resource()
 
 
-def delete_resource(idss=None, resource_group_name=None,
+def delete_resource(resource_ids=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                     resource_name=None, api_version=None):
     args = locals()
@@ -504,7 +504,7 @@ def delete_resource(idss=None, resource_group_name=None,
     return res.delete()
 
 
-def update_resource(parameters,
+def update_resource(parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None):
@@ -514,7 +514,7 @@ def update_resource(parameters,
     return res.update(parameters)
 
 
-def tag_resource(tags,
+def tag_resource(tags, resource_ids=None,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None):
