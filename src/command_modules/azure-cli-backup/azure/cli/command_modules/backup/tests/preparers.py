@@ -134,7 +134,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
 
             vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
                                             .format(vault, self.resource_group)).get_output_in_json())
-            policy_json = json.dumps(execute('az backup policy show --policy-name {} --vault \'{}\''
+            policy_json = json.dumps(execute('az backup policy show -n {} --vault \'{}\''
                                              .format('DefaultPolicy', vault_json)).get_output_in_json())
             vm_json = json.dumps(execute('az vm show -n {} -g {}'
                                          .format(vm, self.resource_group)).get_output_in_json())
@@ -197,12 +197,12 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
 
             self.vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
                                                  .format(self.vault, self.resource_group)).get_output_in_json())
-            policy_json = execute('az backup policy show --policy-name {} --vault \'{}\''
+            policy_json = execute('az backup policy show -n {} --vault \'{}\''
                                   .format('DefaultPolicy', self.vault_json)).get_output_in_json()
             policy_json['name'] = name
             policy_json = json.dumps(policy_json)
 
-            execute('az backup policy update --policy \'{}\''.format(policy_json))
+            execute('az backup policy set --policy \'{}\''.format(policy_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -249,9 +249,9 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
 
             vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
                                             .format(vault, self.resource_group)).get_output_in_json())
-            container_json = json.dumps(execute('az backup container show --container-name \'{}\' --vault \'{}\''
+            container_json = json.dumps(execute('az backup container show -n \'{}\' --vault \'{}\''
                                                 .format(vm, vault_json)).get_output_in_json())
-            item_json = json.dumps(execute('az backup item show --item-name \'{}\' --container \'{}\''
+            item_json = json.dumps(execute('az backup item show -n \'{}\' --container \'{}\''
                                            .format(vm, container_json)).get_output_in_json())
             retain_date = datetime.utcnow() + timedelta(days=30)
             backup_job_json = json.dumps(execute(

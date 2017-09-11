@@ -74,8 +74,8 @@ def transform_recovery_point_list(recovery_point_list):
 cli_command(__name__, 'backup vault create', 'azure.cli.command_modules.backup.custom#create_vault', vaults_cf)
 cli_command(__name__, 'backup vault show', 'azure.mgmt.recoveryservices.operations.vaults_operations#VaultsOperations.get', vaults_cf)
 cli_command(__name__, 'backup vault list', 'azure.cli.command_modules.backup.custom#list_vaults', vaults_cf)
-cli_command(__name__, 'backup vault get-backup-properties', 'azure.mgmt.recoveryservices.operations.backup_storage_configs_operations#BackupStorageConfigsOperations.get', vaults_cf)
-cli_command(__name__, 'backup vault set-backup-properties', 'azure.cli.command_modules.backup.custom#set_backup_properties', backup_storage_configs_cf)
+cli_command(__name__, 'backup vault backup-properties show', 'azure.mgmt.recoveryservices.operations.backup_storage_configs_operations#BackupStorageConfigsOperations.get', vaults_cf)
+cli_command(__name__, 'backup vault backup-properties set', 'azure.cli.command_modules.backup.custom#set_backup_properties', backup_storage_configs_cf)
 cli_command(__name__, 'backup vault delete', 'azure.mgmt.recoveryservices.operations.vaults_operations#VaultsOperations.delete', vaults_cf, confirmation=True)
 
 cli_command(__name__, 'backup container show', 'azure.cli.command_modules.backup.custom#show_container', backup_protection_containers_cf)
@@ -85,7 +85,7 @@ cli_command(__name__, 'backup policy get-default-for-vm', 'azure.cli.command_mod
 cli_command(__name__, 'backup policy show', 'azure.cli.command_modules.backup.custom#show_policy', protection_policies_cf)
 cli_command(__name__, 'backup policy list', 'azure.cli.command_modules.backup.custom#list_policies', backup_policies_cf, table_transformer=transform_policy_list)
 cli_command(__name__, 'backup policy list-associated-items', 'azure.cli.command_modules.backup.custom#list_associated_items_for_policy', protection_policies_cf, table_transformer=transform_item_list)
-cli_command(__name__, 'backup policy update', 'azure.cli.command_modules.backup.custom#update_policy', protection_policies_cf)
+cli_command(__name__, 'backup policy set', 'azure.cli.command_modules.backup.custom#set_policy', protection_policies_cf)
 cli_command(__name__, 'backup policy delete', 'azure.cli.command_modules.backup.custom#delete_policy', protection_policies_cf)
 
 cli_command(__name__, 'backup protection enable-for-vm', 'azure.cli.command_modules.backup.custom#enable_protection_for_vm', protected_items_cf)
@@ -94,7 +94,7 @@ cli_command(__name__, 'backup protection disable', 'azure.cli.command_modules.ba
 
 cli_command(__name__, 'backup item show', 'azure.cli.command_modules.backup.custom#show_item', backup_protection_containers_cf)
 cli_command(__name__, 'backup item list', 'azure.cli.command_modules.backup.custom#list_items', backup_protection_containers_cf, table_transformer=transform_item_list)
-cli_command(__name__, 'backup item update-policy', 'azure.cli.command_modules.backup.custom#update_policy_for_item', protected_items_cf)
+cli_command(__name__, 'backup item set-policy', 'azure.cli.command_modules.backup.custom#update_policy_for_item', protected_items_cf)
 
 cli_command(__name__, 'backup job list', 'azure.cli.command_modules.backup.custom#list_jobs', backup_jobs_cf, table_transformer=transform_job_list)
 cli_command(__name__, 'backup job show', 'azure.cli.command_modules.backup.custom#show_job', job_details_cf)

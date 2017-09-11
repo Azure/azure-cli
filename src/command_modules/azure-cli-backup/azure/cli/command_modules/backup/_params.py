@@ -21,7 +21,7 @@ allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM']
 
 # Vault
-for command in ['create', 'delete', 'show', 'set-backup-properties', 'get-backup-properties']:
+for command in ['create', 'delete', 'show', 'backup-properties set', 'backup-properties show']:
     register_cli_argument('backup vault {}'.format(command), 'resource_group_name', resource_group_name_type, help='The name of the Azure resource group in which to create or from which to retrieve this vault.', completer=None, validator=None)
     register_cli_argument('backup vault {}'.format(command), 'vault_name', vault_name_type, options_list=('--name', '-n'), help='The name of the Recovery Services vault.')
 
@@ -29,7 +29,7 @@ register_cli_argument('backup vault create', 'region', location_type, help='The 
 
 register_cli_argument('backup vault list', 'resource_group_name', resource_group_name_type, help='The name of the Azure resource group in which to create or from which to retrieve this vault.', completer=None, validator=None)
 
-register_cli_argument('backup vault set-backup-properties', 'backup_storage_redundancy', help='Sets backup storage properties for a Recovery Services vault.', **enum_choice_list(['GeoRedundant', 'LocallyRedundant']))
+register_cli_argument('backup vault backup-properties set', 'backup_storage_redundancy', help='Sets backup storage properties for a Recovery Services vault.', **enum_choice_list(['GeoRedundant', 'LocallyRedundant']))
 
 # Container
 for command in ['list', 'show']:
@@ -37,26 +37,26 @@ for command in ['list', 'show']:
     register_cli_argument('backup container {}'.format(command), 'container_type', help='The type of container.', **enum_choice_list(allowed_container_types))
     register_cli_argument('backup container {}'.format(command), 'status', help='The registration status of this container to the vault.', **enum_choice_list(['Registered']))
 
-register_cli_argument('backup container show', 'container_name', help='The name of the container or resource which has items to be protected.')
+register_cli_argument('backup container show', 'name', options_list=('--name', '-n'), help='The name of the container or resource which has items to be protected.')
 
 # Item
 for command in ['list', 'show']:
     register_cli_argument('backup item {}'.format(command), 'container', type=file_type, help='JSON encoded container definition. Use the show command of the container to obtain a container object.', completer=FilesCompleter())
     register_cli_argument('backup item {}'.format(command), 'workload_type', help='The type of the backed up item.', **enum_choice_list(allowed_workload_types))
 
-register_cli_argument('backup item show', 'item_name', help='The name of the backed up item.')
+register_cli_argument('backup item show', 'name', options_list=('--name', '-n'), help='The name of the backed up item.')
 
-register_cli_argument('backup item update-policy', 'policy', type=file_type, help='The new policy/existing policy updated with the values to be associated with this item. JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
-register_cli_argument('backup item update-policy', 'backup_item', type=file_type, help='JSON encoded backupItem definition. Use the show command of the backup item to obtain the relevant backupItem object.', completer=FilesCompleter())
+register_cli_argument('backup item set-policy', 'policy', type=file_type, help='The new policy/existing policy updated with the values to be associated with this item. JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
+register_cli_argument('backup item set-policy', 'backup_item', type=file_type, help='JSON encoded backupItem definition. Use the show command of the backup item to obtain the relevant backupItem object.', completer=FilesCompleter())
 
 # Policy
 for command in ['get-default-for-vm', 'list', 'show']:
     register_cli_argument('backup policy {}'.format(command), 'vault', type=file_type, help='The Recovery services vault to which this policy should apply/belongs to.', completer=FilesCompleter())
 
-for command in ['update', 'delete', 'list-associated-items']:
+for command in ['set', 'delete', 'list-associated-items']:
     register_cli_argument('backup policy {}'.format(command), 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
 
-register_cli_argument('backup policy show', 'policy_name', help='The name of the backup policy.')
+register_cli_argument('backup policy show', 'name', options_list=('--name', '-n'), help='The name of the backup policy.')
 
 # Recovery Point
 for command in ['show', 'list']:
@@ -82,7 +82,7 @@ register_cli_argument('backup protection disable', 'delete_backup_data', help='O
 # Restore
 register_cli_argument('backup restore disks', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
 register_cli_argument('backup restore disks', 'destination_storage_account', help='The name of the storge accout to which the disks are restored.')
-register_cli_argument('backup restore disks', 'destination_storage_account_resource_group', help='The name of the resource group of the storge accout to which the disks are restored.')
+register_cli_argument('backup restore disks', 'resource_group', resource_group_name_type, help='The name of the resource group of the storge accout to which the disks are restored.')
 register_cli_argument('backup restore files mount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
 register_cli_argument('backup restore files unmount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
 

@@ -32,14 +32,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Enable Protection
         policy_json = json.dumps(self.cmd(
-            'az backup policy show --policy-name DefaultPolicy --vault \'{}\''.format(vault_json)).get_output_in_json())
+            'az backup policy show -n DefaultPolicy --vault \'{}\''.format(vault_json)).get_output_in_json())
         vm_json = self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json()
         vm_json = json.dumps(vm_json)
         self.cmd('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
                  .format(policy_json, vault_json, vm_json)).get_output_in_json()
 
         # Get Container
-        container_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                              .format(vm_name, vault_json)).get_output_in_json())
 
         # Get Item
@@ -61,7 +61,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string = 'az backup restore disks'
         restore_cmd_string += ' --recovery-point \'{}\''.format(recovery_point_json)
         restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' --destination-storage-account-resource-group {}'.format(resource_group)
+        restore_cmd_string += ' -g {}'.format(resource_group)
         trigger_restore_job_json = json.dumps(self.cmd(restore_cmd_string).get_output_in_json())
         self.cmd('az backup job wait --job \'{}\''.format(trigger_restore_job_json))
 
@@ -97,7 +97,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         storage_model_types = [e.value for e in StorageModelType]
-        vault_properties = self.cmd('az backup vault get-backup-properties -n {} -g {}'
+        vault_properties = self.cmd('az backup vault backup-properties show -n {} -g {}'
                                     .format(vault1, resource_group), checks=[
                                         JMESPathCheckExists("contains({}, storageModelType)"
                                                             .format(storage_model_types)),
@@ -109,10 +109,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         else:
             new_storage_model = StorageModelType.geo_redundant.value
 
-        self.cmd('az backup vault set-backup-properties -n {} -g {} --backup-storage-redundancy {}'
+        self.cmd('az backup vault backup-properties set -n {} -g {} --backup-storage-redundancy {}'
                  .format(vault1, resource_group, new_storage_model))
 
-        self.cmd('az backup vault get-backup-properties -n {} -g {}'.format(vault1, resource_group), checks=[
+        self.cmd('az backup vault backup-properties show -n {} -g {}'.format(vault1, resource_group), checks=[
             JMESPathCheck('storageModelType', new_storage_model)
         ])
 
@@ -134,7 +134,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
 
-        container_json = self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container_json = self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                   .format(vm1, vault_json), checks=[
                                       JMESPathCheck('properties.friendlyName', vm1),
                                       JMESPathCheck('properties.healthStatus', 'Healthy'),
@@ -168,10 +168,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         policy3 = self.create_random_name('clitest-policy', 24)
         default_policy = 'DefaultPolicy'
-        default_policy_json = json.dumps(self.cmd('az backup policy show --policy-name {} --vault \'{}\''
+        default_policy_json = json.dumps(self.cmd('az backup policy show -n {} --vault \'{}\''
                                                   .format(default_policy, vault_json)).get_output_in_json())
 
-        policy1_json = self.cmd('az backup policy show --policy-name {} --vault \'{}\''
+        policy1_json = self.cmd('az backup policy show -n {} --vault \'{}\''
                                 .format(policy1, vault_json), checks=[
                                     JMESPathCheck('name', policy1),
                                     JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
@@ -190,7 +190,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         policy1_json['name'] = policy3
         policy1_json = json.dumps(policy1_json)
 
-        self.cmd('az backup policy update --policy \'{}\''
+        self.cmd('az backup policy set --policy \'{}\''
                  .format(policy1_json), checks=[
                      JMESPathCheck('name', policy3),
                      JMESPathCheck('resourceGroup', resource_group)])
@@ -220,14 +220,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_item_commands(self, resource_group, vault_name, vm1, vm2, policy_name):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
-        container1_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container1_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                               .format(vm1, vault_json)).get_output_in_json())
-        container2_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container2_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                               .format(vm2, vault_json)).get_output_in_json())
 
         default_policy = 'DefaultPolicy'
 
-        item1_json = self.cmd('az backup item show --container \'{}\' --item-name {}'
+        item1_json = self.cmd('az backup item show --container \'{}\' -n {}'
                               .format(container1_json, vm1), checks=[
                                   JMESPathCheck('properties.friendlyName', vm1),
                                   JMESPathCheck('properties.healthStatus', 'Passed'),
@@ -251,17 +251,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      JMESPathCheck("length(@)", 1),
                      JMESPathCheck("length([?properties.friendlyName == '{}'])".format(vm2), 1)])
 
-        policy_json = json.dumps(self.cmd('az backup policy show --policy-name \'{}\' --vault \'{}\''
+        policy_json = json.dumps(self.cmd('az backup policy show -n \'{}\' --vault \'{}\''
                                           .format(policy_name, vault_json)).get_output_in_json())
 
-        self.cmd('az backup item update-policy --backup-item \'{}\' --policy \'{}\''
+        self.cmd('az backup item set-policy --backup-item \'{}\' --policy \'{}\''
                  .format(json.dumps(item1_json), policy_json), checks=[
                      JMESPathCheck("properties.entityFriendlyName", vm1),
                      JMESPathCheck("properties.operation", "ConfigureBackup"),
                      JMESPathCheck("properties.status", "Completed"),
                      JMESPathCheck("resourceGroup", resource_group)])
 
-        item1_json = self.cmd('az backup item show --container \'{}\' --item-name {}'
+        item1_json = self.cmd('az backup item show --container \'{}\' -n {}'
                               .format(container1_json, vm1)).get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
@@ -274,9 +274,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_rp_commands(self, resource_group, vault_name, vm_name):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
-        container_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                              .format(vm_name, vault_json)).get_output_in_json())
-        item_json = json.dumps(self.cmd('az backup item show --container \'{}\' --item-name {}'
+        item_json = json.dumps(self.cmd('az backup item show --container \'{}\' -n {}'
                                         .format(container_json, vm_name)).get_output_in_json())
         rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
                             .format(item_json), checks=[
@@ -304,7 +304,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_protection_commands(self, resource_group, vault_name, vm_name):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
-        policy_json = json.dumps(self.cmd('az backup policy show --policy-name {} --vault \'{}\''
+        policy_json = json.dumps(self.cmd('az backup policy show -n {} --vault \'{}\''
                                           .format('DefaultPolicy', vault_json)).get_output_in_json())
         vm_json = json.dumps(self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json())
 
@@ -315,9 +315,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      JMESPathCheck("properties.status", "Completed"),
                      JMESPathCheck("resourceGroup", resource_group)])
 
-        container_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                              .format(vm_name, vault_json)).get_output_in_json())
-        item_json = json.dumps(self.cmd('az backup item show --item-name \'{}\' --container \'{}\''
+        item_json = json.dumps(self.cmd('az backup item show -n \'{}\' --container \'{}\''
                                         .format(vm_name, container_json)).get_output_in_json())
 
         self.cmd('az backup protection disable --backup-item \'{}\' --yes'
@@ -327,7 +327,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      JMESPathCheck("properties.status", "Completed"),
                      JMESPathCheck("resourceGroup", resource_group)])
 
-        self.cmd('az backup item show --item-name \'{}\' --container \'{}\''
+        self.cmd('az backup item show -n \'{}\' --container \'{}\''
                  .format(vm_name, container_json), checks=[
                      JMESPathCheck("properties.friendlyName", vm_name),
                      JMESPathCheck("properties.protectionState", "ProtectionStopped"),
@@ -353,9 +353,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_restore_commands(self, resource_group, vault_name, vm_name, storage_account):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
-        container_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                              .format(vm_name, vault_json)).get_output_in_json())
-        item_json = json.dumps(self.cmd('az backup item show --container \'{}\' --item-name {}'
+        item_json = json.dumps(self.cmd('az backup item show --container \'{}\' -n {}'
                                         .format(container_json, vm_name)).get_output_in_json())
         rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
                             .format(item_json)).get_output_in_json()
@@ -368,7 +368,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string = 'az backup restore disks'
         restore_cmd_string += ' --recovery-point \'{}\''.format(rp1_json)
         restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' --destination-storage-account-resource-group {}'.format(resource_group)
+        restore_cmd_string += ' -g {}'.format(resource_group)
         trigger_restore_job_json = self.cmd(restore_cmd_string, checks=[
             JMESPathCheck("properties.entityFriendlyName", vm_name),
             JMESPathCheck("properties.operation", "Restore"),
@@ -406,9 +406,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_job_commands(self, resource_group, vault_name, vm_name, storage_account):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
-        container_json = json.dumps(self.cmd('az backup container show --container-name \'{}\' --vault \'{}\''
+        container_json = json.dumps(self.cmd('az backup container show -n \'{}\' --vault \'{}\''
                                              .format(vm_name, vault_json)).get_output_in_json())
-        item_json = json.dumps(self.cmd('az backup item show --container \'{}\' --item-name {}'
+        item_json = json.dumps(self.cmd('az backup item show --container \'{}\' -n {}'
                                         .format(container_json, vm_name)).get_output_in_json())
         rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
                             .format(item_json)).get_output_in_json()
@@ -417,7 +417,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string = 'az backup restore disks'
         restore_cmd_string += ' --recovery-point \'{}\''.format(rp_json)
         restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' --destination-storage-account-resource-group {}'.format(resource_group)
+        restore_cmd_string += ' -g {}'.format(resource_group)
         trigger_restore_job_json = self.cmd(restore_cmd_string).get_output_in_json()
         trigger_restore_job_id = trigger_restore_job_json['name']
         trigger_restore_job_json = json.dumps(trigger_restore_job_json)

@@ -57,11 +57,11 @@ def get_default_policy_for_vm(client, vault):
     return show_policy(client, default_policy_name, vault)
 
 
-def show_policy(client, policy_name, vault):
+def show_policy(client, name, vault):
     rs_vault = _get_vault_from_json(vaults_cf(None), vault)
     resource_group = _get_resource_group_from_id(rs_vault.id)
 
-    policy = client.get(rs_vault.name, resource_group, policy_name, custom_headers=_get_custom_headers())
+    policy = client.get(rs_vault.name, resource_group, name, custom_headers=_get_custom_headers())
     return policy
 
 
@@ -89,7 +89,7 @@ def list_associated_items_for_policy(client, policy):
     return _get_list_from_paged_response(items)
 
 
-def update_policy(client, policy):
+def set_policy(client, policy):
     policy_object = _get_policy_from_json(client, policy)
     vault_name = _get_vault_from_arm_id(policy_object.id)
     resource_group = _get_resource_group_from_id(policy_object.id)
@@ -106,8 +106,8 @@ def delete_policy(client, policy):
     client.delete(vault_name, resource_group, policy_object.name, custom_headers=_get_custom_headers())
 
 
-def show_container(client, container_name, vault, container_type="AzureIaasVM", status="Registered"):
-    return _get_one_or_many(_get_containers(client, container_type, status, vault, container_name))
+def show_container(client, name, vault, container_type="AzureIaasVM", status="Registered"):
+    return _get_one_or_many(_get_containers(client, container_type, status, vault, name))
 
 
 def list_containers(client, vault, container_type="AzureIaasVM", status="Registered"):
@@ -169,7 +169,7 @@ def enable_protection_for_vm(client, vault, vm, policy):
     return _track_backup_job(result, rs_vault.name, resource_group)
 
 
-def show_item(client, item_name, container, workload_type="VM"):
+def show_item(client, name, container, workload_type="VM"):
     container_object = _get_container_from_json(client, container)
 
     filter_string = _get_filter_string({
@@ -178,7 +178,7 @@ def show_item(client, item_name, container, workload_type="VM"):
 
     items = _get_items(container_object, filter_string)
 
-    return _get_one_or_many([item for item in items if item.properties.friendly_name == item_name])
+    return _get_one_or_many([item for item in items if item.properties.friendly_name == name])
 
 
 def list_items(client, container, workload_type="VM"):
@@ -289,23 +289,22 @@ def list_recovery_points(client, backup_item, start_date=None, end_date=None):
     return paged_recovery_points
 
 
-def restore_disks(client, recovery_point, destination_storage_account, destination_storage_account_resource_group):
+def restore_disks(client, recovery_point, destination_storage_account, resource_group):
     # Get objects from JSON files
     recovery_point_object = _get_recovery_point_from_json(recovery_points_cf(None), recovery_point)
     vault_name = _get_vault_from_arm_id(recovery_point_object.id)
-    resource_group = _get_resource_group_from_id(recovery_point_object.id)
-    vault = vaults_cf(None).get(resource_group, vault_name, custom_headers=_get_custom_headers())
+    vault_rg = _get_resource_group_from_id(recovery_point_object.id)
+    vault = vaults_cf(None).get(vault_rg, vault_name, custom_headers=_get_custom_headers())
     vault_location = vault.location
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(recovery_point_object.id)
     item_uri = _get_protected_item_uri_from_id(recovery_point_object.id)
-    item = _get_associated_vm_item(container_uri, item_uri, resource_group, vault_name)
+    item = _get_associated_vm_item(container_uri, item_uri, vault_rg, vault_name)
 
     # Construct trigger restore request object
     _recovery_point_id = recovery_point_object.name
-    _storage_account_id = _get_storage_account_id(destination_storage_account,
-                                                  destination_storage_account_resource_group)
+    _storage_account_id = _get_storage_account_id(destination_storage_account, resource_group)
     _source_resource_id = item.properties.source_resource_id
     trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
                                                       recovery_point_id=_recovery_point_id,
@@ -316,10 +315,10 @@ def restore_disks(client, recovery_point, destination_storage_account, destinati
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     # Trigger restore
-    result = client.trigger(vault_name, resource_group, fabric_name, container_uri, item_uri,
+    result = client.trigger(vault_name, vault_rg, fabric_name, container_uri, item_uri,
                             _recovery_point_id, trigger_restore_request, raw=True,
                             custom_headers=_get_custom_headers())
-    return _track_backup_job(result, vault_name, resource_group)
+    return _track_backup_job(result, vault_name, vault_rg)
 
 
 def restore_files_mount_rp(client, recovery_point):

@@ -27,7 +27,7 @@ helps['backup vault delete'] = """
 
 helps['backup vault list'] = """
             type: command
-            short-summary: List Recovery Services vaults within a resource group.
+            short-summary: List Recovery Services vaults within a subscription.
             """
 
 helps['backup vault show'] = """
@@ -35,9 +35,19 @@ helps['backup vault show'] = """
             short-summary: Show details of a Recovery Services vault.
             """
 
-helps['backup vault set-backup-properties'] = """
+helps['backup vault backup-properties'] = """
+            type: group
+            short-summary: Properties of the Recovery Services vault.
+            """
+
+helps['backup vault backup-properties show'] = """
             type: command
-            short-summary: To set backup related properties of the Recovery Services vault.
+            short-summary: Gets backup related properties of the Recovery Services vault.
+            """
+
+helps['backup vault backup-properties set'] = """
+            type: command
+            short-summary: Sets backup related properties of the Recovery Services vault.
             """
 
 helps['backup container'] = """
@@ -50,9 +60,9 @@ helps['backup container list'] = """
             short-summary: Lists the containers registered to the vault.
             """
 
-helps['backup container list'] = """
+helps['backup container show'] = """
             type: command
-            short-summary: Lists the containers registered to the vault
+            short-summary: Show details of a container registered to a vault.
             """
 
 helps['backup item'] = """
@@ -70,12 +80,7 @@ helps['backup item show'] = """
             short-summary: Shows details of a particular backed up item.
             """
 
-helps['backup item update-policy'] = """
-            type: command
-            short-summary: Update the policy associated with this item.
-            """
-
-helps['backup item update-policy'] = """
+helps['backup item set-policy'] = """
             type: command
             short-summary: Update the policy associated with this item.
             """
@@ -102,17 +107,17 @@ helps['backup policy show'] = """
 
 helps['backup policy delete'] = """
             type: command
-            short-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. Before you delete the policy, make sure that each associated item is associated with some other policy. To associate another policy with a Backup item, use the Enable-AzureRmRecoveryServicesBackupProtection cmdlet.
+            short-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. Before you delete the policy, make sure that each associated item is associated with some other policy. To associate another policy with a Backup item, use the set-policy command of the backup Item
             """
 
-helps['backup policy update'] = """
+helps['backup policy set'] = """
             type: command
-            short-summary: Update the properties of the backup policy.
+            short-summary: Update the properties of the backup policy. Use the show command to obtain a policy object. Modify the values of the object in a file and use this command to update.
             """
 
 helps['backup policy list-associated-items'] = """
             type: command
-            short-summary: List all items using a backup policy.
+            short-summary: List all items protected by a backup policy.
             """
 
 helps['backup recoverypoint'] = """
