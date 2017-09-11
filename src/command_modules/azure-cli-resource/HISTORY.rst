@@ -8,6 +8,8 @@ Release History
 * Allows passing in parameter values for 'policy assignment create'.
 * In all cases params can be provided either via json or file.
 * Incremented API version.
+* Support '--ids' parameter to refer to locks
+* Various lock command bug fixes
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
