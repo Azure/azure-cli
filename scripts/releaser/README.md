@@ -29,6 +29,7 @@ These can be set in the initial `docker run` command above or by using `export E
 python release.py
 python release-docker.py
 python release-debian.py
+python release-rpm.py
 ```
 
 Environment Variables
@@ -51,7 +52,9 @@ The `GITHUB_USER` should have the following GitHub OAuth scopes:
 `DOCKER_USERNAME` - The Docker username that has push permissions to the above Docker repo.
 `DOCKER_PASSWORD` - The Docker password for the user.
 
+`MS_REPO_URL` - The repository URL to publish .deb/.rpm packages.
+`MS_REPO_USERNAME` - The repository username to publish .deb/.rpm packages.
+`MS_REPO_PASSWORD` - The user password to publish the .deb/.rpm package.
+
 `DEBIAN_REPO_ID` - The repository ID to publish the .deb package.
-`DEBIAN_REPO_URL` - The repository URL to publish the .deb package.
-`DEBIAN_REPO_USERNAME` - The repository username to publish the .deb package.
-`DEBIAN_REPO_PASSWORD` - The user password to publish the .deb package.
+`YUM_REPO_ID` - The repository ID to publish the .rpm package.
