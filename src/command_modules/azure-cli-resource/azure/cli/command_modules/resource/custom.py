@@ -914,6 +914,16 @@ def _validate_lock_params_match_lock(
 
 
 def _parse_lock_id(id_arg):
+    """
+    Lock ids look very different from regular resource ids, this function uses a regular expression
+    that parses a lock's id and extracts the following parameters if available:
+    -name: the lock's name; always present in a lock id
+    -resource_group_name: the name of the resource group; present in group/resource level locks
+    -resource_provider_namespace: the resource provider; present in resource level locks
+    -resource_type: the resource type; present in resource level locks
+    -resource_name: the resource name; present in resource level locks
+    -parent_resource_path: the resource's parent path; present in child resources such as subnets
+    """
     regex = re.compile(
         '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
         '(/providers/(?P<resource_provider_namespace>[^/]*)'
