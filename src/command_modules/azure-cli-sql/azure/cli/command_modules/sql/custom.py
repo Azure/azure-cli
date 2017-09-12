@@ -63,6 +63,7 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
 def _db_dw_create(
         client,
         db_id,
+        raw,
         kwargs):
 
     # Determine server location
@@ -75,6 +76,7 @@ def _db_dw_create(
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name,
         database_name=db_id.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
@@ -85,6 +87,7 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Verify edition
@@ -96,6 +99,7 @@ def db_create(
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -104,6 +108,7 @@ def _db_create_special(
         client,
         source_db,
         dest_db,
+        raw,
         kwargs):
 
     # Determine server location
@@ -125,6 +130,7 @@ def _db_create_special(
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name,
         database_name=dest_db.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
@@ -137,6 +143,7 @@ def db_copy(
         dest_name,
         dest_server_name=None,
         dest_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -150,6 +157,7 @@ def db_copy(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
+        raw,
         kwargs)
 
 
@@ -162,6 +170,7 @@ def db_create_replica(
         # Replica must have the same database name as the source db
         partner_server_name,
         partner_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -175,6 +184,7 @@ def db_create_replica(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
+        raw,
         kwargs)
 
 
@@ -187,6 +197,7 @@ def db_restore(
         resource_group_name,
         restore_point_in_time,
         dest_name,
+        raw=False,
         **kwargs):
 
     # Set create mode properties
@@ -198,6 +209,7 @@ def db_restore(
         DatabaseIdentity(database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(dest_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -656,6 +668,7 @@ def dw_create(
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Set edition
@@ -665,6 +678,7 @@ def dw_create(
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
