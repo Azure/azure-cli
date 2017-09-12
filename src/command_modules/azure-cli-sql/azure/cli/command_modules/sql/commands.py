@@ -176,7 +176,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             c.command('create', 'create_or_update')
             c.command('delete', 'delete', confirmation=True)
             c.command('show', 'get')
-            c.command('list', 'list_by_resource_group')
+            c.custom_command('list', 'server_list')
             c.generic_update_command('update', 'get', 'create_or_update',
                                      custom_func_name='server_update')
 
