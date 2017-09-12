@@ -49,28 +49,30 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
 
     with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
         with s.group('sql db') as c:
-            c.custom_command('create', 'db_create')
-            c.custom_command('copy', 'db_copy')
-            c.custom_command('restore', 'db_restore')
+            c.custom_command('create', 'db_create', no_wait_param='raw')
+            c.custom_command('copy', 'db_copy', no_wait_param='raw')
+            c.custom_command('restore', 'db_restore', no_wait_param='raw')
             c.command('show', 'get')
             c.custom_command('list', 'db_list')
             c.command('list-usages', 'list_usages')
             c.command('delete', 'delete', confirmation=True)
-            c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
+            c.generic_update_command('update', 'get', 'create_or_update',
+                                     custom_func_name='db_update', no_wait_param='raw')
             c.custom_command('import', 'db_import')
             c.custom_command('export', 'db_export')
 
         with s.group('sql db replica') as c:
-            c.custom_command('create', 'db_create_replica')
+            c.custom_command('create', 'db_create_replica', no_wait_param='raw')
 
         with s.group('sql dw') as c:
-            c.custom_command('create', 'dw_create')
+            c.custom_command('create', 'dw_create', no_wait_param='raw')
             c.command('show', 'get')
             c.custom_command('list', 'dw_list')
             c.command('delete', 'delete', confirmation=True)
             c.command('pause', 'pause')
             c.command('resume', 'resume')
-            c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='dw_update')
+            c.generic_update_command('update', 'get', 'create_or_update',
+                                     custom_func_name='dw_update', no_wait_param='raw')
 
         # Data Warehouse restore will not be included in the first batch of GA commands
         # (list_restore_points also applies to db, but it's not very useful. It's
