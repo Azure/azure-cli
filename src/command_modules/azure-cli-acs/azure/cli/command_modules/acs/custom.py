@@ -725,7 +725,6 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
     properties = {
         "orchestratorProfile": {
             "orchestratorType": orchestrator_type,
-            "orchestratorRelease": orchestrator_release,
         },
         "masterProfile": masterPoolProfile,
         "agentPoolProfiles": agentPoolProfiles,
@@ -740,6 +739,8 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             "adminUsername": admin_username
         },
     }
+    if api_version == "2017-07-01":
+        properties["orchestratorProfile"]["orchestratorRelease"] = orchestrator_release
 
     if windows_profile is not None:
         properties["windowsProfile"] = windows_profile
