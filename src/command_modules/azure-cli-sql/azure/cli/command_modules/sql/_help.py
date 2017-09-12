@@ -251,6 +251,11 @@ helps['sql server create'] = """
 helps['sql server list'] = """
     type: command
     short-summary: Lists servers.
+    examples:
+        - name: List all servers in the current subscription
+          text: az sql server list
+        - name: List all servers in a resource group
+          text: az sql server list -g mygroup
     """
 helps['sql server update'] = """
     type: command
