@@ -811,6 +811,19 @@ def elastic_pool_list_capabilities(
 ###############################################
 
 
+# Lists servers in a resource group or subscription
+def server_list(
+        client,
+        resource_group_name=None):
+
+    if resource_group_name:
+        # List all servers in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all servers in the subscription
+    return client.list()
+
+
 # Update server. Custom update function to apply parameters to instance.
 def server_update(
         instance,
