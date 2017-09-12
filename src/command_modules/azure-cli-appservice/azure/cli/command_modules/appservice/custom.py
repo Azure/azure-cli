@@ -28,7 +28,7 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import _generic_site_operation
+from ._params import _generic_site_operation, AUTH_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 
 
@@ -118,6 +118,39 @@ def _list_app(app_types, resource_group_name=None):
     return result
 
 
+def get_auth_settings(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_auth_settings', slot)
+
+
+def update_auth_settings(resource_group_name, name, enabled=None, action=None,
+                         aad_client_id=None, aad_client_secret=None, aad_allowed_token_audiences=None, aad_token_issuer_url=None,
+                         facebook_app_id=None, facebook_app_secret=None, facebook_oauth_scopes=None,
+                         slot=None):
+
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    auth_settings = get_auth_settings(resource_group_name, name, slot)
+    if action == 'AllowAnonymous':
+        auth_settings.unauthenticated_client_action = 'AllowAnonymous'
+    elif action:
+        auth_settings.unauthenticated_client_action = 'RedirectToLoginPage'
+        auth_settings.default_provider = AUTH_TYPES[action]
+
+    if enabled:
+        auth_settings.enabled = enabled == 'true'
+    if aad_client_id:
+        auth_settings.client_id = aad_client_id
+    if aad_client_secret:
+        auth_settings.client_secret = aad_client_secret
+    if aad_allowed_token_audiences:
+        auth_settings.allowed_audiences = aad_allowed_token_audiences
+    if aad_token_issuer_url:
+        auth_settings.issuer = aad_token_issuer_url
+
+    # filling in the rest
+    return _generic_site_operation(resource_group_name, name, 'update_auth_settings', slot, auth_settings)
+
+    
 def list_runtimes(linux=False):
     client = web_client_factory()
     if linux:
@@ -1432,3 +1465,5 @@ def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+
+
