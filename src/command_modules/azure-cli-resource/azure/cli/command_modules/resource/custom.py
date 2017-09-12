@@ -917,7 +917,7 @@ def _parse_lock_id(id_arg):
     """
     Lock ids look very different from regular resource ids, this function uses a regular expression
     that parses a lock's id and extracts the following parameters if available:
-    -name: the lock's name; always present in a lock id
+    -lock_name: the lock's name; always present in a lock id
     -resource_group_name: the name of the resource group; present in group/resource level locks
     -resource_provider_namespace: the resource provider; present in resource level locks
     -resource_type: the resource type; present in resource level locks
@@ -928,7 +928,7 @@ def _parse_lock_id(id_arg):
         '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
         '(/providers/(?P<resource_provider_namespace>[^/]*)'
         '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
-        '/providers/Microsoft.Authorization/locks/(?P<name>[^/]*)')
+        '/providers/Microsoft.Authorization/locks/(?P<lock_name>[^/]*)')
 
     return regex.match(id_arg).groupdict()
 
@@ -939,7 +939,7 @@ def _call_subscription_get(lock_client, *args):
     return lock_client.management_locks.get_at_subscription_level(*args)
 
 
-def get_lock(name=None, resource_group_name=None, resource_provider_namespace=None,
+def get_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None,
              parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
@@ -966,25 +966,24 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return _call_subscription_get(lock_client, name)
+        return _call_subscription_get(lock_client, lock_name)
     if resource_name is None:
-        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, lock_name)
     if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
         lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
                                resource_type, resource_name)
-        lock_list = [lock for lock in lock_list if lock.name == name]
-        return lock_list[0] if lock_list else None
+        return next((lock for lock in lock_list if lock.name == lock_name), None)
     return lock_client.management_locks.get_at_resource_level(
         resource_group_name, resource_provider_namespace,
-        parent_resource_path or '', resource_type, resource_name, name)
+        parent_resource_path or '', resource_type, resource_name, lock_name)
 
 
-def delete_lock(name=None, resource_group_name=None, resource_provider_namespace=None,
+def delete_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
@@ -1017,18 +1016,18 @@ def delete_lock(name=None, resource_group_name=None, resource_provider_namespace
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return lock_client.management_locks.delete_at_subscription_level(name)
+        return lock_client.management_locks.delete_at_subscription_level(lock_name)
     if resource_name is None:
         return lock_client.management_locks.delete_at_resource_group_level(
-            resource_group_name, name)
+            resource_group_name, lock_name)
     return lock_client.management_locks.delete_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name)
+        resource_name, lock_name)
 
 
 def _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -1046,7 +1045,7 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(name,
+def create_lock(lock_name,
                 resource_group_name=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None):
     """
@@ -1065,7 +1064,7 @@ def create_lock(name,
     """
     if level != 'ReadOnly' and level != 'CanNotDelete':
         raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
-    parameters = ManagementLockObject(level=level, notes=notes, name=name)
+    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -1076,15 +1075,15 @@ def create_lock(name,
     resource_type = lock_resource[3]
 
     if resource_group_name is None:
-        return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)
+        return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, parameters)
 
     if resource_name is None:
         return lock_client.management_locks.create_or_update_at_resource_group_level(
-            resource_group_name, name, parameters)
+            resource_group_name, lock_name, parameters)
 
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name, parameters)
+        resource_name, lock_name, parameters)
 
 
 def _update_lock_parameters(parameters, level, notes):
@@ -1094,7 +1093,7 @@ def _update_lock_parameters(parameters, level, notes):
         parameters.notes = notes
 
 
-def update_lock(name=None, resource_group_name=None, resource_provider_namespace=None, notes=None,
+def update_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None, ids=None):
     """
     Allows updates to the lock-type(level) and the notes of the lock
@@ -1120,32 +1119,30 @@ def update_lock(name=None, resource_group_name=None, resource_provider_namespace
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name, resource_provider_namespace,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name, resource_provider_namespace,
                                      parent_resource_path, resource_type, resource_name)
 
     if resource_group_name is None:
-        params = _call_subscription_get(lock_client, name)
+        params = _call_subscription_get(lock_client, lock_name)
         _update_lock_parameters(params, level, notes)
-        return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
+        return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, params)
     if resource_name is None:
-        params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+        params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, lock_name)
         _update_lock_parameters(params, level, notes)
-        return lock_client.management_locks.create_or_update_at_resource_group_level(resource_group_name, name, params)
+        return lock_client.management_locks.create_or_update_at_resource_group_level(
+            resource_group_name, lock_name, params)
     if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
         lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
                                resource_type, resource_name)
-        lock_list = [lock for lock in lock_list if lock.name == name]
-        if not lock_list:
-            return
-        params = lock_list[0]
+        return next((lock for lock in lock_list if lock.name == lock_name), None)
     else:
         params = lock_client.management_locks.get_at_resource_level(
             resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-            resource_name, name)
+            resource_name, lock_name)
     _update_lock_parameters(params, level, notes)
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name, params)
+        resource_name, lock_name, params)
 
 
 def create_resource_link(link_id, target_id, notes=None):

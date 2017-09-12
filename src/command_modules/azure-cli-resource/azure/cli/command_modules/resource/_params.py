@@ -109,7 +109,7 @@ register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
-register_cli_argument('lock', 'name', options_list=('--name', '-n'), validator=validate_lock_parameters)
+register_cli_argument('lock', 'lock_name', options_list=('--name', '-n'), validator=validate_lock_parameters)
 register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list(LockLevel))
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)

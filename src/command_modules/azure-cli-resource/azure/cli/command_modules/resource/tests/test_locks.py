@@ -180,7 +180,7 @@ class ParseIdTests(unittest.TestCase):
                     'parent_resource_path': None,
                     'resource_type': None,
                     'resource_name': None,
-                    'name': 'sublock'
+                    'lock_name': 'sublock'
                 }
             },
             {
@@ -192,7 +192,7 @@ class ParseIdTests(unittest.TestCase):
                     'parent_resource_path': None,
                     'resource_type': None,
                     'resource_name': None,
-                    'name': 'grouplock'
+                    'lock_name': 'grouplock'
                 }
             },
             {
@@ -205,7 +205,7 @@ class ParseIdTests(unittest.TestCase):
                     'parent_resource_path': None,
                     'resource_type': 'virtualNetworks',
                     'resource_name': 'myvnet',
-                    'name': 'vnetlock'
+                    'lock_name': 'vnetlock'
                 }
             },
             {
@@ -218,7 +218,7 @@ class ParseIdTests(unittest.TestCase):
                     'parent_resource_path': 'virtualNetworks/myvnet',
                     'resource_type': 'subnets',
                     'resource_name': 'subnet',
-                    'name': 'subnetlock'
+                    'lock_name': 'subnetlock'
                 }
             },
             {
@@ -232,7 +232,7 @@ class ParseIdTests(unittest.TestCase):
                     'parent_resource_path': 'resourceType1/name1/providers/Microsoft.Provider2',
                     'resource_type': 'resourceType2',
                     'resource_name': 'name2',
-                    'name': 'somelock'
+                    'lock_name': 'somelock'
                 }
             }
         ]
