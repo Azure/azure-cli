@@ -81,6 +81,33 @@ helps['lock create'] = """
           text: >
             az lock create --name lockName --lock-type ReadOnly
     """
+helps['lock delete'] = """
+    type: commands
+    short-summary: Delete a lock.
+    examples:
+        - name: Delete a resource-group-level lock
+          text: >
+            az lock delete --name lockName --resource-group group
+    """
+helps['lock list'] = """
+    type: command
+    short-summary: List lock information.
+    examples:
+        - name: List out the locks on a vnet resource. Includes locks in the associated group and subscription.
+          text: >
+            az lock list --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks -g group
+        - name: List out all locks on the subscription level
+          text: >
+            az lock list
+    """
+helps['lock show'] = """
+    type: command
+    short-summary: Show the properties of a lock
+    examples:
+        - name: Show a subscription level lock
+          text: >
+            az lock show -n lockname
+    """
 helps['lock update'] = """
     type: command
     short-summary: Update the properties of a lock.
@@ -89,9 +116,9 @@ helps['lock update'] = """
           type: string
           short-summary: 'Notes about this lock'
     examples:
-        - name: Update a resource-group level lock with new notes
+        - name: Update a resource-group level lock with new notes and type
           text: >
-            az lock update --name lockName --resource-group group --notes newNotesHere
+            az lock update --name lockName --resource-group group --notes newNotesHere --lock-type CanNotDelete
     """
 helps['policy'] = """
     type: group
