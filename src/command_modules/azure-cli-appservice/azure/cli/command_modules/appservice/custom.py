@@ -531,15 +531,17 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,  # pylint: disable=too-many-locals
                           git_token=None, manual_integration=None, slot=None, cd_provider=None,
-                          cd_app_type=None, cd_account=None, cd_account_must_exist=None):
+                          cd_app_type=None, nodejs_task_runner=None, python_framework=None, 
+                          python_version=None, cd_account=None, cd_account_must_exist=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
     if cd_provider == 'vsts':
         create_account = not cd_account_must_exist
         vsts_provider = VstsContinuousDeliveryProvider()
+        cd_app_type_details = get_app_type_details(cd_app_type, nodejs_task_runner, python_framework, python_version)
         status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
-                                                         branch, git_token, slot, cd_app_type,
+                                                         branch, git_token, slot, cd_app_type_details,
                                                          cd_account, create_account, location)
         logger.warning(status.status_message)
         return status
@@ -569,6 +571,15 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                     raise
                 logger.warning('retrying %s/4', i + 1)
                 time.sleep(5)   # retry in a moment
+
+
+def get_app_type_details(cd_app_type, nodejs_task_runner, python_framework, python_version):
+    return {
+        'cd_app_type': cd_app_type,
+        'nodejs_task_runner': nodejs_task_runner,
+        'python_framework': python_framework,
+        'python_version': python_version
+    }
 
 
 def update_git_token(git_token=None):
