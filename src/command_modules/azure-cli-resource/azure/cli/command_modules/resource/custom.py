@@ -933,7 +933,7 @@ def _parse_lock_id(id_arg):
     return regex.match(id_arg).groupdict()
 
 
-def _call_correct_subscription_get(lock_client, *args):
+def _call_subscription_get(lock_client, *args):
     if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
         return lock_client.management_locks.get(*args)
     return lock_client.management_locks.get_at_subscription_level(*args)
@@ -971,7 +971,7 @@ def get_lock(name=None, resource_group_name=None, resource_provider_namespace=No
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return _call_correct_subscription_get(lock_client, name)
+        return _call_subscription_get(lock_client, name)
     if resource_name is None:
         return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
     if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
@@ -1124,7 +1124,7 @@ def update_lock(name=None, resource_group_name=None, resource_provider_namespace
                                      parent_resource_path, resource_type, resource_name)
 
     if resource_group_name is None:
-        params = _call_correct_subscription_get(lock_client, name)
+        params = _call_subscription_get(lock_client, name)
         _update_lock_parameters(params, level, notes)
         return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
     if resource_name is None:

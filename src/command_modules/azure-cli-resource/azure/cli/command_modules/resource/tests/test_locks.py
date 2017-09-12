@@ -6,6 +6,7 @@
 from time import sleep
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only
+from azure.cli.command_modules.resource.custom import _parse_lock_id
 
 
 class ResourceLockTests(ScenarioTest):
@@ -165,6 +166,95 @@ class ResourceLockTests(ScenarioTest):
     def _sleep_for_lock_operation(self):
         if self.is_live:
             sleep(5)
+
+
+class ParseIdTests(unittest.TestCase):
+    def test_parsing_lock_ids(self):
+        tests = [
+            {
+                'input': "/subscriptions/subId/providers/"
+                         "Microsoft.Authorization/locks/sublock",
+                'expected': {
+                    'resource_group_name': None,
+                    'resource_provider_namespace': None,
+                    'parent_resource_path': None,
+                    'resource_type': None,
+                    'resource_name': None,
+                    'name': 'sublock'
+                }
+            },
+            {
+                'input': "/subscriptions/subId/resourceGroups/examplegroup/providers/"
+                         "Microsoft.Authorization/locks/grouplock",
+                'expected': {
+                    'resource_group_name': 'examplegroup',
+                    'resource_provider_namespace': None,
+                    'parent_resource_path': None,
+                    'resource_type': None,
+                    'resource_name': None,
+                    'name': 'grouplock'
+                }
+            },
+            {
+                'input': "/subscriptions/subId/resourcegroups/mygroup/providers/"
+                         "Microsoft.Network/virtualNetworks/myvnet/providers/"
+                         "Microsoft.Authorization/locks/vnetlock",
+                'expected': {
+                    'resource_group_name': 'mygroup',
+                    'resource_provider_namespace': 'Microsoft.Network',
+                    'parent_resource_path': None,
+                    'resource_type': 'virtualNetworks',
+                    'resource_name': 'myvnet',
+                    'name': 'vnetlock'
+                }
+            },
+            {
+                'input': "/subscriptions/subId/resourceGroups/mygroup/providers/"
+                         "Microsoft.Network/virtualNetworks/myvnet/subnets/subnet/providers/"
+                         "Microsoft.Authorization/locks/subnetlock",
+                'expected': {
+                    'resource_group_name': 'mygroup',
+                    'resource_provider_namespace': 'Microsoft.Network',
+                    'parent_resource_path': 'virtualNetworks/myvnet',
+                    'resource_type': 'subnets',
+                    'resource_name': 'subnet',
+                    'name': 'subnetlock'
+                }
+            },
+            {
+                'input': "/subscriptions/subId/resourceGroups/mygroup/providers/"
+                         "Microsoft.Provider1/resourceType1/name1/providers/"
+                         "Microsoft.Provider2/resourceType2/name2/providers/"
+                         "Microsoft.Authorization/locks/somelock",
+                'expected': {
+                    'resource_group_name': 'mygroup',
+                    'resource_provider_namespace': 'Microsoft.Provider1',
+                    'parent_resource_path': 'resourceType1/name1/providers/Microsoft.Provider2',
+                    'resource_type': 'resourceType2',
+                    'resource_name': 'name2',
+                    'name': 'somelock'
+                }
+            }
+        ]
+        for test in tests:
+            kwargs = _parse_lock_id(test['input'])
+            self.assertDictEqual(kwargs, test['expected'])
+
+        fail_tests = [
+            "/notsubscriptions/subId/providers/Microsoft.Authorization/locks/sublock",
+            "/subscriptions/subId/notResourceGroups/examplegroup/providers/Microsoft.Authorization/locks/grouplock",
+            "/subscriptions/subId/resourceGroups/examplegroup/providers/Microsoft.NotAuthorization/not_locks/grouplock",
+            "/subscriptions/subId/resourcegroups/mygroup/Microsoft.Network/virtualNetworks/myvnet/providers/"
+            "Microsoft.Authorization/locks/missingProvidersLock",
+            "/subscriptions/subId/resourcegroups/mygroup/providers/Microsoft.Network/myvnet/providers/"
+            "Microsoft.Authorization/locks/missingRsrcTypeLock",
+            "/subscriptions/subId/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/subnet/providers/"
+            "Microsoft.Authorization/locks/missingRsrcGroupLock",
+            "not_a_id_at_all"
+        ]
+        for test in fail_tests:
+            with self.assertRaises(AttributeError):
+                _parse_lock_id(test)
 
 
 if __name__ == '__main__':
