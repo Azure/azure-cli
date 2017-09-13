@@ -4,11 +4,18 @@ Homebrew Packaging
 
 Updating the formula
 --------------------
-1. Change the `url` in the formula to point to the new release.
-2. Modify any checksums as required.
+1. Change the `url` in the formula to point to the new release and change the `sha256` value also.
+2. Update the resources list in the formula (see below).
 3. Run the formula verification commands (see below).
 4. Submit a PR to https://github.com/Homebrew/homebrew-core.
 
+
+Updating the resources list
+---------------------------
+```
+# Create a new virtual environment first
+pip install azure-cli homebrew-pypi-poet; poet -r azure-cli
+```
 
 Verification
 ------------
