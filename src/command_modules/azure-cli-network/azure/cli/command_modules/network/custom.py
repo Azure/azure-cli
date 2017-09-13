@@ -2282,23 +2282,23 @@ def _create_or_update_ipv6_peering(config, primary_peer_address_prefix, secondar
                                    advertised_public_prefixes, customer_asn, routing_registry_name):
     if config:
         # update scenario
-        if primary_peer_address_prefix is not None:
+        if primary_peer_address_prefix:
             config.primary_peer_address_prefix = primary_peer_address_prefix
 
-        if secondary_peer_address_prefix is not None:
+        if secondary_peer_address_prefix:
             config.secondary_peer_address_prefix = secondary_peer_address_prefix
 
-        if route_filter is not None:
+        if route_filter:
             RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
             config.route_filter = RouteFilter(id=route_filter)
 
-        if advertised_public_prefixes is not None:
+        if advertised_public_prefixes:
             config.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
 
-        if customer_asn is not None:
+        if customer_asn:
             config.microsoft_peering_config.customer_asn = customer_asn
 
-        if routing_registry_name is not None:
+        if routing_registry_name:
             config.microsoft_peering_config.routing_registry_name = routing_registry_name
     else:
         # create scenario
@@ -2352,8 +2352,7 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
 
         try:
             if advertised_public_prefixes is not None:
-                instance.microsoft_peering_config.advertised_public_prefixes = \
-                    advertised_public_prefixes
+                instance.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
 
             if customer_asn is not None:
                 instance.microsoft_peering_config.customer_asn = customer_asn

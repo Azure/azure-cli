@@ -589,14 +589,10 @@ class NetworkRouteFilterScenarioTest(ScenarioTest):
         self.cmd('network route-filter list -g {rg}'.format(**kwargs))
 
         self.cmd('network route-filter rule list-service-communities')
-        try:
+        with self.assertRaises(CLIError):
             self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow'.format(**kwargs))
-        except CLIError:
-            pass
-        try:
+        with self.assertRaises(Exception):
             self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny'.format(**kwargs))
-        except Exception:
-            pass
         self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
         self.cmd('network route-filter rule list -g {rg} --filter-name {filter}'.format(**kwargs))
         self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
