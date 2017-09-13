@@ -55,11 +55,14 @@ helps['eventgrid topic event-subscription create'] = """
     short-summary: Create a new event subscription to a topic.
     examples:
         - name: Create a new event subscription with default filters
-          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription with a filter specifying a subject prefix
-          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
+          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
         - name: Create a new event subscription with default filters and with additional labels
-          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --labels Finance HR
+          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code> --labels Finance HR
+        - name: Create a new event subscription with an EventHub as a destination
+          text: az eventgrid topic event-subscription create -g rg1 --topic-name topic1 --name es1 --endpoint_type eventhub --endpoint /subscriptions/55f3dcd4-cac7-43b4-990b-a139d62a1eb2/resourceGroups/TestRG/providers/Microsoft.EventHub/namespaces/ContosoNamespace/eventhubs/EH1
+
     """
 helps['eventgrid topic event-subscription delete'] = """
     type: command
@@ -86,14 +89,15 @@ helps['eventgrid event-subscription create'] = """
     short-summary: Create a new event subscription to a subscription or resource group.
     examples:
         - name: Create a new event subscription to a subscription, using default filters.
-          text: az eventgrid event-subscription create --name es2 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: az eventgrid event-subscription create --name es2 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription to a resource group, using default filters.
-          text: az eventgrid event-subscription create -g rg1 --name es3 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: az eventgrid event-subscription create -g rg1 --name es3 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription to a subscription, with a filter specifying a subject prefix
-          text: az eventgrid event-subscription create --name es4 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
+          text: az eventgrid event-subscription create --name es4 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
         - name: Create a new event subscription to a resource group, with a filter specifying a subject suffix
-          text: az eventgrid event-subscription create -g rg2 --name es5 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-ends-with mysubject_suffix
-
+          text: az eventgrid event-subscription create -g rg2 --name es5 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code> --subject-ends-with mysubject_suffix
+        - name: Create a new event subscription to a subscription, using default filters, and an EventHub as a destination.
+          text: az eventgrid event-subscription create --name es2 --endpoint_type eventhub --endpoint /subscriptions/55f3dcd4-cac7-43b4-990b-a139d62a1eb2/resourceGroups/TestRG/providers/Microsoft.EventHub/namespaces/ContosoNamespace/eventhubs/EH1
     """
 helps['eventgrid event-subscription delete'] = """
     type: command
@@ -124,11 +128,11 @@ helps['eventgrid resource event-subscription create'] = """
     short-summary: Create a new event subscription to a resource.
     examples:
         - name: Create a new event subscription to subscribe to events from an Azure Event Hubs namespace, using default filters
-          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code>
+          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code>
         - name: Create a new event subscription to subscribe to events from an Azure Storage account, using a filter specifying a subject prefix
-          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.Storage --resource-type storageAccounts --resource-name sa1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
+          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.Storage --resource-type storageAccounts --resource-name sa1 --name es1 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code> --subject-begins-with mysubject_prefix
         - name: Create a new event subscription to subscribe to events from an Azure Event Hubs namespace, using default filters and additional labels
-          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://<yourfunction>.azurewebsites.net/api/f1?code=<code> --labels Finance HR
+          text: az eventgrid resource event-subscription create -g rg1 --provider-namespace Microsoft.EventHub --resource-type namespaces --resource-name EHNamespace1 --name es1 --endpoint https://contoso.azurewebsites.net/api/f1?code=<code> --labels Finance HR
     """
 helps['eventgrid resource event-subscription delete'] = """
     type: command
