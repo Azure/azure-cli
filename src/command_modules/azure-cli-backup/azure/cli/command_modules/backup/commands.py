@@ -11,7 +11,7 @@ from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
     job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_cf, \
-    item_level_recovery_connections_cf  # pylint: disable=unused-variable
+    item_level_recovery_connections_cf, backup_protected_items_cf  # pylint: disable=unused-variable
 
 
 def transform_container(result):
@@ -92,8 +92,8 @@ cli_command(__name__, 'backup protection enable-for-vm', 'azure.cli.command_modu
 cli_command(__name__, 'backup protection backup-now', 'azure.cli.command_modules.backup.custom#backup_now', backups_cf)
 cli_command(__name__, 'backup protection disable', 'azure.cli.command_modules.backup.custom#disable_protection', protected_items_cf, confirmation=True)
 
-cli_command(__name__, 'backup item show', 'azure.cli.command_modules.backup.custom#show_item', backup_protection_containers_cf)
-cli_command(__name__, 'backup item list', 'azure.cli.command_modules.backup.custom#list_items', backup_protection_containers_cf, table_transformer=transform_item_list)
+cli_command(__name__, 'backup item show', 'azure.cli.command_modules.backup.custom#show_item', backup_protected_items_cf)
+cli_command(__name__, 'backup item list', 'azure.cli.command_modules.backup.custom#list_items', backup_protected_items_cf, table_transformer=transform_item_list)
 cli_command(__name__, 'backup item set-policy', 'azure.cli.command_modules.backup.custom#update_policy_for_item', protected_items_cf)
 
 cli_command(__name__, 'backup job list', 'azure.cli.command_modules.backup.custom#list_jobs', backup_jobs_cf, table_transformer=transform_job_list)

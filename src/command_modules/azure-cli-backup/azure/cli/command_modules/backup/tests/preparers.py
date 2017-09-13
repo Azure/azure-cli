@@ -59,14 +59,15 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
 
     @staticmethod
     def _cleanup(vault_name, resource_group):
-        vault = execute('az backup vault show -n {} -g {}'.format(vault_name, resource_group)).get_output_in_json()
-        containers = execute('az backup container list --vault \'{}\''.format(json.dumps(vault))).get_output_in_json()
+        containers = execute('az backup container list -v {} -g {} --query [].properties.friendlyName'
+                             .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
-            items = execute('az backup item list --container \'{}\''.format(json.dumps(container))).get_output_in_json()
+            items = execute('az backup item list -g {} -v {} -c {}'
+                            .format(vault_name, resource_group, container)).get_output_in_json()
             for item in items:
                 execute('az backup protection disable --backup-item \'{}\' --delete-backup-data true --yes'
                         .format(json.dumps(item)))
-        execute('az backup vault delete -n {} -g {} --yes'.format(vault['name'], resource_group))
+        execute('az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
 
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
@@ -247,12 +248,8 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             vm = self._get_vm(**kwargs)
 
-            vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
-                                            .format(vault, self.resource_group)).get_output_in_json())
-            container_json = json.dumps(execute('az backup container show -n \'{}\' --vault \'{}\''
-                                                .format(vm, vault_json)).get_output_in_json())
-            item_json = json.dumps(execute('az backup item show -n \'{}\' --container \'{}\''
-                                           .format(vm, container_json)).get_output_in_json())
+            item_json = json.dumps(execute('az backup item show -g {} -v {} -c {} -n {}'
+                                           .format(self.resource_group, vault, vm, vm)).get_output_in_json())
             retain_date = datetime.utcnow() + timedelta(days=30)
             backup_job_json = json.dumps(execute(
                 'az backup protection backup-now --backup-item \'{}\' --retain-until {}'

@@ -15,39 +15,41 @@ from azure.cli.command_modules.backup._validators import \
 
 # ARGUMENT DEFINITIONS
 
-vault_name_type = CliArgumentType(help='The name of the Recovery Services vault.', options_list=('--vault-name',), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'), id_part=None)
-
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM']
 
+vault_name_type = CliArgumentType(help='The Recovery Services vault name.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
+container_name_type = CliArgumentType(help='The Recovery Services container name.', options_list=('--container-name', '-c'))
+container_type_type = CliArgumentType(help='The Recovery Services container type.', **enum_choice_list(allowed_container_types))
+item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'))
+item_type_type = CliArgumentType(help='The Recovery Services item type.', **enum_choice_list(allowed_workload_types))
+policy_name_type = CliArgumentType(help='The Recovery Services policy name.', options_list=('--policy-name', '-p'))
+
 # Vault
-for command in ['create', 'delete', 'show', 'backup-properties set', 'backup-properties show']:
-    register_cli_argument('backup vault {}'.format(command), 'resource_group_name', resource_group_name_type, help='The name of the Azure resource group in which to create or from which to retrieve this vault.', completer=None, validator=None)
-    register_cli_argument('backup vault {}'.format(command), 'vault_name', vault_name_type, options_list=('--name', '-n'), help='The name of the Recovery Services vault.')
+for command in ['create', 'delete', 'show', 'backup-properties']:
+    register_cli_argument('backup vault {}'.format(command), 'vault_name', vault_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('backup vault create', 'region', location_type, help='The name of the geographic location of the vault.')
-
-register_cli_argument('backup vault list', 'resource_group_name', resource_group_name_type, help='The name of the Azure resource group in which to create or from which to retrieve this vault.', completer=None, validator=None)
+register_cli_argument('backup vault create', 'region', location_type)
 
 register_cli_argument('backup vault backup-properties set', 'backup_storage_redundancy', help='Sets backup storage properties for a Recovery Services vault.', **enum_choice_list(['GeoRedundant', 'LocallyRedundant']))
 
 # Container
-for command in ['list', 'show']:
-    register_cli_argument('backup container {}'.format(command), 'vault', type=file_type, help='JSON encoded vault definition. Use the show command of the vault to obtain the relevant vault object.', completer=FilesCompleter())
-    register_cli_argument('backup container {}'.format(command), 'container_type', help='The type of container.', **enum_choice_list(allowed_container_types))
-    register_cli_argument('backup container {}'.format(command), 'status', help='The registration status of this container to the vault.', **enum_choice_list(['Registered']))
+register_cli_argument('backup container', 'vault_name', vault_name_type)
+register_cli_argument('backup container', 'container_type', container_type_type)
+register_cli_argument('backup container', 'status', help='The registration status of this container to the vault.', **enum_choice_list(['Registered']))
 
-register_cli_argument('backup container show', 'name', options_list=('--name', '-n'), help='The name of the container or resource which has items to be protected.')
+register_cli_argument('backup container show', 'name', container_name_type, options_list=('--name', '-n'))
 
 # Item
-for command in ['list', 'show']:
-    register_cli_argument('backup item {}'.format(command), 'container', type=file_type, help='JSON encoded container definition. Use the show command of the container to obtain a container object.', completer=FilesCompleter())
-    register_cli_argument('backup item {}'.format(command), 'workload_type', help='The type of the backed up item.', **enum_choice_list(allowed_workload_types))
+register_cli_argument('backup item', 'vault_name', vault_name_type)
+register_cli_argument('backup item', 'container_name', container_name_type)
+register_cli_argument('backup item', 'container_type', container_type_type)
+register_cli_argument('backup item', 'item_type', item_type_type)
 
-register_cli_argument('backup item show', 'name', options_list=('--name', '-n'), help='The name of the backed up item.')
+register_cli_argument('backup item show', 'name', item_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('backup item set-policy', 'policy', type=file_type, help='The new policy/existing policy updated with the values to be associated with this item. JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
-register_cli_argument('backup item set-policy', 'backup_item', type=file_type, help='JSON encoded backupItem definition. Use the show command of the backup item to obtain the relevant backupItem object.', completer=FilesCompleter())
+register_cli_argument('backup item set-policy', 'item_name', item_name_type)
+register_cli_argument('backup item set-policy', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
 
 # Policy
 for command in ['get-default-for-vm', 'list', 'show']:
