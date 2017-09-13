@@ -2216,6 +2216,23 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
+def _validate_ipv6_address_prefixes(prefixes):
+    from ipaddress import ip_network, IPv6Network
+    prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
+    version = None
+    for prefix in prefixes:
+        try:
+            network = ip_network(prefix)
+            if version is None:
+                version = type(network)
+            else:
+                if not isinstance(network, version):
+                    raise CLIError("usage error: '{}' incompatible mix of IPv4 and IPv6 address prefixes.".format(prefixes))
+        except ValueError:
+            raise CLIError("usage error: prefix '{}' is not recognized as an IPv4 or IPv6 address prefix.".format(prefix))
+    return version == IPv6Network
+
+
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
@@ -2235,56 +2252,78 @@ def create_express_route_peering(
     :param str customer_asn: Autonomous system number of the customer.
     :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
     """
-    ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'ExpressRouteCircuitPeering',
-        'ExpressRouteCircuitPeeringConfig',
-        'ExpressRouteCircuitPeeringType',
-        mod='models')
+    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType,
+     RouteFilter) = get_sdk(
+         ResourceType.MGMT_NETWORK,
+         'ExpressRouteCircuitPeering',
+         'ExpressRouteCircuitPeeringConfig',
+         'ExpressRouteCircuitPeeringType',
+         'RouteFilter',
+         mod='models')
 
-    # TODO: Remove workaround when issue #1574 is fixed in the service
-    # region Issue #1574 workaround
-    circuit = _network_client_factory().express_route_circuits.get(
-        resource_group_name, circuit_name)
-    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
-       circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
-        raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
-    for peering in circuit.peerings:
-        if peering.vlan_id == vlan_id:
-            raise CLIError(
-                "VLAN ID '{}' already in use by peering '{}'".format(vlan_id, peering.name))
-    # endregion
-
-    peering_config = ExpressRouteCircuitPeeringConfig(
-        advertised_public_prefixes=advertised_public_prefixes,
-        customer_asn=customer_asn,
-        routing_registry_name=routing_registry_name) \
-        if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
         secondary_peer_address_prefix=secondary_peer_address_prefix,
-        shared_key=shared_key,
-        microsoft_peering_config=peering_config)
+        shared_key=shared_key)
+
+    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value:
+        peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
+            advertised_public_prefixes=advertised_public_prefixes,
+            customer_asn=customer_asn,
+            routing_registry_name=routing_registry_name)
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
-        RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
         peering.route_filter = RouteFilter(id=route_filter)
-    return client.create_or_update(
-        resource_group_name, circuit_name, peering_type, peering)
+
+    return client.create_or_update(resource_group_name, circuit_name, peering_type, peering)
+
+
+def _create_or_update_ipv6_peering(config, primary_peer_address_prefix, secondary_peer_address_prefix, route_filter,
+                                   advertised_public_prefixes, customer_asn, routing_registry_name):
+    if config:
+        # update scenario
+        if primary_peer_address_prefix:
+            config.primary_peer_address_prefix = primary_peer_address_prefix
+
+        if secondary_peer_address_prefix:
+            config.secondary_peer_address_prefix = secondary_peer_address_prefix
+
+        if route_filter:
+            RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+            config.route_filter = RouteFilter(id=route_filter)
+
+        if advertised_public_prefixes:
+            config.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
+
+        if customer_asn:
+            config.microsoft_peering_config.customer_asn = customer_asn
+
+        if routing_registry_name:
+            config.microsoft_peering_config.routing_registry_name = routing_registry_name
+    else:
+        # create scenario
+
+        IPv6Config, MicrosoftPeeringConfig = get_sdk(ResourceType.MGMT_NETWORK, 'Ipv6ExpressRouteCircuitPeeringConfig',
+                                                     'ExpressRouteCircuitPeeringConfig', mod='models')
+        microsoft_config = MicrosoftPeeringConfig(advertised_public_prefixes=advertised_public_prefixes,
+                                                  customer_asn=customer_asn,
+                                                  routing_registry_name=routing_registry_name)
+        config = IPv6Config(primary_peer_address_prefix=primary_peer_address_prefix,
+                            secondary_peer_address_prefix=secondary_peer_address_prefix,
+                            microsoft_peering_config=microsoft_config,
+                            route_filter=route_filter)
+
+    return config
 
 
 def update_express_route_peering(instance, peer_asn=None, primary_peer_address_prefix=None,
                                  secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
                                  advertised_public_prefixes=None, customer_asn=None,
-                                 routing_registry_name=None):
+                                 routing_registry_name=None, route_filter=None, ip_version='IPv4'):
+
+    # update settings common to all peering types
     if peer_asn is not None:
         instance.peer_asn = peer_asn
-
-    if primary_peer_address_prefix is not None:
-        instance.primary_peer_address_prefix = primary_peer_address_prefix
-
-    if secondary_peer_address_prefix is not None:
-        instance.secondary_peer_address_prefix = secondary_peer_address_prefix
 
     if vlan_id is not None:
         instance.vlan_id = vlan_id
@@ -2292,19 +2331,37 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
     if shared_key is not None:
         instance.shared_key = shared_key
 
-    try:
-        if advertised_public_prefixes is not None:
-            instance.microsoft_peering_config.advertised_public_prefixes = \
-                advertised_public_prefixes
+    if ip_version == 'IPv6':
+        # update is the only way to add IPv6 peering options
+        instance.ipv6_peering_config = _create_or_update_ipv6_peering(instance.ipv6_peering_config,
+                                                                      primary_peer_address_prefix,
+                                                                      secondary_peer_address_prefix, route_filter,
+                                                                      advertised_public_prefixes, customer_asn,
+                                                                      routing_registry_name)
+    else:
+        # IPv4 Microsoft Peering (or non-Microsoft Peering)
+        if primary_peer_address_prefix is not None:
+            instance.primary_peer_address_prefix = primary_peer_address_prefix
 
-        if customer_asn is not None:
-            instance.microsoft_peering_config.customer_asn = customer_asn
+        if secondary_peer_address_prefix is not None:
+            instance.secondary_peer_address_prefix = secondary_peer_address_prefix
 
-        if routing_registry_name is not None:
-            instance.routing_registry_name = routing_registry_name
-    except AttributeError:
-        raise CLIError("--advertised-public-prefixes, --customer-asn and "
-                       "--routing-registry-name are only applicable for 'MicrosoftPeering'")
+        if route_filter is not None:
+            RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+            instance.route_filter = RouteFilter(id=route_filter)
+
+        try:
+            if advertised_public_prefixes is not None:
+                instance.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
+
+            if customer_asn is not None:
+                instance.microsoft_peering_config.customer_asn = customer_asn
+
+            if routing_registry_name is not None:
+                instance.microsoft_peering_config.routing_registry_name = routing_registry_name
+        except AttributeError:
+            raise CLIError('--advertised-public-prefixes, --customer-asn and --routing-registry-name are only '
+                           'applicable for Microsoft Peering.')
 
     return instance
 
