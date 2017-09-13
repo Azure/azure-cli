@@ -9,7 +9,8 @@ from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType)
 from azure.cli.core.commands.parameters import \
-    (resource_group_name_type, get_resource_name_completion_list, file_type, location_type, three_state_flag, enum_choice_list)
+    (get_resource_name_completion_list, resource_group_name_type, file_type, location_type, three_state_flag,
+     enum_choice_list)
 from azure.cli.command_modules.backup._validators import \
     (datetime_type)
 
@@ -18,18 +19,16 @@ from azure.cli.command_modules.backup._validators import \
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM']
 
-vault_name_type = CliArgumentType(help='The Recovery Services vault name.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
-container_name_type = CliArgumentType(help='The Recovery Services container name.', options_list=('--container-name', '-c'))
+vault_name_type = CliArgumentType(help='The Recovery Services vault name.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'), id_part='name')
+container_name_type = CliArgumentType(help='The Recovery Services container name.', options_list=('--container-name', '-c'), id_part='child_name')
 container_type_type = CliArgumentType(help='The Recovery Services container type.', **enum_choice_list(allowed_container_types))
-item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'))
+item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'), id_part='grandchild_name')
 item_type_type = CliArgumentType(help='The Recovery Services item type.', **enum_choice_list(allowed_workload_types))
 policy_name_type = CliArgumentType(help='The Recovery Services policy name.', options_list=('--policy-name', '-p'))
 
 # Vault
-for command in ['create', 'delete', 'show', 'backup-properties']:
-    register_cli_argument('backup vault {}'.format(command), 'vault_name', vault_name_type, options_list=('--name', '-n'))
-
-register_cli_argument('backup vault create', 'region', location_type)
+register_cli_argument('backup vault', 'vault_name', vault_name_type, options_list=('--name', '-n'))
+register_cli_argument('backup vault', 'region', location_type)
 
 register_cli_argument('backup vault backup-properties set', 'backup_storage_redundancy', help='Sets backup storage properties for a Recovery Services vault.', **enum_choice_list(['GeoRedundant', 'LocallyRedundant']))
 
