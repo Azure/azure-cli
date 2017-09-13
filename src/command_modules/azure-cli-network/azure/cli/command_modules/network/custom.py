@@ -200,8 +200,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              None,
-                                                              None))
+                                                              None, None, None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
@@ -860,7 +859,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None):
+                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
@@ -903,13 +902,14 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                                                               tags,
                                                               public_ip_address_allocation,
                                                               public_ip_dns_name,
-                                                              sku))
+                                                              sku, public_ip_zone))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
         load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
-        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku)
+        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
+        frontend_ip_zone)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -1004,7 +1004,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation='dynamic'):
+        private_ip_address_allocation='dynamic', zone=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_config = FrontendIPConfiguration(
@@ -1013,6 +1013,10 @@ def create_lb_frontend_ip_configuration(
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
         subnet=Subnet(subnet) if subnet else None)
+
+    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_config.zones = zone
+
     _upsert(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().frontend_ip_configurations, item_name)

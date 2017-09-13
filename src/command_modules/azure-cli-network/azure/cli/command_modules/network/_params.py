@@ -477,6 +477,9 @@ register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
 
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
     c.register_cli_argument('network public-ip', 'zone', zone_type)
+    c.register_cli_argument('network lb create', 'frontend_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--frontend-ip-zone'), help='used to create internal facing Load balancer'))
+    c.register_cli_argument('network lb create', 'public_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--public-ip-zone'), help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer'))
+    c.register_cli_argument('network lb frontend-ip', 'zone', zone_type)
 
 for item in ['create', 'update']:
     register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))

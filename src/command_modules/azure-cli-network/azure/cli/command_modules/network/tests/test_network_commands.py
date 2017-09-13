@@ -44,6 +44,46 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkLoadBalancerWithZone(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_zone')
+    def test_network_lb_zone(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'lb': 'lb1',
+            'zone': '2',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        # LB with public ip
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip}'.format(**kwargs))
+        # No zone on LB and its front-ip-config
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2("frontendIpConfigurations[0].zones", None),
+            JMESPathCheckV2("zones", None)
+        ])
+        # Zone on public-ip which LB uses to infer the zone
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('zones[0]', kwargs['zone'])
+        ])
+
+        # LB w/o public ip, so called ILB
+        kwargs['lb'] = 'lb2'
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1'.format(**kwargs))
+        # Zone on front-ip-config, and still no zone on LB resource
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2("frontendIpConfigurations[0].zones[0]", kwargs['zone']),
+            JMESPathCheckV2("zones", None)
+        ])
+        # add a second frontend ip configuration
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n LoadBalancerFrontEnd2 -z {zone}  --vnet-name vnet1 --subnet subnet1'.format(**kwargs), checks=[
+            JMESPathCheckV2("zones", [kwargs['zone']])
+        ])
+
+
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
 class NetworkPublicIpWithSku(ScenarioTest):
 

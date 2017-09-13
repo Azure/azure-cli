@@ -854,11 +854,13 @@ helps['network lb create'] = """
             az network lb create -g MyResourceGroup -n MyLb
         - name: Create a load balancer on a specific virtual network and subnet.
           text: >
-            az network lb create
-            -g MyResourceGroup
-            -n MyLb
-            --vnet-name MyVnet
-            --subnet MySubnet
+            az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
+        - name: create a zone flavored public facing load balancer through provisiong a zonal public ip
+          text: >
+            az network lb create -g MyResourceGroup -n myLB --public-ip-zone 2
+        - name: create a zone flavored internal facing load balancer through provisioning a zonal frontend ip configuration
+          text: >
+            az network lb create -g MyResourceGroup -n myLB --frontend-ip-zone 1 -vnet-name MyVnet --subnet MySubnet
 """
 
 helps['network lb delete'] = """
