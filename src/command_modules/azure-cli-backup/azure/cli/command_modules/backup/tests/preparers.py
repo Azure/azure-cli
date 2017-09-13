@@ -63,7 +63,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                              .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
             items = execute('az backup item list -g {} -v {} -c {}'
-                            .format(vault_name, resource_group, container)).get_output_in_json()
+                            .format(resource_group, vault_name, container)).get_output_in_json()
             for item in items:
                 execute('az backup protection disable --backup-item \'{}\' --delete-backup-data true --yes'
                         .format(json.dumps(item)))
@@ -135,8 +135,8 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
 
             vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
                                             .format(vault, self.resource_group)).get_output_in_json())
-            policy_json = json.dumps(execute('az backup policy show -n {} --vault \'{}\''
-                                             .format('DefaultPolicy', vault_json)).get_output_in_json())
+            policy_json = json.dumps(execute('az backup policy show -g {} -v {} -n {}'
+                                             .format(self.resource_group, vault, 'DefaultPolicy')).get_output_in_json())
             vm_json = json.dumps(execute('az vm show -n {} -g {}'
                                          .format(vm, self.resource_group)).get_output_in_json())
             enable_protection_job_json = json.dumps(
@@ -187,7 +187,6 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
         self.vault = None
-        self.vault_json = None
         self.vault_parameter_name = vault_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
 
@@ -196,14 +195,13 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
             self.resource_group = self._get_resource_group(**kwargs)
             self.vault = self._get_vault(**kwargs)
 
-            self.vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
-                                                 .format(self.vault, self.resource_group)).get_output_in_json())
-            policy_json = execute('az backup policy show -n {} --vault \'{}\''
-                                  .format('DefaultPolicy', self.vault_json)).get_output_in_json()
+            policy_json = execute('az backup policy show -g {} -v {} -n {}'
+                                  .format(self.resource_group, self.vault, 'DefaultPolicy')).get_output_in_json()
             policy_json['name'] = name
             policy_json = json.dumps(policy_json)
 
-            execute('az backup policy set --policy \'{}\''.format(policy_json))
+            execute('az backup policy set -g {} -v {} --policy \'{}\''.format(self.resource_group, self.vault,
+                                                                              policy_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 

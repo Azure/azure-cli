@@ -47,17 +47,16 @@ register_cli_argument('backup item', 'item_type', item_type_type)
 
 register_cli_argument('backup item show', 'name', item_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('backup item set-policy', 'item_name', item_name_type)
-register_cli_argument('backup item set-policy', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
+register_cli_argument('backup item set-policy', 'item_name', item_name_type, options_list=('--name', '-n'))
+register_cli_argument('backup item set-policy', 'policy_name', policy_name_type)
 
 # Policy
-for command in ['get-default-for-vm', 'list', 'show']:
-    register_cli_argument('backup policy {}'.format(command), 'vault', type=file_type, help='The Recovery services vault to which this policy should apply/belongs to.', completer=FilesCompleter())
+register_cli_argument('backup policy', 'vault_name', vault_name_type)
 
-for command in ['set', 'delete', 'list-associated-items']:
-    register_cli_argument('backup policy {}'.format(command), 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
+for command in ['show', 'delete', 'list-associated-items']:
+    register_cli_argument('backup policy {}'.format(command), 'name', policy_name_type, options_list=('--name', '-n'))
 
-register_cli_argument('backup policy show', 'name', options_list=('--name', '-n'), help='The name of the backup policy.')
+register_cli_argument('backup policy set', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
 
 # Recovery Point
 for command in ['show', 'list']:

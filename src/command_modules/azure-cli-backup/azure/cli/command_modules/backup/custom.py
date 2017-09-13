@@ -53,57 +53,35 @@ def set_backup_properties(client, vault_name, resource_group_name, backup_storag
     client.update(resource_group_name, vault_name, backup_storage_config, custom_headers=_get_custom_headers())
 
 
-def get_default_policy_for_vm(client, vault):
-    return show_policy(client, default_policy_name, vault)
+def get_default_policy_for_vm(client, resource_group_name, vault_name):
+    return show_policy(client, resource_group_name, vault_name, default_policy_name)
 
 
-def show_policy(client, name, vault):
-    rs_vault = _get_vault_from_json(vaults_cf(None), vault)
-    resource_group = _get_resource_group_from_id(rs_vault.id)
-
-    policy = client.get(rs_vault.name, resource_group, name, custom_headers=_get_custom_headers())
-    return policy
+def show_policy(client, resource_group_name, vault_name, name):
+    return client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
 
 
-def list_policies(client, vault):
-    rs_vault = _get_vault_from_json(vaults_cf(None), vault)
-    resource_group = _get_resource_group_from_id(rs_vault.id)
-
-    policies = client.list(rs_vault.name, resource_group, custom_headers=_get_custom_headers())
+def list_policies(client, resource_group_name, vault_name):
+    policies = client.list(vault_name, resource_group_name, custom_headers=_get_custom_headers())
     return _get_list_from_paged_response(policies)
 
 
-def list_associated_items_for_policy(client, policy):
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(None)
-
-    policy_object = _get_policy_from_json(client, policy)
-    vault_name = _get_vault_from_arm_id(policy_object.id)
-    resource_group = _get_resource_group_from_id(policy_object.id)
-
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name):
     filter_string = _get_filter_string({
-        'policyName': str(policy_object.name)})
-
-    items = backup_protected_items_client.list(vault_name, resource_group, filter_string,
-                                               custom_headers=_get_custom_headers())
+        'policyName': name})
+    items = client.list(vault_name, resource_group_name, filter_string, custom_headers=_get_custom_headers())
     return _get_list_from_paged_response(items)
 
 
-def set_policy(client, policy):
+def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
-    vault_name = _get_vault_from_arm_id(policy_object.id)
-    resource_group = _get_resource_group_from_id(policy_object.id)
 
-    return client.create_or_update(vault_name, resource_group, policy_object.name, policy_object,
+    return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object,
                                    custom_headers=_get_custom_headers())
 
 
-def delete_policy(client, policy):
-    policy_object = _get_policy_from_json(client, policy)
-    vault_name = _get_vault_from_arm_id(policy_object.id)
-    resource_group = _get_resource_group_from_id(policy_object.id)
-
-    client.delete(vault_name, resource_group, policy_object.name, custom_headers=_get_custom_headers())
+def delete_policy(client, resource_group_name, vault_name, name):
+    client.delete(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
 
 
 def show_container(client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
@@ -188,18 +166,17 @@ def list_items(client, resource_group_name, vault_name, container_name, containe
     return [item for item in paged_items if item.properties.container_name.lower() in container.name.lower()]
 
 
-def update_policy_for_item(client, resource_group_name, vault_name, container_name, item_name, policy,
+def update_policy_for_item(client, resource_group_name, vault_name, container_name, item_name, policy_name,
                            container_type="AzureIaasVM", item_type="VM"):
     # Client factories
     backup_protected_items_client = backup_protected_items_cf(None)
-    protection_policies_client = protection_policies_cf(None)
 
     # Get objects from JSON files
     item = show_item(backup_protected_items_client, resource_group_name, vault_name, container_name, item_name,
                      container_type, item_type)
-    policy_object = _get_policy_from_json(protection_policies_client, policy)
+    policy = show_policy(protection_policies_cf(None), resource_group_name, vault_name, policy_name)
 
-    if item.properties.backup_management_type != policy_object.properties.backup_management_type:
+    if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
             The policy type should match with the workload being protected.
@@ -212,7 +189,7 @@ def update_policy_for_item(client, resource_group_name, vault_name, container_na
 
     # Update policy request
     vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
-    vm_item_properties.policy_id = policy_object.id
+    vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = item.properties.source_resource_id
     vm_item = ProtectedItemResource(properties=vm_item_properties)
 

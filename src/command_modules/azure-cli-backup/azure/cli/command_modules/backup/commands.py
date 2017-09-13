@@ -84,7 +84,7 @@ cli_command(__name__, 'backup container list', 'azure.cli.command_modules.backup
 cli_command(__name__, 'backup policy get-default-for-vm', 'azure.cli.command_modules.backup.custom#get_default_policy_for_vm', protection_policies_cf)
 cli_command(__name__, 'backup policy show', 'azure.cli.command_modules.backup.custom#show_policy', protection_policies_cf)
 cli_command(__name__, 'backup policy list', 'azure.cli.command_modules.backup.custom#list_policies', backup_policies_cf, table_transformer=transform_policy_list)
-cli_command(__name__, 'backup policy list-associated-items', 'azure.cli.command_modules.backup.custom#list_associated_items_for_policy', protection_policies_cf, table_transformer=transform_item_list)
+cli_command(__name__, 'backup policy list-associated-items', 'azure.cli.command_modules.backup.custom#list_associated_items_for_policy', backup_protected_items_cf, table_transformer=transform_item_list)
 cli_command(__name__, 'backup policy set', 'azure.cli.command_modules.backup.custom#set_policy', protection_policies_cf)
 cli_command(__name__, 'backup policy delete', 'azure.cli.command_modules.backup.custom#delete_policy', protection_policies_cf)
 

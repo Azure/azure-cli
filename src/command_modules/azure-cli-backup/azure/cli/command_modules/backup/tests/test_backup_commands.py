@@ -31,8 +31,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'az backup vault show -n {} -g {}'.format(vault_name, resource_group)).get_output_in_json())
 
         # Enable Protection
-        policy_json = json.dumps(self.cmd(
-            'az backup policy show -n DefaultPolicy --vault \'{}\''.format(vault_json)).get_output_in_json())
+        policy_json = json.dumps(self.cmd('az backup policy show -g {} -v {} -n DefaultPolicy'
+                                          .format(resource_group, vault_name, vault_json)).get_output_in_json())
         vm_json = self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json()
         vm_json = json.dumps(vm_json)
         self.cmd('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
@@ -160,48 +160,44 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ItemPreparer(vm_parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm2')
     def test_policy_commands(self, resource_group, vault_name, policy1, policy2, vm1, vm2):
-        vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
-                                         .format(vault_name, resource_group)).get_output_in_json())
-
         policy3 = self.create_random_name('clitest-policy', 24)
         default_policy = 'DefaultPolicy'
-        default_policy_json = json.dumps(self.cmd('az backup policy show -n {} --vault \'{}\''
-                                                  .format(default_policy, vault_json)).get_output_in_json())
 
-        policy1_json = self.cmd('az backup policy show -n {} --vault \'{}\''
-                                .format(policy1, vault_json), checks=[
+        policy1_json = self.cmd('az backup policy show -g {} -v {} -n {}'
+                                .format(resource_group, vault_name, policy1), checks=[
                                     JMESPathCheck('name', policy1),
                                     JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
 
-        self.cmd('az backup policy list --vault \'{}\''.format(vault_json), checks=[
+        self.cmd('az backup policy list -g {} -v {}'.format(resource_group, vault_name), checks=[
             JMESPathCheck("length(@)", 3),
             JMESPathCheck("length([?name == '{}'])".format(default_policy), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy1), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy2), 1)])
 
-        self.cmd('az backup policy list-associated-items --policy \'{}\''.format(default_policy_json), checks=[
-            JMESPathCheck("length(@)", 2),
-            JMESPathCheck("length([?properties.friendlyName == '{}'])".format(vm1), 1),
-            JMESPathCheck("length([?properties.friendlyName == '{}'])".format(vm2), 1)])
+        self.cmd('az backup policy list-associated-items -g {} -v {} -n {}'
+                 .format(resource_group, vault_name, default_policy), checks=[
+                     JMESPathCheck("length(@)", 2),
+                     JMESPathCheck("length([?properties.friendlyName == '{}'])".format(vm1), 1),
+                     JMESPathCheck("length([?properties.friendlyName == '{}'])".format(vm2), 1)])
 
         policy1_json['name'] = policy3
         policy1_json = json.dumps(policy1_json)
 
-        self.cmd('az backup policy set --policy \'{}\''
-                 .format(policy1_json), checks=[
+        self.cmd('az backup policy set -g {} -v {} --policy \'{}\''
+                 .format(resource_group, vault_name, policy1_json), checks=[
                      JMESPathCheck('name', policy3),
                      JMESPathCheck('resourceGroup', resource_group)])
 
-        self.cmd('az backup policy list --vault \'{}\''.format(vault_json), checks=[
+        self.cmd('az backup policy list -g {} -v {}'.format(resource_group, vault_name), checks=[
             JMESPathCheck("length(@)", 4),
             JMESPathCheck("length([?name == '{}'])".format(default_policy), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy1), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy2), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy3), 1)])
 
-        self.cmd('az backup policy delete --policy \'{}\''.format(policy1_json))
+        self.cmd('az backup policy delete -g {} -v {} -n {}'.format(resource_group, vault_name, policy3))
 
-        self.cmd('az backup policy list --vault \'{}\''.format(vault_json), checks=[
+        self.cmd('az backup policy list -g {} -v {}'.format(resource_group, vault_name), checks=[
             JMESPathCheck("length(@)", 3),
             JMESPathCheck("length([?name == '{}'])".format(default_policy), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy1), 1),
@@ -215,8 +211,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ItemPreparer(vm_parameter_name='vm2')
     @PolicyPreparer()
     def test_item_commands(self, resource_group, vault_name, vm1, vm2, policy_name):
-        vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
-                                         .format(vault_name, resource_group)).get_output_in_json())
         container1 = self.cmd('az backup container show -n {} -v {} -g {} --query properties.friendlyName'
                               .format(vm1, vault_name, resource_group)).get_output_in_json()
         container2 = self.cmd('az backup container show -n {} -v {} -g {} --query properties.friendlyName'
@@ -248,11 +242,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      JMESPathCheck("length(@)", 1),
                      JMESPathCheck("length([?properties.friendlyName == '{}'])".format(vm2), 1)])
 
-        policy_json = json.dumps(self.cmd('az backup policy show -n \'{}\' --vault \'{}\''
-                                          .format(policy_name, vault_json)).get_output_in_json())
-
-        self.cmd('az backup item set-policy -g {} -v {} -c {} -i {} --policy \'{}\''
-                 .format(resource_group, vault_name, container1, vm1, policy_json), checks=[
+        self.cmd('az backup item set-policy -g {} -v {} -c {} -n {} -p {}'
+                 .format(resource_group, vault_name, container1, vm1, policy_name), checks=[
                      JMESPathCheck("properties.entityFriendlyName", vm1),
                      JMESPathCheck("properties.operation", "ConfigureBackup"),
                      JMESPathCheck("properties.status", "Completed"),
@@ -297,8 +288,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_protection_commands(self, resource_group, vault_name, vm_name):
         vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
                                          .format(vault_name, resource_group)).get_output_in_json())
-        policy_json = json.dumps(self.cmd('az backup policy show -n {} --vault \'{}\''
-                                          .format('DefaultPolicy', vault_json)).get_output_in_json())
+        policy_json = json.dumps(self.cmd('az backup policy show -g {} -v {} -n {}'
+                                          .format(resource_group, vault_name, 'DefaultPolicy')).get_output_in_json())
         vm_json = json.dumps(self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json())
 
         self.cmd('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
