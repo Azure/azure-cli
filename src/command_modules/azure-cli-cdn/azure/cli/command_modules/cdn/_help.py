@@ -185,7 +185,7 @@ helps['cdn custom-domain create'] = """
         - name: Create a custom domain within an endpoint and profile
           text: >
             az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
-                -n domain-name --host-name www.example.com
+                -n domain-name --hostname www.example.com
 """
 
 helps['cdn origin'] = """

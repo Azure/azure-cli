@@ -20,6 +20,50 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBa
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'lb': 'lb1',
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-address {ip}'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class NetworkPublicIpWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'sku': 'standard',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku}'.format(**kwargs))
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkMultiIdsShowScenarioTest, self).__init__(__file__, test_method, resource_group='test_multi_id')
@@ -61,8 +105,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg))
         self.cmd('network application-gateway wait -g {} -n ag1 --exists'.format(rg))
         self.cmd('network application-gateway update -g {} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo'.format(rg))
-        self.cmd('network application-gateway wait -g {} -n ag1 --created'.format(rg))
-        self.cmd('network application-gateway list')
+        self.cmd('network application-gateway wait -g {} -n ag1 --updated'.format(rg))
 
         ag_list = self.cmd('network application-gateway list --resource-group {}'.format(rg), checks=[
             JMESPathCheckV2('type(@)', 'array'),
@@ -531,6 +574,32 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('network public-ip list -g {}'.format(rg), checks=JMESPathCheck("length[?name == '{}']".format(public_ip_dns), None))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkRouteFilterScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
+    def test_network_route_filter(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'filter': 'filter1'
+        }
+        self.cmd('network route-filter create -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter update -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter show -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter list -g {rg}'.format(**kwargs))
+
+        self.cmd('network route-filter rule list-service-communities')
+        with self.assertRaises(CLIError):
+            self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow'.format(**kwargs))
+        with self.assertRaises(Exception):
+            self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny'.format(**kwargs))
+        self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
+        self.cmd('network route-filter rule list -g {rg} --filter-name {filter}'.format(**kwargs))
+        self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
+
+        self.cmd('network route-filter delete -g {rg} -n {filter}'.format(**kwargs))
+
+
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_express_route')
@@ -601,6 +670,29 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network express-route delete --resource-group {} --name {}'.format(rg, circuit))
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {}'.format(rg), checks=NoneCheck())
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
+    def test_network_express_route_ipv6_peering(self, resource_group):
+
+        rg = resource_group
+        circuit = 'circuit1'
+
+        # Premium SKU required to create MicrosoftPeering settings
+        self.cmd('network express-route create -g {} -n {} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51 --sku-tier Premium'.format(rg, circuit))
+        self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit))
+        self.cmd('network express-route peering update -g {} --circuit-name {} -n MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2001:db00::/126 --secondary-peer-subnet 2002:db00::/126 --advertised-public-prefixes 2001:db00::/126 --customer-asn 100001 --routing-registry-name level3'.format(rg, circuit))
+        self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
+            JMESPathCheckV2('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
+            JMESPathCheckV2('microsoftPeeringConfig.customerAsn', 10000),
+            JMESPathCheckV2('microsoftPeeringConfig.routingRegistryName', 'LEVEL3'),
+            JMESPathCheckV2('ipv6PeeringConfig.microsoftPeeringConfig.advertisedPublicPrefixes[0]', '2001:db00::/126'),
+            JMESPathCheckV2('ipv6PeeringConfig.microsoftPeeringConfig.customerAsn', 100001),
+            JMESPathCheckV2('ipv6PeeringConfig.state', 'Enabled')
+        ])
 
 
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
@@ -1106,6 +1198,40 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue(len(result['value']) > 0)
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkExtendedNSGScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
+    def test_network_extended_nsg(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'nsg': 'nsg1',
+            'rule': 'rule1'
+        }
+        self.cmd('network nsg create --name {nsg} -g {rg}'.format(**kwargs))
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(destinationAddressPrefixes)', 2),
+            JMESPathCheckV2('destinationAddressPrefix', ''),
+            JMESPathCheckV2('length(sourceAddressPrefixes)', 0),
+            JMESPathCheckV2('sourceAddressPrefix', '*'),
+            JMESPathCheckV2('length(sourcePortRanges)', 2),
+            JMESPathCheckV2('sourcePortRange', None),
+            JMESPathCheckV2('length(destinationPortRanges)', 0),
+            JMESPathCheckV2('destinationPortRange', '4444')
+        ])
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000 2000 3000'.format(**kwargs), checks=[
+            JMESPathCheckV2('length(destinationAddressPrefixes)', 0),
+            JMESPathCheckV2('destinationAddressPrefix', 'Internet'),
+            JMESPathCheckV2('length(sourceAddressPrefixes)', 2),
+            JMESPathCheckV2('sourceAddressPrefix', ''),
+            JMESPathCheckV2('length(sourcePortRanges)', 0),
+            JMESPathCheckV2('sourcePortRange', '*'),
+            JMESPathCheckV2('length(destinationPortRanges)', 3),
+            JMESPathCheckV2('destinationPortRange', None)
+        ])
+
+
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_nsg')
@@ -1231,54 +1357,95 @@ class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
         # Expecting the vnet we deleted to not be listed after delete
         self.cmd('network vnet list --resource-group {}'.format(self.resource_group), NoneCheck())
 
-# TODO: Troubleshoot issue with VNET gateway and re-enable
-# class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
-#    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
-#    def test_network_vnet_peering(self, resource_group):
-#        rg = resource_group
-#        # create two vnets with non-overlapping prefixes
-#        self.cmd('network vnet create -g {} -n vnet1'.format(rg))
-#        self.cmd('network vnet create -g {} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24'.format(rg))
-#        # create supporting resources for gateway
-#        self.cmd('network public-ip create -g {} -n ip1'.format(rg))
-#        ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg)).get_output_in_json()
-#        vnet_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
-#        # create the gateway on vnet2
-#        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --vnet {}'.format(rg, ip_id, vnet_id))
+class NetworkVNetPeeringScenarioTest(ScenarioTest):
 
-#        vnet1_id = self.cmd('network vnet show -g {} -n vnet1 --query id'.format(rg)).get_output_in_json()
-#        vnet2_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
-#        # set up gateway sharing from vnet1 to vnet2
-#        self.cmd('network vnet peering create -g {} -n peering2 --vnet-name vnet2 --remote-vnet-id {} --allow-gateway-transit'.format(rg, vnet1_id), checks=[
-#            JMESPathCheckV2('allowGatewayTransit', True),
-#            JMESPathCheckV2('remoteVirtualNetwork.id', vnet1_id),
-#            JMESPathCheckV2('peeringState', 'Initiated')
-#        ])
-#        self.cmd('network vnet peering create -g {} -n peering1 --vnet-name vnet1 --remote-vnet-id {} --use-remote-gateways --allow-forwarded-traffic'.format(rg, vnet2_id), checks=[
-#            JMESPathCheckV2('useRemoteGateways', True),
-#            JMESPathCheckV2('remoteVirtualNetwork.id', vnet2_id),
-#            JMESPathCheckV2('peeringState', 'Connected'),
-#            JMESPathCheckV2('allowVirtualNetworkAccess', False)
-#        ])
-#        self.cmd('network vnet peering show -g {} -n peering1 --vnet-name vnet1'.format(rg),
-#                 checks=JMESPathCheckV2('name', 'peering1'))
-#        self.cmd('network vnet peering list -g {} --vnet-name vnet2'.format(rg), checks=[
-#            JMESPathCheckV2('[0].name', 'peering2'),
-#            JMESPathCheckV2('length(@)', 1)
-#        ])
-#        with self.assertRaises(Exception):
-#            # TODO: Server-side regression results in this failing. Verify the error.  When this fails (i.e. no more error)
-#            # then this can be reverted.
-#            self.cmd('network vnet peering update -g {} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false'.format(rg), checks=[
-#                JMESPathCheckV2('useRemoteGateways', False),
-#                JMESPathCheckV2('allowForwardedTraffic', True)
-#            ])
-#        self.cmd('network vnet peering delete -g {} -n peering1 --vnet-name vnet1'.format(rg))
-#        self.cmd('network vnet peering list -g {} --vnet-name vnet1'.format(rg), checks=NoneCheck())
-#        # must delete the second peering and the gateway or the resource group delete will fail
-#        self.cmd('network vnet peering delete -g {} -n peering2 --vnet-name vnet2'.format(rg))
-#        self.cmd('network vnet-gateway delete -g {} -n gateway1'.format(rg))
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
+    def test_network_vnet_peering(self, resource_group):
+        rg = resource_group
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {} -n vnet1'.format(rg))
+        self.cmd('network vnet create -g {} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24'.format(rg))
+        # create supporting resources for gateway
+        self.cmd('network public-ip create -g {} -n ip1'.format(rg))
+        ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg)).get_output_in_json()
+        vnet_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
+        # create the gateway on vnet2
+        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --vnet {}'.format(rg, ip_id, vnet_id))
+
+        vnet1_id = self.cmd('network vnet show -g {} -n vnet1 --query id'.format(rg)).get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg)).get_output_in_json()
+        # set up gateway sharing from vnet1 to vnet2
+        self.cmd('network vnet peering create -g {} -n peering2 --vnet-name vnet2 --remote-vnet-id {} --allow-gateway-transit'.format(rg, vnet1_id), checks=[
+            JMESPathCheckV2('allowGatewayTransit', True),
+            JMESPathCheckV2('remoteVirtualNetwork.id', vnet1_id),
+            JMESPathCheckV2('peeringState', 'Initiated')
+        ])
+        self.cmd('network vnet peering create -g {} -n peering1 --vnet-name vnet1 --remote-vnet-id {} --use-remote-gateways --allow-forwarded-traffic'.format(rg, vnet2_id), checks=[
+            JMESPathCheckV2('useRemoteGateways', True),
+            JMESPathCheckV2('remoteVirtualNetwork.id', vnet2_id),
+            JMESPathCheckV2('peeringState', 'Connected'),
+            JMESPathCheckV2('allowVirtualNetworkAccess', False)
+        ])
+        self.cmd('network vnet peering show -g {} -n peering1 --vnet-name vnet1'.format(rg),
+                 checks=JMESPathCheckV2('name', 'peering1'))
+        self.cmd('network vnet peering list -g {} --vnet-name vnet2'.format(rg), checks=[
+            JMESPathCheckV2('[0].name', 'peering2'),
+            JMESPathCheckV2('length(@)', 1)
+        ])
+        self.cmd('network vnet peering update -g {} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false'.format(rg), checks=[
+            JMESPathCheckV2('useRemoteGateways', False),
+            JMESPathCheckV2('allowForwardedTraffic', True)
+        ])
+        self.cmd('network vnet peering delete -g {} -n peering1 --vnet-name vnet1'.format(rg))
+        self.cmd('network vnet peering list -g {} --vnet-name vnet1'.format(rg), checks=NoneCheck())
+        # must delete the second peering and the gateway or the resource group delete will fail
+        self.cmd('network vnet peering delete -g {} -n peering2 --vnet-name vnet2'.format(rg))
+        self.cmd('network vnet-gateway delete -g {} -n gateway1'.format(rg))
+
+
+class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_connection_ipsec')
+    def test_network_vpn_connection_ipsec(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vnet1': 'vnet1',
+            'vnet_prefix1': '10.11.0.0/16',
+            'vnet_prefix2': '10.12.0.0/16',
+            'fe_sub1': 'FrontEnd',
+            'fe_sub_prefix1': '10.11.0.0/24',
+            'be_sub1': 'BackEnd',
+            'be_sub_prefix1': '10.12.0.0/24',
+            'gw_sub1': 'GatewaySubnet',
+            'gw_sub_prefix1': '10.12.255.0/27',
+            'gw1ip': 'pip1',
+            'gw1': 'gw1',
+            'gw1_sku': 'Standard',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1'
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1}'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {gw1ip}'.format(**kwargs))
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}'.format(**kwargs))
+        self.cmd('network local-gateway create -g {rg} -n {lgw1} --gateway-ip-address {lgw1ip} --local-address-prefixes {lgw1_prefix1} {lgw1_prefix2}'.format(**kwargs))
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3'.format(**kwargs))
+
+        self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048'.format(**kwargs))
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}'.format(**kwargs))
+        self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}'.format(**kwargs))
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}'.format(**kwargs))
+
+        # TODO: Continue with the VNET-to-VNET scenario... >_>
 
 
 class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
@@ -1313,20 +1480,24 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
 
 
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
-class NetworkSubnetPrivateAccessScenarioTest(ScenarioTest):
+class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_subnet_private_access_test', location='westcentralus')
-    def test_network_subnet_private_access(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
+    def test_network_subnet_endpoint_service(self, resource_group):
         kwargs = {
             'rg': resource_group,
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
+        self.cmd('network vnet list-endpoint-services -l westus', checks=[
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('@[0].name', 'Microsoft.Storage')
+        ])
         self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --private-access-services Microsoft.Storage'.format(**kwargs),
-                 checks=JMESPathCheckV2('privateAccessServices[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --private-access-services ""'.format(**kwargs),
-                 checks=JMESPathCheckV2('privateAccessServices', None))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints[0].service', 'Microsoft.Storage'))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""'.format(**kwargs),
+                 checks=JMESPathCheckV2('serviceEndpoints', None))
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -1453,6 +1624,7 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase):  # pyli
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2015-06-15')
 class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
@@ -1516,6 +1688,128 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, gateway2_name))
         self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
                  checks=JMESPathCheckV2('routingWeight', 25))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01')
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
+    def test_network_vpn_gateway(self, resource_group):
+        vnet1_name = 'myvnet1'
+        vnet2_name = 'myvnet2'
+        vnet3_name = 'myvnet3'
+        gateway1_name = 'gateway1'
+        gateway2_name = 'gateway2'
+        gateway3_name = 'gateway3'
+        ip1_name = 'pubip1'
+        ip2_name = 'pubip2'
+        ip3_name = 'pubip3'
+        rg = resource_group
+
+        self.cmd('network public-ip create -n {} -g {}'.format(ip1_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip2_name, rg))
+        self.cmd('network public-ip create -n {} -g {}'.format(ip3_name, rg))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24'.format(rg, vnet1_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16'.format(rg, vnet2_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16'.format(rg, vnet3_name))
+
+        subscription_id = MOCKED_SUBSCRIPTION_ID if not self.in_recording \
+            else self.cmd('account list --query "[?isDefault].id"').get_output_in_json()[0]
+
+        vnet1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, vnet1_name)
+        vnet2_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(subscription_id, rg, vnet2_name)
+
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, gateway1_name, vnet1_id, ip1_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait'.format(rg, gateway2_name, vnet2_id, ip2_name))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --public-ip-address {} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50'.format(rg, gateway3_name, vnet3_name, ip3_name))
+
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway2_name))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gateway3_name))
+
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway1_name), checks=[
+            JMESPathCheckV2('gatewayType', 'Vpn'),
+            JMESPathCheckV2('sku.capacity', 2),
+            JMESPathCheckV2('sku.name', 'Basic'),
+            JMESPathCheckV2('vpnType', 'RouteBased'),
+            JMESPathCheckV2('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway2_name), checks=[
+            JMESPathCheckV2('gatewayType', 'Vpn'),
+            JMESPathCheckV2('sku.capacity', 2),
+            JMESPathCheckV2('sku.name', 'Basic'),
+            JMESPathCheckV2('vpnType', 'RouteBased'),
+            JMESPathCheckV2('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {} -n {}'.format(rg, gateway3_name), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('enableBgp', True),
+            JMESPathCheckV2('bgpSettings.asn', 12345),
+            JMESPathCheckV2('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            JMESPathCheckV2('bgpSettings.peerWeight', 50)
+        ])
+
+        conn12 = 'conn1to2'
+        conn21 = 'conn2to1'
+        gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, gateway1_name)
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, gateway2_name))
+        self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
+                 checks=JMESPathCheckV2('routingWeight', 25))
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway2 {} --vnet-gateway1 {}'.format(conn21, rg, gateway1_id, gateway2_name))
+
+        self.cmd('network vnet-gateway list-learned-routes -g {} -n {}'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway list-advertised-routes -g {} -n {} --peer 10.1.1.1'.format(rg, gateway1_name))
+        self.cmd('network vnet-gateway list-bgp-peer-status -g {} -n {} --peer 10.1.1.1'.format(rg, gateway1_name))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2017-06-01')
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} --processor-architecture X86'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.exe' in output, 'Expected EXE file in output.\nActual: {}'.format(output))
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway} --processor-architecture Amd64'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.exe' in output, 'Expected EXE file in output.\nActual: {}'.format(output))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        }
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet'.format(**kwargs))
+        self.cmd('network public-ip create -g {rg} -n {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}'.format(**kwargs))
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):

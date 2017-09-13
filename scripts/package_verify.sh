@@ -3,7 +3,7 @@ set -ex
 export PYTHONPATH=
 virtualenv package-verify-env
 . package-verify-env/bin/activate
-pip install -e scripts
+pip install -e tools
 python -m automation.tests.verify_packages
 python -m automation.tests.verify_dependencies
 deactivate

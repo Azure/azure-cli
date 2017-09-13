@@ -9,13 +9,15 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.mgmt.resource.locks.models import LockLevel
 from azure.mgmt.resource.managedapplications.models import ApplianceLockLevel
-from azure.cli.core.commands import register_cli_argument, CliArgumentType
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands import register_cli_argument, CliArgumentType, VersionConstraint
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
                                                 enum_choice_list, no_wait_type, file_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
 from ._validators import process_deployment_create_namespace, validate_lock_parameters
+
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -61,11 +63,24 @@ existing_policy_definition_name_type = CliArgumentType(options_list=('--name', '
 register_cli_argument('policy', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 register_cli_argument('policy definition', 'policy_definition_name', arg_type=existing_policy_definition_name_type)
 register_cli_argument('policy definition create', 'name', options_list=('--name', '-n'), help='name of the new policy definition')
-register_cli_argument('policy definition', 'rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
+register_cli_argument('policy definition', 'rules',
+                      help='JSON formatted string or a path to a file or uri with such content',
+                      type=file_type, completer=FilesCompleter())
+
+with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') as c:
+    c.register_cli_argument('policy definition', 'params',
+                            help='JSON formatted string or a path to a file or uri with parameter definitions',
+                            type=file_type, completer=FilesCompleter())
+
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
 register_cli_argument('policy assignment create', 'name', options_list=('--name', '-n'), help='name of the new assignment')
+
+with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') as c:
+    c.register_cli_argument('policy assignment create', 'params', options_list=('--params', '-p'),
+                            help='JSON formatted string or path to file with parameter values of policy rule')
+
 register_cli_argument('policy assignment', 'scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('policy assignment', 'disable_scope_strict_match', action='store_true', help='include assignment either inhertied from parent scope or at child scope')
 register_cli_argument('policy assignment', 'display_name', help='display name of the assignment')
@@ -94,13 +109,14 @@ register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
-register_cli_argument('lock', 'name', options_list=('--name', '-n'), validator=validate_lock_parameters)
+register_cli_argument('lock', 'lock_name', options_list=('--name', '-n'), validator=validate_lock_parameters)
 register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list(LockLevel))
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
                       completer=get_resource_types_completion_list,)
 register_cli_argument('lock', 'resource_name', options_list=('--resource-name'))
+register_cli_argument('lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
 
 register_cli_argument('managedapp', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
 register_cli_argument('managedapp', 'appliance_name', options_list=('--name', '-n'), id_part='name')

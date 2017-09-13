@@ -734,6 +734,16 @@ helps['network express-route'] = """
 helps['network express-route create'] = """
     type: command
     short-summary: Create an ExpressRoute circuit.
+    parameters:
+        - name: --bandwidth
+          populator-commands:
+          - az network express-route list-service-providers
+        - name: --peering-location
+          populator-commands:
+          - az network express-route list-service-providers
+        - name: --provider
+          populator-commands:
+          - az network express-route list-service-providers
 """
 
 helps['network express-route delete'] = """
@@ -775,6 +785,12 @@ helps['network express-route list-service-providers'] = """
     type: command
     short-summary: List available ExpressRoute service providers.
 """
+
+helps['network express-route wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the ExpressRoute is met.
+"""
+
 # endregion
 
 # region Express Route auth
@@ -815,6 +831,12 @@ helps['network express-route peering'] = """
 helps['network express-route peering create'] = """
     type: command
     short-summary: Create peering settings.
+    examples:
+        - name: Create Microsoft Peering settings with IPv4 configuration.
+          text: az network express-route peering create -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 101.0.0.0/30 --secondary-peer-subnet 102.0.0.0/30 --advertised-public-prefixes 101.0.0.0/30
+        - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
+          text: az network express-route peering update -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
+          min_profile: latest
 """
 
 helps['network express-route peering delete'] = """
@@ -835,6 +857,11 @@ helps['network express-route peering show'] = """
 helps['network express-route peering update'] = """
     type: command
     short-summary: Update peering settings.
+    examples:
+        - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
+          text: az network express-route peering update -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
+          min_profile: latest
+
 """
 # endregion
 
@@ -1361,10 +1388,10 @@ helps['network nsg rule create'] = """
             --nsg-name MyNsg
             -n MyNsgRule
             --priority 4096
-            --source-address-prefix 208.130.28/24
-            --source-port-range 80
-            --destination-address-prefix *
-            --destination-port-range 80
+            --source-address-prefixes 208.130.28/24
+            --source-port-ranges 80
+            --destination-address-prefixes *
+            --destination-port-ranges 80
             --access Deny
             --protocol Tcp
             --description "Deny from specific IP address range on 80."
@@ -1752,10 +1779,10 @@ helps['network vnet subnet create'] = """
     type: command
     short-summary: Create a subnet and associate an existing NSG and route table.
     parameters:
-        - name: --private-access-services
-          short-summary: Space separated list of services for which to allow private access to this subnet.
+        - name: --service-endpoints
+          short-summary: Space separated list of services for which to allow tunneling to this subnet.
           populator-commands:
-            - az network list-private-access-services
+            - az network vnet list-endpoint-services
     examples:
         - name: Create new subnet attached to an NSG with a custom route table.
           text: >
@@ -1782,10 +1809,10 @@ helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
     parameters:
-        - name: --private-access-services
-          short-summary: Space separated list of services for which to allow private access to this subnet.
+        - name: --service-endpoints
+          short-summary: Space separated list of services for which to allow tunneling to this subnet.
           populator-commands:
-            - az network list-private-access-services
+            - az network vnet list-endpoint-services
 """
 # endregion
 
@@ -1953,6 +1980,18 @@ helps['network vnet-gateway wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
 """
+
+helps['network vnet-gateway vpn-client'] = """
+    type: group
+    short-summary: Download a configured client with which to connect to a VPN.
+"""
+
+helps['network vnet-gateway vpn-client generate'] = """
+    type: command
+    short-summary: Generates a binary client file that can be used to connect to a VPN.
+    long-summary: The legacy implementation returns an EXE, while the latest implementation returns a ZIP file.
+"""
+
 
 # endregion
 
@@ -2159,7 +2198,7 @@ helps['network watcher flow-log show'] = """
 
 # endregion
 
-helps['network list-private-access-services'] = """
+helps['network vnet list-service-endpoints'] = """
     type: command
-    short-summary: List which services support private access for a given region.
+    short-summary: List which services support VNET service tunneling for a given region.
 """

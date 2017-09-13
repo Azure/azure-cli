@@ -34,7 +34,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,too-many-lines
+# pylint:disable=no-member,too-many-lines,too-many-locals
 
 
 def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=None,
@@ -44,12 +44,14 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     client = web_client_factory()
     if is_valid_resource_id(plan):
-        plan = parse_resource_id(plan)['name']
-    plan_info = client.app_service_plans.get(resource_group_name, plan)
+        parse_result = parse_resource_id(plan)
+        plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+    else:
+        plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    webapp_def = Site(server_farm_id=plan, location=location, site_config=site_config)
+    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
         if runtime and deployment_container_image_name:
@@ -61,6 +63,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
+            site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -82,6 +85,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
                              deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
+
     return webapp
 
 
@@ -134,8 +138,18 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def delete_webapp(resource_group_name, name, slot=None):
+def delete_function_app(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'delete', slot)
+
+
+def delete_webapp(resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
+                  keep_dns_registration=None, slot=None):
+    client = web_client_factory()
+    delete_method = getattr(client.web_apps, 'delete' if slot is None else 'delete_slot')
+    delete_method(resource_group_name, name,
+                  delete_metrics=False if keep_metrics else None,
+                  delete_empty_server_farm=False if keep_empty_plan else None,
+                  skip_dns_registration=False if keep_dns_registration else None)
 
 
 def stop_webapp(resource_group_name, name, slot=None):
@@ -157,12 +171,8 @@ def get_site_configs(resource_group_name, name, slot=None):
 def get_app_settings(resource_group_name, name, slot=None):
     result = _generic_site_operation(resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory()
-    slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
-                              .connection_string_names or []
-    result = [{'name': p,
-               'value': result.properties[p],
-               'slotSetting': p in slot_constr_names} for p in _mask_creds_related_appsettings(result.properties)]
-    return result
+    slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
+    return _build_app_settings_output(result.properties, slot_app_setting_names)
 
 
 def get_connection_strings(resource_group_name, name, slot=None):
@@ -251,16 +261,17 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
 
     result = _generic_site_operation(resource_group_name, name, 'update_application_settings',
                                      slot, app_settings)
-
+    app_settings_slot_cfg_names = []
     if slot_settings:
         client = web_client_factory()
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
+        app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _mask_creds_related_appsettings(result.properties)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
@@ -277,9 +288,16 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _mask_creds_related_appsettings(_generic_site_operation(resource_group_name, name,
-                                                                   'update_application_settings',
-                                                                   slot, app_settings).properties)
+    result = _generic_site_operation(resource_group_name, name,
+                                     'update_application_settings', slot, app_settings)
+    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+
+
+def _build_app_settings_output(app_settings, slot_cfg_names):
+    slot_cfg_names = slot_cfg_names or []
+    return [{'name': p,
+             'value': app_settings[p],
+             'slotSetting': p in slot_cfg_names} for p in _mask_creds_related_appsettings(app_settings)]
 
 
 def update_connection_strings(resource_group_name, name, connection_string_type,
@@ -335,7 +353,7 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
-                              'DOCKER_REGISTRY_SERVER_PASSWORD']
+                              'DOCKER_REGISTRY_SERVER_PASSWORD', 'DOCKER_CUSTOM_IMAGE_NAME']
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
@@ -798,7 +816,7 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
+    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUM'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
@@ -974,6 +992,10 @@ def config_diagnostics(resource_group_name, name, level=None,
 
     return _generic_site_operation(resource_group_name, name, 'update_diagnostic_logs_config',
                                    slot, site_log_config)
+
+
+def show_diagnostic_settings(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
 def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
@@ -1354,9 +1376,8 @@ def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_sourc
     if deployment_source_url:
         logger.warning("Linking to git repository '%s'", deployment_source_url)
         try:
-            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
-                                           deployment_source_branch, manual_integration=True)
-            LongRunningOperation()(poller)
+            config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                  deployment_source_branch, manual_integration=True)
         except Exception as ex:  # pylint: disable=broad-except
             ex = ex_handler_factory(no_throw=True)(ex)
             logger.warning("Link to git repository failed due to error '%s'", ex)

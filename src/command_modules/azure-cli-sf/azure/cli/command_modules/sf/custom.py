@@ -8,6 +8,7 @@ from __future__ import print_function
 
 import os
 import sys
+import concurrent.futures
 
 # Breaking py2 to py3 change
 try:
@@ -30,8 +31,8 @@ az_config = AzConfig()
 logger = azlogging.get_az_logger(__name__)
 
 
-def sf_create_compose_application(client, compose_file, application_id, repo_user=None, encrypted=False,
-                                  repo_pass=None, timeout=60):
+def sf_create_compose_application(client, compose_file, application_id, registry_user=None,
+                                  registry_pass=None, encrypted=False, timeout=60):
     # We need to read from a file which makes this a custom command
     # Encrypted param to indicate a password will be prompted
     """
@@ -43,40 +44,33 @@ def sf_create_compose_application(client, compose_file, application_id, repo_use
 
     :param str compose_file: Path to the Compose file to use
 
-    :param str repo_user: Container repository user name if needed for
-    authentication
+    :param str registry_user: Username for target container registry
 
-    :param bool encrypted: If true, indicate to use an encrypted password
-    rather than prompting for a plaintext one
+    :param bool encrypted: Indicates usage of encrypted password
 
-    :param str repo_pass: Encrypted container repository password
+    :param str registry_pass: Password for target container registry
     """
     from azure.cli.core.util import read_file_content
+    from azure.cli.core.prompting import prompt
     from azure.cli.core.prompting import prompt_pass
+
     # pylint: disable=line-too-long
     from azure.servicefabric.models.create_compose_application_description import CreateComposeApplicationDescription
     from azure.servicefabric.models.repository_credential import RepositoryCredential
 
-    if (any([encrypted, repo_pass]) and
-            not all([encrypted, repo_pass, repo_user])):
-        raise CLIError(
-            "Invalid arguments: [ --application_id --file | "
-            "--application_id --file --repo_user | --application_id --file "
-            "--repo_user --encrypted --repo_pass ])"
-        )
+    if not registry_user and registry_pass:
+        registry_user = prompt("Registry username: ", "Username for target container registry")
 
-    if repo_user:
-        plaintext_pass = prompt_pass("Container repository password: ", False,
-                                     "Password for container repository "
-                                     "containing container images")
-        repo_pass = plaintext_pass
+    if not registry_pass and registry_user:
+        registry_pass = prompt_pass("Registry password: ", False,
+                                    "Password for target container registry")
 
-    repo_cred = RepositoryCredential(repo_user, repo_pass, encrypted)
+    registry_cred = RepositoryCredential(
+        registry_user, registry_pass, encrypted) if registry_user and registry_pass else None
 
     file_contents = read_file_content(compose_file)
 
-    model = CreateComposeApplicationDescription(application_id, file_contents,
-                                                repo_cred)
+    model = CreateComposeApplicationDescription(application_id, file_contents, registry_cred)
 
     client.create_compose_application(model, timeout)
 
@@ -188,10 +182,9 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
         if sf_config.no_verify_setting is False:
             ca_cert = sf_config.ca_cert_info()
     total_files_count = 0
-    current_files_count = 0
+    current_files_count = {"val": 0}
     total_files_size = 0
-    # For py2 we use dictionary instead of nonlocal
-    current_files_size = {"size": 0}
+    current_files_size = {"val": 0}
 
     for root, _, files in os.walk(abspath):
         total_files_count += (len(files) + 1)
@@ -200,65 +193,68 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
             total_files_size += t.st_size
 
     def print_progress(size, rel_file_path):
-        current_files_size["size"] += size
+        current_files_size["val"] += size
         if show_progress:
             print(
                 "[{}/{}] files, [{}/{}] bytes, {}".format(
-                    current_files_count,
+                    current_files_count["val"],
                     total_files_count,
-                    current_files_size["size"],
+                    current_files_size["val"],
                     total_files_size,
                     rel_file_path), file=sys.stderr)
 
-    for root, _, files in os.walk(abspath):
-        rel_path = os.path.normpath(os.path.relpath(root, abspath))
-        for f in files:
-            url_path = (
-                os.path.normpath(os.path.join("ImageStore", basename,
-                                              rel_path, f))
-            ).replace("\\", "/")
-            fp = os.path.normpath(os.path.join(root, f))
-            with open(fp, 'rb') as file_opened:
-                url_parsed = list(urlparse(endpoint))
-                url_parsed[2] = url_path
-                url_parsed[4] = urlencode(
-                    {"api-version": "3.0-preview"})
-                url = urlunparse(url_parsed)
+    def upload_file(root, rel_path, f):
+        url_path = os.path.normpath(os.path.join("ImageStore", basename, rel_path, f)).replace("\\", "/")
+        fp = os.path.normpath(os.path.join(root, f))
+        with open(fp, 'rb') as file_opened:
+            url_parsed = list(urlparse(endpoint))
+            url_parsed[2] = url_path
+            url_parsed[4] = urlencode(
+                {"api-version": "3.0-preview"})
+            url = urlunparse(url_parsed)
 
-                def file_chunk(target_file, rel_path, print_progress):
-                    chunk = True
-                    while chunk:
-                        chunk = target_file.read(100000)
+            def file_chunk(target_file, rel_path, print_progress):
+                chunk = True
+                while chunk:
+                    chunk = target_file.read(1000000)
+                    if chunk:
                         print_progress(len(chunk), rel_path)
-                        yield chunk
+                    yield chunk
 
-                fc = file_chunk(file_opened, os.path.normpath(
-                    os.path.join(rel_path, f)
-                ), print_progress)
-                requests.put(url, data=fc, cert=cert,
-                             verify=ca_cert)
-                current_files_count += 1
-                print_progress(0, os.path.normpath(
-                    os.path.join(rel_path, f)
-                ))
-        url_path = (
-            os.path.normpath(os.path.join("ImageStore", basename,
-                                          rel_path, "_.dir"))
-        ).replace("\\", "/")
+            fc = file_chunk(file_opened, os.path.normpath(
+                os.path.join(rel_path, f)
+            ), print_progress)
+            requests.put(url, data=fc, cert=cert, verify=ca_cert)
+            current_files_count["val"] += 1
+            print_progress(0, os.path.normpath(
+                os.path.join(rel_path, f)
+            ))
+
+    def upload_dir_file(rel_path):
+        url_path = os.path.normpath(os.path.join("ImageStore", basename, rel_path, "_.dir")).replace("\\", "/")
         url_parsed = list(urlparse(endpoint))
         url_parsed[2] = url_path
         url_parsed[4] = urlencode({"api-version": "3.0-preview"})
         url = urlunparse(url_parsed)
         requests.put(url, cert=cert, verify=ca_cert)
-        current_files_count += 1
+        current_files_count["val"] += 1
         print_progress(0, os.path.normpath(os.path.join(rel_path, '_.dir')))
 
-    if show_progress:
-        print("[{}/{}] files, [{}/{}] bytes sent".format(
-            current_files_count,
-            total_files_count,
-            current_files_size["size"],
-            total_files_size), file=sys.stderr)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for root, _, files in os.walk(abspath):
+            rel_path = os.path.normpath(os.path.relpath(root, abspath))
+            for f in files:
+                futures.append(executor.submit(upload_file, root, rel_path, f))
+            futures.append(executor.submit(upload_dir_file, rel_path))
+
+        concurrent.futures.wait(futures)
+        if show_progress:
+            print("[{}/{}] files, [{}/{}] bytes sent".format(
+                current_files_count["val"],
+                total_files_count,
+                current_files_size["val"],
+                total_files_size), file=sys.stderr)
 
 
 def parse_app_params(formatted_params):
@@ -1501,3 +1497,14 @@ def sf_service_package_upload(client, node_name,
                                                  app_type_version,
                                                  node_name, list_psps)
     client.deployed_service_package_to_node(node_name, desc, timeout)
+
+
+def sfctl_info():
+    """Information about new Service Fabric CLI module"""
+
+    info_string = (
+        "The `az sf` module has been migrated to a new Service Fabric CLI. To install this module, run `pip install "
+        "sfctl`. More information on the CLI can be found on Microsoft Docs: "
+        "https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cli"
+    )
+    logger.warning(info_string)

@@ -14,12 +14,13 @@ import mock
 import uuid
 
 import six
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck, MOCKED_SUBSCRIPTION_ID)
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
@@ -319,6 +320,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image2, prepared_vm), checks=[
             JMESPathCheckV2('name', image2)
         ])
+
         self.cmd('vm create -g {} -n vm2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image2), checks=[
                 JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
@@ -327,14 +329,27 @@ class VMCustomImageTest(ScenarioTest):
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
             JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage')
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
+
+        self.cmd('vm create -g {} -n vm3 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku Premium_LRS'.format(
+            resource_group, image2))
+        self.cmd('vm show -g {} -n vm3'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
+        ])
+
         self.cmd('vmss create -g {} -n vmss2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image2), checks=[
             JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
             JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage')
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage'),
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
 
@@ -423,7 +438,8 @@ class VMAttachDisksOnCreate(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
-            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3)
+            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
     @ResourceGroupPreparer()
@@ -1468,7 +1484,9 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
             JMESPathCheck('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
             JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
-            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3)
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
         self.cmd('vmss disk detach -g {} -n {} --lun 1'.format(self.resource_group, vmss_name))
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
@@ -1901,12 +1919,49 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 
+class VMSSILBSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_with_ilb(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd('vmss create -g {} -n {} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""'.format(resource_group, vmss_name))
+        # list connection information should fail
+        with self.assertRaises(CLIError) as err:
+            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name))
+        self.assertTrue('internal load balancer' in str(err.exception))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class VMSSLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
+    def test_vmss_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vmss': 'vmss1',
+            'lb': 'lb1',
+            'ip': 'pubip1',
+            'sku': 'standard',
+            'location': 'eastus2'
+        }
+
+        self.cmd('vmss create -g {rg} -l {location} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
 class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_vm_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
         vm1 = 'vm1'
         vm1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}'.format(subscription_id, resource_group, vm1)
         vm2 = 'vm2'
@@ -1920,10 +1975,9 @@ class MSIScenarioTest(ScenarioTest):
                  uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create a linux vm with default configuration
-            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
+            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vm1, default_scope), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),
                 JMESPathCheckV2('identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
-                JMESPathCheckV2('identity.subscription', subscription_id),
                 JMESPathCheckV2('identity.port', 50342)
             ])
 
@@ -1936,12 +1990,12 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm create -g {} -n {} --image Win2016Datacenter --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2, vm1_id), checks=[
                 JMESPathCheckV2('identity.role', 'reader'),
                 JMESPathCheckV2('identity.scope', vm1_id),
-                JMESPathCheckV2('identity.subscription', subscription_id),
                 JMESPathCheckV2('identity.port', 50342)
             ])
 
             self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
                 JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -1951,12 +2005,12 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm assign-identity -g {} -n {} --scope {} --role reader --port 50343'.format(resource_group, vm3, vm1_id), checks=[
                 JMESPathCheckV2('role', 'reader'),
                 JMESPathCheckV2('scope', vm1_id),
-                JMESPathCheckV2('subscription', subscription_id),
                 JMESPathCheckV2('port', 50343)
             ])
 
             self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm3), checks=[
                 JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50343)
             ])
 
@@ -1964,6 +2018,7 @@ class MSIScenarioTest(ScenarioTest):
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
         vmss1 = 'vmss11'
         vmss1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachineScaleSets/{}'.format(subscription_id, resource_group, vmss1)
         vmss2 = 'vmss2'
@@ -1976,15 +2031,15 @@ class MSIScenarioTest(ScenarioTest):
                  uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C124')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
+            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vmss1, default_scope), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'Contributor'),
                 JMESPathCheckV2('vmss.identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
-                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
                 JMESPathCheckV2('vmss.identity.port', 50342)
             ])
 
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -1992,11 +2047,11 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss create -g {} -n {} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2, vmss1_id), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'reader'),
                 JMESPathCheckV2('vmss.identity.scope', vmss1_id),
-                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
                 JMESPathCheckV2('vmss.identity.port', 50342)
             ])
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -2009,7 +2064,6 @@ class MSIScenarioTest(ScenarioTest):
                 self.cmd('vmss assign-identity -g {} -n {} --scope "{}" --role reader --port 50343'.format(resource_group, vmss3, vmss1_id), checks=[
                     JMESPathCheckV2('role', 'reader'),
                     JMESPathCheckV2('scope', vmss1_id),
-                    JMESPathCheckV2('subscription', subscription_id),
                     JMESPathCheckV2('port', 50343)
                 ])
 
@@ -2020,16 +2074,13 @@ class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_msi_no_scope(self, resource_group):
-        subscription_id = self.get_subscription_id()
-
         vm1 = 'vm1'
         vmss1 = 'vmss1'
         vm2 = 'vm2'
         vmss2 = 'vmss2'
 
         # create a linux vm with identity but w/o a role assignment (--scope "")
-        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vm1), checks=[
-            JMESPathCheckV2('identity.subscription', subscription_id),
+        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
             JMESPathCheckV2('identity.scope', ''),
             JMESPathCheckV2('identity.port', 50342)
         ])
@@ -2040,8 +2091,7 @@ class MSIScenarioTest(ScenarioTest):
         ])
 
         # create a vmss with identity but w/o a role assignment (--scope "")
-        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vmss1), checks=[
-            JMESPathCheckV2('vmss.identity.subscription', subscription_id),
+        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
             JMESPathCheckV2('vmss.identity.scope', ''),
             JMESPathCheckV2('vmss.identity.port', 50342)
         ])
@@ -2055,9 +2105,8 @@ class MSIScenarioTest(ScenarioTest):
         # create a vm w/o identity
         self.cmd('vm create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2))
         # assign identity but w/o a role assignment
-        self.cmd('vm assign-identity -g {} -n {} --scope ""'.format(resource_group, vm2), checks=[
+        self.cmd('vm assign-identity -g {} -n {}'.format(resource_group, vm2), checks=[
             JMESPathCheckV2('scope', ''),
-            JMESPathCheckV2('subscription', subscription_id),
             JMESPathCheckV2('port', 50342)
         ])
         # the extension should still get provisioned
@@ -2069,9 +2118,8 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2))
         # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
         if self.is_live:
-            self.cmd('vmss assign-identity -g {} -n {} --scope ""'.format(resource_group, vmss2), checks=[
+            self.cmd('vmss assign-identity -g {} -n {}'.format(resource_group, vmss2), checks=[
                 JMESPathCheckV2('scope', ''),
-                JMESPathCheckV2('subscription', subscription_id),
                 JMESPathCheckV2('port', 50342)
             ])
 

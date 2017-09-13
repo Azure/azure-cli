@@ -2,6 +2,23 @@
 
 Release History
 ===============
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* msi: don't assign access unless `--scope` is provided
+* msi: use the same extension naming as portal does
+* msi: remove the useless `subscription` from the `vm/vmss create` commands output
+* `vm/vmss create`: fix a bug that the storage sku is not applied on data disks coming with an image
+* `vm format-secret`: Fix issue where `--secrets` would not accept newline separated IDs.
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* `vmss get-instance-view`: Fix issue where extra, erroneous information was displayed when using `--instance-id *`
+* `vmss create`: Added support for `--lb-sku`
+* `vm/vmss create`: remove human names from the admin name blacklist
+* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image. 
+* `vmss create`: fix a crash when create a scaleset with an internal LB
+* `vm availability-set create`: Fix issue where --no-wait argument did not work.
+
 2.0.12 (2017-08-11)
 +++++++++++++++++++
 * availability-set: expose fault domain count on convert

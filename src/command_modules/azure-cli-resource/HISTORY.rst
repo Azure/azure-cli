@@ -2,9 +2,22 @@
 
 Release History
 ===============
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'. 
+* Allows passing in parameter values for 'policy assignment create'.
+* In all cases params can be provided either via json or file.
+* Incremented API version.
+* Support '--ids' parameter to refer to locks
+* Various lock command bug fixes
+
 2.0.12 (2017-08-11)
 +++++++++++++++++++
 * minor fixes
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* `group deployment create`: Fixes issue where templates which lacked "parameters" or "resources" failed to deploy.
 
 2.0.11 (2017-07-27)
 +++++++++++++++++++

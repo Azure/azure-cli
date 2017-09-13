@@ -77,9 +77,36 @@ helps['lock create'] = """
           type: string
           short-summary: 'Notes about this lock'
     examples:
-        - name: Update a subscription level lock with new notes
+        - name: Create a new subscription level Read-Only lock
           text: >
-            az lock update --name lockName --resource-group group --notes newNotesHere
+            az lock create --name lockName --lock-type ReadOnly
+    """
+helps['lock delete'] = """
+    type: commands
+    short-summary: Delete a lock.
+    examples:
+        - name: Delete a resource-group-level lock
+          text: >
+            az lock delete --name lockName --resource-group group
+    """
+helps['lock list'] = """
+    type: command
+    short-summary: List lock information.
+    examples:
+        - name: List out the locks on a vnet resource. Includes locks in the associated group and subscription.
+          text: >
+            az lock list --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks -g group
+        - name: List out all locks on the subscription level
+          text: >
+            az lock list
+    """
+helps['lock show'] = """
+    type: command
+    short-summary: Show the properties of a lock
+    examples:
+        - name: Show a subscription level lock
+          text: >
+            az lock show -n lockname
     """
 helps['lock update'] = """
     type: command
@@ -89,9 +116,9 @@ helps['lock update'] = """
           type: string
           short-summary: 'Notes about this lock'
     examples:
-        - name: Update a subscription level lock with new notes
+        - name: Update a resource-group level lock with new notes and type
           text: >
-            az lock update --name lockName --resource-group group --notes newNotesHere
+            az lock update --name lockName --resource-group group --notes newNotesHere --lock-type CanNotDelete
     """
 helps['policy'] = """
     type: group
@@ -122,6 +149,19 @@ helps['policy definition create'] = """
                                 "effect": "deny"
                             }
                         }
+                - name: Create a policy parameter definition with the following example
+                  text: |
+                        {
+                            "allowedLocations": {
+                                "type": "array",
+                                "metadata": {
+                                    "description": "The list of locations that can be specified
+                                                    when deploying resources",
+                                    "strongType": "location",
+                                    "displayName": "Allowed locations"
+                                }
+                            }
+                        }
             """
 helps['policy definition delete'] = """
     type: command
@@ -142,6 +182,18 @@ helps['policy assignment'] = """
 helps['policy assignment create'] = """
     type: command
     short-summary: Create a resource policy assignment.
+    examples:
+        - name: Provide rule parameter values with the following example
+          text: |
+                {
+                    "allowedLocations": {
+                        "value": [
+                            "australiaeast",
+                            "eastus",
+                            "japaneast"
+                        ]
+                    }
+                }
 """
 helps['policy assignment delete'] = """
     type: command

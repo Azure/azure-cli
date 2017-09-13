@@ -25,8 +25,7 @@ from azure.mgmt.storage import StorageManagementClient
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
 from ._util import (
-    get_sql_servers_operations,
-    get_sql_elastic_pools_operations
+    get_sql_servers_operations
 )
 
 ###############################################
@@ -64,6 +63,7 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
 def _db_dw_create(
         client,
         db_id,
+        raw,
         kwargs):
 
     # Determine server location
@@ -76,6 +76,7 @@ def _db_dw_create(
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name,
         database_name=db_id.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
@@ -86,6 +87,7 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Verify edition
@@ -97,6 +99,7 @@ def db_create(
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -105,6 +108,7 @@ def _db_create_special(
         client,
         source_db,
         dest_db,
+        raw,
         kwargs):
 
     # Determine server location
@@ -126,6 +130,7 @@ def _db_create_special(
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name,
         database_name=dest_db.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
@@ -138,6 +143,7 @@ def db_copy(
         dest_name,
         dest_server_name=None,
         dest_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -151,6 +157,7 @@ def db_copy(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
+        raw,
         kwargs)
 
 
@@ -163,6 +170,7 @@ def db_create_replica(
         # Replica must have the same database name as the source db
         partner_server_name,
         partner_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -176,6 +184,7 @@ def db_create_replica(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
+        raw,
         kwargs)
 
 
@@ -188,6 +197,7 @@ def db_restore(
         resource_group_name,
         restore_point_in_time,
         dest_name,
+        raw=False,
         **kwargs):
 
     # Set create mode properties
@@ -199,6 +209,7 @@ def db_restore(
         DatabaseIdentity(database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(dest_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -212,7 +223,7 @@ def db_failover(
         allow_data_loss=False):
 
     # List replication links
-    links = list(client.list_replication_links(
+    links = list(client.list_by_database(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name))
@@ -229,9 +240,9 @@ def db_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.failover_replication_link_allow_data_loss
+        failover_func = client.failover_allow_data_loss
     else:
-        failover_func = client.failover_replication_link
+        failover_func = client.failover
 
     # Execute failover from the primary to this database
     return failover_func(
@@ -304,7 +315,7 @@ def db_delete_replica_link(
     partner_resource_group_name = partner_resource_group_name or resource_group_name
 
     # Find the replication link
-    links = list(client.list_replication_links(
+    links = list(client.list_by_database(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name))
@@ -316,7 +327,7 @@ def db_delete_replica_link(
         # No link exists, nothing to be done
         return
 
-    return client.delete_replication_link(
+    return client.delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -387,8 +398,7 @@ def db_list(
 
     if elastic_pool_name:
         # List all databases in the elastic pool
-        pool_client = get_sql_elastic_pools_operations(None)
-        return pool_client.list_databases(
+        return client.list_by_elastic_pool(
             server_name=server_name,
             resource_group_name=resource_group_name,
             elastic_pool_name=elastic_pool_name,
@@ -658,6 +668,7 @@ def dw_create(
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Set edition
@@ -667,6 +678,7 @@ def dw_create(
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -813,6 +825,19 @@ def elastic_pool_list_capabilities(
 ###############################################
 
 
+# Lists servers in a resource group or subscription
+def server_list(
+        client,
+        resource_group_name=None):
+
+    if resource_group_name:
+        # List all servers in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all servers in the subscription
+    return client.list()
+
+
 # Update server. Custom update function to apply parameters to instance.
 def server_update(
         instance,
@@ -910,3 +935,32 @@ def firewall_rule_update(
         resource_group_name=resource_group_name,
         start_ip_address=start_ip_address or instance.start_ip_address,
         end_ip_address=end_ip_address or instance.end_ip_address)
+
+#####
+#           sql server vnet-rule validate
+#####
+
+# Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
+
+
+def validate_subnet(namespace):
+    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+
+    subnet = namespace.virtual_network_subnet_id
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        pass
+    elif subnet and not subnet_is_id and vnet:
+        namespace.virtual_network_subnet_id = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type='subnets',
+            child_name=subnet)
+    else:
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+    delattr(namespace, 'vnet_name')

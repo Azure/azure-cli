@@ -8,6 +8,7 @@ import tempfile
 import unittest
 import mock
 
+from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import DefaultStr
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -91,30 +92,30 @@ class TestActions(unittest.TestCase):
         err_invalid_char = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
 
         self._verify_username_with_ex('!@#', 'linux', err_invalid_char)
-        self._verify_username_with_ex('dav[', 'linux', err_invalid_char)
-        self._verify_username_with_ex('Adavid', 'linux', err_invalid_char)
-        self._verify_username_with_ex('-ddavid', 'linux', err_invalid_char)
+        self._verify_username_with_ex('gue[', 'linux', err_invalid_char)
+        self._verify_username_with_ex('Aguest', 'linux', err_invalid_char)
+        self._verify_username_with_ex('-gguest', 'linux', err_invalid_char)
         self._verify_username_with_ex('', 'linux', 'admin user name can not be empty')
-        self._verify_username_with_ex('david', 'linux',
-                                      "This user name 'david' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        self._verify_username_with_ex('guest', 'linux',
+                                      "This user name 'guest' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('d-avid1', 'linux')
-        _validate_admin_username('david1', 'linux')
-        _validate_admin_username('david1.', 'linux')
+        _validate_admin_username('g-uest1', 'linux')
+        _validate_admin_username('guest1', 'linux')
+        _validate_admin_username('guest1.', 'linux')
 
     def test_validate_admin_username_windows(self):
         # pylint: disable=line-too-long
         err_invalid_char = r'admin user name cannot contain special characters \/"[]:|<>+=;,?*@# or ends with .'
 
         self._verify_username_with_ex('!@#', 'windows', err_invalid_char)
-        self._verify_username_with_ex('dav[', 'windows', err_invalid_char)
+        self._verify_username_with_ex('gue[', 'windows', err_invalid_char)
         self._verify_username_with_ex('dddivid.', 'windows', err_invalid_char)
-        self._verify_username_with_ex('john', 'windows',
-                                      "This user name 'john' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        self._verify_username_with_ex('backup', 'windows',
+                                      "This user name 'backup' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('ADAVID', 'windows')
-        _validate_admin_username('d-avid1', 'windows')
-        _validate_admin_username('david1', 'windows')
+        _validate_admin_username('AGUEST', 'windows')
+        _validate_admin_username('g-uest1', 'windows')
+        _validate_admin_username('guest1', 'windows')
 
     def test_validate_admin_password_linux(self):
         # pylint: disable=line-too-long
@@ -172,6 +173,29 @@ class TestActions(unittest.TestCase):
         self.assertEqual('product1', np.plan_product)
         self.assertEqual('publisher1', np.plan_publisher)
 
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
+    def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
+        compute_client = mock.MagicMock()
+        resp = mock.MagicMock()
+        resp.status_code = 404
+        resp.text = '{"Message": "Not Found"}'
+
+        compute_client.virtual_machine_images.get.side_effect = CloudError(resp, error='image not found')
+        client_factory_mock.return_value = compute_client
+
+        np = mock.MagicMock()
+        np.location = 'some region'
+        np.image = 'publisher1:offer1:sku1:1.0.0'
+
+        # action
+        _parse_image_argument(np)
+
+        # assert
+        logger_mock.assert_called_with("Querying the image of '%s' failed for an error '%s'. "
+                                       "Configuring plan settings will be skipped", 'publisher1:offer1:sku1:1.0.0',
+                                       'image not found')
+
     def test_get_next_subnet_addr_suffix(self):
         result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
         self.assertEqual(result, '10.0.1.0/24')
@@ -215,13 +239,13 @@ class TestActions(unittest.TestCase):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
         np_mock.assign_identity = True
-        np_mock.identity_scope = ''
+        np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
 
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
-                        str(err.exception))
+        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
+                        "not provided" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
@@ -249,17 +273,6 @@ class TestActions(unittest.TestCase):
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         self.assertEqual(np_mock.identity_role, 'reader')
         mock_resolve_role_id.assert_called_with('reader', 'foo-scope')
-
-        # check we set right default scope
-        np_mock = mock.MagicMock()
-        np_mock.assign_identity = True
-        np_mock.identity_scope = None
-        np_mock.identity_role = 'Reader'
-        np_mock.resource_group_name = 'foo-group'
-        mock_get_subscription.return_value = 'foo-subscription-id'
-        mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(np_mock)
-        self.assertEqual('/subscriptions/foo-subscription-id/resourceGroups/foo-group', np_mock.identity_scope)
 
     @mock.patch('azure.cli.command_modules.vm._validators._resolve_role_id', autospec=True)
     def test_validate_msi_on_assign_identity_command(self, mock_resolve_role_id):

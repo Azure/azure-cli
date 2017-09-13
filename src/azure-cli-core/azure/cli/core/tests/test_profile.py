@@ -424,11 +424,11 @@ class Test_Profile(unittest.TestCase):
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
         test_port = '12345'
-        test_user = test_subscription_id + '@' + test_port
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI', self.state1, test_tenant_id)
+        test_user = 'VM'
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI@' + str(test_port), self.state1, test_tenant_id)
         consolidated = Profile._normalize_properties(test_user,
                                                      [msi_subscription],
-                                                     False)
+                                                     True)
         profile._set_subscriptions(consolidated)
 
         # setup a response for the token request
@@ -454,8 +454,8 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(test_token_entry['token_type'], token_type)
         self.assertEqual(test_token_entry, whole_entry)
         mock_post.assert_called_with('http://localhost:12345/oauth2/token',
-                                     {'authority': 'https://login.microsoftonline.com/{}'.format(test_tenant_id),
-                                      'resource': 'https://management.core.windows.net/'})
+                                     data={'resource': 'https://management.core.windows.net/'},
+                                     headers={'Metadata': 'true'})
 
     @mock.patch('requests.post', autospec=True)
     @mock.patch('time.sleep', autospec=True)
@@ -477,7 +477,7 @@ class Test_Profile(unittest.TestCase):
         mock_post.side_effect = [ValueError('fail'), bad_response, good_response]
 
         # action
-        token_type, token, whole_entry = Profile.get_msi_token('azure-resource', 'aad-endpoint', 'tenant-id', 12345)
+        token_type, token, whole_entry = Profile.get_msi_token('azure-resource', 12345)
 
         # assert
         self.assertEqual(test_token_entry['access_token'], token)
@@ -691,41 +691,40 @@ class Test_Profile(unittest.TestCase):
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
 
-    @mock.patch('requests.get', autospec=True)
-    def test_init_if_in_msi_env(self, get_mock):
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi(self, mock_get_client_class, mock_post):
+
+        class ClientStub:
+            def __init__(self, *args, **kwargs):
+                self.subscriptions = mock.MagicMock()
+                self.subscriptions.list.return_value = [Test_Profile.subscription1]
+
+        mock_get_client_class.return_value = ClientStub
+
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock, use_global_creds_cache=False)
 
-        # setup the response for the tenant search request
-        test_subscription_id = '04b07795-8ddb-461a-bbee-02f9e1bf9999'
-        test_tenant = 'tenant1'
-        test_port = 12345
-        result = mock.MagicMock()
-        result.status_code = 401
-        headers = {
-            'www-authenticate': 'foo;authorization_uri="https://haha/{}";bar'.format(test_tenant)
+        test_token_entry = {
+            'token_type': 'Bearer',
+            'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1USIsImtpZCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1USJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC81NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEvIiwiaWF0IjoxNTAzMzU0ODc2LCJuYmYiOjE1MDMzNTQ4NzYsImV4cCI6MTUwMzM1ODc3NiwiYWNyIjoiMSIsImFpbyI6IkFTUUEyLzhFQUFBQTFGL1k0VVR3bFI1Y091QXJxc1J0OU5UVVc2MGlsUHZna0daUC8xczVtdzg9IiwiYW1yIjpbInB3ZCJdLCJhcHBpZCI6IjA0YjA3Nzk1LThkZGItNDYxYS1iYmVlLTAyZjllMWJmN2I0NiIsImFwcGlkYWNyIjoiMCIsImVfZXhwIjoyNjI4MDAsImZhbWlseV9uYW1lIjoic2RrIiwiZ2l2ZW5fbmFtZSI6ImFkbWluMyIsImdyb3VwcyI6WyJlNGJiMGI1Ni0xMDE0LTQwZjgtODhhYi0zZDhhOGNiMGUwODYiLCI4YTliMTYxNy1mYzhkLTRhYTktYTQyZi05OTg2OGQzMTQ2OTkiLCI1NDgwMzkxNy00YzcxLTRkNmMtOGJkZi1iYmQ5MzEwMTBmOGMiXSwiaXBhZGRyIjoiMTY3LjIyMC4xLjIzNCIsIm5hbWUiOiJhZG1pbjMiLCJvaWQiOiJlN2UxNThkMy03Y2RjLTQ3Y2QtODgyNS01ODU5ZDdhYjJiNTUiLCJwdWlkIjoiMTAwMzNGRkY5NUQ0NEU4NCIsInNjcCI6InVzZXJfaW1wZXJzb25hdGlvbiIsInN1YiI6ImhRenl3b3FTLUEtRzAySTl6ZE5TRmtGd3R2MGVwZ2lWY1Vsdm1PZEZHaFEiLCJ0aWQiOiI1NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEiLCJ1bmlxdWVfbmFtZSI6ImFkbWluM0BBenVyZVNES1RlYW0ub25taWNyb3NvZnQuY29tIiwidXBuIjoiYWRtaW4zQEF6dXJlU0RLVGVhbS5vbm1pY3Jvc29mdC5jb20iLCJ1dGkiOiJuUEROYm04UFkwYUdELWhNeWxrVEFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyI2MmU5MDM5NC02OWY1LTQyMzctOTE5MC0wMTIxNzcxNDVlMTAiXX0.Pg4cq0MuP1uGhY_h51ZZdyUYjGDUFgTW2EfIV4DaWT9RU7GIK_Fq9VGBTTbFZA0pZrrmP-z7DlN9-U0A0nEYDoXzXvo-ACTkm9_TakfADd36YlYB5aLna-yO0B7rk5W9ANelkzUQgRfidSHtCmV6i4Ve-lOym1sH5iOcxfIjXF0Tp2y0f3zM7qCq8Cp1ZxEwz6xYIgByoxjErNXrOME5Ld1WizcsaWxTXpwxJn_Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzjZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw'
         }
-        result.headers = headers
-        get_mock.return_value = result
-        user = test_subscription_id + '@' + str(test_port)
+        encoded_test_token = json.dumps(test_token_entry).encode()
+        good_response = mock.MagicMock()
+        good_response.status_code = 200
+        good_response.content = encoded_test_token
+        mock_post.return_value = good_response
 
-        # action
-        subscriptions = profile.init_if_in_msi_env(user)
+        subscriptions = profile.find_subscriptions_in_vm_with_msi('9999')
 
         # assert
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
-        self.assertEqual(s['user']['name'], test_subscription_id + '@' + str(test_port))
-        self.assertEqual(s['user']['type'], 'user')
-        self.assertEqual(s['name'], 'MSI')
-        self.assertEqual(s['id'], test_subscription_id)
-        self.assertEqual(s['tenantId'], test_tenant)
-
-    def test_do_nothing_if_not_in_msi_env(self):
-        # verify do nothing on regular user name
-        storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock, use_global_creds_cache=False)
-        self.assertIsNone(profile.init_if_in_msi_env('foo@bar.com'))
+        self.assertEqual(s['user']['name'], 'VM')
+        self.assertEqual(s['user']['type'], 'servicePrincipal')
+        self.assertEqual(s['name'], 'MSI@9999')
+        self.assertEqual(s['id'], self.id1.split('/')[-1])
+        self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)

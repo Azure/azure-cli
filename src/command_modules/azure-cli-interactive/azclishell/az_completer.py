@@ -18,8 +18,6 @@ from azure.cli.core.parser import AzCliCommandParser
 
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
-BLACKLISTED_COMPLETIONS = ['interactive']
-
 
 def initialize_command_table_attributes(completer):
     completer.cmdtab = FRESH_TABLE.command_table
@@ -78,7 +76,7 @@ def gen_dyn_completion(comp, started_param, prefix, text):
         yield Completion(completion, -len(prefix))
 
 
-def sort_completions(gen):
+def sort_completions(completions_gen):
     """ sorts the completions """
 
     def _get_weight(val):
@@ -88,11 +86,7 @@ def sort_completions(gen):
             priority = ' '  # a space has the lowest ordinance
         return priority + val.text
 
-    completions = []
-    for comp in gen:
-        if comp.text not in BLACKLISTED_COMPLETIONS:
-            completions.append(comp)
-    return sorted(completions, key=_get_weight)
+    return sorted(completions_gen, key=_get_weight)
 
 
 # pylint: disable=too-many-instance-attributes

@@ -54,6 +54,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         # or description for a command. We better stash it away before handing it off for
         # "normal" argparse handling...
         self._description = kwargs.pop('description', None)
+        self.command_source = kwargs.pop('_command_source', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
     def load_command_table(self, command_table):
@@ -81,7 +82,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   parents=self.parents,
                                                   conflict_handler='error',
                                                   help_file=metadata.help,
-                                                  formatter_class=fc)
+                                                  formatter_class=fc,
+                                                  _command_source=metadata.command_source)
 
             argument_validators = []
             argument_groups = {}

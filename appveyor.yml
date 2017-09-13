@@ -41,7 +41,7 @@ build_script:
       }
       $fileCommitMap | ConvertTo-Json | Out-File "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\doc_commit_map.json"
   - cd doc\sphinx 
-  - make xml
+  - make xmlwithversion
   - mkdir %TEMP%\azure-cli-xml2yml
   - cd %TEMP%\azure-cli-xml2yml
   - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-docs-cli-pre-process
@@ -58,10 +58,10 @@ on_success:
   - git config --global user.name "%GIT_USER_NAME%"
   - git clone --depth 5 -q --branch=%TARGET_BRANCH% %GIT_CONTENT_REPO_URL% %TEMP%\azure-cli-content
   - ps: |
-      $folders = Get-ChildItem -Path "%TEMP%\azure-cli-content" -Directory
+      $folders = Get-ChildItem -Path "$env:TEMP\azure-cli-content" -Directory
       ForEach($folder in $folders)
       {
-          $folderPath = [System.IO.Path]::Combine("%TEMP%\azure-cli-content", $folder)
+          $folderPath = [System.IO.Path]::Combine("$env:TEMP\azure-cli-content", $folder)
           $subFolders = Get-ChildItem -Path $folderPath -Directory -Name
           if ($subFolders -contains "$env:YML_OUTPUT_FOLDER" -and $subFolders -contains "$env:CONCEPTUAL_DOC_FOLDER")
           {
@@ -70,6 +70,6 @@ on_success:
           }
       }
   - cd %TEMP%\azure-cli-content
-  - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content /e
+  - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content /e & IF !ERRORLEVEL! EQU 1 (exit 0) ELSE (IF !ERRORLEVEL! EQU 3 (exit 0) ELSE (exit 1))
   - git add -A
   - git diff --quiet --exit-code --cached || git commit -m "Update Document Content" && git push origin %TARGET_BRANCH% && appveyor AddMessage "Document Updated"

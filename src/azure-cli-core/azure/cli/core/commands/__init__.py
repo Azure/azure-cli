@@ -27,6 +27,8 @@ from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.profiles._shared import get_versioned_sdk_path
+from azure.cli.core.extension import (get_extension_names, get_extension_path,
+                                      get_extension_modname, EXTENSIONS_MOD_PREFIX)
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -284,6 +286,27 @@ class CommandTable(dict):
         return wrapped
 
 
+class ExtensionCommandSource(object):
+    """ Class for commands contributed by an extension """
+
+    def __init__(self, overrides_command=False, extension_name=None):
+        super(ExtensionCommandSource, self).__init__()
+        # True if the command overrides a CLI command
+        self.overrides_command = overrides_command
+        self.extension_name = extension_name
+
+    def get_command_warn_msg(self):
+        if self.overrides_command:
+            if self.extension_name:
+                return "The behavior of this command has been altered by the following extension: " \
+                    "{}".format(self.extension_name)
+            return "The behavior of this command has been altered by an extension."
+        else:
+            if self.extension_name:
+                return "This command is from the following extension: {}".format(self.extension_name)
+            return "This command is from an extension."
+
+
 class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
@@ -300,11 +323,11 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         self.table_transformer = table_transformer
         self.formatter_class = formatter_class
         self.deprecate_info = deprecate_info
+        self.command_source = None
 
     @staticmethod
     def _should_load_description():
         from azure.cli.core.application import APPLICATION
-
         return not APPLICATION.session['completer_active']
 
     def load_arguments(self):
@@ -343,6 +366,9 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         return self(**kwargs)
 
     def __call__(self, *args, **kwargs):
+        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
+           self.command_source.overrides_command:
+            logger.warning(self.command_source.get_command_warn_msg())
         if self.deprecate_info is not None:
             text = 'This command is deprecating and will be removed in future releases.'
             if self.deprecate_info:
@@ -356,6 +382,9 @@ command_table = CommandTable()
 # Map to determine what module a command was registered in
 command_module_map = {}
 
+# Map to determine which extension a module belongs to
+mod_to_ext_map = {}
+
 
 def load_params(command):
     try:
@@ -367,9 +396,34 @@ def load_params(command):
         logger.debug("Unable to load commands for '%s'. No module in command module map found.",
                      command)
         return
-    module_to_load = command_module[:command_module.rfind('.')]
+    last_dot_index = command_module.rfind('.')
+    if last_dot_index == -1:
+        module_to_load = command_module
+    else:
+        module_to_load = command_module[:last_dot_index]
     import_module(module_to_load).load_params(command)
     _apply_parameter_info(command, command_table[command])
+
+
+def _get_command_table_from_extensions():
+    extensions = get_extension_names()
+    if extensions:
+        logger.debug("Found {} extensions: {}".format(len(extensions), extensions))
+        for ext_name in extensions:
+            ext_dir = get_extension_path(ext_name)
+            sys.path.append(ext_dir)
+            try:
+                ext_mod = get_extension_modname(ext_dir=ext_dir)
+                # Add to the map. This needs to happen before we load commands as registering a command
+                # from an extension requires this map to be up-to-date.
+                mod_to_ext_map[ext_mod] = ext_name
+                start_time = timeit.default_timer()
+                import_module(ext_mod).load_commands()
+                elapsed_time = timeit.default_timer() - start_time
+                logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
+            except Exception:  # pylint: disable=broad-except
+                logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
+                logger.debug(traceback.format_exc())
 
 
 def get_command_table(module_name=None):
@@ -378,7 +432,8 @@ def get_command_table(module_name=None):
     If the module is not found, all commands are loaded.
     '''
     loaded = False
-    if module_name and module_name not in BLACKLISTED_MODS:
+    # TODO remove module_name != 'sf' once old sf module is deprecated from the repo
+    if module_name and module_name not in BLACKLISTED_MODS and module_name != 'sf':
         try:
             import_module('azure.cli.command_modules.' + module_name).load_commands()
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
@@ -415,6 +470,13 @@ def get_command_table(module_name=None):
         logger.debug("Loaded all modules in %.3f seconds. "
                      "(note: there's always an overhead with the first module loaded)",
                      cumulative_elapsed_time)
+    try:
+        # We always load extensions even if the appropriate module has been loaded
+        # as an extension could override the commands already loaded.
+        _get_command_table_from_extensions()
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Unable to load extensions. Use --debug for more information.")
+        logger.debug(traceback.format_exc())
     _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
@@ -443,11 +505,20 @@ def cli_command(module_name, name, operation,
         if not supported_api_version(resource_type, min_api=min_api, max_api=max_api):
             return
 
-    command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, no_wait_param, confirmation=confirmation,
-                                         exception_handler=exception_handler,
-                                         formatter_class=formatter_class,
-                                         deprecate_info=deprecate_info)
+    cmd = create_command(module_name, name, operation, transform, table_transformer,
+                         client_factory, no_wait_param, confirmation=confirmation,
+                         exception_handler=exception_handler,
+                         formatter_class=formatter_class,
+                         deprecate_info=deprecate_info)
+
+    # Set the command source as we have the current command table and are about to add the command
+    if module_name and module_name.startswith(EXTENSIONS_MOD_PREFIX):
+        ext_mod = module_name.split('.')[0]
+        cmd.command_source = ExtensionCommandSource(extension_name=mod_to_ext_map.get(ext_mod, None))
+        if name in command_table:
+            cmd.command_source.overrides_command = True
+
+    command_table[name] = cmd
 
 
 def get_op_handler(operation):

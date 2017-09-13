@@ -2,6 +2,28 @@
 
 Release History
 ===============
+0.1.16 (2017-09-11)
++++++++++++++++++++
+* webapp: able to create a webapp in a resource group other than the service plan's
+
+0.1.15 (2017-08-31)
++++++++++++++++++++
+* minor fixes
+
+0.1.14 (2017-08-28)
++++++++++++++++++++
+Breaking Change:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
+webapp: add a new alias of '-i' for "az webapp config container set --docker-custom-image-name"
+webapp: expose 'az webapp log show'
+webapp: expose new arguments from 'az webapp delete' to retain app service plan, metrics or dns registration. 
+webapp: detect a slot setting correctly 
+webapp: add param --docker-container-logging that goes through the same logic as --web-server-logging
+webapp: add premium v2 sku
+
+0.1.13 (2017-08-15)
++++++++++++++++++++
+webapp: fix an exception when create a new git based linux webapp
+
 0.1.12 (2017-08-11)
 +++++++++++++++++++
 * minor fixes

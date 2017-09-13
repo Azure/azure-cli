@@ -28,12 +28,9 @@ else
     python -m automation.tests.run
 fi
 
-if [[ "$CI" == "true" ]]; then
-    $scripts_root/package_verify.sh
-fi
-
 python -m automation.commandlint.run
 python -m automation.tests.verify_doc_source_map
 python -m automation.tests.verify_readme_history
+python -m automation.tests.verify_default_modules
 
 python $scripts_root/license/verify.py

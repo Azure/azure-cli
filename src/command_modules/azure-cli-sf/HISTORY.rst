@@ -2,6 +2,17 @@
 
 Release History
 ===============
+
+1.0.8 (2017-08-31)
+++++++++++++++++++
+* Deprecating all commands in favor of Service Fabric CLI (sfctl)
+
+1.0.7 (2017-08-28)
+++++++++++++++++++
+* Simplified registry user/pass rules for command.
+* Fixed password prompt for user even after passing in the param.
+* Supports None registry_cred.
+
 1.0.6 (2017-08-11)
 ++++++++++++++++++
 * minor fixes
