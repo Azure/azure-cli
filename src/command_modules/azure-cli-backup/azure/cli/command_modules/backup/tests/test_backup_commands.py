@@ -41,11 +41,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Trigger Backup
         retain_date = datetime.utcnow() + timedelta(days=30)
-        trigger_backup_job_json = json.dumps(
-            self.cmd('az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {}'
-                     .format(resource_group, vault_name, container, item_json['properties']['friendlyName'],
-                             retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
-        self.cmd('az backup job wait --job \'{}\''.format(trigger_backup_job_json))
+        backup_cmd_string = 'az backup protection backup-now'
+        backup_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
+        backup_cmd_string += ' -c {} -i {}'.format(container, item_json['properties']['friendlyName'])
+        backup_cmd_string += ' --retain-until {} --query name'.format(retain_date.strftime('%d-%m-%Y'))
+        trigger_backup_job_name = self.cmd(backup_cmd_string).get_output_in_json()
+        self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_backup_job_name))
 
         # Get Recovery Point
         recovery_point_json = json.dumps(self.cmd('az backup recoverypoint list --backup-item \'{}\' --query [0]'
@@ -55,16 +56,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string = 'az backup restore disks'
         restore_cmd_string += ' --recovery-point \'{}\''.format(recovery_point_json)
         restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' -g {}'.format(resource_group)
-        trigger_restore_job_json = json.dumps(self.cmd(restore_cmd_string).get_output_in_json())
-        self.cmd('az backup job wait --job \'{}\''.format(trigger_restore_job_json))
+        restore_cmd_string += ' -g {} --query name'.format(resource_group)
+        trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
+        self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))
 
         # Disable Protection
-        disable_protection_job_json = json.dumps(
-            self.cmd('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
-                     .format(resource_group, vault_name, container,
-                             item_json['properties']['friendlyName'])).get_output_in_json())
-        self.cmd('az backup job wait --job \'{}\''.format(disable_protection_job_json))
+        self.cmd('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                 .format(resource_group, vault_name, container, item_json['properties']['friendlyName']))
 
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
@@ -319,8 +317,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @StorageAccountPreparer()
     def test_restore_commands(self, resource_group, vault_name, vm_name, storage_account):
-        vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
-                                         .format(vault_name, resource_group)).get_output_in_json())
         item_json = json.dumps(self.cmd('az backup item show -g {} -v {} -c {} -n {}'
                                         .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json())
         rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
@@ -341,12 +337,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             JMESPathCheck("properties.status", "InProgress"),
             JMESPathCheck("resourceGroup", resource_group)
         ]).get_output_in_json()
-        trigger_restore_job_id = trigger_restore_job_json['name']
-        trigger_restore_job_json = json.dumps(trigger_restore_job_json)
-        self.cmd('az backup job wait --job \'{}\''.format(trigger_restore_job_json))
+        trigger_restore_job_name = trigger_restore_job_json['name']
+        self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))
 
-        trigger_restore_job_details = self.cmd('az backup job show --job-id {} --vault \'{}\''
-                                               .format(trigger_restore_job_id, vault_json), checks=[
+        trigger_restore_job_details = self.cmd('az backup job show -g {} -v {} -n {}'
+                                               .format(resource_group, vault_name, trigger_restore_job_name), checks=[
                                                    JMESPathCheck("properties.entityFriendlyName", vm_name),
                                                    JMESPathCheck("properties.operation", "Restore"),
                                                    JMESPathCheck("properties.status", "Completed"),
@@ -370,8 +365,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @StorageAccountPreparer()
     def test_job_commands(self, resource_group, vault_name, vm_name, storage_account):
-        vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
-                                         .format(vault_name, resource_group)).get_output_in_json())
         item_json = json.dumps(self.cmd('az backup item show -g {} -v {} -c {} -n {}'
                                         .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json())
         rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
@@ -383,31 +376,27 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
         restore_cmd_string += ' -g {}'.format(resource_group)
         trigger_restore_job_json = self.cmd(restore_cmd_string).get_output_in_json()
-        trigger_restore_job_id = trigger_restore_job_json['name']
-        trigger_restore_job_json = json.dumps(trigger_restore_job_json)
+        trigger_restore_job_name = trigger_restore_job_json['name']
 
-        self.cmd('az backup job show --job-id {} --vault \'{}\''
-                 .format(trigger_restore_job_id, vault_json), checks=[
-                     JMESPathCheck("name", trigger_restore_job_id),
+        self.cmd('az backup job show -g {} -v {} -n {}'
+                 .format(resource_group, vault_name, trigger_restore_job_name), checks=[
+                     JMESPathCheck("name", trigger_restore_job_name),
                      JMESPathCheck("properties.entityFriendlyName", vm_name),
                      JMESPathCheck("properties.operation", "Restore"),
                      JMESPathCheck("properties.status", "InProgress"),
                      JMESPathCheck("resourceGroup", resource_group)])
 
-        self.cmd('az backup job list --vault \'{}\''.format(vault_json), checks=[
-            JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_id), 1)
-        ])
+        self.cmd('az backup job list -g {} -v {}'.format(resource_group, vault_name), checks=[
+            JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_name), 1)])
 
-        self.cmd('az backup job list --vault \'{}\' --status InProgress'.format(vault_json), checks=[
-            JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_id), 1)
-        ])
+        self.cmd('az backup job list -g {} -v {} --status InProgress'.format(resource_group, vault_name), checks=[
+            JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_name), 1)])
 
-        self.cmd('az backup job list --vault \'{}\' --operation Restore'.format(vault_json), checks=[
-            JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_id), 1)
-        ])
+        self.cmd('az backup job list -g {} -v {} --operation Restore'.format(resource_group, vault_name), checks=[
+            JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_name), 1)])
 
-        self.cmd('az backup job list --vault \'{}\' --operation Restore --status InProgress'
-                 .format(vault_json), checks=[
-                     JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_id), 1)])
+        self.cmd('az backup job list -g {} -v {} --operation Restore --status InProgress'
+                 .format(resource_group, vault_name), checks=[
+                     JMESPathCheck("length([?name == '{}'])".format(trigger_restore_job_name), 1)])
 
-        self.cmd('az backup job stop --job \'{}\''.format(trigger_restore_job_json))
+        self.cmd('az backup job stop -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))

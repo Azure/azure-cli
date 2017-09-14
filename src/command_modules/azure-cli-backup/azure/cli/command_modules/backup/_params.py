@@ -25,6 +25,7 @@ container_type_type = CliArgumentType(help='The Recovery Services container type
 item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'), id_part='grandchild_name')
 item_type_type = CliArgumentType(help='The Recovery Services item type.', **enum_choice_list(allowed_workload_types))
 policy_name_type = CliArgumentType(help='The Recovery Services policy name.', options_list=('--policy-name', '-p'))
+job_name_type = CliArgumentType(help='The Recovery Services job name.', options_list=('--name', '-n'))
 
 # Vault
 register_cli_argument('backup vault', 'vault_name', vault_name_type, options_list=('--name', '-n'))
@@ -91,17 +92,14 @@ register_cli_argument('backup restore files mount-rp', 'recovery_point', type=fi
 register_cli_argument('backup restore files unmount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
 
 # Job
-for command in ['list', 'show']:
-    register_cli_argument('backup job {}'.format(command), 'vault', type=file_type, help='JSON encoded vault definition. Use the show command of the vault to obtain the relevant vault object.', completer=FilesCompleter())
+register_cli_argument('backup job', 'vault_name', vault_name_type)
 
-for command in ['stop', 'wait']:
-    register_cli_argument('backup job {}'.format(command), 'job', type=file_type, help='JSON encoded Job definition. Use the show command of the job to obtain the relevant Job object.', completer=FilesCompleter())
+for command in ['show', 'stop', 'wait']:
+    register_cli_argument('backup job {}'.format(command), 'name', job_name_type)
 
 register_cli_argument('backup job list', 'status', help='The status of the Job.', **enum_choice_list(['Completed', 'InProgress', 'Failed', 'Cancelled', 'CompletedWithWarnings']))
 register_cli_argument('backup job list', 'operation', help='The user initiated operation.', **enum_choice_list(['ConfigureBackup', 'Backup', 'Restore', 'DisableBackup', 'DeleteBackupData']))
 register_cli_argument('backup job list', 'start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
 register_cli_argument('backup job list', 'end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
-
-register_cli_argument('backup job show', 'job_id', help='The id of the job. Use the list command to get the ID and use to identify a particular job.')
 
 register_cli_argument('backup job wait', 'timeout', type=int, help='Maximum time to wait before aborting wait in seconds.')

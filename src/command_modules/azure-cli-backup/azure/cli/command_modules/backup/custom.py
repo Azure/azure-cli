@@ -364,10 +364,7 @@ def disable_protection(client, resource_group_name, vault_name, container_name, 
     return _track_backup_job(result, vault_name, resource_group_name)
 
 
-def list_jobs(client, vault, status=None, operation=None, start_date=None, end_date=None):
-    rs_vault = _get_vault_from_json(vaults_cf(None), vault)
-    resource_group = _get_resource_group_from_id(rs_vault.id)
-
+def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None):
     query_end_date, query_start_date = _get_query_dates(end_date, start_date)
 
     filter_string = _get_filter_string({
@@ -376,40 +373,27 @@ def list_jobs(client, vault, status=None, operation=None, start_date=None, end_d
         'startTime': query_start_date,
         'endTime': query_end_date})
 
-    return _get_list_from_paged_response(client.list(rs_vault.name, resource_group, filter_string,
+    return _get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string,
                                                      custom_headers=_get_custom_headers()))
 
 
-def show_job(client, vault, job_id):
-    rs_vault = _get_vault_from_json(vaults_cf(None), vault)
-    resource_group = _get_resource_group_from_id(rs_vault.id)
-
-    return client.get(rs_vault.name, resource_group, job_id, custom_headers=_get_custom_headers())
+def show_job(client, resource_group_name, vault_name, name):
+    return client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
 
 
-def stop_job(client, job):
-    job_object = _get_or_read_json(job)
-
-    vault_name = _get_vault_from_arm_id(job_object['id'])
-    resource_group = _get_resource_group_from_id(job_object['id'])
-
-    client.trigger(vault_name, resource_group, job_object['name'], custom_headers=_get_custom_headers())
+def stop_job(client, resource_group_name, vault_name, name):
+    client.trigger(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
 
 
-def wait_for_job(client, job, timeout=None):
-    job_object = _get_or_read_json(job)
-
-    vault_name = _get_vault_from_arm_id(job_object['id'])
-    resource_group = _get_resource_group_from_id(job_object['id'])
-
+def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
     start_timestamp = datetime.utcnow()
-    job_details = client.get(vault_name, resource_group, job_object['name'], custom_headers=_get_custom_headers())
+    job_details = client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
     while _job_in_progress(job_details.properties.status):
         if timeout:
             elapsed_time = datetime.utcnow() - start_timestamp
             if elapsed_time.seconds > timeout:
                 break
-        job_details = client.get(vault_name, resource_group, job_object['name'], custom_headers=_get_custom_headers())
+        job_details = client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
         time.sleep(30)
 
 # Client Utilities

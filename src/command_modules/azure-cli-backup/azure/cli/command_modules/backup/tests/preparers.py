@@ -133,10 +133,9 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             vm = self._get_vm(**kwargs)
 
-            enable_protection_job_json = json.dumps(
-                execute('az backup protection enable-for-vm -g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
-                        .format(self.resource_group, vault, vm, self.resource_group)).get_output_in_json())
-            execute('az backup job wait --job \'{}\''.format(enable_protection_job_json))
+            params_format = '-g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
+            param_string = params_format.format(self.resource_group, vault, vm, self.resource_group)
+            execute('az backup protection enable-for-vm {}'.format(param_string))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -241,10 +240,11 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             vm = self._get_vm(**kwargs)
 
             retain_date = datetime.utcnow() + timedelta(days=30)
-            backup_job_json = json.dumps(execute(
-                'az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {}'
-                .format(self.resource_group, vault, vm, vm, retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
-            execute('az backup job wait --job \'{}\''.format(backup_job_json))
+            command_string = 'az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {} --query name'
+            command_string = command_string.format(self.resource_group, vault, vm, vm,
+                                                   retain_date.strftime('%d-%m-%Y'))
+            backup_job = execute(command_string).get_output_in_json()
+            execute('az backup job wait -g {} -v {} -n {}'.format(self.resource_group, vault, backup_job))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
