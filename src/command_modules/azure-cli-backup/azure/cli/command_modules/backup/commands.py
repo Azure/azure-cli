@@ -31,7 +31,7 @@ def transform_item(result):
 
 
 def transform_job(result):
-    return OrderedDict([('ID', result['name']),
+    return OrderedDict([('Name', result['name']),
                         ('Operation', result['properties']['operation']),
                         ('Status', result['properties']['status']),
                         ('Item Name', result['properties']['entityFriendlyName']),
@@ -46,7 +46,7 @@ def transform_policy(result):
 
 
 def transform_recovery_point(result):
-    return OrderedDict([('ID', result['name']),
+    return OrderedDict([('Name', result['name']),
                         ('Time', result['properties']['recoveryPointTime']),
                         ('Consistency', result['properties']['recoveryPointType'])])
 
