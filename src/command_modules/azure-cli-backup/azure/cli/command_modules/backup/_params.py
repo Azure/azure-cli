@@ -88,11 +88,12 @@ register_cli_argument('backup protection backup-now', 'retain_until', type=datet
 register_cli_argument('backup protection disable', 'delete_backup_data', help='Option to delete the existing backed up data in the recovery services vault.', **three_state_flag())
 
 # Restore
-register_cli_argument('backup restore disks', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
-register_cli_argument('backup restore disks', 'destination_storage_account', help='The name of the storge accout to which the disks are restored.')
-register_cli_argument('backup restore disks', 'resource_group', resource_group_name_type, help='The name of the resource group of the storge accout to which the disks are restored.')
-register_cli_argument('backup restore files mount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
-register_cli_argument('backup restore files unmount-rp', 'recovery_point', type=file_type, help='JSON encoded recovery point definition. Use the show command of the recovery point to obtain the relevant recovery point object.', completer=FilesCompleter())
+register_cli_argument('backup restore', 'container_name', container_name_type)
+register_cli_argument('backup restore', 'item_name', item_name_type)
+register_cli_argument('backup restore', 'rp_name', rp_name_type)
+
+register_cli_argument('backup restore disks', 'storage_account_name', help='The name of the storge accout to which the disks are restored.')
+register_cli_argument('backup restore disks', 'storage_account_rg', resource_group_name_type, help='The name of the resource group of the storge accout to which the disks are restored.')
 
 # Job
 register_cli_argument('backup job', 'vault_name', vault_name_type)

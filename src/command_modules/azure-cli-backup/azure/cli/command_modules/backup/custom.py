@@ -242,25 +242,22 @@ def list_recovery_points(client, resource_group_name, vault_name, container_name
     return paged_recovery_points
 
 
-def restore_disks(client, recovery_point, destination_storage_account, resource_group):
-    # Get objects from JSON files
-    recovery_point_object = _get_recovery_point_from_json(recovery_points_cf(None), recovery_point)
-    vault_name = _get_vault_from_arm_id(recovery_point_object.id)
-    vault_rg = _get_resource_group_from_id(recovery_point_object.id)
-    vault = vaults_cf(None).get(vault_rg, vault_name, custom_headers=_get_custom_headers())
+def restore_disks(client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account_name,
+                  storage_account_rg):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     "AzureIaasVM", "VM")
+    vault = vaults_cf(None).get(resource_group_name, vault_name, custom_headers=_get_custom_headers())
     vault_location = vault.location
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(recovery_point_object.id)
-    item_uri = _get_protected_item_uri_from_id(recovery_point_object.id)
-    item = _get_associated_vm_item(container_uri, item_uri, vault_rg, vault_name)
+    container_uri = _get_protection_container_uri_from_id(item.id)
+    item_uri = _get_protected_item_uri_from_id(item.id)
 
     # Construct trigger restore request object
-    _recovery_point_id = recovery_point_object.name
-    _storage_account_id = _get_storage_account_id(destination_storage_account, resource_group)
+    _storage_account_id = _get_storage_account_id(storage_account_name, storage_account_rg)
     _source_resource_id = item.properties.source_resource_id
     trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
-                                                      recovery_point_id=_recovery_point_id,
+                                                      recovery_point_id=rp_name,
                                                       recovery_type='RestoreDisks',
                                                       region=vault_location,
                                                       storage_account_id=_storage_account_id,
@@ -268,44 +265,35 @@ def restore_disks(client, recovery_point, destination_storage_account, resource_
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     # Trigger restore
-    result = client.trigger(vault_name, vault_rg, fabric_name, container_uri, item_uri,
-                            _recovery_point_id, trigger_restore_request, raw=True,
-                            custom_headers=_get_custom_headers())
-    return _track_backup_job(result, vault_name, vault_rg)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                            trigger_restore_request, raw=True, custom_headers=_get_custom_headers())
+    return _track_backup_job(result, vault_name, resource_group_name)
 
 
-def restore_files_mount_rp(client, recovery_point):
-    # Get objects from JSON files
-    recovery_point_object = _get_recovery_point_from_json(recovery_points_cf(None), recovery_point)
-    vault_name = _get_vault_from_arm_id(recovery_point_object.id)
-    resource_group = _get_resource_group_from_id(recovery_point_object.id)
+def restore_files_mount_rp(client, resource_group_name, vault_name, container_name, item_name, rp_name):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     "AzureIaasVM", "VM")
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(recovery_point_object.id)
-    item_uri = _get_protected_item_uri_from_id(recovery_point_object.id)
+    container_uri = _get_protection_container_uri_from_id(item.id)
+    item_uri = _get_protected_item_uri_from_id(item.id)
 
     # file restore request
-    item = _get_associated_vm_item(container_uri, item_uri, resource_group, vault_name)
-    _recovery_point_id = recovery_point_object.name
     _virtual_machine_id = item.properties.virtual_machine_id
-    file_restore_request_properties = IaasVMILRRegistrationRequest(recovery_point_id=_recovery_point_id,
+    file_restore_request_properties = IaasVMILRRegistrationRequest(recovery_point_id=rp_name,
                                                                    virtual_machine_id=_virtual_machine_id)
     file_restore_request = ILRRequestResource(properties=file_restore_request_properties)
 
-    rp_fresh = recovery_points_cf(None).get(vault_name, resource_group, fabric_name, container_uri, item_uri,
-                                            _recovery_point_id, custom_headers=_get_custom_headers())
+    recovery_point = recovery_points_cf(None).get(vault_name, resource_group_name, fabric_name, container_uri,
+                                                  item_uri, rp_name, custom_headers=_get_custom_headers())
 
-    if not rp_fresh.properties.is_instant_ilr_session_active:
-        logger.info('New ILR Connection')
-        result = client.provision(vault_name, resource_group, fabric_name, container_uri, item_uri, _recovery_point_id,
-                                  file_restore_request, raw=True, custom_headers=_get_custom_headers())
-    else:
-        logger.info('Extend ILR Connection')
-        rp_fresh.properties.renew_existing_registration = True
-        result = client.provision(vault_name, resource_group, fabric_name, container_uri, item_uri, _recovery_point_id,
-                                  file_restore_request, raw=True, custom_headers=_get_custom_headers())
+    if recovery_point.properties.is_instant_ilr_session_active:
+        recovery_point.properties.renew_existing_registration = True
 
-    client_scripts = _track_backup_ilr(result, vault_name, resource_group)
+    result = client.provision(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                              file_restore_request, raw=True, custom_headers=_get_custom_headers())
+
+    client_scripts = _track_backup_ilr(result, vault_name, resource_group_name)
 
     if client_scripts[0].os_type == os_windows:
         _run_client_script_for_windows(client_scripts)
@@ -313,25 +301,21 @@ def restore_files_mount_rp(client, recovery_point):
         _run_client_script_for_linux(client_scripts)
 
 
-def restore_files_unmount_rp(client, recovery_point):
-    # Get objects from JSON files
-    recovery_point_object = _get_recovery_point_from_json(recovery_points_cf(None), recovery_point)
-    vault_name = _get_vault_from_arm_id(recovery_point_object.id)
-    resource_group = _get_resource_group_from_id(recovery_point_object.id)
+def restore_files_unmount_rp(client, resource_group_name, vault_name, container_name, item_name, rp_name):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     "AzureIaasVM", "VM")
 
     # Get container and item URIs
-    container_uri = _get_protection_container_uri_from_id(recovery_point_object.id)
-    item_uri = _get_protected_item_uri_from_id(recovery_point_object.id)
+    container_uri = _get_protection_container_uri_from_id(item.id)
+    item_uri = _get_protected_item_uri_from_id(item.id)
 
-    _recovery_point_id = recovery_point_object.name
-    rp_fresh = recovery_points_cf(None).get(vault_name, resource_group, fabric_name, container_uri, item_uri,
-                                            _recovery_point_id, custom_headers=_get_custom_headers())
+    recovery_point = recovery_points_cf(None).get(vault_name, resource_group_name, fabric_name, container_uri,
+                                                  item_uri, rp_name, custom_headers=_get_custom_headers())
 
-    if rp_fresh.properties.is_instant_ilr_session_active:
-        logger.info('Revoke ILR Connection')
-        result = client.revoke(vault_name, resource_group, fabric_name, container_uri, item_uri, _recovery_point_id,
+    if recovery_point.properties.is_instant_ilr_session_active:
+        result = client.revoke(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
                                raw=True, custom_headers=_get_custom_headers())
-        _track_backup_operation(resource_group, result, vault_name)
+        _track_backup_operation(resource_group_name, result, vault_name)
 
 
 def disable_protection(client, resource_group_name, vault_name, container_name, item_name,  # pylint: disable=unused-argument

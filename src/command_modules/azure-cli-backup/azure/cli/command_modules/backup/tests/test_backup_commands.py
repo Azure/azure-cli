@@ -49,15 +49,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_backup_job_name))
 
         # Get Recovery Point
-        recovery_point_json = json.dumps(self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [0]'
-                                                  .format(resource_group, vault_name, container,
-                                                          item)).get_output_in_json())
+        recovery_point = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [0].name'
+                                  .format(resource_group, vault_name, container, item)).get_output_in_json()
 
         # Trigger Restore
         restore_cmd_string = 'az backup restore disks'
-        restore_cmd_string += ' --recovery-point \'{}\''.format(recovery_point_json)
-        restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' -g {} --query name'.format(resource_group)
+        restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
+        restore_cmd_string += ' -c {} -i {} -r {}'.format(container, item, recovery_point)
+        restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
+        restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
         trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
         self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))
 
@@ -254,11 +254,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @RPPreparer()
     def test_rp_commands(self, resource_group, vault_name, vm_name):
-        rps_json = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {}'
+        rp_names = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [].name'
                             .format(resource_group, vault_name, vm_name, vm_name), checks=[
                                 JMESPathCheck("length(@)", 2)]).get_output_in_json()
 
-        rp1_name = rps_json[0]['name']
+        rp1_name = rp_names[0]
         rp1_json = self.cmd('az backup recoverypoint show -g {} -v {} -c {} -i {} -n {}'
                             .format(resource_group, vault_name, vm_name, vm_name, rp1_name), checks=[
                                 JMESPathCheck("name", rp1_name),
@@ -266,7 +266,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp1_json['id'].lower())
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
-        rp2_name = rps_json[1]['name']
+        rp2_name = rp_names[1]
         rp2_json = self.cmd('az backup recoverypoint show -g {} -v {} -c {} -i {} -n {}'
                             .format(resource_group, vault_name, vm_name, vm_name, rp2_name), checks=[
                                 JMESPathCheck("name", rp2_name),
@@ -316,18 +316,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @StorageAccountPreparer()
     def test_restore_commands(self, resource_group, vault_name, vm_name, storage_account):
-        rps_json = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {}'
-                            .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
-
-        rp1_name = rps_json[0]['name']
-        rp1_json = json.dumps(self.cmd('az backup recoverypoint show -g {} -v {} -c {} -i {} -n {}'
-                                       .format(resource_group, vault_name, vm_name, vm_name, rp1_name)).get_output_in_json())
+        rp_name = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [0].name'
+                           .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
 
         # Trigger Restore
         restore_cmd_string = 'az backup restore disks'
-        restore_cmd_string += ' --recovery-point \'{}\''.format(rp1_json)
-        restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' -g {}'.format(resource_group)
+        restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
+        restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
+        restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
+        restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
         trigger_restore_job_json = self.cmd(restore_cmd_string, checks=[
             JMESPathCheck("properties.entityFriendlyName", vm_name),
             JMESPathCheck("properties.operation", "Restore"),
@@ -362,14 +359,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @StorageAccountPreparer()
     def test_job_commands(self, resource_group, vault_name, vm_name, storage_account):
-        rps_json = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {}'
-                            .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
-        rp_json = json.dumps(rps_json[0])
+        rp_name = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [0].name'
+                           .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
 
         restore_cmd_string = 'az backup restore disks'
-        restore_cmd_string += ' --recovery-point \'{}\''.format(rp_json)
-        restore_cmd_string += ' --destination-storage-account {}'.format(storage_account)
-        restore_cmd_string += ' -g {}'.format(resource_group)
+        restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
+        restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
+        restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
+        restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
         trigger_restore_job_json = self.cmd(restore_cmd_string).get_output_in_json()
         trigger_restore_job_name = trigger_restore_job_json['name']
 
