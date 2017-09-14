@@ -19,10 +19,10 @@ from azure.cli.command_modules.backup._validators import \
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM']
 
-vault_name_type = CliArgumentType(help='The Recovery Services vault name.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'), id_part='name')
-container_name_type = CliArgumentType(help='The Recovery Services container name.', options_list=('--container-name', '-c'), id_part='child_name')
+vault_name_type = CliArgumentType(help='The Recovery Services vault name.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
+container_name_type = CliArgumentType(help='The Recovery Services container name.', options_list=('--container-name', '-c'))
 container_type_type = CliArgumentType(help='The Recovery Services container type.', **enum_choice_list(allowed_container_types))
-item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'), id_part='grandchild_name')
+item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'))
 item_type_type = CliArgumentType(help='The Recovery Services item type.', **enum_choice_list(allowed_workload_types))
 policy_name_type = CliArgumentType(help='The Recovery Services policy name.', options_list=('--policy-name', '-p'))
 job_name_type = CliArgumentType(help='The Recovery Services job name.', options_list=('--name', '-n'))
