@@ -68,12 +68,16 @@ register_cli_argument('backup recoverypoint list', 'end_date', type=datetime_typ
 register_cli_argument('backup recoverypoint show', 'id', help='The id of the recovery point. Use list command to view IDs of recovery points.')
 
 # Protection
-register_cli_argument('backup protection enable-for-vm', 'vault', type=file_type, help='JSON encoded vault definition. Use the show command of the vault to obtain the relevant vault object.', completer=FilesCompleter())
-register_cli_argument('backup protection enable-for-vm', 'vm', type=file_type, help='JSON encoded Virtual machine definition. Use the show command of the az virtual machine to obtain the relevant VM object.', completer=FilesCompleter())
-register_cli_argument('backup protection enable-for-vm', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
+register_cli_argument('backup protection', 'vault_name', vault_name_type)
+register_cli_argument('backup protection enable-for-vm', 'vm_name', help='Name of the Virtual Machine to be protected.')
+register_cli_argument('backup protection enable-for-vm', 'vm_rg', help='Resource Group of the Virtual Machine to be protected.')
+register_cli_argument('backup protection enable-for-vm', 'policy_name', policy_name_type)
 
 for command in ['backup-now', 'disable']:
-    register_cli_argument('backup protection {}'.format(command), 'backup_item', type=file_type, help='JSON encoded backupItem definition. Use the show command of the backup item to obtain the relevant backupItem object.', completer=FilesCompleter())
+    register_cli_argument('backup protection {}'.format(command), 'container_name', container_name_type)
+    register_cli_argument('backup protection {}'.format(command), 'container_type', container_type_type)
+    register_cli_argument('backup protection {}'.format(command), 'item_name', item_name_type)
+    register_cli_argument('backup protection {}'.format(command), 'item_type', item_type_type)
 
 register_cli_argument('backup protection backup-now', 'retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval in UTC (d-m-Y).')
 

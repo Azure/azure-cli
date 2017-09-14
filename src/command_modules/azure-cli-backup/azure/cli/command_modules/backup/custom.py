@@ -92,17 +92,12 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
     return _get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def enable_protection_for_vm(client, vault, vm, policy):
-    # Client factories
-    protection_policies_client = protection_policies_cf(None)
+def enable_protection_for_vm(client, resource_group_name, vault_name, vm_name, vm_rg, policy_name):
+    vm = virtual_machines_cf().get(vm_rg, vm_name)
+    vault = vaults_cf(None).get(resource_group_name, vault_name)
+    policy = show_policy(protection_policies_cf(None), resource_group_name, vault_name, policy_name)
 
-    # Get objects from JSON files
-    vm = _get_vm_from_json(virtual_machines_cf(), vm)
-    rs_vault = _get_vault_from_json(vaults_cf(None), vault)
-    resource_group = _get_resource_group_from_id(rs_vault.id)
-    policy = _get_policy_from_json(protection_policies_client, policy)
-
-    if vm.location != rs_vault.location:
+    if vm.location != vault.location:
         raise CLIError(
             """
             The VM should be in the same location as that of the Recovery Services vault to enable protection.
@@ -115,12 +110,8 @@ def enable_protection_for_vm(client, vault, vm, policy):
             Use the relevant get-default policy command and use it to protect the workload.
             """)
 
-    # VM name and resource group name
-    vm_name = vm.name
-    vm_rg = _get_resource_group_from_id(vm.id)
-
     # Get protectable item.
-    protectable_item = _get_protectable_item_for_vm(rs_vault.name, resource_group, vm_name, vm_rg)
+    protectable_item = _get_protectable_item_for_vm(vault_name, resource_group_name, vm_name, vm_rg)
     if protectable_item is None:
         raise CLIError(
             """
@@ -142,9 +133,9 @@ def enable_protection_for_vm(client, vault, vm, policy):
     vm_item = ProtectedItemResource(properties=vm_item_properties)
 
     # Trigger enable protection and wait for completion
-    result = client.create_or_update(rs_vault.name, resource_group, fabric_name, container_uri, item_uri, vm_item,
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
                                      raw=True, custom_headers=_get_custom_headers())
-    return _track_backup_job(result, rs_vault.name, resource_group)
+    return _track_backup_job(result, vault_name, resource_group_name)
 
 
 def show_item(client, resource_group_name, vault_name, container_name, name, container_type="AzureIaasVM",
@@ -199,14 +190,10 @@ def update_policy_for_item(client, resource_group_name, vault_name, container_na
     return _track_backup_job(result, vault_name, resource_group_name)
 
 
-def backup_now(client, backup_item, retain_until):
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(None)
-
-    # Get objects from JSON files
-    item = _get_item_from_json(backup_protected_items_client, backup_item)
-    vault_name = _get_vault_from_arm_id(item.id)
-    resource_group = _get_resource_group_from_id(item.id)
+def backup_now(client, resource_group_name, vault_name, container_name, item_name, retain_until,
+               container_type="AzureIaasVM", item_type="VM"):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     container_type, item_type)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -214,9 +201,9 @@ def backup_now(client, backup_item, retain_until):
     trigger_backup_request = _get_backup_request(item.properties.workload_type, retain_until)
 
     # Trigger backup
-    result = client.trigger(vault_name, resource_group, fabric_name, container_uri, item_uri,
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
                             trigger_backup_request, raw=True, custom_headers=_get_custom_headers())
-    return _track_backup_job(result, vault_name, resource_group)
+    return _track_backup_job(result, vault_name, resource_group_name)
 
 
 def show_recovery_point(client, id, backup_item):  # pylint: disable=redefined-builtin
@@ -355,14 +342,10 @@ def restore_files_unmount_rp(client, recovery_point):
         _track_backup_operation(resource_group, result, vault_name)
 
 
-def disable_protection(client, backup_item, delete_backup_data=False, **kwargs):  # pylint: disable=unused-argument
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(None)
-
-    # Get objects from JSON files
-    item = _get_item_from_json(backup_protected_items_client, backup_item)
-    vault_name = _get_vault_from_arm_id(item.id)
-    resource_group = _get_resource_group_from_id(item.id)
+def disable_protection(client, resource_group_name, vault_name, container_name, item_name,  # pylint: disable=unused-argument
+                       container_type="AzureIaasVM", item_type="VM", delete_backup_data=False, **kwargs):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     container_type, item_type)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -370,15 +353,15 @@ def disable_protection(client, backup_item, delete_backup_data=False, **kwargs):
 
     # Trigger disable protection and wait for completion
     if delete_backup_data:
-        result = client.delete(vault_name, resource_group, fabric_name, container_uri, item_uri, raw=True,
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True,
                                custom_headers=_get_custom_headers())
-        return _track_backup_job(result, vault_name, resource_group)
+        return _track_backup_job(result, vault_name, resource_group_name)
 
     vm_item = _get_disable_protection_request(item)
 
-    result = client.create_or_update(vault_name, resource_group, fabric_name, container_uri, item_uri, vm_item,
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
                                      raw=True, custom_headers=_get_custom_headers())
-    return _track_backup_job(result, vault_name, resource_group)
+    return _track_backup_job(result, vault_name, resource_group_name)
 
 
 def list_jobs(client, vault, status=None, operation=None, start_date=None, end_date=None):

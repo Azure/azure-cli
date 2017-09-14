@@ -62,11 +62,11 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
         containers = execute('az backup container list -v {} -g {} --query [].properties.friendlyName'
                              .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
-            items = execute('az backup item list -g {} -v {} -c {}'
+            items = execute('az backup item list -g {} -v {} -c {} --query [].properties.friendlyName'
                             .format(resource_group, vault_name, container)).get_output_in_json()
             for item in items:
-                execute('az backup protection disable --backup-item \'{}\' --delete-backup-data true --yes'
-                        .format(json.dumps(item)))
+                execute('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                        .format(resource_group, vault_name, container, item))
         execute('az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
 
 
@@ -133,15 +133,9 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             vm = self._get_vm(**kwargs)
 
-            vault_json = json.dumps(execute('az backup vault show -n {} -g {}'
-                                            .format(vault, self.resource_group)).get_output_in_json())
-            policy_json = json.dumps(execute('az backup policy show -g {} -v {} -n {}'
-                                             .format(self.resource_group, vault, 'DefaultPolicy')).get_output_in_json())
-            vm_json = json.dumps(execute('az vm show -n {} -g {}'
-                                         .format(vm, self.resource_group)).get_output_in_json())
             enable_protection_job_json = json.dumps(
-                execute('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
-                        .format(policy_json, vault_json, vm_json)).get_output_in_json())
+                execute('az backup protection enable-for-vm -g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
+                        .format(self.resource_group, vault, vm, self.resource_group)).get_output_in_json())
             execute('az backup job wait --job \'{}\''.format(enable_protection_job_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -246,12 +240,10 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             vm = self._get_vm(**kwargs)
 
-            item_json = json.dumps(execute('az backup item show -g {} -v {} -c {} -n {}'
-                                           .format(self.resource_group, vault, vm, vm)).get_output_in_json())
             retain_date = datetime.utcnow() + timedelta(days=30)
             backup_job_json = json.dumps(execute(
-                'az backup protection backup-now --backup-item \'{}\' --retain-until {}'
-                .format(item_json, retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
+                'az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {}'
+                .format(self.resource_group, vault, vm, vm, retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
             execute('az backup job wait --job \'{}\''.format(backup_job_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}

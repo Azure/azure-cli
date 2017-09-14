@@ -27,35 +27,29 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VMPreparer()
     @StorageAccountPreparer()
     def test_backup_restore(self, resource_group, vault_name, vm_name, storage_account):
-        vault_json = json.dumps(self.cmd(
-            'az backup vault show -n {} -g {}'.format(vault_name, resource_group)).get_output_in_json())
-
         # Enable Protection
-        policy_json = json.dumps(self.cmd('az backup policy show -g {} -v {} -n DefaultPolicy'
-                                          .format(resource_group, vault_name, vault_json)).get_output_in_json())
-        vm_json = self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json()
-        vm_json = json.dumps(vm_json)
-        self.cmd('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
-                 .format(policy_json, vault_json, vm_json)).get_output_in_json()
+        self.cmd('az backup protection enable-for-vm -g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
+                 .format(resource_group, vault_name, vm_name, resource_group)).get_output_in_json()
 
         # Get Container
         container = self.cmd('az backup container show -n {} -v {} -g {} --query properties.friendlyName'
                              .format(vm_name, vault_name, resource_group)).get_output_in_json()
 
         # Get Item
-        item_json = json.dumps(self.cmd('az backup item list -g {} -v {} -c {} --query [0]'
-                                        .format(resource_group, vault_name, container)).get_output_in_json())
+        item_json = self.cmd('az backup item list -g {} -v {} -c {}'
+                             .format(resource_group, vault_name, container)).get_output_in_json()
 
         # Trigger Backup
         retain_date = datetime.utcnow() + timedelta(days=30)
         trigger_backup_job_json = json.dumps(
-            self.cmd('az backup protection backup-now --backup-item \'{}\' --retain-until {}'
-                     .format(item_json, retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
+            self.cmd('az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {}'
+                     .format(resource_group, vault_name, container, item_json['properties']['friendlyName'],
+                             retain_date.strftime('%d-%m-%Y'))).get_output_in_json())
         self.cmd('az backup job wait --job \'{}\''.format(trigger_backup_job_json))
 
         # Get Recovery Point
         recovery_point_json = json.dumps(self.cmd('az backup recoverypoint list --backup-item \'{}\' --query [0]'
-                                                  .format(item_json)).get_output_in_json())
+                                                  .format(json.dumps(item_json))).get_output_in_json())
 
         # Trigger Restore
         restore_cmd_string = 'az backup restore disks'
@@ -67,8 +61,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Disable Protection
         disable_protection_job_json = json.dumps(
-            self.cmd('az backup protection disable --backup-item \'{}\' --delete-backup-data true --yes'
-                     .format(item_json)).get_output_in_json())
+            self.cmd('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                     .format(resource_group, vault_name, container,
+                             item_json['properties']['friendlyName'])).get_output_in_json())
         self.cmd('az backup job wait --job \'{}\''.format(disable_protection_job_json))
 
     @ResourceGroupPreparer()
@@ -286,24 +281,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VaultPreparer()
     @VMPreparer()
     def test_protection_commands(self, resource_group, vault_name, vm_name):
-        vault_json = json.dumps(self.cmd('az backup vault show -n {} -g {}'
-                                         .format(vault_name, resource_group)).get_output_in_json())
-        policy_json = json.dumps(self.cmd('az backup policy show -g {} -v {} -n {}'
-                                          .format(resource_group, vault_name, 'DefaultPolicy')).get_output_in_json())
-        vm_json = json.dumps(self.cmd('az vm show -n {} -g {}'.format(vm_name, resource_group)).get_output_in_json())
-
-        self.cmd('az backup protection enable-for-vm --policy \'{}\' --vault \'{}\' --vm \'{}\''
-                 .format(policy_json, vault_json, vm_json), checks=[
+        self.cmd('az backup protection enable-for-vm -g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
+                 .format(resource_group, vault_name, vm_name, resource_group), checks=[
                      JMESPathCheck("properties.entityFriendlyName", vm_name),
                      JMESPathCheck("properties.operation", "ConfigureBackup"),
                      JMESPathCheck("properties.status", "Completed"),
                      JMESPathCheck("resourceGroup", resource_group)])
 
-        item_json = json.dumps(self.cmd('az backup item show -g {} -v {} -c {} -n {}'
-                                        .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json())
-
-        self.cmd('az backup protection disable --backup-item \'{}\' --yes'
-                 .format(item_json), checks=[
+        self.cmd('az backup protection disable -g {} -v {} -c {} -i {} --yes'
+                 .format(resource_group, vault_name, vm_name, vm_name), checks=[
                      JMESPathCheck("properties.entityFriendlyName", vm_name),
                      JMESPathCheck("properties.operation", "DisableBackup"),
                      JMESPathCheck("properties.status", "Completed"),
@@ -315,8 +301,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      JMESPathCheck("properties.protectionState", "ProtectionStopped"),
                      JMESPathCheck("resourceGroup", resource_group)])
 
-        self.cmd('az backup protection disable --backup-item \'{}\' --delete-backup-data true --yes'
-                 .format(item_json), checks=[
+        self.cmd('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                 .format(resource_group, vault_name, vm_name, vm_name), checks=[
                      JMESPathCheck("properties.entityFriendlyName", vm_name),
                      JMESPathCheck("properties.operation", "DeleteBackupData"),
                      JMESPathCheck("properties.status", "Completed"),
