@@ -525,11 +525,10 @@ def delete_resource(resource_ids=None, resource_group_name=None,
 
     threads = deque()
     results = []
-    num_ids = len(parsed_ids)
     deleted = True
     while parsed_ids and deleted:
         deleted = False
-        for _ in range(num_ids):
+        for _ in range(len(parsed_ids)):
             parsed_id = parsed_ids.pop()
             try:
                 threads.append(delete_resource(
@@ -544,7 +543,6 @@ def delete_resource(resource_ids=None, resource_group_name=None,
                 parsed_ids.appendleft(parsed_id)
         while threads:
             results.append(threads.pop().result())
-            num_ids -= 1
             deleted = True
 
     if parsed_ids:
