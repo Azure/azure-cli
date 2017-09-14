@@ -9,7 +9,6 @@ from azure.cli.testsdk.vcr_test_base import MOCKED_SUBSCRIPTION_ID
 
 
 class ResourceDeleteTests(ScenarioTest):
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources', location='eastus')
     def test_delete_dependent_resources(self, resource_group):
         vm_name = self.create_random_name('cli-test-vm', 30)

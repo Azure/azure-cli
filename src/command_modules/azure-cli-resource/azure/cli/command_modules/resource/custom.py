@@ -536,6 +536,7 @@ def delete_resource(resource_ids=None, resource_group_name=None,
             return
         parsed_ids.append(id_dict)
 
+    # queue stores operations so that they are run in parallel
     operations = deque()
     results = []
     deleted = True
@@ -552,8 +553,11 @@ def delete_resource(resource_ids=None, resource_group_name=None,
                     resource_name=id_dict['resource_name'], api_version=api_version))
                 logger.debug("deleting", id_dict['resource_name'])
             except CloudError as e:
+                # request to delete failed, add parsed id dict back to queue
                 id_dict['exception'] = str(e)
                 parsed_ids.appendleft(id_dict)
+
+        # all operations return before next pass
         while operations:
             results.append(operations.pop().result())
             deleted = True
