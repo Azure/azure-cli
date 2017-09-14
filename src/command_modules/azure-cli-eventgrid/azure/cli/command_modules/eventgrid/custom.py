@@ -8,6 +8,8 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionDestination,
+    WebHookEventSubscriptionDestination,
+    EventHubEventSubscriptionDestination,
     EventSubscriptionFilter)
 
 from six.moves.urllib.parse import quote  # pylint: disable=import-error
