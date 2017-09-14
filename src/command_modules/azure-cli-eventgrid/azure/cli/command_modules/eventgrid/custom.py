@@ -7,7 +7,6 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
-    EventSubscriptionDestination,
     WebHookEventSubscriptionDestination,
     EventHubEventSubscriptionDestination,
     EventSubscriptionFilter)
@@ -348,7 +347,7 @@ def _event_subscription_create(
         labels):
     scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
     if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
-            destination = WebHookEventSubscriptionDestination(endpoint)
+        destination = WebHookEventSubscriptionDestination(endpoint)
     elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
         destination = EventHubEventSubscriptionDestination(endpoint)
 
