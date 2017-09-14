@@ -57,7 +57,7 @@ class CommandGroup(object):
         pass
 
     def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None,
-                exception_handler=None,no_wait_param=None):
+                exception_handler=None, no_wait_param=None):
         """
         Register a CLI command
         :param name: Name of the command as it will be called on the command line
