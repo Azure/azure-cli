@@ -22,6 +22,31 @@ class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):
         super(DataLakeStoreFileAccessScenarioTest, self).__init__(__file__, test_method, resource_group='test-adls-access')
         self.adls_name = 'cliadls123426'
         self.location = 'eastus2'
+        my_vcr = vcr.VCR(before_record_request=scrub_uri_request,)
+
+    def scrub_uri_request(request):
+        uri = request.uri
+        if uri.find('?') == -1:
+            return request
+        hostQuerysplit = uri.split('?')
+        result = ''
+        specialQuery = ['leaseid', 'syncFlag', 'filesessionid']
+        for st in hostQuerysplit[1].split('&'):
+            if st.find('=') == -1:
+                if len(result) != 0:
+                    result += '&'
+                result += st
+            else:
+                keyval = st.split('=')
+                if keyval[0] in specialQuery:
+                    pass
+                else:
+                    if len(result) != 0:
+                        result += '&'
+                    result += st
+
+        request.uri = hostQuerysplit[0] + '?' + result
+        return request
 
     def test_dls_file_access_mgmt(self):
         self.execute()
@@ -127,6 +152,31 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.local_folder = os.path.join(os.getcwd(), 'adls_resources')
         self.local_file = os.path.join(self.local_folder, 'sample_file.txt')
         self.local_file_content = 'Local File Content'
+        my_vcr = vcr.VCR(before_record_request=scrub_uri_request,)
+
+    def scrub_uri_request(request):
+        uri = request.uri
+        if uri.find('?') == -1:
+            return request
+        hostQuerysplit = uri.split('?')
+        result = ''
+        specialQuery = ['leaseid', 'syncFlag', 'filesessionid']
+        for st in hostQuerysplit[1].split('&'):
+            if st.find('=') == -1:
+                if len(result) != 0:
+                    result += '&'
+                result += st
+            else:
+                keyval = st.split('=')
+                if keyval[0] in specialQuery:
+                    pass
+                else:
+                    if len(result) != 0:
+                        result += '&'
+                    result += st
+
+        request.uri = hostQuerysplit[0] + '?' + result
+        return request
 
     def test_dls_file_mgmt(self):
         self.execute()
@@ -295,6 +345,31 @@ class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
         super(DataLakeStoreAccountScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-adls-mgmt')
         self.adls_name = 'cliadls1234510'
         self.location = 'eastus2'
+        my_vcr = vcr.VCR(before_record_request=scrub_uri_request,)
+
+    def scrub_uri_request(request):
+        uri = request.uri
+        if uri.find('?') == -1:
+            return request
+        hostQuerysplit = uri.split('?')
+        result = ''
+        specialQuery = ['leaseid', 'syncFlag', 'filesessionid']
+        for st in hostQuerysplit[1].split('&'):
+            if st.find('=') == -1:
+                if len(result) != 0:
+                    result += '&'
+                result += st
+            else:
+                keyval = st.split('=')
+                if keyval[0] in specialQuery:
+                    pass
+                else:
+                    if len(result) != 0:
+                        result += '&'
+                    result += st
+
+        request.uri = hostQuerysplit[0] + '?' + result
+        return request
 
     def test_dls_account_mgmt(self):
         self.execute()
