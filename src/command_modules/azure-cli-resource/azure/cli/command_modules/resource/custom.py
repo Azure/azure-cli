@@ -785,6 +785,22 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
+def get_policy_definition(policy_definition_name):
+    from msrestazure.azure_exceptions import CloudError
+    policy_client = _resource_policy_client_factory()
+    try:
+        result = policy_client.policy_definitions.get(policy_definition_name)
+    except CloudError as ex:
+        if ex.status_code == 404:
+            # work around for https://github.com/Azure/azure-cli/issues/692
+            policy_id = '/providers/Microsoft.Authorization/policydefinitions/' + policy_definition_name
+            rcf = _resource_client_factory()
+            result = rcf.resources.get_by_id(policy_id, policy_client.policy_definitions.api_version)
+        else:
+            raise
+    return result
+
+
 def update_policy_definition(policy_definition_name, rules=None, params=None,
                              display_name=None, description=None):
     if rules:

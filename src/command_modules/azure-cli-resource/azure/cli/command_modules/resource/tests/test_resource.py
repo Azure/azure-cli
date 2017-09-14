@@ -558,6 +558,13 @@ class PolicyScenarioTest(ScenarioTest):
         time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy definition list', checks=JCheck("length([?name=='{}'])".format(policy_name), 0))
 
+    def test_show_built_in_policy(self):
+        result = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
+        policy_name = result['name']
+        self.cmd('policy definition show -n ' + policy_name, checks=[
+            JCheck('name', policy_name)
+        ])
+
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
