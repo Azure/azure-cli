@@ -61,6 +61,7 @@ for command in ['show', 'delete', 'list-associated-items']:
 register_cli_argument('backup policy set', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
 
 # Recovery Point
+register_cli_argument('backup recoverypoint', 'vault_name', vault_name_type)
 register_cli_argument('backup recoverypoint', 'container_name', container_name_type)
 register_cli_argument('backup recoverypoint', 'container_type', container_type_type)
 register_cli_argument('backup recoverypoint', 'item_name', item_name_type)
@@ -88,12 +89,13 @@ register_cli_argument('backup protection backup-now', 'retain_until', type=datet
 register_cli_argument('backup protection disable', 'delete_backup_data', help='Option to delete the existing backed up data in the recovery services vault.', **three_state_flag())
 
 # Restore
+register_cli_argument('backup restore', 'vault_name', vault_name_type)
 register_cli_argument('backup restore', 'container_name', container_name_type)
 register_cli_argument('backup restore', 'item_name', item_name_type)
 register_cli_argument('backup restore', 'rp_name', rp_name_type)
 
 register_cli_argument('backup restore disks', 'storage_account_name', help='The name of the storge accout to which the disks are restored.')
-register_cli_argument('backup restore disks', 'storage_account_rg', resource_group_name_type, help='The name of the resource group of the storge accout to which the disks are restored.')
+register_cli_argument('backup restore disks', 'storage_account_rg', help='The name of the resource group of the storge accout to which the disks are restored.')
 
 # Job
 register_cli_argument('backup job', 'vault_name', vault_name_type)
