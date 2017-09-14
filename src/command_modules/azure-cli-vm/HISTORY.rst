@@ -2,9 +2,11 @@
 
 Release History
 ===============
+(unreleased)
+* `vm run-command`: support to run commands on remote VMs
+
 2.0.14 (2017-09-11)
 +++++++++++++++++++
-* `vm run-command`: support to run commands on remote VMs
 * msi: don't assign access unless `--scope` is provided
 * msi: use the same extension naming as portal does
 * msi: remove the useless `subscription` from the `vm/vmss create` commands output
