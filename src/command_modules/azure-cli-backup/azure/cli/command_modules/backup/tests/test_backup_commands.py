@@ -36,7 +36,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                              .format(vm_name, vault_name, resource_group)).get_output_in_json()
 
         # Get Item
-        item = self.cmd('az backup item list -g {} -v {} -c {} --query properties.friendlyName'
+        item = self.cmd('az backup item list -g {} -v {} -c {} --query [0].properties.friendlyName'
                         .format(resource_group, vault_name, container)).get_output_in_json()
 
         # Trigger Backup
