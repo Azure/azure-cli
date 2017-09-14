@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType)
 from azure.cli.core.commands.parameters import \
-    (get_resource_name_completion_list, resource_group_name_type, file_type, location_type, three_state_flag,
+    (get_resource_name_completion_list, file_type, location_type, three_state_flag,
      enum_choice_list)
 from azure.cli.command_modules.backup._validators import \
     (datetime_type)
