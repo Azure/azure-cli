@@ -121,7 +121,7 @@ cli_command(__name__, 'policy assignment show', 'azure.cli.command_modules.resou
 cli_command(__name__, 'policy definition create', 'azure.cli.command_modules.resource.custom#create_policy_definition')
 cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.delete', cf_policy_definitions)
 cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
-cli_command(__name__, 'policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions, exception_handler=empty_on_404)
+cli_command(__name__, 'policy definition show', 'azure.cli.command_modules.resource.custom#get_policy_definition', exception_handler=empty_on_404)
 cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
 
 cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
