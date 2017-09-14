@@ -11,16 +11,24 @@ mkdir -p ./artifacts
 echo `git rev-parse --verify HEAD` > ./artifacts/build.sha
 
 mkdir -p ./artifacts/build
+mkdir -p ./artifacts/source
 mkdir -p ./artifacts/app
 mkdir -p ./artifacts/testsrc
 
 output_dir=$(cd artifacts/build && pwd)
+sdist_dir=$(cd artifacts/source && pwd)
 testsrc_dir=$(cd artifacts/testsrc && pwd)
 app_dir=$(cd artifacts/app && pwd)
 
 ##############################################
 # Copy app scripts for batch run - To be retired in the future
 cp $(cd $(dirname $0); pwd)/app/* $app_dir
+
+##############################################
+# Update version strings
+if $TRAVIS; then
+    $(cd $(dirname $0); pwd)/version.sh $1
+fi
 
 ##############################################
 # List tests to the test file - To be replaced by other mechanism in the fucture
@@ -49,7 +57,8 @@ for setup_file in $(find src -name 'setup.py'); do
     pushd $(dirname $setup_file)
     echo ""
     echo "Building module at $(pwd) ..."
-    python setup.py bdist_wheel -d $output_dir sdist -d $output_dir
+    python setup.py -q bdist_wheel -d $output_dir
+    python setup.py -q sdist -d $sdist_dir
     popd
 done
 
@@ -81,7 +90,7 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0+dev"
+VERSION = "1.0.0+dev$TRAVIS_BUILD_NUMBER"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -117,7 +126,6 @@ EOL
 
 for name in $(ls src/command_modules | grep azure-cli-); do
     module_name=${name##azure-cli-}
-    echo "src/command_modules/azure-cli-$name/azure/cli/command_modules/$name/tests"
     if [ -d src/command_modules/$name/azure/cli/command_modules/$module_name/tests ]; then
         echo "        'azure.cli.command_modules.$module_name.tests'," >>$testsrc_dir/setup.py
     fi
@@ -154,7 +162,16 @@ cat >>$testsrc_dir/setup.py <<EOL
 EOL
 
 pushd $testsrc_dir
-python setup.py bdist_wheel -d $output_dir sdist -d $output_dir
+python setup.py -q bdist_wheel -d $output_dir 
+python setup.py -q sdist -d $sdist_dir
 popd
 
-rm -rf $testsrc_dir  # clear afterwards
+##############################################
+# clear afterwards
+rm -rf $testsrc_dir  
+git checkout src
+
+##############################################
+# summary 
+echo 'Build result:'
+ls -R ./artifacts
