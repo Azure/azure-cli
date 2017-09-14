@@ -251,6 +251,11 @@ helps['sql server create'] = """
 helps['sql server list'] = """
     type: command
     short-summary: Lists servers.
+    examples:
+        - name: List all servers in the current subscription
+          text: az sql server list
+        - name: List all servers in a resource group
+          text: az sql server list -g mygroup
     """
 helps['sql server update'] = """
     type: command
@@ -279,4 +284,22 @@ helps['sql server firewall-rule show'] = """
 helps['sql server firewall-rule list'] = """
     type: command
     short-summary: Lists the firewall rules.
+    """
+helps['sql server vnet-rule'] = """
+    type: group
+    short-summary: Manage a server's virtual network rules.
+    """
+helps['sql server vnet-rule update'] = """
+    type: command
+    short-summary: Updates a virtual network rule.
+    """
+helps['sql server vnet-rule create'] = """
+    type: command
+    short-summary: Creates a virtual network rule which allows access to an Azure Sql server.
+
+    examples:
+        - name: Create a vnet rule by providing the subnet id. Vnet name is not required.
+          text: az sql server vnet-rule create --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgName/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
+        - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the sql server.
+          text: az sql server vnet-rule create --subnet subnetName --vnet-name vnetName
     """

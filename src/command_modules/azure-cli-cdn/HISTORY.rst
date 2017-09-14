@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.0.8 (2017-09-11)
+++++++++++++++++++
+* `cdn custom-domain create`: Fixed 'CustomDomain is not interable' bug.
+
 0.0.7 (2017-08-28)
 ++++++++++++++++++
 * minor fixes

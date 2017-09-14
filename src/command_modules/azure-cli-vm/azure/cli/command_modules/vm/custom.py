@@ -1731,8 +1731,19 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             resource_group_name, deployment_name, properties, raw=no_wait))
     vm = get_vm_details(resource_group_name, vm_name)
     if assign_identity:
+        if not identity_scope:
+            _show_missing_access_warning(resource_group_name, vm_name, 'vm')
         setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT))
     return vm
+
+
+def _show_missing_access_warning(resource_group, name, command):
+    warn = ("No access was given yet to the '{1}', because '--scope' was not provided. "
+            "You should setup by creating a role assignment, e.g. "
+            "'az role assignment create --assignee <principal-id> --role contributor -g {0}' "
+            "would let it access the current resource group. To get the pricipal id, run "
+            "'az {2} show -g {0} -n {1} --query \"identity.principalId\" -otsv'".format(resource_group, name, command))
+    logger.warning(warn)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -2004,6 +2015,8 @@ def create_vmss(vmss_name, resource_group_name, image,
     deployment_result = DeploymentOutputLongRunningOperation()(
         client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
     if assign_identity:
+        if not identity_scope:
+            _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
                                                                          _MSI_PORT)
     return deployment_result
@@ -2067,8 +2080,12 @@ def get_vm_format_secret(secrets, certificate_store=None):
     client = get_mgmt_service_client(KeyVaultManagementClient).vaults
     grouped_secrets = {}
 
+    merged_secrets = []
+    for s in secrets:
+        merged_secrets += s.splitlines()
+
     # group secrets by source vault
-    for secret in secrets:
+    for secret in merged_secrets:
         parsed = KeyVaultId.parse_secret_id(secret)
         match = re.search('://(.+?)\\.', parsed.vault)
         vault_name = match.group(1)
@@ -2155,7 +2172,7 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultSt
 
 def _construct_identity_info(identity_scope, identity_role, port):
     return {
-        'scope': identity_scope,
+        'scope': identity_scope or '',
         'role': str(identity_role),  # could be DefaultStr, so convert to string
         'port': port
     }

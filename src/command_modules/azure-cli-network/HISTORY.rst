@@ -3,6 +3,15 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++
+* `express-route`: Add support for IPv6 Microsoft Peering
+
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
+* `vnet-gateway`: Added command `vpn-client generate`.
+
 2.0.13 (2017-08-28)
 +++++++++++++++++++
 * BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
@@ -10,7 +19,6 @@ Release History
 * `nsg rule create/update`: Add support for multiple IP ranges and port ranges.
 * `lb create`: Added support for SKU.
 * `public-ip create`: Added support for SKU.
-
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++

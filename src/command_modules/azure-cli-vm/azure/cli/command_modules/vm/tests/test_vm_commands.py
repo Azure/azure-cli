@@ -1927,7 +1927,7 @@ class VMSSILBSceanrioTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""'.format(resource_group, vmss_name))
         # list connection information should fail
         with self.assertRaises(CLIError) as err:
-            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
+            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name))
         self.assertTrue('internal load balancer' in str(err.exception))
 
 
@@ -1962,6 +1962,7 @@ class MSIScenarioTest(ScenarioTest):
     def test_vm_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
         vm1 = 'vm1'
         vm1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}'.format(subscription_id, resource_group, vm1)
         vm2 = 'vm2'
@@ -1975,7 +1976,7 @@ class MSIScenarioTest(ScenarioTest):
                  uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create a linux vm with default configuration
-            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
+            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vm1, default_scope), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),
                 JMESPathCheckV2('identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
                 JMESPathCheckV2('identity.port', 50342)
@@ -2018,6 +2019,7 @@ class MSIScenarioTest(ScenarioTest):
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
         vmss1 = 'vmss11'
         vmss1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachineScaleSets/{}'.format(subscription_id, resource_group, vmss1)
         vmss2 = 'vmss2'
@@ -2030,7 +2032,7 @@ class MSIScenarioTest(ScenarioTest):
                  uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C124')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
+            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vmss1, default_scope), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'Contributor'),
                 JMESPathCheckV2('vmss.identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
                 JMESPathCheckV2('vmss.identity.port', 50342)
@@ -2079,7 +2081,7 @@ class MSIScenarioTest(ScenarioTest):
         vmss2 = 'vmss2'
 
         # create a linux vm with identity but w/o a role assignment (--scope "")
-        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vm1), checks=[
+        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
             JMESPathCheckV2('identity.scope', ''),
             JMESPathCheckV2('identity.port', 50342)
         ])
@@ -2090,7 +2092,7 @@ class MSIScenarioTest(ScenarioTest):
         ])
 
         # create a vmss with identity but w/o a role assignment (--scope "")
-        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope ""'.format(resource_group, vmss1), checks=[
+        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
             JMESPathCheckV2('vmss.identity.scope', ''),
             JMESPathCheckV2('vmss.identity.port', 50342)
         ])
@@ -2104,7 +2106,7 @@ class MSIScenarioTest(ScenarioTest):
         # create a vm w/o identity
         self.cmd('vm create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2))
         # assign identity but w/o a role assignment
-        self.cmd('vm assign-identity -g {} -n {} --scope ""'.format(resource_group, vm2), checks=[
+        self.cmd('vm assign-identity -g {} -n {}'.format(resource_group, vm2), checks=[
             JMESPathCheckV2('scope', ''),
             JMESPathCheckV2('port', 50342)
         ])
@@ -2117,7 +2119,7 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2))
         # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
         if self.is_live:
-            self.cmd('vmss assign-identity -g {} -n {} --scope ""'.format(resource_group, vmss2), checks=[
+            self.cmd('vmss assign-identity -g {} -n {}'.format(resource_group, vmss2), checks=[
                 JMESPathCheckV2('scope', ''),
                 JMESPathCheckV2('port', 50342)
             ])

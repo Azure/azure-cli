@@ -1,14 +1,23 @@
-sudo: false
+dist: trusty
+sudo: off
 language: python
+addons:
+  apt:
+    packages:
+      - libssl-dev
+      - libffi-dev
+      - python-dev
+install: echo 'skip'
+cache: pip
 jobs:
   include:
-   - stage: all
-     env: CODE_COVERAGE="True"
-     python: 2.7
-     install: python scripts/dev_setup.py
-     script: scripts/build.sh
-   -
-     env: CODE_COVERAGE="True"
-     python: 3.6
-     install: python scripts/dev_setup.py
-     script: scripts/build.sh
+    - stage: build
+      script: ./scripts/ci/build.sh
+    - stage: verify
+      env: PURPOSE='Automation'
+      script: ./scripts/ci/test_automation.sh
+      python: 3.6
+    - stage: verify
+      env: PURPOSE='Automation'
+      script: ./scripts/ci/test_automation.sh
+      python: 2.7

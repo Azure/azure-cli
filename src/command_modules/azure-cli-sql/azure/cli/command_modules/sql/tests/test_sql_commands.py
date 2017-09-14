@@ -58,69 +58,72 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer()
-    def test_sql_server_mgmt(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
         server1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        rg = resource_group
         loc = resource_group_location
         user = admin_login
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, server1, loc, user, admin_passwords[0]),
+                 .format(resource_group_1, server1, loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
         # test list sql server should be 1
-        self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --admin-password {}'
-                 .format(rg, server1, admin_passwords[1]),
+                 .format(resource_group_1, server1, admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, server2, loc, user, admin_passwords[0]),
+                 .format(resource_group_2, server2, loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server2),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('administratorLogin', user)])
 
-        # test list sql server should be 2
-        self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 2)])
+        # test list sql server in that group should be 1
+        self.cmd('sql server list -g {}'.format(resource_group_2), checks=[JMESPathCheck('length(@)', 1)])
+
+        # test list sql server in the subscription should be at least 2
+        self.cmd('sql server list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
-                 .format(rg, server1),
+                 .format(resource_group_1, server1),
                  checks=[
                      JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
         self.cmd('sql server list-usages -g {} -n {}'
-                 .format(rg, server1),
+                 .format(resource_group_1, server1),
                  checks=[JMESPathCheck('[0].resourceName', server1)])
 
         # test delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(rg, server1), checks=NoneCheck())
+                 .format(resource_group_1, server1), checks=NoneCheck())
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(rg, server2), checks=NoneCheck())
+                 .format(resource_group_2, server2), checks=NoneCheck())
 
         # test list sql server should be 0
-        self.cmd('sql server list -g {}'.format(rg), checks=[NoneCheck()])
+        self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
 
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
@@ -470,7 +473,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update audit policy - enable
         state_enabled = 'Enabled'
-        key
         retention_days = 30
         audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
@@ -1315,3 +1317,81 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('serverName', server),
                      JMESPathCheck('status', 'Completed')])
+
+
+class SqlServerVnetMgmtScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
+        rg = resource_group
+        vnet_rule_1 = 'rule1'
+        vnet_rule_2 = 'rule2'
+
+        # Create vnet's - vnet1 and vnet2
+
+        vnetName1 = 'vnet1'
+        vnetName2 = 'vnet2'
+        subnetName = 'subnet1'
+        addressPrefix = '10.0.1.0/24'
+        endpoint = 'Microsoft.Sql'
+
+        # Vnet 1
+        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+                 .format(rg, vnetName1, subnetName, addressPrefix, endpoint),
+                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
+                         .format(subnetName, vnetName1, rg)).get_output_in_json()
+        vnet_id_1 = vnet1['id']
+
+        # Vnet 2
+        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName2))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+                 .format(rg, vnetName2, subnetName, addressPrefix, endpoint),
+                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        vnet2 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
+                         .format(subnetName, vnetName2, rg)).get_output_in_json()
+        vnet_id_2 = vnet2['id']
+
+        # test sql server vnet-rule create using subnet name and vnet name
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {}'
+                 .format(vnet_rule_1, rg, server, subnetName, vnetName1))
+
+        # test sql server vnet-rule show rule 1
+        self.cmd('sql server vnet-rule show --name {} -g {} --server {}'
+                 .format(vnet_rule_1, rg, server),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        # test sql server vnet-rule create using subnet id
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
+                 .format(vnet_rule_2, rg, server, vnet_id_1),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_2),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+
+        # test sql server vnet-rule update rule 1 with vnet 2
+        self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {}'
+                 .format(vnet_rule_1, rg, server, vnet_id_2),
+
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
+
+        # test sql server vnet-rule list
+        self.cmd('sql server vnet-rule list -g {} --server {}'
+                 .format(rg, server), checks=[JMESPathCheck('length(@)', 2)])
+
+        # test sql server vnet-rule delete rule 1
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
+                 .format(vnet_rule_1, rg, server), checks=NoneCheck())
+
+        # test sql server vnet-rule delete rule 2
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
+                 .format(vnet_rule_2, rg, server), checks=NoneCheck())

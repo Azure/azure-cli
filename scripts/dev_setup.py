@@ -34,7 +34,7 @@ exec_command('pip install privates/azure_mgmt_network-1.5.0a1-py2.py3-none-any.w
 exec_command('pip install -r requirements.txt')
 
 # install automation package
-exec_command('pip install -e ./scripts')
+exec_command('pip install -e ./tools')
 
 # command modules have dependency on azure-cli-core so install this first
 exec_command('pip install -e src/azure-cli-nspkg')

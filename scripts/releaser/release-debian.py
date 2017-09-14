@@ -26,9 +26,9 @@ add_script_env('CLI_VERSION')
 add_script_env('CLI_DOWNLOAD_SHA256')
 add_script_env('AZURE_STORAGE_CONNECTION_STRING')
 add_script_env('DEBIAN_REPO_ID')
-add_script_env('DEBIAN_REPO_URL')
-add_script_env('DEBIAN_REPO_USERNAME')
-add_script_env('DEBIAN_REPO_PASSWORD')
+add_script_env('MS_REPO_URL')
+add_script_env('MS_REPO_USERNAME')
+add_script_env('MS_REPO_PASSWORD')
 
 assert (all(script_env[n] != None for n in script_env)), "Not all required environment variables have been set.  {}".format(script_env)
 
@@ -133,9 +133,9 @@ def main():
     upload_script = REPO_UPLOAD_SCRIPT_TMPL.format(cli_version=script_env.get('CLI_VERSION'),
                                                    repo_id=script_env.get('DEBIAN_REPO_ID'),
                                                    source_url=deb_url,
-                                                   repo_package_url=script_env.get('DEBIAN_REPO_URL'),
-                                                   repo_user=script_env.get('DEBIAN_REPO_USERNAME'),
-                                                   repo_pass=script_env.get('DEBIAN_REPO_PASSWORD'))
+                                                   repo_package_url=script_env.get('MS_REPO_URL'),
+                                                   repo_user=script_env.get('MS_REPO_USERNAME'),
+                                                   repo_pass=script_env.get('MS_REPO_PASSWORD'))
     my_vm(['echo', '-e', '"{}"'.format(upload_script), '>>', 'repo_upload.py'], _out=sys.stdout, _err=sys.stdout)
     my_vm(['python', 'repo_upload.py'], _out=sys.stdout, _err=sys.stdout)
     print_status('Done. :)')

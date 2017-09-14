@@ -341,7 +341,7 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
     cli_command(__name__, 'network route-filter show', rf_path + 'get', cf_route_filters)
     cli_command(__name__, 'network route-filter create', custom_path + 'create_route_filter', cf_route_filters)
     cli_command(__name__, 'network route-filter delete', rf_path + 'delete', cf_route_filters)
-    cli_generic_update_command(__name__, 'network route-filter update', rf_path + 'get', rf_path + 'create_or_update', cf_route_filters)
+    cli_generic_update_command(__name__, 'network route-filter update', rf_path + 'get', rf_path + 'create_or_update', cf_route_filters, setter_arg_name='route_filter_parameters')
 
     # RouteFilterRulesOperations
     rfr_path = 'azure.mgmt.network.operations#RouteFilterRulesOperations.'
@@ -349,7 +349,7 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
     cli_command(__name__, 'network route-filter rule show', rfr_path + 'get', cf_route_filter_rules)
     cli_command(__name__, 'network route-filter rule create', custom_path + 'create_route_filter_rule', cf_route_filter_rules)
     cli_command(__name__, 'network route-filter rule delete', rfr_path + 'delete', cf_route_filter_rules)
-    cli_generic_update_command(__name__, 'network route-filter rule update', rfr_path + 'get', rfr_path + 'create_or_update', cf_route_filter_rules)
+    cli_generic_update_command(__name__, 'network route-filter rule update', rfr_path + 'get', rfr_path + 'create_or_update', cf_route_filter_rules, setter_arg_name='route_filter_rule_parameters')
 
     # ServiceCommunitiesOperations
     sc_path = 'azure.mgmt.network.operations#BgpServiceCommunitiesOperations.'
@@ -420,6 +420,13 @@ cli_command(__name__, 'network vnet-gateway root-cert create', custom_path + 'cr
 cli_command(__name__, 'network vnet-gateway root-cert delete', custom_path + 'delete_vnet_gateway_root_cert')
 cli_command(__name__, 'network vnet-gateway revoked-cert create', custom_path + 'create_vnet_gateway_revoked_cert')
 cli_command(__name__, 'network vnet-gateway revoked-cert delete', custom_path + 'delete_vnet_gateway_revoked_cert')
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
+    cli_command(__name__, 'network vnet-gateway list-bgp-peer-status', vgw_path + 'get_bgp_peer_status', cf_virtual_network_gateways)
+    cli_command(__name__, 'network vnet-gateway list-advertised-routes', vgw_path + 'get_advertised_routes', cf_virtual_network_gateways)
+    cli_command(__name__, 'network vnet-gateway list-learned-routes', vgw_path + 'get_learned_routes', cf_virtual_network_gateways)
+
+cli_command(__name__, 'network vnet-gateway vpn-client generate', custom_path + 'generate_vpn_client', cf_virtual_network_gateways)
 
 # VirtualNetworksOperations
 vnet_path = 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.'

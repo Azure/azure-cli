@@ -8,6 +8,7 @@ from __future__ import print_function
 
 import os
 import sys
+import concurrent.futures
 
 # Breaking py2 to py3 change
 try:
@@ -181,10 +182,9 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
         if sf_config.no_verify_setting is False:
             ca_cert = sf_config.ca_cert_info()
     total_files_count = 0
-    current_files_count = 0
+    current_files_count = {"val": 0}
     total_files_size = 0
-    # For py2 we use dictionary instead of nonlocal
-    current_files_size = {"size": 0}
+    current_files_size = {"val": 0}
 
     for root, _, files in os.walk(abspath):
         total_files_count += (len(files) + 1)
@@ -193,65 +193,68 @@ def sf_upload_app(path, show_progress=False):  # pylint: disable=too-many-locals
             total_files_size += t.st_size
 
     def print_progress(size, rel_file_path):
-        current_files_size["size"] += size
+        current_files_size["val"] += size
         if show_progress:
             print(
                 "[{}/{}] files, [{}/{}] bytes, {}".format(
-                    current_files_count,
+                    current_files_count["val"],
                     total_files_count,
-                    current_files_size["size"],
+                    current_files_size["val"],
                     total_files_size,
                     rel_file_path), file=sys.stderr)
 
-    for root, _, files in os.walk(abspath):
-        rel_path = os.path.normpath(os.path.relpath(root, abspath))
-        for f in files:
-            url_path = (
-                os.path.normpath(os.path.join("ImageStore", basename,
-                                              rel_path, f))
-            ).replace("\\", "/")
-            fp = os.path.normpath(os.path.join(root, f))
-            with open(fp, 'rb') as file_opened:
-                url_parsed = list(urlparse(endpoint))
-                url_parsed[2] = url_path
-                url_parsed[4] = urlencode(
-                    {"api-version": "3.0-preview"})
-                url = urlunparse(url_parsed)
+    def upload_file(root, rel_path, f):
+        url_path = os.path.normpath(os.path.join("ImageStore", basename, rel_path, f)).replace("\\", "/")
+        fp = os.path.normpath(os.path.join(root, f))
+        with open(fp, 'rb') as file_opened:
+            url_parsed = list(urlparse(endpoint))
+            url_parsed[2] = url_path
+            url_parsed[4] = urlencode(
+                {"api-version": "3.0-preview"})
+            url = urlunparse(url_parsed)
 
-                def file_chunk(target_file, rel_path, print_progress):
-                    chunk = True
-                    while chunk:
-                        chunk = target_file.read(100000)
+            def file_chunk(target_file, rel_path, print_progress):
+                chunk = True
+                while chunk:
+                    chunk = target_file.read(1000000)
+                    if chunk:
                         print_progress(len(chunk), rel_path)
-                        yield chunk
+                    yield chunk
 
-                fc = file_chunk(file_opened, os.path.normpath(
-                    os.path.join(rel_path, f)
-                ), print_progress)
-                requests.put(url, data=fc, cert=cert,
-                             verify=ca_cert)
-                current_files_count += 1
-                print_progress(0, os.path.normpath(
-                    os.path.join(rel_path, f)
-                ))
-        url_path = (
-            os.path.normpath(os.path.join("ImageStore", basename,
-                                          rel_path, "_.dir"))
-        ).replace("\\", "/")
+            fc = file_chunk(file_opened, os.path.normpath(
+                os.path.join(rel_path, f)
+            ), print_progress)
+            requests.put(url, data=fc, cert=cert, verify=ca_cert)
+            current_files_count["val"] += 1
+            print_progress(0, os.path.normpath(
+                os.path.join(rel_path, f)
+            ))
+
+    def upload_dir_file(rel_path):
+        url_path = os.path.normpath(os.path.join("ImageStore", basename, rel_path, "_.dir")).replace("\\", "/")
         url_parsed = list(urlparse(endpoint))
         url_parsed[2] = url_path
         url_parsed[4] = urlencode({"api-version": "3.0-preview"})
         url = urlunparse(url_parsed)
         requests.put(url, cert=cert, verify=ca_cert)
-        current_files_count += 1
+        current_files_count["val"] += 1
         print_progress(0, os.path.normpath(os.path.join(rel_path, '_.dir')))
 
-    if show_progress:
-        print("[{}/{}] files, [{}/{}] bytes sent".format(
-            current_files_count,
-            total_files_count,
-            current_files_size["size"],
-            total_files_size), file=sys.stderr)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        for root, _, files in os.walk(abspath):
+            rel_path = os.path.normpath(os.path.relpath(root, abspath))
+            for f in files:
+                futures.append(executor.submit(upload_file, root, rel_path, f))
+            futures.append(executor.submit(upload_dir_file, rel_path))
+
+        concurrent.futures.wait(futures)
+        if show_progress:
+            print("[{}/{}] files, [{}/{}] bytes sent".format(
+                current_files_count["val"],
+                total_files_count,
+                current_files_size["val"],
+                total_files_size), file=sys.stderr)
 
 
 def parse_app_params(formatted_params):
