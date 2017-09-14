@@ -128,30 +128,6 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.local_file = os.path.join(self.local_folder, 'sample_file.txt')
         self.local_file_content = 'Local File Content'
 
-    def scrub_uri_request(request):
-        uri = request.uri
-        if uri.find('?') == -1:
-            return request
-        hostQuerysplit = uri.split('?')
-        result = ''
-        specialQuery = ['leaseid', 'syncFlag', 'filesessionid']
-        for st in hostQuerysplit[1].split('&'):
-            if st.find('=') == -1:
-                if len(result) != 0:
-                    result += '&'
-                result += st
-            else:
-                keyval = st.split('=')
-                if keyval[0] in specialQuery:
-                    pass
-                else:
-                    if len(result) != 0:
-                        result += '&'
-                    result += st
-
-        request.uri = hostQuerysplit[0] + '?' + result
-        return request
-
     def test_dls_file_mgmt(self):
         self.execute()
 
