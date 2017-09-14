@@ -482,23 +482,31 @@ def create_resource(properties,
     return res.create_resource(properties, location, is_full_object)
 
 
+def _call_on_ids(resource_ids, function, api_version, cmd_str, *args):
+    """
+    Takes care of looping through the resource_ids and calling the provided function with the right parsed arguments
+    """
+    results = []
+    for rid in resource_ids:
+        id_dict = parse_resource_id(rid)
+        if len(id_dict) == 1:
+            logger.error('az resource %s: error: argument --ids: invalid ResourceId value: \'%s\'' % (cmd_str, rid))
+            return
+        results.append(function(
+            *args,
+            resource_group_name=id_dict['resource_group'],
+            resource_provider_namespace=id_dict['resource_namespace'],
+            parent_resource_path=id_dict['resource_parent'],
+            resource_type=id_dict['resource_type'],
+            resource_name=id_dict['resource_name'], api_version=api_version))
+    return results[0] if len(results) == 1 else results
+
+
 def show_resource(resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None):
-    if resource_ids:
-        results = []
-        for rid in resource_ids:
-            parsed_id = parse_resource_id(rid)
-            if len(parsed_id) == 1:
-                logger.error('az resource show: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
-                return
-            results.append(show_resource(
-                resource_group_name=parsed_id['resource_group'],
-                resource_provider_namespace=parsed_id['resource_namespace'],
-                parent_resource_path=parsed_id['resource_parent'],
-                resource_type=parsed_id['resource_type'],
-                resource_name=parsed_id['resource_name'], api_version=api_version))
-        return results[0] if len(results) == 1 else results
+    if resource_ids and isinstance(resource_ids, list):
+        return _call_on_ids(resource_ids, show_resource, api_version, "show")
 
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
@@ -509,7 +517,12 @@ def show_resource(resource_ids=None, resource_group_name=None,
 def delete_resource(resource_ids=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                     resource_name=None, api_version=None):
-    if not resource_ids:
+    """
+    This function allows for the ability to delete multiple ids with dependencies on one another no matter the order.
+    This is done with multiple passes through the given ids.
+    A new pass is done as long as one resource was sucessfully deleted.
+    """
+    if not resource_ids or not isinstance(resource_ids, list):
         res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                              parent_resource_path, resource_type, resource_name, None, api_version)
         return res.delete()
@@ -517,37 +530,39 @@ def delete_resource(resource_ids=None, resource_group_name=None,
     from collections import deque
     parsed_ids = deque()
     for rid in resource_ids:
-        parsed_id = parse_resource_id(rid)
-        if len(parsed_id) == 1:
+        id_dict = parse_resource_id(rid)
+        if len(id_dict) == 1:
             logger.error('az resource delete: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
             return
-        parsed_ids.append(parsed_id)
+        parsed_ids.append(id_dict)
 
-    threads = deque()
+    operations = deque()
     results = []
     deleted = True
     while parsed_ids and deleted:
         deleted = False
         for _ in range(len(parsed_ids)):
-            parsed_id = parsed_ids.pop()
+            id_dict = parsed_ids.pop()
             try:
-                threads.append(delete_resource(
-                    resource_group_name=parsed_id['resource_group'],
-                    resource_provider_namespace=parsed_id['resource_namespace'],
-                    parent_resource_path=parsed_id['resource_parent'],
-                    resource_type=parsed_id['resource_type'],
-                    resource_name=parsed_id['resource_name'], api_version=api_version))
-                logger.debug("deleting", parsed_id['resource_name'])
+                operations.append(delete_resource(
+                    resource_group_name=id_dict['resource_group'],
+                    resource_provider_namespace=id_dict['resource_namespace'],
+                    parent_resource_path=id_dict['resource_parent'],
+                    resource_type=id_dict['resource_type'],
+                    resource_name=id_dict['resource_name'], api_version=api_version))
+                logger.debug("deleting", id_dict['resource_name'])
             except CloudError as e:
-                parsed_id['exception'] = str(e)
-                parsed_ids.appendleft(parsed_id)
-        while threads:
-            results.append(threads.pop().result())
+                id_dict['exception'] = str(e)
+                parsed_ids.appendleft(id_dict)
+        while operations:
+            results.append(operations.pop().result())
             deleted = True
+        if parsed_ids and deleted:
+            logger.debug("failed to delete all resources; starting next loop")
 
     if parsed_ids:
-        for parsed_id in parsed_ids:
-            logger.warning(parsed_id['exception'])
+        for id_dict in parsed_ids:
+            logger.warning(id_dict['exception'])
 
     return results[0] if len(results) == 1 else results
 
@@ -555,21 +570,8 @@ def delete_resource(resource_ids=None, resource_group_name=None,
 def update_resource(parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
-    if resource_ids:
-        results = []
-        for rid in resource_ids:
-            parsed_id = parse_resource_id(rid)
-            if len(parsed_id) == 1:
-                logger.error('az resource update: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
-                return
-            results.append(update_resource(
-                parameters,
-                resource_group_name=parsed_id['resource_group'],
-                resource_provider_namespace=parsed_id['resource_namespace'],
-                parent_resource_path=parsed_id['resource_parent'],
-                resource_type=parsed_id['resource_type'],
-                resource_name=parsed_id['resource_name'], api_version=api_version))
-        return results[0] if len(results) == 1 else results
+    if resource_ids and isinstance(resource_ids, list):
+        return _call_on_ids(resource_ids, update_resource, api_version, "update", parameters)
 
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
@@ -582,21 +584,8 @@ def tag_resource(tags, resource_ids=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
-    if resource_ids:
-        results = []
-        for rid in resource_ids:
-            parsed_id = parse_resource_id(rid)
-            if len(parsed_id) == 1:
-                logger.error('az resource tag: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
-                return
-            results.append(tag_resource(
-                tags,
-                resource_group_name=parsed_id['resource_group'],
-                resource_provider_namespace=parsed_id['resource_namespace'],
-                parent_resource_path=parsed_id['resource_parent'],
-                resource_type=parsed_id['resource_type'],
-                resource_name=parsed_id['resource_name'], api_version=api_version))
-        return results[0] if len(results) == 1 else results
+    if resource_ids and isinstance(resource_ids, list):
+        return _call_on_ids(resource_ids, tag_resource, api_version, "tag", tags)
 
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,

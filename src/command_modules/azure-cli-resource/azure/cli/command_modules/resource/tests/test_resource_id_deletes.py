@@ -4,20 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, live_only
+from azure.cli.testsdk.vcr_test_base import MOCKED_SUBSCRIPTION_ID
 
 
 class ResourceDeleteTests(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources')
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources', location='eastus')
     def test_delete_dependent_resources(self, resource_group):
         vm_name = self.create_random_name('cli-test-vm', 30)
         tag_name = self.create_random_name('cli-test-tag', 20)
+        username = 'ubuntu'
+        password = self.create_random_name('Password#1', 30)
 
-        self.cmd('az vm create -n {} -g {} --image UbuntuLTS --tag {}'.format(vm_name, resource_group, tag_name))
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --tag {} '
+                 '--admin-username {} --admin-password {} --authentication-type {}'
+                 .format(vm_name, resource_group, tag_name, username, password, 'password'))
 
-        rsrc_list = self.cmd('az resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
+        rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
 
-        delete_output = self.cmd('az resource delete --ids {}'.format(' '.join(rsrc_list))).get_output_in_json()
+        delete_output = self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list))).get_output_in_json()
 
         self.assertTrue(len(rsrc_list) == len(delete_output))
 
