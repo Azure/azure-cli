@@ -172,6 +172,10 @@ helps['policy definition delete'] = """
     type: command
     short-summary: Delete a policy definition.
 """
+helps['policy definition show'] = """
+    type: command
+    short-summary: get a policy definition.
+"""
 helps['policy definition update'] = """
     type: command
     short-summary: Update a policy definition.
