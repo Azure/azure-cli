@@ -381,9 +381,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
         # ADLS remove random uuid created
-        request.uri = re.sub(r'&?syncFlag=[A-Z]+','', request.uri)
-        request.uri = re.sub(r'&?leaseid=[0-9a-z-]+','', request.uri)
-        request.uri = re.sub(r'&?filesessionid=[0-9a-z-]+','', request.uri)
+        request.uri = re.sub(r'&?syncFlag=[A-Z]+', '', request.uri)
+        request.uri = re.sub(r'&?leaseid=[0-9a-z-]+', '', request.uri)
+        request.uri = re.sub(r'&?filesessionid=[0-9a-z-]+', '', request.uri)
         # do not record requests sent for token refresh'
         if (request.body and 'grant-type=refresh_token' in str(request.body)) or \
                 ('/oauth2/token' in request.uri):
