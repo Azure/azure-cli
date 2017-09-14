@@ -57,7 +57,7 @@ class CommandGroup(object):
         pass
 
     def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None,
-                exception_handler=None, deprecate_info=None, no_wait_param=None):
+                exception_handler=None,no_wait_param=None):
         """
         Register a CLI command
         :param name: Name of the command as it will be called on the command line
@@ -84,18 +84,16 @@ class CommandGroup(object):
                     transform=transform,
                     table_transformer=table_transformer,
                     confirmation=confirmation,
-                    deprecate_info=deprecate_info,
                     exception_handler=exception_handler or self._exception_handler,
                     no_wait_param=no_wait_param)
 
     def custom_command(self, name, custom_func_name, confirmation=None,
-                       exception_handler=None, deprecate_info=None, no_wait_param=None):
+                       exception_handler=None, no_wait_param=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._custom_path.format(custom_func_name),
                     client_factory=self._client_factory,
                     confirmation=confirmation,
-                    deprecate_info=deprecate_info,
                     exception_handler=exception_handler or self._exception_handler,
                     no_wait_param=no_wait_param)
 

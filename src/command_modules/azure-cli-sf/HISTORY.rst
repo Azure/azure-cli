@@ -2,9 +2,12 @@
 
 Release History
 ===============
+<<<<<<< HEAD
+
+1.0.9 (2017-09-14)
+* Revert 'Deprecating all commands in favor of Service Fabric CLI (sfctl)'
 
 1.0.8 (2017-08-31)
-++++++++++++++++++
 * Deprecating all commands in favor of Service Fabric CLI (sfctl)
 
 1.0.7 (2017-08-28)
