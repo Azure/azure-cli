@@ -26,6 +26,7 @@ import yaml
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from six.moves.urllib.request import TimeoutError  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 from msrestazure.azure_exceptions import CloudError
@@ -233,9 +234,9 @@ def acs_install_cli(resource_group, name, install_location=None, client_version=
     kwargs = {'install_location': install_location}
     if client_version:
         kwargs['client_version'] = client_version
-    if orchestrator_type == 'kubernetes':
+    if orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes:
         return k8s_install_cli(**kwargs)
-    elif orchestrator_type == 'dcos':
+    elif orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
         return dcos_install_cli(**kwargs)
     else:
         raise CLIError('Unsupported orchestrator type {} for install-cli'.format(orchestrator_type))
@@ -418,7 +419,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                orchestrator_type="DCOS",
                orchestrator_release="", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
-               validate=False, no_wait=False):
+               validate=False, no_wait=False, get_credentials=None):
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
@@ -493,6 +494,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type admin_password: str
     :param bool raw: returns the direct response alongside the
      deserialized response
+    :type get_credentials: bool
+    :param get_credentials: If true, credentials for the cluster will be downloaded after cluster create.
+    Only available if --no-wait=false
     :rtype:
     :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
      instance that returns :class:`DeploymentExtended
@@ -526,6 +530,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             api_version = "2017-01-31"
 
     if orchestrator_type.lower() == 'kubernetes':
+        if get_credentials is None:
+            get_credentials = True
         # TODO: This really needs to be broken out and unit tested.
         client = _graph_client_factory()
         if not service_principal:
@@ -557,10 +563,11 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             if not client_secret:
                 raise CLIError('--client-secret is required if --service-principal is specified')
             _validate_service_principal(client, service_principal)
-
-    elif windows:
-        raise CLIError('--windows is only supported for Kubernetes clusters')
-
+    else:
+        if windows:
+            raise CLIError('--windows is only supported for Kubernetes clusters')
+        if get_credentials:
+            raise CLIError('--get-credentials is only supported for Kubernetes clusters')
     return _create(resource_group_name, deployment_name, dns_name_prefix, name,
                    ssh_key_value, admin_username=admin_username,
                    api_version=api_version,
@@ -581,7 +588,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                    location=location, service_principal=service_principal,
                    client_secret=client_secret, master_count=master_count,
                    windows=windows, admin_password=admin_password,
-                   validate=validate, no_wait=no_wait, tags=tags)
+                   validate=validate, no_wait=no_wait, tags=tags,
+                   get_creds=get_credentials)
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
@@ -622,7 +630,7 @@ def load_acs_service_principals(config_path):
         return None
 
 
-# pylint: disable-msg=too-many-arguments
+# pylint: disable-msg=too-many-arguments,too-many-statements
 def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
             admin_username="azureuser", api_version=None, orchestrator_type="DCOS", orchestrator_release="",
             master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
@@ -630,7 +638,10 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
             agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
             agent_vnet_subnet_id="", agent_ports=None, agent_storage_profile="",
             location=None, service_principal=None, client_secret=None,
-            windows=False, admin_password='', validate=False, no_wait=False, tags=None):
+            windows=False, admin_password='', validate=False, no_wait=False, tags=None,
+            get_creds=True):
+    if get_creds and no_wait:
+        logger.warning('--get-credentials is ignored when --no-wait is true.')
     if not location:
         location = '[resourceGroup().location]'
     windows_profile = None
@@ -745,6 +756,11 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
     if windows_profile is not None:
         properties["windowsProfile"] = windows_profile
 
+    if get_creds:
+        callback = lambda argv: k8s_get_credentials(name, resource_group_name)  # noqa
+    else:
+        callback = None
+
     resource = {
         "apiVersion": api_version,
         "location": location,
@@ -780,10 +796,10 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
                 "value": client_secret
             }
         }
-    return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+    return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait, callback)
 
 
-def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
+def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait, callback=None):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties
 
@@ -794,12 +810,19 @@ def _invoke_deployment(resource_group_name, deployment_name, template, parameter
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
         return smc.validate(resource_group_name, deployment_name, properties)
-    return smc.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    result = smc.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    if callback is not None:
+        try:
+            result.add_done_callback(callback)
+        except ValueError:
+            # Request has already completed.
+            callback(result)
+    return result
 
 
 def k8s_get_credentials(name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        ssh_key_file=None):
+                        ssh_key_file=None, retry=5):
     """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
@@ -810,8 +833,16 @@ def k8s_get_credentials(name, resource_group_name,
     :param ssh_key_file: Path to an SSH key file to use
     :type ssh_key_file: str
     """
+    logger.warn('Setting kubernetes default cluster to %', name)
     acs_info = _get_acs_info(name, resource_group_name)
-    _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file)
+    i = 0
+    while i < retry:
+        try:
+            _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file)
+            return
+        except TimeoutError as exc:
+            logger.warning('Failed to download credentials to kube config file: %s', exc)
+        time.sleep(i * 5)
 
 
 def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):

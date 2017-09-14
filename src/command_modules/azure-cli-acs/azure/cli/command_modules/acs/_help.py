@@ -30,6 +30,12 @@ helps['acs install-cli'] = """
     short-summary: Download the DCOS/Kubernetes command line.
 """
 helps['acs create'] = """
+    parameters:
+        - name: --get-credentials
+          type: bool
+          text: >
+            If true, download credentials for using the cluster after it is created.
+            Only applicable to Kubernetes clustes. Default is True for Kubernetes clusters.
     examples:
         - name: Create a default acs cluster
           text: az acs create -g MyResourceGroup -n MyContainerService
