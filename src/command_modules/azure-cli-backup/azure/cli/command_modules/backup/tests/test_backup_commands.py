@@ -325,13 +325,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
         restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
         restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
-        trigger_restore_job_json = self.cmd(restore_cmd_string, checks=[
+        trigger_restore_job_name = self.cmd(restore_cmd_string, checks=[
             JMESPathCheck("properties.entityFriendlyName", vm_name),
             JMESPathCheck("properties.operation", "Restore"),
             JMESPathCheck("properties.status", "InProgress"),
             JMESPathCheck("resourceGroup", resource_group)
         ]).get_output_in_json()
-        trigger_restore_job_name = trigger_restore_job_json['name']
         self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))
 
         trigger_restore_job_details = self.cmd('az backup job show -g {} -v {} -n {}'
@@ -367,9 +366,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
         restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
         restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
-        trigger_restore_job_json = self.cmd(restore_cmd_string).get_output_in_json()
-        trigger_restore_job_name = trigger_restore_job_json['name']
-
+        trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
+        
         self.cmd('az backup job show -g {} -v {} -n {}'
                  .format(resource_group, vault_name, trigger_restore_job_name), checks=[
                      JMESPathCheck("name", trigger_restore_job_name),
