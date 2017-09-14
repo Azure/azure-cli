@@ -26,6 +26,7 @@ item_name_type = CliArgumentType(help='The Recovery Services item name.', option
 item_type_type = CliArgumentType(help='The Recovery Services item type.', **enum_choice_list(allowed_workload_types))
 policy_name_type = CliArgumentType(help='The Recovery Services policy name.', options_list=('--policy-name', '-p'))
 job_name_type = CliArgumentType(help='The Recovery Services job name.', options_list=('--name', '-n'))
+rp_name_type = CliArgumentType(help='The Recovery Services recovery point name.', options_list=('--rp-name', '-r'))
 
 # Vault
 register_cli_argument('backup vault', 'vault_name', vault_name_type, options_list=('--name', '-n'))
@@ -60,13 +61,15 @@ for command in ['show', 'delete', 'list-associated-items']:
 register_cli_argument('backup policy set', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
 
 # Recovery Point
-for command in ['show', 'list']:
-    register_cli_argument('backup recoverypoint {}'.format(command), 'backup_item', type=file_type, help='JSON encoded backupItem definition. Use the show command of the backup item to obtain the relevant backupItem object.', completer=FilesCompleter())
+register_cli_argument('backup recoverypoint', 'container_name', container_name_type)
+register_cli_argument('backup recoverypoint', 'container_type', container_type_type)
+register_cli_argument('backup recoverypoint', 'item_name', item_name_type)
+register_cli_argument('backup recoverypoint', 'item_type', item_type_type)
 
 register_cli_argument('backup recoverypoint list', 'start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
 register_cli_argument('backup recoverypoint list', 'end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
 
-register_cli_argument('backup recoverypoint show', 'id', help='The id of the recovery point. Use list command to view IDs of recovery points.')
+register_cli_argument('backup recoverypoint show', 'name', rp_name_type, options_list=('--name', '-n'))
 
 # Protection
 register_cli_argument('backup protection', 'vault_name', vault_name_type)

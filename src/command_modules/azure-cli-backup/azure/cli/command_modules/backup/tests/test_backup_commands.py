@@ -36,21 +36,22 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                              .format(vm_name, vault_name, resource_group)).get_output_in_json()
 
         # Get Item
-        item_json = self.cmd('az backup item list -g {} -v {} -c {}'
-                             .format(resource_group, vault_name, container)).get_output_in_json()
+        item = self.cmd('az backup item list -g {} -v {} -c {} --query properties.friendlyName'
+                        .format(resource_group, vault_name, container)).get_output_in_json()
 
         # Trigger Backup
         retain_date = datetime.utcnow() + timedelta(days=30)
         backup_cmd_string = 'az backup protection backup-now'
         backup_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
-        backup_cmd_string += ' -c {} -i {}'.format(container, item_json['properties']['friendlyName'])
+        backup_cmd_string += ' -c {} -i {}'.format(container, item)
         backup_cmd_string += ' --retain-until {} --query name'.format(retain_date.strftime('%d-%m-%Y'))
         trigger_backup_job_name = self.cmd(backup_cmd_string).get_output_in_json()
         self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_backup_job_name))
 
         # Get Recovery Point
-        recovery_point_json = json.dumps(self.cmd('az backup recoverypoint list --backup-item \'{}\' --query [0]'
-                                                  .format(json.dumps(item_json))).get_output_in_json())
+        recovery_point_json = json.dumps(self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [0]'
+                                                  .format(resource_group, vault_name, container,
+                                                          item)).get_output_in_json())
 
         # Trigger Restore
         restore_cmd_string = 'az backup restore disks'
@@ -62,7 +63,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Disable Protection
         self.cmd('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
-                 .format(resource_group, vault_name, container, item_json['properties']['friendlyName']))
+                 .format(resource_group, vault_name, container, item))
 
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
@@ -253,23 +254,21 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @RPPreparer()
     def test_rp_commands(self, resource_group, vault_name, vm_name):
-        item_json = json.dumps(self.cmd('az backup item show -g {} -v {} -c {} -n {}'
-                                        .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json())
-        rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
-                            .format(item_json), checks=[
+        rps_json = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {}'
+                            .format(resource_group, vault_name, vm_name, vm_name), checks=[
                                 JMESPathCheck("length(@)", 2)]).get_output_in_json()
 
         rp1_name = rps_json[0]['name']
-        rp1_json = self.cmd('az backup recoverypoint show --backup-item \'{}\' --id {}'
-                            .format(item_json, rp1_name), checks=[
+        rp1_json = self.cmd('az backup recoverypoint show -g {} -v {} -c {} -i {} -n {}'
+                            .format(resource_group, vault_name, vm_name, vm_name, rp1_name), checks=[
                                 JMESPathCheck("name", rp1_name),
                                 JMESPathCheck("resourceGroup", resource_group)]).get_output_in_json()
         self.assertIn(vault_name.lower(), rp1_json['id'].lower())
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
         rp2_name = rps_json[1]['name']
-        rp2_json = self.cmd('az backup recoverypoint show --backup-item \'{}\' --id {}'
-                            .format(item_json, rp2_name), checks=[
+        rp2_json = self.cmd('az backup recoverypoint show -g {} -v {} -c {} -i {} -n {}'
+                            .format(resource_group, vault_name, vm_name, vm_name, rp2_name), checks=[
                                 JMESPathCheck("name", rp2_name),
                                 JMESPathCheck("resourceGroup", resource_group)]).get_output_in_json()
         self.assertIn(vault_name.lower(), rp2_json['id'].lower())
@@ -317,14 +316,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @StorageAccountPreparer()
     def test_restore_commands(self, resource_group, vault_name, vm_name, storage_account):
-        item_json = json.dumps(self.cmd('az backup item show -g {} -v {} -c {} -n {}'
-                                        .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json())
-        rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
-                            .format(item_json)).get_output_in_json()
+        rps_json = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {}'
+                            .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
 
         rp1_name = rps_json[0]['name']
-        rp1_json = json.dumps(self.cmd('az backup recoverypoint show --backup-item \'{}\' --id {}'
-                                       .format(item_json, rp1_name)).get_output_in_json())
+        rp1_json = json.dumps(self.cmd('az backup recoverypoint show -g {} -v {} -c {} -i {} -n {}'
+                                       .format(resource_group, vault_name, vm_name, vm_name, rp1_name)).get_output_in_json())
 
         # Trigger Restore
         restore_cmd_string = 'az backup restore disks'
@@ -365,10 +362,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RPPreparer()
     @StorageAccountPreparer()
     def test_job_commands(self, resource_group, vault_name, vm_name, storage_account):
-        item_json = json.dumps(self.cmd('az backup item show -g {} -v {} -c {} -n {}'
-                                        .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json())
-        rps_json = self.cmd('az backup recoverypoint list --backup-item \'{}\''
-                            .format(item_json)).get_output_in_json()
+        rps_json = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {}'
+                            .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
         rp_json = json.dumps(rps_json[0])
 
         restore_cmd_string = 'az backup restore disks'

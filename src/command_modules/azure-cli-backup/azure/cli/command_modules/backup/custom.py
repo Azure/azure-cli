@@ -206,31 +206,23 @@ def backup_now(client, resource_group_name, vault_name, container_name, item_nam
     return _track_backup_job(result, vault_name, resource_group_name)
 
 
-def show_recovery_point(client, id, backup_item):  # pylint: disable=redefined-builtin
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(None)
-
-    # Get objects from JSON files
-    item = _get_item_from_json(backup_protected_items_client, backup_item)
-    vault_name = _get_vault_from_arm_id(item.id)
-    resource_group = _get_resource_group_from_id(item.id)
+def show_recovery_point(client, resource_group_name, vault_name, container_name, item_name, name,  # pylint: disable=redefined-builtin
+                        container_type="AzureIaasVM", item_type="VM"):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     container_type, item_type)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
 
-    return client.get(vault_name, resource_group, fabric_name, container_uri, item_uri, id,
+    return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name,
                       custom_headers=_get_custom_headers())
 
 
-def list_recovery_points(client, backup_item, start_date=None, end_date=None):
-    # Client factories
-    backup_protected_items_client = backup_protected_items_cf(None)
-
-    # Get objects from JSON files
-    item = _get_item_from_json(backup_protected_items_client, backup_item)
-    vault_name = _get_vault_from_arm_id(item.id)
-    resource_group = _get_resource_group_from_id(item.id)
+def list_recovery_points(client, resource_group_name, vault_name, container_name, item_name,
+                         container_type="AzureIaasVM", item_type="VM", start_date=None, end_date=None):
+    item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
+                     container_type, item_type)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -243,7 +235,7 @@ def list_recovery_points(client, backup_item, start_date=None, end_date=None):
         'endDate': query_end_date})
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group, fabric_name, container_uri, item_uri, filter_string,
+    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string,
                                   custom_headers=_get_custom_headers())
     paged_recovery_points = _get_list_from_paged_response(recovery_points)
 
