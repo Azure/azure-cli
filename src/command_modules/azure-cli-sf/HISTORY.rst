@@ -1,8 +1,10 @@
 .. :changelog:
 
-Unreleased History
+Release History
 ===============
 
+unreleased
+++++++++++++++++++
 1.0.9 (2017-09-14)
 * Revert 'Deprecating all commands in favor of Service Fabric CLI (sfctl)'
 
