@@ -16,6 +16,21 @@ type: group
 short-summary: Manage web apps.
 """
 
+helps['webapp auth'] = """
+    type: group
+    short-summary: Manage webapp authentication and authorization
+"""
+
+helps['webapp auth show'] = """
+    type: command
+    short-summary: Show the authentification settings for the webapp.
+"""
+
+helps['webapp auth update'] = """
+    type: command
+    short-summary: Update the authentication settings for the webapp.
+"""
+
 helps['webapp config'] = """
 type: group
 short-summary: Configure a web app.

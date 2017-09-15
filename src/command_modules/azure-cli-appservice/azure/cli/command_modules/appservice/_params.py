@@ -15,7 +15,7 @@ from ._validators import validate_existing_function_app, validate_existing_web_a
 
 
 AUTH_TYPES = {
-    'AllowAnonymous': 'na', 
+    'AllowAnonymous': 'na',
     'LoginWithAzureActiveDirectory': BuiltInAuthenticationProvider.azure_active_directory,
     'LoginWithFacebook': BuiltInAuthenticationProvider.facebook,
     'LoginWithGoogle': BuiltInAuthenticationProvider.google,
@@ -193,14 +193,25 @@ register_cli_argument('webapp config backup restore', 'overwrite', help='Overwri
 register_cli_argument('webapp config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
 register_cli_argument('webapp auth update', 'enabled', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp auth update', 'token_store', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp auth update', 'action', **enum_choice_list(AUTH_TYPES))
+register_cli_argument('webapp auth update', 'token_refresh_extension_hours', type=float, help="Hours, must be formattable into a float")
+register_cli_argument('webapp auth update', 'allowed_external_redirect_urls', nargs='+', help="One or more urls (space delimited).")
 register_cli_argument('webapp auth update', 'aad_client_id', arg_group='Azure Active Directory')
 register_cli_argument('webapp auth update', 'aad_client_secret', arg_group='Azure Active Directory')
-register_cli_argument('webapp auth update', 'aad_allowed_token_audiences', nargs='+', arg_group='Azure Active Directory')
+register_cli_argument('webapp auth update', 'aad_allowed_token_audiences', nargs='+', arg_group='Azure Active Directory', help="One or more token audiences (space delimited).")
 register_cli_argument('webapp auth update', 'aad_token_issuer_url', help='TODO mention command to get it', arg_group='Azure Active Directory')
 register_cli_argument('webapp auth update', 'facebook_app_id', arg_group='Facebook')
 register_cli_argument('webapp auth update', 'facebook_app_secret', arg_group='Facebook')
-register_cli_argument('webapp auth update', 'facebook_oauth_scopes', nargs='+', arg_group='Facebook')
+register_cli_argument('webapp auth update', 'facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space delimited).", arg_group='Facebook')
+register_cli_argument('webapp auth update', 'twitter_consumer_key', arg_group='Twitter')
+register_cli_argument('webapp auth update', 'twitter_consumer_secret', arg_group='Twitter')
+register_cli_argument('webapp auth update', 'google_client_id', arg_group='Google')
+register_cli_argument('webapp auth update', 'google_client_secret', arg_group='Google')
+register_cli_argument('webapp auth update', 'google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space delimited).", arg_group='Google')
+register_cli_argument('webapp auth update', 'microsoft_account_client_id', arg_group='Microsoft')
+register_cli_argument('webapp auth update', 'microsoft_account_client_secret', arg_group='Microsoft')
+register_cli_argument('webapp auth update', 'microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space delimited).", arg_group='Microsoft')
 
 register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app')
 register_cli_argument('functionapp config hostname', 'webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
