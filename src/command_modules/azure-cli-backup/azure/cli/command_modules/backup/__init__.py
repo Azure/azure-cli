@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import azure.cli.command_modules.backup._help  # pylint: disable=unused-import
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
 
 
 def load_params(_):

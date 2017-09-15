@@ -362,15 +362,18 @@ def stop_job(client, resource_group_name, vault_name, name):
 
 
 def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
+    logger.warning("Waiting for job '{}' ...".format(name))
     start_timestamp = datetime.utcnow()
     job_details = client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
     while _job_in_progress(job_details.properties.status):
         if timeout:
             elapsed_time = datetime.utcnow() - start_timestamp
             if elapsed_time.seconds > timeout:
+                logger.warning("Command timed out while waiting for job '{}'".format(name))
                 break
         job_details = client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
         time.sleep(30)
+    return job_details
 
 # Client Utilities
 
@@ -684,10 +687,10 @@ def _get_or_read_json(json_or_file):
     if json_obj is None:
         raise ValueError(
             """
-            The variable passed should be in JSON format supplied by az backup CLI commands.
-            Make sure that you use relevant az backup show commandlets output and the output is json
+            The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
+            Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'
             (use -o json for explicit JSON output) while assigning value to this variable.
-            Take care to edit only the values and not the keys within the JSON file.
+            Take care to edit only the values and not the keys within the JSON file or string.
             """)
     return json_obj
 
@@ -701,10 +704,10 @@ def _get_object_from_json(client, json_or_file, class_name):
     if param is None:
         raise ValueError(
             """
-            The variable passed should be in JSON format supplied by az backup CLI commands.
-            Make sure that you use relevant az backup show commandlets output and the output is json
+            The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
+            Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'
             (use -o json for explicit JSON output) while assigning value to this variable.
-            Take care to edit only the values and not the keys within the JSON file.
+            Take care to edit only the values and not the keys within the JSON file or string.
             """)
 
     return param
