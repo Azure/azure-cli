@@ -53,6 +53,7 @@ DEPENDENCIES = [
     'azure-cli-acs',
     'azure-cli-appservice',
     'azure-cli-batch',
+    'azure-cli-backup',
     'azure-cli-billing',
     'azure-cli-cdn',
     'azure-cli-cloud',
