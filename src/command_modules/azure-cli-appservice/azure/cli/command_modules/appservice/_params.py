@@ -200,7 +200,9 @@ register_cli_argument('webapp auth update', 'allowed_external_redirect_urls', na
 register_cli_argument('webapp auth update', 'aad_client_id', arg_group='Azure Active Directory')
 register_cli_argument('webapp auth update', 'aad_client_secret', arg_group='Azure Active Directory')
 register_cli_argument('webapp auth update', 'aad_allowed_token_audiences', nargs='+', arg_group='Azure Active Directory', help="One or more token audiences (space delimited).")
-register_cli_argument('webapp auth update', 'aad_token_issuer_url', help='TODO mention command to get it', arg_group='Azure Active Directory')
+register_cli_argument('webapp auth update', 'aad_token_issuer_url',
+                      help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from \'az cloud show\' at \"endpoints.activeDirectory\". '
+                           'The tenantID can be found using \'az account show\'. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.', arg_group='Azure Active Directory')
 register_cli_argument('webapp auth update', 'facebook_app_id', arg_group='Facebook')
 register_cli_argument('webapp auth update', 'facebook_app_secret', arg_group='Facebook')
 register_cli_argument('webapp auth update', 'facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space delimited).", arg_group='Facebook')
