@@ -160,22 +160,22 @@ helps['backup restore'] = """
             short-summary: Restore the backed up items from recovery points in the Recovery Services vault.
             """
 
-helps['backup restore-disks'] = """
+helps['backup restore restore-disks'] = """
             type: command
             short-summary: Restore the disks of the backed VM from the specified recovery point.
             """
 
-helps['backup restore-files'] = """
+helps['backup restore files'] = """
             type: group
             short-summary: Gives access to all the files of the recovery point.
             """
 
-helps['backup restore-files mount-rp'] = """
+helps['backup restore files mount-rp'] = """
             type: command
             short-summary: Downloads a script which mounts the files of a recovery point.
             """
 
-helps['backup restore-files unmount-rp'] = """
+helps['backup restore files unmount-rp'] = """
             type: command
             short-summary: Closes the access to the recovery point.
             """
