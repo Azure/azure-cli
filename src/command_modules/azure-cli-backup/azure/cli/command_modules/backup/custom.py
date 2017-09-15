@@ -19,6 +19,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
+from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
 
 from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protected_items_cf, \
     protection_policies_cf, virtual_machines_cf, recovery_points_cf, protection_containers_cf, \
@@ -92,7 +93,8 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
     return _get_containers(client, container_type, status, resource_group_name, vault_name)
 
 
-def enable_protection_for_vm(client, resource_group_name, vault_name, vm_name, vm_rg, policy_name):
+def enable_protection_for_vm(client, resource_group_name, vault_name, vm, policy_name):
+    vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm)
     vm = virtual_machines_cf().get(vm_rg, vm_name)
     vault = vaults_cf(None).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(None), resource_group_name, vault_name, policy_name)
@@ -242,8 +244,7 @@ def list_recovery_points(client, resource_group_name, vault_name, container_name
     return paged_recovery_points
 
 
-def restore_disks(client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account_name,
-                  storage_account_rg):
+def restore_disks(client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      "AzureIaasVM", "VM")
     vault = vaults_cf(None).get(resource_group_name, vault_name, custom_headers=_get_custom_headers())
@@ -254,7 +255,8 @@ def restore_disks(client, resource_group_name, vault_name, container_name, item_
     item_uri = _get_protected_item_uri_from_id(item.id)
 
     # Construct trigger restore request object
-    _storage_account_id = _get_storage_account_id(storage_account_name, storage_account_rg)
+    sa_name, sa_rg = _get_resource_name_and_rg(resource_group_name, storage_account)
+    _storage_account_id = _get_storage_account_id(sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
     trigger_restore_properties = IaasVMRestoreRequest(create_new_cloud_service=True,
                                                       recovery_point_id=rp_name,
@@ -554,6 +556,17 @@ def _get_custom_headers():
     import uuid
 
     return {'x-ms-client-request-id': str(uuid.uuid1()) + '-Cli'}
+
+
+def _get_resource_name_and_rg(resource_group_name, name_or_id):
+    if is_valid_resource_id(name_or_id):
+        id_parts = parse_resource_id(name_or_id)
+        name = id_parts['name']
+        resource_group = id_parts['resource_group']
+    else:
+        name = name_or_id
+        resource_group = resource_group_name
+    return name, resource_group
 
 # Tracking Utilities
 

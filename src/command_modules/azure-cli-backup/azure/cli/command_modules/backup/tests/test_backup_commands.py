@@ -28,8 +28,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @StorageAccountPreparer()
     def test_backup_restore(self, resource_group, vault_name, vm_name, storage_account):
         # Enable Protection
-        self.cmd('az backup protection enable-for-vm -g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
-                 .format(resource_group, vault_name, vm_name, resource_group)).get_output_in_json()
+        self.cmd('az backup protection enable-for-vm -g {} -v {} --vm {} -p DefaultPolicy'
+                 .format(resource_group, vault_name, vm_name)).get_output_in_json()
 
         # Get Container
         container = self.cmd('az backup container show -n {} -v {} -g {} --query properties.friendlyName'
@@ -53,11 +53,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                                   .format(resource_group, vault_name, container, item)).get_output_in_json()
 
         # Trigger Restore
-        restore_cmd_string = 'az backup restore disks'
+        restore_cmd_string = 'az backup restore-disks'
         restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         restore_cmd_string += ' -c {} -i {} -r {}'.format(container, item, recovery_point)
-        restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
-        restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
+        restore_cmd_string += ' --storage-account {} --query name'.format(storage_account)
         trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
         self.cmd('az backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))
 
@@ -278,8 +277,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VaultPreparer()
     @VMPreparer()
     def test_protection_commands(self, resource_group, vault_name, vm_name):
-        self.cmd('az backup protection enable-for-vm -g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
-                 .format(resource_group, vault_name, vm_name, resource_group), checks=[
+        self.cmd('az backup protection enable-for-vm -g {} -v {} --vm {} -p DefaultPolicy'
+                 .format(resource_group, vault_name, vm_name), checks=[
                      JMESPathCheck("properties.entityFriendlyName", vm_name),
                      JMESPathCheck("properties.operation", "ConfigureBackup"),
                      JMESPathCheck("properties.status", "Completed"),
@@ -320,11 +319,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                            .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
 
         # Trigger Restore
-        restore_cmd_string = 'az backup restore disks'
+        restore_cmd_string = 'az backup restore-disks'
         restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
-        restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
-        restore_cmd_string += ' --storage-account-rg {}'.format(resource_group)
+        restore_cmd_string += ' --storage-account {}'.format(storage_account)
         trigger_restore_job_json = self.cmd(restore_cmd_string, checks=[
             JMESPathCheck("properties.entityFriendlyName", vm_name),
             JMESPathCheck("properties.operation", "Restore"),
@@ -362,11 +360,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         rp_name = self.cmd('az backup recoverypoint list -g {} -v {} -c {} -i {} --query [0].name'
                            .format(resource_group, vault_name, vm_name, vm_name)).get_output_in_json()
 
-        restore_cmd_string = 'az backup restore disks'
+        restore_cmd_string = 'az backup restore-disks'
         restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
-        restore_cmd_string += ' --storage-account-name {}'.format(storage_account)
-        restore_cmd_string += ' --storage-account-rg {} --query name'.format(resource_group)
+        restore_cmd_string += ' --storage-account {} --query name'.format(storage_account)
         trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
 
         self.cmd('az backup job show -g {} -v {} -n {}'

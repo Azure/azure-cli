@@ -133,8 +133,8 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             vm = self._get_vm(**kwargs)
 
-            params_format = '-g {} -v {} --vm-name {} --vm-rg {} -p DefaultPolicy'
-            param_string = params_format.format(self.resource_group, vault, vm, self.resource_group)
+            params_format = '-g {} -v {} --vm {} -p DefaultPolicy'
+            param_string = params_format.format(self.resource_group, vault, vm)
             execute('az backup protection enable-for-vm {}'.format(param_string))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}

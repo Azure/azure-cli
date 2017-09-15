@@ -104,6 +104,6 @@ cli_command(__name__, 'backup job wait', 'azure.cli.command_modules.backup.custo
 cli_command(__name__, 'backup recoverypoint show', 'azure.cli.command_modules.backup.custom#show_recovery_point', recovery_points_cf)
 cli_command(__name__, 'backup recoverypoint list', 'azure.cli.command_modules.backup.custom#list_recovery_points', recovery_points_cf, table_transformer=transform_recovery_point_list)
 
-cli_command(__name__, 'backup restore disks', 'azure.cli.command_modules.backup.custom#restore_disks', restores_cf)
-cli_command(__name__, 'backup restore files mount-rp', 'azure.cli.command_modules.backup.custom#restore_files_mount_rp', item_level_recovery_connections_cf)
-cli_command(__name__, 'backup restore files unmount-rp', 'azure.cli.command_modules.backup.custom#restore_files_unmount_rp', item_level_recovery_connections_cf)
+cli_command(__name__, 'backup restore-disks', 'azure.cli.command_modules.backup.custom#restore_disks', restores_cf)
+cli_command(__name__, 'backup restore-files mount-rp', 'azure.cli.command_modules.backup.custom#restore_files_mount_rp', item_level_recovery_connections_cf)
+cli_command(__name__, 'backup restore-files unmount-rp', 'azure.cli.command_modules.backup.custom#restore_files_unmount_rp', item_level_recovery_connections_cf)
