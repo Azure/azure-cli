@@ -29,12 +29,12 @@ vm_extension_info = {
 vmss_extension_info = {
     'Linux': {
         'publisher': 'Microsoft.Azure.Security',
-        'name':  'AzureDiskEncryptionForLinuxTest', # vm_extension_info['Linux']['name'],
+        'name': 'AzureDiskEncryptionForLinuxTest',  # vm_extension_info['Linux']['name'],
         'version': '1.1'
     },
     'Windows': {
         'publisher': 'Microsoft.Azure.Security',
-        'name': 'ADETest',#vm_extension_info['Windows']['name'],
+        'name': 'ADETest',  # vm_extension_info['Windows']['name'],
         'version': '2.1'
     }
 }
@@ -387,7 +387,7 @@ def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, forc
     return volume_type
 
 
-def encrypt_vmss(resource_group_name, vmss_name, # pylint: disable=too-many-locals, too-many-statements
+def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-locals, too-many-statements
                  disk_encryption_keyvault,
                  key_encryption_keyvault=None,
                  key_encryption_key=None,
@@ -524,9 +524,6 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
 
 
 def show_vmss_encryption_status(resource_group_name, vmss_name):
-    '''
-    (PREVIEW)Show encryption related status
-    '''
     encryption_ext_names = [v['name'] for v in vmss_extension_info.values()]
     views = get_vmss_instance_view(resource_group_name, vmss_name)
     if not views.extensions or not [e for e in views.extensions if e.name in encryption_ext_names]:
@@ -564,7 +561,7 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
         kek_vault_info = parse_resource_id(kek_vault_id)
         if disk_vault_resource_info['name'].lower() != kek_vault_info['name'].lower():
             client.get(kek_vault_info['resource_group'], kek_vault_info['name'])
-    
+
     # verify subscription mataches
     vmss_resource_info = parse_resource_id(vmss.id)
     if vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
@@ -573,4 +570,3 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
     # verify region matches
     if key_vault.location.replace(' ', '').lower() != vmss.location.replace(' ', '').lower():
         _report_client_side_validation_error("VM scale-set's region doesn't match keyvault's region. Encryption might fail")
-

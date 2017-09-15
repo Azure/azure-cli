@@ -793,13 +793,24 @@ helps['vmss encryption'] = """
 helps['vmss encryption enable'] = """
     type: command
     short-summary: Encrypt a virtual machine scale set with managed disks.
-    long-summary: For linux VM scale-sets, only data disk encryption is supported
+    examples:
+        - name: encrypte a VM Scale-set using a key vault in the same resource group
+          text: >
+            az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
 """
 
 helps['vmss encryption disable'] = """
     type: command
     short-summary: disable the encryption on a virtual machine scale set with managed disks.
-    long-summary: For linux VM scale-sets, only data disk encryption is supported
+    examples:
+        - name: disable encryption a VM Scale-set
+          text: >
+            az vmss encryption disable -g MyResourceGroup -n MyVm
+"""
+
+helps['vmss encryption show'] = """
+    type: command
+    short-summary: show the encryption status
 """
 
 helps['vm capture'] = """

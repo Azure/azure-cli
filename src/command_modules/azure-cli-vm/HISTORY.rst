@@ -5,6 +5,7 @@ Release History
 (unreleased)
 +++++++++++++++++++
 * `vm run-command`: support to run commands on remote VMs
+* `vmss encryption`: (PREVIEW) support vmss disk encryptions
 
 2.0.14 (2017-09-11)
 +++++++++++++++++++
