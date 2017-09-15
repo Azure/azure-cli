@@ -82,13 +82,13 @@ register_cli_argument('backup protection backup-now', 'retain_until', type=datet
 register_cli_argument('backup protection disable', 'delete_backup_data', help='Option to delete the existing backed up data in the recovery services vault.', **three_state_flag())
 
 # Restore
-for command in ['disks', 'files']:
-    register_cli_argument('backup restore-{}'.format(command), 'vault_name', vault_name_type)
-    register_cli_argument('backup restore-{}'.format(command), 'container_name', container_name_type)
-    register_cli_argument('backup restore-{}'.format(command), 'item_name', item_name_type)
-    register_cli_argument('backup restore-{}'.format(command), 'rp_name', rp_name_type)
+for command in ['restore-disks', 'files']:
+    register_cli_argument('backup restore {}'.format(command), 'vault_name', vault_name_type)
+    register_cli_argument('backup restore {}'.format(command), 'container_name', container_name_type)
+    register_cli_argument('backup restore {}'.format(command), 'item_name', item_name_type)
+    register_cli_argument('backup restore {}'.format(command), 'rp_name', rp_name_type)
 
-register_cli_argument('backup restore-disks', 'storage_account', help='Name or ID of the storge accout to which the disks are restored.')
+register_cli_argument('backup restore restore-disks', 'storage_account', help='Name or ID of the storge accout to which the disks are restored.')
 
 # Job
 register_cli_argument('backup job', 'vault_name', vault_name_type)
