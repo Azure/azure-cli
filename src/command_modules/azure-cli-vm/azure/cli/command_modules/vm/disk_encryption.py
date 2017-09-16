@@ -495,7 +495,8 @@ def decrypt_vmss(resource_group_name, vmss_name, volume_type=None, force=False):
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
                                           force_update_tag=uuid.uuid4())
-    if not vmss.virtual_machine_profile.extension_profile or not vmss.virtual_machine_profile.extension_profile.extensions:
+    if (not vmss.virtual_machine_profile.extension_profile or
+            not vmss.virtual_machine_profile.extension_profile.extensions):
         extensions = []
     else:
         extensions = vmss.virtual_machine_profile.extension_profile.extensions
@@ -555,7 +556,8 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
 
     # ensure vault has 'EnabledForDiskEncryption' permission
     if not key_vault.properties.enabled_for_disk_encryption:
-        _report_client_side_validation_error("keyvault '{}' is not enabled for disk encryption. ".format(disk_vault_resource_info['resource_name']))
+        _report_client_side_validation_error("keyvault '{}' is not enabled for disk encryption. ".format(
+            disk_vault_resource_info['resource_name']))
 
     if kek_vault_id:
         kek_vault_info = parse_resource_id(kek_vault_id)
@@ -565,8 +567,10 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
     # verify subscription mataches
     vmss_resource_info = parse_resource_id(vmss.id)
     if vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
-        _report_client_side_validation_error("VM scale-set's subscription doesn't match keyvault's subscription. Encryption might fail")
+        _report_client_side_validation_error(
+            "VM scale-set's subscription doesn't match keyvault's subscription. Encryption might fail")
 
     # verify region matches
     if key_vault.location.replace(' ', '').lower() != vmss.location.replace(' ', '').lower():
-        _report_client_side_validation_error("VM scale-set's region doesn't match keyvault's region. Encryption might fail")
+        _report_client_side_validation_error(
+            "VM scale-set's region doesn't match keyvault's region. Encryption might fail")
