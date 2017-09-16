@@ -29,12 +29,12 @@ vm_extension_info = {
 vmss_extension_info = {
     'Linux': {
         'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryptionForLinuxTest',  # vm_extension_info['Linux']['name'],
+        'name': vm_extension_info['Linux']['name'],
         'version': '1.1'
     },
     'Windows': {
         'publisher': 'Microsoft.Azure.Security',
-        'name': 'ADETest',  # vm_extension_info['Windows']['name'],
+        'name': vm_extension_info['Windows']['name'],
         'version': '2.1'
     }
 }
@@ -377,7 +377,7 @@ def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, forc
     if is_linux:
         volume_type = volume_type or 'DATA'
         if volume_type != 'DATA':
-            msg = 'None data disk encyrption is not yet supported for Linux VM scale-sets'
+            msg = 'OS disk encyrption is not yet supported for Linux VM scale sets'
             if force:
                 logger.warning(msg)
             else:
@@ -426,8 +426,7 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
                 logger.warning(message)
 
     # retrieve keyvault details
-    disk_encryption_keyvault_url = _get_key_vault_base_url(
-        (parse_resource_id(disk_encryption_keyvault))['name'])
+    disk_encryption_keyvault_url = _get_key_vault_base_url((parse_resource_id(disk_encryption_keyvault))['name'])
 
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
@@ -436,7 +435,7 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
             key_encryption_key = _get_keyvault_key_url(
                 (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
-    #  to avoid a bad server error, ensure the vault is right here
+    #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
 
     # 2. we are ready to provision/update the disk encryption extensions
@@ -466,20 +465,16 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
 
 
 def decrypt_vmss(resource_group_name, vmss_name, volume_type=None, force=False):
-    '''
-    (PREVIEW)Disable encryption on a virtual machine scale set
-    '''
     from azure.cli.core.profiles import get_sdk, ResourceType
     UpgradeMode, VirtualMachineScaleSetExtension = get_sdk(
-        ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension',
-        mod='models')
+        ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension', mod='models')
     compute_client = _compute_client_factory()
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     os_type = 'Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration else 'Windows'
     is_linux = _is_linux_vm(os_type)
     extension = vmss_extension_info[os_type]
 
-    # 1. be nice, figure out the default volume type and also verify VM will not be busted
+    # 1. be nice, figure out the default volume type
     volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
 
     # 2. update the disk encryption extension
@@ -504,7 +499,7 @@ def decrypt_vmss(resource_group_name, vmss_name, volume_type=None, force=False):
     ade_extension = [x for x in extensions if
                      x.type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
     if not ade_extension:
-        raise CLIError("VM scaleset '{}' was not encrypted".format(vmss_name))
+        raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
 
     index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
     vmss.virtual_machine_profile.extension_profile.extensions[index] = ext
@@ -568,9 +563,9 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
     vmss_resource_info = parse_resource_id(vmss.id)
     if vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
         _report_client_side_validation_error(
-            "VM scale-set's subscription doesn't match keyvault's subscription. Encryption might fail")
+            "VM scale set's subscription doesn't match keyvault's subscription. Encryption might fail")
 
     # verify region matches
     if key_vault.location.replace(' ', '').lower() != vmss.location.replace(' ', '').lower():
         _report_client_side_validation_error(
-            "VM scale-set's region doesn't match keyvault's region. Encryption might fail")
+            "VM scale set's region doesn't match keyvault's region. Encryption might fail")
