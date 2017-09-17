@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++++++++++
+2.0.10 (2017-09-11)
++++++++++++++++++++
 * `keyvault set-policy`: Fix issue where permissions were case sensitive.
 
 2.0.9 (2017-08-31)
