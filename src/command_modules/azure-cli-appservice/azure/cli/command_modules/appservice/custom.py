@@ -18,7 +18,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule)
+                                   RampUpRule, UnauthenticatedClientAction)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -28,7 +28,7 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import _generic_site_operation
+from ._params import _generic_site_operation, AUTH_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 
 
@@ -116,6 +116,44 @@ def _list_app(app_types, resource_group_name=None):
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
+
+
+def get_auth_settings(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_auth_settings', slot)
+
+
+def update_auth_settings(resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
+                         client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
+                         runtime_version=None, token_refresh_extension_hours=None,  # pylint: disable=unused-argument
+                         allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
+                         allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
+                         facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
+                         twitter_consumer_key=None, twitter_consumer_secret=None,  # pylint: disable=unused-argument
+                         google_client_id=None, google_client_secret=None,  # pylint: disable=unused-argument
+                         google_oauth_scopes=None, microsoft_account_client_id=None,  # pylint: disable=unused-argument
+                         microsoft_account_client_secret=None,  # pylint: disable=unused-argument
+                         microsoft_account_oauth_scopes=None, slot=None):  # pylint: disable=unused-argument
+    auth_settings = get_auth_settings(resource_group_name, name, slot)
+
+    if action == 'AllowAnonymous':
+        auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.allow_anonymous
+    elif action:
+        auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
+        auth_settings.default_provider = AUTH_TYPES[action]
+
+    import inspect
+    frame = inspect.currentframe()
+    bool_flags = ['enabled', 'token_store_enabled']
+    # note: getargvalues is used already in azure.cli.core.commands.
+    # and no simple functional replacement for this deprecating method for 3.5
+    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+
+    for arg in args[2:]:
+        print(arg, values[arg])
+        if values.get(arg, None):
+            setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+
+    return _generic_site_operation(resource_group_name, name, 'update_auth_settings', slot, auth_settings)
 
 
 def list_runtimes(linux=False):

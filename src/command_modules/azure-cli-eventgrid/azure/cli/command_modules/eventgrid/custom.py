@@ -5,9 +5,10 @@
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.command_modules.eventgrid.sdk.models import (
+from azure.mgmt.eventgrid.models import (
     EventSubscription,
-    EventSubscriptionDestination,
+    WebHookEventSubscriptionDestination,
+    EventHubEventSubscriptionDestination,
     EventSubscriptionFilter)
 
 from six.moves.urllib.parse import quote  # pylint: disable=import-error
@@ -18,6 +19,8 @@ RESOURCES_NAMESPACE = "Microsoft.Resources"
 RESOURCE_TYPE_SUBSCRIPTIONS = "subscriptions"
 RESOURCE_TYPE_RESOURCE_GROUPS = "resourcegroups"
 EVENTGRID_TOPICS = "topics"
+WEBHOOK_DESTINATION = "webhook"
+EVENTHUB_DESTINATION = "eventhub"
 
 
 def cli_topic_list(
@@ -343,7 +346,11 @@ def _event_subscription_create(
         is_subject_case_sensitive,
         labels):
     scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
-    destination = EventSubscriptionDestination(endpoint_type, endpoint)
+    if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
+        destination = WebHookEventSubscriptionDestination(endpoint)
+    elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
+        destination = EventHubEventSubscriptionDestination(endpoint)
+
     event_subscription_filter = EventSubscriptionFilter(
         subject_begins_with,
         subject_ends_with,

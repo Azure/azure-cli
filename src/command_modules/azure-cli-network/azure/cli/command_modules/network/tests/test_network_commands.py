@@ -14,7 +14,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint, live_only
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -574,6 +574,32 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('network public-ip list -g {}'.format(rg), checks=JMESPathCheck("length[?name == '{}']".format(public_ip_dns), None))
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkRouteFilterScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
+    def test_network_route_filter(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'filter': 'filter1'
+        }
+        self.cmd('network route-filter create -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter update -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter show -g {rg} -n {filter}'.format(**kwargs))
+        self.cmd('network route-filter list -g {rg}'.format(**kwargs))
+
+        self.cmd('network route-filter rule list-service-communities')
+        with self.assertRaises(CLIError):
+            self.cmd('network route-filter rule create -g {rg} --filter-name {filter} -n rule1 --communities 12076:5040 12076:5030 --access allow'.format(**kwargs))
+        with self.assertRaises(Exception):
+            self.cmd('network route-filter rule update -g {rg} --filter-name {filter} -n rule1 --set access=Deny'.format(**kwargs))
+        self.cmd('network route-filter rule show -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
+        self.cmd('network route-filter rule list -g {rg} --filter-name {filter}'.format(**kwargs))
+        self.cmd('network route-filter rule delete -g {rg} --filter-name {filter} -n rule1'.format(**kwargs))
+
+        self.cmd('network route-filter delete -g {rg} -n {filter}'.format(**kwargs))
+
+
 class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(NetworkExpressRouteScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_express_route')
@@ -644,6 +670,29 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network express-route delete --resource-group {} --name {}'.format(rg, circuit))
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {}'.format(rg), checks=NoneCheck())
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
+    def test_network_express_route_ipv6_peering(self, resource_group):
+
+        rg = resource_group
+        circuit = 'circuit1'
+
+        # Premium SKU required to create MicrosoftPeering settings
+        self.cmd('network express-route create -g {} -n {} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51 --sku-tier Premium'.format(rg, circuit))
+        self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit))
+        self.cmd('network express-route peering update -g {} --circuit-name {} -n MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2001:db00::/126 --secondary-peer-subnet 2002:db00::/126 --advertised-public-prefixes 2001:db00::/126 --customer-asn 100001 --routing-registry-name level3'.format(rg, circuit))
+        self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
+            JMESPathCheckV2('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
+            JMESPathCheckV2('microsoftPeeringConfig.customerAsn', 10000),
+            JMESPathCheckV2('microsoftPeeringConfig.routingRegistryName', 'LEVEL3'),
+            JMESPathCheckV2('ipv6PeeringConfig.microsoftPeeringConfig.advertisedPublicPrefixes[0]', '2001:db00::/126'),
+            JMESPathCheckV2('ipv6PeeringConfig.microsoftPeeringConfig.customerAsn', 100001),
+            JMESPathCheckV2('ipv6PeeringConfig.state', 'Enabled')
+        ])
 
 
 class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
@@ -1742,6 +1791,7 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
 class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
 

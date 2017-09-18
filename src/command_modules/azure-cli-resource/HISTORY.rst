@@ -2,12 +2,18 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* policy: support to show built-in policy definition
+
 2.0.14 (2017-09-11)
 +++++++++++++++++++
 * Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'. 
 * Allows passing in parameter values for 'policy assignment create'.
 * In all cases params can be provided either via json or file.
 * Incremented API version.
+* Support '--ids' parameter to refer to locks
+* Various lock command bug fixes
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
