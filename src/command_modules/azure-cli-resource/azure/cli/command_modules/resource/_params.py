@@ -29,7 +29,6 @@ resource_parent_type = CliArgumentType(required=False, options_list=('--parent',
                                        help="The parent path (Ex: 'resA/myA/resB/myB')")
 _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 register_cli_argument('resource', 'no_wait', no_wait_type)
-register_cli_argument('resource', 'resource_id', ignore_type)
 register_cli_argument('resource', 'resource_name', resource_name_type)
 register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
 register_cli_argument('resource', 'resource_provider_namespace', resource_namespace_type)
