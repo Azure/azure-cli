@@ -122,10 +122,11 @@ def get_auth_settings(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'get_auth_settings', slot)
 
 
-def update_auth_settings(resource_group_name, name, enabled=None, action=None, aad_client_id=None,
-                         token_store=None, runtime_version=None, token_refresh_extension_hours=None,
-                         allowed_external_redirect_urls=None, aad_client_secret=None, aad_allowed_token_audiences=None,
-                         aad_token_issuer_url=None, facebook_app_id=None, facebook_app_secret=None,
+# pylint: disable=unused-argument
+def update_auth_settings(resource_group_name, name, enabled=None, action=None, client_id=None,
+                         token_store_enabled=None, runtime_version=None, token_refresh_extension_hours=None,
+                         allowed_external_redirect_urls=None, client_secret=None, allowed_audiences=None,
+                         issuer=None, facebook_app_id=None, facebook_app_secret=None,
                          facebook_oauth_scopes=None, twitter_consumer_key=None, twitter_consumer_secret=None,
                          google_client_id=None, google_client_secret=None, google_oauth_scopes=None,
                          microsoft_account_client_id=None, microsoft_account_client_secret=None,
@@ -138,34 +139,20 @@ def update_auth_settings(resource_group_name, name, enabled=None, action=None, a
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
         auth_settings.default_provider = AUTH_TYPES[action]
 
-    auth_attr_map = {
-        'enabled': enabled == 'true',
-        'token_store_enabled': token_store == 'true',
-        'runtime_version': runtime_version,
-        'allowed_external_redirect_urls': allowed_external_redirect_urls,
-        'token_refresh_extension_hours': token_refresh_extension_hours,
-        'client_id': aad_client_id,
-        'client_secret': aad_client_secret,
-        'allowed_audiences': aad_allowed_token_audiences,
-        'issuer': aad_token_issuer_url,
-        'facebook_app_id': facebook_app_id,
-        'facebook_app_secret': facebook_app_secret,
-        'facebook_oauth_scopes': facebook_oauth_scopes,
-        'twitter_consumer_key': twitter_consumer_key,
-        'twitter_consumer_secret': twitter_consumer_secret,
-        'google_client_id': google_client_id,
-        'google_client_secret': google_client_secret,
-        'google_oauth_scopes': google_oauth_scopes,
-        'microsoft_account_client_id': microsoft_account_client_id,
-        'microsoft_account_client_secret': microsoft_account_client_secret,
-        'microsoft_account_oauth_scopes': microsoft_account_oauth_scopes
-    }
-    for attr, arg in auth_attr_map.items():
-        if arg is not None:
-            setattr(auth_settings, attr, arg)
+    import inspect
+    frame = inspect.currentframe()
+    bool_flags = ['enabled', 'token_store_enabled']
+    # note: getargvalues is used already in azure.cli.core.commands.
+    # and no simple functional replacement for this deprecating method for 3.5
+    args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
 
-    # filling in the rest
+    for arg in args[2:]:
+        print(arg, values[arg])
+        if values.get(arg, None):
+            setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+
     return _generic_site_operation(resource_group_name, name, 'update_auth_settings', slot, auth_settings)
+# pylint: enable=unused-argument
 
 
 def list_runtimes(linux=False):
