@@ -122,15 +122,17 @@ def get_auth_settings(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'get_auth_settings', slot)
 
 
-# pylint: disable=unused-argument
-def update_auth_settings(resource_group_name, name, enabled=None, action=None, client_id=None,
-                         token_store_enabled=None, runtime_version=None, token_refresh_extension_hours=None,
-                         allowed_external_redirect_urls=None, client_secret=None, allowed_audiences=None,
-                         issuer=None, facebook_app_id=None, facebook_app_secret=None,
-                         facebook_oauth_scopes=None, twitter_consumer_key=None, twitter_consumer_secret=None,
-                         google_client_id=None, google_client_secret=None, google_oauth_scopes=None,
-                         microsoft_account_client_id=None, microsoft_account_client_secret=None,
-                         microsoft_account_oauth_scopes=None, slot=None):
+def update_auth_settings(resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
+                         client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
+                         runtime_version=None, token_refresh_extension_hours=None,  # pylint: disable=unused-argument
+                         allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
+                         allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
+                         facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
+                         twitter_consumer_key=None, twitter_consumer_secret=None,  # pylint: disable=unused-argument
+                         google_client_id=None, google_client_secret=None,  # pylint: disable=unused-argument
+                         google_oauth_scopes=None, microsoft_account_client_id=None,  # pylint: disable=unused-argument
+                         microsoft_account_client_secret=None,  # pylint: disable=unused-argument
+                         microsoft_account_oauth_scopes=None, slot=None):  # pylint: disable=unused-argument
     auth_settings = get_auth_settings(resource_group_name, name, slot)
 
     if action == 'AllowAnonymous':
@@ -152,7 +154,6 @@ def update_auth_settings(resource_group_name, name, enabled=None, action=None, c
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(resource_group_name, name, 'update_auth_settings', slot, auth_settings)
-# pylint: enable=unused-argument
 
 
 def list_runtimes(linux=False):
