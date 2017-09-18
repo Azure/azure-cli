@@ -23,10 +23,10 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
-from azure.mgmt.resource.managedapplications.models import Appliance
+from azure.mgmt.resource.managedapplications.models import Application
 from azure.mgmt.resource.managedapplications.models import Plan
-from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
-from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
+from azure.mgmt.resource.managedapplications.models import ApplicationDefinition
+from azure.mgmt.resource.managedapplications.models import ApplicationProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
@@ -80,14 +80,14 @@ def create_resource_group(rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
-def create_appliance(resource_group_name,
-                     appliance_name, managedby_resource_group_id,
+def create_application(resource_group_name,
+                     application_name, managedby_resource_group_id,
                      location, kind, managedapp_definition_id=None,
                      plan_name=None, plan_publisher=None, plan_product=None,
                      plan_version=None, tags=None, parameters=None):
     """ Create a new managed application.
     :param str resource_group_name:the desired resource group name
-    :param str appliance_name:the managed application name
+    :param str application_name:the managed application name
     :param str kind:the managed application kind. can be marketplace or servicecatalog
     :param str plan_name:the managed application package plan name
     :param str plan_publisher:the managed application package plan publisher
@@ -96,7 +96,7 @@ def create_appliance(resource_group_name,
     :param str tags:tags in 'a=b c' format
     """
     racf = _resource_managedapps_client_factory()
-    appliance = Appliance(
+    application = Application(
         location=location,
         managed_resource_group_id=managedby_resource_group_id,
         kind=kind,
@@ -105,7 +105,7 @@ def create_appliance(resource_group_name,
 
     if kind.lower() == 'servicecatalog':
         if managedapp_definition_id:
-            appliance.appliance_definition_id = managedapp_definition_id
+            application.application_definition_id = managedapp_definition_id
         else:
             raise CLIError('--managedapp-definition-id is required if kind is ServiceCatalog')
     elif kind.lower() == 'marketplace':
@@ -114,79 +114,98 @@ def create_appliance(resource_group_name,
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
         else:
-            appliance.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
+            application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
 
-    applianceParameters = None
+    applicationParameters = None
 
     if parameters:
         if os.path.exists(parameters):
-            applianceParameters = get_file_json(parameters)
+            applicationParameters = get_file_json(parameters)
         else:
-            applianceParameters = shell_safe_json_parse(parameters)
+            applicationParameters = shell_safe_json_parse(parameters)
 
-    appliance.parameters = applianceParameters
+    application.parameters = applicationParameters
 
-    return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
+    return racf.applications.create_or_update(resource_group_name, application_name, application)
 
 
-def show_appliance(resource_group_name=None, appliance_name=None):
+def show_application(resource_group_name=None, application_name=None):
     """ Gets a managed application.
     :param str resource_group_name:the resource group name
-    :param str appliance_name:the managed application name
+    :param str application_name:the managed application name
     """
     racf = _resource_managedapps_client_factory()
-    return racf.appliances.get(resource_group_name, appliance_name)
+    return racf.applications.get(resource_group_name, application_name)
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None):
+def show_applicationdefinition(resource_group_name=None, application_definition_name=None):
     """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
-    :param str appliance_definition_name:the managed application definition name
+    :param str application_definition_name:the managed application definition name
     """
     racf = _resource_managedapps_client_factory()
-    return racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
+    return racf.application_definitions.get(resource_group_name, application_definition_name)
 
 
-def create_appliancedefinition(resource_group_name,
-                               appliance_definition_name, location,
-                               lock_level, package_file_uri, authorizations,
-                               description, display_name, tags=None):
+def create_applicationdefinition(resource_group_name,
+                               application_definition_name, location,
+                               lock_level, authorizations,
+                               description, display_name,
+                               package_file_uri=None, create_ui_def=None,
+                               main_template=None, tags=None):
     """ Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
-    :param str appliance_definition_name:the managed application definition name
+    :param str application_definition_name:the managed application definition name
     :param str description:the managed application definition description
     :param str display_name:the managed application definition display name
     :param str package_file_uri:the managed application definition package file uri
+    :param str create_ui_def:the managed application definition create ui definition
+    :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
+    if(package_file_uri is None and create_ui_def is None and
+            main_template is None):
+        raise CLIError('Please specify either --package-file-uri or \
+        --create-ui-def and --main-template')
+    elif(package_file_uri is not None):
+        if(create_ui_def is not None or main_template is not None):
+            raise CLIError('If --package-file-uri is specified, \
+            --create-ui-def and --main-template should not be specified')
+    elif(package_file_uri is None):
+        if(create_ui_def is None or main_template is None):
+            raise CLIError('If --package-file-uri is not specified, \
+            --create-ui-def and --main-template should have a valid value')
     racf = _resource_managedapps_client_factory()
     authorizations = authorizations or []
-    applianceAuthList = []
+    applicationAuthList = []
 
     for name_value in authorizations:
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
-        applianceAuth = ApplianceProviderAuthorization(principalId, roleDefinitionId)
-        applianceAuthList.append(applianceAuth)
+        applicationAuth = ApplicationProviderAuthorization(principalId, roleDefinitionId)
+        applicationAuthList.append(applicationAuth)
 
-    applianceDef = ApplianceDefinition(lock_level, applianceAuthList, package_file_uri)
-    applianceDef.display_name = display_name
-    applianceDef.description = description
-    applianceDef.location = location
-    applianceDef.tags = tags
+    applicationDef = ApplicationDefinition(lock_level, applicationAuthList, package_file_uri)
+    applicationDef.display_name = display_name
+    applicationDef.description = description
+    applicationDef.location = location
+    applicationDef.package_file_uri = package_file_uri
+    applicationDef.create_ui_definition = create_ui_def
+    applicationDef.main_template = main_template
+    applicationDef.tags = tags
 
-    return racf.appliance_definitions.create_or_update(resource_group_name,
-                                                       appliance_definition_name, applianceDef)
+    return racf.application_definitions.create_or_update(resource_group_name,
+                                                       application_definition_name, applicationDef)
 
 
-def list_appliances(resource_group_name=None):
+def list_applications(resource_group_name=None):
     racf = _resource_managedapps_client_factory()
 
     if resource_group_name:
-        appliances = racf.appliances.list_by_resource_group(resource_group_name)
+        applications = racf.applications.list_by_resource_group(resource_group_name)
     else:
-        appliances = racf.appliances.list_by_subscription()
-    return list(appliances)
+        applications = racf.applications.list_by_subscription()
+    return list(applications)
 
 
 def export_group_as_template(
