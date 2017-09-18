@@ -44,10 +44,10 @@ helps['monitor alert create'] = """
     examples:
         - name: Create a high CPU usage alert on a VM with no actions.
           text: >
-            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition "Percentage CPU > 90 avg 5m"
+            az alert rule create -n rule1 -g <RG> --target <VM ID> --condition "Percentage CPU > 90 avg 5m"
         - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
-            az vm alert rule create -n rule1 -g <RG> --target <VM ID> \\
+            az alert rule create -n rule1 -g <RG> --target <VM ID> \\
                 --condition "Percentage CPU > 90 avg 5m" \\
                 --action email bob@contoso.com ann@contoso.com --email-service-owners \\
                 --action webhook https://www.contoso.com/alerts?type=HighCPU \\
