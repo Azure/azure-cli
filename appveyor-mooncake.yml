@@ -41,7 +41,7 @@ build_script:
       }
       $fileCommitMap | ConvertTo-Json | Out-File "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\doc_commit_map.json"
   - cd doc\sphinx 
-  - make xmlwithlatest
+  - make xmlwithversion
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - git config --global user.email "%GIT_USER_EMAIL%"
