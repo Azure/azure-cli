@@ -284,7 +284,7 @@ if "%1" == "xmlwithlatest" (
 	if errorlevel 1 exit /b 1
 	echo.
 	echo.Build finished. The XML files are in %BUILDDIR%/xml/latest.
-	goto end
+	goto :eof
 )
 
 if "%1" == "xmlwithversion" (
