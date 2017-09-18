@@ -35,12 +35,12 @@ helps['webapp auth update'] = """
         az webapp auth update  -g groupname -n webappname --enabled true \\
           --action LoginWithAzureActiveDirectory \\
           --aad-allowed-token-audiences <site-url>/.auth/login/aad/callback \\
-          --aad-client-id <aad-appId> --aad-client-secret <aad-password> \\
-          --aad-token-issuer-url <issuer; see param help for instructions>
+          --aad-client-id aad_appId --aad-client-secret aad_password \\
+          --aad-token-issuer-url issuer_url
     - name: Allow Facebook authentication by setting FB-associated parameters and turning on public-profile and email scopes; allow anonymous users
       text: >
         az webapp auth update -g groupname -n webappname --action AllowAnonymous \\
-          --facebook-app-id <fb-appId> --facebook-app-secret <fb-secret> \\
+          --facebook-app-id my_fb_id --facebook-app-secret my_fb_secret \\
           --facebook-oauth-scopes public_profile email
 """
 

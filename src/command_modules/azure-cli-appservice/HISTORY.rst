@@ -1,11 +1,14 @@
 .. :changelog:
 
+unreleased
+----------
+* webapp: able to update and show authentication settings using "az webapp auth update/show"
+
 Release History
 ===============
 0.1.16 (2017-09-11)
 +++++++++++++++++++
 * webapp: able to create a webapp in a resource group other than the service plan's
-* webapp: able to update and show authentication settings using "az webapp auth update/show"
 
 0.1.15 (2017-08-31)
 +++++++++++++++++++
