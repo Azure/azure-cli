@@ -33,7 +33,7 @@ from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_cho
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 from msrestazure.azure_exceptions import CloudError
@@ -488,24 +488,24 @@ def _call_on_ids(resource_ids, function, api_version, cmd_str, *args):
     """
     results = []
     for rid in resource_ids:
-        id_dict = parse_resource_id(rid)
-        if len(id_dict) == 1:
+        if not is_valid_resource_id(rid):
             logger.error('az resource %s: error: argument --ids: invalid ResourceId value: \'%s\'' % (cmd_str, rid))
             return
-        results.append(function(
-            *args,
-            resource_group_name=id_dict['resource_group'],
-            resource_provider_namespace=id_dict['resource_namespace'],
-            parent_resource_path=id_dict['resource_parent'],
-            resource_type=id_dict['resource_type'],
-            resource_name=id_dict['resource_name'], api_version=api_version))
+        results.append(parse_resource_id(rid))
+
+    results = [function(*args,
+                        resource_group_name=id_dict['resource_group'],
+                        resource_provider_namespace=id_dict['resource_namespace'],
+                        parent_resource_path=id_dict['resource_parent'],
+                        resource_type=id_dict['resource_type'],
+                        resource_name=id_dict['resource_name'], api_version=api_version) for id_dict in results]
     return results[0] if len(results) == 1 else results
 
 
 def show_resource(resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None):
-    if resource_ids and isinstance(resource_ids, list):
+    if resource_ids:
         return _call_on_ids(resource_ids, show_resource, api_version, "show")
 
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -522,7 +522,7 @@ def delete_resource(resource_ids=None, resource_group_name=None,
     This is done with multiple passes through the given ids.
     A new pass is done as long as one resource was sucessfully deleted.
     """
-    if not resource_ids or not isinstance(resource_ids, list):
+    if not resource_ids:
         res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                              parent_resource_path, resource_type, resource_name, None, api_version)
         return res.delete()
@@ -530,17 +530,17 @@ def delete_resource(resource_ids=None, resource_group_name=None,
     from collections import deque
     parsed_ids = deque()
     for rid in resource_ids:
-        id_dict = parse_resource_id(rid)
-        if len(id_dict) == 1:
+        if not is_valid_resource_id(rid):
             logger.error('az resource delete: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
             return
-        parsed_ids.append(id_dict)
+        parsed_ids.append(parse_resource_id(rid))
 
     # queue stores operations so that they are run in parallel
     operations = deque()
     results = []
     deleted = True
     while parsed_ids and deleted:
+        logger.debug("Start new loop to delete resources.")
         deleted = False
         for _ in range(len(parsed_ids)):
             id_dict = parsed_ids.pop()
@@ -551,7 +551,7 @@ def delete_resource(resource_ids=None, resource_group_name=None,
                     parent_resource_path=id_dict['resource_parent'],
                     resource_type=id_dict['resource_type'],
                     resource_name=id_dict['resource_name'], api_version=api_version))
-                logger.debug("deleting", id_dict['resource_name'])
+                logger.debug("deleting", resource_id(**id_dict))
             except CloudError as e:
                 # request to delete failed, add parsed id dict back to queue
                 id_dict['exception'] = str(e)
@@ -561,8 +561,6 @@ def delete_resource(resource_ids=None, resource_group_name=None,
         while operations:
             results.append(operations.pop().result())
             deleted = True
-        if parsed_ids and deleted:
-            logger.debug("failed to delete all resources; starting next loop")
 
     if parsed_ids:
         for id_dict in parsed_ids:
@@ -574,7 +572,7 @@ def delete_resource(resource_ids=None, resource_group_name=None,
 def update_resource(parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
-    if resource_ids and isinstance(resource_ids, list):
+    if resource_ids:
         return _call_on_ids(resource_ids, update_resource, api_version, "update", parameters)
 
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -588,7 +586,7 @@ def tag_resource(tags, resource_ids=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
-    if resource_ids and isinstance(resource_ids, list):
+    if resource_ids:
         return _call_on_ids(resource_ids, tag_resource, api_version, "tag", tags)
 
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
