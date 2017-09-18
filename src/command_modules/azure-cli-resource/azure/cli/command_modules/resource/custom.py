@@ -151,7 +151,7 @@ def create_applicationdefinition(resource_group_name,
                                application_definition_name, location,
                                lock_level, authorizations,
                                description, display_name,
-                               package_file_uri=None, create_ui_def=None,
+                               package_file_uri=None, create_ui_definition=None,
                                main_template=None, tags=None):
     """ Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
@@ -159,22 +159,22 @@ def create_applicationdefinition(resource_group_name,
     :param str description:the managed application definition description
     :param str display_name:the managed application definition display name
     :param str package_file_uri:the managed application definition package file uri
-    :param str create_ui_def:the managed application definition create ui definition
+    :param str create_ui_definition:the managed application definition create ui definition
     :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
-    if(package_file_uri is None and create_ui_def is None and
-            main_template is None):
+    if(not package_file_uri and not create_ui_definition and
+            not main_template):
         raise CLIError('Please specify either --package-file-uri or \
-        --create-ui-def and --main-template')
-    elif(package_file_uri is not None):
-        if(create_ui_def is not None or main_template is not None):
+        --create-ui-definition and --main-template')
+    elif(not package_file_uri):
+        if(not create_ui_definition or not main_template):
             raise CLIError('If --package-file-uri is specified, \
-            --create-ui-def and --main-template should not be specified')
-    elif(package_file_uri is None):
-        if(create_ui_def is None or main_template is None):
+            --create-ui-definition and --main-template should not be specified')
+    elif(not package_file_uri):
+        if(not create_ui_definition or not main_template):
             raise CLIError('If --package-file-uri is not specified, \
-            --create-ui-def and --main-template should have a valid value')
+            --create-ui-definition and --main-template should have a valid value')
     racf = _resource_managedapps_client_factory()
     authorizations = authorizations or []
     applicationAuthList = []
@@ -190,7 +190,7 @@ def create_applicationdefinition(resource_group_name,
     applicationDef.description = description
     applicationDef.location = location
     applicationDef.package_file_uri = package_file_uri
-    applicationDef.create_ui_definition = create_ui_def
+    applicationDef.create_ui_definition = create_ui_definition
     applicationDef.main_template = main_template
     applicationDef.tags = tags
 
