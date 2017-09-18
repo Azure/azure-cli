@@ -29,6 +29,19 @@ helps['webapp auth show'] = """
 helps['webapp auth update'] = """
     type: command
     short-summary: Update the authentication settings for the webapp.
+    examples:
+    - name: Enable AAD by enabling authentication and setting AAD-associated parameters. Default provider is set to AAD. Must have created a AAD service principal beforehand.
+      text: >
+        az webapp auth update  -g groupname -n webappname --enabled true \\
+          --action LoginWithAzureActiveDirectory \\
+          --aad-allowed-token-audiences <site-url>/.auth/login/aad/callback \\
+          --aad-client-id <aad-appId> --aad-client-secret <aad-password> \\
+          --aad-token-issuer-url <issuer; see param help for instructions>
+    - name: Allow Facebook authentication by setting FB-associated parameters and turning on public-profile and email scopes; allow anonymous users
+      text: >
+        az webapp auth update -g groupname -n webappname --action AllowAnonymous \\
+          --facebook-app-id <fb-appId> --facebook-app-secret <fb-secret> \\
+          --facebook-oauth-scopes public_profile email
 """
 
 helps['webapp config'] = """

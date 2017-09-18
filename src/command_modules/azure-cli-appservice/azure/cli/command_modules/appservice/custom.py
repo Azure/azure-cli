@@ -161,7 +161,7 @@ def update_auth_settings(resource_group_name, name, enabled=None, action=None, a
         'microsoft_account_oauth_scopes': microsoft_account_oauth_scopes
     }
     for attr, arg in auth_attr_map.items():
-        if arg:
+        if arg is not None:
             setattr(auth_settings, attr, arg)
 
     # filling in the rest
