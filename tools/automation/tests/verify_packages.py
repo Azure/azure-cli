@@ -119,6 +119,7 @@ def verify_packages(built_packages_dir):
     p = multiprocessing.Pool(multiprocessing.cpu_count())
     for i, res in enumerate(p.imap_unordered(run_help_on_command_without_err, all_commands, 10), 1):
         sys.stderr.write('{}/{}'.format(i, len(all_commands)))
+        sys.stderr.flush()
         command_results.append(res)
 
     p.close()
