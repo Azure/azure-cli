@@ -3,6 +3,7 @@
 Release History
 ===============
 (unreleased)
++++++++++++++++++++
 * `vm run-command`: support to run commands on remote VMs
 
 2.0.14 (2017-09-11)
