@@ -732,5 +732,63 @@ class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
         self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
 
 
+class WebappAuthenticationTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(WebappAuthenticationTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-authentication')
+        self.webapp_name = 'webapp-authentication-test'
+
+    def test_webapp_authentication(self):
+        self.execute()
+
+    def set_up(self):
+        super(WebappAuthenticationTest, self).set_up()
+        plan_name = 'webapp-authentication-plan'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan_name))
+
+    def body(self):
+        # testing for auth show in newly created webapp
+        # verify initial fields
+        result = self.cmd('webapp auth show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+            JMESPathCheck('unauthenticatedClientAction', None),
+            JMESPathCheck('defaultProvider', None),
+            JMESPathCheck('enabled', False),
+            JMESPathCheck('tokenStoreEnabled', None),
+            JMESPathCheck('runtimeVersion', None),
+            JMESPathCheck('allowedExternalRedirectUrls', None),
+            JMESPathCheck('tokenRefreshExtensionHours', None),
+            JMESPathCheck('clientId', None),
+            JMESPathCheck('clientSecret', None),
+            JMESPathCheck('allowedAudiences', None),
+            JMESPathCheck('issuer', None),
+            JMESPathCheck('facebookAppId', None),
+            JMESPathCheck('facebookAppSecret', None),
+            JMESPathCheck('facebookOauthScopes', None)
+        ])
+        # update and verify
+        result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
+                          '--token-store true --runtime-version v5.0 --token-refresh-extension-hours 7.2 '
+                          '--aad-client-id aad_client_id --aad-client-secret aad_secret '
+                          '--aad-allowed-token-audiences audience1 --aad-token-issuer-url issuer_url '
+                          '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
+                          '--facebook-oauth-scopes public_profile email'
+                          .format(self.resource_group, self.webapp_name), checks=[
+                              JMESPathCheck('unauthenticatedClientAction', 'RedirectToLoginPage'),
+                              JMESPathCheck('defaultProvider', 'Facebook'),
+                              JMESPathCheck('enabled', True),
+                              JMESPathCheck('tokenStoreEnabled', True),
+                              JMESPathCheck('runtimeVersion', 'v5.0'),
+                              JMESPathCheck('tokenRefreshExtensionHours', 7.2),
+                              JMESPathCheck('clientId', 'aad_client_id'),
+                              JMESPathCheck('clientSecret', 'aad_secret'),
+                              JMESPathCheck('issuer', 'issuer_url'),
+                              JMESPathCheck('facebookAppId', 'facebook_id'),
+                              JMESPathCheck('facebookAppSecret', 'facebook_secret')])
+
+        self.assertIn('audience1', result['allowedAudiences'])
+        self.assertIn('email', result['facebookOauthScopes'])
+        self.assertIn('public_profile', result['facebookOauthScopes'])
+
+
 if __name__ == '__main__':
     unittest.main()
