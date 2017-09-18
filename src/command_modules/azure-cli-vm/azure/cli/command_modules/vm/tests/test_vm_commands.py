@@ -2169,6 +2169,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world'.format(resource_group, vm))
 
 
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMSSDiskEncryptionTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2euap')  # the feature is only available in canary, should rollout to public soon
     def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
