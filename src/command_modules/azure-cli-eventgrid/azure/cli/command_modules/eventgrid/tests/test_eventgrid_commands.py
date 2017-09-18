@@ -26,7 +26,7 @@ class EventGridTests(ScenarioTest):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
         self.cmd(
             'az eventgrid topic create --name {} --resource-group {} --location {}'
-            .format(topic_name, resource_group, 'eastus2euap'))
+            .format(topic_name, resource_group, 'westus2'))
         self.cmd('az eventgrid topic show --name {} --resource-group {}'.format(topic_name, resource_group), checks=[
             JMESPathCheck('type', 'Microsoft.EventGrid/topics'),
             JMESPathCheck('name', topic_name),
@@ -73,10 +73,11 @@ class EventGridTests(ScenarioTest):
         ])
         self.cmd('az eventgrid event-subscription delete --resource-group {} --name {}'.format(resource_group, event_subscription_name))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_create_event_subscriptions_to_resource(self, resource_group, storage_account):
+    def test_create_event_subscriptions_to_resource(self):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
+
+        resource_group = 'rajagrid'
+        storage_account = 'rajagridstorageblobonly'
 
         self.cmd('az eventgrid resource event-subscription create -g {} --provider-namespace Microsoft.Storage --resource-type storageAccounts --resource-name {} --name {} --endpoint https://requestb.in/18zmdhv1'.format(resource_group, storage_account, event_subscription_name), checks=[
             JMESPathCheck('type', 'Microsoft.EventGrid/eventSubscriptions'),

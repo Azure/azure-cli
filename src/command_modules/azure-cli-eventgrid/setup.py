@@ -32,7 +32,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'six'
+    'six',
+    'azure-mgmt-eventgrid==0.2.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -54,10 +55,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.eventgrid',
-        'azure.cli.command_modules.eventgrid.sdk',
-        'azure.cli.command_modules.eventgrid.sdk.models',
-        'azure.cli.command_modules.eventgrid.sdk.operations'
+        'azure.cli.command_modules.eventgrid'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

@@ -6,7 +6,7 @@
 
 def cf_eventgrid(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.eventgrid.sdk import EventGridManagementClient
+    from azure.mgmt.eventgrid import EventGridManagementClient
     return get_mgmt_service_client(EventGridManagementClient)
 
 
