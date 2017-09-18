@@ -689,7 +689,7 @@ class ManagedAppScenarioTest(ScenarioTest):
         create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
         app = self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
             JCheck('name', managedapp_name),
-            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
             JCheck('managedResourceGroupId', managedrg),
             JCheck('applianceDefinitionId', managedappdef['id'])
@@ -704,7 +704,7 @@ class ManagedAppScenarioTest(ScenarioTest):
         show_cmd = 'managedapp show --ids {}'
         self.cmd(show_cmd.format(app['id']), checks=[
             JCheck('name', managedapp_name),
-            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
             JCheck('managedResourceGroupId', managedrg),
             JCheck('applianceDefinitionId', managedappdef['id'])
