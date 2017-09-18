@@ -15,8 +15,8 @@ from azure.cli.core.commands.validators import DefaultStr
 
 logger = get_az_logger(__name__)
 
-_CLOUD_CONSOLE_ERR_TEMPLATE = ("Azure Cloud Shell relies on the user account it was initially launched under, "
-                               "as a result 'az {}' is disabled.")
+_CLOUD_CONSOLE_WARNING_TEMPLATE = ("Azure Cloud Shell automatically authenticates the user account it was initially"
+                                   " launched under, as a result 'az %s' is disabled.")
 
 
 def load_subscriptions(all_clouds=False, refresh=False):
@@ -106,8 +106,8 @@ def login(username=None, password=None, service_principal=None, tenant=None,
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
         if console_tokens:
             return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
-        else:
-            raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('login'))
+        logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'login')
+        return
 
     if msi:
         return profile.find_subscriptions_in_vm_with_msi(msi_port)
@@ -150,7 +150,8 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 def logout(username=None):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
-        raise CLIError(_CLOUD_CONSOLE_ERR_TEMPLATE.format('logout'))
+        logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'logout')
+        return
 
     profile = Profile()
     if not username:

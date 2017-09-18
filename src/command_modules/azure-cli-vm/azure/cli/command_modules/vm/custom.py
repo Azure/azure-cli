@@ -2222,3 +2222,28 @@ def list_skus(location=None):
     if location:
         result = [r for r in result if _match_location(location, r.locations)]
     return result
+
+
+def run_command_invoke(resource_group_name, vm_name, command_id, scripts=None, parameters=None):
+    RunCommandInput, RunCommandInputParameter = get_sdk(ResourceType.MGMT_COMPUTE, 'RunCommandInput',
+                                                        'RunCommandInputParameter', mod='models')
+
+    parameters = parameters or []
+    run_command_input_parameters = []
+    auto_arg_name_num = 0
+    for p in parameters:
+        if '=' in p:
+            n, v = p.split('=', 1)
+        else:
+            # RunCommand API requires named arguments, which doesn't make lots of sense for bash scripts
+            # using positional arguments, so here we provide names just to get API happy
+            # note, we don't handle mixing styles, but will consolidate by GA when API is settled
+            auto_arg_name_num += 1
+            n = 'arg{}'.format(auto_arg_name_num)
+            v = p
+        run_command_input_parameters.append(RunCommandInputParameter(n, v))
+
+    client = _compute_client_factory()
+    return client.virtual_machines.run_command(resource_group_name, vm_name,
+                                               RunCommandInput(command_id=command_id, script=scripts,
+                                                               parameters=run_command_input_parameters))

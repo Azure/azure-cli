@@ -278,6 +278,15 @@ if "%1" == "dummy" (
 	goto end
 )
 
+if "%1" == "xmlwithlatest" (
+	az cloud update --profile latest
+	%SPHINXBUILD% -E -b xml %ALLSPHINXOPTS% %BUILDDIR%/xml/latest
+	if errorlevel 1 exit /b 1
+	echo.
+	echo.Build finished. The XML files are in %BUILDDIR%/xml/latest.
+	goto :eof
+)
+
 if "%1" == "xmlwithversion" (
 	call :genxmlwithversion
 	if errorlevel 1 exit /b 1

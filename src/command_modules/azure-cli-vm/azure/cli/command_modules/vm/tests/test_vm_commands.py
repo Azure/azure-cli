@@ -2200,6 +2200,28 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group, resource_group_location, disk_name, zones]).issubset(table_output))
 
 
+class VMRunCommandScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_run_command_e2e(self, resource_group, resource_group_location):
+        vm = 'test-run-command-vm'
+        self.cmd('vm run-command list -l ' + resource_group_location)
+        self.cmd('vm run-command show --command-id RunShellScript -l ' + resource_group_location)
+        public_ip = self.cmd('vm create -g {} -n {} --image ubuntults --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm)).get_output_in_json()['publicIpAddress']
+
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm))
+        self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"'.format(resource_group, vm))
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + public_ip)
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+    @ResourceGroupPreparer()
+    def test_run_command_with_parameters(self, resource_group):
+        vm = 'test-run-command-vm2'
+        self.cmd('vm create -g {} -n {} --image debian --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm))
+        self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world'.format(resource_group, vm))
+
+
 # endregion
 
 
