@@ -33,7 +33,8 @@ from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_cho
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id, resource_id
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
+from azure.cli.core.commands.arm import resource_id as resource_dict_to_id
 
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 from msrestazure.azure_exceptions import CloudError
@@ -551,7 +552,7 @@ def delete_resource(resource_ids=None, resource_group_name=None,
                     parent_resource_path=id_dict['resource_parent'],
                     resource_type=id_dict['resource_type'],
                     resource_name=id_dict['resource_name'], api_version=api_version))
-                logger.debug("deleting", resource_id(**id_dict))
+                logger.debug("deleting", resource_dict_to_id(**id_dict))
             except CloudError as e:
                 # request to delete failed, add parsed id dict back to queue
                 id_dict['exception'] = str(e)
@@ -748,8 +749,6 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
     """
-    from azure.cli.core.commands.arm import resource_id
-
     # verify all resource ids are valid and under the same group
     resources = []
     for i in ids:
@@ -764,7 +763,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
         raise CLIError('All resources should be under the same group')
 
     rcf = _resource_client_factory()
-    target = resource_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
+    target = resource_dict_to_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
                          resource_group=destination_group)
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
@@ -899,7 +898,6 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
 
 
 def get_policy_definition(policy_definition_name):
-    from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
     try:
         return policy_client.policy_definitions.get(policy_definition_name)
