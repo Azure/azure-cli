@@ -13,7 +13,7 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
-from azure.cli.core.commands.validators import DefaultStr
+from azure.cli.core.commands.validators import DefaultStr, DefaultInt
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -853,6 +853,22 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 # endregion
 
+# region Application Security Group commands
+
+def create_asg(client, resource_group_name, application_security_group_name, location=None, tags=None):
+    ApplicationSecurityGroup = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationSecurityGroup', mod='models')
+    asg = ApplicationSecurityGroup(location=location, tags=tags)
+    return client.create_or_update(resource_group_name, application_security_group_name, asg)
+
+
+def update_asg(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+# endregion
+
+
 # region Load Balancer subresource commands
 
 def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
@@ -1144,7 +1160,8 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
-               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None):
+               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
+               application_security_groups=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
 
@@ -1173,6 +1190,8 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     }
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         ip_config_args['private_ip_address_version'] = private_ip_address_version
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        ip_config_args['application_security_groups'] = application_security_groups
     ip_config = NetworkInterfaceIPConfiguration(**ip_config_args)
 
     if public_ip_address:
@@ -1213,7 +1232,8 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          private_ip_address=None,
                          private_ip_address_allocation=IPAllocationMethod.dynamic.value,
                          private_ip_address_version=None,
-                         make_primary=False):
+                         make_primary=False,
+                         application_security_groups=None):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
@@ -1238,6 +1258,8 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         new_config_args['private_ip_address_version'] = private_ip_address_version
         new_config_args['primary'] = make_primary
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        new_config_args['application_security_groups'] = application_security_groups
     new_config = NetworkInterfaceIPConfiguration(**new_config_args)
 
     _upsert(nic, 'ip_configurations', new_config, 'name')
@@ -1251,7 +1273,8 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
                       private_ip_address=None, private_ip_address_allocation=None,
-                      private_ip_address_version='ipv4', make_primary=False):
+                      private_ip_address_version='ipv4', make_primary=False,
+                      application_security_groups=None):
     if make_primary:
         for config in parent.ip_configurations:
             config.primary = False
@@ -1287,6 +1310,11 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,
         instance.load_balancer_inbound_nat_rules = None
     elif load_balancer_inbound_nat_rule_ids is not None:
         instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
+
+    if application_security_groups == ['']:
+        instance.application_security_groups = None
+    elif application_security_groups:
+        instance.application_security_groups = application_security_groups
 
     return parent
 
@@ -1377,12 +1405,21 @@ def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name)
         kwargs[plural_name] = None
 
 
+def _handle_asg_property(kwargs, key, asgs):
+    prefix = key.split('_', 1)[0] + '_'
+    if asgs:
+        kwargs[key] = asgs
+        if kwargs[prefix + 'address_prefix'].is_default:
+            kwargs[prefix + 'address_prefix'] = ''
+
+
 def create_nsg_rule_2017_06_01(resource_group_name, network_security_group_name, security_rule_name,
                                priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
                                access=SecurityRuleAccess.allow.value,
                                direction=SecurityRuleDirection.inbound.value,
-                               source_port_ranges='*', source_address_prefixes='*',
-                               destination_port_ranges=80, destination_address_prefixes='*'):
+                               source_port_ranges=DefaultStr('*'), source_address_prefixes=DefaultStr('*'),
+                               destination_port_ranges=DefaultInt(80), destination_address_prefixes=DefaultStr('*'),
+                               source_asgs=None, destination_asgs=None):
     kwargs = {
         'protocol': protocol,
         'direction': direction,
@@ -1403,6 +1440,10 @@ def create_nsg_rule_2017_06_01(resource_group_name, network_security_group_name,
     # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
     kwargs['source_address_prefix'] = kwargs['source_address_prefix'] or ''
     kwargs['destination_address_prefix'] = kwargs['destination_address_prefix'] or ''
+
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        _handle_asg_property(kwargs, 'source_application_security_groups', source_asgs)
+        _handle_asg_property(kwargs, 'destination_application_security_groups', destination_asgs)
 
     settings = SecurityRule(**kwargs)
     ncf = _network_client_factory()
@@ -1448,7 +1489,8 @@ def _update_singular_or_plural_property(instance, val, singular_name, plural_nam
 
 def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=None,
                                destination_address_prefixes=None, access=None, direction=None, description=None,
-                               source_port_ranges=None, destination_port_ranges=None, priority=None):
+                               source_port_ranges=None, destination_port_ranges=None, priority=None,
+                               source_asgs=None, destination_asgs=None):
     # No client validation as server side returns pretty good errors
     instance.protocol = protocol if protocol is not None else instance.protocol
     instance.access = access if access is not None else instance.access
@@ -1468,6 +1510,16 @@ def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=
     # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
     instance.source_address_prefix = instance.source_address_prefix or ''
     instance.destination_address_prefix = instance.destination_address_prefix or ''
+
+    if source_asgs == ['']:
+        instance.source_application_security_groups = None
+    elif source_asgs:
+        instance.source_application_security_groups = source_asgs
+
+    if destination_asgs == ['']:
+        instance.destination_application_security_groups = None
+    elif destination_asgs:
+        instance.destination_application_security_groups = destination_asgs
 
     return instance
 
@@ -1587,7 +1639,7 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 # pylint: disable=too-many-locals
 def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None):
+                location=None, tags=None, vm_protection=None, ddos_protection=None):
     client = _network_client_factory().virtual_networks
     tags = tags or {}
     vnet = VirtualNetwork(
@@ -1597,10 +1649,13 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
             vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
     if subnet_name:
         vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        vnet.enable_ddos_protection = ddos_protection
+        vnet.enable_vm_protection = vm_protection
     return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(instance, vnet_prefixes=None, dns_servers=None):
+def update_vnet(instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     if vnet_prefixes:
@@ -1609,6 +1664,10 @@ def update_vnet(instance, vnet_prefixes=None, dns_servers=None):
         instance.dhcp_options.dns_servers = None
     elif dns_servers:
         instance.dhcp_options.dns_servers = dns_servers
+    if ddos_protection is not None:
+        instance.enable_ddos_protection = ddos_protection
+    if vm_protection is not None:
+        instance.enable_vm_protection = vm_protection
     return instance
 
 
@@ -2578,17 +2637,36 @@ def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_t
 # region DNS Commands
 
 def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
-                    if_none_match=False):
-    kwargs = {
-        'resource_group_name': resource_group_name,
-        'zone_name': zone_name,
-        'parameters': Zone(location=location, tags=tags)
-    }
+                    if_none_match=False, zone_type=None, resolution_vnets=None, registration_vnets=None):
+    zone = Zone(location=location, tags=tags)
 
-    if if_none_match:
-        kwargs['if_none_match'] = '*'
+    if hasattr(zone, 'zone_type'):
+        zone.zone_type = zone_type
+        zone.registration_virtual_networks = registration_vnets
+        zone.resolution_virtual_networks = resolution_vnets
 
-    return client.create_or_update(**kwargs)
+    return client.create_or_update(resource_group_name, zone_name, zone, if_none_match='*' if if_none_match else None)
+
+
+def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
+
+    if tags is not None:
+        instance.tags = tags
+
+    if zone_type:
+        instance.zone_type = zone_type
+
+    if resolution_vnets == ['']:
+        instance.resolution_virtual_networks = None
+    elif resolution_vnets:
+        instance.resolution_virtual_networks = resolution_vnets
+
+    if registration_vnets == ['']:
+        instance.registration_virtual_networks = None
+    elif registration_vnets:
+        instance.registration_virtual_networks = registration_vnets
+
+    return instance
 
 
 def list_dns_zones(resource_group_name=None):
