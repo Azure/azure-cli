@@ -16,10 +16,10 @@ from azure.cli.core.util import get_json_object
 # PARAMETER REGISTRATIONS
 
 register_cli_argument('sf cluster list', 'resource_group_name', resource_group_name_type,
-                      id_part=None, help='The resouce group name')
+                      id_part=None, help='The resource group name')
 
 register_cli_argument('sf', 'resource_group_name', resource_group_name_type,
-                      id_part=None, help='The resouce group name')
+                      id_part=None, help='The resource group name')
 register_cli_argument('sf', 'cluster_name', options_list=('--name', '--cluster-name', '-n'),
                       help='Specify the name of the cluster, if not given it will be same as resource group name')
 register_cli_argument('sf', 'location',

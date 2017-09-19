@@ -1435,7 +1435,7 @@ def _download_secret(vault_base_url, secret_name, pem_path, pfx_path, encoding=N
     client = _get_keyVault_not_arm_client()
     secret = client.get_secret(vault_base_url, secret_name, secret_version)
     secret_value = secret.value
-    if pem_path is not None:
+    if pem_path:
         try:
             import base64
             decoded = base64.b64decode(secret_value)
@@ -1456,7 +1456,7 @@ def _download_secret(vault_base_url, secret_name, pem_path, pfx_path, encoding=N
                 os.remove(pem_path)
             raise ex
 
-    if pfx_path is not None:
+    if pfx_path:
         try:
             import base64
             decoded = base64.b64decode(secret_value)
