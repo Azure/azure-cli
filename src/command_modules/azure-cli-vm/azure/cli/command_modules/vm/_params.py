@@ -294,9 +294,11 @@ with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
     c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
     c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')
 
-register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
-register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
-register_cli_argument('vm encryption', 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
+for scope in ['vm encryption', 'vmss encryption']:
+    register_cli_argument(scope, 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
+    register_cli_argument(scope, 'force', action='store_true', help='continue by ignoring client side validation errors')
+    register_cli_argument(scope, 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
+register_cli_argument('vmss encryption', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
