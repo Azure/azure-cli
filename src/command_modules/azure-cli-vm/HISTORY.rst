@@ -2,8 +2,11 @@
 
 Release History
 ===============
-(unreleased)
+
+unreleased
 +++++++++++++++++++
+* `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
+* `vm create`: Added `--asgs` support.
 * `vm run-command`: support to run commands on remote VMs
 * `vmss encryption`: (PREVIEW) support vmss disk encryptions
 * `vm perform-maintenance`: support to perform maintenance on a vm

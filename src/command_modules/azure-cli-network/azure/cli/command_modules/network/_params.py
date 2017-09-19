@@ -36,7 +36,8 @@ from azure.cli.command_modules.network._validators import \
      validate_address_pool_name_or_id, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-     get_network_watcher_from_vm, get_network_watcher_from_location)
+     get_network_watcher_from_vm, get_network_watcher_from_location,
+     get_asg_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
@@ -337,6 +338,10 @@ with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
 for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
     register_cli_argument('network application-gateway url-path-map rule', item, arg_group=None)
 
+# ApplicationSecurityGroups
+register_cli_argument('network asg', 'application_security_group_name', name_arg_type, id_part='name')
+register_cli_argument('network asg', 'location', location_type, validator=get_default_location_from_resource_group)
+
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
 register_cli_argument('network express-route', 'sku_family', help='Chosen SKU family of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuFamily))
@@ -414,6 +419,10 @@ for item in ['create', 'ip-config update', 'ip-config create']:
     register_cli_argument('network nic {}'.format(item), 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
     register_cli_argument('network nic {}'.format(item), 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
 
+    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
+        c.register_cli_argument('network nic {}'.format(item), 'application_security_groups', help='Space separated list of application security groups.', nargs='+', validator=get_asg_validator('application_security_groups'))
+
+
 register_cli_argument('network nic ip-config', 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
 register_cli_argument('network nic ip-config', 'ip_config_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
 register_cli_argument('network nic ip-config', 'resource_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
@@ -463,6 +472,10 @@ for item in ['create', 'update']:
         register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
         register_cli_argument('network nsg rule {}'.format(item), 'destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
         register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+
+    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
+        c.register_cli_argument('network nsg rule {}'.format(item), 'source_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Source', validator=get_asg_validator('source_asgs'))
+        c.register_cli_argument('network nsg rule {}'.format(item), 'destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Destination', validator=get_asg_validator('destination_asgs'))
 
 register_cli_argument('network nsg rule create', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
 
@@ -518,6 +531,10 @@ register_cli_argument('network route-filter rule create', 'location', location_t
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
 register_cli_argument('network vnet', 'vnet_prefixes', nargs='+', help='Space separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
 register_cli_argument('network vnet', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP')
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
+    c.register_cli_argument('network vnet', 'ddos_protection', help='Enable DDoS protection for protected resources in the VNet.', **three_state_flag())
+    c.register_cli_argument('network vnet', 'vm_protection', help='Enable VM protection for all subnets in the VNet.', **three_state_flag())
 
 register_cli_argument('network vnet create', 'location', location_type)
 register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.', validator=process_vnet_create_namespace)
@@ -723,6 +740,16 @@ register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in sp
 
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
 register_cli_argument('network dns zone', 'location', ignore_type)
+
+# TODO: remove when feature ready
+register_cli_argument('network dns zone', 'zone_type', ignore_type)
+register_cli_argument('network dns zone', 'registration_vnets', ignore_type)
+register_cli_argument('network dns zone', 'resolution_vnets', ignore_type)
+
+# TODO: Uncomment when feature is ready
+# register_cli_argument('network dns zone', 'zone_type', help='Type of DNS zone to create.', **enum_choice_list(ZoneType))
+# register_cli_argument('network dns zone', 'registration_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
+# register_cli_argument('network dns zone', 'resolution_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
 
 register_cli_argument('network dns zone import', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
 register_cli_argument('network dns zone export', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')

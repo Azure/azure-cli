@@ -20,6 +20,10 @@ def cf_application_gateways(_):
     return _network_client_factory().application_gateways
 
 
+def cf_application_security_groups(_):
+    return _network_client_factory().application_security_groups
+
+
 def cf_express_route_circuit_authorizations(_):
     return _network_client_factory().express_route_circuit_authorizations
 
