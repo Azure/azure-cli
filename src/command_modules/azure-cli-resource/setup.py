@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-resource==1.1.0',
+    'azure-mgmt-resource==1.2.0rc1',
     'azure-cli-core',
     'azure-mgmt-authorization==0.30.0'
 ]
