@@ -16,8 +16,8 @@ def get_target_resource_validator(dest, required):
         res_type = namespace.resource_type
 
         usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
-                               '--{0}-namespace NAMESPACE [--{0}-parent PARENT] '
-                               '[--{0}-type TYPE]'.format(dest))
+                               '--{0}-type TYPE [--{0}-parent PARENT] '
+                               '[--{0}-namespace NAMESPACE]'.format(dest))
         if not name_or_id and required:
             raise usage_error
         elif name_or_id:
