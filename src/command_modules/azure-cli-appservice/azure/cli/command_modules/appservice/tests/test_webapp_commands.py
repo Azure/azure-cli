@@ -152,6 +152,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheckV2('name', 'webInOtherRG')
         ])
 
+
 class AppServicePlanSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_retain_plan(self, resource_group):
