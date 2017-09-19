@@ -82,7 +82,7 @@ def create_resource_group(rg_name, location, tags=None):
 
 def create_application(resource_group_name,
                        application_name, managedby_resource_group_id,
-                       location, kind, managedapp_definition_id=None,
+                       kind, managedapp_definition_id=None, location = None,
                        plan_name=None, plan_publisher=None, plan_product=None,
                        plan_version=None, tags=None, parameters=None):
     """ Create a new managed application.
@@ -96,6 +96,9 @@ def create_application(resource_group_name,
     :param str tags:tags in 'a=b c' format
     """
     racf = _resource_managedapps_client_factory()
+    rcf = _resource_client_factory()
+    if not location:
+        location = rcf.resource_groups.get(resource_group_name).location
     application = Application(
         location=location,
         managed_resource_group_id=managedby_resource_group_id,
@@ -148,11 +151,11 @@ def show_applicationdefinition(resource_group_name=None, application_definition_
 
 
 def create_applicationdefinition(resource_group_name,
-                                 application_definition_name, location,
+                                 application_definition_name,
                                  lock_level, authorizations,
                                  description, display_name,
                                  package_file_uri=None, create_ui_definition=None,
-                                 main_template=None, tags=None):
+                                 main_template=None, location=None, tags=None):
     """ Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
     :param str application_definition_name:the managed application definition name
@@ -167,7 +170,7 @@ def create_applicationdefinition(resource_group_name,
        not main_template):
         raise CLIError('Please specify either --package-file-uri or \
         --create-ui-definition and --main-template')
-    elif not package_file_uri:
+    elif package_file_uri:
         if not create_ui_definition or not main_template:
             raise CLIError('If --package-file-uri is specified, \
             --create-ui-definition and --main-template should not be specified')
@@ -176,6 +179,9 @@ def create_applicationdefinition(resource_group_name,
             raise CLIError('If --package-file-uri is not specified, \
             --create-ui-definition and --main-template should have a valid value')
     racf = _resource_managedapps_client_factory()
+    rcf = _resource_client_factory()
+    if not location:
+        location = rcf.resource_groups.get(resource_group_name).location
     authorizations = authorizations or []
     applicationAuthList = []
 
