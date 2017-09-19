@@ -691,8 +691,7 @@ class ManagedAppScenarioTest(ScenarioTest):
             JCheck('name', managedapp_name),
             JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
-            JCheck('managedResourceGroupId', managedrg),
-            JCheck('applianceDefinitionId', managedappdef['id'])
+            JCheck('managedResourceGroupId', managedrg)
         ]).get_output_in_json()
 
         # list and show
@@ -706,8 +705,7 @@ class ManagedAppScenarioTest(ScenarioTest):
             JCheck('name', managedapp_name),
             JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
-            JCheck('managedResourceGroupId', managedrg),
-            JCheck('applianceDefinitionId', managedappdef['id'])
+            JCheck('managedResourceGroupId', managedrg)
         ])
 
         # delete
