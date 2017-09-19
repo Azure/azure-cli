@@ -9,9 +9,18 @@ from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
-from azure.mgmt.web.models import DatabaseType, ConnectionStringType
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
 from ._client_factory import web_client_factory
 from ._validators import validate_existing_function_app, validate_existing_web_app
+
+
+AUTH_TYPES = {
+    'AllowAnonymous': 'na',
+    'LoginWithAzureActiveDirectory': BuiltInAuthenticationProvider.azure_active_directory,
+    'LoginWithFacebook': BuiltInAuthenticationProvider.facebook,
+    'LoginWithGoogle': BuiltInAuthenticationProvider.google,
+    'LoginWithMicrosoftAccount': BuiltInAuthenticationProvider.microsoft_account,
+    'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
@@ -182,6 +191,29 @@ register_cli_argument('webapp config backup restore', 'backup_name', help='Name 
 register_cli_argument('webapp config backup restore', 'target_name', help='The name to use for the restored webapp. If unspecified, will default to the name that was used when the backup was created')
 register_cli_argument('webapp config backup restore', 'overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
 register_cli_argument('webapp config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
+
+register_cli_argument('webapp auth update', 'enabled', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp auth update', 'token_store_enabled', options_list=('--token-store'), **enum_choice_list(two_states_switch))
+register_cli_argument('webapp auth update', 'action', **enum_choice_list(AUTH_TYPES))
+register_cli_argument('webapp auth update', 'token_refresh_extension_hours', type=float, help="Hours, must be formattable into a float")
+register_cli_argument('webapp auth update', 'allowed_external_redirect_urls', nargs='+', help="One or more urls (space delimited).")
+register_cli_argument('webapp auth update', 'client_id', options_list=('--aad-client-id'), arg_group='Azure Active Directory')
+register_cli_argument('webapp auth update', 'client_secret', options_list=('--aad-client-secret'), arg_group='Azure Active Directory')
+register_cli_argument('webapp auth update', 'allowed_audiences', nargs='+', options_list=('--aad-allowed-token-audiences'), arg_group='Azure Active Directory', help="One or more token audiences (space delimited).")
+register_cli_argument('webapp auth update', 'issuer', options_list=('--aad-token-issuer-url'),
+                      help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from \'az cloud show\' at \"endpoints.activeDirectory\". '
+                           'The tenantID can be found using \'az account show\'. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.', arg_group='Azure Active Directory')
+register_cli_argument('webapp auth update', 'facebook_app_id', arg_group='Facebook')
+register_cli_argument('webapp auth update', 'facebook_app_secret', arg_group='Facebook')
+register_cli_argument('webapp auth update', 'facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space delimited).", arg_group='Facebook')
+register_cli_argument('webapp auth update', 'twitter_consumer_key', arg_group='Twitter')
+register_cli_argument('webapp auth update', 'twitter_consumer_secret', arg_group='Twitter')
+register_cli_argument('webapp auth update', 'google_client_id', arg_group='Google')
+register_cli_argument('webapp auth update', 'google_client_secret', arg_group='Google')
+register_cli_argument('webapp auth update', 'google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space delimited).", arg_group='Google')
+register_cli_argument('webapp auth update', 'microsoft_account_client_id', arg_group='Microsoft')
+register_cli_argument('webapp auth update', 'microsoft_account_client_secret', arg_group='Microsoft')
+register_cli_argument('webapp auth update', 'microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space delimited).", arg_group='Microsoft')
 
 register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app')
 register_cli_argument('functionapp config hostname', 'webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')

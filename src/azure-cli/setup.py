@@ -82,7 +82,6 @@ DEPENDENCIES = [
     'azure-cli-redis',
     'azure-cli-resource',
     'azure-cli-role',
-    'azure-cli-sf',
     'azure-cli-sql',
     'azure-cli-storage',
     'azure-cli-vm',

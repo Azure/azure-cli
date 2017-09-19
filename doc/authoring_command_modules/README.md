@@ -178,10 +178,20 @@ This will be the release notes for the next release.
 
 e.g.:  
 ```
+.. :changelog:
+
+Release History
+===============
+
 unreleased
-----------
+++++++++++
 
 * This is my change.
+
+0.0.1 (YYYY-MM-DD)
+++++++++++++++++++
+
+* This is the changelog from a prev. release.
 
 ```
 
