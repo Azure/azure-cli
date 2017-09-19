@@ -82,7 +82,7 @@ def create_resource_group(rg_name, location, tags=None):
 
 def create_application(resource_group_name,
                        application_name, managedby_resource_group_id,
-                       kind, managedapp_definition_id=None, location = None,
+                       kind, managedapp_definition_id=None, location=None,
                        plan_name=None, plan_publisher=None, plan_product=None,
                        plan_version=None, tags=None, parameters=None):
     """ Create a new managed application.
