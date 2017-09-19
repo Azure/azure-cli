@@ -799,7 +799,7 @@ def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
     return shell_safe_json_parse(file_or_string_or_uri)
 
 
-def create_policy_definition(name, rules=None, params=None, display_name=None, description=None):
+def create_policy_definition(name, rules=None, params=None, display_name=None, description=None, mode=None):
     rules = _load_file_string_or_uri(rules, 'rules')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -807,6 +807,8 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(policy_rule=rules, parameters=params, description=description,
                                   display_name=display_name)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01'):
+        parameters.mode = mode
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
