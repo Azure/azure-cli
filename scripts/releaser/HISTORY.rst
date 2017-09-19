@@ -3,6 +3,12 @@
 Release History
 ===============
 
+
+0.1.6 (2017-09-21)
+++++++++++++++++++
+
+* Script to create new Homebrew formula for Azure CLI that PRs can be created from.
+
 0.1.5 (2017-09-11)
 ++++++++++++++++++
 
