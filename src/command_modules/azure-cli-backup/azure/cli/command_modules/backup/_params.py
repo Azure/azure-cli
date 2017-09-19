@@ -19,12 +19,12 @@ from azure.cli.command_modules.backup._validators import \
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM']
 
-vault_name_type = CliArgumentType(help='The Recovery Services vault name.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
-container_name_type = CliArgumentType(help='The Recovery Services container name.', options_list=('--container-name', '-c'))
-item_name_type = CliArgumentType(help='The Recovery Services item name.', options_list=('--item-name', '-i'))
-policy_name_type = CliArgumentType(help='The Recovery Services policy name.', options_list=('--policy-name', '-p'))
-job_name_type = CliArgumentType(help='The Recovery Services job name.', options_list=('--name', '-n'))
-rp_name_type = CliArgumentType(help='The Recovery Services recovery point name.', options_list=('--rp-name', '-r'))
+vault_name_type = CliArgumentType(help='Name of the Recovery services vault.', options_list=('--vault-name', '-v'), completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
+container_name_type = CliArgumentType(help='Name of the container.', options_list=('--container-name', '-c'))
+item_name_type = CliArgumentType(help='Name of the backed up item.', options_list=('--item-name', '-i'))
+policy_name_type = CliArgumentType(help='Name of the backup policy.', options_list=('--policy-name', '-p'))
+job_name_type = CliArgumentType(help='Name of the job.', options_list=('--name', '-n'))
+rp_name_type = CliArgumentType(help='Name of the recovery point.', options_list=('--rp-name', '-r'))
 
 register_cli_argument('backup', 'container_type', ignore_type)
 register_cli_argument('backup', 'item_type', ignore_type)
@@ -37,26 +37,26 @@ register_cli_argument('backup vault backup-properties set', 'backup_storage_redu
 
 # Container
 register_cli_argument('backup container', 'vault_name', vault_name_type)
-register_cli_argument('backup container', 'status', help='The registration status of this container to the vault.', **enum_choice_list(['Registered']))
+register_cli_argument('backup container', 'status', ignore_type)
 
-register_cli_argument('backup container show', 'name', container_name_type, options_list=('--name', '-n'))
+register_cli_argument('backup container show', 'name', container_name_type, options_list=('--name', '-n'), help='Name of the container. You can use the backup container list command to get the name of a container.')
 
 # Item
 register_cli_argument('backup item', 'vault_name', vault_name_type)
 register_cli_argument('backup item', 'container_name', container_name_type)
 
-register_cli_argument('backup item show', 'name', item_name_type, options_list=('--name', '-n'))
+register_cli_argument('backup item show', 'name', item_name_type, options_list=('--name', '-n'), help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
 
-register_cli_argument('backup item set-policy', 'item_name', item_name_type, options_list=('--name', '-n'))
-register_cli_argument('backup item set-policy', 'policy_name', policy_name_type)
+register_cli_argument('backup item set-policy', 'item_name', item_name_type, options_list=('--name', '-n'), help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
+register_cli_argument('backup item set-policy', 'policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
 
 # Policy
 register_cli_argument('backup policy', 'vault_name', vault_name_type)
 
 for command in ['show', 'delete', 'list-associated-items']:
-    register_cli_argument('backup policy {}'.format(command), 'name', policy_name_type, options_list=('--name', '-n'))
+    register_cli_argument('backup policy {}'.format(command), 'name', policy_name_type, options_list=('--name', '-n'), help='Name of the backup policy. You can use the backup policy list command to get the name of a policy.')
 
-register_cli_argument('backup policy set', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command to obtain a policy object.', completer=FilesCompleter())
+register_cli_argument('backup policy set', 'policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
 
 # Recovery Point
 register_cli_argument('backup recoverypoint', 'vault_name', vault_name_type)
@@ -66,7 +66,7 @@ register_cli_argument('backup recoverypoint', 'item_name', item_name_type)
 register_cli_argument('backup recoverypoint list', 'start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
 register_cli_argument('backup recoverypoint list', 'end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
 
-register_cli_argument('backup recoverypoint show', 'name', rp_name_type, options_list=('--name', '-n'))
+register_cli_argument('backup recoverypoint show', 'name', rp_name_type, options_list=('--name', '-n'), help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
 
 # Protection
 register_cli_argument('backup protection', 'vault_name', vault_name_type)
@@ -77,9 +77,9 @@ for command in ['backup-now', 'disable']:
     register_cli_argument('backup protection {}'.format(command), 'container_name', container_name_type)
     register_cli_argument('backup protection {}'.format(command), 'item_name', item_name_type)
 
-register_cli_argument('backup protection backup-now', 'retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval in UTC (d-m-Y).')
+register_cli_argument('backup protection backup-now', 'retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
 
-register_cli_argument('backup protection disable', 'delete_backup_data', help='Option to delete the existing backed up data in the recovery services vault.', **three_state_flag())
+register_cli_argument('backup protection disable', 'delete_backup_data', help='Option to delete existing backed up data in the Recovery services vault.', **three_state_flag())
 
 # Restore
 for command in ['restore-disks', 'files']:
@@ -88,17 +88,17 @@ for command in ['restore-disks', 'files']:
     register_cli_argument('backup restore {}'.format(command), 'item_name', item_name_type)
     register_cli_argument('backup restore {}'.format(command), 'rp_name', rp_name_type)
 
-register_cli_argument('backup restore restore-disks', 'storage_account', help='Name or ID of the storge accout to which the disks are restored.')
+register_cli_argument('backup restore restore-disks', 'storage_account', help='Name or ID of the storge account to which disks are restored.')
 
 # Job
 register_cli_argument('backup job', 'vault_name', vault_name_type)
 
 for command in ['show', 'stop', 'wait']:
-    register_cli_argument('backup job {}'.format(command), 'name', job_name_type)
+    register_cli_argument('backup job {}'.format(command), 'name', job_name_type, help='Name of the job. You can use the backup job list command to get the name of a job.')
 
-register_cli_argument('backup job list', 'status', help='The status of the Job.', **enum_choice_list(['Completed', 'InProgress', 'Failed', 'Cancelled', 'CompletedWithWarnings']))
-register_cli_argument('backup job list', 'operation', help='The user initiated operation.', **enum_choice_list(['ConfigureBackup', 'Backup', 'Restore', 'DisableBackup', 'DeleteBackupData']))
+register_cli_argument('backup job list', 'status', help='Status of the Job.', **enum_choice_list(['Cancelled', 'Completed', 'CompletedWithWarnings', 'Failed', 'InProgress']))
+register_cli_argument('backup job list', 'operation', help='User initiated operation.', **enum_choice_list(['Backup', 'ConfigureBackup', 'DeleteBackupData', 'DisableBackup', 'Restore']))
 register_cli_argument('backup job list', 'start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
 register_cli_argument('backup job list', 'end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
 
-register_cli_argument('backup job wait', 'timeout', type=int, help='Maximum time to wait before aborting wait in seconds.')
+register_cli_argument('backup job wait', 'timeout', type=int, help='Maximum time, in seconds, to wait before aborting.')
