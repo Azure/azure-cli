@@ -19,8 +19,9 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
-
 import azure.cli.core.azlogging as azlogging
+
+from ._homebrew_patch import HomebrewPipPatch
 
 
 logger = azlogging.get_az_logger(__name__)
@@ -130,7 +131,8 @@ def _add_whl_ext(source):  # pylint: disable=too-many-statements
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
     logger.debug('Executing pip with args: %s', pip_args)
-    pip_status_code = _run_pip(pip, pip_args)
+    with HomebrewPipPatch():
+        pip_status_code = _run_pip(pip, pip_args)
     if pip_status_code > 0:
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
         shutil.rmtree(extension_path, ignore_errors=True)
