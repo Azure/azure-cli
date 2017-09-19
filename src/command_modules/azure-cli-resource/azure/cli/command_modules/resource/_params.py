@@ -9,7 +9,6 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.mgmt.resource.locks.models import LockLevel
 from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-from azure.mgmt.resource.policy.models import PolicyMode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, VersionConstraint
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
@@ -69,6 +68,7 @@ register_cli_argument('policy definition', 'rules',
                       type=file_type, completer=FilesCompleter())
 
 with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') as c:
+    from azure.mgmt.resource.policy.models import PolicyMode
     c.register_cli_argument('policy definition', 'params',
                             help='JSON formatted string or a path to a file or uri with parameter definitions',
                             type=file_type, completer=FilesCompleter())
