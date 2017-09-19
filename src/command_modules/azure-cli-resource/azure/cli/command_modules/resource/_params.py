@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.mgmt.resource.locks.models import LockLevel
 from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
+from azure.mgmt.resource.policy.models import PolicyMode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, VersionConstraint
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
@@ -63,7 +64,6 @@ existing_policy_definition_name_type = CliArgumentType(options_list=('--name', '
 register_cli_argument('policy', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 register_cli_argument('policy definition', 'policy_definition_name', arg_type=existing_policy_definition_name_type)
 register_cli_argument('policy definition create', 'name', options_list=('--name', '-n'), help='name of the new policy definition')
-register_cli_argument('policy definition create', 'mode', options_list=('--mode', '-m'), help='mode of the new policy definition. One of Indexed or All')
 register_cli_argument('policy definition', 'rules',
                       help='JSON formatted string or a path to a file or uri with such content',
                       type=file_type, completer=FilesCompleter())
@@ -74,7 +74,8 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
                             type=file_type, completer=FilesCompleter())
     c.register_cli_argument('policy definition create', 'mode',
                             options_list=('--mode', '-m'),
-                            help='mode of the new policy definition. One of Indexed or All')
+                            help='mode of the new policy definition. One of Indexed or All',
+                            **enum_choice_list(PolicyMode))
 
 
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
