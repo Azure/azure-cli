@@ -21,7 +21,7 @@ from ._client_factory import (cf_application_gateways, cf_express_route_circuit_
                               cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
                               cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
                               cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-                              cf_public_ip_addresses, cf_endpoint_service)
+                              cf_public_ip_addresses, cf_endpoint_service, cf_application_security_groups)
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
                     delete_network_resource_property_entry)
@@ -120,6 +120,16 @@ cli_command(__name__, 'network application-gateway waf-config show', custom_path
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
     cli_command(__name__, 'network application-gateway waf-config list-rule-sets', custom_path + 'list_ag_waf_rule_sets', cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
+
+# ApplicationSecurityGroupsOperations
+asg_path = 'azure.mgmt.network.operations.application_security_groups_operations#ApplicationSecurityGroupsOperations.'
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+    cli_command(__name__, 'network asg create', custom_path + 'create_asg', cf_application_security_groups)
+    cli_command(__name__, 'network asg show', asg_path + 'get', cf_application_security_groups)
+    cli_command(__name__, 'network asg list', asg_path + 'list_all', cf_application_security_groups)
+    cli_command(__name__, 'network asg delete', asg_path + 'delete', cf_application_security_groups)
+    cli_generic_update_command(__name__, 'network asg update', asg_path + 'get', asg_path + 'create_or_update',
+                               factory=cf_application_security_groups, custom_function_op=custom_path + 'update_asg')
 
 # ExpressRouteCircuitAuthorizationsOperations
 erca_path = 'azure.mgmt.network.operations.express_route_circuit_authorizations_operations#ExpressRouteCircuitAuthorizationsOperations.'
@@ -425,6 +435,9 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
 
 cli_command(__name__, 'network vnet-gateway vpn-client generate', custom_path + 'generate_vpn_client', cf_virtual_network_gateways)
 
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+    cli_command(__name__, 'network vnet-gateway vpn-client show-url', vgw_path + 'get_vpn_profile_package_url', cf_virtual_network_gateways)
+
 # VirtualNetworksOperations
 vnet_path = 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.'
 cli_command(__name__, 'network vnet delete', vnet_path + 'delete', cf_virtual_networks)
@@ -480,7 +493,7 @@ cli_command(__name__, 'network dns zone delete', dns_zone_path + 'delete', cf_dn
 cli_command(__name__, 'network dns zone show', dns_zone_path + 'get', cf_dns_mgmt_zones, table_transformer=transform_dns_zone_table_output, exception_handler=empty_on_404)
 cli_command(__name__, 'network dns zone delete', dns_zone_path + 'delete', cf_dns_mgmt_zones, confirmation=True)
 cli_command(__name__, 'network dns zone list', custom_path + 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
-cli_generic_update_command(__name__, 'network dns zone update', dns_zone_path + 'get', dns_zone_path + 'create_or_update', cf_dns_mgmt_zones)
+cli_generic_update_command(__name__, 'network dns zone update', dns_zone_path + 'get', dns_zone_path + 'create_or_update', cf_dns_mgmt_zones, custom_function_op=custom_path + 'update_dns_zone')
 cli_command(__name__, 'network dns zone import', custom_path + 'import_zone')
 cli_command(__name__, 'network dns zone export', custom_path + 'export_zone')
 cli_command(__name__, 'network dns zone create', custom_path + 'create_dns_zone', cf_dns_mgmt_zones)

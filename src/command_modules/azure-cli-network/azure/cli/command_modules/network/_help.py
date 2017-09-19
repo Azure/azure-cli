@@ -660,6 +660,40 @@ helps['network dns record-set list'] = """
 
 # endregion
 
+# region Application Security Group
+
+helps['network asg'] = """
+    type: group
+    short-summary: Manage application security groups.
+"""
+
+helps['network asg create'] = """
+    type: command
+    short-summary: Create an application security group.
+"""
+
+helps['network asg delete'] = """
+    type: command
+    short-summary: Delete an application security group.
+"""
+
+helps['network asg list'] = """
+    type: command
+    short-summary: List application security groups.
+"""
+
+helps['network asg show'] = """
+    type: command
+    short-summary: Get details of an application security group.
+"""
+
+helps['network asg update'] = """
+    type: command
+    short-summary: Update an application security group.
+"""
+
+# endregion
+
 # region DNS Zone
 helps['network dns zone'] = """
     type: group
@@ -1335,10 +1369,10 @@ helps['network nsg rule create'] = """
             az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 100
         - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority.
           text: >
-            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 \\
-                    --source-address-prefixes 208.130.28/24 --source-port-ranges 80 \\
-                    --destination-address-prefixes * --destination-port-ranges 80 --access Deny \\
-                    --protocol Tcp --description "Deny from specific IP address range on 80."
+            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096
+                    --source-address-prefixes 208.130.28/24 --source-port-ranges 80
+                    --destination-address-prefixes * --destination-port-ranges 80 8080 --access Deny
+                    --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
 """
 
 helps['network nsg rule delete'] = """

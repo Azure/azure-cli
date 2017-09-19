@@ -433,6 +433,15 @@ helps['provider'] = """
     type: group
     short-summary: Manage resource providers.
 """
+
+helps['provider list'] = """
+    type: command
+    examples:
+        - name: Display all resource types for the network resource provider.
+          text: >
+            az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
+"""
+
 helps['provider register'] = """
     type: command
     short-summary: Register a provider.
