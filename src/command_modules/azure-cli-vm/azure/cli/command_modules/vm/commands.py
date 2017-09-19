@@ -132,6 +132,9 @@ cli_generic_update_command(__name__, 'vm update',
                            cf_vm,
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vm perform-maintenance', mgmt_path.format(op_var, op_class, 'perform_maintenance'), cf_vm)
+
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
