@@ -806,7 +806,9 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
     policy_client = _resource_policy_client_factory()
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(policy_rule=rules, parameters=params, description=description,
-                                  display_name=display_name, mode=mode)
+                                  display_name=display_name)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01'):
+        parameters.mode = mode
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
