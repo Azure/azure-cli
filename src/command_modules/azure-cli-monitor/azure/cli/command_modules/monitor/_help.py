@@ -37,21 +37,23 @@ helps['monitor alert create'] = """
           short-summary: Create the rule in a disabled state.
         - name: --condition
           short-summary: The condition which triggers the rule.
-          long-summary: |
-            Usage:   --condition "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD"
+          long-summary: >
+            The form of a condition is "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD".
+            Values for METRIC and appropriate THRESHOLD values can be obtained from `az monitor metric` commands,
+            and PERIOD is of the form "##h##m##s".
         - name: --email-service-owners
           short-summary: Email the service owners if an alert is triggered.
     examples:
         - name: Create a high CPU usage alert on a VM with no actions.
           text: >
-            az alert rule create -n rule1 -g <RG> --target <VM ID> --condition "Percentage CPU > 90 avg 5m"
+            az monitor alert create -n rule1 -g {RG} --target {VM ID} --condition "Percentage CPU > 90 avg 5m"
         - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
-            az alert rule create -n rule1 -g <RG> --target <VM ID> \\
+            az monitor alert create -n rule1 -g {RG} --target {VM ID} \\
                 --condition "Percentage CPU > 90 avg 5m" \\
                 --action email bob@contoso.com ann@contoso.com --email-service-owners \\
                 --action webhook https://www.contoso.com/alerts?type=HighCPU \\
-                --action webhook https://alerts.contoso.com apiKey=<KEY> type=HighCPU
+                --action webhook https://alerts.contoso.com apiKey={KEY} type=HighCPU
 """
 
 helps['monitor alert update'] = """
@@ -63,10 +65,11 @@ helps['monitor alert update'] = """
         - name: --description
           short-summary: Description of the rule.
         - name: --condition
-          short-summary: The condition expression which triggers the rule.
-          long-summary: |
-            Usage:   --condition "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD"
-            Example: --condition "Percentage CPU > 60 avg 1h30m"
+          short-summary: The condition which triggers the rule.
+          long-summary: >
+            The form of a condition is "METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD".
+            Values for METRIC and appropriate THRESHOLD values can be obtained from `az monitor metric` commands,
+            and PERIOD is of the form "##h##m##s".
         - name: --add-action -a
           short-summary: Add an action to fire when the alert is triggered.
           long-summary: |
@@ -74,7 +77,7 @@ helps['monitor alert update'] = """
             Email:   --add-action email bob@contoso.com ann@contoso.com
             Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
             Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
-            Multiple actions can be specified by using more than one `--action` argument.
+            Multiple actions can be specified by using more than one `--add-action` argument.
         - name: --remove-action -r
           short-summary: Remove one or more actions.
           long-summary: |
