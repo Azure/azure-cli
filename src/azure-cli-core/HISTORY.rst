@@ -16,6 +16,11 @@ unreleased
 * `availability-set create`: Fixed issue where this command would not work on Azure Stack.
 
 
+unreleased
+++++++++++
+
+* More user-friendly handling of invalid cloud configurations
+
 2.0.16 (2017-09-11)
 +++++++++++++++++++
 * Enable command module to set its own correlation ID in telemetry
