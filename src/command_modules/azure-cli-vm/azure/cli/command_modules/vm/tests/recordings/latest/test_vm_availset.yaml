@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:16 GMT']
+      date: ['Mon, 18 Sep 2017 22:55:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -46,19 +46,19 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:16 GMT']
+      date: ['Mon, 18 Sep 2017 22:55:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"parameters": {}, "template": {"resources": [{"location":
-      "westus", "apiVersion": "2017-03-30", "type": "Microsoft.Compute/availabilitySets",
-      "sku": {"name": "Aligned"}, "tags": {}, "properties": {"platformFaultDomainCount":
-      2}, "name": "availset-test"}], "contentVersion": "1.0.0.0", "variables": {},
-      "parameters": {}, "outputs": {}, "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"},
-      "mode": "Incremental"}}'
+    body: '{"properties": {"template": {"resources": [{"properties": {"platformFaultDomainCount":
+      2}, "name": "availset-test", "location": "westus", "tags": {}, "apiVersion":
+      "2017-03-30", "type": "Microsoft.Compute/availabilitySets", "sku": {"name":
+      "Aligned"}}], "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {}, "variables": {}, "outputs": {}, "contentVersion": "1.0.0.0"},
+      "parameters": {}, "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -66,24 +66,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['469']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_oeolCjGNQhkQINQdS3Rz4re9zI6fTZAt","name":"av_set_deploy_oeolCjGNQhkQINQdS3Rz4re9zI6fTZAt","properties":{"templateHash":"16724975534458308243","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-08-23T20:47:19.2564889Z","duration":"PT0.5719696S","correlationId":"a57d988a-b96a-4f80-bf31-76ce1053e120","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_4rzXhxsHiaoIX9ZaedcAvVRWCodUpOoC","name":"av_set_deploy_4rzXhxsHiaoIX9ZaedcAvVRWCodUpOoC","properties":{"templateHash":"16724975534458308243","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-09-18T22:56:00.6435789Z","duration":"PT0.5346736S","correlationId":"d7aea100-3ada-48d8-bee4-aa8584d6a440","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_oeolCjGNQhkQINQdS3Rz4re9zI6fTZAt/operationStatuses/08586980856467930879?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_4rzXhxsHiaoIX9ZaedcAvVRWCodUpOoC/operationStatuses/08586958315253687152?api-version=2017-05-10']
       cache-control: [no-cache]
       content-length: ['684']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:19 GMT']
+      date: ['Mon, 18 Sep 2017 22:56:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -93,19 +93,19 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586980856467930879?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586958315253687152?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:49 GMT']
+      date: ['Mon, 18 Sep 2017 22:56:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -119,19 +119,19 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_oeolCjGNQhkQINQdS3Rz4re9zI6fTZAt","name":"av_set_deploy_oeolCjGNQhkQINQdS3Rz4re9zI6fTZAt","properties":{"templateHash":"16724975534458308243","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-08-23T20:47:21.3933694Z","duration":"PT2.7088501S","correlationId":"a57d988a-b96a-4f80-bf31-76ce1053e120","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_4rzXhxsHiaoIX9ZaedcAvVRWCodUpOoC","name":"av_set_deploy_4rzXhxsHiaoIX9ZaedcAvVRWCodUpOoC","properties":{"templateHash":"16724975534458308243","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-18T22:56:02.0146641Z","duration":"PT1.9057588S","correlationId":"d7aea100-3ada-48d8-bee4-aa8584d6a440","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test"}]}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['929']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:49 GMT']
+      date: ['Mon, 18 Sep 2017 22:56:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -145,8 +145,8 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
@@ -161,7 +161,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['500']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:51 GMT']
+      date: ['Mon, 18 Sep 2017 22:56:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -177,9 +177,9 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -189,19 +189,19 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:50 GMT']
+      date: ['Mon, 18 Sep 2017 22:56:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"parameters": {}, "template": {"resources": [{"location":
-      "westus", "apiVersion": "2017-03-30", "type": "Microsoft.Compute/availabilitySets",
-      "sku": {"name": "Aligned"}, "tags": {}, "properties": {"platformUpdateDomainCount":
-      2, "platformFaultDomainCount": 2}, "name": "avset2"}], "contentVersion": "1.0.0.0",
-      "variables": {}, "parameters": {}, "outputs": {}, "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"},
-      "mode": "Incremental"}}'
+    body: '{"properties": {"template": {"resources": [{"properties": {"platformFaultDomainCount":
+      2, "platformUpdateDomainCount": 2}, "name": "avset2", "location": "westus",
+      "tags": {}, "apiVersion": "2017-03-30", "type": "Microsoft.Compute/availabilitySets",
+      "sku": {"name": "Aligned"}}], "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {}, "variables": {}, "outputs": {}, "contentVersion": "1.0.0.0"},
+      "parameters": {}, "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -209,24 +209,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['494']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_grHr3dz9PJlUvVxo1anANi5U3Go2XGXy","name":"av_set_deploy_grHr3dz9PJlUvVxo1anANi5U3Go2XGXy","properties":{"templateHash":"14562559441644411845","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-08-23T20:47:52.66856Z","duration":"PT0.459088S","correlationId":"537207ec-077c-4d7a-bb4d-1a974c5aebf2","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_7NcCDmZ7RzDKv8ZYgHCOXheMrO0ZeOLB","name":"av_set_deploy_7NcCDmZ7RzDKv8ZYgHCOXheMrO0ZeOLB","properties":{"templateHash":"16882283043238171356","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-09-18T22:56:33.3255909Z","duration":"PT0.4235054S","correlationId":"c0ea9145-5197-44a9-96e4-dc009d0b634f","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_grHr3dz9PJlUvVxo1anANi5U3Go2XGXy/operationStatuses/08586980856132681356?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_7NcCDmZ7RzDKv8ZYgHCOXheMrO0ZeOLB/operationStatuses/08586958314925755261?api-version=2017-05-10']
       cache-control: [no-cache]
-      content-length: ['681']
+      content-length: ['684']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:47:52 GMT']
+      date: ['Mon, 18 Sep 2017 22:56:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -236,19 +236,19 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586980856132681356?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586958314925755261?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:22 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -262,19 +262,19 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_grHr3dz9PJlUvVxo1anANi5U3Go2XGXy","name":"av_set_deploy_grHr3dz9PJlUvVxo1anANi5U3Go2XGXy","properties":{"templateHash":"14562559441644411845","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-08-23T20:47:54.392143Z","duration":"PT2.182671S","correlationId":"537207ec-077c-4d7a-bb4d-1a974c5aebf2","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/av_set_deploy_7NcCDmZ7RzDKv8ZYgHCOXheMrO0ZeOLB","name":"av_set_deploy_7NcCDmZ7RzDKv8ZYgHCOXheMrO0ZeOLB","properties":{"templateHash":"16882283043238171356","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-18T22:56:35.2127947Z","duration":"PT2.3107092S","correlationId":"c0ea9145-5197-44a9-96e4-dc009d0b634f","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"availabilitySets","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2"}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['920']
+      content-length: ['922']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:22 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -288,8 +288,8 @@ interactions:
       CommandName: [vm availability-set create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2017-03-30
@@ -304,7 +304,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['486']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:25 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -321,8 +321,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/avset2?api-version=2017-03-30
@@ -331,12 +331,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 23 Aug 2017 20:48:25 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -346,8 +346,8 @@ interactions:
       CommandName: [vm availability-set update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
@@ -362,7 +362,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['500']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:26 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -371,8 +371,9 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "tags": {"test": "success"}, "properties": {"platformUpdateDomainCount":
-      5, "virtualMachines": [], "platformFaultDomainCount": 2}, "sku": {"name": "Aligned"}}'
+    body: '{"properties": {"platformFaultDomainCount": 2, "platformUpdateDomainCount":
+      5, "virtualMachines": []}, "tags": {"test": "success"}, "location": "westus",
+      "sku": {"name": "Aligned"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -380,8 +381,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['181']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
@@ -396,7 +397,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['499']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:26 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -413,8 +414,8 @@ interactions:
       CommandName: [vm availability-set list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets?api-version=2017-03-30
@@ -431,7 +432,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['620']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:26 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -447,8 +448,8 @@ interactions:
       CommandName: [vm availability-set list-sizes]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test/vmSizes?api-version=2017-03-30
@@ -779,7 +780,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['21785']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:27 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -795,8 +796,8 @@ interactions:
       CommandName: [vm availability-set show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
@@ -812,7 +813,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['527']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:27 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -829,8 +830,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets/availset-test?api-version=2017-03-30
@@ -839,12 +840,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 23 Aug 2017 20:48:28 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -854,8 +855,8 @@ interactions:
       CommandName: [vm availability-set list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 computemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/availabilitySets?api-version=2017-03-30
@@ -865,7 +866,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 23 Aug 2017 20:48:28 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -880,9 +881,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.13
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.13+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.16+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -891,11 +892,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 23 Aug 2017 20:48:28 GMT']
+      date: ['Mon, 18 Sep 2017 22:57:08 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc0QUhFUFk1WUZDU1k1Tkg1R1dPTFNTNE5ZSjJTWVNPQUtVWHwyODIyQTFCOTcxQkE2NUQ3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdBV0FNUkhZRlpZVk1LSUhJMlpaSk9JT1JPWE9GQkVITFE3VXwwNjAwRkRFNzhGQTgzQzkyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 version: 1

@@ -24,6 +24,31 @@ from ._client_factory import _compute_client_factory
 logger = azlogging.get_az_logger(__name__)
 
 
+def validate_asg_names_or_ids(namespace):
+    from azure.cli.core.profiles import get_sdk, ResourceType
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    ApplicationSecurityGroup = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationSecurityGroup', mod='models')
+
+    resource_group = namespace.resource_group_name
+    subscription_id = get_subscription_id()
+    names_or_ids = getattr(namespace, 'application_security_groups')
+    ids = []
+
+    if names_or_ids == [""] or not names_or_ids:
+        return
+
+    for val in names_or_ids:
+        if not is_valid_resource_id(val):
+            val = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group,
+                namespace='Microsoft.Network', type='applicationSecurityGroups',
+                name=val
+            )
+        ids.append(ApplicationSecurityGroup(id=val))
+    setattr(namespace, 'application_security_groups', ids)
+
+
 def validate_nsg_name(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
@@ -838,12 +863,13 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         if namespace.application_gateway:
             client = get_network_client().application_gateways
             try:
-                client.get(namespace.resource_group_name, namespace.application_gateway)
+                rg = parse_resource_id(namespace.application_gateway).get(
+                    'resource_group', namespace.resource_group_name)
+                ag_name = parse_resource_id(namespace.application_gateway)['name']
+                client.get(rg, ag_name)
                 namespace.app_gateway_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
-                    _get_default_address_pool(namespace.resource_group_name,
-                                              namespace.application_gateway,
-                                              'application_gateways')
+                    _get_default_address_pool(rg, ag_name, 'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
             except CloudError:
                 namespace.app_gateway_type = 'new'
@@ -875,13 +901,12 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         validate_parameter_set(namespace, required, forbidden, description='network balancer: load balancer')
 
         if namespace.load_balancer:
-            if check_existence(namespace.load_balancer, namespace.resource_group_name,
-                               'Microsoft.Network', 'loadBalancers'):
+            rg = parse_resource_id(namespace.load_balancer).get('resource_group', namespace.resource_group_name)
+            lb_name = parse_resource_id(namespace.load_balancer)['name']
+            if check_existence(lb_name, rg, 'Microsoft.Network', 'loadBalancers'):
                 namespace.load_balancer_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
-                    _get_default_address_pool(namespace.resource_group_name,
-                                              namespace.load_balancer,
-                                              'load_balancers')
+                    _get_default_address_pool(rg, lb_name, 'load_balancers')
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'

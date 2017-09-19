@@ -6,11 +6,18 @@ Release History
 unreleased
 +++++++++++++++++++
 * `express-route`: Add support for IPv6 Microsoft Peering
+* Add `asg` application security group commands.
+* `nic create`: Added `--application-security-groups` support.
+* `nic ip-config create/update`: Added `--application-security-groups` support.
+* `nsg rule create/update`: Added `--source-asgs` and `--destination-asgs` support.
+* `vnet create/update`: Added `--ddos-protection` and `--vm-protection` support.
+* Added command: `vnet-gateway vpn-client show-url`
 
 2.0.14 (2017-09-11)
 +++++++++++++++++++
 * `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
 * `vnet-gateway`: Added command `vpn-client generate`.
+
 
 2.0.13 (2017-08-28)
 +++++++++++++++++++

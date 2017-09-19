@@ -137,14 +137,23 @@ cli_generic_update_command(__name__, 'vm update',
                            cf_vm,
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vm perform-maintenance', mgmt_path.format(op_var, op_class, 'perform_maintenance'), cf_vm)
+
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
 
-    # VM encryption
-    cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
-    cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
-    cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)
+# VM encryption
+cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_vm')
+cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#decrypt_vm')
+cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show_vm_encryption_status', exception_handler=empty_on_404)
+
+# VMSS encryption
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vmss encryption enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_vmss')
+    cli_command(__name__, 'vmss encryption disable', 'azure.cli.command_modules.vm.disk_encryption#decrypt_vmss')
+    cli_command(__name__, 'vmss encryption show', 'azure.cli.command_modules.vm.disk_encryption#show_vmss_encryption_status', exception_handler=empty_on_404)
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))

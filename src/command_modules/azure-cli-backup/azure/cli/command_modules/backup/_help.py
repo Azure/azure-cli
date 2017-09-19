@@ -22,17 +22,17 @@ helps['backup vault create'] = """
 
 helps['backup vault delete'] = """
             type: command
-            short-summary: Delete an existing Recovery Services vault.
+            short-summary: Delete an existing Recovery services vault.
             """
 
 helps['backup vault list'] = """
             type: command
-            short-summary: List Recovery Services vaults within a subscription.
+            short-summary: List Recovery service vaults within a subscription.
             """
 
 helps['backup vault show'] = """
             type: command
-            short-summary: Show details of a Recovery Services vault.
+            short-summary: Show details of a particular Recovery service vault.
             """
 
 helps['backup vault backup-properties'] = """
@@ -52,32 +52,32 @@ helps['backup vault backup-properties set'] = """
 
 helps['backup container'] = """
             type: group
-            short-summary: Resoure which houses items or applications to be protected.
+            short-summary: Resource which houses items or applications to be protected.
             """
 
 helps['backup container list'] = """
             type: command
-            short-summary: Lists the containers registered to the vault.
+            short-summary: List containers registered to a Recovery services vault.
             """
 
 helps['backup container show'] = """
             type: command
-            short-summary: Show details of a container registered to a vault.
+            short-summary: Show details of a container registered to a Recovery services vault.
             """
 
 helps['backup item'] = """
             type: group
-            short-summary: An item which is already protected or backed up to Azure with an associated policy.
+            short-summary: An item which is already protected or backed up to an Azure Recovery services vault with an associated policy.
             """
 
 helps['backup item list'] = """
             type: command
-            short-summary: Lists all the backed up items within a container.
+            short-summary: List all backed up items within a container.
             """
 
 helps['backup item show'] = """
             type: command
-            short-summary: Shows details of a particular backed up item.
+            short-summary: Show details of a particular backed up item.
             """
 
 helps['backup item set-policy'] = """
@@ -92,27 +92,27 @@ helps['backup policy'] = """
 
 helps['backup policy get-default-for-vm'] = """
             type: command
-            short-summary: Get the default policy with default values to backup a VM. Define when you want to take backup and how long you want to retain each backup with policies.
+            short-summary: Get the default policy with default values to backup a VM.
             """
 
 helps['backup policy list'] = """
             type: command
-            short-summary: List all the policies for a Recovery services vault.
+            short-summary: List all policies for a Recovery services vault.
             """
 
 helps['backup policy show'] = """
             type: command
-            short-summary: Show the details of a policy.
+            short-summary: Show details of a particular policy.
             """
 
 helps['backup policy delete'] = """
             type: command
-            short-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. Before you delete the policy, make sure that each associated item is associated with some other policy. To associate another policy with a Backup item, use the set-policy command of the backup Item
+            short-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To  associate another policy with a Backup item, use the backup item set-policy command.
             """
 
 helps['backup policy set'] = """
             type: command
-            short-summary: Update the properties of the backup policy. Use the show command to obtain a policy object. Modify the values of the object in a file and use this command to update.
+            short-summary: Update the properties of the backup policy.
             """
 
 helps['backup policy list-associated-items'] = """
@@ -127,12 +127,12 @@ helps['backup recoverypoint'] = """
 
 helps['backup recoverypoint list'] = """
             type: command
-            short-summary: Lists all the recovery points for the backed up item.
+            short-summary: List all recovery points of a backed up item.
             """
 
 helps['backup recoverypoint show'] = """
             type: command
-            short-summary: Shows details of the recovery point.
+            short-summary: Shows details of a particular recovery point.
             """
 
 helps['backup protection'] = """
@@ -142,57 +142,57 @@ helps['backup protection'] = """
 
 helps['backup protection enable-for-vm'] = """
             type: command
-            short-summary: To start protecting the Azure VM as per the specified policy.
+            short-summary: Start protecting a previously unprotected Azure VM as per the specified policy to a Recovery services vault.
             """
 
 helps['backup protection backup-now'] = """
             type: command
-            short-summary: To perform an on-demand backup.
+            short-summary: Perform an on-demand backup of a backed up item.
             """
 
 helps['backup protection disable'] = """
             type: command
-            short-summary: To stop protecting the backed up Item. Will ask for confirmation once again.
+            short-summary: Stop protecting a backed up Azure VM.
             """
 
 helps['backup restore'] = """
             type: group
-            short-summary: Restore the backed up items from recovery points in the Recovery Services vault.
+            short-summary: Restore backed up items from recovery points in a Recovery Services vault.
             """
 
 helps['backup restore restore-disks'] = """
             type: command
-            short-summary: Restore the disks of the backed VM from the specified recovery point.
+            short-summary: Restore disks of the backed VM from the specified recovery point.
             """
 
 helps['backup restore files'] = """
             type: group
-            short-summary: Gives access to all the files of the recovery point.
+            short-summary: Gives access to all files of a recovery point.
             """
 
 helps['backup restore files mount-rp'] = """
             type: command
-            short-summary: Downloads a script which mounts the files of a recovery point.
+            short-summary: Download a script which mounts files of a recovery point.
             """
 
 helps['backup restore files unmount-rp'] = """
             type: command
-            short-summary: Closes the access to the recovery point.
+            short-summary: Close access to the recovery point.
             """
 
 helps['backup job'] = """
             type: group
-            short-summary: Entity which contains the details of the job.
+            short-summary: Entity which contains details of the job.
             """
 
 helps['backup job list'] = """
             type: command
-            short-summary: Lists all the backup jobs of the Recovery Services vault.
+            short-summary: List all backup jobs of a Recovery Services vault.
             """
 
 helps['backup job show'] = """
             type: command
-            short-summary: Show the details of a particular job.
+            short-summary: Show details of a particular job.
             """
 
 helps['backup job stop'] = """

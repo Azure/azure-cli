@@ -546,7 +546,7 @@ def _run_client_script_for_linux(client_scripts):
         with open(file_name, 'w', newline='\n') as out_file:
             out_file.write(script_content)
     elif _get_host_os() == os_linux:
-        with open(file_name, 'wb') as out_file:
+        with open(file_name, 'w') as out_file:
             out_file.write(script_content)
 
     logger.warning('File downloaded: {}. Use password {}'.format(file_name, password))

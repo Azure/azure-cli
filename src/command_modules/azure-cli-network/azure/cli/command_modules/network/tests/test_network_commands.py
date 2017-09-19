@@ -14,7 +14,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint, live_only
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, MOCKED_SUBSCRIPTION_ID)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -1846,6 +1846,7 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
 class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
 
@@ -1864,6 +1865,8 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}'.format(**kwargs))
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"'.format(**kwargs))
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}'.format(**kwargs)).get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+        output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}'.format(**kwargs)).get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 

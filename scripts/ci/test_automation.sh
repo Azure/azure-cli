@@ -8,7 +8,7 @@ pip install -qqq -e ./tools
 pip install -qqq coverage codecov
 
 pip install ./privates/azure_mgmt_compute-3.0.0-py2.py3-none-any.whl
-pip install ./privates/azure_mgmt_network-1.5.0a1-py2.py3-none-any.whl
+pip install ./privates/azure_mgmt_network-1.5.0rc2-py2.py3-none-any.whl
 
 pip install -qqq azure-cli-fulltest -f $share_folder/build
 

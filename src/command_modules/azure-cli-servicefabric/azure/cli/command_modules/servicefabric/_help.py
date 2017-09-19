@@ -7,6 +7,21 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 # pylint: disable=line-too-long
 
+helps["sf"] = """
+     type: group
+     short-summary: Manage and administer Azure Service Fabric clusters.
+"""
+
+helps["sf application"] = """
+    type: group
+    short-summary: Manage applications running on an Azure Service Fabric cluster.
+"""
+
+helps["sf cluster"] = """
+    type: group
+    short-summary: Manage an Azure Service Fabric cluster.
+"""
+
 helps["sf cluster certificate"] = """
     type: group
     short-summary: Manage a cluster certificate.
