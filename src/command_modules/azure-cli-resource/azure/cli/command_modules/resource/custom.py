@@ -169,15 +169,15 @@ def create_applicationdefinition(resource_group_name,
     if(not package_file_uri and not create_ui_definition and
        not main_template):
         raise CLIError('usage error: --package-file-uri <url> | \
-        --create-ui-definition and --main-template')
+        --create-ui-definition --main-template')
     elif package_file_uri:
         if create_ui_definition or main_template:
             raise CLIError('usage error: must not specify \
-            --create-ui-definition and --main-template')
+            --create-ui-definition --main-template')
     elif not package_file_uri:
         if not create_ui_definition or not main_template:
             raise CLIError('usage error: must specify \
-            --create-ui-definition and --main-template')
+            --create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory()
     rcf = _resource_client_factory()
     if not location:
