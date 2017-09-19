@@ -505,14 +505,16 @@ class PolicyScenarioTest(ScenarioTest):
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
         params_def_file = os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
         params_file = os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
+        mode = 'Indexed'
 
         # create a policy
-        self.cmd('policy definition create -n {} --rules {} --params {} --display-name {} --description {}'.format(
-            policy_name, rules_file, params_def_file, policy_display_name, policy_description),
+        self.cmd('policy definition create -n {} --rules {} --params {} --display-name {} --description {} --mode {}'.format(
+            policy_name, rules_file, params_def_file, policy_display_name, policy_description, mode),
             checks=[
                         JCheck('name', policy_name),
                         JCheck('displayName', policy_display_name),
-                        JCheck('description', policy_description)
+                        JCheck('description', policy_description),
+                        JCheck('mode', mode)
                    ]
         )
 

@@ -68,9 +68,15 @@ register_cli_argument('policy definition', 'rules',
                       type=file_type, completer=FilesCompleter())
 
 with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') as c:
+    from azure.mgmt.resource.policy.models import PolicyMode
     c.register_cli_argument('policy definition', 'params',
                             help='JSON formatted string or a path to a file or uri with parameter definitions',
                             type=file_type, completer=FilesCompleter())
+    c.register_cli_argument('policy definition create', 'mode',
+                            options_list=('--mode', '-m'),
+                            help='mode of the new policy definition.',
+                            **enum_choice_list(PolicyMode))
+
 
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
