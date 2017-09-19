@@ -569,17 +569,66 @@ class PolicyScenarioTest(ScenarioTest):
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
-        location = 'westcentralus'
+        location = 'eastus2euap'
         appdef_name = self.create_random_name('testappdefname', 20)
         appdef_display_name = self.create_random_name('test_appdef', 20)
         appdef_description = 'test_appdef_123'
-        packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
+        packageUri = 'https:\/\/testclinew.blob.core.windows.net\/files\/vivekMAD.zip'
         auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
         lock = 'None'
 
         # create a managedapp definition
         create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
         appdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
+            JCheck('name', appdef_name),
+            JCheck('displayName', appdef_display_name),
+            JCheck('description', appdef_description),
+            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].type', 'Template'),
+            JCheck('artifacts[1].name', 'CreateUiDefinition'),
+            JCheck('artifacts[1].type', 'Custom')
+        ]).get_output_in_json()
+
+        # list and show it
+        list_cmd = 'managedapp definition list -g {}'
+        self.cmd(list_cmd.format(resource_group), checks=[
+            JCheck('[0].name', appdef_name)
+        ])
+
+        show_cmd = 'managedapp definition show --ids {}'
+        self.cmd(show_cmd.format(appdef['id']), checks=[
+            JCheck('name', appdef_name),
+            JCheck('displayName', appdef_display_name),
+            JCheck('description', appdef_description),
+            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].type', 'Template'),
+            JCheck('artifacts[1].name', 'CreateUiDefinition'),
+            JCheck('artifacts[1].type', 'Custom')
+        ])
+
+        # delete
+        self.cmd('managedapp definition delete -g {} -n {}'.format(resource_group, appdef_name))
+        self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
+
+    @ResourceGroupPreparer()
+    def test_managedappdefInline(self, resource_group):
+        location = 'eastus2euap'
+        appdef_name = self.create_random_name('testappdefname', 20)
+        appdef_display_name = self.create_random_name('test_appdef', 20)
+        appdef_description = 'test_appdef_123'
+        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
+        lock = 'None'
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        createUiDef_file = os.path.join(curr_dir, 'sample_create_ui_definition.json').replace('\\', '\\\\')
+        mainTemplate_file = os.path.join(curr_dir, 'sample_main_template.json').replace('\\', '\\\\')
+
+        # create a managedapp definition with inline params for create-ui-definition and main-template
+        create_cmd = 'managedapp definition create -n {} --create-ui-definition @"{}" --main-template @"{}" --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
+        appdef = self.cmd(create_cmd.format(appdef_name, createUiDef_file, mainTemplate_file, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
             JCheck('name', appdef_name),
             JCheck('displayName', appdef_display_name),
             JCheck('description', appdef_description),
@@ -640,10 +689,9 @@ class ManagedAppScenarioTest(ScenarioTest):
         create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
         app = self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
             JCheck('name', managedapp_name),
-            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
-            JCheck('managedResourceGroupId', managedrg),
-            JCheck('applianceDefinitionId', managedappdef['id'])
+            JCheck('managedResourceGroupId', managedrg)
         ]).get_output_in_json()
 
         # list and show
@@ -655,10 +703,9 @@ class ManagedAppScenarioTest(ScenarioTest):
         show_cmd = 'managedapp show --ids {}'
         self.cmd(show_cmd.format(app['id']), checks=[
             JCheck('name', managedapp_name),
-            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
-            JCheck('managedResourceGroupId', managedrg),
-            JCheck('applianceDefinitionId', managedappdef['id'])
+            JCheck('managedResourceGroupId', managedrg)
         ])
 
         # delete

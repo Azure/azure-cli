@@ -38,6 +38,11 @@ helps['managedapp definition create'] = """
             az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
                 --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
                 --package-file-uri "https://path/to/myPackage.zip"
+        - name: Create a managed application defintion with inline values for createUiDefinition and mainTemplate.
+          text: >
+            az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+                --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
+                --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
 helps['managedapp definition delete'] = """
     type: command
