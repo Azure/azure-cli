@@ -92,6 +92,9 @@ class LiveScenarioTest(IntegrationTestBase):
 
 class ExecutionResult(object):
     def __init__(self, command, expect_failure=False, in_process=True):
+        self.output = ''
+        self.applog = ''
+
         if in_process:
             self._in_process_execute(command, expect_failure=expect_failure)
         else:
