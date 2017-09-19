@@ -74,7 +74,7 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
                             type=file_type, completer=FilesCompleter())
     c.register_cli_argument('policy definition create', 'mode',
                             options_list=('--mode', '-m'),
-                            help='mode of the new policy definition. One of Indexed or All',
+                            help='mode of the new policy definition.',
                             **enum_choice_list(PolicyMode))
 
 
