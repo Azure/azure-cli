@@ -764,7 +764,7 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
 
     rcf = _resource_client_factory()
     target = resource_dict_to_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
-                         resource_group=destination_group)
+                                 resource_group=destination_group)
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
