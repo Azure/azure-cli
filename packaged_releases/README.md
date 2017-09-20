@@ -64,10 +64,10 @@ Get the SHA256 checksum:
 shasum -a 256 azure-cli_packaged_{VERSION}.tar.gz
 ```
 
-3 - Build/Release for Debian, Docker, Homebrew
-----------------------------------------------
+3 - Build/Release for Debian, Docker, Windows, RPM, Homebrew
+------------------------------------------------------------
 
-Follow the instructions in the `debian`, `docker`, `windows`, `bundled` and `homebrew` subdirectories to create these releases.
+Follow the instructions in the `debian`, `docker`, `windows`, `rpm` and `homebrew` subdirectories to create these releases.
 
 
 4 - Modify HISTORY.md
