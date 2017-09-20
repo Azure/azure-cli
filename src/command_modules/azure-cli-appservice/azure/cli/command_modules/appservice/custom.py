@@ -246,6 +246,7 @@ def update_site_configs(resource_group_name, name, slot=None,
 
     configs = get_site_configs(resource_group_name, name, slot)
     site_config = configs.site_config
+    print("Config is {}".format(site_config))
 
     import inspect
     frame = inspect.currentframe()
@@ -1082,20 +1083,20 @@ def set_traffic_routing(resource_group_name, name, distribution):
     site = client.web_apps.get(resource_group_name, name)
     configs = get_site_configs(resource_group_name, name)
     host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
-    configs.experiments.ramp_up_rules = []
+    configs.site_config.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
-        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+        configs.site_config.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
                                                             name=slot))
     _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
 
-    return configs.experiments.ramp_up_rules
+    return configs.site_config.experiments.ramp_up_rules
 
 
 def show_traffic_routing(resource_group_name, name):
     configs = get_site_configs(resource_group_name, name)
-    return configs.experiments.ramp_up_rules
+    return configs.site_config.experiments.ramp_up_rules
 
 
 def clear_traffic_routing(resource_group_name, name):

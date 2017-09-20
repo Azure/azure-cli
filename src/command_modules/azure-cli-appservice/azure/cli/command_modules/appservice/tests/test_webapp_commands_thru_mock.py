@@ -182,6 +182,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
         update_site_configs('myRG', 'myweb', java_version='1.8')
         # assert
         config_for_set = site_op_mock.call_args_list[1][0][4]
+        print("Config_set is: {}".format(config_for_set))
         self.assertEqual(config_for_set.java_version, '1.8')
         # point check some unrelated properties should stay at None
         self.assertEqual(config_for_set.use32_bit_worker_process, None)
