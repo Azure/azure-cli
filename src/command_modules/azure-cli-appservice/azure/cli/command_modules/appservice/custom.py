@@ -530,19 +530,22 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,  # pylint: disable=too-many-locals
-                          git_token=None, manual_integration=None, slot=None, cd_provider=None,
-                          cd_app_type=None, nodejs_task_runner=None, python_framework=None, 
-                          python_version=None, cd_account=None, cd_account_must_exist=None):
+                          manual_integration=None, git_token=None, slot=None, cd_app_type=None, 
+                          app_working_dir=None, nodejs_task_runner=None, python_framework=None, 
+                          python_version=None, cd_account_create=None, cd_project_url=None, test=None, 
+                          swap_slot=None, private_repo_username=None, private_repo_password=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
-    if cd_provider == 'vsts':
-        create_account = not cd_account_must_exist
+    if cd_project_url is not None and cd_project_url.find('visualstudio.com'):
+        webapp_list = None if test is None else list_webapp(resource_group_name)
+        cd_account = (cd_project_url.split('.visualstudio.com', 1)[0]).strip('https://')
         vsts_provider = VstsContinuousDeliveryProvider()
-        cd_app_type_details = get_app_type_details(cd_app_type, nodejs_task_runner, python_framework, python_version)
+        cd_app_type_details = get_app_type_details(cd_app_type, app_working_dir, nodejs_task_runner, python_framework, python_version)
         status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
-                                                         branch, git_token, slot, cd_app_type_details,
-                                                         cd_account, create_account, location)
+                                                         branch, git_token, swap_slot, cd_app_type_details,
+                                                         cd_account, cd_account_create, location, test,
+                                                         private_repo_username, private_repo_password, webapp_list)
         logger.warning(status.status_message)
         return status
     else:
@@ -573,9 +576,10 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                 time.sleep(5)   # retry in a moment
 
 
-def get_app_type_details(cd_app_type, nodejs_task_runner, python_framework, python_version):
+def get_app_type_details(cd_app_type, app_working_dir, nodejs_task_runner, python_framework, python_version):
     return {
         'cd_app_type': cd_app_type,
+        'app_working_dir': app_working_dir,
         'nodejs_task_runner': nodejs_task_runner,
         'python_framework': python_framework,
         'python_version': python_version
