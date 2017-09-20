@@ -324,6 +324,11 @@ helps['resource update'] = """
     short-summary: Update a resource.
 """
 
+helps['resource invoke-action'] = """
+    type: command
+    short-summary: Invoke an action on the resource.
+"""
+
 helps['feature'] = """
     type: group
     short-summary: Manage resource provider features.

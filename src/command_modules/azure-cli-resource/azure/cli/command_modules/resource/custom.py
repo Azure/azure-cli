@@ -520,16 +520,21 @@ def tag_resource(tags,
     return res.tag(tags)
 
 
-def invoke_resource_action(action, parameters=None,
+def invoke_resource_action(action=None, parameters=None, post_url=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
                            resource_id=None, api_version=None):
-    """ Invokes the provided action on an existing resource. To clear tags, specify the --tag option
-    without anything else. """
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
-    return res.invoke_action(action, parameters)
+    """ Invokes the provided action on an existing resource. """
+    if post_url:
+        if action or resource_group_name or resource_id or resource_name or resource_type:
+            logger.warning("Resource information, action, and api_version info should be included in POST url")
+        # create _ResourceUtils object with empty fields, set api_version to bypass api_version resolvement
+        res = _ResourceUtils(api_version='')
+    else:
+        res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                             parent_resource_path, resource_type, resource_name,
+                             resource_id, api_version)
+    return res.invoke_action(action=action, parameters=parameters, url=post_url)
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
@@ -1370,26 +1375,35 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                    self.resource_name,
                                                    self.api_version,
                                                    parameters)
-    
-    def invoke_action(self, action, parameters, url=None):
-        from msrestazure.azure_operation import AzureOperationPoller
-        resource = self.get_resource()
-        # pylint: disable=no-member
-        url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
-        path_format_arguments = {
-            'resourceGroupName': self.rcf.resources._serialize.url("resource_group_name", self.resource_group_name, 'str', max_length=90, min_length=1, pattern='^[-\w\._\(\)]+$'),
-            'resourceProviderNamespace': self.rcf.resources._serialize.url("resource_provider_namespace", self.resource_provider_namespace, 'str'),
-            'parentResourcePath': self.rcf.resources._serialize.url("parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
-            'resourceType': self.rcf.resources._serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
-            'resourceName': self.rcf.resources._serialize.url("resource_name", self.resource_name, 'str'),
-            'subscriptionId': self.rcf.resources._serialize.url("self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
-            'action': self.rcf.resources._serialize.url("action", action, 'str')
-        }
-        url = self.rcf.resources._client.format_url(url, **path_format_arguments)
 
-        # Construct parameters
+    def invoke_action(self, action=None, parameters=None, url=None):
+        from msrestazure.azure_operation import AzureOperationPoller
+
         query_parameters = {}
-        query_parameters['api-version'] = self.rcf.resources._serialize.query("api_version", self.api_version, 'str')
+
+        if not url:
+            url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
+                '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
+            path_format_arguments = {
+                'resourceGroupName': self.rcf.resources._serialize.url(
+                    "resource_group_name", self.resource_group_name, 'str',
+                    max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+                'resourceProviderNamespace': self.rcf.resources._serialize.url(
+                    "resource_provider_namespace", self.resource_provider_namespace, 'str'),
+                'parentResourcePath': self.rcf.resources._serialize.url(
+                    "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
+                'resourceType': self.rcf.resources._serialize.url(
+                    "resource_type", self.resource_type, 'str', skip_quote=True),
+                'resourceName': self.rcf.resources._serialize.url("resource_name", self.resource_name, 'str'),
+                'subscriptionId': self.rcf.resources._serialize.url(
+                    "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
+                'action': self.rcf.resources._serialize.url("action", action, 'str')
+            }
+            url = self.rcf.resources._client.format_url(url, **path_format_arguments)
+
+            # Construct parameters
+            query_parameters['api-version'] = self.rcf.resources._serialize.query(
+                "api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}
@@ -1397,20 +1411,20 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         if self.rcf.resources.config.generate_client_request_id:
             header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
         if self.rcf.resources.config.accept_language is not None:
-            header_parameters['accept-language'] = self.rcf.resources._serialize.header("self.config.accept_language", self.rcf.resources.config.accept_language, 'str')
+            header_parameters['accept-language'] = self.rcf.resources._serialize.header(
+                "self.config.accept_language", self.rcf.resources.config.accept_language, 'str')
 
         # Construct and send request
         def long_running_send():
             request = self.rcf.resources._client.post(url, query_parameters)
             return self.rcf.resources._client.send(
-                request, header_parameters, json.loads(parameters))
+                request, header_parameters, json.loads(parameters) if parameters else None)
 
         def get_long_running_status(status_link, headers=None):
             request = self.rcf.resources._client.get(status_link)
             if headers:
                 request.headers.update(headers)
-            return self.rcf.resources._client.send(
-                request, header_parameters)
+            return self.rcf.resources._client.send(request, header_parameters)
 
         def get_long_running_output(response):
             from msrestazure.azure_exceptions import CloudError
@@ -1418,15 +1432,12 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
                 raise exp
+            if response.status_code == 200:
+                return self.rcf.resources._deserialize('GenericResource', response)
+            return self.rcf.resources._deserialize('str', response)
 
-            deserialized = None
-
-            if response.status_code in [200, 202, 204]:
-                deserialized = self.rcf.resources._deserialize('str', response)
-
-            return deserialized
-
-        return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status, self.rcf.resources.config.long_running_operation_timeout)
+        return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status,
+                                    self.rcf.resources.config.long_running_operation_timeout)
 
 
     @staticmethod
