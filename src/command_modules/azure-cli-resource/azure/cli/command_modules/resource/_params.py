@@ -17,7 +17,17 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
 from ._validators import process_deployment_create_namespace, validate_lock_parameters
+# , validate_invoke_parameters
 
+class JsonString(dict):
+    def __init__(self, value):
+        from azure.cli.core.util import shell_safe_json_parse
+        super(JsonString, self).__init__()
+        if value[0] in ("'", '"') and value[-1] == value[0]:
+            # Remove leading and trailing quotes for dos/cmd.exe users
+            value = value[1:-1]
+        dictval = shell_safe_json_parse(value)
+        self.update(dictval)
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -41,6 +51,9 @@ register_cli_argument('resource', 'tags', tags_type)
 
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
+register_cli_argument('resource invoke_action', 'action')
+register_cli_argument('resource invoke_action', 'parameters', type=JsonString)
+#add json validator
 
 register_cli_argument('resource create', 'resource_id', options_list=['--id'], help='Resource ID.', action=None)
 register_cli_argument('resource create', 'properties', options_list=('--properties', '-p'),
