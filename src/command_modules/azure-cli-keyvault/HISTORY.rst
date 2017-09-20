@@ -3,6 +3,10 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+* Update azure-keyvault SDK to 0.3.6
+
 2.0.10 (2017-09-11)
 +++++++++++++++++++
 * `keyvault set-policy`: Fix issue where permissions were case sensitive.
