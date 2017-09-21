@@ -749,5 +749,36 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
 
+class InvokeActionTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_invoke_action')
+    def test_invoke_action(self, resource_group):
+        vm_name = self.create_random_name('cli-test-vm', 30)
+        username = 'ubuntu'
+        password = self.create_random_name('Longpassword#1', 30)
+
+        vm_json = self.cmd('vm create -g {} -n {} --use-unmanaged-disk --image UbuntuLTS --admin-username {} '
+                           '--admin-password {} --authentication-type {}'
+                           .format(resource_group, vm_name, username, password, 'password')).get_output_in_json()
+
+        vm_id = vm_json.get('id', None)
+
+        self.cmd('resource invoke-action --action powerOff --ids {}'.format(vm_id))
+        self.cmd('resource invoke-action --action generalize --ids {}'.format(vm_id))
+        self.cmd('resource invoke-action --action deallocate --ids {}'.format(vm_id))
+
+        parameters = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",' \
+                     '\\"overwriteVhds\\":\\"true\\"}'
+
+        self.cmd('resource invoke-action --action capture --ids {} --parameters {}'.format(vm_id, parameters))
+
+        from azure.cli.core._profile import CLOUD
+        from azure.cli.core.profiles._shared import (ResourceType, get_api_version)
+        arm_endpoint = CLOUD.endpoints.resource_manager
+        api_version = get_api_version(CLOUD.profile, ResourceType.MGMT_COMPUTE)
+
+        self.cmd('resource invoke-action --post-url {}{}/capture?api-version={} --parameters {}'
+                 .format(arm_endpoint, vm_id, api_version, parameters))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1378,7 +1378,6 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
 
     def invoke_action(self, action=None, parameters=None, url=None):
         from msrestazure.azure_operation import AzureOperationPoller
-
         query_parameters = {}
 
         if not url:
@@ -1432,13 +1431,12 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
                 raise exp
-            if response.status_code == 200:
-                return self.rcf.resources._deserialize('GenericResource', response)
+            # if response.status_code == 200:
+            #     return self.rcf.resources._deserialize('GenericResource', response)
             return self.rcf.resources._deserialize('str', response)
 
         return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status,
                                     self.rcf.resources.config.long_running_operation_timeout)
-
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):
