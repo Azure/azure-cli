@@ -524,7 +524,7 @@ def invoke_resource_action(action=None, parameters=None, post_url=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
                            resource_id=None, api_version=None):
-    """ Invokes the provided action on an existing resource. """
+    """ Invokes the provided action on an existing resource. Action specified through either action or post-url"""
     if post_url:
         if action or resource_group_name or resource_id or resource_name or resource_type:
             logger.warning("Resource information, action, and api_version info should be included in POST url")
@@ -1377,6 +1377,9 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                    parameters)
 
     def invoke_action(self, action=None, parameters=None, url=None):
+        """
+        Formats Url if none provided and sends the POST request with the url and parameters.
+        """
         from msrestazure.azure_operation import AzureOperationPoller
         query_parameters = {}
         serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
