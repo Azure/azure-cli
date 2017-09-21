@@ -21,6 +21,7 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_deployments,
                                                                 cf_deployment_operations,
                                                                 cf_policy_definitions,
+                                                                cf_policy_set_definitions,
                                                                 cf_resource_links,
                                                                 cf_resource_managedapplications,
                                                                 cf_resource_managedappdefinitions)
@@ -123,6 +124,12 @@ cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.op
 cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
 cli_command(__name__, 'policy definition show', 'azure.cli.command_modules.resource.custom#get_policy_definition', exception_handler=empty_on_404)
 cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
+
+cli_command(__name__, 'policy setdefinition create', 'azure.cli.command_modules.resource.custom#create_policy_setdefinition')
+cli_command(__name__, 'policy setdefinition delete', 'azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.delete', cf_policy_set_definitions)
+cli_command(__name__, 'policy setdefinition list', 'azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.list', cf_policy_set_definitions)
+cli_command(__name__, 'policy setdefinition show', 'azure.cli.command_modules.resource.custom#get_policy_setdefinition', exception_handler=empty_on_404)
+cli_command(__name__, 'policy setdefinition update', 'azure.cli.command_modules.resource.custom#update_policy_setdefinition')
 
 cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
 cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')

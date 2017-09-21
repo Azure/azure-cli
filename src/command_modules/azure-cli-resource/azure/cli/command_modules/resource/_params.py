@@ -14,8 +14,9 @@ from azure.cli.core.commands import register_cli_argument, CliArgumentType, Vers
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
                                                 enum_choice_list, no_wait_type, file_type)
-from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
-                     get_resource_types_completion_list, get_providers_completion_list)
+from .custom import (get_policy_completion_list, get_policy_set_completion_list,
+                     get_policy_assignment_completion_list, get_resource_types_completion_list,
+                     get_providers_completion_list)
 from ._validators import process_deployment_create_namespace, validate_lock_parameters
 
 
@@ -64,6 +65,13 @@ register_cli_argument('policy', 'resource_group_name', arg_type=resource_group_n
 register_cli_argument('policy definition', 'policy_definition_name', arg_type=existing_policy_definition_name_type)
 register_cli_argument('policy definition create', 'name', options_list=('--name', '-n'), help='name of the new policy definition')
 register_cli_argument('policy definition', 'rules',
+                      help='JSON formatted string or a path to a file or uri with such content',
+                      type=file_type, completer=FilesCompleter())
+
+existing_policy_set_definition_name_type = CliArgumentType(options_list=('--name', '-n'), completer=get_policy_set_completion_list, help='The policy set definition name')
+register_cli_argument('policy setdefinition', 'policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
+register_cli_argument('policy setdefinition create', 'name', options_list=('--name', '-n'), help='name of the new policy set definition')
+register_cli_argument('policy setdefinition', 'definitions',
                       help='JSON formatted string or a path to a file or uri with such content',
                       type=file_type, completer=FilesCompleter())
 
