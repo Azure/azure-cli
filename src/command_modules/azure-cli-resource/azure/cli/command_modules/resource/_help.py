@@ -326,7 +326,7 @@ helps['resource update'] = """
 
 helps['resource invoke-action'] = """
     type: command
-    short-summary: Invoke an action on the resource. Must provide either the --action parameter or the --post-url parameter
+    short-summary: Invoke an action on the resource. Must provide the --action parameter
     examples:
        - name: Power-off a vm, specified by Id.
          text: >

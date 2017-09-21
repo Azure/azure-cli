@@ -40,7 +40,7 @@ register_cli_argument('resource', 'tags', tags_type)
 
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
-register_cli_argument('resource invoke-action', 'action', help='The action that will be invoked')
+register_cli_argument('resource invoke-action', 'action', help='The action that will be invoked on the specified resource')
 register_cli_argument('resource invoke-action', 'request_body', help='Parameter arguments for the action that will be passed along in the post request body')
 
 register_cli_argument('resource create', 'resource_id', options_list=['--id'], help='Resource ID.', action=None)

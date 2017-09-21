@@ -524,7 +524,7 @@ def invoke_resource_action(action, request_body=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
                            resource_id=None, api_version=None):
-    """ Invokes the provided action on an existing resource. Action specified through either action or post-url"""
+    """ Invokes the provided action on an existing resource."""
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
@@ -1304,7 +1304,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         else:
             resource = self.rcf.resources.create_or_update(self.resource_group_name,
                                                            self.resource_provider_namespace,
-                                                           self.parent_resource_path or '',
+                                                           self.parent_resource_path,
                                                            self.resource_type,
                                                            self.resource_name,
                                                            self.api_version,
@@ -1317,7 +1317,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         else:
             resource = self.rcf.resources.get(self.resource_group_name,
                                               self.resource_provider_namespace,
-                                              self.parent_resource_path or '',
+                                              self.parent_resource_path,
                                               self.resource_type,
                                               self.resource_name,
                                               self.api_version)
@@ -1328,7 +1328,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             return self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
         return self.rcf.resources.delete(self.resource_group_name,
                                          self.resource_provider_namespace,
-                                         self.parent_resource_path or '',
+                                         self.parent_resource_path,
                                          self.resource_type,
                                          self.resource_name,
                                          self.api_version)
@@ -1340,7 +1340,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                              parameters)
         return self.rcf.resources.create_or_update(self.resource_group_name,
                                                    self.resource_provider_namespace,
-                                                   self.parent_resource_path or '',
+                                                   self.parent_resource_path,
                                                    self.resource_type,
                                                    self.resource_name,
                                                    self.api_version,
@@ -1364,7 +1364,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                              parameters)
         return self.rcf.resources.create_or_update(self.resource_group_name,
                                                    self.resource_provider_namespace,
-                                                   self.parent_resource_path or '',
+                                                   self.parent_resource_path,
                                                    self.resource_type,
                                                    self.resource_name,
                                                    self.api_version,
@@ -1372,7 +1372,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
 
     def invoke_action(self, action, request_body):
         """
-        Formats Url if none provided and sends the POST request with the url and parameters.
+        Formats Url if none provided and sends the POST request with the url and request-body.
         """
         from msrestazure.azure_operation import AzureOperationPoller
         query_parameters = {}
@@ -1382,21 +1382,21 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
 
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
             '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
-        path_format_arguments = {
-            'resourceGroupName': serialize.url(
+
+        url = client.format_url(
+            url,
+            resourceGroupName=serialize.url(
                 "resource_group_name", self.resource_group_name, 'str',
                 max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
-            'resourceProviderNamespace': serialize.url(
+            resourceProviderNamespace=serialize.url(
                 "resource_provider_namespace", self.resource_provider_namespace, 'str'),
-            'parentResourcePath': serialize.url(
+            parentResourcePath=serialize.url(
                 "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
-            'resourceType': serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
-            'resourceName': serialize.url("resource_name", self.resource_name, 'str'),
-            'subscriptionId': serialize.url(
+            resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
+            resourceName=serialize.url("resource_name", self.resource_name, 'str'),
+            subscriptionId=serialize.url(
                 "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
-            'action': serialize.url("action", action, 'str')
-        }
-        url = client.format_url(url, **path_format_arguments)
+            action=serialize.url("action", action, 'str'))
 
         # Construct parameters
         query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
@@ -1405,7 +1405,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         header_parameters = {}
         header_parameters['Content-Type'] = 'application/json; charset=utf-8'
         if self.rcf.resources.config.generate_client_request_id:
-            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid4())
         if self.rcf.resources.config.accept_language is not None:
             header_parameters['accept-language'] = serialize.header(
                 "self.config.accept_language", self.rcf.resources.config.accept_language, 'str')
