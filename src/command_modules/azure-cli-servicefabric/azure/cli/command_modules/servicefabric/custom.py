@@ -1532,6 +1532,7 @@ def _create_self_signed_key_vault_certificate(vault_base_url, certificate_name, 
 
             raise CLIError('{}'.format(message))
 
+    pem_output_folder = None
     if certificate_output_folder is not None:
         pem_output_folder = os.path.join(
             certificate_output_folder, certificate_name + '.pem')
