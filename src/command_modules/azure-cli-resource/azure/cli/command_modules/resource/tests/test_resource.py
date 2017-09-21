@@ -766,18 +766,10 @@ class InvokeActionTest(ScenarioTest):
         self.cmd('resource invoke-action --action generalize --ids {}'.format(vm_id))
         self.cmd('resource invoke-action --action deallocate --ids {}'.format(vm_id))
 
-        parameters = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",' \
-                     '\\"overwriteVhds\\":\\"true\\"}'
+        request_body = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",' \
+                       '\\"overwriteVhds\\":\\"true\\"}'
 
-        self.cmd('resource invoke-action --action capture --ids {} --parameters {}'.format(vm_id, parameters))
-
-        from azure.cli.core._profile import CLOUD
-        from azure.cli.core.profiles._shared import (ResourceType, get_api_version)
-        arm_endpoint = CLOUD.endpoints.resource_manager
-        api_version = get_api_version(CLOUD.profile, ResourceType.MGMT_COMPUTE)
-
-        self.cmd('resource invoke-action --post-url {}{}/capture?api-version={} --parameters {}'
-                 .format(arm_endpoint, vm_id, api_version, parameters))
+        self.cmd('resource invoke-action --action capture --ids {} --request-body {}'.format(vm_id, request_body))
 
 
 if __name__ == '__main__':

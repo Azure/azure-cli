@@ -520,21 +520,15 @@ def tag_resource(tags,
     return res.tag(tags)
 
 
-def invoke_resource_action(action=None, parameters=None, post_url=None,
+def invoke_resource_action(action, request_body=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
                            resource_id=None, api_version=None):
     """ Invokes the provided action on an existing resource. Action specified through either action or post-url"""
-    if post_url:
-        if action or resource_group_name or resource_id or resource_name or resource_type:
-            logger.warning("Resource information, action, and api_version info should be included in POST url")
-        # create _ResourceUtils object with empty fields, set api_version to bypass api_version resolvement
-        res = _ResourceUtils(api_version='')
-    else:
-        res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                             parent_resource_path, resource_type, resource_name,
-                             resource_id, api_version)
-    return res.invoke_action(action=action, parameters=parameters, url=post_url)
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    return res.invoke_action(action=action, request_body=request_body)
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
@@ -1376,7 +1370,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                    self.api_version,
                                                    parameters)
 
-    def invoke_action(self, action=None, parameters=None, url=None):
+    def invoke_action(self, action, request_body):
         """
         Formats Url if none provided and sends the POST request with the url and parameters.
         """
@@ -1386,27 +1380,26 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         deserialize = self.rcf.resources._deserialize  # pylint: disable=protected-access
         client = self.rcf.resources._client  # pylint: disable=protected-access
 
-        if not url:
-            url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
-                '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
-            path_format_arguments = {
-                'resourceGroupName': serialize.url(
-                    "resource_group_name", self.resource_group_name, 'str',
-                    max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
-                'resourceProviderNamespace': serialize.url(
-                    "resource_provider_namespace", self.resource_provider_namespace, 'str'),
-                'parentResourcePath': serialize.url(
-                    "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
-                'resourceType': serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
-                'resourceName': serialize.url("resource_name", self.resource_name, 'str'),
-                'subscriptionId': serialize.url(
-                    "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
-                'action': serialize.url("action", action, 'str')
-            }
-            url = client.format_url(url, **path_format_arguments)
+        url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
+            '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
+        path_format_arguments = {
+            'resourceGroupName': serialize.url(
+                "resource_group_name", self.resource_group_name, 'str',
+                max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceProviderNamespace': serialize.url(
+                "resource_provider_namespace", self.resource_provider_namespace, 'str'),
+            'parentResourcePath': serialize.url(
+                "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
+            'resourceType': serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
+            'resourceName': serialize.url("resource_name", self.resource_name, 'str'),
+            'subscriptionId': serialize.url(
+                "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
+            'action': serialize.url("action", action, 'str')
+        }
+        url = client.format_url(url, **path_format_arguments)
 
-            # Construct parameters
-            query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
+        # Construct parameters
+        query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}
@@ -1421,7 +1414,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         def long_running_send():
             request = client.post(url, query_parameters)
             return client.send(
-                request, header_parameters, json.loads(parameters) if parameters else None)
+                request, header_parameters, json.loads(request_body) if request_body else None)
 
         def get_long_running_status(status_link, headers=None):
             request = client.get(status_link)

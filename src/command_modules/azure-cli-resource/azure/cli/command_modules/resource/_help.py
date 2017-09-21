@@ -331,9 +331,9 @@ helps['resource invoke-action'] = """
        - name: Power-off a vm, specified by Id.
          text: >
             az resource invoke-action --action powerOff --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM
-       - name: Capture information for a stopped vm. VM and action specified by giving --post-url.
+       - name: Capture information for a stopped vm.
          text: >
-            az resource invoke-action --post-url https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM/capture?api-version=2017-03-30 --parameters {\"vhdPrefix\":\"myPrefix\",\"destinationContainerName\":\"myContainer\",\"overwriteVhds\":\"true\"}
+            az resource invoke-action --action capture --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM --request-body {\"vhdPrefix\":\"myPrefix\",\"destinationContainerName\":\"myContainer\",\"overwriteVhds\":\"true\"}
 """
 
 helps['feature'] = """
