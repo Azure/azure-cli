@@ -6,6 +6,8 @@
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our next generation multi-platform command line experience for Azure.
 
+THIS IS A TEST
+
 ## Installation
 
 ```bash
