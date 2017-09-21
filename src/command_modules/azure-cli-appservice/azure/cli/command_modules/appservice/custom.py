@@ -530,10 +530,10 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
-                          manual_integration=None, git_token=None, slot=None, cd_app_type='AspNet', 
-                          app_working_dir=None, nodejs_task_runner=None, python_framework='Django', 
-                          python_version='Python 3.5.3 x86', cd_account_create=None, cd_project_url=None, test=None, 
-                          swap_slot=None, private_repo_username=None, private_repo_password=None):
+                          manual_integration=None, git_token=None, slot=None, cd_app_type='AspNet',
+                          app_working_dir=None, nodejs_task_runner=None, python_framework='Django',
+                          python_version='Python 3.5.3 x86', cd_account_create=None, cd_project_url=None, test=None,
+                          slot_swap=None, private_repo_username=None, private_repo_password=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
@@ -541,9 +541,10 @@ def config_source_control(resource_group_name, name, repo_url, repository_type='
         webapp_list = None if test is None else list_webapp(resource_group_name)
         cd_account = (cd_project_url.split('.visualstudio.com', 1)[0]).strip('https://')
         vsts_provider = VstsContinuousDeliveryProvider()
-        cd_app_type_details = get_app_type_details(cd_app_type, app_working_dir, nodejs_task_runner, python_framework, python_version)
+        cd_app_type_details = get_app_type_details(cd_app_type, app_working_dir, nodejs_task_runner,
+                                                   python_framework, python_version)
         status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
-                                                         branch, git_token, swap_slot, cd_app_type_details,
+                                                         branch, git_token, slot_swap, cd_app_type_details,
                                                          cd_account, cd_account_create, location, test,
                                                          private_repo_username, private_repo_password, webapp_list)
         logger.warning(status.status_message)

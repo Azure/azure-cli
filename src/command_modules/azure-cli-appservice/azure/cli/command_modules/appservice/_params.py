@@ -113,7 +113,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'cd_project_url', arg_group='VSTS CD Provider', help='URL of the Visual Studio Team Services (VSTS) project to use for continuous delivery. URL should be in format https://<accountname>.visualstudio.com/<projectname>')
     register_cli_argument(scope + ' deployment source', 'cd_account_create', arg_group='VSTS CD Provider', help='To create a new Visual Studio Team Services (VSTS) account if it doesn’t exist already', action='store_false')
     register_cli_argument(scope + ' deployment source', 'test', arg_group='VSTS CD Provider', help='Name of the web app to be used for load testing. If web app is not available, it will be created. Default: Disable')
-    register_cli_argument(scope + ' deployment source', 'swap_slot', arg_group='VSTS CD Provider', help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Production Slot')
+    register_cli_argument(scope + ' deployment source', 'slot_swap', arg_group='VSTS CD Provider', help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Production Slot')
     register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', **enum_choice_list(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
     register_cli_argument(scope + ' deployment source', 'git_token', help='Git access token required for auto sync')
     register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
