@@ -6,6 +6,8 @@ Release History
 +++++++++++++++++++
 * policy: support to show built-in policy definition.
 * policy: support mode parameter for creating policy definitions.
+* policy: add policy set definition commands.
+* policy: add sku and policysetdefinition parameters when creating policy assignment
 * managedapp definition: support to create managedapp definition using create-ui-definition and main-template.
 * BREAKING CHANGE: managedapp: Update to latest ARM package, which includes changing resource type from appliances to applications and applianceDefinitions to applicationDefinitions.
 

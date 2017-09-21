@@ -68,13 +68,6 @@ register_cli_argument('policy definition', 'rules',
                       help='JSON formatted string or a path to a file or uri with such content',
                       type=file_type, completer=FilesCompleter())
 
-existing_policy_set_definition_name_type = CliArgumentType(options_list=('--name', '-n'), completer=get_policy_set_completion_list, help='The policy set definition name')
-register_cli_argument('policy setdefinition', 'policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
-register_cli_argument('policy setdefinition create', 'name', options_list=('--name', '-n'), help='name of the new policy set definition')
-register_cli_argument('policy setdefinition', 'definitions',
-                      help='JSON formatted string or a path to a file or uri with such content',
-                      type=file_type, completer=FilesCompleter())
-
 with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') as c:
     from azure.mgmt.resource.policy.models import PolicyMode
     c.register_cli_argument('policy definition', 'params',
@@ -85,11 +78,8 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
                             help='mode of the new policy definition.',
                             **enum_choice_list(PolicyMode))
 
-
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
-register_cli_argument('policy setdefinition', 'display_name', help='display name of policy set definition')
-register_cli_argument('policy setdefinition', 'description', help='description of policy set definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
 register_cli_argument('policy assignment create', 'name', options_list=('--name', '-n'), help='name of the new assignment')
 
@@ -98,6 +88,14 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
                             help='JSON formatted string or path to file with parameter values of policy rule')
 
 with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    existing_policy_set_definition_name_type = CliArgumentType(options_list=('--name', '-n'), completer=get_policy_set_completion_list, help='The policy set definition name')
+    c.register_cli_argument('policy setdefinition', 'policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
+    c.register_cli_argument('policy setdefinition create', 'name', options_list=('--name', '-n'), help='name of the new policy set definition')
+    c.register_cli_argument('policy setdefinition', 'display_name', help='display name of policy set definition')
+    c.register_cli_argument('policy setdefinition', 'description', help='description of policy set definition')
+    c.register_cli_argument('policy setdefinition', 'definitions',
+                      help='JSON formatted string or a path to a file or uri with such content',
+                      type=file_type, completer=FilesCompleter())
     c.register_cli_argument('policy assignment create', 'policysetdefinition', options_list=('--policy-set-definition', '-d'),
                             help='policy set definition name or fully qualified id')
     c.register_cli_argument('policy assignment create', 'sku', options_list=('--sku', '-s'),
