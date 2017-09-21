@@ -690,12 +690,16 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy, name=None, display_name=None, params=None,
-                             resource_group_name=None, scope=None):
+def create_policy_assignment(policy=None, policysetdefinition=None,
+                             name=None, display_name=None, params=None,
+                             resource_group_name=None, scope=None, sku=None):
+    if policy and policysetdefinition:
+        raise CLIError('usage error: must specify only one --policy POLICY | \
+        --policy-set-definition POLICYSETDEFINITION')
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
-    policy_id = _resolve_policy_id(policy, policy_client)
+    policy_id = _resolve_policy_id(policy, policysetdefinition, policy_client)
 
     if params:
         if os.path.exists(params):
@@ -705,6 +709,12 @@ def create_policy_assignment(policy, name=None, display_name=None, params=None,
 
     PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
     assignment = PolicyAssignment(display_name, policy_id, scope, params if params else None)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+        PolicySku = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySku', mod='models')
+        policySku = PolicySku('A0', 'Free')
+        if sku:
+            policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
+        assignment.sku = policySku
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
                                                    assignment)
@@ -774,11 +784,15 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
     return scope
 
 
-def _resolve_policy_id(policy, client):
-    policy_id = policy
-    if not is_valid_resource_id(policy):
-        policy_def = client.policy_definitions.get(policy)
-        policy_id = policy_def.id
+def _resolve_policy_id(policy, policysetdefinition, client):
+    policy_id = policy or policysetdefinition
+    if not is_valid_resource_id(policy_id):
+        if policy:
+            policy_def = client.policy_definitions.get(policy)
+            policy_id = policy_def.id
+        else:
+            policy_setdef = client.policy_set_definitions.get(policysetdefinition)
+            policy_id = policy_setdef.id
     return policy_id
 
 

@@ -88,12 +88,20 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
 
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
+register_cli_argument('policy setdefinition', 'display_name', help='display name of policy set definition')
+register_cli_argument('policy setdefinition', 'description', help='description of policy set definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
 register_cli_argument('policy assignment create', 'name', options_list=('--name', '-n'), help='name of the new assignment')
 
 with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') as c:
     c.register_cli_argument('policy assignment create', 'params', options_list=('--params', '-p'),
                             help='JSON formatted string or path to file with parameter values of policy rule')
+
+with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    c.register_cli_argument('policy assignment create', 'policysetdefinition', options_list=('--policy-set-definition', '-d'),
+                            help='policy set definition name or fully qualified id')
+    c.register_cli_argument('policy assignment create', 'sku', options_list=('--sku', '-s'),
+                            help='policy sku. One of Free or Standard.')
 
 register_cli_argument('policy assignment', 'scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('policy assignment', 'disable_scope_strict_match', action='store_true', help='include assignment either inhertied from parent scope or at child scope')
