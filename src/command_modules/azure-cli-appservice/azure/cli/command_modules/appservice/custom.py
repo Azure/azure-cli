@@ -529,10 +529,10 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     return result
 
 
-def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,  # pylint: disable=too-many-locals
-                          manual_integration=None, git_token=None, slot=None, cd_app_type=None, 
-                          app_working_dir=None, nodejs_task_runner=None, python_framework=None, 
-                          python_version=None, cd_account_create=None, cd_project_url=None, test=None, 
+def config_source_control(resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
+                          manual_integration=None, git_token=None, slot=None, cd_app_type='AspNet', 
+                          app_working_dir=None, nodejs_task_runner=None, python_framework='Django', 
+                          python_version='Python 3.5.3 x86', cd_account_create=None, cd_project_url=None, test=None, 
                           swap_slot=None, private_repo_username=None, private_repo_password=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
