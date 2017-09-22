@@ -695,7 +695,7 @@ def create_policy_assignment(policy=None, policysetdefinition=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None):
     """Creates a policy assignment
-    :param ids: the space separated not scopes value
+    :param not_scopes: Space separated scopes where the policy assignment does not apply.
     """
     if bool(policy) == bool(policysetdefinition):
         raise CLIError('usage error: --policy NAME_OR_ID | \
@@ -717,10 +717,15 @@ def create_policy_assignment(policy=None, policysetdefinition=None,
 
     if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
         if not_scopes:
-            notscopes = []
-            for i in not_scopes:
-                notscopes.append(i)
-            assignment.not_scopes = notscopes
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                if parse_resource_id(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    logger.error('az policy assignment create error: argument --not-scopes: \
+                    invalid notscopes value: \'%s\'' % id_arg)
+                    return
+            assignment.not_scopes = kwargs_list
         PolicySku = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySku', mod='models')
         policySku = PolicySku('A0', 'Free')
         if sku:
