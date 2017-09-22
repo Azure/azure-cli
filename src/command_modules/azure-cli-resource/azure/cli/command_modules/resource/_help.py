@@ -337,7 +337,8 @@ helps['resource invoke-action'] = """
             az resource invoke-action --action powerOff --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM
        - name: Capture information for a stopped vm.
          text: >
-            az resource invoke-action --action capture --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM --request-body {\"vhdPrefix\":\"myPrefix\",\"destinationContainerName\":\"myContainer\",\"overwriteVhds\":\"true\"}
+            az resource invoke-action --action capture --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM --request-body
+            {\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"myContainer\\",\\"overwriteVhds\\":\\"true\\"}
 """
 
 helps['feature'] = """
