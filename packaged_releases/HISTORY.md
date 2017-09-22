@@ -1,6 +1,24 @@
 Release History
 ===============
 
+2.0.18 (2017-09-22)
+-------------------
+
+* See the `HISTORY.rst` files in each module for a changelog.  
+
+Source download:
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_2.0.18.tar.gz
+TODOHASHHERE
+
+<details>
+  <summary>List of component versions in this release (click to expand)</summary><p>
+
+$ az --version
+
+TODOVERSIONSHERE
+</p></details>
+
+
 2.0.17 (2017-09-11)
 -------------------
 
