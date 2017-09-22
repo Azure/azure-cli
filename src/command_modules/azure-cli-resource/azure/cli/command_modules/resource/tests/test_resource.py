@@ -439,11 +439,11 @@ class ResourceMoveScenarioTest(ScenarioTest):
         nsg1_name = self.create_random_name('nsg-move', 20)
         nsg2_name = self.create_random_name('nsg-move', 20)
 
-        nsg1 = self.cmd('network nsg create -n {} -g {}'.format(nsg1_name, resource_group))
-        nsg2 = self.cmd('network nsg create -n {} -g {}'.format(nsg2_name, resource_group))
+        nsg1 = self.cmd('network nsg create -n {} -g {}'.format(nsg1_name, resource_group)).get_output_in_json()
+        nsg2 = self.cmd('network nsg create -n {} -g {}'.format(nsg2_name, resource_group)).get_output_in_json()
 
-        nsg1_id = nsg1.get_output_in_json().get('NewNSG').get('id')
-        nsg2_id = nsg2.get_output_in_json().get('NewNSG').get('id')
+        nsg1_id = nsg1['NewNSG']['id']
+        nsg2_id = nsg2['NewNSG']['id']
 
         self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id, resource_group_dest))
 
