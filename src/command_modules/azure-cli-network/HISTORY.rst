@@ -5,6 +5,7 @@ Release History
 
 unreleased
 +++++++++++++++++++
+* `lb/public-ip`: Add availability zone support.
 * `express-route`: Add support for IPv6 Microsoft Peering
 * Add `asg` application security group commands.
 * `nic create`: Added `--application-security-groups` support.
@@ -29,7 +30,6 @@ unreleased
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
-* `public-ip`: Add availability zone support.
 * `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted
 * `application-gateway {subresource} delete`: Fixed issue where `--no-wait` was not honored.
 * `application-gateway http-settings update`: Fix issue where `--connection-draining-timeout` could not be turned off.
