@@ -5,6 +5,7 @@ Release History
 
 unreleased
 +++++++++++++++++++
+* `lb/public-ip`: Add availability zone support.
 * `express-route`: Add support for IPv6 Microsoft Peering
 * Add `asg` application security group commands.
 * `nic create`: Added `--application-security-groups` support.

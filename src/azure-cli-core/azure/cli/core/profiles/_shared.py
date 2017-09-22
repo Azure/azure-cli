@@ -28,7 +28,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     MGMT_STORAGE = ('azure.mgmt.storage',
                     'StorageManagementClient')
-    MGMT_COMPUTE = ('azure.mgmt.compute.compute',
+    MGMT_COMPUTE = ('azure.mgmt.compute',
                     'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network',
                     'NetworkManagementClient')

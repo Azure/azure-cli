@@ -908,6 +908,12 @@ helps['network lb create'] = """
         - name: Create a load balancer on a specific virtual network and subnet.
           text: >
             az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
+        - name: create a zone flavored public facing load balancer through provisioning a zonal public ip
+          text: >
+            az network lb create -g MyResourceGroup -n myLB --public-ip-zone 2
+        - name: create a zone flavored internal facing load balancer through provisioning a zonal frontend ip configuration
+          text: >
+            az network lb create -g MyResourceGroup -n myLB --frontend-ip-zone 1 -vnet-name MyVnet --subnet MySubnet
 """
 
 helps['network lb delete'] = """
@@ -1418,6 +1424,9 @@ helps['network public-ip create'] = """
         - name: Create a static public IP resource for a DNS name label.
           text: >
             az network public-ip create -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
+        - name: Create a public IP resource in an availability zone in the current resource group's region.
+          text: >
+            az network public-ip create -g MyResourceGroup -n MyIp --zone 2
 """
 
 helps['network public-ip delete'] = """
@@ -1778,27 +1787,71 @@ helps['network vnet peering'] = """
 helps['network vnet peering create'] = """
     type: command
     short-summary: Create a peering.
+    examples:
+        - name: Create a virtual network peering between virtual networks in the same region
+          text: >
+            az network vnet create --name myVnet1 --resource-group myResourceGroup --location eastus --address-prefix 10.0.0.0/16
+            \\n\\n az network vnet create --name myVnet2 --resource-group myResourceGroup --location eastus --address-prefix 10.1.0.0/16
+            \\n\\n vnet1Id=$(az network vnet show --resource-group myResourceGroup--name myVnet1 --query id --out tsv)
+            \\n\\n vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
+            \\n\\n az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
+            \\n\\n az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
+
+        - name: Create a virtual network peering between virtual networks in different regions
+          text: >
+            az network vnet create --name myVnet1 --resource-group myResourceGroup --location westcentralus --address-prefix 10.0.0.0/16
+            \\n\\n az network vnet create --name myVnet2 --resource-group myResourceGroup --location canadacentral --address-prefix 10.2.0.0/16
+            \\n\\n vnet1Id=$(az network vnet show --resource-group myResourceGroup--name myVnet1 --query id --out tsv)
+            \\n\\n vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
+            \\n\\n az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
+            \\n\\n az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
     type: command
     short-summary: Delete a peering.
+    examples:
+        - name: Delete a virtual network peering
+          text: >
+            az network vnet peering delete --name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1
 """
 
 helps['network vnet peering list'] = """
     type: command
     short-summary: List peerings.
+    examples:
+        - name: List all peerings of a specified virtual network
+          text: >
+            az network vnet peering list --resource-group myResourceGroup --vnet-name myVnet1
 """
 
 helps['network vnet peering show'] = """
     type: command
-    short-summary: Get the details of a peering.
-"""
+    short-summary: Show details of a peering.
+    examples:
+        - name: Show all details of the specified virtual network peering.
+          text: >
+             az network vnet peering show --name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1
+  """
 
 helps['network vnet peering update'] = """
     type: command
     short-summary: Update a peering.
+    examples:
+        - name: Change forwarded traffic configuration of a virtual network peering
+          text: >
+            az network vnet peering update ---name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --set allowForwardedTraffic==true
+        - name: Change virtual network access of a virtual network peering
+          text: >
+            az network vnet peering update ---name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --set allowVirtualNetworkAccess==true
+        - name: Change gateway transit property configuration of a virtual network peering
+          text: >
+            az network vnet peering update ---name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --set allowGatewayTransit==true
+        - name: Use remote gateways in virtual network peering
+          text: >
+            az network vnet peering update ---name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --set useRemoteGateways==true
 """
+
 # endregion
 
 # region VPN Connection
