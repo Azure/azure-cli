@@ -1428,7 +1428,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
                 raise exp
-            return deserialize('str', response)
+            return response.text
 
         return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status,
                                     self.rcf.resources.config.long_running_operation_timeout)
