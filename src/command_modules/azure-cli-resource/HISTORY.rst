@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.15 (2017-09-22)
 +++++++++++++++++++
 * policy: support to show built-in policy definition.
 * policy: support mode parameter for creating policy definitions.
