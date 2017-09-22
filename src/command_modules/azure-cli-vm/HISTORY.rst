@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.15 (2017-09-22)
 +++++++++++++++++++
 * `vm/vmss/disk create`: support availability zone
 * `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
