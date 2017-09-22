@@ -326,7 +326,11 @@ helps['resource update'] = """
 
 helps['resource invoke-action'] = """
     type: command
-    short-summary: Invoke an action on the resource. Must provide the --action parameter
+    short-summary: Invoke an action on the resource.
+    long-summary: >
+        A list of possible actions corresponding to a resource can be found at https://docs.microsoft.com/en-us/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
+        request URI is https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/virtualMachines/{vm}/powerOff?api-version={apiVersion} and the corresponding action is `powerOff`. This can
+        be found at https://docs.microsoft.com/en-us/rest/api/compute/virtualmachines/virtualmachines-stop.
     examples:
        - name: Power-off a vm, specified by Id.
          text: >
