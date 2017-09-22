@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:41:56 GMT']
+      date: ['Fri, 22 Sep 2017 22:31:54 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: 'b''{"properties": {"mode": "Indexed", "displayName": "test_policy000003",
@@ -53,11 +53,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['687']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:41:59 GMT']
+      date: ['Fri, 22 Sep 2017 22:31:55 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -80,7 +80,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['687']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:00 GMT']
+      date: ['Fri, 22 Sep 2017 22:31:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -113,11 +113,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:02 GMT']
+      date: ['Fri, 22 Sep 2017 22:31:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -133,8 +133,10 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policydefinitions?api-version=2016-12-01
   response:
-    body: {string: '{"value":[{"properties":{"displayName":"[Preview]: Monitor unencrypted
-        VM Disks in Security Center","policyType":"BuiltIn","mode":"All","description":"VMs
+    body: {string: '{"value":[{"properties":{"displayName":"Audit VMs that do not
+        use managed disks","policyType":"BuiltIn","mode":"All","description":"This
+        policy audits VMs that do not use managed disks","metadata":{},"parameters":{},"policyRule":{"if":{"anyOf":[{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"field":"Microsoft.Compute/virtualMachines/osDisk.uri","exists":"True"}]},{"allOf":[{"field":"type","equals":"Microsoft.Compute/VirtualMachineScaleSets"},{"anyOf":[{"field":"Microsoft.Compute/VirtualMachineScaleSets/osDisk.vhdContainers","exists":"True"},{"field":"Microsoft.Compute/VirtualMachineScaleSets/osdisk.imageUrl","exists":"True"}]}]}]},"then":{"effect":"audit"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","type":"Microsoft.Authorization/policyDefinitions","name":"06a78e20-9358-41c9-923c-fb736d382a4d"},{"properties":{"displayName":"[Preview]:
+        Monitor unencrypted VM Disks in Security Center","policyType":"BuiltIn","mode":"All","description":"VMs
         without an enabled disk encryption will be monitored by Azure Security Center
         as recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Compute/virtualMachines"},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"encryption","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d","type":"Microsoft.Authorization/policyDefinitions","name":"0961003e-5a0a-4549-abde-af6a37f2724d"},{"properties":{"displayName":"Enforce
         tag and its value","policyType":"BuiltIn","description":"Enforces a required
@@ -238,16 +240,16 @@ interactions:
         list of locations that can be specified when deploying resources.","strongType":"location","displayName":"Allowed
         locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policyijppv2psk","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy3um67aujr","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy3um67aujr"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy3um67aujr","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy3um67aujr"},{"properties":{"displayName":"test_policybgrkug5se","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policybgrkug5se","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyhqu5tiln5","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyhqu5tiln5"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyhqu5tiln5","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyhqu5tiln5"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk1071","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk1071"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk2200","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk2200"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk3296","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk3296"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk634","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk634"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk6972","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk6972"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk7587","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk7587"},{"properties":{"policyType":"Custom","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test123","type":"Microsoft.Authorization/policyDefinitions","name":"test123"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"blah"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test2","type":"Microsoft.Authorization/policyDefinitions","name":"test2"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testclinewpdmode","type":"Microsoft.Authorization/policyDefinitions","name":"testclinewpdmode"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testuri","type":"Microsoft.Authorization/policyDefinitions","name":"testuri"},{"properties":{"displayName":"dsfdsdsf","policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testvivek","type":"Microsoft.Authorization/policyDefinitions","name":"testvivek"}]}'}
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk1071","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk1071"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk2200","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk2200"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk3296","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk3296"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk634","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk634"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk6972","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk6972"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk7587","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk7587"},{"properties":{"policyType":"Custom","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test123","type":"Microsoft.Authorization/policyDefinitions","name":"test123"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"blah"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test2","type":"Microsoft.Authorization/policyDefinitions","name":"test2"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testclinewpdmode","type":"Microsoft.Authorization/policyDefinitions","name":"testclinewpdmode"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testuri","type":"Microsoft.Authorization/policyDefinitions","name":"testuri"},{"properties":{"displayName":"dsfdsdsf","policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testvivek","type":"Microsoft.Authorization/policyDefinitions","name":"testvivek"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['30128']
+      content-length: ['30993']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:04 GMT']
+      date: ['Fri, 22 Sep 2017 22:31:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -275,7 +277,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:06 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -303,7 +305,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:08 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -334,11 +336,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['825']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:11 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -359,7 +361,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['837']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:13 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -385,7 +387,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['837']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:15 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -412,13 +414,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['825']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:17 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -439,7 +441,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:19 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -468,13 +470,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:21 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -490,8 +492,10 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policydefinitions?api-version=2016-12-01
   response:
-    body: {string: '{"value":[{"properties":{"displayName":"[Preview]: Monitor unencrypted
-        VM Disks in Security Center","policyType":"BuiltIn","mode":"All","description":"VMs
+    body: {string: '{"value":[{"properties":{"displayName":"Audit VMs that do not
+        use managed disks","policyType":"BuiltIn","mode":"All","description":"This
+        policy audits VMs that do not use managed disks","metadata":{},"parameters":{},"policyRule":{"if":{"anyOf":[{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"field":"Microsoft.Compute/virtualMachines/osDisk.uri","exists":"True"}]},{"allOf":[{"field":"type","equals":"Microsoft.Compute/VirtualMachineScaleSets"},{"anyOf":[{"field":"Microsoft.Compute/VirtualMachineScaleSets/osDisk.vhdContainers","exists":"True"},{"field":"Microsoft.Compute/VirtualMachineScaleSets/osdisk.imageUrl","exists":"True"}]}]}]},"then":{"effect":"audit"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","type":"Microsoft.Authorization/policyDefinitions","name":"06a78e20-9358-41c9-923c-fb736d382a4d"},{"properties":{"displayName":"[Preview]:
+        Monitor unencrypted VM Disks in Security Center","policyType":"BuiltIn","mode":"All","description":"VMs
         without an enabled disk encryption will be monitored by Azure Security Center
         as recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Compute/virtualMachines"},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"encryption","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d","type":"Microsoft.Authorization/policyDefinitions","name":"0961003e-5a0a-4549-abde-af6a37f2724d"},{"properties":{"displayName":"Enforce
         tag and its value","policyType":"BuiltIn","description":"Enforces a required
@@ -600,9 +604,9 @@ interactions:
         locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyhqu5tiln5","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyhqu5tiln5"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk1071","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk1071"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk2200","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk2200"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk3296","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk3296"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk634","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk634"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk6972","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk6972"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk7587","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk7587"},{"properties":{"policyType":"Custom","metadata":{"test":"test"},"policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test123","type":"Microsoft.Authorization/policyDefinitions","name":"test123"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"blah"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test2","type":"Microsoft.Authorization/policyDefinitions","name":"test2"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testclinewpdmode","type":"Microsoft.Authorization/policyDefinitions","name":"testclinewpdmode"},{"properties":{"policyType":"Custom","mode":"All","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testuri","type":"Microsoft.Authorization/policyDefinitions","name":"testuri"},{"properties":{"displayName":"dsfdsdsf","policyType":"Custom","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/testvivek","type":"Microsoft.Authorization/policyDefinitions","name":"testvivek"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['29440']
+      content-length: ['30318']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Sep 2017 20:42:34 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -629,11 +633,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 22 Sep 2017 20:42:36 GMT']
+      date: ['Fri, 22 Sep 2017 22:32:26 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZSENJQUZPSzZJRFJaQk00WURKUUY3TDRXVVJQR3wwRDQwQzM1OUM5RUE5NzBGLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZUlBHSEhDSEJMNzJSTjdPRlI1NExTQkFPM1dVTXwzMzlEQkNFOTQyNEE0RUI5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 202, message: Accepted}
 version: 1

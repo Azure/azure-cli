@@ -537,7 +537,9 @@ class PolicyScenarioTest(ScenarioTest):
                  policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
                  checks=[
                     JCheck('name', policy_assignment_name),
-                    JCheck('displayName', policy_assignment_display_name)
+                    JCheck('displayName', policy_assignment_display_name),
+                    JCheck('sku.name', 'A0'),
+                    JCheck('sku.tier', 'Free'),
                  ])
 
         # listing at subscription level won't find the assignment made at a resource group
