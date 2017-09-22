@@ -34,7 +34,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].sku.name', 'B1')
         ])
         self.cmd('appservice plan list', checks=[
-            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, self.resource_group), 1)
+            JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, self.resource_group), 0)
         ])
         self.cmd('appservice plan show -g {} -n {}'.format(self.resource_group, plan), checks=[
             JMESPathCheck('name', plan)
@@ -67,10 +67,10 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('failedRequestsTracing.enabled', True)
         ])
         self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
-            JMESPathCheck('detailedErrorLoggingEnabled', True),
-            JMESPathCheck('httpLoggingEnabled', True),
-            JMESPathCheck('scmType', 'LocalGit'),
-            JMESPathCheck('requestTracingEnabled', True)
+            JMESPathCheck('siteConfig.detailedErrorLoggingEnabled', True),
+            JMESPathCheck('siteConfig.httpLoggingEnabled', True),
+            JMESPathCheck('siteConfig.scmType', 'LocalGit'),
+            JMESPathCheck('siteConfig.requestTracingEnabled', True)
             # TODO: contact webapp team for where to retrieve 'level'
         ])
         # show publish profile info
@@ -188,7 +188,7 @@ class AppServicePlanSceanrioTest(ScenarioTest):
 class WebappConfigureTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappConfigureTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-config')
-        self.webapp_name = 'webapp-config-test'
+        self.webapp_name = 'webapp-config-test1'
 
     def test_webapp_config(self):
         self.execute()
@@ -203,23 +203,23 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         # site config testing
         # verify the baseline
         result = self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('alwaysOn', False),
-            JMESPathCheck('autoHealEnabled', False),
-            JMESPathCheck('phpVersion', '5.6'),
-            JMESPathCheck('netFrameworkVersion', 'v4.0'),
-            JMESPathCheck('pythonVersion', ''),
-            JMESPathCheck('use32BitWorkerProcess', True),
-            JMESPathCheck('webSocketsEnabled', False)
+            JMESPathCheck('siteConfig.alwaysOn', False),
+            JMESPathCheck('siteConfig.autoHealEnabled', False),
+            JMESPathCheck('siteConfig.phpVersion', '5.6'),
+            JMESPathCheck('siteConfig.netFrameworkVersion', 'v4.0'),
+            JMESPathCheck('siteConfig.pythonVersion', ''),
+            JMESPathCheck('siteConfig.use32BitWorkerProcess', True),
+            JMESPathCheck('siteConfig.webSocketsEnabled', False)
         ])
         # update and verify
         checks = [
-            JMESPathCheck('alwaysOn', True),
-            JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.0'),
-            JMESPathCheck('netFrameworkVersion', 'v3.0'),
-            JMESPathCheck('pythonVersion', '3.4'),
-            JMESPathCheck('use32BitWorkerProcess', False),
-            JMESPathCheck('webSocketsEnabled', True)
+            JMESPathCheck('siteConfig.alwaysOn', True),
+            JMESPathCheck('siteConfig.autoHealEnabled', True),
+            JMESPathCheck('siteConfig.phpVersion', '7.0'),
+            JMESPathCheck('siteConfig.netFrameworkVersion', 'v3.0'),
+            JMESPathCheck('siteConfig.pythonVersion', '3.4'),
+            JMESPathCheck('siteConfig.use32BitWorkerProcess', False),
+            JMESPathCheck('siteConfig.webSocketsEnabled', True)
         ]
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
             self.resource_group, self.webapp_name), checks=checks)
@@ -232,7 +232,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck("length([?name=='s3'])", 1),
             JMESPathCheck("length([?value=='foo'])", 1),
             JMESPathCheck("length([?value=='bar'])", 1),
-            JMESPathCheck("length([?value=='foo'])", 1)
+            JMESPathCheck("length([?value=='bar2'])", 1)
         ])
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
@@ -361,7 +361,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
             JMESPathCheckV2('[0].name', webapp)
         ])
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
-            JMESPathCheckV2('appCommandLine', 'process.json')
+            JMESPathCheckV2('siteConfig.appCommandLine', 'process.json')
         ])
 
         result = self.cmd('webapp deployment container config -g {} -n {} --enable-cd true'.format(resource_group, webapp)).get_output_in_json()
@@ -446,6 +446,7 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
         test_php_version = '5.6'
+        test_arr_affinity = True
         # create a few app-settings to test they can be cloned
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
         # create an empty slot
@@ -461,10 +462,11 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         result = self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['s1']))
         # create a new slot by cloning from prod slot
-        self.cmd('webapp config set -g {} -n {} --php-version {}'.format(self.resource_group, self.webapp, test_php_version))
+        self.cmd('webapp config set -g {} -n {} --php-version {} --arr-affinity {}'.format(self.resource_group, self.webapp, test_php_version, test_arr_affinity))
         self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
         self.cmd('webapp config show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
-            JMESPathCheck("phpVersion", test_php_version),
+            JMESPathCheck('siteConfig.phpVersion', test_php_version),
+            JMESPathCheck('clientAffinityEnabled', test_arr_affinity)
         ])
         self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("[?name=='s4']|[0].slotSetting", True),

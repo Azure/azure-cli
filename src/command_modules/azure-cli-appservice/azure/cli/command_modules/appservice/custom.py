@@ -53,7 +53,11 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
+    # adding default app setting for webapp
+    site_config.app_settings.append(NameValuePair('WEBSITE_NODE_DEFAULT_VERSION', '6.5.0'))
+
     if is_linux:
+        site_config.app_settings = []  # linux doesn't support the default app settings
         if runtime and deployment_container_image_name:
             raise CLIError('usage error: --runtime | --deployment-container-image-name')
         if startup_file:
@@ -203,7 +207,15 @@ def restart_webapp(resource_group_name, name, slot=None):
 
 
 def get_site_configs(resource_group_name, name, slot=None):
-    return _generic_site_operation(resource_group_name, name, 'get_configuration', slot)
+    client = web_client_factory()
+    site_config = _generic_site_operation(resource_group_name, name, 'get_configuration', slot)
+    if not slot:
+        site_props = client.web_apps.get(resource_group_name, name)
+    else:
+        site_props = client.web_apps.get_slot(resource_group_name, name, slot)
+
+    site_props.site_config = site_config
+    return site_props
 
 
 def get_app_settings(resource_group_name, name, slot=None):
@@ -267,20 +279,36 @@ def update_site_configs(resource_group_name, name, slot=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
                         use32_bit_worker_process=None,  # pylint: disable=unused-argument
+                        arr_affinity=None,  # pylint: disable=unused-argument
                         app_command_line=None):  # pylint: disable=unused-argument
+
     configs = get_site_configs(resource_group_name, name, slot)
+    site_config = configs.site_config
+    print("Config is {}".format(site_config))
+
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process']
+                  'auto_heal_enabled', 'use32_bit_worker_process', 'arr_affinity']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+
     for arg in args[3:]:
         if values.get(arg, None):
-            setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+            if arg == 'arr_affinity':
+                setattr(configs, 'client_affinity_enabled', values[arg] == 'true')
+                configs = _set_arr_affinity(name, resource_group_name, configs, slot)
+                # the above call sets the site_config to null
+                configs.site_config = site_config
+            else:
+                setattr(site_config, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
-    return _generic_site_operation(resource_group_name, name, 'update_configuration', slot, configs)
+    site_config_updated = _generic_site_operation(resource_group_name, name, 'update_configuration', slot,
+                                                  configs.site_config)
+    configs.site_config = site_config_updated
+
+    return configs
 
 
 def update_app_settings(resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -1093,20 +1121,20 @@ def set_traffic_routing(resource_group_name, name, distribution):
     site = client.web_apps.get(resource_group_name, name)
     configs = get_site_configs(resource_group_name, name)
     host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
-    configs.experiments.ramp_up_rules = []
+    configs.site_config.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
-        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+        configs.site_config.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
                                                             name=slot))
     _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
 
-    return configs.experiments.ramp_up_rules
+    return configs.site_config.experiments.ramp_up_rules
 
 
 def show_traffic_routing(resource_group_name, name):
     configs = get_site_configs(resource_group_name, name)
-    return configs.experiments.ramp_up_rules
+    return configs.site_config.experiments.ramp_up_rules
 
 
 def clear_traffic_routing(resource_group_name, name):
@@ -1470,3 +1498,13 @@ def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+
+
+def _set_arr_affinity(name, resource_group_name, config, slot=None):
+    client = web_client_factory()
+    if not slot:
+        updated_config = client.web_apps.create_or_update(resource_group_name, name, config)
+    else:
+        print("Slot update arr Affinity")
+        updated_config = client.web_apps.create_or_update_slot(resource_group_name, name, config, slot)
+    return updated_config
