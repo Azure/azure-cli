@@ -10,6 +10,7 @@ if "%CLIVERSION%"=="" (
     goto ERROR
 )
 
+::when change to a later version, please update ones in build_local.cmd 
 set PYTHON_VERSION=3.6.1
 
 pushd %~dp0..\

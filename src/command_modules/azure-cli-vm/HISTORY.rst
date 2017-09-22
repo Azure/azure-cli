@@ -5,6 +5,7 @@ Release History
 
 unreleased
 +++++++++++++++++++
+* `vm/vmss/disk create`: support availability zone
 * `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
 * `vm create`: Added `--asgs` support.
 * `vm run-command`: support to run commands on remote VMs
