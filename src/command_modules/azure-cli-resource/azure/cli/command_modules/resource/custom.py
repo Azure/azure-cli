@@ -693,9 +693,9 @@ def list_features(client, resource_provider_namespace=None):
 def create_policy_assignment(policy=None, policysetdefinition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None):
-    if policy and policysetdefinition:
-        raise CLIError('usage error: must specify only one --policy POLICY | \
-        --policy-set-definition POLICYSETDEFINITION')
+    if bool(policy) == bool(policysetdefinition):
+        raise CLIError('usage error: --policy NAME_OR_ID | \
+        --policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
@@ -784,15 +784,15 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
     return scope
 
 
-def _resolve_policy_id(policy, policysetdefinition, client):
-    policy_id = policy or policysetdefinition
+def _resolve_policy_id(policy, policy_set_definition, client):
+    policy_id = policy or policy_set_definition
     if not is_valid_resource_id(policy_id):
         if policy:
             policy_def = client.policy_definitions.get(policy)
             policy_id = policy_def.id
         else:
-            policy_setdef = client.policy_set_definitions.get(policysetdefinition)
-            policy_id = policy_setdef.id
+            policy_set_def = client.policy_set_definitions.get(policy_set_definition)
+            policy_id = policy_set_def.id
     return policy_id
 
 
