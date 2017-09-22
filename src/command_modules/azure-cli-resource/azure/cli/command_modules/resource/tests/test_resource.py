@@ -542,6 +542,24 @@ class PolicyScenarioTest(ScenarioTest):
                     JCheck('sku.tier', 'Free'),
                  ])
 
+        # create a policy assignment with not scopes and standard sku
+        get_cmd = 'group show -n {}'
+        rg = self.cmd(get_cmd.format(resource_group)).get_output_in_json()
+        vnet_name = self.create_random_name('azurecli-test-policy-vnet', 40)
+        subnet_name = self.create_random_name('azurecli-test-policy-subnet', 40)
+        vnetcreatecmd = 'network vnet create -g {} -n {} --subnet-name {}'
+        self.cmd(vnetcreatecmd.format(resource_group, vnet_name, subnet_name))
+        notscope = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks'.format(rg['id'].split("/")[2], resource_group)
+        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --not-scopes {} --params {} --sku {}'.format(
+                 policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, notscope, params_file, 'standard'),
+                 checks=[
+                    JCheck('name', policy_assignment_name),
+                    JCheck('displayName', policy_assignment_display_name),
+                    JCheck('sku.name', 'A1'),
+                    JCheck('sku.tier', 'Standard'),
+                    JCheck('notScopes[0]', notscope)
+                 ])
+
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
