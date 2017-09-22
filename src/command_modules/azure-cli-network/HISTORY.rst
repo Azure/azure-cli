@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.15 (2017-09-22)
 +++++++++++++++++++
 * `lb/public-ip`: Add availability zone support.
 * `express-route`: Add support for IPv6 Microsoft Peering
