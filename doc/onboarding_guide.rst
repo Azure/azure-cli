@@ -5,17 +5,19 @@ You'll have a dev contact on the CLI team. Early and frequent communication with
 
 Suggested timeline:
 
-- **First Week:** Reach out to your contact on the CLI team. Set up a short 30 minute Skype call to discuss initial questions.
+- **Initial Kickoff:** Reach out to your contact on the CLI team. Set up a short 30 minute Skype call to discuss initial questions.
 
-- **Second Week and as needed:** Create a few commands. Schedule a short 30 minute Skype screen-share to demo your commands. This is crucial! Teams have created entire modules using anti-patterns, resulting in comment-filled PRs and last-minute rework! A quick command review would have prevented this.
+- **Initial Review:** Create a few commands. Schedule a short 30 minute Skype screen-share to demo your commands. This is crucial! Teams have created entire modules using anti-patterns, resulting in comment-filled PRs and last-minute rework! A quick command review would have prevented this.
 
-- **During command authoring:** Run *check_style --module {your module} --pep8 --pylint* frequently to ensure you are staying on type of style issues that will stall your build when you submit a PR.
+- **During command authoring:** Run *check_style --module {your module}* frequently to ensure you are staying on type of style issues that will stall your build when you submit a PR.
+
+- **Period Command Review:** As practical.
 
 - **Just before opening PR:** Run *check_style --ci* and *run_tests* to address issues before the CI finds them.
 
 - **2 weeks before desired release date:** Open PR in CLI repo (public or private depending on your service). Request your CLI contact as the reviewer for the PR.
 
-- **1 week prior to desired release date:** Hopefully, PR is merged! Download the nightly build and try it out. Submit follow-up PRs to address any small issues. Anything caught before release is not a breaking change!
+- **1 week prior to desired release date:** Hopefully, PR is merged! Download the edge build and try it out. Submit follow-up PRs to address any small issues. Anything caught before release is not a breaking change!
 
 Inital Pull Request Guidance
 ============================
