@@ -3,8 +3,8 @@
 Release History
 ===============
 
-Unreleased
-++++++++++++++++++++
+2.0.12 (2017-09-22)
++++++++++++++++++++
 * az sql server list --resource-group argument is now optional. If not specified, all sql servers in the entire subscription will be returned.
 * Added --no-wait param to db create, db copy, db restore, db update, db replica create, dw create, and dw update commands
 
