@@ -908,7 +908,7 @@ helps['network lb create'] = """
         - name: Create a load balancer on a specific virtual network and subnet.
           text: >
             az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
-        - name: create a zone flavored public facing load balancer through provisiong a zonal public ip
+        - name: create a zone flavored public facing load balancer through provisioning a zonal public ip
           text: >
             az network lb create -g MyResourceGroup -n myLB --public-ip-zone 2
         - name: create a zone flavored internal facing load balancer through provisioning a zonal frontend ip configuration

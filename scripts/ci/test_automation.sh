@@ -6,7 +6,6 @@ set -e
 
 pip install -qqq -e ./tools
 pip install -qqq coverage codecov
-
 pip install -qqq azure-cli-fulltest -f $share_folder/build
 
 echo '=== List installed packages'
