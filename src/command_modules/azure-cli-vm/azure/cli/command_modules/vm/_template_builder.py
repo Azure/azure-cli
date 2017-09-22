@@ -851,13 +851,15 @@ def build_av_set_resource(name, location, tags,
         'location': location,
         'tags': tags,
         'apiVersion': av_set_api_version,
-        'sku': {
-            'name': 'Classic' if unmanaged else 'Aligned'
-        },
         "properties": {
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
+
+    if supported_api_version(ResourceType.MGMT_COMPUTE, '2016-04-30-preview'):
+        av_set['sku'] = {
+            'name': 'Classic' if unmanaged else 'Aligned'
+        }
 
     # server defaults the UD to 5 unless set otherwise
     if platform_update_domain_count is not None:
