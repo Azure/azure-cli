@@ -16,15 +16,21 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _get_extension_instance_name)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
+
+
 from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, _check_encrypt_is_supported,
                                                           encrypt_vmss, decrypt_vmss)
-from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
-                                       OperatingSystemTypes, InstanceViewStatus,
-                                       VirtualMachineExtensionInstanceView,
-                                       VirtualMachineExtension, ImageReference,
-                                       DiskCreateOptionTypes, CachingTypes,
-                                       VirtualMachineScaleSetVMProfile, VirtualMachineScaleSetOSProfile,
-                                       LinuxConfiguration)
+from azure.cli.core.profiles import get_sdk, ResourceType
+
+NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
+    VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
+    VirtualMachineScaleSetVMProfile, VirtualMachineScaleSetOSProfile, LinuxConfiguration, \
+    CachingTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
+                           'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
+                           'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
+                           'VirtualMachineScaleSetVMProfile', 'VirtualMachineScaleSetOSProfile', 'LinuxConfiguration',
+                           'CachingTypes',
+                           mod='models')
 
 
 class Test_Vm_Custom(unittest.TestCase):

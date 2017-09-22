@@ -2,8 +2,8 @@
 
 Release History
 ===============
-unreleased
-++++++++++
+0.1.17 (2017-09-22)
++++++++++++++++++++
 * webapp: able to update and show authentication settings using "az webapp auth update/show"
 
 0.1.16 (2017-09-11)

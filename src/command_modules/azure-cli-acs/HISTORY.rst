@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.16 (2017-09-22)
 +++++++++++++++++++
 * add orchestrator-release option for acs preview regions
 
