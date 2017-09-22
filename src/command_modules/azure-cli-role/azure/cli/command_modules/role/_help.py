@@ -9,6 +9,7 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 helps['ad sp create-for-rbac'] = """
     type: command
     short-summary: Create a service principal and configure its access to Azure resources.
+    Note: if cli login is using service principal, the service principal should have read and write access to Microsoft Graph appliation in the AAD tenant.
     parameters:
         - name: --name -n
           short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
