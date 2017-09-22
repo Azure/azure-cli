@@ -103,6 +103,7 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-pr
                             help='name or id of the policy set definition.')
     c.register_cli_argument('policy assignment create', 'sku', options_list=('--sku', '-s'),
                             help='policy sku.', **enum_choice_list(['free', 'standard']))
+    c.register_cli_argument('policy assignment create', 'notscopes', options_list=('--not-scopes'), nargs='+')
 
 register_cli_argument('policy assignment', 'scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('policy assignment', 'disable_scope_strict_match', action='store_true', help='include assignment either inhertied from parent scope or at child scope')

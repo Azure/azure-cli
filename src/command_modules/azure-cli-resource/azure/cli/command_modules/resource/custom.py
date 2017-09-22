@@ -692,7 +692,11 @@ def list_features(client, resource_provider_namespace=None):
 
 def create_policy_assignment(policy=None, policysetdefinition=None,
                              name=None, display_name=None, params=None,
-                             resource_group_name=None, scope=None, sku=None):
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None):
+    """Creates a policy assignment
+    :param ids: the space separated not scopes value
+    """
     if bool(policy) == bool(policysetdefinition):
         raise CLIError('usage error: --policy NAME_OR_ID | \
         --policy-set-definition NAME_OR_ID')
@@ -708,13 +712,21 @@ def create_policy_assignment(policy=None, policysetdefinition=None,
             params = shell_safe_json_parse(params)
 
     PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
-    assignment = PolicyAssignment(display_name, policy_id, scope, params if params else None)
+    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment.parameters = params if params else None
+
     if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+        if not_scopes:
+            notscopes = []
+            for i in not_scopes:
+                notscopes.append(i)
+            assignment.not_scopes = notscopes
         PolicySku = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySku', mod='models')
         policySku = PolicySku('A0', 'Free')
         if sku:
             policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
         assignment.sku = policySku
+
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
                                                    assignment)
