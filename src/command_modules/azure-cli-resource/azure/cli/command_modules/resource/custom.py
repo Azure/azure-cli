@@ -1377,7 +1377,6 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         from msrestazure.azure_operation import AzureOperationPoller
         query_parameters = {}
         serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
-        deserialize = self.rcf.resources._deserialize  # pylint: disable=protected-access
         client = self.rcf.resources._client  # pylint: disable=protected-access
 
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
