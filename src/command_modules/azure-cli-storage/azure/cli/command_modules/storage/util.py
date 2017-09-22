@@ -143,10 +143,10 @@ def guess_content_type(file_path, original, settings_class):
 
     import mimetypes
 
-    content_type, content_encoding = mimetypes.guess_type(file_path)
+    content_type, _ = mimetypes.guess_type(file_path)
     return settings_class(
         content_type=content_type,
-        content_encoding=content_encoding,
+        content_encoding=original.content_encoding,
         content_disposition=original.content_disposition,
         content_language=original.content_language,
         content_md5=original.content_md5,

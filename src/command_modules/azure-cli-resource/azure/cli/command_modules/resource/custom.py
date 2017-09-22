@@ -23,10 +23,10 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
-from azure.mgmt.resource.managedapplications.models import Appliance
+from azure.mgmt.resource.managedapplications.models import Application
 from azure.mgmt.resource.managedapplications.models import Plan
-from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
-from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
+from azure.mgmt.resource.managedapplications.models import ApplicationDefinition
+from azure.mgmt.resource.managedapplications.models import ApplicationProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
@@ -34,7 +34,7 @@ from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
@@ -80,14 +80,14 @@ def create_resource_group(rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
-def create_appliance(resource_group_name,
-                     appliance_name, managedby_resource_group_id,
-                     location, kind, managedapp_definition_id=None,
-                     plan_name=None, plan_publisher=None, plan_product=None,
-                     plan_version=None, tags=None, parameters=None):
+def create_application(resource_group_name,
+                       application_name, managedby_resource_group_id,
+                       kind, managedapp_definition_id=None, location=None,
+                       plan_name=None, plan_publisher=None, plan_product=None,
+                       plan_version=None, tags=None, parameters=None):
     """ Create a new managed application.
     :param str resource_group_name:the desired resource group name
-    :param str appliance_name:the managed application name
+    :param str application_name:the managed application name
     :param str kind:the managed application kind. can be marketplace or servicecatalog
     :param str plan_name:the managed application package plan name
     :param str plan_publisher:the managed application package plan publisher
@@ -96,7 +96,10 @@ def create_appliance(resource_group_name,
     :param str tags:tags in 'a=b c' format
     """
     racf = _resource_managedapps_client_factory()
-    appliance = Appliance(
+    rcf = _resource_client_factory()
+    if not location:
+        location = rcf.resource_groups.get(resource_group_name).location
+    application = Application(
         location=location,
         managed_resource_group_id=managedby_resource_group_id,
         kind=kind,
@@ -105,7 +108,7 @@ def create_appliance(resource_group_name,
 
     if kind.lower() == 'servicecatalog':
         if managedapp_definition_id:
-            appliance.appliance_definition_id = managedapp_definition_id
+            application.application_definition_id = managedapp_definition_id
         else:
             raise CLIError('--managedapp-definition-id is required if kind is ServiceCatalog')
     elif kind.lower() == 'marketplace':
@@ -114,79 +117,101 @@ def create_appliance(resource_group_name,
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
         else:
-            appliance.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
+            application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
 
-    applianceParameters = None
+    applicationParameters = None
 
     if parameters:
         if os.path.exists(parameters):
-            applianceParameters = get_file_json(parameters)
+            applicationParameters = get_file_json(parameters)
         else:
-            applianceParameters = shell_safe_json_parse(parameters)
+            applicationParameters = shell_safe_json_parse(parameters)
 
-    appliance.parameters = applianceParameters
+    application.parameters = applicationParameters
 
-    return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
+    return racf.applications.create_or_update(resource_group_name, application_name, application)
 
 
-def show_appliance(resource_group_name=None, appliance_name=None):
+def show_application(resource_group_name=None, application_name=None):
     """ Gets a managed application.
     :param str resource_group_name:the resource group name
-    :param str appliance_name:the managed application name
+    :param str application_name:the managed application name
     """
     racf = _resource_managedapps_client_factory()
-    return racf.appliances.get(resource_group_name, appliance_name)
+    return racf.applications.get(resource_group_name, application_name)
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None):
+def show_applicationdefinition(resource_group_name=None, application_definition_name=None):
     """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
-    :param str appliance_definition_name:the managed application definition name
+    :param str application_definition_name:the managed application definition name
     """
     racf = _resource_managedapps_client_factory()
-    return racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
+    return racf.application_definitions.get(resource_group_name, application_definition_name)
 
 
-def create_appliancedefinition(resource_group_name,
-                               appliance_definition_name, location,
-                               lock_level, package_file_uri, authorizations,
-                               description, display_name, tags=None):
+def create_applicationdefinition(resource_group_name,
+                                 application_definition_name,
+                                 lock_level, authorizations,
+                                 description, display_name,
+                                 package_file_uri=None, create_ui_definition=None,
+                                 main_template=None, location=None, tags=None):
     """ Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
-    :param str appliance_definition_name:the managed application definition name
+    :param str application_definition_name:the managed application definition name
     :param str description:the managed application definition description
     :param str display_name:the managed application definition display name
     :param str package_file_uri:the managed application definition package file uri
+    :param str create_ui_definition:the managed application definition create ui definition
+    :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
+    if(not package_file_uri and not create_ui_definition and
+       not main_template):
+        raise CLIError('usage error: --package-file-uri <url> | \
+        --create-ui-definition --main-template')
+    elif package_file_uri:
+        if create_ui_definition or main_template:
+            raise CLIError('usage error: must not specify \
+            --create-ui-definition --main-template')
+    elif not package_file_uri:
+        if not create_ui_definition or not main_template:
+            raise CLIError('usage error: must specify \
+            --create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory()
+    rcf = _resource_client_factory()
+    if not location:
+        location = rcf.resource_groups.get(resource_group_name).location
     authorizations = authorizations or []
-    applianceAuthList = []
+    applicationAuthList = []
 
     for name_value in authorizations:
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
-        applianceAuth = ApplianceProviderAuthorization(principalId, roleDefinitionId)
-        applianceAuthList.append(applianceAuth)
+        applicationAuth = ApplicationProviderAuthorization(principalId, roleDefinitionId)
+        applicationAuthList.append(applicationAuth)
 
-    applianceDef = ApplianceDefinition(lock_level, applianceAuthList, package_file_uri)
-    applianceDef.display_name = display_name
-    applianceDef.description = description
-    applianceDef.location = location
-    applianceDef.tags = tags
+    applicationDef = ApplicationDefinition(lock_level, applicationAuthList, package_file_uri)
+    applicationDef.display_name = display_name
+    applicationDef.description = description
+    applicationDef.location = location
+    applicationDef.package_file_uri = package_file_uri
+    applicationDef.create_ui_definition = create_ui_definition
+    applicationDef.main_template = main_template
+    applicationDef.tags = tags
 
-    return racf.appliance_definitions.create_or_update(resource_group_name,
-                                                       appliance_definition_name, applianceDef)
+    return racf.application_definitions.create_or_update(resource_group_name,
+                                                         application_definition_name, applicationDef)
 
 
-def list_appliances(resource_group_name=None):
+def list_applications(resource_group_name=None):
     racf = _resource_managedapps_client_factory()
 
     if resource_group_name:
-        appliances = racf.appliances.list_by_resource_group(resource_group_name)
+        applications = racf.applications.list_by_resource_group(resource_group_name)
     else:
-        appliances = racf.appliances.list_by_subscription()
-    return list(appliances)
+        applications = racf.applications.list_by_subscription()
+    return list(applications)
 
 
 def export_group_as_template(
@@ -774,7 +799,7 @@ def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
     return shell_safe_json_parse(file_or_string_or_uri)
 
 
-def create_policy_definition(name, rules=None, params=None, display_name=None, description=None):
+def create_policy_definition(name, rules=None, params=None, display_name=None, description=None, mode=None):
     rules = _load_file_string_or_uri(rules, 'rules')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -782,7 +807,23 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(policy_rule=rules, parameters=params, description=description,
                                   display_name=display_name)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01'):
+        parameters.mode = mode
     return policy_client.policy_definitions.create_or_update(name, parameters)
+
+
+def get_policy_definition(policy_definition_name):
+    from msrestazure.azure_exceptions import CloudError
+    policy_client = _resource_policy_client_factory()
+    try:
+        return policy_client.policy_definitions.get(policy_definition_name)
+    except CloudError as ex:
+        if ex.status_code == 404:
+            # work around for https://github.com/Azure/azure-cli/issues/692
+            policy_id = '/providers/Microsoft.Authorization/policydefinitions/' + policy_definition_name
+            rcf = _resource_client_factory()
+            return rcf.resources.get_by_id(policy_id, policy_client.policy_definitions.api_version)
+        raise
 
 
 def update_policy_definition(policy_definition_name, rules=None, params=None,
@@ -852,7 +893,7 @@ def list_locks(resource_group_name=None,
         return lock_client.management_locks.list_at_resource_group_level(
             resource_group_name, filter=filter_string)
     return lock_client.management_locks.list_at_resource_level(
-        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, filter=filter_string)
 
 
@@ -913,12 +954,49 @@ def _validate_lock_params_match_lock(
                 name, _resource_name))
 
 
-def get_lock(name, resource_group_name=None, resource_provider_namespace=None,
-             parent_resource_path=None, resource_type=None, resource_name=None):
+def _parse_lock_id(id_arg):
+    """
+    Lock ids look very different from regular resource ids, this function uses a regular expression
+    that parses a lock's id and extracts the following parameters if available:
+    -lock_name: the lock's name; always present in a lock id
+    -resource_group_name: the name of the resource group; present in group/resource level locks
+    -resource_provider_namespace: the resource provider; present in resource level locks
+    -resource_type: the resource type; present in resource level locks
+    -resource_name: the resource name; present in resource level locks
+    -parent_resource_path: the resource's parent path; present in child resources such as subnets
+    """
+    regex = re.compile(
+        '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
+        '(/providers/(?P<resource_provider_namespace>[^/]*)'
+        '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
+        '/providers/Microsoft.Authorization/locks/(?P<lock_name>[^/]*)')
+
+    return regex.match(id_arg).groupdict()
+
+
+def _call_subscription_get(lock_client, *args):
+    if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
+        return lock_client.management_locks.get(*args)
+    return lock_client.management_locks.get_at_subscription_level(*args)
+
+
+def get_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None,
+             parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
     :type name: str
     """
+    if ids:
+        kwargs_list = []
+        for id_arg in ids:
+            try:
+                kwargs_list.append(_parse_lock_id(id_arg))
+            except AttributeError:
+                logger.error('az lock show: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        results = [get_lock(**kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
+
     lock_client = _resource_lock_client_factory()
 
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -929,22 +1007,25 @@ def get_lock(name, resource_group_name=None, resource_provider_namespace=None,
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return lock_client.management_locks.get_at_subscription_level(name)
+        return _call_subscription_get(lock_client, lock_name)
     if resource_name is None:
-        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, lock_name)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
+        lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
+                               resource_type, resource_name)
+        return next((lock for lock in lock_list if lock.name == lock_name), None)
     return lock_client.management_locks.get_at_resource_level(
         resource_group_name, resource_provider_namespace,
-        parent_resource_path or '', resource_type, resource_name, name)
+        parent_resource_path or '', resource_type, resource_name, lock_name)
 
 
-def delete_lock(name,
-                resource_group_name=None, resource_provider_namespace=None,
-                parent_resource_path=None, resource_type=None, resource_name=None):
+def delete_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None,
+                parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
     :type name: str
@@ -957,6 +1038,17 @@ def delete_lock(name,
     :param resource_name: Name of a resource that has a lock.
     :type resource_name: str
     """
+    if ids:
+        kwargs_list = []
+        for id_arg in ids:
+            try:
+                kwargs_list.append(_parse_lock_id(id_arg))
+            except AttributeError:
+                logger.error('az lock delete: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        results = [delete_lock(**kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
+
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
                                          resource_type, resource_name)
@@ -965,18 +1057,18 @@ def delete_lock(name,
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return lock_client.management_locks.delete_at_subscription_level(name)
+        return lock_client.management_locks.delete_at_subscription_level(lock_name)
     if resource_name is None:
         return lock_client.management_locks.delete_at_resource_group_level(
-            resource_group_name, name)
+            resource_group_name, lock_name)
     return lock_client.management_locks.delete_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name)
+        resource_name, lock_name)
 
 
 def _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -994,7 +1086,7 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(name,
+def create_lock(lock_name,
                 resource_group_name=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None):
     """
@@ -1013,7 +1105,7 @@ def create_lock(name,
     """
     if level != 'ReadOnly' and level != 'CanNotDelete':
         raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
-    parameters = ManagementLockObject(level=level, notes=notes, name=name)
+    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory()
     lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -1024,38 +1116,74 @@ def create_lock(name,
     resource_type = lock_resource[3]
 
     if resource_group_name is None:
-        return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)
+        return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, parameters)
 
     if resource_name is None:
         return lock_client.management_locks.create_or_update_at_resource_group_level(
-            resource_group_name, name, parameters)
+            resource_group_name, lock_name, parameters)
 
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name, parameters)
+        resource_name, lock_name, parameters)
 
 
-def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
+def _update_lock_parameters(parameters, level, notes):
     if level is not None:
         parameters.level = level
     if notes is not None:
-        parameters.nodes = notes
-    if lock_id is not None:
-        parameters.id = lock_id
-    if lock_type is not None:
-        parameters.type = lock_type
+        parameters.notes = notes
 
 
-def update_lock(name, resource_group_name=None, level=None, notes=None):
+def update_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None, notes=None,
+                parent_resource_path=None, resource_type=None, resource_name=None, level=None, ids=None):
+    """
+    Allows updates to the lock-type(level) and the notes of the lock
+    """
+    if ids:
+        kwargs_list = []
+        for id_arg in ids:
+            try:
+                kwargs_list.append(_parse_lock_id(id_arg))
+            except AttributeError:
+                logger.error('az lock update: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        results = [update_lock(level=level, notes=notes, **kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
+
     lock_client = _resource_lock_client_factory()
+
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
+
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name, resource_provider_namespace,
+                                     parent_resource_path, resource_type, resource_name)
+
     if resource_group_name is None:
-        params = lock_client.management_locks.get(name)
-        _update_lock_parameters(params, level, notes, None, None)
-        return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
-    params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
-    _update_lock_parameters(params, level, notes, None, None)
-    return lock_client.management_locks.create_or_update_at_resource_group_level(
-        resource_group_name, name, params)
+        params = _call_subscription_get(lock_client, lock_name)
+        _update_lock_parameters(params, level, notes)
+        return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, params)
+    if resource_name is None:
+        params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, lock_name)
+        _update_lock_parameters(params, level, notes)
+        return lock_client.management_locks.create_or_update_at_resource_group_level(
+            resource_group_name, lock_name, params)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
+        lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
+                               resource_type, resource_name)
+        return next((lock for lock in lock_list if lock.name == lock_name), None)
+    else:
+        params = lock_client.management_locks.get_at_resource_level(
+            resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
+            resource_name, lock_name)
+    _update_lock_parameters(params, level, notes)
+    return lock_client.management_locks.create_or_update_at_resource_level(
+        resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
+        resource_name, lock_name, params)
 
 
 def create_resource_link(link_id, target_id, notes=None):

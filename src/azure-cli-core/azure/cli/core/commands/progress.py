@@ -123,7 +123,10 @@ class IndeterminateStandardOut(ProgressViewBase):
         self.spinner.step(label=msg)
 
     def clear(self):
-        self.spinner.clear()
+        try:
+            self.spinner.clear()
+        except AttributeError:
+            pass
 
     def flush(self):
         self.out.flush()

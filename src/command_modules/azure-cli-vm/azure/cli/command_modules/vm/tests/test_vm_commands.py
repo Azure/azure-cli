@@ -2147,6 +2147,55 @@ class VMLiveScenarioTest(LiveScenarioTest):
         self.assertTrue('Succeeded: {} (Microsoft.Compute/virtualMachines)'.format(vm_name) in lines)
 
 
+class VMRunCommandScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_run_command_e2e(self, resource_group, resource_group_location):
+        vm = 'test-run-command-vm'
+        self.cmd('vm run-command list -l ' + resource_group_location)
+        self.cmd('vm run-command show --command-id RunShellScript -l ' + resource_group_location)
+        public_ip = self.cmd('vm create -g {} -n {} --image ubuntults --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm)).get_output_in_json()['publicIpAddress']
+
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm))
+        self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"'.format(resource_group, vm))
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + public_ip)
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+    @ResourceGroupPreparer()
+    def test_run_command_with_parameters(self, resource_group):
+        vm = 'test-run-command-vm2'
+        self.cmd('vm create -g {} -n {} --image debian --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm))
+        self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world'.format(resource_group, vm))
+
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSSDiskEncryptionTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')  # the feature is only available in canary, should rollout to public soon
+    def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
+        vault_name = self.create_random_name('vault', 10)
+        vmss_name = 'vmss1'
+        self.cmd('keyvault create -g {} -n {} --enabled-for-disk-encryption "true"'.format(resource_group, vault_name))
+        self.cmd('vmss create -g {} -n {} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption enable -g {} -n {} --disk-encryption-keyvault {}'.format(resource_group, vmss_name, vault_name))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted')
+        ])
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+        self.cmd('vmss encryption disable -g {} -n {}'.format(resource_group, vmss_name))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted')
+        ])
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+
 # endregion
 
 

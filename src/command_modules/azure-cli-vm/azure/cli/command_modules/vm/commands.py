@@ -10,7 +10,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
-                                                          cf_images)
+                                                          cf_images, cf_run_commands)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
@@ -132,14 +132,23 @@ cli_generic_update_command(__name__, 'vm update',
                            cf_vm,
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vm perform-maintenance', mgmt_path.format(op_var, op_class, 'perform_maintenance'), cf_vm)
+
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
 
-    # VM encryption
-    cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
-    cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
-    cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)
+# VM encryption
+cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_vm')
+cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#decrypt_vm')
+cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show_vm_encryption_status', exception_handler=empty_on_404)
+
+# VMSS encryption
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    cli_command(__name__, 'vmss encryption enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_vmss')
+    cli_command(__name__, 'vmss encryption disable', 'azure.cli.command_modules.vm.disk_encryption#decrypt_vmss')
+    cli_command(__name__, 'vmss encryption show', 'azure.cli.command_modules.vm.disk_encryption#show_vmss_encryption_status', exception_handler=empty_on_404)
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))
@@ -315,6 +324,11 @@ cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     cli_command(__name__, 'vm list-skus', custom_path.format('list_skus'), table_transformer=transform_sku_for_table_output)
+    op_var = 'virtual_machine_run_commands_operations'
+    op_class = 'VirtualMachineRunCommandsOperations'
+    cli_command(__name__, 'vm run-command show', mgmt_path.format(op_var, op_class, 'get'), cf_run_commands)
+    cli_command(__name__, 'vm run-command list', mgmt_path.format(op_var, op_class, 'list'), cf_run_commands)
+    cli_command(__name__, 'vm run-command invoke', custom_path.format('run_command_invoke'))
 
 # MSI
 cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))

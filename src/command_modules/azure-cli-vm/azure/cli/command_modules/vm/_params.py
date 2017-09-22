@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._actions import \
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk,
+     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
      process_disk_encryption_namespace, process_assign_identity_namespace)
 
 
@@ -38,6 +38,16 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
         location = get_one_of_subscription_locations()
     result = get_vm_sizes(location)
     return [r.name for r in result]
+
+
+def get_vm_run_command_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    from ._client_factory import _compute_client_factory
+    try:
+        location = parsed_args.location
+    except AttributeError:
+        location = get_one_of_subscription_locations()
+    result = _compute_client_factory().virtual_machine_run_commands.list(location)
+    return [r.id for r in result]
 
 
 # REUSABLE ARGUMENT DEFINITIONS
@@ -261,6 +271,8 @@ register_cli_argument('vm create', 'attach_data_disks', nargs='+', help='Attach 
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
 register_cli_argument('vm create', 'nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
 register_cli_argument('vm create', 'nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', **enum_choice_list(['RDP', 'SSH']))
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
+    c.register_cli_argument('vm create', 'application_security_groups', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'], arg_group='Network Balancer')
@@ -284,9 +296,11 @@ with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
     c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
     c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')
 
-register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
-register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
-register_cli_argument('vm encryption', 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
+for scope in ['vm encryption', 'vmss encryption']:
+    register_cli_argument(scope, 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
+    register_cli_argument(scope, 'force', action='store_true', help='continue by ignoring client side validation errors')
+    register_cli_argument(scope, 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
+register_cli_argument('vmss encryption', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
@@ -327,3 +341,7 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+
+register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
+register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
+register_cli_argument('vm run-command', 'command_id', completer=get_vm_run_command_completion_list, help="The run command id")

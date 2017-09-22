@@ -1568,7 +1568,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               license_type=None, assign_identity=False, identity_scope=None,
-              identity_role=DefaultStr('Contributor'), identity_role_id=None):
+              identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, build_vm_resource,
@@ -1650,15 +1650,15 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         ]
         nic_resource = build_nic_resource(
             nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
-            public_ip_address_id)
+            public_ip_address_id, application_security_groups)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
     else:
         # Using an existing NIC
-        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name]
+        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name, application_security_groups]
         if any(invalid_parameters):
             raise CLIError('When specifying an existing NIC, do not specify NSG, '
-                           'public IP, VNet or subnet.')
+                           'public IP, ASGs, VNet or subnet.')
 
     os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
@@ -1847,6 +1847,8 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []
+        if vnet_type == 'new':
+            lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
         if public_ip_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
             lb_dependencies.append(
@@ -1876,6 +1878,8 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
 
         ag_dependencies = []
+        if vnet_type == 'new':
+            ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
         if public_ip_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
             ag_dependencies.append(
@@ -2219,3 +2223,28 @@ def list_skus(location=None):
     if location:
         result = [r for r in result if _match_location(location, r.locations)]
     return result
+
+
+def run_command_invoke(resource_group_name, vm_name, command_id, scripts=None, parameters=None):
+    RunCommandInput, RunCommandInputParameter = get_sdk(ResourceType.MGMT_COMPUTE, 'RunCommandInput',
+                                                        'RunCommandInputParameter', mod='models')
+
+    parameters = parameters or []
+    run_command_input_parameters = []
+    auto_arg_name_num = 0
+    for p in parameters:
+        if '=' in p:
+            n, v = p.split('=', 1)
+        else:
+            # RunCommand API requires named arguments, which doesn't make lots of sense for bash scripts
+            # using positional arguments, so here we provide names just to get API happy
+            # note, we don't handle mixing styles, but will consolidate by GA when API is settled
+            auto_arg_name_num += 1
+            n = 'arg{}'.format(auto_arg_name_num)
+            v = p
+        run_command_input_parameters.append(RunCommandInputParameter(n, v))
+
+    client = _compute_client_factory()
+    return client.virtual_machines.run_command(resource_group_name, vm_name,
+                                               RunCommandInput(command_id=command_id, script=scripts,
+                                                               parameters=run_command_input_parameters))

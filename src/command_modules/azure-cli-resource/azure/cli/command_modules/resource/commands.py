@@ -121,7 +121,7 @@ cli_command(__name__, 'policy assignment show', 'azure.cli.command_modules.resou
 cli_command(__name__, 'policy definition create', 'azure.cli.command_modules.resource.custom#create_policy_definition')
 cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.delete', cf_policy_definitions)
 cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
-cli_command(__name__, 'policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions, exception_handler=empty_on_404)
+cli_command(__name__, 'policy definition show', 'azure.cli.command_modules.resource.custom#get_policy_definition', exception_handler=empty_on_404)
 cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
 
 cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
@@ -137,12 +137,12 @@ cli_command(__name__, 'resource link list', 'azure.cli.command_modules.resource.
 cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resource.custom#update_resource_link')
 
 if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
-    cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_appliance')
-    cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#AppliancesOperations.delete', cf_resource_managedapplications)
-    cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
-    cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_appliances')
+    cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_application')
+    cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.delete', cf_resource_managedapplications)
+    cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_application', exception_handler=empty_on_404)
+    cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_applications')
 
-    cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
-    cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedappdefinitions)
-    cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
-    cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)
+    cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_applicationdefinition')
+    cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.delete', cf_resource_managedappdefinitions)
+    cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_applicationdefinition')
+    cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)

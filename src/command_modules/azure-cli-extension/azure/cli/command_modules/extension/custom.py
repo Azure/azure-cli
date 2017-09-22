@@ -19,8 +19,9 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
-
 import azure.cli.core.azlogging as azlogging
+
+from ._homebrew_patch import HomebrewPipPatch
 
 
 logger = azlogging.get_az_logger(__name__)
@@ -62,13 +63,13 @@ def _whl_download_from_url(url_parse_result, ext_file):
 
 
 def _validate_whl_cli_compat(azext_metadata):
-    is_compatible, cli_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_version, min_required, max_required)
+    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI version {} and this extension " \
-                          "requires ".format(cli_version)
+                          "You have CLI core version {} and this extension " \
+                          "requires ".format(cli_core_version)
         if min_required and max_required:
             min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
         elif min_required:
@@ -130,7 +131,8 @@ def _add_whl_ext(source):  # pylint: disable=too-many-statements
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
     logger.debug('Executing pip with args: %s', pip_args)
-    pip_status_code = _run_pip(pip, pip_args)
+    with HomebrewPipPatch():
+        pip_status_code = _run_pip(pip, pip_args)
     if pip_status_code > 0:
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
         shutil.rmtree(extension_path, ignore_errors=True)
