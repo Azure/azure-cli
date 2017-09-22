@@ -1558,10 +1558,10 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
-def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None, no_wait=False,
-              authentication_type=None, admin_password=None, admin_username=DefaultStr(getpass.getuser()),
-              ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
-              availability_set=None, nics=None, nsg=None, nsg_rule=None,
+def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
+              no_wait=False, authentication_type=None, admin_password=None,
+              admin_username=DefaultStr(getpass.getuser()), ssh_dest_key_path=None, ssh_key_value=None,
+              generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None, os_caching=None,
               data_caching=None, storage_container_name=None, storage_sku=None, use_unmanaged_disk=False,
@@ -1571,7 +1571,8 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               license_type=None, assign_identity=False, identity_scope=None,
-              identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None, zone=None):
+              identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None,
+              zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, build_vm_resource,

@@ -33,7 +33,6 @@ NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, Instance
                            mod='models')
 
 
-
 class Test_Vm_Custom(unittest.TestCase):
 
     @classmethod
