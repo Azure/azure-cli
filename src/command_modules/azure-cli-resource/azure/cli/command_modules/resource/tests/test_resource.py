@@ -641,7 +641,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name, resource_group))
         self.cmd('policy assignment list --disable-scope-strict-match')
 
-        # delete the policy
+        # delete the policy set
         self.cmd('policy set-definition delete -n {}'.format(policyset_name))
         time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy set-definition list', checks=JCheck("length([?name=='{}'])".format(policyset_name), 0))

@@ -690,7 +690,7 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy=None, policysetdefinition=None,
+def create_policy_assignment(policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None):
@@ -703,7 +703,7 @@ def create_policy_assignment(policy=None, policysetdefinition=None,
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
-    policy_id = _resolve_policy_id(policy, policysetdefinition, policy_client)
+    policy_id = _resolve_policy_id(policy, policy_set_definition, policy_client)
 
     if params:
         if os.path.exists(params):
