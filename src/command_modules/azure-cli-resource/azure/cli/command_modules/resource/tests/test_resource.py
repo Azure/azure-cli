@@ -594,7 +594,6 @@ class PolicyScenarioTest(ScenarioTest):
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
         policyset_file = os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\')
         params_def_file = os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
-        params_file = os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
 
         # create a policy
         policycreatecmd = 'policy definition create -n {} --rules {} --params {} --display-name {} --description {}'
