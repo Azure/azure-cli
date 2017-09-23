@@ -99,7 +99,7 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-pr
     c.register_cli_argument('policy set-definition', 'definitions',
                             help='JSON formatted string or a path to a file or uri with such content',
                             type=file_type, completer=FilesCompleter())
-    c.register_cli_argument('policy assignment create', 'policysetdefinition', options_list=('--policy-set-definition', '-d'),
+    c.register_cli_argument('policy assignment create', 'policy_set_definition', options_list=('--policy-set-definition', '-d'),
                             help='name or id of the policy set definition.')
     c.register_cli_argument('policy assignment create', 'sku', options_list=('--sku', '-s'),
                             help='policy sku.', **enum_choice_list(['free', 'standard']))
