@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.0.16 (2017-09-22)
++++++++++++++++++++
+* `storage account network-rule`: Fixed issue where commands may fail after updating the SDK.
+
+
 2.0.15 (2017-09-11)
 +++++++++++++++++++
 * minor fixes

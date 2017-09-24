@@ -16,6 +16,7 @@ import uuid
 import six
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
@@ -2147,6 +2148,58 @@ class VMLiveScenarioTest(LiveScenarioTest):
         self.assertTrue('Succeeded: {} (Microsoft.Compute/virtualMachines)'.format(vm_name) in lines)
 
 
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMZoneScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_vm_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        vm_name = 'vm123'
+        ip_name = 'vm123ip'
+        self.cmd('vm create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zone {} --public-ip-address {}'.format(resource_group, vm_name, zones, ip_name), checks=[
+            JMESPathCheckV2('zones', zones)
+        ])
+        self.cmd('network public-ip show -g {} -n {}'.format(resource_group, ip_name),
+                 checks=JMESPathCheckV2('zones[0]', zones))
+        # Test VM's specific table output
+        result = self.cmd('vm show -g {} -n {} -otable'.format(resource_group, vm_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, zones]).issubset(table_output))
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_vmss_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        vmss_name = 'vmss123'
+        self.cmd('vmss create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {}'.format(resource_group, vmss_name, zones))
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        result = self.cmd('vmss show -g {} -n {} -otable'.format(resource_group, vmss_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, vmss_name, zones]).issubset(table_output))
+        result = self.cmd('vmss list -g {} -otable'.format(resource_group, vmss_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, vmss_name, zones]).issubset(table_output))
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_disk_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        disk_name = 'disk123'
+        size = 1
+        self.cmd('disk create -g {} -n {} --size-gb {} --zone {}'.format(resource_group, disk_name, size, zones), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        self.cmd('disk show -g {} -n {}'.format(resource_group, disk_name), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        result = self.cmd('disk show -g {} -n {} -otable'.format(resource_group, disk_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group, resource_group_location, disk_name, zones, str(size), 'Premium_LRS']).issubset(table_output))
+        result = self.cmd('disk list -g {} -otable'.format(resource_group))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group, resource_group_location, disk_name, zones]).issubset(table_output))
+
+
 class VMRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_run_command_e2e(self, resource_group, resource_group_location):
@@ -2168,6 +2221,33 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm create -g {} -n {} --image debian --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm))
         self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world'.format(resource_group, vm))
 
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSSDiskEncryptionTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')  # the feature is only available in canary, should rollout to public soon
+    def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
+        vault_name = self.create_random_name('vault', 10)
+        vmss_name = 'vmss1'
+        self.cmd('keyvault create -g {} -n {} --enabled-for-disk-encryption "true"'.format(resource_group, vault_name))
+        self.cmd('vmss create -g {} -n {} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption enable -g {} -n {} --disk-encryption-keyvault {}'.format(resource_group, vmss_name, vault_name))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted')
+        ])
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+        self.cmd('vmss encryption disable -g {} -n {}'.format(resource_group, vmss_name))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted')
+        ])
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
 
 # endregion
 

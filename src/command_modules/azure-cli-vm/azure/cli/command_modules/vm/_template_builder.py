@@ -128,7 +128,7 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku):
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -143,13 +143,15 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name,
         'dependsOn': [],
         'properties': public_ip_properties
     }
+    if zone:
+        public_ip['zones'] = zone
     if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
 
 
 def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None):
+                       nsg_id=None, public_ip_id=None, application_security_groups=None):
 
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
@@ -175,8 +177,14 @@ def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_addr
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
 
+    api_version = '2015-06-15'
+    if application_security_groups:
+        asg_ids = [{'id': x.id} for x in application_security_groups]
+        nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
+        api_version = '2017-09-01'
+
     nic = {
-        'apiVersion': '2015-06-15',
+        'apiVersion': api_version,
         'type': 'Microsoft.Network/networkInterfaces',
         'name': name,
         'location': location,
@@ -306,7 +314,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None, secrets=None, license_type=None):
+        custom_data=None, secrets=None, license_type=None, zone=None):
 
     def _build_os_profile():
 
@@ -439,6 +447,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         'dependsOn': [],
         'properties': vm_properties,
     }
+    if zone:
+        vm['zones'] = zone
     return vm
 
 
@@ -683,7 +693,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None, secrets=None):
+                        single_placement_group=None, custom_data=None, secrets=None, zones=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -833,6 +843,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         },
         'properties': vmss_properties
     }
+    if zones:
+        vmss['zones'] = zones
     return vmss
 
 

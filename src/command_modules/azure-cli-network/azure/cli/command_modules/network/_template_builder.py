@@ -63,7 +63,7 @@ class ArmTemplateBuilder(object):
 
 
 def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_ip_address=None,
-                              private_ip_allocation=None):
+                              private_ip_allocation=None, zone=None):
     frontend_ip_config = {
         'name': name
     }
@@ -82,6 +82,10 @@ def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_i
                 'subnet': {'id': subnet_id}
             }
         })
+
+    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        frontend_ip_config['zones'] = zone
+
     return frontend_ip_config
 
 
@@ -207,9 +211,9 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
 
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation, sku):
+                                 private_ip_address, private_ip_allocation, sku, frontend_ip_zone):
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
-                                                   private_ip_allocation)
+                                                   private_ip_allocation, frontend_ip_zone)
 
     lb_properties = {
         'backendAddressPools': [
@@ -233,7 +237,7 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, fronte
     return lb
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku):
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -250,6 +254,8 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name,
     }
     if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
+    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        public_ip['zones'] = zone
     return public_ip
 
 

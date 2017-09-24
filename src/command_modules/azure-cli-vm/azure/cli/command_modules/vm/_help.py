@@ -86,6 +86,9 @@ helps['vm create'] = """
         - name: Create a CentOS VM with Managed Service Identity. The VM will have a 'Contributor' role with access to a storage account.
           text: >
              az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        - name: Create a VM in an availability zone in the current resource group's region
+          text: >
+             az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """
 
 helps['vmss create'] = """
@@ -130,6 +133,9 @@ helps['vmss create'] = """
         - name: Create a VM scaleset with Managed Service Identity. The VM will have a 'Contributor' Role with access to a storage account.
           text: >
              az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        - name: Create a single zone VM scaleset in the current resource group's region
+          text: >
+             az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """
 
 helps['vm availability-set create'] = """
@@ -785,6 +791,34 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
             az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
 """
 
+helps['vmss encryption'] = """
+    type: group
+    short-summary: (PREVIEW) Manage encryption of VM scale sets.
+"""
+
+helps['vmss encryption enable'] = """
+    type: command
+    short-summary: Encrypt a VM scale set with managed disks.
+    examples:
+        - name: encrypte a VM scale set using a key vault in the same resource group
+          text: >
+            az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
+"""
+
+helps['vmss encryption disable'] = """
+    type: command
+    short-summary: disable the encryption on a VM scale set with managed disks.
+    examples:
+        - name: disable encryption a VM scale set
+          text: >
+            az vmss encryption disable -g MyResourceGroup -n MyVm
+"""
+
+helps['vmss encryption show'] = """
+    type: command
+    short-summary: show the encryption status
+"""
+
 helps['vm capture'] = """
     type: command
     short-summary: Capture information for a stopped VM.
@@ -1019,6 +1053,9 @@ helps['disk create'] = """
         - name: Create a managed disk by copying an existing disk or snapshot.
           text: >
             az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
+        - name: Create a disk in an availability zone in the region of "East US 2"
+          text: >
+            az disk create -n MyDisk -g MyResourceGroup --size-gb 10 --location eastus2 --zone 1
 """
 
 helps['disk list'] = """

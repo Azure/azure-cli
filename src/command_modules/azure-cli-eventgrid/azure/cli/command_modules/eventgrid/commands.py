@@ -10,8 +10,8 @@ from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._client_factory import (topics_factory, event_subscriptions_factory, topic_types_factory)
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    topics_mgmt_path = 'azure.cli.command_modules.eventgrid.sdk.operations.topics_operations#'
-    topic_types_mgmt_path = 'azure.cli.command_modules.eventgrid.sdk.operations.topic_types_operations#'
+    topics_mgmt_path = 'azure.mgmt.eventgrid.operations.topics_operations#'
+    topic_types_mgmt_path = 'azure.mgmt.eventgrid.operations.topic_types_operations#'
     custom_path = 'azure.cli.command_modules.eventgrid.custom#'
 
     cli_command(__name__, 'eventgrid topic create', topics_mgmt_path + 'TopicsOperations.create_or_update', topics_factory)

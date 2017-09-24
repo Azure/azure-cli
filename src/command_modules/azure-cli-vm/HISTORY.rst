@@ -2,8 +2,15 @@
 
 Release History
 ===============
-(unreleased)
+
+2.0.15 (2017-09-22)
++++++++++++++++++++
+* `vm/vmss/disk create`: support availability zone
+* `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
+* `vm create`: Added `--asgs` support.
 * `vm run-command`: support to run commands on remote VMs
+* `vmss encryption`: (PREVIEW) support vmss disk encryptions
+* `vm perform-maintenance`: support to perform maintenance on a vm
 
 2.0.14 (2017-09-11)
 +++++++++++++++++++
