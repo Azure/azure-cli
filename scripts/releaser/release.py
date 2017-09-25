@@ -262,7 +262,7 @@ def run_push_to_git():
 def set_up_cli_repo_dir():
     working_dir = tempfile.mkdtemp()
     check_call(['git', 'clone', 'https://github.com/{}'.format(script_env.get('REPO_NAME')), working_dir])
-    check_call(['pip', 'install', '-e', 'scripts'], cwd=working_dir)
+    check_call(['pip', 'install', '-e', 'tools'], cwd=working_dir)
     return working_dir
 
 def publish_to_pypi(working_dir, commitish_list):
@@ -271,7 +271,7 @@ def publish_to_pypi(working_dir, commitish_list):
     for mod_name, commitish, _ in commitish_list:
         assets_dir = tempfile.mkdtemp()
         check_call(['git', 'checkout', commitish], cwd=working_dir)
-        check_call(['python', '-m', 'scripts.automation.release.run', '-c', mod_name,
+        check_call(['python', '-m', 'tools.automation.release.run', '-c', mod_name,
                     '-r', script_env.get('PYPI_REPO'), '--dest', assets_dir], cwd=working_dir)
         assets_dir_map[mod_name] = assets_dir
     # reset back
@@ -326,7 +326,7 @@ def run_create_packaged_release(working_dir):
     print_status('Finished installing CLI into venv')
     archive_dir = tempfile.mkdtemp()
     # create the packaged releases automatically
-    args = ['python', '-m', 'scripts.automation.release.packaged', '--version', script_env.get('CLI_VERSION'), '--dest', archive_dir, '--components']
+    args = ['python', '-m', 'tools.automation.release.packaged', '--version', script_env.get('CLI_VERSION'), '--dest', archive_dir, '--components']
     for name, version in components_list:
         # The tag for this module is slightly different so make that change.
         if name == 'azure-cli-command-modules-nspkg':
