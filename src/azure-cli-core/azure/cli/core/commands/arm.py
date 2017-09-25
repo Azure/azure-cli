@@ -25,9 +25,9 @@ logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile(
     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-    '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-    '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*)')
+
+children_regex = re.compile('(/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
 
 def handle_long_running_operation_exception(ex):
@@ -84,23 +84,32 @@ def deployment_validate_table_format(result):
     return result
 
 
+def _get_parent_from_parts(kwargs):
+    '''
+    Get the parent given all the children parameters.
+    '''
+    parent = ''
+    if kwargs['last_child_num'] is not None:
+        parent_builder = ['{type}/{name}'.format(**kwargs)]
+        for index in range(1, kwargs['last_child_num']):
+            parent_builder.append('/providers/{{child_namespace_{0}}}/{{child_type_{0}}}/{{child_name_{0}}}'
+                                  .format(index).format(**kwargs))
+        parent_builder.append('/providers/{{child_namespace_{}}}'.format(kwargs['last_child_num']).format(**kwargs))
+        parent = ''.join(parent_builder)
+
+    parent = parent.replace('/providers/None', '')
+    return '{}/'.format(parent) if parent and not parent.endswith('/') else parent
+
+
 def _populate_alternate_kwargs(kwargs):
     """ Translates the parsed arguments into a format used by generic ARM commands
     such as the resource and lock commands. """
-    parent = ''
-    has_child = all(kwargs[x] is not None for x in ['child_name', 'child_type'])
-    has_grandchild = all(kwargs[x] is not None for x in ['grandchild_name', 'grandchild_type'])
-    resource_namespace = kwargs['namespace']
-    resource_type = kwargs['grandchild_type'] or kwargs['child_type'] or kwargs['type']
-    resource_name = kwargs['grandchild_name'] or kwargs['child_name'] or kwargs['name']
-    if has_grandchild:
-        parent = '{type}/{name}/providers/{child_namespace}/{child_type}/{child_name}/providers/{grandchild_namespace}'.format(**kwargs)  # pylint: disable=line-too-long
-    elif has_child:
-        parent = '{type}/{name}/providers/{child_namespace}'.format(**kwargs)
-    parent = parent.replace('providers/None', '')
-    parent = '{}/'.format(parent) if parent and not parent.endswith('/') else parent
 
-    kwargs['resource_parent'] = parent
+    resource_namespace = kwargs['namespace']
+    resource_type = kwargs.get('child_type_{}'.format(kwargs['last_child_num'])) or kwargs['type']
+    resource_name = kwargs.get('child_name_{}'.format(kwargs['last_child_num'])) or kwargs['name']
+
+    kwargs['resource_parent'] = _get_parent_from_parts(kwargs)
     kwargs['resource_namespace'] = resource_namespace
     kwargs['resource_type'] = resource_type
     kwargs['resource_name'] = resource_name
@@ -108,42 +117,37 @@ def _populate_alternate_kwargs(kwargs):
 
 
 def resource_id(**kwargs):
-    '''Create a valid resource id string from the given parts
+    '''Create a valid resource id string from the given parts. Children start at level 1.
     The method accepts the following keyword arguments:
-        - subscription          Subscription id
-        - resource_group        Name of resource group
-        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                  Type of the resource (i.e. virtualMachines)
-        - name                  Name of the resource (or parent if child_name is also specified)
-        - child_namespace       Namespace for the child resoure (optional)
-        - child_type            Type of the child resource
-        - child_name            Name of the child resource
-        - grandchild_namespace  Namespace for the grandchild resource (optional)
-        - grandchild_type       Type of the grandchild resource
-        - grandchild_name       Name of the grandchild resource
+        - subscription              Subscription id
+        - resource_group            Name of resource group
+        - namespace                 Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type                      Type of the resource (i.e. virtualMachines)
+        - name                      Name of the resource (or parent if child_name is also specified)
+        - child_namespace_{level}   Namespace for the child resoure of that level (optional)
+        - child_type_{level}        Type of the child resource of that level
+        - child_name_{level}        Name of the child resource of that level
     '''
-    kwargs = {key: value for key, value in kwargs.items() if value is not None}
-    rid = '/subscriptions/{subscription}'.format(**kwargs)
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
+    rid_builder = ['/subscriptions/{subscription}'.format(**kwargs)]
     try:
         try:
-            rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
+            rid_builder.append('resourceGroups/{resource_group}'.format(**kwargs))
         except KeyError:
             pass
-        rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
-        rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
-        try:
-            rid = '/'.join((rid, 'providers/{child_namespace}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
-        try:
-            rid = '/'.join((rid, 'providers/{grandchild_namespace}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, '{grandchild_type}/{grandchild_name}'.format(**kwargs)))
+        rid_builder.append('providers/{namespace}'.format(**kwargs))
+        rid_builder.append('{type}/{name}'.format(**kwargs))
+        count = 1
+        while True:
+            try:
+                rid_builder.append('providers/{{child_namespace_{}}}'.format(count).format(**kwargs))
+            except KeyError:
+                pass
+            rid_builder.append('{{child_type_{0}}}/{{child_name_{0}}}'.format(count).format(**kwargs))
+            count += 1
     except KeyError:
         pass
-    return rid
+    return '/'.join(rid_builder)
 
 
 def parse_resource_id(rid):
@@ -153,12 +157,9 @@ def parse_resource_id(rid):
         - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
         - type                  Type of the root resource (i.e. virtualMachines)
         - name                  Name of the root resource
-        - child_namespace       Namespace for the child resoure (optional)
-        - child_type            Type of the child resource
-        - child_name            Name of the child resource
-        - grandchild_namespace  Namespace for the grandchild resource (optional)
-        - grandchild_type       Type of the grandchild resource
-        - grandchild_name       Name of the grandchild resource
+        - child_namespace_{level}   Namespace for the child resoure of that level (optional)
+        - child_type_{level}        Type of the child resource of that level
+        - child_name_{level}        Name of the child resource of that level
         - resource_parent       Computed parent in the following pattern: providers/{namespace}/{parent}/{type}/{name}
         - resource_namespace    Same as namespace. Note that this may be different than the target resource's namespace.
         - resource_type         Type of the target resource (not the parent)
@@ -166,10 +167,14 @@ def parse_resource_id(rid):
     '''
     if not rid:
         return {}
-
     m = regex.match(rid)
     if m:
         result = m.groupdict()
+        children = children_regex.finditer(result["children"])
+        count = None
+        for count, child in enumerate(children):
+            result.update({key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
+        result["last_child_num"] = count + 1 if isinstance(count, int) else None
         result = _populate_alternate_kwargs(result)
     else:
         result = dict(name=rid)

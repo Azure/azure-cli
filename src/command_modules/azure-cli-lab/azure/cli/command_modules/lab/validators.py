@@ -80,10 +80,10 @@ def validate_lab_vm_list(namespace):
                                                 namespace='Microsoft.DevTestLab',
                                                 type='labs',
                                                 name=namespace.lab_name,
-                                                child_type='users',
-                                                child_name=_get_owner_object_id(),
-                                                grandchild_type='environments',
-                                                grandchild_name=namespace.environment)
+                                                child_type_1='users',
+                                                child_name_1=_get_owner_object_id(),
+                                                child_type_2='environments',
+                                                child_name_2=namespace.environment)
         if namespace.filters is None:
             namespace.filters = "Properties/environmentId eq '{}'".format(namespace.environment)
         else:
@@ -107,10 +107,10 @@ def validate_template_id(namespace):
                                              namespace='Microsoft.DevTestLab',
                                              type='labs',
                                              name=namespace.lab_name,
-                                             child_type='artifactSources',
-                                             child_name=namespace.artifact_source_name,
-                                             grandchild_type='armTemplates',
-                                             grandchild_name=namespace.arm_template)
+                                             child_type_1='artifactSources',
+                                             child_name_1=namespace.artifact_source_name,
+                                             child_type_2='armTemplates',
+                                             child_name_2=namespace.arm_template)
 
 
 def validate_claim_vm(namespace):

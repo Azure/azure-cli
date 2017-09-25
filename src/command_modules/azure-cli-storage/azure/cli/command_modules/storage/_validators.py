@@ -829,8 +829,8 @@ def validate_subnet(namespace):
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=vnet,
-            child_type='subnets',
-            child_name=subnet)
+            child_type_1='subnets',
+            child_name_1=subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 

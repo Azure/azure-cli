@@ -63,8 +63,8 @@ def check_existence(value, resource_group, provider_namespace, resource_type,
 
     if parent_name and parent_type:
         parent_path = '{}/{}'.format(parent_type, parent_name)
-        resource_name = id_parts.get('child_name', value)
-        resource_type = id_parts.get('child_type', resource_type)
+        resource_name = id_parts.get('child_name_1', value)
+        resource_type = id_parts.get('child_type_1', resource_type)
     else:
         parent_path = ''
         resource_name = id_parts['name']
