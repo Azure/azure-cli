@@ -28,6 +28,8 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
+from azure.mgmt.trafficmanager.models import MonitorProtocol
+
 logger = azlogging.get_az_logger(__name__)
 
 AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, ApplicationGatewaySslPolicy, \
@@ -2543,14 +2545,14 @@ def list_traffic_manager_profiles(resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
-        return client.list_by_in_resource_group(resource_group_name)
+        return client.list_by_resource_group(resource_group_name)
 
-    return client.list_all()
+    return client.list_by_subscription()
 
 
 def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path='/',
-                                   monitor_port=80, monitor_protocol='http', status='enabled',
+                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value, status='enabled',
                                    ttl=30, tags=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
