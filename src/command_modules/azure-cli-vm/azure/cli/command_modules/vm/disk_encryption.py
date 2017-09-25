@@ -47,8 +47,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                key_encryption_keyvault=None,
                key_encryption_key=None,
                key_encryption_algorithm='RSA-OAEP',
-               volume_type=None,
-               premium_vm=False):
+               volume_type=None):
     '''
     Enable disk encryption on OS disk, Data disks, or both
     :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
@@ -60,14 +59,18 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     :param str key_encryption_key: KeyVault key name or URL used to encrypt the disk encryption key
     :param str key_encryption_keyvault: the KeyVault containing the key encryption key
     used to encrypt the disk encryption key. If missing, CLI will use --disk-encryption-keyvault
-    :param bool premium_vm: whether the vm is a premium vm or not. Only for testing will be removed before push.
     '''
     # pylint: disable=no-member
     compute_client = _compute_client_factory()
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
+<<<<<<< HEAD
     extension = vm_extension_info[os_type]
+=======
+    extension = extension_info[os_type]
+    backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
+>>>>>>> First working version
 
     # 1. First validate arguments
 
@@ -148,7 +151,6 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     status_url = extension_result.instance_view.statuses[0].message
 
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-    compute_client.virtual_machines.get()
     secret_ref = KeyVaultSecretReference(secret_url=status_url,
                                          source_vault=SubResource(disk_encryption_keyvault))
 
@@ -160,16 +162,17 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
                                                       key_encryption_key=key_encryption_key_obj,
                                                       enabled=True)
-    if premium_vm:
-        # In this case stop the vm before update
-        compute_client.virtual_machines.stop(resource_group_name, vm_name)
+    if backup_encryption_settings.enabled:
+        # stop the vm before update if the vm is already encrypted
+        compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
         vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
 
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
     set_vm(vm)
 
-    if premium_vm:
-        compute_client.virtual_machines.start(resource_group_name, vm_name)
+    if backup_encryption_settings.enabled:
+        # and start after the update
+        compute_client.virtual_machines.start(resource_group_name, vm_name).result()
 
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
         # TODO: expose a 'wait' command to do the monitor and handle the reboot
