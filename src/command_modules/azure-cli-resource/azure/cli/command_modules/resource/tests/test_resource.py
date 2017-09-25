@@ -432,50 +432,25 @@ class DeploymentThruUriTest(ScenarioTest):
         self.cmd('group deployment list -g {}'.format(self.resource_group), checks=NoneCheck())
 
 
-class ResourceMoveScenarioTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ResourceMoveScenarioTest, self).__init__(__file__, test_method)
-        self.source_group = 'res_move_src_group'
-        self.destination_group = 'res_move_dest_group'
+class ResourceMoveScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest')
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_move_source')
+    def test_resource_move(self, resource_group, resource_group_dest):
+        nsg1_name = self.create_random_name('nsg-move', 20)
+        nsg2_name = self.create_random_name('nsg-move', 20)
 
-    def test_resource_move(self):
-        self.execute()
+        nsg1 = self.cmd('network nsg create -n {} -g {}'.format(nsg1_name, resource_group)).get_output_in_json()
+        nsg2 = self.cmd('network nsg create -n {} -g {}'.format(nsg2_name, resource_group)).get_output_in_json()
 
-    def set_up(self):
-        self.cmd('group create --location westus --name {}'.format(self.source_group))
-        self.cmd('group create --location westus --name {}'.format(self.destination_group))
+        nsg1_id = nsg1['NewNSG']['id']
+        nsg2_id = nsg2['NewNSG']['id']
 
-    def tear_down(self):
-        self.cmd('group delete --name {} --yes'.format(self.source_group))
-        self.cmd('group delete --name {} --yes'.format(self.destination_group))
+        self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id, resource_group_dest))
 
-    def body(self):
-        if self.playback:
-            subscription_id = MOCKED_SUBSCRIPTION_ID
-        else:
-            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
-
-        # use 'network security group' for testing as it is fast to create
-        nsg1 = 'nsg1'
-        nsg1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
-                  'networkSecurityGroups/{}'.format(subscription_id,
-                                                    self.source_group,
-                                                    nsg1)
-        nsg2 = 'nsg2'
-        nsg2_id = nsg1_id.replace(nsg1, nsg2)
-
-        self.cmd('network nsg create -g {} --name {}'.format(self.source_group, nsg1))
-        self.cmd('network nsg create -g {} --name {}'.format(self.source_group, nsg2))
-
-        # move
-        self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id,
-                                                                           self.destination_group))
-
-        # see they show up at destination
-        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg1),
-                 [JMESPathCheck('name', nsg1)])
-        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg2),
-                 [JMESPathCheck('name', nsg2)])
+        self.cmd('network nsg show -g {} -n {}'.format(resource_group_dest, nsg1_name), checks=[
+            JCheck('name', nsg1_name)])
+        self.cmd('network nsg show -g {} -n {}'.format(resource_group_dest, nsg2_name), checks=[
+            JCheck('name', nsg2_name)])
 
 
 class FeatureScenarioTest(VCRTestBase):
