@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++
+* `application-gateway address-pool create`: `--server` argument is not optional to allow creation of empty address pools.
+
+
 2.0.15 (2017-09-22)
 +++++++++++++++++++
 * `lb/public-ip`: Add availability zone support.

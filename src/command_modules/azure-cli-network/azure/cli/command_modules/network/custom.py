@@ -262,7 +262,7 @@ def update_ag_authentication_certificate(instance, parent, item_name, cert_data)
 
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
-                                   servers, no_wait=False):
+                                   servers=None, no_wait=False):
     ApplicationGatewayBackendAddressPool = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendAddressPool',
