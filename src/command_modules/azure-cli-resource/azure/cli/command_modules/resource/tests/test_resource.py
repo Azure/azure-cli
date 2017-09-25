@@ -749,5 +749,28 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
 
+class InvokeActionTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_invoke_action')
+    def test_invoke_action(self, resource_group):
+        vm_name = self.create_random_name('cli-test-vm', 30)
+        username = 'ubuntu'
+        password = self.create_random_name('Longpassword#1', 30)
+
+        vm_json = self.cmd('vm create -g {} -n {} --use-unmanaged-disk --image UbuntuLTS --admin-username {} '
+                           '--admin-password {} --authentication-type {}'
+                           .format(resource_group, vm_name, username, password, 'password')).get_output_in_json()
+
+        vm_id = vm_json.get('id', None)
+
+        self.cmd('resource invoke-action --action powerOff --ids {}'.format(vm_id))
+        self.cmd('resource invoke-action --action generalize --ids {}'.format(vm_id))
+        self.cmd('resource invoke-action --action deallocate --ids {}'.format(vm_id))
+
+        request_body = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",' \
+                       '\\"overwriteVhds\\":\\"true\\"}'
+
+        self.cmd('resource invoke-action --action capture --ids {} --request-body {}'.format(vm_id, request_body))
+
+
 if __name__ == '__main__':
     unittest.main()

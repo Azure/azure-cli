@@ -60,6 +60,7 @@ cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custo
 cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custom#list_resources', table_transformer=transform_resource_list)
 cli_command(__name__, 'resource tag', 'azure.cli.command_modules.resource.custom#tag_resource')
 cli_command(__name__, 'resource move', 'azure.cli.command_modules.resource.custom#move_resource')
+cli_command(__name__, 'resource invoke-action', 'azure.cli.command_modules.resource.custom#invoke_resource_action')
 
 # Resource provider commands
 cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.list', cf_providers)
