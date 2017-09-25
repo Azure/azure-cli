@@ -104,24 +104,24 @@ The repo has a launch.json file that will launch the version of Python that is f
 
   To run the CLI tests:
   ```BatchFile
-  <clone root>\scripts\run_tests.bat [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
+  <clone root>\tools\scripts\run_tests.bat [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
   To check the CLI and command modules for style errors:
   ```BatchFile
-  <clone root>\scripts\check_style.bat [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
+  <clone root>\tools\scripts\check_style.bat [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
 
 ##### OSX/Ubuntu (bash):
 
   To run the CLI tests:
   ```Shell
-   <clone root>/scripts/run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
+   <clone root>/tools/scripts/run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
   To check the CLI and command modules for style errors:
   ```Shell
-   <clone root>/scripts/check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
+   <clone root>/tools/scripts/check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
 
 #### VS Code
