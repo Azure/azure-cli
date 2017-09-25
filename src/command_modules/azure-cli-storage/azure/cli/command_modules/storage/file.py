@@ -64,8 +64,8 @@ def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=
     return list(_upload_action(src, dst) for src, dst in source_files)
 
 
-def storage_file_download_batch(client, source, destination, pattern=None, dryrun=False,
-                                validate_content=False, max_connections=1):
+def storage_file_download_batch(client, source, destination, pattern=None, dryrun=False, validate_content=False,
+                                max_connections=1):
     """
     Download files from file share to local directory in batch
     """

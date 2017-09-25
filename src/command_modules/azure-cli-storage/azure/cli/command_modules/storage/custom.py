@@ -14,19 +14,18 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.command_modules.storage.util import guess_content_type
 from azure.cli.core.application import APPLICATION
+from .sdkutil import get_table_data_type
 
-Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
-                                                                    'Logging',
-                                                                    'Metrics',
-                                                                    'CorsRule',
-                                                                    'AccessPolicy',
-                                                                    'RetentionPolicy',
-                                                                    mod='models')
+Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \
+    get_sdk(ResourceType.DATA_STORAGE, 'Logging', 'Metrics', 'CorsRule', 'AccessPolicy', 'RetentionPolicy',
+            mod='common.models')
 
-BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, TableService, QueueService = \
+BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, QueueService = \
     get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService', 'blob.baseblobservice#BaseBlobService',
-            'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties', 'table#TableService',
+            'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties',
             'queue#QueueService')
+
+TableService = get_table_data_type('table', 'TableService')
 
 
 def _update_progress(current, total):
@@ -149,10 +148,11 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
 
 
 @transfer_doc(FileService.list_directories_and_files)
-def list_share_files(client, share_name, directory_name=None, timeout=None,
-                     exclude_dir=False):
-    generator = client.list_directories_and_files(share_name, directory_name,
-                                                  timeout=timeout)
+def list_share_files(client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
+    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
+        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
+    else:
+        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout)
     if exclude_dir:
         return list(f for f in generator if isinstance(f.properties, FileProperties))
 
