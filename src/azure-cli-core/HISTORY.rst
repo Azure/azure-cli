@@ -10,11 +10,8 @@ unreleased
 ++++++++++
 
 * Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
-
-unreleased
-+++++++++++++++++++
+* More user-friendly handling of invalid cloud configurations
 * `availability-set create`: Fixed issue where this command would not work on Azure Stack.
-
 
 2.0.16 (2017-09-11)
 +++++++++++++++++++

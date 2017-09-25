@@ -87,7 +87,9 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         val = object.__getattribute__(self, name)
         if val is None:
             raise CloudEndpointNotSetException("The endpoint '{}' for this cloud "
-                                               "is not set but is used.".format(name))
+                                               "is not set but is used.\n"
+                                               "{} may be corrupt or invalid.\nResolve the error or delete this file "
+                                               "and try again.".format(name, CLOUD_CONFIG_FILE))
         return val
 
 
@@ -110,7 +112,9 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         val = object.__getattribute__(self, name)
         if val is None:
             raise CloudSuffixNotSetException("The suffix '{}' for this cloud "
-                                             "is not set but is used.".format(name))
+                                             "is not set but is used.\n"
+                                             "{} may be corrupt or invalid.\nResolve the error or delete this file "
+                                             "and try again.".format(name, CLOUD_CONFIG_FILE))
         return val
 
 
@@ -280,7 +284,13 @@ def get_cloud(cloud_name):
 
 
 def get_active_cloud():
-    return get_cloud(get_active_cloud_name())
+    try:
+        return get_cloud(get_active_cloud_name())
+    except CloudNotRegisteredException as err:
+        logger.warning(err)
+        logger.warning("Resetting active cloud to'%s'.", AZURE_PUBLIC_CLOUD.name)
+        _set_active_cloud(AZURE_PUBLIC_CLOUD.name)
+        return get_cloud(AZURE_PUBLIC_CLOUD.name)
 
 
 def get_cloud_subscription(cloud_name):
