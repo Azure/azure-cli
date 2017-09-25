@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from subprocess import call, PIPE
-
 from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
@@ -226,17 +224,47 @@ def acr_update_set(client,
     return client.update(resource_group_name, registry_name, parameters)
 
 
-def acr_login(registry_name, resource_group_name=None, username=None, password=None):
+def _try_aad_token_login(login_server):
+    try:
+        username = "00000000-0000-0000-0000-000000000000"
+        password = get_login_refresh_token(login_server)
+        return username, password
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("AAD authentication failed with message: %s", str(e))
+        return None, None
+
+
+def _try_admin_user_login(registry_name):
+    try:
+        cred = acr_credential_show(registry_name)
+        username = cred.username
+        password = cred.passwords[0].value
+        return username, password
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Admin user authentication failed with message: %s", str(e))
+        return None, None
+
+
+def acr_login(registry_name,
+              resource_group_name=None,
+              username=None,
+              password=None):
     """Login to a container registry through Docker.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
+    from subprocess import PIPE, Popen
+    docker_not_available = "Please verify whether docker is installed and running properly"
+
     try:
-        call(["docker", "ps"], stdout=PIPE, stderr=PIPE)
+        p = Popen(["docker", "ps"], stdout=PIPE, stderr=PIPE)
+        returncode = p.wait()
+        if returncode:
+            raise CLIError(docker_not_available)
     except:
-        raise CLIError("Please verify whether docker is installed and running properly")
+        raise CLIError(docker_not_available)
 
     registry, _ = get_registry_by_name(registry_name, resource_group_name)
     sku_tier = registry.sku.tier
@@ -249,23 +277,13 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
         except NoTTYException:
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
-    if sku_tier == SkuTier.managed.value:
-        # 2. if we don't yet have credentials, attempt to get a refresh token
-        if not password:
-            try:
-                username = "00000000-0000-0000-0000-000000000000"
-                password = get_login_refresh_token(login_server)
-            except Exception as e:  # pylint: disable=broad-except
-                logger.warning("AAD authentication failed with message: %s", str(e))
+    # 2. if we don't yet have credentials, attempt to get a refresh token
+    if not password and sku_tier == SkuTier.managed.value:
+        username, password = _try_aad_token_login(login_server)
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if not password:
-        try:
-            cred = acr_credential_show(registry_name)
-            username = cred.username
-            password = cred.passwords[0].value
-        except Exception as e:  # pylint: disable=broad-except
-            logger.warning("Admin user authentication failed with message: %s", str(e))
+        username, password = _try_admin_user_login(registry_name)
 
     # 4. if we still don't have credentials, prompt the user
     if not password:
@@ -277,10 +295,27 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
                 'Unable to authenticate using AAD or admin login credentials. ' +
                 'Please specify both username and password in non-interactive mode.')
 
-    call(["docker", "login",
-          "--username", username,
-          "--password", password,
-          login_server])
+    use_password_stdin = False
+    try:
+        p = Popen(["docker", "login", "--help"], stdout=PIPE, stderr=PIPE)
+        stdout, _ = p.communicate()
+        if b'--password-stdin' in stdout:
+            use_password_stdin = True
+    except:
+        raise CLIError(docker_not_available)
+
+    if use_password_stdin:
+        p = Popen(["docker", "login",
+                   "--username", username,
+                   "--password-stdin",
+                   login_server], stdin=PIPE)
+        p.communicate(input=password.encode())
+    else:
+        p = Popen(["docker", "login",
+                   "--username", username,
+                   "--password", password,
+                   login_server])
+        p.wait()
 
 
 def acr_show_usage(registry_name, resource_group_name=None):
