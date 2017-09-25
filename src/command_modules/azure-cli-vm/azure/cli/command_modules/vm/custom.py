@@ -1563,9 +1563,10 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               admin_username=DefaultStr(getpass.getuser()), ssh_dest_key_path=None, ssh_key_value=None,
               generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
-              public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None, os_caching=None,
-              data_caching=None, storage_container_name=None, storage_sku=None, use_unmanaged_disk=False,
-              attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
+              public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None,
+              os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
+              use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None,
+              attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
@@ -1686,8 +1687,8 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, attach_data_disks, data_disk_sizes_gb, image_data_disks, custom_data, secrets,
-        license_type, zone)
+        os_vhd_uri, attach_os_disk, os_disk_size_gb, attach_data_disks, data_disk_sizes_gb, image_data_disks,
+        custom_data, secrets, license_type, zone)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:

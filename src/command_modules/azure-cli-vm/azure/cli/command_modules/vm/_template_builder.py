@@ -313,8 +313,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None, secrets=None, license_type=None, zone=None):
+        attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None, data_disk_sizes_gb=None,
+        image_data_disks=None, custom_data=None, secrets=None, license_type=None, zone=None):
 
     def _build_os_profile():
 
@@ -418,6 +418,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
         }
         profile = storage_profiles[storage_profile.name]
+        if os_disk_size_gb:
+            profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                                  data_caching, storage_sku, attach_data_disks=attach_data_disks)
 
