@@ -65,12 +65,10 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
-<<<<<<< HEAD
     extension = vm_extension_info[os_type]
-=======
-    extension = extension_info[os_type]
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
->>>>>>> First working version
+    if backup_encryption_settings is None:
+        backup_encryption_settings = DiskEncryptionSettings(enabled=False)
 
     # 1. First validate arguments
 
