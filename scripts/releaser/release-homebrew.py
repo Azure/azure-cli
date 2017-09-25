@@ -55,6 +55,9 @@ def modify_sha256(formula_content):
             formula_content[line_no] = '  sha256 "' + script_env.get('CLI_DOWNLOAD_SHA256') + '"'
             break
 
+def _should_include_resource(r):
+    return not r.startswith('azure-cli') and r not in ['futures']
+
 def modify_resources(formula_content):
     start_resources_line_no = None
     end_resources_line_no = None
@@ -69,7 +72,7 @@ def modify_resources(formula_content):
     # The script will have installed homebrew-pypi-poet by this point so we can import
     from poet.poet import make_graph, RESOURCE_TEMPLATE
     nodes = make_graph('azure-cli')
-    filtered_nodes = OrderedDict([(n, nodes[n]) for n in nodes if not n.startswith('azure-cli')])
+    filtered_nodes = OrderedDict([(n, nodes[n]) for n in nodes if _should_include_resource(n)])
     resources_stanza = '\n\n'.join([RESOURCE_TEMPLATE.render(resource=node) for node in filtered_nodes.values()])
     formula_content[start_resources_line_no:start_resources_line_no] = resources_stanza.split('\n')
 
