@@ -418,7 +418,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
         }
         profile = storage_profiles[storage_profile.name]
-        if os_disk_size_gb is not None:
+        if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                                  data_caching, storage_sku, attach_data_disks=attach_data_disks)
