@@ -6,6 +6,11 @@ Release History
 +++++++++++++++++++
 * minor fixes
 
+unreleased
+++++++++++
+
+* Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
+
 2.0.16 (2017-09-11)
 +++++++++++++++++++
 * Enable command module to set its own correlation ID in telemetry
