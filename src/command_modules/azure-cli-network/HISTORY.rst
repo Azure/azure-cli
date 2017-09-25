@@ -6,6 +6,7 @@ Release History
 unreleased
 +++++++++++++++++++
 * `application-gateway address-pool create`: `--server` argument is not optional to allow creation of empty address pools.
+* `traffic-manager`: Updates to support latest features.
 
 
 2.0.15 (2017-09-22)

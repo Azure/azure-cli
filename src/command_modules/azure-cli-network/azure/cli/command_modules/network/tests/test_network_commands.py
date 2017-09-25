@@ -1870,31 +1870,28 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 
-class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkTrafficManagerScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_traffic_manager')
+class NetworkTrafficManagerScenarioTest(ScenarioTest):
 
-    def test_network_traffic_manager(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer('cli_test_traffic_manager')
+    def test_network_traffic_manager(self, resource_group):
+        self.resource_group = resource_group
         tm_name = 'mytmprofile'
         endpoint_name = 'myendpoint'
         unique_dns_name = 'mytrafficmanager001100a'
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method priority --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name), checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
-        self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name), checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
-        self.cmd('network traffic-manager profile update -n {} -g {} --routing-method weighted'.format(tm_name, self.resource_group), checks=JMESPathCheck('trafficRoutingMethod', 'Weighted'))
+        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method priority --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name), checks=JMESPathCheckV2('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
+        self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('dnsConfig.relativeName', unique_dns_name))
+        self.cmd('network traffic-manager profile update -n {} -g {} --routing-method weighted'.format(tm_name, self.resource_group), checks=JMESPathCheckV2('trafficRoutingMethod', 'Weighted'))
         self.cmd('network traffic-manager profile list -g {}'.format(self.resource_group))
 
         # Endpoint tests
-        self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group), checks=JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[JMESPathCheck('weight', 25), JMESPathCheck('target', 'www.contoso.com')])
+        self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group), checks=JMESPathCheckV2('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
+        self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[JMESPathCheckV2('weight', 25), JMESPathCheckV2('target', 'www.contoso.com')])
         self.cmd('network traffic-manager endpoint show -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
-        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheck('length(@)', 1))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 1))
         self.cmd('network traffic-manager endpoint delete -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
-        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 0))
 
         self.cmd('network traffic-manager profile delete -g {} -n {}'.format(self.resource_group, tm_name))
 
