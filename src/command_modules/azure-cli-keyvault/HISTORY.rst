@@ -2,6 +2,9 @@
 
 Release History
 ===============
+unreleased
+++++++++++
+* Update azure-keyvault SDK to 0.3.7
 
 2.0.11 (2017-09-22)
 +++++++++++++++++++
