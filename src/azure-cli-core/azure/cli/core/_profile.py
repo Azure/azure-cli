@@ -16,7 +16,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import CLIError, get_file_json, in_cloud_console
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -72,7 +72,6 @@ def _authentication_context_factory(tenant, cache):
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
-init_known_clouds(force=True)
 CLOUD = get_active_cloud()
 
 logger.debug('Current cloud config:\n%s', str(CLOUD))
