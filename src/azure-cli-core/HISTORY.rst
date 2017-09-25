@@ -11,6 +11,11 @@ unreleased
 
 * Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
 
+unreleased
++++++++++++++++++++
+* `availability-set create`: Fixed issue where this command would not work on Azure Stack.
+
+
 2.0.16 (2017-09-11)
 +++++++++++++++++++
 * Enable command module to set its own correlation ID in telemetry
