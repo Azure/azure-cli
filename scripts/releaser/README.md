@@ -30,6 +30,7 @@ python release.py
 python release-docker.py
 python release-debian.py
 python release-rpm.py
+python release-homebrew.py
 ```
 
 Environment Variables

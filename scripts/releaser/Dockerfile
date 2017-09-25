@@ -6,7 +6,7 @@
 FROM python:3.5.2-alpine
 
 RUN apk upgrade --no-cache && \
-    apk add --no-cache bash git openssh gcc make \
+    apk add --no-cache bash git openssh gcc make nano vim \
       openssl-dev libffi-dev musl-dev ca-certificates openssl && update-ca-certificates
 
 RUN pip install --no-cache-dir --upgrade pip wheel twine requests virtualenv uritemplate.py azure-cli sh
