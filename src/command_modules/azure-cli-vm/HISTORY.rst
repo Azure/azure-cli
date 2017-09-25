@@ -2,6 +2,9 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* `vm create`: expose --os-disk-size-gb
 
 2.0.15 (2017-09-22)
 +++++++++++++++++++
