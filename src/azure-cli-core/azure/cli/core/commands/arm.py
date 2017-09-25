@@ -25,9 +25,11 @@ logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile(
     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-    '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-    '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<id_end>.+)')
+    # '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+    # '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+
+children_regex = re.compile('((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?')
 
 
 def handle_long_running_operation_exception(ex):
@@ -92,6 +94,7 @@ def deployment_validate_table_format(result):
 def _populate_alternate_kwargs(kwargs):
     """ Translates the parsed arguments into a format used by generic ARM commands
     such as the resource and lock commands. """
+
     parent = ''
     has_child = all(kwargs[x] is not None for x in ['child_name', 'child_type'])
     has_grandchild = all(kwargs[x] is not None for x in ['grandchild_name', 'grandchild_type'])
