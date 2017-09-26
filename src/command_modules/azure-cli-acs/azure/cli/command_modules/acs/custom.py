@@ -295,14 +295,17 @@ def k8s_install_cli(client_version='latest', install_location=None):
 
     file_url = ''
     system = platform.system()
-    base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
+    base_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/{}/{}/{}'
+    arch = platform.machine().lower()
+    if len(arch) == 0:
+        arch = 'amd64'
+
     if system == 'Windows':
-        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
+        file_url = base_url.format(client_version, 'windows', arch, 'kubectl.exe')
     elif system == 'Linux':
-        # TODO: Support ARM CPU here
-        file_url = base_url.format(client_version, 'linux', 'kubectl')
+        file_url = base_url.format(client_version, 'linux', arch, 'kubectl')
     elif system == 'Darwin':
-        file_url = base_url.format(client_version, 'darwin', 'kubectl')
+        file_url = base_url.format(client_version, 'darwin', arch, 'kubectl')
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
