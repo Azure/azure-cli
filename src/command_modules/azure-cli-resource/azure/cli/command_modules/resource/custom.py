@@ -701,16 +701,20 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy=None, policysetdefinition=None,
+def create_policy_assignment(policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
-                             resource_group_name=None, scope=None, sku=None):
-    if policy and policysetdefinition:
-        raise CLIError('usage error: must specify only one --policy POLICY | \
-        --policy-set-definition POLICYSETDEFINITION')
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None):
+    """Creates a policy assignment
+    :param not_scopes: Space separated scopes where the policy assignment does not apply.
+    """
+    if bool(policy) == bool(policy_set_definition):
+        raise CLIError('usage error: --policy NAME_OR_ID | \
+        --policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
-    policy_id = _resolve_policy_id(policy, policysetdefinition, policy_client)
+    policy_id = _resolve_policy_id(policy, policy_set_definition, policy_client)
 
     if params:
         if os.path.exists(params):
@@ -719,13 +723,26 @@ def create_policy_assignment(policy=None, policysetdefinition=None,
             params = shell_safe_json_parse(params)
 
     PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
-    assignment = PolicyAssignment(display_name, policy_id, scope, params if params else None)
+    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment.parameters = params if params else None
+
     if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+        if not_scopes:
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                if parse_resource_id(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    logger.error('az policy assignment create error: argument --not-scopes: \
+                    invalid notscopes value: \'%s\'' % id_arg)
+                    return
+            assignment.not_scopes = kwargs_list
         PolicySku = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySku', mod='models')
         policySku = PolicySku('A0', 'Free')
         if sku:
             policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
         assignment.sku = policySku
+
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
                                                    assignment)
@@ -795,15 +812,15 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
     return scope
 
 
-def _resolve_policy_id(policy, policysetdefinition, client):
-    policy_id = policy or policysetdefinition
+def _resolve_policy_id(policy, policy_set_definition, client):
+    policy_id = policy or policy_set_definition
     if not is_valid_resource_id(policy_id):
         if policy:
             policy_def = client.policy_definitions.get(policy)
             policy_id = policy_def.id
         else:
-            policy_setdef = client.policy_set_definitions.get(policysetdefinition)
-            policy_id = policy_setdef.id
+            policy_set_def = client.policy_set_definitions.get(policy_set_definition)
+            policy_id = policy_set_def.id
     return policy_id
 
 

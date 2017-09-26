@@ -189,7 +189,11 @@ helps['policy definition list'] = """
     type: command
     short-summary: List policy definitions.
 """
-helps['policy setdefinition create'] = """
+helps['policy set-definition'] = """
+    type: group
+    short-summary: Manage resource policy set definitions.
+"""
+helps['policy set-definition create'] = """
             type: command
             short-summary: Create a policy set definition.
             parameters:
@@ -206,19 +210,19 @@ helps['policy setdefinition create'] = """
                             } \\
                         ]
 """
-helps['policy setdefinition delete'] = """
+helps['policy set-definition delete'] = """
     type: command
     short-summary: Delete a policy set definition.
 """
-helps['policy setdefinition show'] = """
+helps['policy set-definition show'] = """
     type: command
     short-summary: get a policy set definition.
 """
-helps['policy setdefinition update'] = """
+helps['policy set-definition update'] = """
     type: command
     short-summary: Update a policy set definition.
 """
-helps['policy setdefinition list'] = """
+helps['policy set-definition list'] = """
     type: command
     short-summary: List policy set definitions.
 """
