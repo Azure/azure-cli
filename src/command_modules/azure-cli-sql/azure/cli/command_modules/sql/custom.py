@@ -3,18 +3,27 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=C0302
+
+import re
+
 from enum import Enum
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
 from azure.cli.core.util import CLIError
+from azure.mgmt.sql.models.server_key import ServerKey
+from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
+from azure.mgmt.sql.models.resource_identity import ResourceIdentity
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
     DatabaseEdition,
+    IdentityType,
     ReplicationRole,
     SecurityAlertPolicyState,
+    ServerKeyType,
     ServiceObjectiveName,
     StorageKeyType
 )
@@ -824,6 +833,22 @@ def elastic_pool_list_capabilities(
 #                sql server                   #
 ###############################################
 
+def server_create(
+        client,
+        resource_group_name,
+        server_name,
+        assign_identity=False,
+        **kwargs):
+
+    if assign_identity:
+        kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    # Create
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
 
 # Lists servers in a resource group or subscription
 def server_list(
@@ -841,7 +866,12 @@ def server_list(
 # Update server. Custom update function to apply parameters to instance.
 def server_update(
         instance,
-        administrator_login_password=None):
+        administrator_login_password=None,
+        assign_identity=False):
+
+    # Once assigned, the identity cannot be removed
+    if instance.identity is None and assign_identity:
+        instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     # Apply params to instance
     instance.administrator_login_password = (
@@ -935,6 +965,105 @@ def firewall_rule_update(
         resource_group_name=resource_group_name,
         start_ip_address=start_ip_address or instance.start_ip_address,
         end_ip_address=end_ip_address or instance.end_ip_address)
+
+
+#####
+#           sql server key
+#####
+
+
+def server_key_create(
+        client,
+        resource_group_name,
+        server_name,
+        kid=None):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name,
+        parameters=ServerKey(
+            server_key_type=ServerKeyType.azure_key_vault.value,
+            uri=kid
+        )
+    )
+
+
+def server_key_get(
+        client,
+        resource_group_name,
+        server_name,
+        kid):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def server_key_delete(
+        client,
+        resource_group_name,
+        server_name,
+        kid):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+# The SQL server key API requires that the server key has a specific name
+# based on the vault, key and key version.
+def _get_server_key_name_from_uri(uri):
+
+    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+
+    if match is None:
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    vault = uri.split('.')[0].split('/')[-1]
+    key = uri.split('/')[-2]
+    version = uri.split('/')[-1]
+    return '{}_{}_{}'.format(vault, key, version)
+
+
+#####
+#           sql server encryption-protector
+#####
+
+
+def encryption_protector_update(
+        client,
+        resource_group_name,
+        server_name,
+        server_key_type,
+        kid=None):
+
+    if server_key_type == ServerKeyType.service_managed.value:
+        key_name = 'ServiceManaged'
+    else:
+        if kid is None:
+            raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
+        else:
+            key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters=EncryptionProtector(
+            server_key_type=server_key_type,
+            server_key_name=key_name
+        )
+    )
+
 
 #####
 #           sql server vnet-rule validate

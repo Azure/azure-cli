@@ -185,6 +185,14 @@ helps['sql db threat-policy update'] = """
         - name: Disable a threat policy.
           text: az sql db threat-policy update -g mygroup -s myserver -n mydb --state Disabled
     """
+helps['sql db tde'] = """
+            type: group
+            short-summary: Manage a database's transparent data encryption.
+            """
+helps['sql db tde set'] = """
+            type: command
+            short-summary: Sets a database's transparent data encryption configuration.
+            """
 helps['sql dw'] = """
     type: group
     short-summary: Manage data warehouses.
@@ -278,6 +286,30 @@ helps['sql server firewall-rule show'] = """
 helps['sql server firewall-rule list'] = """
     type: command
     short-summary: List a server's firewall rules.
+    """
+helps['sql server key'] = """
+    type: group
+    short-summary: Manage a server's keys.
+    """
+helps['sql server key create'] = """
+    type: command
+    short-summary: Creates a server key.
+    """
+helps['sql server key show'] = """
+    type: command
+    short-summary: Shows a server key.
+    """
+helps['sql server key delete'] = """
+    type: command
+    short-summary: Deletes a server key.
+    """
+helps['sql server tde-key'] = """
+    type: group
+    short-summary: Manage a server's encryption protector.
+    """
+helps['sql server tde-key set'] = """
+    type: command
+    short-summary: Sets the server's encryption protector.
     """
 helps['sql server vnet-rule'] = """
     type: group
