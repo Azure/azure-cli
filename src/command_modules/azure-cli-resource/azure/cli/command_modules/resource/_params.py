@@ -18,7 +18,6 @@ from .custom import (get_policy_completion_list, get_policy_assignment_completio
                      get_resource_types_completion_list, get_providers_completion_list)
 from ._validators import process_deployment_create_namespace, validate_lock_parameters
 
-
 # BASIC PARAMETER CONFIGURATION
 
 resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name. (Ex: myC)')
@@ -41,6 +40,8 @@ register_cli_argument('resource', 'tags', tags_type)
 
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
+register_cli_argument('resource invoke-action', 'action', help='The action that will be invoked on the specified resource')
+register_cli_argument('resource invoke-action', 'request_body', help='JSON encoded parameter arguments for the action that will be passed along in the post request body. Use @{file} to load from a file.')
 
 register_cli_argument('resource create', 'resource_id', options_list=['--id'], help='Resource ID.', action=None)
 register_cli_argument('resource create', 'properties', options_list=('--properties', '-p'),

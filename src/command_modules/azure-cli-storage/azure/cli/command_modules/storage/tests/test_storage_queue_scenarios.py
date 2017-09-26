@@ -112,7 +112,8 @@ class StorageQueueScenarioTests(ScenarioTest):
                  checks=JMESPathCheck('exists', False))
 
         # check status of the queue
-        self.cmd('storage queue stats', checks=JMESPathCheck('geoReplication.status', 'live'))
+        queue_status = self.cmd('storage queue stats').get_output_in_json()
+        self.assertIn(queue_status['geoReplication']['status'], ('live', 'unavailable'))
 
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'

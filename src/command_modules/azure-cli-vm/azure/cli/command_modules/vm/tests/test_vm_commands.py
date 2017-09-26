@@ -434,13 +434,15 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
 
         # rebuild a new vm
-        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
+        # (os disk can be resized)
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-disk-size-gb 100 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
             JMESPathCheckV2('powerState', 'VM running'),
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
             JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3),
-            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheckV2('storageProfile.osDisk.diskSizeGb', 100)
         ])
 
     @ResourceGroupPreparer()
@@ -459,6 +461,23 @@ class VMAttachDisksOnCreate(ScenarioTest):
         # rebuild a new vm
         self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux --use-unmanaged-disk'.format(
             resource_group, os_disk_vhd, data_disk_vhd), checks=[JMESPathCheckV2('powerState', 'VM running')])
+
+
+class VMOSDiskSize(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_set_os_disk_size(self, resource_group):
+        # test unmanaged disk
+        storage_name = self.create_random_name(prefix='cli', length=12)
+        self.cmd('vm create -g {} -n vm --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --use-unmanaged-disk --storage-account {}'.format(resource_group, storage_name))
+        result = self.cmd('storage blob list --account-name {} --container-name vhds'.format(storage_name)).get_output_in_json()
+        self.assertTrue(result[0]['properties']['contentLength'] > 75000000000)
+
+        # test managed disk
+        self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75'.format(resource_group))
+        self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.osDisk.diskSizeGb', 75)
+        ])
 
 
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):

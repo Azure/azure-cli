@@ -8,6 +8,7 @@ Release History
 * policy: support mode parameter for creating policy definitions.
 * managedapp definition: support to create managedapp definition using create-ui-definition and main-template.
 * BREAKING CHANGE: managedapp: Update to latest ARM package, which includes changing resource type from appliances to applications and applianceDefinitions to applicationDefinitions.
+* resource invoke-action: supports ability to invoke any action onto resource, also supports user-specified url to post.
 
 2.0.14 (2017-09-11)
 +++++++++++++++++++

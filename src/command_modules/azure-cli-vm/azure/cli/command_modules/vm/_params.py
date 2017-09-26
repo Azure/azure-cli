@@ -106,11 +106,13 @@ register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit num
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
-register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int,
                       help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
 register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview') as c:
+    c.register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')
@@ -271,6 +273,7 @@ register_cli_argument('vm assign-identity', 'vm_name', existing_vm_name, validat
 register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, validator=process_assign_identity_namespace)
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
+register_cli_argument('vm create', 'os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')

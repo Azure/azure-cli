@@ -25,14 +25,13 @@ LABEL org.label-schema.schema-version="1.0" \
 # INSTALL DEPENDENCIES
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
-RUN pip install --upgrade pip wheel jmespath-terminal
+RUN pip install --no-cache-dir --upgrade pip wheel jmespath-terminal
 # bash gcc openssl-dev libffi-dev musl-dev - dependencies required for CLI
 # jq - we include jq as a useful tool
 # openssh - included for ssh-keygen
-# ca-certificates 
+# ca-certificates
 # wget - required for installing jp
-RUN apk update \
-        && apk add bash gcc make openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl git \
+RUN apk add --no-cache bash gcc make openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl git \
         && update-ca-certificates
 # We also, install jp
 RUN wget https://github.com/jmespath/jp/releases/download/0.1.2/jp-linux-amd64 -qO /usr/local/bin/jp \

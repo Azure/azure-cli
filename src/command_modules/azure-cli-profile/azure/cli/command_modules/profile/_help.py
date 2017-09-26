@@ -24,7 +24,7 @@ helps['login'] = """
             az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
         - name: Log in using a VM's managed service identity (MSI)
           text: >
-            az login -msi
+            az login --msi
     """
 
 helps['account'] = """
