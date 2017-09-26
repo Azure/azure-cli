@@ -528,23 +528,19 @@ def delete_resource(resource_ids=None, resource_group_name=None,
                              parent_resource_path, resource_type, resource_name, None, api_version)
         return res.delete()
 
-    from collections import deque
-    parsed_ids = deque()
+    parsed_ids = []
     for rid in resource_ids:
         if not is_valid_resource_id(rid):
             logger.error('az resource delete: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
             return
         parsed_ids.append(parse_resource_id(rid))
 
-    # queue stores operations so that they are run in parallel
-    operations = deque()
     results = []
-    deleted = True
-    while parsed_ids and deleted:
+    while parsed_ids:
         logger.debug("Start new loop to delete resources.")
-        deleted = False
-        for _ in range(len(parsed_ids)):
-            id_dict = parsed_ids.pop()
+        operations = []
+        failed_parsed_ids = []
+        for id_dict in parsed_ids:
             try:
                 operations.append(delete_resource(
                     resource_group_name=id_dict['resource_group'],
@@ -556,12 +552,16 @@ def delete_resource(resource_ids=None, resource_group_name=None,
             except CloudError as e:
                 # request to delete failed, add parsed id dict back to queue
                 id_dict['exception'] = str(e)
-                parsed_ids.appendleft(id_dict)
+                failed_parsed_ids.append(id_dict)
+        parsed_ids = failed_parsed_ids
 
-        # all operations return before next pass
-        while operations:
-            results.append(operations.pop().result())
-            deleted = True
+        # stop deleting if none deletable
+        if not operations:
+            break
+
+        # all operations return result before next pass
+        for operation in operations:
+            results.append(operation.result())
 
     if parsed_ids:
         for id_dict in parsed_ids:
@@ -596,14 +596,17 @@ def tag_resource(tags, resource_ids=None,
     return res.tag(tags)
 
 
-def invoke_resource_action(action, request_body=None,
+def invoke_resource_action(action, request_body=None, resource_ids=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
-                           resource_id=None, api_version=None):
+                           api_version=None):
     """ Invokes the provided action on an existing resource."""
+    if resource_ids:
+        return _call_on_ids(resource_ids, invoke_resource_action, api_version, "tag", action, request_body)
+
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
+                         None, api_version)
     return res.invoke_action(action=action, request_body=request_body)
 
 
@@ -1495,7 +1498,6 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             return client.send(request, header_parameters)
 
         def get_long_running_output(response):
-            from msrestazure.azure_exceptions import CloudError
             if response.status_code not in [200, 202, 204]:
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')

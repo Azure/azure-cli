@@ -5,9 +5,9 @@
 
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, live_only
-from azure.cli.testsdk.vcr_test_base import MOCKED_SUBSCRIPTION_ID
 
 
+@live_only()
 class ResourceDeleteTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources', location='eastus')
     def test_delete_dependent_resources(self, resource_group):
@@ -22,9 +22,10 @@ class ResourceDeleteTests(ScenarioTest):
 
         rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
 
-        delete_output = self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list))).get_output_in_json()
+        self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list)))
 
-        self.assertTrue(len(rsrc_list) == len(delete_output))
+        self.cmd('resource list --tag {}'.format(tag_name), checks=[
+            JMESPathCheck('length([])', 0)])
 
 
 if __name__ == '__main__':
