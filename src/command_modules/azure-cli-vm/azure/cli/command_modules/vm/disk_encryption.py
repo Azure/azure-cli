@@ -161,6 +161,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                                                       enabled=True)
     if vm_encrypted:
         # stop the vm before update if the vm is already encrypted
+        logger.warning("Deallocating the VM before updating encryption settings...")
         compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
         vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
 
@@ -169,6 +170,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
 
     if vm_encrypted:
         # and start after the update
+        logger.warning("Restarting the VM after the update...")
         compute_client.virtual_machines.start(resource_group_name, vm_name).result()
 
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
