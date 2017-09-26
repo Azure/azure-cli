@@ -537,15 +537,14 @@ def config_source_control(resource_group_name, name, repo_url, repository_type='
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
-    if cd_project_url is not None and cd_project_url.find('visualstudio.com'):
+    if cd_project_url is not None:
         webapp_list = None if test is None else list_webapp(resource_group_name)
-        cd_account = (cd_project_url.split('.visualstudio.com', 1)[0]).strip('https://')
         vsts_provider = VstsContinuousDeliveryProvider()
         cd_app_type_details = get_app_type_details(cd_app_type, app_working_dir, nodejs_task_runner,
                                                    python_framework, python_version)
         status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
                                                          branch, git_token, slot_swap, cd_app_type_details,
-                                                         cd_account, cd_account_create, location, test,
+                                                         cd_project_url, cd_account_create, location, test,
                                                          private_repo_username, private_repo_password, webapp_list)
         logger.warning(status.status_message)
         return status

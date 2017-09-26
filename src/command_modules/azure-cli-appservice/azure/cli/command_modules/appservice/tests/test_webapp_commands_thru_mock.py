@@ -179,7 +179,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
         cd_app_type_details = get_app_type_details('ASPNet', 'working_directory', 'Gulp',
                                                    'Django', 'Python 2.7.12 x64')
         cd_manager.setup_continuous_delivery.assert_called_with('slot1', cd_app_type_details,
-                                                                'account1', True, None, None, None)
+                                                                'https://account1.visualstudio.com',
+                                                                True, None, None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
