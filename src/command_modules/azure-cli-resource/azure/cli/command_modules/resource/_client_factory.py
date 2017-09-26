@@ -78,6 +78,10 @@ def cf_policy_definitions(_):
     return _resource_policy_client_factory().policy_definitions
 
 
+def cf_policy_set_definitions(_):
+    return _resource_policy_client_factory().policy_set_definitions
+
+
 def cf_management_locks(_):
     return _resource_lock_client_factory().management_locks
 

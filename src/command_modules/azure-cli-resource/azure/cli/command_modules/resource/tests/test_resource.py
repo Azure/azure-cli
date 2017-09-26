@@ -3,12 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import os
 import time
 import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                JMESPathCheck as JCheck, create_random_name)
+from azure.cli.core.util import get_file_json
 # AZURE CLI RESOURCE TEST DEFINITIONS
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
                                              BooleanCheck,
@@ -512,7 +514,27 @@ class PolicyScenarioTest(ScenarioTest):
                  policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
                  checks=[
                     JCheck('name', policy_assignment_name),
-                    JCheck('displayName', policy_assignment_display_name)
+                    JCheck('displayName', policy_assignment_display_name),
+                    JCheck('sku.name', 'A0'),
+                    JCheck('sku.tier', 'Free'),
+                 ])
+
+        # create a policy assignment with not scopes and standard sku
+        get_cmd = 'group show -n {}'
+        rg = self.cmd(get_cmd.format(resource_group)).get_output_in_json()
+        vnet_name = self.create_random_name('azurecli-test-policy-vnet', 40)
+        subnet_name = self.create_random_name('azurecli-test-policy-subnet', 40)
+        vnetcreatecmd = 'network vnet create -g {} -n {} --subnet-name {}'
+        self.cmd(vnetcreatecmd.format(resource_group, vnet_name, subnet_name))
+        notscope = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks'.format(rg['id'].split("/")[2], resource_group)
+        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --not-scopes {} --params {} --sku {}'.format(
+                 policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, notscope, params_file, 'standard'),
+                 checks=[
+                    JCheck('name', policy_assignment_name),
+                    JCheck('displayName', policy_assignment_display_name),
+                    JCheck('sku.name', 'A1'),
+                    JCheck('sku.tier', 'Standard'),
+                    JCheck('notScopes[0]', notscope)
                  ])
 
         # listing at subscription level won't find the assignment made at a resource group
@@ -534,6 +556,70 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition delete -n {}'.format(policy_name))
         time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy definition list', checks=JCheck("length([?name=='{}'])".format(policy_name), 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy')
+    def test_resource_policyset(self, resource_group):
+        policy_name = self.create_random_name('azure-cli-test-policy', 30)
+        policy_display_name = self.create_random_name('test_policy', 20)
+        policy_description = 'desc_for_test_policy_123'
+        policyset_name = self.create_random_name('azure-cli-test-policyset', 30)
+        policyset_display_name = self.create_random_name('test_policyset', 20)
+        policyset_description = 'desc_for_test_policyset_123'
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
+        policyset_file = os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\')
+        params_def_file = os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+
+        # create a policy
+        policycreatecmd = 'policy definition create -n {} --rules {} --params {} --display-name {} --description {}'
+        policy = self.cmd(policycreatecmd.format(policy_name, rules_file, params_def_file, policy_display_name,
+                                                 policy_description)).get_output_in_json()
+
+        # create a policy set
+        policyset = get_file_json(policyset_file)
+        policyset[0]['policyDefinitionId'] = policy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+        self.cmd('policy set-definition create -n {} --definitions @"{}" --display-name {} --description {}'.format(
+                 policyset_name, policyset_file, policyset_display_name, policyset_description),
+                 checks=[
+                    JCheck('name', policyset_name),
+                    JCheck('displayName', policyset_display_name),
+                    JCheck('description', policyset_description)
+                ])
+
+        # update it
+        new_policyset_description = policy_description + '_new'
+        self.cmd('policy set-definition update -n {} --description {}'.format(policyset_name, new_policyset_description),
+                 checks=JCheck('description', new_policyset_description))
+
+        # list and show it
+        self.cmd('policy set-definition list', checks=JMESPathCheck("length([?name=='{}'])".format(policyset_name), 1))
+        self.cmd('policy set-definition show -n {}'.format(policyset_name), checks=[
+            JCheck('name', policyset_name),
+            JCheck('displayName', policyset_display_name)
+        ])
+
+        # create a policy assignment on a resource group
+        policy_assignment_name = self.create_random_name('azurecli-test-policy-assignment', 40)
+        policy_assignment_display_name = self.create_random_name('test_assignment', 20)
+        self.cmd('policy assignment create -d {} -n {} --display-name {} -g {}'.format(
+                 policyset_name, policy_assignment_name, policy_assignment_display_name, resource_group),
+                 checks=[
+                    JCheck('name', policy_assignment_name),
+                    JCheck('displayName', policy_assignment_display_name),
+                    JCheck('sku.name', 'A0'),
+                    JCheck('sku.tier', 'Free'),
+                 ])
+
+        # delete the assignment
+        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name, resource_group))
+        self.cmd('policy assignment list --disable-scope-strict-match')
+
+        # delete the policy set
+        self.cmd('policy set-definition delete -n {}'.format(policyset_name))
+        time.sleep(10)  # ensure the policy is gone when run live.
+        self.cmd('policy set-definition list', checks=JCheck("length([?name=='{}'])".format(policyset_name), 0))
 
     def test_show_built_in_policy(self):
         result = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
