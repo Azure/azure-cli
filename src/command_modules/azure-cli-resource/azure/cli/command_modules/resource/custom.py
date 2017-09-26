@@ -114,8 +114,8 @@ def create_application(resource_group_name,
     elif kind.lower() == 'marketplace':
         if (plan_name is None and plan_product is None and
                 plan_publisher is None and plan_version is None):
-            raise CLIError('--plan-name, --plan-product, --plan-publisher and \
-            --plan-version are all required if kind is MarketPlace')
+            raise CLIError('--plan-name, --plan-product, --plan-publisher and '
+                           '--plan-version are all required if kind is MarketPlace')
         else:
             application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
 
@@ -168,16 +168,16 @@ def create_applicationdefinition(resource_group_name,
     """
     if(not package_file_uri and not create_ui_definition and
        not main_template):
-        raise CLIError('usage error: --package-file-uri <url> | \
-        --create-ui-definition --main-template')
+        raise CLIError('usage error: --package-file-uri <url> | '
+                       '--create-ui-definition --main-template')
     elif package_file_uri:
         if create_ui_definition or main_template:
-            raise CLIError('usage error: must not specify \
-            --create-ui-definition --main-template')
+            raise CLIError('usage error: must not specify '
+                           '--create-ui-definition --main-template')
     elif not package_file_uri:
         if not create_ui_definition or not main_template:
-            raise CLIError('usage error: must specify \
-            --create-ui-definition --main-template')
+            raise CLIError('usage error: must specify '
+                           '--create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory()
     rcf = _resource_client_factory()
     if not location:
@@ -701,12 +701,20 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy, name=None, display_name=None, params=None,
-                             resource_group_name=None, scope=None):
+def create_policy_assignment(policy=None, policy_set_definition=None,
+                             name=None, display_name=None, params=None,
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None):
+    """Creates a policy assignment
+    :param not_scopes: Space separated scopes where the policy assignment does not apply.
+    """
+    if bool(policy) == bool(policy_set_definition):
+        raise CLIError('usage error: --policy NAME_OR_ID | '
+                       '--policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
-    policy_id = _resolve_policy_id(policy, policy_client)
+    policy_id = _resolve_policy_id(policy, policy_set_definition, policy_client)
 
     if params:
         if os.path.exists(params):
@@ -715,7 +723,26 @@ def create_policy_assignment(policy, name=None, display_name=None, params=None,
             params = shell_safe_json_parse(params)
 
     PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
-    assignment = PolicyAssignment(display_name, policy_id, scope, params if params else None)
+    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment.parameters = params if params else None
+
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+        if not_scopes:
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                if parse_resource_id(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    logger.error('az policy assignment create error: argument --not-scopes: \
+                    invalid notscopes value: \'%s\'' % id_arg)
+                    return
+            assignment.not_scopes = kwargs_list
+        PolicySku = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySku', mod='models')
+        policySku = PolicySku('A0', 'Free')
+        if sku:
+            policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
+        assignment.sku = policySku
+
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
                                                    assignment)
@@ -785,11 +812,15 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
     return scope
 
 
-def _resolve_policy_id(policy, client):
-    policy_id = policy
-    if not is_valid_resource_id(policy):
-        policy_def = client.policy_definitions.get(policy)
-        policy_id = policy_def.id
+def _resolve_policy_id(policy, policy_set_definition, client):
+    policy_id = policy or policy_set_definition
+    if not is_valid_resource_id(policy_id):
+        if policy:
+            policy_def = client.policy_definitions.get(policy)
+            policy_id = policy_def.id
+        else:
+            policy_set_def = client.policy_set_definitions.get(policy_set_definition)
+            policy_id = policy_set_def.id
     return policy_id
 
 
@@ -823,6 +854,17 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
+def create_policy_setdefinition(name, definitions, params=None, display_name=None, description=None):
+    definitions = _load_file_string_or_uri(definitions, 'definitions')
+    params = _load_file_string_or_uri(params, 'params', False)
+
+    policy_client = _resource_policy_client_factory()
+    PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
+    parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
+                                     display_name=display_name)
+    return policy_client.policy_set_definitions.create_or_update(name, parameters)
+
+
 def get_policy_definition(policy_definition_name):
     from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
@@ -834,6 +876,20 @@ def get_policy_definition(policy_definition_name):
             policy_id = '/providers/Microsoft.Authorization/policydefinitions/' + policy_definition_name
             rcf = _resource_client_factory()
             return rcf.resources.get_by_id(policy_id, policy_client.policy_definitions.api_version)
+        raise
+
+
+def get_policy_setdefinition(policy_set_definition_name):
+    from msrestazure.azure_exceptions import CloudError
+    policy_client = _resource_policy_client_factory()
+    try:
+        return policy_client.policy_set_definitions.get(policy_set_definition_name)
+    except CloudError as ex:
+        if ex.status_code == 404:
+            # work around for https://github.com/Azure/azure-cli/issues/692
+            policy_id = '/providers/Microsoft.Authorization/policysetdefinitions/' + policy_set_definition_name
+            rcf = _resource_client_factory()
+            return rcf.resources.get_by_id(policy_id, policy_client.policy_set_definitions.api_version)
         raise
 
 
@@ -863,9 +919,41 @@ def update_policy_definition(policy_definition_name, rules=None, params=None,
     return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
 
 
+def update_policy_setdefinition(policy_set_definition_name, definitions=None, params=None,
+                                display_name=None, description=None):
+    if definitions:
+        if os.path.exists(definitions):
+            definitions = get_file_json(definitions)
+        else:
+            definitions = shell_safe_json_parse(definitions)
+
+    if params:
+        if os.path.exists(params):
+            params = get_file_json(params)
+        else:
+            params = shell_safe_json_parse(params)
+
+    policy_client = _resource_policy_client_factory()
+    definition = policy_client.policy_set_definitions.get(policy_set_definition_name)
+    # pylint: disable=line-too-long,no-member
+    PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
+    parameters = PolicySetDefinition(
+        policy_definitions=definitions if definitions is not None else definition.policy_definitions,
+        description=description if description is not None else definition.description,
+        display_name=display_name if display_name is not None else definition.display_name,
+        parameters=params if params is not None else definition.parameters)
+    return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
+
+
 def get_policy_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     policy_client = _resource_policy_client_factory()
     result = policy_client.policy_definitions.list()
+    return [i.name for i in result]
+
+
+def get_policy_set_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory()
+    result = policy_client.policy_set_definitions.list()
     return [i.name for i in result]
 
 
