@@ -225,6 +225,20 @@ no_wait_type = CliArgumentType(
     action='store_true'
 )
 
+zones_type = CliArgumentType(
+    options_list=['--zones', '-z'],
+    nargs='+',
+    help='Space separated list of availability zones into which to provision the resource.',
+    choices=['1', '2', '3']
+)
+
+zone_type = CliArgumentType(
+    options_list=['--zone', '-z'],
+    help='Availability zone into which to provision the resource.',
+    choices=['1', '2', '3'],
+    nargs=1
+)
+
 register_cli_argument('', 'resource_group_name', resource_group_name_type)
 register_cli_argument('', 'location', location_type)
 register_cli_argument('', 'deployment_name', deployment_name_type)

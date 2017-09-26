@@ -21,7 +21,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='source_account')
     @StorageAccountPreparer(parameter_name='target_account')
     def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
-        source_file = self.create_temp_file(16, full_random=True)
+        source_file = self.create_temp_file(16)
         source_account_info = self.get_account_info(resource_group, source_account)
         source_container = self.create_container(source_account_info)
         self.storage_cmd('storage blob upload -c {} -n src -f {} -t page', source_account_info,
@@ -131,7 +131,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     def test_storage_blob_lease_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
-        local_file = self.create_temp_file(128, full_random=True)
+        local_file = self.create_temp_file(128)
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
         proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
@@ -174,7 +174,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     def test_storage_blob_snapshot_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
-        local_file = self.create_temp_file(128, full_random=True)
+        local_file = self.create_temp_file(128)
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
 
@@ -190,11 +190,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     def test_storage_blob_metadata_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
-        local_file = self.create_temp_file(128, full_random=True)
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
 
-        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, local_file)
+        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, __file__)
         self.storage_cmd('storage blob metadata update -n {} -c {} --metadata a=b c=d',
                          account_info, b, c)
         self.storage_cmd('storage blob metadata show -n {} -c {}', account_info, b, c) \

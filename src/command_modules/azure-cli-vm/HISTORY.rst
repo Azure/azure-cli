@@ -2,9 +2,13 @@
 
 Release History
 ===============
-
-unreleased
+(unreleased)
 +++++++++++++++++++
+* `vm create`: expose --os-disk-size-gb
+
+2.0.15 (2017-09-22)
++++++++++++++++++++
+* `vm/vmss/disk create`: support availability zone
 * `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
 * `vm create`: Added `--asgs` support.
 * `vm run-command`: support to run commands on remote VMs

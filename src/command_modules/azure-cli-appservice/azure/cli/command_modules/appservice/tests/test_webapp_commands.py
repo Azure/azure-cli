@@ -103,8 +103,8 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create_cd(self, resource_group):
-        webapp_name = 'webapp-quick-cd'
-        plan = 'plan-quick'
+        webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
+        plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
         import time
@@ -116,8 +116,9 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japaneast')
     def test_linux_webapp_quick_create(self, resource_group):
-        webapp_name = 'webapp-quick-linux'
-        plan = 'plan-quick-linux'
+        webapp_name = self.create_random_name(prefix='webapp-quick-linux', length=24)
+        plan = self.create_random_name(prefix='plan-quick-linux', length=24)
+
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
         import requests
@@ -132,8 +133,8 @@ class WebappQuickCreateTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='westus')
     def test_linux_webapp_quick_create_cd(self, resource_group):
-        webapp_name = 'webapp-quick-linux-cd'
-        plan = 'plan-quick-linux-cd'
+        webapp_name = 'webapp-quick-linux-cd3'
+        plan = 'plan-quick-linux-cd3'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
         import requests
@@ -185,92 +186,86 @@ class AppServicePlanSceanrioTest(ScenarioTest):
         ])
 
 
-class WebappConfigureTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(WebappConfigureTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-config')
-        self.webapp_name = 'webapp-config-test'
+class WebappConfigureTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_config')
+    def test_webapp_config(self, resource_group):
+        webapp_name = self.create_random_name('webapp-config-test', 40)
+        plan_name = self.create_random_name('webapp-config-plan', 40)
 
-    def test_webapp_config(self):
-        self.execute()
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
-    def set_up(self):
-        super(WebappConfigureTest, self).set_up()
-        plan = 'webapp-config-plan'
-        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan_result['id']))
-
-    def body(self):
-        # site config testing
         # verify the baseline
-        result = self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('alwaysOn', False),
-            JMESPathCheck('autoHealEnabled', False),
-            JMESPathCheck('phpVersion', '5.6'),
-            JMESPathCheck('netFrameworkVersion', 'v4.0'),
-            JMESPathCheck('pythonVersion', ''),
-            JMESPathCheck('use32BitWorkerProcess', True),
-            JMESPathCheck('webSocketsEnabled', False)
-        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheckV2('alwaysOn', False),
+            JMESPathCheckV2('autoHealEnabled', False),
+            JMESPathCheckV2('phpVersion', '5.6'),
+            JMESPathCheckV2('netFrameworkVersion', 'v4.0'),
+            JMESPathCheckV2('pythonVersion', ''),
+            JMESPathCheckV2('use32BitWorkerProcess', True),
+            JMESPathCheckV2('webSocketsEnabled', False)])
+
         # update and verify
         checks = [
-            JMESPathCheck('alwaysOn', True),
-            JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.0'),
-            JMESPathCheck('netFrameworkVersion', 'v3.0'),
-            JMESPathCheck('pythonVersion', '3.4'),
-            JMESPathCheck('use32BitWorkerProcess', False),
-            JMESPathCheck('webSocketsEnabled', True)
+            JMESPathCheckV2('alwaysOn', True),
+            JMESPathCheckV2('autoHealEnabled', True),
+            JMESPathCheckV2('phpVersion', '7.0'),
+            JMESPathCheckV2('netFrameworkVersion', 'v3.0'),
+            JMESPathCheckV2('pythonVersion', '3.4'),
+            JMESPathCheckV2('use32BitWorkerProcess', False),
+            JMESPathCheckV2('webSocketsEnabled', True)
         ]
-        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
-            self.resource_group, self.webapp_name), checks=checks)
-        self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
+        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 '
+                 '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
+                 '--web-sockets-enabled=true'.format(resource_group, webapp_name)).assert_with_checks(checks)
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
+            .assert_with_checks(checks)
+
         # site appsettings testing
         # update
-        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck("length([?name=='s1'])", 1),
-            JMESPathCheck("length([?name=='s2'])", 1),
-            JMESPathCheck("length([?name=='s3'])", 1),
-            JMESPathCheck("length([?value=='foo'])", 1),
-            JMESPathCheck("length([?value=='bar'])", 1),
-            JMESPathCheck("length([?value=='foo'])", 1)
-        ])
-        # show
-        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
-        s2 = next((x for x in result if x['name'] == 's2'))
-        self.assertEqual(s2['name'], 's2')
-        self.assertEqual(s2['slotSetting'], False)
-        self.assertEqual(s2['value'], 'bar')
-        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheckV2("length([?name=='s1'])", 1),
+                     JMESPathCheckV2("length([?name=='s2'])", 1),
+                     JMESPathCheckV2("length([?name=='s3'])", 1),
+                     JMESPathCheckV2("length([?value=='foo'])", 1),
+                     JMESPathCheckV2("length([?value=='bar'])", 1),
+                     JMESPathCheckV2("length([?value=='foo'])", 1)])
+
         # delete
-        self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck("length([?name=='s3'])", 1)
-        ])
-        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(self.resource_group, self.webapp_name))
-        self.assertEqual(set([x['name'] for x in result]), set(['s3', 'WEBSITE_NODE_DEFAULT_VERSION']))
+        self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheckV2("length([?name=='s3'])", 1),
+                     JMESPathCheckV2("length([?name=='s1'])", 0),
+                     JMESPathCheckV2("length([?name=='s2'])", 0)])
+
         # hostnames
-        self.cmd('webapp config hostname list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(self.webapp_name))
-        ])
+        self.cmd('webapp config hostname list -g {} --webapp-name {}'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheckV2('length(@)', 1),
+                     JMESPathCheckV2('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
+
         # site connection string tests
-        self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('length([])', 3),
-            JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
-            JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
-            JMESPathCheck("[?name=='c1']|[0].value.value", 'conn1'),
-            JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
-            JMESPathCheck("[?name=='c3']|[0].slotSetting", True),
-        ])
-        self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'.format(self.resource_group, self.webapp_name))
-        result = self.cmd('webapp config connection-string list -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].slotSetting', False),
-            JMESPathCheck('[0].name', 'c2')
-        ])
-        # see deployment user
-        result = self.cmd('webapp deployment user show')
-        self.assertTrue(result['type'])  # just make sure the command does return something
+        self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
+                 '--slot-settings c3=conn3'.format(resource_group, webapp_name))
+        self.cmd('webapp config connection-string list -g {} -n {}'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheckV2('length([])', 3),
+                     JMESPathCheckV2("[?name=='c1']|[0].slotSetting", False),
+                     JMESPathCheckV2("[?name=='c1']|[0].value.type", 'MySql'),
+                     JMESPathCheckV2("[?name=='c1']|[0].value.value", 'conn1'),
+                     JMESPathCheckV2("[?name=='c2']|[0].slotSetting", False),
+                     JMESPathCheckV2("[?name=='c3']|[0].slotSetting", True)])
+        self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
+                 .format(resource_group, webapp_name))
+        self.cmd('webapp config connection-string list -g {} -n {}'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheckV2('length([])', 1),
+                     JMESPathCheckV2('[0].slotSetting', False),
+                     JMESPathCheckV2('[0].name', 'c2')])
+
+        # see deployment user; just make sure the command does return something
+        self.assertTrue(self.cmd('webapp deployment user show').get_output_in_json()['type'])
 
 
 class WebappScaleTest(ResourceGroupVCRTestBase):
@@ -347,8 +342,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp(self, resource_group):
         runtime = 'node|6.4'
-        plan = 'webapp-linux-plan2'
-        webapp = 'webapp-linux2'
+        plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
+        webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
             JMESPathCheckV2('sku.name', 'S1'),
@@ -369,15 +364,17 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         self.assertTrue(result['CI_CD_URL'].startswith('https://'))
         self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
 
-        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
-            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url')).get_output_in_json()
+        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'false')).get_output_in_json()
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
 
         result = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
-        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE']))
         self.assertEqual(set(x['value'] for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
         self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
+        sample = next((x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+        self.assertEqual(sample, {'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
         self.cmd('webapp config container delete -g {} -n {}'.format(resource_group, webapp))
         result2 = self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp)).get_output_in_json()
         self.assertEqual(result2, [])
@@ -386,8 +383,8 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 class WebappACRSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_integration(self, resource_group):
-        plan = 'plan11'
-        webapp = 'webappacrtest11'
+        plan = self.create_random_name(prefix='acrtestplan', length=24)
+        webapp = self.create_random_name(prefix='webappacrtest', length=24)
         runtime = 'node|6.4'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))

@@ -2,6 +2,16 @@
 
 Release History
 ===============
+2.0.17 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+unreleased
+++++++++++
+
+* Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
+* More user-friendly handling of invalid cloud configurations
+* `availability-set create`: Fixed issue where this command would not work on Azure Stack.
 
 2.0.16 (2017-09-11)
 +++++++++++++++++++

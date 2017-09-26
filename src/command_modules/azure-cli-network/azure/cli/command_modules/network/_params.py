@@ -11,7 +11,7 @@ from azure.cli.core.commands import \
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
-                                                three_state_flag, model_choice_list)
+                                                three_state_flag, model_choice_list, zone_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -39,6 +39,7 @@ from azure.cli.command_modules.network._validators import \
      get_network_watcher_from_vm, get_network_watcher_from_location,
      get_asg_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
+from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 from azure.cli.core.util import get_json_object
@@ -490,6 +491,12 @@ register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
 register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
 
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
+    c.register_cli_argument('network public-ip', 'zone', zone_type)
+    c.register_cli_argument('network lb create', 'frontend_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--frontend-ip-zone'), help='used to create internal facing Load balancer'))
+    c.register_cli_argument('network lb create', 'public_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--public-ip-zone'), help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer'))
+    c.register_cli_argument('network lb frontend-ip', 'zone', zone_type)
+
 for item in ['create', 'update']:
     register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
@@ -704,7 +711,7 @@ register_cli_argument('network traffic-manager profile', 'traffic_manager_profil
 register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
 register_cli_argument('network traffic-manager profile', 'monitor_path', help='Path to monitor.')
 register_cli_argument('network traffic-manager profile', 'monitor_port', help='Port to monitor.', type=int)
-register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.')
+register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.', **enum_choice_list(MonitorProtocol))
 register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', **enum_choice_list(['Enabled', 'Disabled']))
 register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(['Performance', 'Weighted', 'Priority', 'Geographic']))
 register_cli_argument('network traffic-manager profile', 'unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")

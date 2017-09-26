@@ -24,7 +24,9 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CreateMode,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
-    StorageKeyType)
+    ServerKeyType,
+    StorageKeyType,
+    TransparentDataEncryptionStatus)
 from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
@@ -455,6 +457,23 @@ with ParametersContext(command='sql db threat-policy update') as c:
 
     # TODO: use server default
 
+#####
+#           sql db transparent-data-encryption
+#####
+
+with ParametersContext(command='sql db tde') as c:
+    c.argument('database_name',
+               options_list=('--database', '-d'),
+               required=True,
+               help='Name of the Azure Sql Database.')
+
+with ParametersContext(command='sql db tde set') as c:
+    c.argument('status',
+               options_list=('--status'),
+               required=True,
+               help='Status of the transparent data encryption.',
+               **enum_choice_list(TransparentDataEncryptionStatus))
+
 ###############################################
 #                sql dw                       #
 ###############################################
@@ -581,6 +600,11 @@ with ParametersContext(command='sql server create') as c:
         'administrator_login_password': patch_arg_make_required
     })
 
+    c.argument('assign_identity',
+               options_list=('--assign-identity', '-i'),
+               help='Generate and assign an Azure Active Directory Identity for this server'
+               'for use with key management services like Azure KeyVault.')
+
     # 12.0 is the only server version allowed and it's already the default.
     c.ignore('version')
 
@@ -590,6 +614,10 @@ with ParametersContext(command='sql server create') as c:
 
 with ParametersContext(command='sql server update') as c:
     c.argument('administrator_login_password', help='The administrator login password.')
+    c.argument('assign_identity',
+               options_list=('--assign_identity', '-i'),
+               help='Generate and assign an Azure Active Directory Identity for this server'
+               'for use with key management services like Azure KeyVault.')
 
 
 #####
@@ -620,9 +648,7 @@ with ParametersContext(command='sql server ad-admin create') as c:
 with ParametersContext(command='sql server firewall-rule') as c:
     # Help text needs to be specified because 'sql server firewall-rule update' is a custom
     # command.
-    c.argument('server_name',
-               options_list=('--server', '-s'),
-               help='The name of the Azure SQL server.')
+    c.argument('server_name', arg_type=server_param_type)
 
     c.argument('firewall_rule_name',
                options_list=('--name', '-n'),
@@ -640,8 +666,44 @@ with ParametersContext(command='sql server firewall-rule') as c:
 
 
 #####
+#           sql server key
+#####
+
+
+with ParametersContext(command='sql server key') as c:
+    c.argument('server_name', arg_type=server_param_type)
+    c.argument('key_name', options_list=('--name', '-n'))
+    c.argument('kid',
+               options_list=('--kid', '-k'),
+               required=True,
+               help='The Azure Key Vault key identifier of the server key. An example key identifier is '
+               '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+
+#####
+#           sql server tde-key
+#####
+
+
+with ParametersContext(command='sql server tde-key') as c:
+    c.argument('server_name', arg_type=server_param_type)
+
+with ParametersContext(command='sql server tde-key set') as c:
+    c.argument('kid',
+               options_list=('--kid', '-k'),
+               help='The Azure Key Vault key identifier of the server key to be made encryption protector.'
+               'An example key identifier is '
+               '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+    c.argument('server_key_type',
+               options_list=('--server-key-type', '-t'),
+               help='The type of the server key',
+               **enum_choice_list(ServerKeyType))
+
+
+#####
 #           sql server vnet-rule
 #####
+
 
 with ParametersContext(command='sql server vnet-rule') as c:
     # Help text needs to be specified because 'sql server vnet-rule create' is a custom

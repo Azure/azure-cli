@@ -44,6 +44,46 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkLoadBalancerWithZone(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_zone')
+    def test_network_lb_zone(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'lb': 'lb1',
+            'zone': '2',
+            'location': 'eastus2',
+            'ip': 'pubip1'
+        }
+
+        # LB with public ip
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip}'.format(**kwargs))
+        # No zone on LB and its front-ip-config
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2("frontendIpConfigurations[0].zones", None),
+            JMESPathCheckV2("zones", None)
+        ])
+        # Zone on public-ip which LB uses to infer the zone
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('zones[0]', kwargs['zone'])
+        ])
+
+        # LB w/o public ip, so called ILB
+        kwargs['lb'] = 'lb2'
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1'.format(**kwargs))
+        # Zone on front-ip-config, and still no zone on LB resource
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2("frontendIpConfigurations[0].zones[0]", kwargs['zone']),
+            JMESPathCheckV2("zones", None)
+        ])
+        # add a second frontend ip configuration
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb} -n LoadBalancerFrontEnd2 -z {zone}  --vnet-name vnet1 --subnet subnet1'.format(**kwargs), checks=[
+            JMESPathCheckV2("zones", [kwargs['zone']])
+        ])
+
+
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
 class NetworkPublicIpWithSku(ScenarioTest):
 
@@ -575,6 +615,21 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
 
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
+class NetworkZonedPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
+    def test_network_zoned_public_ip(self, resource_group):
+        kwargs = {
+            'rg': resource_group,
+            'ip': 'pubip'
+        }
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2'.format(**kwargs),
+                 checks=JMESPathCheck('publicIp.zones[0]', '2'))
+
+        table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable'.format(**kwargs)).output
+        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+
+
 class NetworkRouteFilterScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
@@ -1815,31 +1870,28 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 
-class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkTrafficManagerScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_traffic_manager')
+class NetworkTrafficManagerScenarioTest(ScenarioTest):
 
-    def test_network_traffic_manager(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer('cli_test_traffic_manager')
+    def test_network_traffic_manager(self, resource_group):
+        self.resource_group = resource_group
         tm_name = 'mytmprofile'
         endpoint_name = 'myendpoint'
         unique_dns_name = 'mytrafficmanager001100a'
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method priority --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name), checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
-        self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name), checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
-        self.cmd('network traffic-manager profile update -n {} -g {} --routing-method weighted'.format(tm_name, self.resource_group), checks=JMESPathCheck('trafficRoutingMethod', 'Weighted'))
+        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method priority --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name), checks=JMESPathCheckV2('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
+        self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('dnsConfig.relativeName', unique_dns_name))
+        self.cmd('network traffic-manager profile update -n {} -g {} --routing-method weighted'.format(tm_name, self.resource_group), checks=JMESPathCheckV2('trafficRoutingMethod', 'Weighted'))
         self.cmd('network traffic-manager profile list -g {}'.format(self.resource_group))
 
         # Endpoint tests
-        self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group), checks=JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[JMESPathCheck('weight', 25), JMESPathCheck('target', 'www.contoso.com')])
+        self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group), checks=JMESPathCheckV2('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
+        self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[JMESPathCheckV2('weight', 25), JMESPathCheckV2('target', 'www.contoso.com')])
         self.cmd('network traffic-manager endpoint show -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
-        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheck('length(@)', 1))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 1))
         self.cmd('network traffic-manager endpoint delete -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
-        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheck('length(@)', 0))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 0))
 
         self.cmd('network traffic-manager profile delete -g {} -n {}'.format(self.resource_group, tm_name))
 

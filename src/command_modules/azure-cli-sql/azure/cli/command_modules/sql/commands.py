@@ -13,10 +13,14 @@ from ._util import (
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
     get_sql_database_threat_detection_policies_operations,
+    get_sql_database_transparent_data_encryption_activities_operations,
+    get_sql_database_transparent_data_encryptions_operations,
     get_sql_database_usages_operations,
     get_sql_elastic_pools_operations,
+    get_sql_encryption_protectors_operations,
     get_sql_firewall_rules_operations,
     get_sql_replication_links_operations,
+    get_sql_server_keys_operations,
     get_sql_servers_operations,
     get_sql_server_usages_operations,
     get_sql_virtual_network_rules_operations
@@ -80,16 +84,27 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
         # with s.group('sql db restore-point') as c:
         #     c.command('list', 'list_restore_points')
 
-        # TDE will not be included in the first batch of GA commands
-        # with s.group('sql db transparent-data-encryption') as c:
-        #     c.command('create', 'create_or_update_transparent_data_encryption_configuration')
-        #     c.command('show-configuration', 'get_transparent_data_encryption_configuration')
-        #     c.command('show-activity', 'list_transparent_data_encryption_activity')
-
         # Service tier advisor will not be included in the first batch of GA commands
         # with s.group('sql db service-tier-advisor') as c:
         #     c.command('list', 'list_service_tier_advisors')
         #     c.command('show', 'get_service_tier_advisor')
+
+    transparent_data_encryptions_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.transparent_data_encryptions_operations',
+        'TransparentDataEncryptionsOperations')
+    with ServiceGroup(__name__, get_sql_database_transparent_data_encryptions_operations,
+                      transparent_data_encryptions_operations, custom_path) as s:
+        with s.group('sql db tde') as c:
+            c.command('set', 'create_or_update')
+            c.command('show', 'get')
+
+    transparent_data_encryption_activities_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.transparent_data_encryption_activities_operations',
+        'TransparentDataEncryptionActivitiesOperations')
+    with ServiceGroup(__name__, get_sql_database_transparent_data_encryption_activities_operations,
+                      transparent_data_encryption_activities_operations, custom_path) as s:
+        with s.group('sql db tde') as c:
+            c.command('list-activity', 'list_by_configuration')
 
     replication_links_operations = create_service_adapter('azure.mgmt.sql.operations.replication_links_operations',
                                                           'ReplicationLinksOperations')
@@ -175,7 +190,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
 
     with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, custom_path) as s:
         with s.group('sql server') as c:
-            c.command('create', 'create_or_update')
+            c.custom_command('create', 'server_create')
             c.command('delete', 'delete', confirmation=True)
             c.command('show', 'get')
             c.custom_command('list', 'server_list')
@@ -217,6 +232,26 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             c.generic_update_command('update', 'get', 'create_or_update',
                                      custom_func_name='server_ad_admin_update',
                                      setter_arg_name='properties')
+
+    server_keys_operations = create_service_adapter('azure.mgmt.sql.operations.server_keys_operations',
+                                                    'ServerKeysOperations')
+
+    with ServiceGroup(__name__, get_sql_server_keys_operations, server_keys_operations, custom_path) as s:
+        with s.group('sql server key') as c:
+            c.custom_command('create', 'server_key_create')
+            c.custom_command('delete', 'server_key_delete')
+            c.custom_command('show', 'server_key_get')
+            c.command('list', 'list_by_server')
+
+    encryption_protectors_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.encryption_protectors_operations',
+        'EncryptionProtectorsOperations')
+
+    with ServiceGroup(__name__, get_sql_encryption_protectors_operations, encryption_protectors_operations,
+                      custom_path) as s:
+        with s.group('sql server tde-key') as c:
+            c.command('show', 'get')
+            c.custom_command('set', 'encryption_protector_update')
 
     virtual_network_rules_operations = create_service_adapter(
         'azure.mgmt.sql.operations.virtual_network_rules_operations',

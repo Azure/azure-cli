@@ -128,7 +128,7 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku):
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -143,6 +143,8 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name,
         'dependsOn': [],
         'properties': public_ip_properties
     }
+    if zone:
+        public_ip['zones'] = zone
     if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
@@ -311,8 +313,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        attach_os_disk=None, attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None, secrets=None, license_type=None):
+        attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None, data_disk_sizes_gb=None,
+        image_data_disks=None, custom_data=None, secrets=None, license_type=None, zone=None):
 
     def _build_os_profile():
 
@@ -416,6 +418,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
         }
         profile = storage_profiles[storage_profile.name]
+        if os_disk_size_gb:
+            profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                                  data_caching, storage_sku, attach_data_disks=attach_data_disks)
 
@@ -445,6 +449,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         'dependsOn': [],
         'properties': vm_properties,
     }
+    if zone:
+        vm['zones'] = zone
     return vm
 
 
@@ -689,7 +695,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None, secrets=None):
+                        single_placement_group=None, custom_data=None, secrets=None, zones=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -839,6 +845,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         },
         'properties': vmss_properties
     }
+    if zones:
+        vmss['zones'] = zones
     return vmss
 
 
@@ -851,13 +859,15 @@ def build_av_set_resource(name, location, tags,
         'location': location,
         'tags': tags,
         'apiVersion': av_set_api_version,
-        'sku': {
-            'name': 'Classic' if unmanaged else 'Aligned'
-        },
         "properties": {
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
+
+    if supported_api_version(ResourceType.MGMT_COMPUTE, '2016-04-30-preview'):
+        av_set['sku'] = {
+            'name': 'Classic' if unmanaged else 'Aligned'
+        }
 
     # server defaults the UD to 5 unless set otherwise
     if platform_update_domain_count is not None:

@@ -28,6 +28,8 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
+from azure.mgmt.trafficmanager.models import MonitorProtocol
+
 logger = azlogging.get_az_logger(__name__)
 
 AddressSpace, ApplicationGatewayFirewallMode, ApplicationGatewaySkuName, ApplicationGatewaySslPolicy, \
@@ -202,8 +204,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              None,
-                                                              None))
+                                                              None, None, None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
@@ -263,7 +264,7 @@ def update_ag_authentication_certificate(instance, parent, item_name, cert_data)
 
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
-                                   servers, no_wait=False):
+                                   servers=None, no_wait=False):
     ApplicationGatewayBackendAddressPool = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendAddressPool',
@@ -878,7 +879,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None):
+                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
@@ -921,13 +922,14 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                                                               tags,
                                                               public_ip_address_allocation,
                                                               public_ip_dns_name,
-                                                              sku))
+                                                              sku, public_ip_zone))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
         load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
-        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku)
+        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
+        frontend_ip_zone)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -1022,7 +1024,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation='dynamic'):
+        private_ip_address_allocation='dynamic', zone=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_config = FrontendIPConfiguration(
@@ -1031,6 +1033,10 @@ def create_lb_frontend_ip_configuration(
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
         subnet=Subnet(subnet) if subnet else None)
+
+    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_config.zones = zone
+
     _upsert(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().frontend_ip_configurations, item_name)
@@ -1554,7 +1560,7 @@ update_nsg_rule_2017_03_01.__doc__ = SecurityRule.__doc__
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None):
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None):
     client = _network_client_factory().public_ip_addresses
     if not allocation_method:
         allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
@@ -1569,6 +1575,8 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
     }
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        public_ip_args['zones'] = zone
     if sku:
         public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
@@ -2537,14 +2545,14 @@ def list_traffic_manager_profiles(resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
-        return client.list_by_in_resource_group(resource_group_name)
+        return client.list_by_resource_group(resource_group_name)
 
-    return client.list_all()
+    return client.list_by_subscription()
 
 
 def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path='/',
-                                   monitor_port=80, monitor_protocol='http', status='enabled',
+                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value, status='enabled',
                                    ttl=30, tags=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig

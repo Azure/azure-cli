@@ -16,6 +16,7 @@ import uuid
 import six
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
@@ -433,13 +434,15 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
 
         # rebuild a new vm
-        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
+        # (os disk can be resized)
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-disk-size-gb 100 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
             JMESPathCheckV2('powerState', 'VM running'),
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
             JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3),
-            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheckV2('storageProfile.osDisk.diskSizeGb', 100)
         ])
 
     @ResourceGroupPreparer()
@@ -458,6 +461,23 @@ class VMAttachDisksOnCreate(ScenarioTest):
         # rebuild a new vm
         self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux --use-unmanaged-disk'.format(
             resource_group, os_disk_vhd, data_disk_vhd), checks=[JMESPathCheckV2('powerState', 'VM running')])
+
+
+class VMOSDiskSize(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_set_os_disk_size(self, resource_group):
+        # test unmanaged disk
+        storage_name = self.create_random_name(prefix='cli', length=12)
+        self.cmd('vm create -g {} -n vm --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --use-unmanaged-disk --storage-account {}'.format(resource_group, storage_name))
+        result = self.cmd('storage blob list --account-name {} --container-name vhds'.format(storage_name)).get_output_in_json()
+        self.assertTrue(result[0]['properties']['contentLength'] > 75000000000)
+
+        # test managed disk
+        self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75'.format(resource_group))
+        self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.osDisk.diskSizeGb', 75)
+        ])
 
 
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
@@ -2145,6 +2165,58 @@ class VMLiveScenarioTest(LiveScenarioTest):
         # spot check we do have relevant messages coming out
         self.assertTrue('Succeeded: {}VMNic (Microsoft.Network/networkInterfaces)'.format(vm_name) in lines)
         self.assertTrue('Succeeded: {} (Microsoft.Compute/virtualMachines)'.format(vm_name) in lines)
+
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMZoneScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_vm_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        vm_name = 'vm123'
+        ip_name = 'vm123ip'
+        self.cmd('vm create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zone {} --public-ip-address {}'.format(resource_group, vm_name, zones, ip_name), checks=[
+            JMESPathCheckV2('zones', zones)
+        ])
+        self.cmd('network public-ip show -g {} -n {}'.format(resource_group, ip_name),
+                 checks=JMESPathCheckV2('zones[0]', zones))
+        # Test VM's specific table output
+        result = self.cmd('vm show -g {} -n {} -otable'.format(resource_group, vm_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, zones]).issubset(table_output))
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_vmss_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        vmss_name = 'vmss123'
+        self.cmd('vmss create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {}'.format(resource_group, vmss_name, zones))
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        result = self.cmd('vmss show -g {} -n {} -otable'.format(resource_group, vmss_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, vmss_name, zones]).issubset(table_output))
+        result = self.cmd('vmss list -g {} -otable'.format(resource_group, vmss_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, vmss_name, zones]).issubset(table_output))
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_disk_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        disk_name = 'disk123'
+        size = 1
+        self.cmd('disk create -g {} -n {} --size-gb {} --zone {}'.format(resource_group, disk_name, size, zones), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        self.cmd('disk show -g {} -n {}'.format(resource_group, disk_name), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        result = self.cmd('disk show -g {} -n {} -otable'.format(resource_group, disk_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group, resource_group_location, disk_name, zones, str(size), 'Premium_LRS']).issubset(table_output))
+        result = self.cmd('disk list -g {} -otable'.format(resource_group))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group, resource_group_location, disk_name, zones]).issubset(table_output))
 
 
 class VMRunCommandScenarioTest(ScenarioTest):
