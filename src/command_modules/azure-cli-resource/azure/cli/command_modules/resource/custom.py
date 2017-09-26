@@ -483,57 +483,47 @@ def create_resource(properties,
     return res.create_resource(properties, location, is_full_object)
 
 
-def _call_on_ids(resource_ids, function, api_version, cmd_str, *args):
+def _call_on_ids(resource_ids, cmd_str):
     """
-    Takes care of looping through the resource_ids and calling the provided function with the right parsed arguments
+    Validates and parses each item in resource_ids.
     """
-    results = []
     for rid in resource_ids:
         if not is_valid_resource_id(rid):
-            logger.error('az resource %s: error: argument --ids: invalid ResourceId value: \'%s\'' % (cmd_str, rid))
-            return
-        results.append(parse_resource_id(rid))
+            raise CLIError('az resource %s: error: argument --ids: invalid ResourceId value: \'%s\'' % (cmd_str, rid))
 
-    results = [function(*args,
-                        resource_group_name=id_dict['resource_group'],
-                        resource_provider_namespace=id_dict['resource_namespace'],
-                        parent_resource_path=id_dict['resource_parent'],
-                        resource_type=id_dict['resource_type'],
-                        resource_name=id_dict['resource_name'], api_version=api_version) for id_dict in results]
-    return results[0] if len(results) == 1 else results
+    return (parse_resource_id(rid) for rid in resource_ids)
 
 
 def show_resource(resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None):
-    if resource_ids:
-        return _call_on_ids(resource_ids, show_resource, api_version, "show")
+    if not resource_ids:
+        res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                             parent_resource_path, resource_type, resource_name,
+                             None, api_version)
+        return res.get_resource()
 
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         None, api_version)
-    return res.get_resource()
+    parsed_id_gen = _call_on_ids(resource_ids, "show")
+    results = [_ResourceUtils(id_dict['resource_group'], id_dict['resource_namespace'], id_dict['resource_parent'],
+                              id_dict['resource_type'], id_dict['resource_name'], None, api_version)
+               .get_resource() for id_dict in parsed_id_gen]
+    return results[0] if len(results) == 1 else results
 
 
 def delete_resource(resource_ids=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                     resource_name=None, api_version=None):
     """
-    This function allows for the ability to delete multiple ids with dependencies on one another no matter the order.
+    Deletes the given resource(s).
+    This function allows deletion of ids with dependencies on one another.
     This is done with multiple passes through the given ids.
-    A new pass is done as long as one resource was sucessfully deleted.
     """
     if not resource_ids:
         res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                              parent_resource_path, resource_type, resource_name, None, api_version)
         return res.delete()
 
-    parsed_ids = []
-    for rid in resource_ids:
-        if not is_valid_resource_id(rid):
-            logger.error('az resource delete: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
-            return
-        parsed_ids.append(parse_resource_id(rid))
+    parsed_ids = _call_on_ids(resource_ids, "delete")
 
     results = []
     while parsed_ids:
@@ -563,9 +553,8 @@ def delete_resource(resource_ids=None, resource_group_name=None,
         for operation in operations:
             results.append(operation.result())
 
-    if parsed_ids:
-        for id_dict in parsed_ids:
-            logger.warning(id_dict['exception'])
+    for id_dict in parsed_ids:
+        logger.warning(id_dict['exception'])
 
     return results[0] if len(results) == 1 else results
 
@@ -573,13 +562,17 @@ def delete_resource(resource_ids=None, resource_group_name=None,
 def update_resource(parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
-    if resource_ids:
-        return _call_on_ids(resource_ids, update_resource, api_version, "update", parameters)
+    if not resource_ids:
+        res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                             parent_resource_path, resource_type, resource_name,
+                             None, api_version)
+        return res.update(parameters)
 
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         None, api_version)
-    return res.update(parameters)
+    parsed_id_gen = _call_on_ids(resource_ids, "update")
+    results = [_ResourceUtils(id_dict['resource_group'], id_dict['resource_namespace'], id_dict['resource_parent'],
+                              id_dict['resource_type'], id_dict['resource_name'], None, api_version)
+               .update(parameters) for id_dict in parsed_id_gen]
+    return results[0] if len(results) == 1 else results
 
 
 def tag_resource(tags, resource_ids=None,
@@ -587,13 +580,17 @@ def tag_resource(tags, resource_ids=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
-    if resource_ids:
-        return _call_on_ids(resource_ids, tag_resource, api_version, "tag", tags)
+    if not resource_ids:
+        res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                             parent_resource_path, resource_type, resource_name,
+                             None, api_version)
+        return res.tag(tags)
 
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         None, api_version)
-    return res.tag(tags)
+    parsed_id_gen = _call_on_ids(resource_ids, "tag")
+    results = [_ResourceUtils(id_dict['resource_group'], id_dict['resource_namespace'], id_dict['resource_parent'],
+                              id_dict['resource_type'], id_dict['resource_name'], None, api_version)
+               .tag(tags) for id_dict in parsed_id_gen]
+    return results[0] if len(results) == 1 else results
 
 
 def invoke_resource_action(action, request_body=None, resource_ids=None,
@@ -601,13 +598,17 @@ def invoke_resource_action(action, request_body=None, resource_ids=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
                            api_version=None):
     """ Invokes the provided action on an existing resource."""
-    if resource_ids:
-        return _call_on_ids(resource_ids, invoke_resource_action, api_version, "tag", action, request_body)
+    if not resource_ids:
+        res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                             parent_resource_path, resource_type, resource_name,
+                             None, api_version)
+        return res.invoke_action(action, request_body)
 
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         None, api_version)
-    return res.invoke_action(action=action, request_body=request_body)
+    parsed_id_gen = _call_on_ids(resource_ids, "invoke-action")
+    results = [_ResourceUtils(id_dict['resource_group'], id_dict['resource_namespace'], id_dict['resource_parent'],
+                              id_dict['resource_type'], id_dict['resource_name'], None, api_version)
+               .invoke_action(action, request_body) for id_dict in parsed_id_gen]
+    return results[0] if len(results) == 1 else results
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
