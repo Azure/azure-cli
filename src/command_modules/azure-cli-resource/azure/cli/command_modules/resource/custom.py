@@ -114,8 +114,8 @@ def create_application(resource_group_name,
     elif kind.lower() == 'marketplace':
         if (plan_name is None and plan_product is None and
                 plan_publisher is None and plan_version is None):
-            raise CLIError('--plan-name, --plan-product, --plan-publisher and '\
-            '--plan-version are all required if kind is MarketPlace')
+            raise CLIError('--plan-name, --plan-product, --plan-publisher and '
+                           '--plan-version are all required if kind is MarketPlace')
         else:
             application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
 
@@ -168,16 +168,16 @@ def create_applicationdefinition(resource_group_name,
     """
     if(not package_file_uri and not create_ui_definition and
        not main_template):
-        raise CLIError('usage error: --package-file-uri <url> | '\
-        '--create-ui-definition --main-template')
+        raise CLIError('usage error: --package-file-uri <url> | '
+                       '--create-ui-definition --main-template')
     elif package_file_uri:
         if create_ui_definition or main_template:
-            raise CLIError('usage error: must not specify '\
-            '--create-ui-definition --main-template')
+            raise CLIError('usage error: must not specify '
+                           '--create-ui-definition --main-template')
     elif not package_file_uri:
         if not create_ui_definition or not main_template:
-            raise CLIError('usage error: must specify '\
-            '--create-ui-definition --main-template')
+            raise CLIError('usage error: must specify '
+                           '--create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory()
     rcf = _resource_client_factory()
     if not location:
@@ -709,8 +709,8 @@ def create_policy_assignment(policy=None, policy_set_definition=None,
     :param not_scopes: Space separated scopes where the policy assignment does not apply.
     """
     if bool(policy) == bool(policy_set_definition):
-        raise CLIError('usage error: --policy NAME_OR_ID | '\
-        '--policy-set-definition NAME_OR_ID')
+        raise CLIError('usage error: --policy NAME_OR_ID | '
+                       '--policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
