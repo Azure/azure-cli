@@ -694,8 +694,13 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
+<<<<<<< HEAD
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
                         single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
+=======
+                        backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
+                        single_placement_group=None, custom_data=None, secrets=None, zones=None):
+>>>>>>> vmss: rolling upgrade support
 
     # Build IP configuration
     ip_configuration = {
@@ -829,6 +834,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
 
     if license_type:
         vmss_properties['virtualMachineProfile']['licenseType'] = license_type
+
+    if health_probe and supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+        vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
 
     if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
