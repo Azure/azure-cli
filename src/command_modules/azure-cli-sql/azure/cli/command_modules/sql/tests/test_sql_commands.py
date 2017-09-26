@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
+
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
@@ -66,7 +68,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        loc = resource_group_location
+        loc = 'westeurope'
         user = admin_login
 
         # test create sql server with minimal required parameters
@@ -76,27 +78,39 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity', None)])
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
 
         # test update sql server
-        self.cmd('sql server update -g {} --name {} --admin-password {}'
+        self.cmd('sql server update -g {} --name {} --admin-password {} -i'
                  .format(resource_group_1, server1, admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
-        # test create another sql server
-        self.cmd('sql server create -g {} --name {} -l {} '
+        # test update without identity parameter, validate identity still exists
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                 .format(resource_group_1, server1, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
+
+        # test create another sql server, with identity this time
+        self.cmd('sql server create -g {} --name {} -l {} -i '
                  '--admin-user {} --admin-password {}'
                  .format(resource_group_2, server2, loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server2),
                      JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test list sql server in that group should be 1
         self.cmd('sql server list -g {}'.format(resource_group_2), checks=[JMESPathCheck('length(@)', 1)])
@@ -1317,6 +1331,162 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('serverName', server),
                      JMESPathCheck('status', 'Completed')])
+
+
+class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
+    def wait_for_encryption_scan(self, rg, sn, db_name):
+        active_scan = True
+        retry_attempts = 5
+        while active_scan:
+            tdeactivity = self.cmd('sql db tde list-activity -g {} -s {} -d {}'
+                                   .format(rg, sn, db_name)).get_output_in_json()
+
+            # if tdeactivity is an empty array, there is no ongoing encryption scan
+            active_scan = (len(tdeactivity) > 0)
+            time.sleep(10)
+            retry_attempts -= 1
+            if retry_attempts <= 0:
+                raise CliTestError("Encryption scan still ongoing: {}.".format(tdeactivity))
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_tde(self, resource_group, server):
+        rg = resource_group
+        sn = server
+        db_name = self.create_random_name("sqltdedb", 20)
+
+        # create database
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(rg, sn, db_name))
+
+        # validate encryption is on by default
+        self.cmd('sql db tde show -g {} -s {} -d {}'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Enabled')])
+
+        self.wait_for_encryption_scan(rg, sn, db_name)
+
+        # disable encryption
+        self.cmd('sql db tde set -g {} -s {} -d {} --status Disabled'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Disabled')])
+
+        self.wait_for_encryption_scan(rg, sn, db_name)
+
+        # validate encryption is disabled
+        self.cmd('sql db tde show -g {} -s {} -d {}'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Disabled')])
+
+        # enable encryption
+        self.cmd('sql db tde set -g {} -s {} -d {} --status Enabled'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Enabled')])
+
+        self.wait_for_encryption_scan(rg, sn, db_name)
+
+        # validate encryption is enabled
+        self.cmd('sql db tde show -g {} -s {} -d {}'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Enabled')])
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_tdebyok(self, resource_group, server):
+        resource_prefix = 'sqltdebyok'
+
+        # add identity to server
+        server_resp = self.cmd('sql server update -g {} -n {} -i'
+                               .format(resource_group, server)).get_output_in_json()
+        server_identity = server_resp['identity']['principalId']
+
+        # create db
+        db_name = self.create_random_name(resource_prefix, 20)
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(resource_group, server, db_name))
+
+        # create vault and acl server identity
+        vault_name = self.create_random_name(resource_prefix, 24)
+        self.cmd('keyvault create -g {} -n {}'
+                 .format(resource_group, vault_name))
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, server_identity))
+
+        # create key
+        key_name = self.create_random_name(resource_prefix, 32)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
+        kid = key_resp['key']['kid']
+
+        # add server key
+        server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
+                                   .format(resource_group, server, kid),
+                                   checks=[
+                                       JMESPathCheck('uri', kid),
+                                       JMESPathCheck('serverKeyType', 'AzureKeyVault')])
+        server_key_name = server_key_resp.get_output_in_json()['name']
+
+        # validate show key
+        self.cmd('sql server key show -g {} -s {} -k {}'
+                 .format(resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('name', server_key_name)])
+
+        # validate list key (should return 2 items)
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # validate encryption protector is service managed via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # update encryption protector to akv key
+        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {}'
+                 .format(resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('serverKeyName', server_key_name),
+                     JMESPathCheck('uri', kid)])
+
+        # validate encryption protector is akv via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('serverKeyName', server_key_name),
+                     JMESPathCheck('uri', kid)])
+
+        # update encryption protector to service managed
+        self.cmd('sql server tde-key set -g {} -s {} -t ServiceManaged'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # validate encryption protector is service managed via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # delete server key
+        self.cmd('sql server key delete -g {} -s {} -k {}'
+                 .format(resource_group, server, kid))
+
+        # wait for key to be deleted
+        time.sleep(10)
+
+        # validate deleted server key via list (should return 1 item)
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
