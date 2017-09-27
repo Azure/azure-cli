@@ -292,13 +292,13 @@ helps['resource show'] = """
             az vm show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Show a web app using a resource identifier.
           text: >
-            az resource show --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Web/sites/{MyWebapp}
-        - name: Show a subnet in the 'Microsoft.Network' namespace which belongs to the virtual network 'MyVnet'.
+            az resource show --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+        - name: Show a subnet.
           text: >
             az resource show -g MyResourceGroup -n MySubnet --namespace Microsoft.Network --parent virtualnetworks/MyVnet --resource-type subnets
         - name: Show a subnet using a resource identifier.
           text: >
-            az resource show --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Network/virtualNetworks/{MyVnet}/subnets/{MySubnet}
+            az resource show --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
         - name: Show an application gateway path rule.
           text: >
             az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
@@ -313,10 +313,10 @@ helps['resource delete'] = """
             az vm delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Delete a web app using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Web/sites/{MyWebApp}
+            az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
         - name: Delete a subnet using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Network/virtualNetworks/{MyVNET}/subnets/{MySubnet}
+            az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
 """
 
 helps['resource tag'] = """
