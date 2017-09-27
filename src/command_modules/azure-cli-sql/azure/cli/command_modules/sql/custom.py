@@ -66,6 +66,13 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
         self.server_name = server_name
         self.resource_group_name = resource_group_name
 
+    def id(self):
+        return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
+            quote(get_subscription_id()),
+            quote(self.resource_group_name),
+            quote(self.server_name),
+            quote(self.database_name))
+
 
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
 # the user doesn't need to specify location.
@@ -126,13 +133,7 @@ def _db_create_special(
         resource_group_name=dest_db.resource_group_name)
 
     # Set create mode properties
-    subscription_id = get_subscription_id()
-    kwargs['source_database_id'] = (
-        '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'
-        .format(quote(subscription_id),
-                quote(source_db.resource_group_name),
-                quote(source_db.server_name),
-                quote(source_db.database_name)))
+    kwargs['source_database_id'] = source_db.id()
 
     # Create
     return client.create_or_update(
@@ -197,21 +198,28 @@ def db_create_replica(
         kwargs)
 
 
-# Creates a database from a database point in time backup.
+# Creates a database from a database point in time backup or deleted database backup.
 # Wrapper function to make create mode more convenient.
 def db_restore(
         client,
         database_name,
         server_name,
         resource_group_name,
-        restore_point_in_time,
         dest_name,
+        restore_point_in_time=None,
+        source_database_deletion_date=None,
         raw=False,
         **kwargs):
 
+    if not (restore_point_in_time or source_database_deletion_date):
+        raise CLIError('Either --time or --deleted-time must be specified.')
+
     # Set create mode properties
-    kwargs['create_mode'] = 'PointInTimeRestore'
+    is_deleted = source_database_deletion_date is not None
+
     kwargs['restore_point_in_time'] = restore_point_in_time
+    kwargs['source_database_deletion_date'] = source_database_deletion_date
+    kwargs['create_mode'] = 'Restore' if is_deleted else 'PointInTimeRestore'
 
     return _db_create_special(
         client,

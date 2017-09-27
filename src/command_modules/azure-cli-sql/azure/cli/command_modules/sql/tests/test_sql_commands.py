@@ -18,7 +18,8 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-
+from datetime import datetime, timedelta
+from time import sleep
 
 # Constants
 server_name_prefix = 'clitestserver'
@@ -385,13 +386,36 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  ])
 
 
+def _get_earliest_restore_date(db):
+    return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+
+
+def _get_deleted_date(deleted_db):
+    return datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+
+
+def _create_db_wait_for_first_backup(test, rg, server, database_name):
+    # create db
+    db = test.cmd('sql db create -g {} --server {} --name {}'
+                  .format(rg, server, database_name),
+                  checks=[
+                      JMESPathCheck('resourceGroup', rg),
+                      JMESPathCheck('name', database_name),
+                      JMESPathCheck('status', 'Online')]).get_output_in_json()
+
+    # Wait until earliestRestoreDate is in the past. When run live, this will take at least
+    # 10 minutes. Unforunately there's no way to speed this up.
+    earliest_restore_date = _get_earliest_restore_date(db)
+    while datetime.utcnow() <= earliest_restore_date:
+        sleep(10)  # seconds
+
+    return db
+
+
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_db_restore(self, resource_group, resource_group_location, server):
-        from datetime import datetime
-        from time import sleep
-
         rg = resource_group
         database_name = 'cliautomationdb01'
 
@@ -403,48 +427,98 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         restore_pool_database_name = 'cliautomationdb01restore2'
         elastic_pool = 'cliautomationpool1'
 
-        # create db
-        db = self.cmd('sql db create -g {} --server {} --name {}'
-                      .format(rg, server, database_name),
-                      checks=[
-                          JMESPathCheck('resourceGroup', rg),
-                          JMESPathCheck('name', database_name),
-                          JMESPathCheck('status', 'Online')])
-
         # create elastic pool
         self.cmd('sql elastic-pool create -g {} -s {} -n {}'
                  .format(rg, server, elastic_pool))
 
-        # Wait until earliestRestoreDate is in the past. When run live, this will take at least
-        # 10 minutes. Unforunately there's no way to speed this up.
-        earliest_restore_date = datetime.strptime(db.get_output_in_json()['earliestRestoreDate'],
-                                                  "%Y-%m-%dT%H:%M:%S.%f+00:00")
-        while datetime.utcnow() <= earliest_restore_date:
-            sleep(10)  # seconds
+        # Create database and wait for first backup to exist
+        _create_db_wait_for_first_backup(self, rg, server, database_name)
 
         # Restore to standalone db
-        db = self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
-                      ' --service-objective {} --edition {}'
-                      .format(rg, server, database_name, datetime.utcnow().isoformat(),
-                              restore_standalone_database_name, restore_service_objective,
-                              restore_edition),
-                      checks=[
-                          JMESPathCheck('resourceGroup', rg),
-                          JMESPathCheck('name', restore_standalone_database_name),
-                          JMESPathCheck('requestedServiceObjectiveName',
-                                        restore_service_objective),
-                          JMESPathCheck('status', 'Online')])
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                 ' --service-objective {} --edition {}'
+                 .format(rg, server, database_name, datetime.utcnow().isoformat(),
+                         restore_standalone_database_name, restore_service_objective,
+                         restore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_standalone_database_name),
+                     JMESPathCheck('requestedServiceObjectiveName',
+                                   restore_service_objective),
+                     JMESPathCheck('status', 'Online')])
 
         # Restore to db into pool
-        db = self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
-                      ' --elastic-pool {}'
-                      .format(rg, server, database_name, datetime.utcnow().isoformat(),
-                              restore_pool_database_name, elastic_pool),
-                      checks=[
-                          JMESPathCheck('resourceGroup', rg),
-                          JMESPathCheck('name', restore_pool_database_name),
-                          JMESPathCheck('elasticPoolName', elastic_pool),
-                          JMESPathCheck('status', 'Online')])
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                 ' --elastic-pool {}'
+                 .format(rg, server, database_name, datetime.utcnow().isoformat(),
+                         restore_pool_database_name, elastic_pool),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_pool_database_name),
+                     JMESPathCheck('elasticPoolName', elastic_pool),
+                     JMESPathCheck('status', 'Online')])
+
+
+class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
+        rg = resource_group
+        database_name = 'cliautomationdb01'
+
+        # Standalone db
+        restore_service_objective = 'S1'
+        restore_edition = 'Standard'
+        restore_database_name1 = 'cliautomationdb01restore1'
+        restore_database_name2 = 'cliautomationdb01restore2'
+
+        # Create database and wait for first backup to exist
+        _create_db_wait_for_first_backup(self, rg, server, database_name)
+
+        # Delete database
+        self.cmd('sql db delete -g {} -s {} -n {} --yes'.format(rg, server, database_name))
+
+        # Wait for deleted database to become visible. When run live, this will take around
+        # 5-10 minutes. Unforunately there's no way to speed this up. Use timeout to ensure
+        # test doesn't loop forever if there's a bug.
+        start_time = datetime.now()
+        timeout = timedelta(0, 15 * 60)  # 15 minutes timeout
+
+        while True:
+            deleted_dbs = list(self.cmd('sql db list-deleted -g {} -s {}'.format(rg, server)).get_output_in_json())
+
+            if deleted_dbs:
+                # Deleted db found, stop polling
+                break
+
+            # Deleted db not found, sleep (if running live) and then poll again.
+            if self.is_live:
+                self.assertTrue(datetime.now() < start_time + timeout, 'Deleted db not found before timeout expired.')
+                sleep(10)  # seconds
+
+        deleted_db = deleted_dbs[0]
+
+        # Restore deleted to latest point in time
+        self.cmd('sql db restore -g {} -s {} -n {} --deleted-time {} --dest-name {}'
+                 ' --service-objective {} --edition {}'
+                 .format(rg, server, database_name, _get_deleted_date(deleted_db).isoformat(),
+                         restore_database_name1, restore_service_objective,
+                         restore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_database_name1),
+                     JMESPathCheck('requestedServiceObjectiveName',
+                                   restore_service_objective),
+                     JMESPathCheck('status', 'Online')])
+
+        # Restore deleted to earlier point in time
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --deleted-time {} --dest-name {}'
+                 .format(rg, server, database_name, _get_earliest_restore_date(deleted_db).isoformat(),
+                         _get_deleted_date(deleted_db).isoformat(), restore_database_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_database_name2),
+                     JMESPathCheck('status', 'Online')])
 
 
 class SqlServerDbSecurityScenarioTest(ScenarioTest):
