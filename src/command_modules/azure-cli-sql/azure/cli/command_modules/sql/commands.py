@@ -20,6 +20,7 @@ from ._util import (
     get_sql_encryption_protectors_operations,
     get_sql_firewall_rules_operations,
     get_sql_replication_links_operations,
+    get_sql_restorable_dropped_databases_operations,
     get_sql_server_keys_operations,
     get_sql_servers_operations,
     get_sql_server_usages_operations,
@@ -58,7 +59,6 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             c.custom_command('restore', 'db_restore', no_wait_param='raw')
             c.command('show', 'get')
             c.custom_command('list', 'db_list')
-            c.command('list-usages', 'list_usages')
             c.command('delete', 'delete', confirmation=True)
             c.generic_update_command('update', 'get', 'create_or_update',
                                      custom_func_name='db_update', no_wait_param='raw')
@@ -114,6 +114,14 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             c.command('list-links', 'list_by_database')
             c.custom_command('delete-link', 'db_delete_replica_link', confirmation=True)
             c.custom_command('set-primary', 'db_failover')
+
+    restorable_dropped_databases_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.restorable_dropped_databases_operations',
+        'RestorableDroppedDatabasesOperations')
+    with ServiceGroup(__name__, get_sql_restorable_dropped_databases_operations,
+                      restorable_dropped_databases_operations, custom_path) as s:
+        with s.group('sql db') as c:
+            c.command('list-deleted', 'list_by_server')
 
     database_blob_auditing_policies_operations = create_service_adapter(
         'azure.mgmt.sql.operations.database_blob_auditing_policies_operations',

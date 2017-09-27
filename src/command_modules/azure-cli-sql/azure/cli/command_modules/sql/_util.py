@@ -72,6 +72,10 @@ def get_sql_replication_links_operations(kwargs):
     return get_sql_management_client(kwargs).replication_links
 
 
+def get_sql_restorable_dropped_databases_operations(kwargs):
+    return get_sql_management_client(kwargs).restorable_dropped_databases
+
+
 def get_sql_server_azure_ad_administrators_operations(kwargs):
     return get_sql_management_client(kwargs).server_azure_ad_administrators
 
