@@ -37,7 +37,6 @@ from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands.arm import resource_id as resource_dict_to_id
 
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
-from msrestazure.azure_exceptions import CloudError
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
@@ -557,6 +556,7 @@ def delete_resource(resource_ids=None, resource_group_name=None,
     to_be_deleted = [(_get_rsrc_util_from_parsed_id(id_dict, api_version), id_dict) for id_dict in parsed_ids]
 
     results = []
+    from msrestazure.azure_exceptions import CloudError
     while to_be_deleted:
         logger.debug("Start new loop to delete resources.")
         operations = []
@@ -580,7 +580,10 @@ def delete_resource(resource_ids=None, resource_group_name=None,
             results.append(operation.result())
 
     for _, id_dict in to_be_deleted:
-        logger.warning(id_dict['exception'])
+        logger.error(id_dict['exception'])
+
+    if to_be_deleted:
+        raise CLIError('Not all resources were deleted.')
 
     return _single_or_collection(results)
 
@@ -919,6 +922,7 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
 
 
 def get_policy_definition(policy_definition_name):
+    from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
     try:
         return policy_client.policy_definitions.get(policy_definition_name)
@@ -1516,6 +1520,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             return client.send(request, header_parameters)
 
         def get_long_running_output(response):
+            from msrestazure.azure_exceptions import CloudError
             if response.status_code not in [200, 202, 204]:
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
