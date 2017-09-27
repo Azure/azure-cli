@@ -579,11 +579,12 @@ def delete_resource(resource_ids=None, resource_group_name=None,
         for operation in operations:
             results.append(operation.result())
 
-    for _, id_dict in to_be_deleted:
-        logger.error(id_dict['exception'])
-
     if to_be_deleted:
-        raise CLIError('Not all resources were deleted.')
+        error_msg_builder = ['Some resources failed to be deleted:']
+        for _, id_dict in to_be_deleted:
+            logger.debug(id_dict['exception'])
+            error_msg_builder.append(resource_dict_to_id(**id_dict))
+        raise CLIError(os.linesep.join(error_msg_builder))
 
     return _single_or_collection(results)
 
