@@ -118,16 +118,8 @@ def _configure_db_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
-    # Make restore point in time required for restore mode only
-    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore]:
-        patches = {
-            'restore_point_in_time': patch_arg_make_required
-        }
-    else:
-        patches = {}
-
     # Include all Database params as a starting point. We will filter from there.
-    cmd.expand('parameters', Database, patches=patches)
+    cmd.expand('parameters', Database)
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.
@@ -147,12 +139,10 @@ def _configure_db_create_params(
     if create_mode != CreateMode.default or engine != Engine.db:
         cmd.ignore('sample_name')
 
-    # Only applicable to point in time restore create mode.
+    # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         cmd.ignore('restore_point_in_time')
-
-    # Only applicable to restore create mode. However using this from CLI isn't tested yet.
-    cmd.ignore('source_database_deletion_date')
+        cmd.ignore('source_database_deletion_date')
 
     # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
@@ -187,7 +177,6 @@ with ParametersContext(command='sql db') as c:
     c.argument('server_name', arg_type=server_param_type)
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective',))
-
     c.argument('max_size_bytes', options_list=('--max-size',),
                type=SizeWithUnitConverter('B', result_type=int),
                help='The max storage size of the database. Only the following'
@@ -255,11 +244,21 @@ with ParametersContext(command='sql db restore') as c:
     c.argument('dest_name',
                help='Name of the database that will be created as the restore destination.')
 
+    restore_point_arg_group = 'Restore Point'
+
     c.argument('restore_point_in_time',
                options_list=('--time', '-t'),
+               arg_group=restore_point_arg_group,
                help='The point in time of the source database that will be restored to create the'
                ' new database. Must be greater than or equal to the source database\'s'
-               ' earliestRestoreDate value.')
+               ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified.')
+
+    c.argument('source_database_deletion_date',
+               options_list=('--deleted-time',),
+               arg_group=restore_point_arg_group,
+               help='If specified, restore from a deleted database instead of from an existing database.'
+               ' Must match the deleted time of a deleted database in the same server.'
+               ' Either --time or --deleted-time (or both) must be specified.')
 
     c.argument('edition',
                help='The edition for the new database.')
