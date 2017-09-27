@@ -97,37 +97,44 @@ def deployment_validate_table_format(result):
     return result
 
 
-def _populate_alternate_kwargs(kwargs, num_last_child):
+def _get_parent_from_parts(kwargs):
+    '''
+    Get the parent given all the children parameters.
+    '''
+    parent = ''
+    if kwargs['last_child_num'] is not None:
+        parent_builder = ['{type}/{name}'.format(**kwargs)]
+        for index in range(1, kwargs['last_child_num']):
+            parent_builder.append('/providers/{{child_namespace_{0}}}/{{child_type_{0}}}/{{child_name_{0}}}'
+                                  .format(index).format(**kwargs))
+        parent_builder.append('/providers/{{child_namespace_{}}}'.format(kwargs['last_child_num']).format(**kwargs))
+        parent = ''.join(parent_builder)
+
+    parent = parent.replace('/providers/None', '')
+    return '{}/'.format(parent) if parent and not parent.endswith('/') else parent
+
+
+def _populate_alternate_kwargs(kwargs):
     """ Translates the parsed arguments into a format used by generic ARM commands
     such as the resource and lock commands. """
     print("_________________")
-    kwargs['child_namespace'] = kwargs.get('child_namespace_0')
-    kwargs['child_type'] = kwargs.get('child_type_0')
-    kwargs['child_name'] = kwargs.get('child_name_0')
-    kwargs['grandchild_namespace'] = kwargs.get('child_namespace_1')
-    kwargs['grandchild_type'] = kwargs.get('child_type_1')
-    kwargs['grandchild_name'] = kwargs.get('child_name_1')
+    kwargs['child_namespace'] = kwargs.get('child_namespace_1')
+    kwargs['child_type'] = kwargs.get('child_type_1')
+    kwargs['child_name'] = kwargs.get('child_name_1')
+    kwargs['grandchild_namespace'] = kwargs.get('child_namespace_2')
+    kwargs['grandchild_type'] = kwargs.get('child_type_2')
+    kwargs['grandchild_name'] = kwargs.get('child_name_2')
 
     resource_namespace = kwargs['namespace']
-    resource_type = kwargs.get('child_type_{}'.format(num_last_child)) or kwargs['type']
-    resource_name = kwargs.get('child_name_{}'.format(num_last_child)) or kwargs['name']
+    resource_type = kwargs.get('child_type_{}'.format(kwargs['last_child_num'])) or kwargs['type']
+    resource_name = kwargs.get('child_name_{}'.format(kwargs['last_child_num'])) or kwargs['name']
 
-    parent = ''
-    if num_last_child is not None:
-        parent_builder = ['{type}/{name}'.format(**kwargs)]
-        for index in range(num_last_child):
-            parent_builder.append('/providers/{{child_namespace_{0}}}/{{child_type_{0}}}/{{child_name_{0}}}'
-                                  .format(index).format(**kwargs))
-        parent_builder.append('/providers/{{child_namespace_{}}}'.format(num_last_child).format(**kwargs))
-        parent = ''.join(parent_builder)
-    parent = parent.replace('providers/None', '')
-    parent = '{}/'.format(parent) if parent and not parent.endswith('/') else parent
-
-    kwargs['resource_parent'] = parent
+    kwargs['resource_parent'] = _get_parent_from_parts(kwargs)
     kwargs['resource_namespace'] = resource_namespace
     kwargs['resource_type'] = resource_type
     kwargs['resource_name'] = resource_name
     print(kwargs)
+    print(resource_id(**kwargs))
     return kwargs
 
 
@@ -146,24 +153,22 @@ def resource_id(**kwargs):
         - grandchild_type       Type of the grandchild resource
         - grandchild_name       Name of the grandchild resource
     '''
-    rid = '/subscriptions/{subscription}'.format(**kwargs)
+    rid_builder = ['/subscriptions/{subscription}'.format(**kwargs)]
     try:
-        rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
-        rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
-        rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
-        try:
-            rid = '/'.join((rid, 'providers/{child_namespace}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
-        try:
-            rid = '/'.join((rid, 'providers/{grandchild_namespace}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, '{grandchild_type}/{grandchild_name}'.format(**kwargs)))
+        rid_builder.append('resourceGroups/{resource_group}'.format(**kwargs))
+        rid_builder.append('providers/{namespace}'.format(**kwargs))
+        rid_builder.append('{type}/{name}'.format(**kwargs))
+        count = 1
+        while True:
+            try:
+                rid_builder.append('providers/{{child_namespace_{}}}'.format(count).format(**kwargs))
+            except KeyError:
+                pass
+            rid_builder.append('{{child_type_{0}}}/{{child_name_{0}}}'.format(count).format(**kwargs))
+            count += 1
     except KeyError:
         pass
-    return rid
+    return '/'.join(rid_builder)
 
 
 def parse_resource_id(rid):
@@ -195,11 +200,10 @@ def parse_resource_id(rid):
         print("children:")
         count = None
         for count, child in enumerate(children):
-            result.update({key + '_%d' % count:group for key, group in child.groupdict().items()})
-        print("result2",result)
-        print("happpy day ___________________")
-        print(count)
-        result = _populate_alternate_kwargs(result, count)
+            result.update({key + '_%d' % (count + 1):group for key, group in child.groupdict().items()})
+        result["last_child_num"] = count + 1
+        print("result", result)
+        result = _populate_alternate_kwargs(result)
     else:
         result = dict(name=rid)
     print("after")
