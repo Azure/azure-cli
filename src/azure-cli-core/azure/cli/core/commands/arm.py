@@ -25,7 +25,7 @@ logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile(
     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.+)')
+    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*)')
     # '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
     # '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
@@ -134,7 +134,7 @@ def _populate_alternate_kwargs(kwargs):
     kwargs['resource_type'] = resource_type
     kwargs['resource_name'] = resource_name
     print(kwargs)
-    print(resource_id(**kwargs))
+    print(resource_id(**{key: value for key, value in kwargs.items() if value is not None}))
     return kwargs
 
 
@@ -201,7 +201,7 @@ def parse_resource_id(rid):
         count = None
         for count, child in enumerate(children):
             result.update({key + '_%d' % (count + 1):group for key, group in child.groupdict().items()})
-        result["last_child_num"] = count + 1
+        result["last_child_num"] = count + 1 if isinstance(count, int) else None
         print("result", result)
         result = _populate_alternate_kwargs(result)
     else:
@@ -213,7 +213,6 @@ def parse_resource_id(rid):
 def is_valid_resource_id(rid, exception_type=None):
     is_valid = False
     try:
-        print("here")
         is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
     except KeyError:
         pass
