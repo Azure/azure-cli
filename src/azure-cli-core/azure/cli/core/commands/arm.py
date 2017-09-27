@@ -25,11 +25,17 @@ logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile(
     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<id_end>.+)')
+    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.+)')
     # '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
     # '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
-children_regex = re.compile('((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?')
+# regex = re.compile(
+#     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
+#     '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
+#     '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+#     '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+
+children_regex = re.compile('(/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
 
 def handle_long_running_operation_exception(ex):
@@ -91,20 +97,29 @@ def deployment_validate_table_format(result):
     return result
 
 
-def _populate_alternate_kwargs(kwargs):
+def _populate_alternate_kwargs(kwargs, num_last_child):
     """ Translates the parsed arguments into a format used by generic ARM commands
     such as the resource and lock commands. """
+    print("_________________")
+    kwargs['child_namespace'] = kwargs.get('child_namespace_0')
+    kwargs['child_type'] = kwargs.get('child_type_0')
+    kwargs['child_name'] = kwargs.get('child_name_0')
+    kwargs['grandchild_namespace'] = kwargs.get('child_namespace_1')
+    kwargs['grandchild_type'] = kwargs.get('child_type_1')
+    kwargs['grandchild_name'] = kwargs.get('child_name_1')
+
+    resource_namespace = kwargs['namespace']
+    resource_type = kwargs.get('child_type_{}'.format(num_last_child)) or kwargs['type']
+    resource_name = kwargs.get('child_name_{}'.format(num_last_child)) or kwargs['name']
 
     parent = ''
-    has_child = all(kwargs[x] is not None for x in ['child_name', 'child_type'])
-    has_grandchild = all(kwargs[x] is not None for x in ['grandchild_name', 'grandchild_type'])
-    resource_namespace = kwargs['namespace']
-    resource_type = kwargs['grandchild_type'] or kwargs['child_type'] or kwargs['type']
-    resource_name = kwargs['grandchild_name'] or kwargs['child_name'] or kwargs['name']
-    if has_grandchild:
-        parent = '{type}/{name}/providers/{child_namespace}/{child_type}/{child_name}/providers/{grandchild_namespace}'.format(**kwargs)  # pylint: disable=line-too-long
-    elif has_child:
-        parent = '{type}/{name}/providers/{child_namespace}'.format(**kwargs)
+    if num_last_child is not None:
+        parent_builder = ['{type}/{name}'.format(**kwargs)]
+        for index in range(num_last_child):
+            parent_builder.append('/providers/{{child_namespace_{0}}}/{{child_type_{0}}}/{{child_name_{0}}}'
+                                  .format(index).format(**kwargs))
+        parent_builder.append('/providers/{{child_namespace_{}}}'.format(num_last_child).format(**kwargs))
+        parent = ''.join(parent_builder)
     parent = parent.replace('providers/None', '')
     parent = '{}/'.format(parent) if parent and not parent.endswith('/') else parent
 
@@ -112,6 +127,7 @@ def _populate_alternate_kwargs(kwargs):
     kwargs['resource_namespace'] = resource_namespace
     kwargs['resource_type'] = resource_type
     kwargs['resource_name'] = resource_name
+    print(kwargs)
     return kwargs
 
 
@@ -174,16 +190,26 @@ def parse_resource_id(rid):
     m = regex.match(rid)
     if m:
         result = m.groupdict()
-        result = _populate_alternate_kwargs(result)
+        print("result1:", result)
+        children = children_regex.finditer(result["children"])
+        print("children:")
+        count = None
+        for count, child in enumerate(children):
+            result.update({key + '_%d' % count:group for key, group in child.groupdict().items()})
+        print("result2",result)
+        print("happpy day ___________________")
+        print(count)
+        result = _populate_alternate_kwargs(result, count)
     else:
         result = dict(name=rid)
-
+    print("after")
     return {key: value for key, value in result.items() if value is not None}
 
 
 def is_valid_resource_id(rid, exception_type=None):
     is_valid = False
     try:
+        print("here")
         is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
     except KeyError:
         pass
