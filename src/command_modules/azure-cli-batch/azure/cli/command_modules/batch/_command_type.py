@@ -160,7 +160,7 @@ def find_return_type(model):
     :returns: str
     """
     # Search for :rtype: in the docstring
-    pattern = r":rtype: (.*?)\n(\s*:rtype:|\s*:raises:|\"\"\")"
+    pattern = r':rtype: (.*?)( or)?\n.*(:raises:)?'
     return_type = re.search(pattern, model.__doc__, re.DOTALL)
     if return_type:
         return re.sub(r"\n\s*", "", return_type.group(1))
