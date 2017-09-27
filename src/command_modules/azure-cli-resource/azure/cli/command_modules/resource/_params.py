@@ -14,8 +14,9 @@ from azure.cli.core.commands import register_cli_argument, CliArgumentType, Vers
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
                                                 enum_choice_list, no_wait_type, file_type)
-from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
-                     get_resource_types_completion_list, get_providers_completion_list)
+from .custom import (get_policy_completion_list, get_policy_set_completion_list,
+                     get_policy_assignment_completion_list, get_resource_types_completion_list,
+                     get_providers_completion_list)
 from ._validators import process_deployment_create_namespace, validate_lock_parameters
 
 # BASIC PARAMETER CONFIGURATION
@@ -78,7 +79,6 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
                             help='mode of the new policy definition.',
                             **enum_choice_list(PolicyMode))
 
-
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
@@ -88,10 +88,28 @@ with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01') 
     c.register_cli_argument('policy assignment create', 'params', options_list=('--params', '-p'),
                             help='JSON formatted string or path to file with parameter values of policy rule')
 
+with VersionConstraint(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
+    existing_policy_set_definition_name_type = CliArgumentType(options_list=('--name', '-n'), completer=get_policy_set_completion_list, help='The policy set definition name')
+    c.register_cli_argument('policy set-definition', 'policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
+    c.register_cli_argument('policy set-definition create', 'name', options_list=('--name', '-n'), help='name of the new policy set definition')
+    c.register_cli_argument('policy set-definition', 'display_name', help='display name of policy set definition')
+    c.register_cli_argument('policy set-definition', 'description', help='description of policy set definition')
+    c.register_cli_argument('policy set-definition', 'params',
+                            help='JSON formatted string or a path to a file or uri with parameter definitions',
+                            type=file_type, completer=FilesCompleter())
+    c.register_cli_argument('policy set-definition', 'definitions',
+                            help='JSON formatted string or a path to a file or uri with such content',
+                            type=file_type, completer=FilesCompleter())
+    c.register_cli_argument('policy assignment create', 'policy_set_definition', options_list=('--policy-set-definition', '-d'),
+                            help='name or id of the policy set definition.')
+    c.register_cli_argument('policy assignment create', 'sku', options_list=('--sku', '-s'),
+                            help='policy sku.', **enum_choice_list(['free', 'standard']))
+    c.register_cli_argument('policy assignment create', 'notscopes', options_list=('--not-scopes'), nargs='+')
+
 register_cli_argument('policy assignment', 'scope', help='scope at which this policy assignment applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('policy assignment', 'disable_scope_strict_match', action='store_true', help='include assignment either inhertied from parent scope or at child scope')
 register_cli_argument('policy assignment', 'display_name', help='display name of the assignment')
-register_cli_argument('policy assignment', 'policy', help='policy name or fully qualified id', completer=get_policy_completion_list)
+register_cli_argument('policy assignment', 'policy', help='name or id of the policy definition.', completer=get_policy_completion_list)
 
 register_cli_argument('group', 'tag', tag_type)
 register_cli_argument('group', 'tags', tags_type)

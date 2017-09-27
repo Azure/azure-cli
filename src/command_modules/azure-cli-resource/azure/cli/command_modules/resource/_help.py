@@ -172,7 +172,7 @@ helps['policy definition create'] = """
                                 }
                             }
                         }
-            """
+"""
 helps['policy definition delete'] = """
     type: command
     short-summary: Delete a policy definition.
@@ -188,6 +188,43 @@ helps['policy definition update'] = """
 helps['policy definition list'] = """
     type: command
     short-summary: List policy definitions.
+"""
+helps['policy set-definition'] = """
+    type: group
+    short-summary: Manage resource policy set definitions.
+"""
+helps['policy set-definition create'] = """
+            type: command
+            short-summary: Create a policy set definition.
+            parameters:
+                - name: --definitions
+                  type: string
+                  short-summary: Policy definitions in JSON format, or a path to a file containing JSON rules.
+            examples:
+                - name: Create a policy set definition.
+                  text: |
+                    az policy setdefinition create -n readOnlyStorage --definitions \\
+                        [ \\
+                            { \\
+                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \\
+                            } \\
+                        ]
+"""
+helps['policy set-definition delete'] = """
+    type: command
+    short-summary: Delete a policy set definition.
+"""
+helps['policy set-definition show'] = """
+    type: command
+    short-summary: get a policy set definition.
+"""
+helps['policy set-definition update'] = """
+    type: command
+    short-summary: Update a policy set definition.
+"""
+helps['policy set-definition list'] = """
+    type: command
+    short-summary: List policy set definitions.
 """
 helps['policy assignment'] = """
     type: group
