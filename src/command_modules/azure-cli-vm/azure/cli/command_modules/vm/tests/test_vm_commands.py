@@ -2273,6 +2273,13 @@ class VMSSDiskEncryptionTest(ScenarioTest):
             JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
 
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSSRollingUpgrade(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_rolling_upgrade(self,resource_group, resource_group_location):
+        lb_name = 'lb1'
+        self.cmd('network lb create -g {} -n {}'.format())
+
 # endregion
 
 

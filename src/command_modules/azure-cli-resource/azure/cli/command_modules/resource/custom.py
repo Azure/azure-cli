@@ -800,6 +800,12 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
+def register_feature(client, resource_provider_namespace, feature_name):
+    logger.warning("Once the fearure '{}' is registered, invoking 'az provider register -n {}' is required "
+                   "to get the change propagated".format(resource_provider_namespace, feature_name))
+    return client.register(resource_provider_namespace, feature_name)
+
+
 def create_policy_assignment(policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
@@ -810,6 +816,7 @@ def create_policy_assignment(policy=None, policy_set_definition=None,
     if bool(policy) == bool(policy_set_definition):
         raise CLIError('usage error: --policy NAME_OR_ID | '
                        '--policy-set-definition NAME_OR_ID')
+
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
