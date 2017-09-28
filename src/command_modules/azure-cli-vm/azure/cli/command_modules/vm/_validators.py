@@ -910,16 +910,14 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
                     _get_default_address_pool(rg, lb_name, 'load_balancers')
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
                 if namespace.upgrade_policy_mode == 'Rolling' and not namespace.health_probe:
-                    if lb.probes:
-                        if len(lb.probes) > 1:
-                            raise CLIError('usage error: please specify a health probe from the load balancer')
-                        else:
-                            namespace.health_probe = lb.probes[0].id
+                    probe_ids = [l.id for l in (lb.probes or [])]
+                    if len(probe_ids) > 1:
+                        raise CLIError("usage error: more than one probes are available, please pick one from '{}'"
+                                       "and supply to '--health-probe'".format(','.join(probe_ids)))
                     else:
-                        raise CLIError("Load balancer '{}' doesn't contain any health probes")
+                        namespace.health_probe = probe_ids[0]
+                        logger.warning("Using health probe '{}' for rolling update".format(probe_ids[0]))
             else:
-                if namespace.upgrade_policy_mode == 'Rolling':
-                    raise CLIError('usage error: please specify an existing load balancer with a health probe')  # TODO, get clear when we should remove this error 
                 namespace.load_balancer_type = 'new'
                 logger.debug("load balancer '%s' not found. It will be created.", namespace.load_balancer)
         elif namespace.load_balancer == '':

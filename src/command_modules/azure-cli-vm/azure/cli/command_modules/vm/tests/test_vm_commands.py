@@ -2276,9 +2276,18 @@ class VMSSDiskEncryptionTest(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMSSRollingUpgrade(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_vmss_rolling_upgrade(self,resource_group, resource_group_location):
+    def test_vmss_rolling_upgrade(self, resource_group):
         lb_name = 'lb1'
-        self.cmd('network lb create -g {} -n {}'.format())
+        probe_name = 'probe1'
+        vmss_name = 'vmss1'
+        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
+        self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
+        self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
+        self.cmd('vmss create -g {} -n {} --image debian --admin-username clitester1 --admin-password Testqwer1234! --upgrade-policy rolling --lb {}'.format(resource_group, vmss_name, lb_name))
+        self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
+        self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name))
+        self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
+        pass
 
 # endregion
 
