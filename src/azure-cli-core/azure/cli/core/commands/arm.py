@@ -191,28 +191,29 @@ def parse_resource_id(rid):
     '''
     if not rid:
         return {}
-
+    print("rid", rid)
     m = regex.match(rid)
     if m:
         result = m.groupdict()
-        print("result1:", result)
         children = children_regex.finditer(result["children"])
-        print("children:")
         count = None
         for count, child in enumerate(children):
+            print("child", child.groupdict())
             result.update({key + '_%d' % (count + 1):group for key, group in child.groupdict().items()})
         result["last_child_num"] = count + 1 if isinstance(count, int) else None
         print("result", result)
         result = _populate_alternate_kwargs(result)
+        print("result after populate", result)
     else:
         result = dict(name=rid)
-    print("after")
     return {key: value for key, value in result.items() if value is not None}
 
 
 def is_valid_resource_id(rid, exception_type=None):
     is_valid = False
     try:
+        print("parsed:", resource_id(**parse_resource_id(rid)).lower())
+        print("unparsed:", rid.lower())
         is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
     except KeyError:
         pass
