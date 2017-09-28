@@ -21,34 +21,30 @@ DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
 LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
 
 
-class RetryableException(Exception):
-    pass
-
-
-def _basic_auth_str(username, password):
+def _get_basic_auth_str(username, password):
     return 'Basic ' + to_native_string(
         b64encode(('%s:%s' % (username, password)).encode('latin1')).strip()
     )
 
 
-def _bearer_auth_str(token):
+def _get_bearer_auth_str(token):
     return 'Bearer ' + token
 
 
-def _manifest_v2_header():
+def _get_manifest_v2_header():
     return {'Accept': 'application/vnd.docker.distribution.manifest.v2+json'}
 
 
-def _authorization_header(username, password):
+def _get_authorization_header(username, password):
     if username is None:
-        auth = _bearer_auth_str(password)
+        auth = _get_bearer_auth_str(password)
     else:
-        auth = _basic_auth_str(username, password)
+        auth = _get_basic_auth_str(username, password)
 
     return {'Authorization': auth}
 
 
-def _pagination_params(count):
+def _get_pagination_params(count):
     return {'n': count}
 
 
@@ -58,7 +54,7 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
         try:
             response = requests.delete(
                 'https://{}/{}'.format(login_server, path),
-                headers=_authorization_header(username, password)
+                headers=_get_authorization_header(username, password)
             )
 
             if response.status_code == 200 or response.status_code == 202:
@@ -66,7 +62,7 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
             elif response.status_code == 401 or response.status_code == 404:
                 raise CLIError(response.text)
             else:
-                raise RetryableException(response.text)
+                raise Exception(response.text)
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -81,8 +77,8 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
     for i in range(0, retry_times):
         errorMessage = None
         try:
-            headers = _authorization_header(username, password)
-            headers.update(_manifest_v2_header())
+            headers = _get_authorization_header(username, password)
+            headers.update(_get_manifest_v2_header())
             response = requests.get(
                 'https://{}/{}'.format(login_server, path),
                 headers=headers
@@ -93,7 +89,7 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
             elif response.status_code == 401 or response.status_code == 404:
                 raise CLIError(response.text)
             else:
-                raise RetryableException(response.text)
+                raise Exception(response.text)
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -122,8 +118,8 @@ def _obtain_data_from_registry(login_server,
             try:
                 response = requests.get(
                     'https://{}/{}'.format(login_server, path),
-                    headers=_authorization_header(username, password),
-                    params=_pagination_params(pagination)
+                    headers=_get_authorization_header(username, password),
+                    params=_get_pagination_params(pagination)
                 )
 
                 if response.status_code == 200:
@@ -142,7 +138,7 @@ def _obtain_data_from_registry(login_server,
                 elif response.status_code == 401 or response.status_code == 404:
                     raise CLIError(response.text)
                 else:
-                    raise RetryableException(response.text)
+                    raise Exception(response.text)
             except CLIError:
                 raise
             except Exception as e:  # pylint: disable=broad-except
@@ -321,14 +317,12 @@ def _delete_manifest_confirmation(login_server,
                                   tag,
                                   manifest,
                                   yes):
-    # Always query manifest if it is None
-    if not manifest:
-        manifest = _get_manifest_digest(
-            login_server=login_server,
-            path='/v2/{}/manifests/{}'.format(repository, tag),
-            username=username,
-            password=password
-        )
+    # Always query manifest if it is empty
+    manifest = manifest or _get_manifest_digest(
+        login_server=login_server,
+        path='/v2/{}/manifests/{}'.format(repository, tag),
+        username=username,
+        password=password)
 
     if yes:
         return manifest
