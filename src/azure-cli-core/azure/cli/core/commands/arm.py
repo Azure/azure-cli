@@ -26,14 +26,6 @@ logger = azlogging.get_az_logger(__name__)
 regex = re.compile(
     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
     '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*)')
-    # '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-    # '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
-
-# regex = re.compile(
-#     '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-#     '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-#     '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-#     '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 children_regex = re.compile('(/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
@@ -117,13 +109,6 @@ def _get_parent_from_parts(kwargs):
 def _populate_alternate_kwargs(kwargs):
     """ Translates the parsed arguments into a format used by generic ARM commands
     such as the resource and lock commands. """
-    print("_________________")
-    # kwargs['child_namespace'] = kwargs.get('child_namespace_1')
-    # kwargs['child_type'] = kwargs.get('child_type_1')
-    # kwargs['child_name'] = kwargs.get('child_name_1')
-    # kwargs['grandchild_namespace'] = kwargs.get('child_namespace_2')
-    # kwargs['grandchild_type'] = kwargs.get('child_type_2')
-    # kwargs['grandchild_name'] = kwargs.get('child_name_2')
 
     resource_namespace = kwargs['namespace']
     resource_type = kwargs.get('child_type_{}'.format(kwargs['last_child_num'])) or kwargs['type']
@@ -133,25 +118,20 @@ def _populate_alternate_kwargs(kwargs):
     kwargs['resource_namespace'] = resource_namespace
     kwargs['resource_type'] = resource_type
     kwargs['resource_name'] = resource_name
-    print(kwargs)
-    print(resource_id(**{key: value for key, value in kwargs.items() if value is not None}))
     return kwargs
 
 
 def resource_id(**kwargs):
-    '''Create a valid resource id string from the given parts
+    '''Create a valid resource id string from the given parts. Children start at level 1.
     The method accepts the following keyword arguments:
-        - subscription          Subscription id
-        - resource_group        Name of resource group
-        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                  Type of the resource (i.e. virtualMachines)
-        - name                  Name of the resource (or parent if child_name is also specified)
-        - child_namespace       Namespace for the child resoure (optional)
-        - child_type            Type of the child resource
-        - child_name            Name of the child resource
-        - grandchild_namespace  Namespace for the grandchild resource (optional)
-        - grandchild_type       Type of the grandchild resource
-        - grandchild_name       Name of the grandchild resource
+        - subscription              Subscription id
+        - resource_group            Name of resource group
+        - namespace                 Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type                      Type of the resource (i.e. virtualMachines)
+        - name                      Name of the resource (or parent if child_name is also specified)
+        - child_namespace_{level}   Namespace for the child resoure of that level (optional)
+        - child_type_{level}        Type of the child resource of that level
+        - child_name_{level}        Name of the child resource of that level
     '''
     rid_builder = ['/subscriptions/{subscription}'.format(**kwargs)]
     try:
@@ -178,12 +158,9 @@ def parse_resource_id(rid):
         - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
         - type                  Type of the root resource (i.e. virtualMachines)
         - name                  Name of the root resource
-        - child_namespace       Namespace for the child resoure (optional)
-        - child_type            Type of the child resource
-        - child_name            Name of the child resource
-        - grandchild_namespace  Namespace for the grandchild resource (optional)
-        - grandchild_type       Type of the grandchild resource
-        - grandchild_name       Name of the grandchild resource
+        - child_namespace_{level}   Namespace for the child resoure of that level (optional)
+        - child_type_{level}        Type of the child resource of that level
+        - child_name_{level}        Name of the child resource of that level
         - resource_parent       Computed parent in the following pattern: providers/{namespace}/{parent}/{type}/{name}
         - resource_namespace    Same as namespace. Note that this may be different than the target resource's namespace.
         - resource_type         Type of the target resource (not the parent)
@@ -191,19 +168,15 @@ def parse_resource_id(rid):
     '''
     if not rid:
         return {}
-    print("rid", rid)
     m = regex.match(rid)
     if m:
         result = m.groupdict()
         children = children_regex.finditer(result["children"])
         count = None
         for count, child in enumerate(children):
-            print("child", child.groupdict())
-            result.update({key + '_%d' % (count + 1):group for key, group in child.groupdict().items()})
+            result.update({key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
         result["last_child_num"] = count + 1 if isinstance(count, int) else None
-        print("result", result)
         result = _populate_alternate_kwargs(result)
-        print("result after populate", result)
     else:
         result = dict(name=rid)
     return {key: value for key, value in result.items() if value is not None}
@@ -212,8 +185,6 @@ def parse_resource_id(rid):
 def is_valid_resource_id(rid, exception_type=None):
     is_valid = False
     try:
-        print("parsed:", resource_id(**parse_resource_id(rid)).lower())
-        print("unparsed:", rid.lower())
         is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
     except KeyError:
         pass
