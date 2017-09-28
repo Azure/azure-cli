@@ -21,11 +21,7 @@ DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
 LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
 
 
-class NotFound(Exception):
-    pass
-
-
-class Unauthorized(Exception):
+class RetryableException(Exception):
     pass
 
 
@@ -48,6 +44,7 @@ def _authorization_header(username, password):
         auth = _bearer_auth_str(password)
     else:
         auth = _basic_auth_str(username, password)
+
     return {'Authorization': auth}
 
 
@@ -66,21 +63,17 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
 
             if response.status_code == 200 or response.status_code == 202:
                 return
-            elif response.status_code == 401:
-                raise Unauthorized(response.text)
-            elif response.status_code == 404:
-                raise NotFound(response.text)
-            else:
+            elif response.status_code == 401 or response.status_code == 404:
                 raise CLIError(response.text)
-        except NotFound:
-            raise
-        except Unauthorized:
+            else:
+                raise RetryableException(response.text)
+        except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
             errorMessage = str(e)
             logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
             time.sleep(retry_interval)
-    else:
+    if errorMessage:
         raise CLIError(errorMessage)
 
 
@@ -97,21 +90,17 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
 
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
-            elif response.status_code == 401:
-                raise Unauthorized(response.text)
-            elif response.status_code == 404:
-                raise NotFound(response.text)
-            else:
+            elif response.status_code == 401 or response.status_code == 404:
                 raise CLIError(response.text)
-        except NotFound:
-            raise
-        except Unauthorized:
+            else:
+                raise RetryableException(response.text)
+        except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
             errorMessage = str(e)
             logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
             time.sleep(retry_interval)
-    else:
+    if errorMessage:
         raise CLIError(errorMessage)
 
 
@@ -123,18 +112,14 @@ def _obtain_data_from_registry(login_server,
                                retry_times=3,
                                retry_interval=5,
                                pagination=20):
-    print(login_server)
-    print(username)
-    print(password)
-    print(pagination)
     resultList = []
     executeNextHttpCall = True
 
     while executeNextHttpCall:
         executeNextHttpCall = False
         for i in range(0, retry_times):
+            errorMessage = None
             try:
-                errorMessage = None
                 response = requests.get(
                     'https://{}/{}'.format(login_server, path),
                     headers=_authorization_header(username, password),
@@ -154,21 +139,16 @@ def _obtain_data_from_registry(login_server,
                         path = linkHeader[(linkHeader.index('<') + 1):linkHeader.index('>')]
                         executeNextHttpCall = True
                     break
-                elif response.status_code == 401:
-                    raise Unauthorized(response.text)
-                elif response.status_code == 404:
-                    raise NotFound(response.text)
-                else:
+                elif response.status_code == 401 or response.status_code == 404:
                     raise CLIError(response.text)
-            except NotFound:
-                raise
-            except Unauthorized:
+                else:
+                    raise RetryableException(response.text)
+            except CLIError:
                 raise
             except Exception as e:  # pylint: disable=broad-except
                 errorMessage = str(e)
                 logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
                 time.sleep(retry_interval)
-
     if errorMessage:
         raise CLIError(errorMessage)
 
