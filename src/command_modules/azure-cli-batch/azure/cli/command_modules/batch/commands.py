@@ -80,13 +80,16 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                                  ignore=['pool.cloud_service_configuration.current_os_version', 'pool.virtual_machine_configuration.windows_configuration',
                                          'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.network_configuration',
                                          'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy', 'pool.virtual_machine_configuration.os_disk',
-                                         'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings', 'pool.start_task.user_identity'],
+                                         'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings', 'pool.start_task.user_identity',
+                                         'pool.virtual_machine_configuration.container_configuration', 'pool.start_task.container_settings',
+                                         'pool.virtual_machine_configuration.license_type'],
                                  silent=['pool.virtual_machine_configuration.image_reference'])
     cli_batch_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), pool_client_factory)
     cli_batch_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), pool_client_factory)
     cli_batch_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), pool_client_factory)
     cli_batch_data_plane_command('batch pool set', data_path.format('pool', 'PoolOperations.patch'), pool_client_factory,
-                                 ignore=['pool_patch_parameter.start_task.user_identity'])
+                                 ignore=['pool_patch_parameter.start_task.user_identity', 'pool_patch_parameter.virtual_machine_configuration.license_type',
+                                         'pool_patch_parameter.start_task.container_settings'])
     cli_command(__name__, 'batch pool reset', custom_path.format('update_pool'), pool_client_factory)
     cli_batch_data_plane_command('batch pool autoscale disable', data_path.format('pool', 'PoolOperations.disable_auto_scale'), pool_client_factory)
     cli_batch_data_plane_command('batch pool autoscale enable', data_path.format('pool', 'PoolOperations.enable_auto_scale'), pool_client_factory)
@@ -100,7 +103,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                                  ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.on_task_failure',
                                          'job.job_manager_task.kill_job_on_completion', 'job.common_environment_settings', 'job.on_all_tasks_complete',
                                          'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references',
-                                         'job.job_manager_task.user_identity', 'job.job_manager_task.allow_low_priority_node'])
+                                         'job.job_manager_task.user_identity', 'job.job_manager_task.allow_low_priority_node', 'job.job_manager_task.container_settings'])
     cli_batch_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), job_client_factory)
     cli_batch_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), job_client_factory)
     cli_batch_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), job_client_factory, flatten=2)

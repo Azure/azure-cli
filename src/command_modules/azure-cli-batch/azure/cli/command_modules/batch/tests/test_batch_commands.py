@@ -257,9 +257,8 @@ class TestBatchParser(unittest.TestCase):
         :type callback: Callable[Bytes, response=None]
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
-        :rtype: Generator
-        :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
-         if raw=true
+        :rtype: Generator or
+         :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
 """
         self.assertEqual(_command_type.find_return_type(model), 'Generator')
 
@@ -574,7 +573,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
         self.assertEqual(len(attrs), 3)
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
-        self.assertEqual(len(attrs), 13)
+        self.assertEqual(len(attrs), 14)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
         self.assertEqual(len(attrs), 10)
 
@@ -582,7 +581,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # pylint: disable=too-many-statements
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 34)
+        self.assertEqual(len(args), 37)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -622,7 +621,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.job_schedule_operations.JobScheduleOperations.add
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
-        self.assertEqual(len(args), 47)
+        self.assertEqual(len(args), 53)
         self.assertTrue('id' in args)
         self.assertTrue('job_manager_task_id' in args)
         self.assertTrue('job_manager_task_max_wall_clock_time' in args)
