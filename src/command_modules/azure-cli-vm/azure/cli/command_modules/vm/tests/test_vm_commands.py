@@ -280,14 +280,19 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
-class VMWindowsLicenseTest(ScenarioTest):
+class VMVMSSWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_windows_vm_license_type(self, resource_group):
+    def test_windows_vm_vmss_license_type(self, resource_group):
         vm_name = 'winvm'
+        vmss_name = 'winvmss'
         self.cmd('vm create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server'.format(resource_group, vm_name))
         self.cmd('vm show -g {} -n {}'.format(resource_group, vm_name), checks=[
             JMESPathCheckV2('licenseType', 'Windows_Server')
+        ])
+        self.cmd('vmss create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1'.format(resource_group, vmss_name))
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.licenseType', 'Windows_Server')
         ])
 
 

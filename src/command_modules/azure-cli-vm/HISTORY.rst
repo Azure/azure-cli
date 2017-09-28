@@ -5,6 +5,7 @@ Release History
 (unreleased)
 +++++++++++++++++++
 * `vm create`: expose --os-disk-size-gb
+* `vmss create`: expose --license-type for windows os
 
 2.0.15 (2017-09-22)
 +++++++++++++++++++
