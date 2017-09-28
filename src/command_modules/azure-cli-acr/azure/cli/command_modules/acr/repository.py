@@ -20,8 +20,9 @@ from .credential import acr_credential_show
 
 
 logger = azlogging.get_az_logger(__name__)
-DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
-LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is not supported for registries in Basic SKU.'
+DOCKER_MANIFEST_V2 = 'application/vnd.docker.distribution.manifest.v2+json'
+DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
+LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
 
 
 class NotFound(Exception):
@@ -42,46 +43,60 @@ def _bearer_auth_str(token):
     return 'Bearer ' + token
 
 
-def _headers(username, password):
+def _headers(username, password, is_manifest=False):
     if username is None:
         auth = _bearer_auth_str(password)
     else:
         auth = _basic_auth_str(username, password)
 
+    if is_manifest:
+        return {'Authorization': auth,
+                'Accept': DOCKER_MANIFEST_V2}
     return {'Authorization': auth}
 
 
-def _delete_data_from_registry(login_server,
-                               path,
-                               username,
-                               password,
-                               resultIndex=None,  # pylint: disable=unused-argument
-                               retry_times=3,  # pylint: disable=unused-argument
-                               retry_interval=5):  # pylint: disable=unused-argument
-    registryEndpoint = 'https://' + login_server
-
-    response = requests.delete(
-        registryEndpoint + path,
-        headers=_headers(username, password)
-    )
-
-    if response.status_code == 200 or response.status_code == 202:
-        return
-    elif response.status_code == 401:
-        raise Unauthorized(response.text)
-    elif response.status_code == 404:
-        raise NotFound(response.text)
-    else:
-        raise CLIError(response.text)
+def _params(count=20):
+    return {'n': count}
 
 
-def _obtain_data_from_registry(login_server,
-                               path,
-                               username,
-                               password,
-                               resultIndex=None,
-                               retry_times=3,
-                               retry_interval=5):
+def _delete_data_from_registry(login_server, path, username, password, **kwargs):
+    retry_times = kwargs['retry_times'] if 'retry_times' in kwargs else 3
+    retry_interval = kwargs['retry_interval'] if 'retry_interval' in kwargs else 5
+
+    for i in range(0, retry_times):
+        try:
+            errorMessage = None
+            response = requests.delete(
+                'https://{}/{}'.format(login_server, path),
+                headers=_headers(username, password)
+            )
+
+            if response.status_code == 200 or response.status_code == 202:
+                return
+            elif response.status_code == 401:
+                raise Unauthorized(response.text)
+            elif response.status_code == 404:
+                raise NotFound(response.text)
+            else:
+                raise CLIError(response.text)
+        except NotFound:
+            raise
+        except Unauthorized:
+            raise
+        except Exception as e:  # pylint: disable=broad-except
+            errorMessage = str(e)
+            logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
+            time.sleep(retry_interval)
+
+    if errorMessage:
+        raise CLIError(errorMessage)
+
+
+def _obtain_data_from_registry(login_server, path, username, password, **kwargs):
+    result_index = kwargs['result_index'] if 'result_index' in kwargs else ''
+    retry_times = kwargs['retry_times'] if 'retry_times' in kwargs else 3
+    retry_interval = kwargs['retry_interval'] if 'retry_interval' in kwargs else 5
+
     registryEndpoint = 'https://' + login_server
     resultList = []
     executeNextHttpCall = True
@@ -93,13 +108,14 @@ def _obtain_data_from_registry(login_server,
                 errorMessage = None
                 response = requests.get(
                     registryEndpoint + path,
-                    headers=_headers(username, password)
+                    headers=_headers(username, password),
+                    params=_params()
                 )
 
                 if response.status_code == 200:
-                    result = response.json()[resultIndex]
+                    result = response.json()[result_index]
                     if result:
-                        resultList += response.json()[resultIndex]
+                        resultList += response.json()[result_index]
                     if 'link' in response.headers and response.headers['link']:
                         linkHeader = response.headers['link']
                         # The registry is telling us there's more items in the list,
@@ -130,9 +146,43 @@ def _obtain_data_from_registry(login_server,
     return resultList
 
 
+def _get_manifest_digest(login_server, path, username, password, **kwargs):
+    retry_times = kwargs['retry_times'] if 'retry_times' in kwargs else 3
+    retry_interval = kwargs['retry_interval'] if 'retry_interval' in kwargs else 5
+
+    for i in range(0, retry_times):
+        try:
+            errorMessage = None
+            response = requests.get(
+                'https://{}/{}'.format(login_server, path),
+                headers=_headers(username, password, is_manifest=True)
+            )
+
+            if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
+                return response.headers['Docker-Content-Digest']
+            elif response.status_code == 401:
+                raise Unauthorized(response.text)
+            elif response.status_code == 404:
+                raise NotFound(response.text)
+            else:
+                raise CLIError(response.text)
+        except NotFound:
+            raise
+        except Unauthorized:
+            raise
+        except Exception as e:  # pylint: disable=broad-except
+            errorMessage = str(e)
+            logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
+            time.sleep(retry_interval)
+
+    if errorMessage:
+        raise CLIError(errorMessage)
+
+
 def _validate_user_credentials(registry_name,
                                resource_group_name,
                                path,
+                               permission,
                                username=None,
                                password=None,
                                repository=None,
@@ -149,14 +199,14 @@ def _validate_user_credentials(registry_name,
                 password = prompt_pass(msg='Password: ')
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
-        return request_method(login_server, path, username, password, result_index)
+        return request_method(login_server, path, username, password, result_index=result_index)
 
     if sku_tier == SkuTier.managed.value:
         # 2. if we don't yet have credentials, attempt to get an access token
         try:
             managed_registry_validation(registry_name, resource_group_name)
-            access_token = get_login_access_token(login_server, repository)
-            return request_method(login_server, path, None, access_token, result_index)
+            access_token = get_login_access_token(login_server, permission, repository)
+            return request_method(login_server, path, None, access_token, result_index=result_index)
         except NotFound as e:
             raise CLIError(str(e))
         except Unauthorized as e:
@@ -169,7 +219,7 @@ def _validate_user_credentials(registry_name,
         cred = acr_credential_show(registry_name)
         username = cred.username
         password = cred.passwords[0].value
-        return request_method(login_server, path, username, password, result_index)
+        return request_method(login_server, path, username, password, result_index=result_index)
     except NotFound as e:
         raise CLIError(str(e))
     except Unauthorized as e:
@@ -185,7 +235,7 @@ def _validate_user_credentials(registry_name,
         raise CLIError(
             'Unable to authenticate using AAD tokens or admin login credentials. ' +
             'Please specify both username and password in non-interactive mode.')
-    return request_method(login_server, path, username, password, result_index)
+    return request_method(login_server, path, username, password, result_index=result_index)
 
 
 def acr_repository_list(registry_name,
@@ -202,9 +252,9 @@ def acr_repository_list(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path='/v2/_catalog',
+        permission='*',
         username=username,
         password=password,
-        repository=None,
         result_index='repositories',
         request_method=_obtain_data_from_registry
     )
@@ -226,6 +276,7 @@ def acr_repository_show_tags(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path='/v2/{}/tags/list'.format(repository),
+        permission='pull',
         username=username,
         password=password,
         repository=repository,
@@ -252,6 +303,7 @@ def acr_repository_show_manifests(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path='/v2/_acr/{}/manifests/list'.format(repository),
+        permission='pull',
         username=username,
         password=password,
         repository=repository,
@@ -295,43 +347,65 @@ def acr_repository_delete(registry_name,
         # Raise if --tag is empty
         if not tag:
             raise CLIError(_INVALID)
-        manifest = _delete_manifest_confirmation(yes, registry_name, repository, None, tag)
+        manifest = _delete_manifest_confirmation(
+            registry_name=registry_name,
+            resource_group_name=resource_group_name,
+            repository=repository,
+            tag=tag,
+            manifest=manifest,
+            username=username,
+            password=password,
+            yes=yes)
         path = '/v2/{}/manifests/{}'.format(repository, manifest)
     # If --manifest is specified with a value
     else:
         # Raise if --tag is not empty
         if tag:
             raise CLIError(_INVALID)
-        manifest = _delete_manifest_confirmation(yes, registry_name, repository, manifest, None)
+        manifest = _delete_manifest_confirmation(
+            registry_name=registry_name,
+            resource_group_name=resource_group_name,
+            repository=repository,
+            tag=tag,
+            manifest=manifest,
+            username=username,
+            password=password,
+            yes=yes)
         path = '/v2/{}/manifests/{}'.format(repository, manifest)
-
     return _validate_user_credentials(
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path=path,
+        permission='*',
         username=username,
         password=password,
         repository=repository,
-        result_index=None,
         request_method=_delete_data_from_registry
     )
 
 
-def _delete_manifest_confirmation(yes, registry_name, repository, manifest, tag):
+def _delete_manifest_confirmation(registry_name,
+                                  resource_group_name,
+                                  repository,
+                                  tag,
+                                  manifest,
+                                  username,
+                                  password,
+                                  yes):
     # All tags that are referencing the manifest, this can be empty.
     tags = []
     # Always query manifest if it is None
-    if manifest is None:
-        manifests = acr_repository_show_manifests(registry_name, repository)
-        filter_by_tag = [x for x in manifests if tag in x['tags']]
-
-        if not filter_by_tag:
-            raise CLIError("No manifest can be found with image '{}:{}'.".format(repository, tag))
-        elif len(filter_by_tag) == 1:
-            manifest = filter_by_tag[0]['digest']
-            tags = filter_by_tag[0]['tags']
-        else:
-            raise CLIError("More than one manifests can be found with image '{}:{}'.".format(repository, tag))
+    if not manifest:
+        manifest = _validate_user_credentials(
+            registry_name=registry_name,
+            resource_group_name=resource_group_name,
+            path='/v2/{}/manifests/{}'.format(repository, tag),
+            permission='pull',
+            username=username,
+            password=password,
+            repository=repository,
+            request_method=_get_manifest_digest
+        )
 
     if yes:
         return manifest

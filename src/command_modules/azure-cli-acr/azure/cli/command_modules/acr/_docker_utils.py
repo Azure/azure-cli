@@ -15,7 +15,7 @@ import requests
 from azure.cli.core.util import CLIError
 
 
-def _get_login_token(login_server, only_refresh_token=True, repository=None):
+def _get_login_token(login_server, only_refresh_token=True, repository=None, permission='*'):
     """Obtains refresh and access tokens for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token,
@@ -88,7 +88,7 @@ def _get_login_token(login_server, only_refresh_token=True, repository=None):
     if repository is None:
         scope = 'registry:catalog:*'
     else:
-        scope = 'repository:' + repository + ':*'
+        scope = 'repository:{}:{}'.format(repository, permission)
 
     content = {
         'grant_type': 'refresh_token',
@@ -110,11 +110,11 @@ def get_login_refresh_token(login_server):
     return refresh_token
 
 
-def get_login_access_token(login_server, repository=None):
+def get_login_access_token(login_server, permission, repository=None):
     """Obtains an access token from the token server for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
     :param str repository: Repository for which the access token is requested
     """
     only_refresh_token = False
-    _, access_token = _get_login_token(login_server, only_refresh_token, repository)
+    _, access_token = _get_login_token(login_server, only_refresh_token, repository, permission)
     return access_token
