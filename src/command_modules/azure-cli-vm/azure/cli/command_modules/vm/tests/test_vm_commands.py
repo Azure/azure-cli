@@ -1194,7 +1194,7 @@ class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
         av_set = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Compute', type='availabilitySets', name=self.availset_name)
         pub_ip = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIpAddresses', name=self.pubip_name)
-        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name=self.vnet_name, child_name_1=self.subnet_name)
         nsg = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='networkSecurityGroups', name=self.nsg_name)
 
         assert is_valid_resource_id(av_set)
@@ -1809,7 +1809,7 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         container_name = 'vrfcontainer'
         sku_name = 'Standard_A3'
 
-        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name=self.vnet_name, child_name_1=self.subnet_name)
         lb = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='loadBalancers', name=self.lb_name)
 
         assert is_valid_resource_id(subnet)

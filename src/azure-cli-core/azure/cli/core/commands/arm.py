@@ -118,12 +118,12 @@ def _populate_alternate_kwargs(kwargs):
     """ Translates the parsed arguments into a format used by generic ARM commands
     such as the resource and lock commands. """
     print("_________________")
-    kwargs['child_namespace'] = kwargs.get('child_namespace_1')
-    kwargs['child_type'] = kwargs.get('child_type_1')
-    kwargs['child_name'] = kwargs.get('child_name_1')
-    kwargs['grandchild_namespace'] = kwargs.get('child_namespace_2')
-    kwargs['grandchild_type'] = kwargs.get('child_type_2')
-    kwargs['grandchild_name'] = kwargs.get('child_name_2')
+    # kwargs['child_namespace'] = kwargs.get('child_namespace_1')
+    # kwargs['child_type'] = kwargs.get('child_type_1')
+    # kwargs['child_name'] = kwargs.get('child_name_1')
+    # kwargs['grandchild_namespace'] = kwargs.get('child_namespace_2')
+    # kwargs['grandchild_type'] = kwargs.get('child_type_2')
+    # kwargs['grandchild_name'] = kwargs.get('child_name_2')
 
     resource_namespace = kwargs['namespace']
     resource_type = kwargs.get('child_type_{}'.format(kwargs['last_child_num'])) or kwargs['type']

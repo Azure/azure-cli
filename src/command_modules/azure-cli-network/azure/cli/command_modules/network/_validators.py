@@ -86,8 +86,8 @@ def _generate_ag_subproperty_id(namespace, child_type, child_name, subscription=
         namespace='Microsoft.Network',
         type='applicationGateways',
         name=namespace.application_gateway_name,
-        child_type=child_type,
-        child_name=child_name)
+        child_type_1=child_type,
+        child_name_1=child_name)
 
 
 def _generate_lb_subproperty_id(namespace, child_type, child_name, subscription=None):
@@ -97,8 +97,8 @@ def _generate_lb_subproperty_id(namespace, child_type, child_name, subscription=
         namespace='Microsoft.Network',
         type='loadBalancers',
         name=namespace.load_balancer_name,
-        child_type=child_type,
-        child_name=child_name)
+        child_type_1=child_type,
+        child_name_1=child_name)
 
 
 def _generate_lb_id_list_from_names_or_ids(namespace, prop, child_type):
@@ -307,8 +307,8 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
                 namespace='Microsoft.Network',
                 type='virtualNetworks',
                 name=namespace.virtual_network_name,
-                child_type='subnets',
-                child_name=namespace.subnet)
+                child_type_1='subnets',
+                child_name_1=namespace.subnet)
 
     def complex_validator_with_type(namespace):
 
@@ -362,8 +362,8 @@ def validate_target_listener(namespace):
             name=namespace.application_gateway_name,
             namespace='Microsoft.Network',
             type='applicationGateways',
-            child_type='httpListeners',
-            child_name=namespace.target_listener)
+            child_type_1='httpListeners',
+            child_name_1=namespace.target_listener)
 
 
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
