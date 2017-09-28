@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import uuid
-import re
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
-from .custom import set_vm, _compute_client_factory, _storage_client_factory, get_vmss_instance_view
+from .custom import set_vm, _compute_client_factory, get_vmss_instance_view
 logger = azlogging.get_az_logger(__name__)
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -160,9 +159,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
                                                       key_encryption_key=key_encryption_key_obj,
                                                       enabled=True)
-
-    deallocate_required = vm_encrypted and _is_disk_premium(vm.storage_profile.os_disk)
-    if deallocate_required:
+    if vm_encrypted:
         # stop the vm before update if the vm is already encrypted
         logger.warning("Deallocating the VM before updating encryption settings...")
         compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
@@ -171,7 +168,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
     set_vm(vm)
 
-    if deallocate_required:
+    if vm_encrypted:
         # and start after the update
         logger.warning("Restarting the VM after the update...")
         compute_client.virtual_machines.start(resource_group_name, vm_name).result()
@@ -311,33 +308,6 @@ def show_vm_encryption_status(resource_group_name, vm_name):
 
     return encryption_status
 
-def _is_disk_premium(disk):
-    """
-    Figures out if a disk is in Standard_LRS or a Premium_LRS account.
-    The method for figuring this out differs between Native and Managed disk
-
-    :param obj disk the storage profile of the disk being checked
-    """
-    if disk.managed_disk is not None:
-        # The disk is Managed
-        storage_account_type = disk.managed_disk.storage_account_type
-        return storage_account_type.value.lower().startswith("premium")
-    else:
-        # The disk is Native
-        vhd_uri = disk.vhd.uri
-        # testing extract the first alphanumeral part of the uri that comes
-        # after a '//'
-        storage_account_name = re.search('(?<=//)\w+', vhd_uri).group(0).lower()
-        # We don't know the resource group of the account, so we go through all
-        # the storage accounts in the sub and match the name
-        storage_client = _storage_client_factory()
-        all_storage_accounts = list(storage_client.storage_accounts.list())
-        matched_accounts = list(filter(lambda sa: sa.name == storage_account_name, all_storage_accounts))
-        if len(matched_accounts) != 1:
-            #something went wrong. Assume the worst (Disk is managed and reboot is required)
-            return True
-        storage_account = matched_accounts[0]
-        return storage_account.sku.tier.value.lower() == "premium"
 
 def _is_linux_vm(os_type):
     return os_type.lower() == 'linux'

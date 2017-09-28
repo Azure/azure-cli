@@ -33,7 +33,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
-from ._client_factory import _compute_client_factory, _storage_client_factory, cf_public_ip_addresses
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
 logger = azlogging.get_az_logger(__name__)
 
