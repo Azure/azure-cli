@@ -695,7 +695,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None, secrets=None, zones=None):
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -826,6 +826,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             }
         }
     }
+
+    if license_type:
+        vmss_properties['virtualMachineProfile']['licenseType'] = license_type
 
     if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
