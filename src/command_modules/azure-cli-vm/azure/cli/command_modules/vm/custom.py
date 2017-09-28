@@ -1772,7 +1772,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
                 public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None,
-                plan_name=None, plan_product=None, plan_publisher=None,
+                plan_name=None, plan_product=None, plan_publisher=None, license_type=None,
                 assign_identity=False, identity_scope=None, identity_role=DefaultStr('Contributor'),
                 identity_role_id=None, zones=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1968,7 +1968,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id,
                                         single_placement_group=single_placement_group,
-                                        custom_data=custom_data, secrets=secrets, zones=zones)
+                                        custom_data=custom_data, secrets=secrets,
+                                        license_type=license_type, zones=zones)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
