@@ -939,7 +939,7 @@ def get_network_lb(resource_group_name, lb_name):
     try:
         return network_client.load_balancers.get(resource_group_name, lb_name)
     except CloudError:
-        return None 
+        return None
 
 
 def process_vmss_create_namespace(namespace):

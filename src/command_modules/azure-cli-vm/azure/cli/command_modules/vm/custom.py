@@ -1479,10 +1479,10 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     if primary_nic_config is None:
         raise CLIError('could not find a primary nic which is needed to search to load balancer')
     ip_configs = primary_nic_config.ip_configurations
-    ip_config = next((ip for ip in ip_configs if ip.load_balancer_backend_address_pools), None)
+    ip_config = next((ip for ip in ip_configs if ip.load_balancer_inbound_nat_pools), None)
     if not ip_config:
         raise CLIError('No load-balancer exist to retrieve public ip address')
-    res_id = ip_config.load_balancer_backend_address_pools[0].id
+    res_id = ip_config.load_balancer_inbound_nat_pools[0].id
     lb_info = parse_resource_id(res_id)
     lb_name = lb_info['name']
     lb_rg = lb_info['resource_group']

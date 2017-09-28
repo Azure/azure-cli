@@ -816,7 +816,6 @@ def create_policy_assignment(policy=None, policy_set_definition=None,
     if bool(policy) == bool(policy_set_definition):
         raise CLIError('usage error: --policy NAME_OR_ID | '
                        '--policy-set-definition NAME_OR_ID')
-
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)

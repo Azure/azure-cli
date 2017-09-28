@@ -2273,6 +2273,7 @@ class VMSSDiskEncryptionTest(ScenarioTest):
             JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
 
+
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMSSRollingUpgrade(ScenarioTest):
     @ResourceGroupPreparer()
@@ -2280,14 +2281,18 @@ class VMSSRollingUpgrade(ScenarioTest):
         lb_name = 'lb1'
         probe_name = 'probe1'
         vmss_name = 'vmss1'
+
+        # the test below is not to test rolling upgrade works correctly, which is blocked by a few service side issues;
+        # rather we test CLI does provision one successfully and related commands were invoked.
+
         self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
         self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
         self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
         self.cmd('vmss create -g {} -n {} --image debian --admin-username clitester1 --admin-password Testqwer1234! --upgrade-policy rolling --lb {}'.format(resource_group, vmss_name, lb_name))
         self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
-        self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name))
+        result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
+        self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
         self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
-        pass
 
 # endregion
 
