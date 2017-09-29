@@ -145,8 +145,8 @@ def _obtain_data_from_registry(login_server,
                 errorMessage = str(e)
                 logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
                 time.sleep(retry_interval)
-    if errorMessage:
-        raise CLIError(errorMessage)
+        if errorMessage:
+            raise CLIError(errorMessage)
 
     return resultList
 
@@ -172,8 +172,7 @@ def acr_repository_list(registry_name,
         path='/v2/_catalog',
         username=username,
         password=password,
-        result_index='repositories'
-    )
+        result_index='repositories')
 
 
 def acr_repository_show_tags(registry_name,
@@ -201,8 +200,7 @@ def acr_repository_show_tags(registry_name,
         path='/v2/{}/tags/list'.format(repository),
         username=username,
         password=password,
-        result_index='tags'
-    )
+        result_index='tags')
 
 
 def acr_repository_show_manifests(registry_name,
@@ -230,8 +228,7 @@ def acr_repository_show_manifests(registry_name,
         path='/v2/_acr/{}/manifests/list'.format(repository),
         username=username,
         password=password,
-        result_index='manifests'
-    )
+        result_index='manifests')
 
 
 def acr_repository_delete(registry_name,
@@ -306,8 +303,7 @@ def acr_repository_delete(registry_name,
         login_server=login_server,
         path=path,
         username=username,
-        password=password
-    )
+        password=password)
 
 
 def _delete_manifest_confirmation(login_server,
