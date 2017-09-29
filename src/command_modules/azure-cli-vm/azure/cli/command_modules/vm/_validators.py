@@ -890,7 +890,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
                 required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
-        forbidden = ['nat_pool_name', 'load_balancer']
+        forbidden = ['nat_pool_name', 'load_balancer', 'health_probe']
         validate_parameter_set(namespace, required, forbidden, description='network balancer: application gateway')
 
     elif balancer_type == 'loadBalancer':
@@ -910,20 +910,12 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
                     _get_default_address_pool(rg, lb_name, 'load_balancers')
                 if not namespace.nat_pool_name:
                     if len(lb.inbound_nat_pools) > 1:
-                        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(
+                        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
                     elif not lb.inbound_nat_pools:
                         logger.warning("No inbound nat pool was configured on '{}'".format(namespace.load_balancer))
-                    namespace.nat_pool_name = lb.inbound_nat_pools[0].name 
+                    namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
-                if namespace.upgrade_policy_mode == 'Rolling' and not namespace.health_probe:
-                    probe_ids = [l.id for l in (lb.probes or [])]
-                    if len(probe_ids) > 1:
-                        raise CLIError("usage error: more than one probes are available, please pick one from '{}'"
-                                       "and supply to '--health-probe'".format(','.join(probe_ids)))
-                    else:
-                        namespace.health_probe = probe_ids[0]
-                        logger.warning("Using health probe '{}' for rolling update".format(probe_ids[0]))
             else:
                 namespace.load_balancer_type = 'new'
                 logger.debug("load balancer '%s' not found. It will be created.", namespace.load_balancer)
