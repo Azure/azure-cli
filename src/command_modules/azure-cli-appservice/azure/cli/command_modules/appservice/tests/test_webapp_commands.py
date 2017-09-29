@@ -53,11 +53,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
-        self.cmd('webapp update -g {} -n {} --set tags.foo=bar'.format(self.resource_group, webapp_name), checks=[
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net'),
-            JMESPathCheck('tags.foo', 'bar')
-        ])
         result = self.cmd('webapp deployment source config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
         self.assertTrue(result['url'].endswith(webapp_name + '.git'))
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
