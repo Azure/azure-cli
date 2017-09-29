@@ -387,7 +387,7 @@ class WebappACRSceanrioTest(ScenarioTest):
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
         runtime = 'node|6.4'
         acr_registry_name = webapp
-        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Classic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
         creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()

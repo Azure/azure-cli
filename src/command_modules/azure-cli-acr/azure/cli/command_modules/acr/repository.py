@@ -12,7 +12,7 @@ from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException, prompt
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 
-from azure.mgmt.containerregistry.v2017_06_01_preview.models import SkuTier
+from azure.mgmt.containerregistry.v2017_10_01.models import SkuTier
 
 from ._utils import get_registry_by_name, managed_registry_validation
 from ._docker_utils import get_login_access_token
@@ -20,8 +20,8 @@ from .credential import acr_credential_show
 
 
 logger = azlogging.get_az_logger(__name__)
-DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
-LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is not supported for registries in Basic SKU.'
+DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
+LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
 
 
 class NotFound(Exception):
@@ -133,6 +133,7 @@ def _obtain_data_from_registry(login_server,
 def _validate_user_credentials(registry_name,
                                resource_group_name,
                                path,
+                               permission,
                                username=None,
                                password=None,
                                repository=None,
@@ -155,7 +156,7 @@ def _validate_user_credentials(registry_name,
         # 2. if we don't yet have credentials, attempt to get an access token
         try:
             managed_registry_validation(registry_name, resource_group_name)
-            access_token = get_login_access_token(login_server, repository)
+            access_token = get_login_access_token(login_server, permission, repository)
             return request_method(login_server, path, None, access_token, result_index)
         except NotFound as e:
             raise CLIError(str(e))
@@ -202,6 +203,7 @@ def acr_repository_list(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path='/v2/_catalog',
+        permission='*',
         username=username,
         password=password,
         repository=None,
@@ -226,6 +228,7 @@ def acr_repository_show_tags(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path='/v2/{}/tags/list'.format(repository),
+        permission='pull',
         username=username,
         password=password,
         repository=repository,
@@ -252,6 +255,7 @@ def acr_repository_show_manifests(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path='/v2/_acr/{}/manifests/list'.format(repository),
+        permission='pull',
         username=username,
         password=password,
         repository=repository,
@@ -309,6 +313,7 @@ def acr_repository_delete(registry_name,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         path=path,
+        permission='*',
         username=username,
         password=password,
         repository=repository,

@@ -16,14 +16,14 @@
         },
         "registrySku": {
             "type": "string",
-            "defaultValue": "Basic",
+            "defaultValue": "Classic",
             "metadata": {
                 "description": "The SKU of the container registry."
             }
         },
         "registryApiVersion": {
             "type": "string",
-            "defaultValue": "2017-03-01",
+            "defaultValue": "2017-10-01",
             "metadata": {
                 "description": "The API version of the container registry."
             }
@@ -32,13 +32,6 @@
             "type": "string",
             "metadata": {
                 "description": "The name of the storage account used by the container registry."
-            }
-        },
-        "storageAccountSku": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "metadata": {
-                "description": "The SKU of the storage account."
             }
         },
         "adminUserEnabled": {
@@ -59,7 +52,7 @@
                 "containerregistry": "[parameters('registryName')]"
             },
             "sku": {
-                "name": "[parameters('storageAccountSku')]"
+                "name": "Standard_LRS"
             },
             "kind": "Storage",
             "properties": {
@@ -87,8 +80,7 @@
             "properties": {
                 "adminUserEnabled": "[parameters('adminUserEnabled')]",
                 "storageAccount": {
-                    "name": "[parameters('storageAccountName')]",
-                    "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-12-01').keys[0].value]"
+                    "id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
                 }
             }
         }
