@@ -790,12 +790,15 @@ class WebappUpdateTest(ScenarioTest):
         webapp_name = self.create_random_name('webapp-update-test', 40)
         plan_name = self.create_random_name('webapp-update-plan', 40)
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name)).assert_with_checks([
+                     JMESPathCheckV2('clientAffinityEnabled', True)])
         # testing update command with --set
-        self.cmd('webapp update -g {} -n {} --set tags.foo=bar'
+        self.cmd('webapp update -g {} -n {} --client-affinity-enabled false --set tags.foo=bar'
                  .format(resource_group, webapp_name)).assert_with_checks([
                      JMESPathCheckV2('name', webapp_name),
-                     JMESPathCheckV2('tags.foo', 'bar')])
+                     JMESPathCheckV2('tags.foo', 'bar'),
+                     JMESPathCheckV2('clientAffinityEnabled', False)])
 
 
 if __name__ == '__main__':
