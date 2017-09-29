@@ -2287,8 +2287,17 @@ class VMSSRollingUpgrade(ScenarioTest):
         self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
         self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
         self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
-        self.cmd('network lb inbound-nat-pool create -g {} --lb-name{} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd'.format(resource_group, lb_name))
+        self.cmd('network lb inbound-nat-pool create -g {} --lb-name {} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd'.format(resource_group, lb_name))
         self.cmd('vmss create -g {} -n {} --image debian --admin-username clitester1 --admin-password Testqwer1234! --upgrade-policy rolling --lb {}'.format(resource_group, vmss_name, lb_name))
+        _, settings_file = tempfile.mkstemp()
+        with open(settings_file, 'w') as outfile:
+            json.dump({
+                "commandToExecute": "sudo apt-get install -y nginx",
+            }, outfile)
+        settings_file = settings_file.replace('\\', '\\\\')
+        self.cmd('vmss extension set -g {} --vmss-name {} -n customScript --publisher Microsoft.Azure.Extensions --settings {}'.format(resource_group, vmss_name, settings_file))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        time.sleep(15)
         self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
         result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
         self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
