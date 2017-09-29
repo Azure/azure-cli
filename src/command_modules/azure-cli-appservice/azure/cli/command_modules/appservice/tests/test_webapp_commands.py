@@ -53,6 +53,11 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
+        self.cmd('webapp update -g {} -n {} --set tags.foo=bar'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net'),
+            JMESPathCheck('tags.foo', 'bar')
+        ])
         result = self.cmd('webapp deployment source config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
         self.assertTrue(result['url'].endswith(webapp_name + '.git'))
         self.cmd('webapp deployment source show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
@@ -777,6 +782,20 @@ class WebappAuthenticationTest(ScenarioTest):
         self.assertIn('audience1', result['allowedAudiences'])
         self.assertIn('email', result['facebookOauthScopes'])
         self.assertIn('public_profile', result['facebookOauthScopes'])
+
+
+class WebappUpdateTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_update')
+    def test_webapp_update(self, resource_group):
+        webapp_name = self.create_random_name('webapp-update-test', 40)
+        plan_name = self.create_random_name('webapp-update-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        # testing update command with --set
+        self.cmd('webapp update -g {} -n {} --set tags.foo=bar'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheckV2('name', webapp_name),
+                     JMESPathCheckV2('tags.foo', 'bar')])
 
 
 if __name__ == '__main__':

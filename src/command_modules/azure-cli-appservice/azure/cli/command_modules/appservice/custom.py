@@ -98,6 +98,10 @@ def show_webapp(resource_group_name, name, slot=None, app_instance=None):
     return webapp
 
 
+def update_webapp(instance):
+    return instance
+
+
 def list_webapp(resource_group_name=None):
     return _list_app(['app', 'app,linux'], resource_group_name)
 

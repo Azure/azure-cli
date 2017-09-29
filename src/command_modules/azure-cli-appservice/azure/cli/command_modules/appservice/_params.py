@@ -93,6 +93,7 @@ register_cli_argument('webapp traffic-routing', 'distribution', options_list=('-
 
 register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('webapp update', 'client_affinity_enabled', ignore_type)
 
 register_cli_argument('webapp browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 register_cli_argument('webapp delete', 'keep_empty_plan', action='store_true', help='keep empty app service plan')
