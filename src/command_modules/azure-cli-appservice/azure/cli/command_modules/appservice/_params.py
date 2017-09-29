@@ -22,6 +22,8 @@ AUTH_TYPES = {
     'LoginWithMicrosoftAccount': BuiltInAuthenticationProvider.microsoft_account,
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
+two_states_switch = ['true', 'false']
+
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
                             extra_parameter=None, client=None):
@@ -93,6 +95,7 @@ register_cli_argument('webapp traffic-routing', 'distribution', options_list=('-
 
 register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('webapp update', 'client_affinity_enabled', help="Enables sending session affinity cookies.", **enum_choice_list(two_states_switch))
 
 register_cli_argument('webapp browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 register_cli_argument('webapp delete', 'keep_empty_plan', action='store_true', help='keep empty app service plan')
@@ -125,8 +128,6 @@ for scope in ['webapp', 'functionapp']:
 register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
-
-two_states_switch = ['true', 'false']
 
 register_cli_argument('webapp deployment container config', 'enable', options_list=('--enable-cd', '-e'), help='enable/disable continuous deployment', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp deployment slot', 'slot', help='the name of the slot')

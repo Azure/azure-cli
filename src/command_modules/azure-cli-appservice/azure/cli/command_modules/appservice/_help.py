@@ -449,6 +449,15 @@ helps['webapp create'] = """
             az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
 """
 
+helps['webapp update'] = """
+    type: command
+    short-summary: Update a web app.
+    examples:
+        - name: Update the tags of a web app.
+          text: >
+            az webapp update -g MyResourceGroup -n MyAppName --set tags.tagName=tagValue
+"""
+
 helps['webapp list-runtimes'] = """
     type: command
     short-summary: List available built-in stacks which can be used for web apps.
