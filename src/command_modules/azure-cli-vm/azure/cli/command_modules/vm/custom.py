@@ -1038,7 +1038,7 @@ def set_vmss_diagnostics_extension(
     result = LongRunningOperation()(poller)
     UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, "UpgradeMode", mod='models')
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
-        poller2 = update_vmss_instances(resource_group_name, vmss_name, '*')
+        poller2 = update_vmss_instances(resource_group_name, vmss_name, ['*'])
         LongRunningOperation()(poller2)
     return result
 
