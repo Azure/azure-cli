@@ -66,6 +66,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     extension = vm_extension_info[os_type]
+    backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
+    vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
 
     # 1. First validate arguments
 
@@ -157,9 +159,20 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
                                                       key_encryption_key=key_encryption_key_obj,
                                                       enabled=True)
+    if vm_encrypted:
+        # stop the vm before update if the vm is already encrypted
+        logger.warning("Deallocating the VM before updating encryption settings...")
+        compute_client.virtual_machines.deallocate(resource_group_name, vm_name).result()
+        vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
 
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
     set_vm(vm)
+
+    if vm_encrypted:
+        # and start after the update
+        logger.warning("Restarting the VM after the update...")
+        compute_client.virtual_machines.start(resource_group_name, vm_name).result()
+
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
         # TODO: expose a 'wait' command to do the monitor and handle the reboot
         logger.warning("The encryption request was accepted. Please use 'show' command to monitor "
