@@ -453,7 +453,7 @@ helps['webapp update'] = """
     type: command
     short-summary: Update a web app.
     examples:
-        - name: Update the tags of a  web app.
+        - name: Update the tags of a web app.
           text: >
             az webapp update -g MyResourceGroup -n MyAppName --set tags.tagName=tagValue
 """
