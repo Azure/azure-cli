@@ -1928,23 +1928,19 @@ def create_vmss(vmss_name, resource_group_name, image,
         network_balancer = load_balancer if load_balancer_type else app_gateway
         balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
 
+        # set backend address pool id, needed by load balancer or app gateway
         if is_valid_resource_id(network_balancer):
-            # backend address pool needed by load balancer or app gateway
             backend_address_pool_id = \
                 '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
-
-            # nat pool only applies to new load balancers
-            inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
-                if load_balancer_type == 'new' else None
         else:
-            # backend address pool needed by load balancer or app gateway
             backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
                 network_id_template, balancer_type, network_balancer, backend_pool_name)
-
-            # nat pool only applies to new load balancers
+        
+        # set inbound nat pool id(load balancer only)
+        inbound_nat_pool_id = None
+        if load_balancer_type and nat_pool_name:
             inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-                network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
-                else None
+                network_id_template, load_balancer, nat_pool_name)
 
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)

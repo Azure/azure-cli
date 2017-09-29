@@ -2282,12 +2282,12 @@ class VMSSRollingUpgrade(ScenarioTest):
         probe_name = 'probe1'
         vmss_name = 'vmss1'
 
-        # the test below is not to test rolling upgrade works correctly, which is blocked by a few service side issues;
-        # rather we test CLI does provision one successfully and related commands were invoked.
+        # we test CLI does provision one successfully and related commands were invoked.
 
         self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
         self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
         self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
+        self.cmd('network lb inbound-nat-pool create -g {} --lb-name{} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd'.format(resource_group, lb_name))
         self.cmd('vmss create -g {} -n {} --image debian --admin-username clitester1 --admin-password Testqwer1234! --upgrade-policy rolling --lb {}'.format(resource_group, vmss_name, lb_name))
         self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
         result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()

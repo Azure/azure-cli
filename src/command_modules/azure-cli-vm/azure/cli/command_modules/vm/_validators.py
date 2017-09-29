@@ -908,6 +908,13 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
                 namespace.load_balancer_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(rg, lb_name, 'load_balancers')
+                if not namespace.nat_pool_name:
+                    if len(lb.inbound_nat_pools) > 1:
+                        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(
+                            '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
+                    elif not lb.inbound_nat_pools:
+                        logger.warning("No inbound nat pool was configured on '{}'".format(namespace.load_balancer))
+                    namespace.nat_pool_name = lb.inbound_nat_pools[0].name 
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
                 if namespace.upgrade_policy_mode == 'Rolling' and not namespace.health_probe:
                     probe_ids = [l.id for l in (lb.probes or [])]
