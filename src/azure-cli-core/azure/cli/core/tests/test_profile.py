@@ -1130,7 +1130,7 @@ class Test_Profile(unittest.TestCase):
         mock_get_cloud.endpoints.active_directory = adfs_url_1
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock, use_global_creds_cache=False)
-        
+
         # test w/ trailing slash
         r = profile.auth_ctx_factory('common', None)
         self.assertEqual(r.authority.url, adfs_url_1)
