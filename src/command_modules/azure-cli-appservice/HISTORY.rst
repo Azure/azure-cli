@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
+++++++++++
+* webapp: added generic update with new command: 'az webapp update'
+
 0.1.17 (2017-09-22)
 +++++++++++++++++++
 * webapp: able to update and show authentication settings using "az webapp auth update/show"
