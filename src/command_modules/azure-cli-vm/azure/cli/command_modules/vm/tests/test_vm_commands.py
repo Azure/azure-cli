@@ -2295,7 +2295,7 @@ class VMSSRollingUpgrade(ScenarioTest):
                 "commandToExecute": "sudo apt-get install -y nginx",
             }, outfile)
         settings_file = settings_file.replace('\\', '\\\\')
-        self.cmd('vmss extension set -g {} --vmss-name {} -n customScript --publisher Microsoft.Azure.Extensions --settings {}'.format(resource_group, vmss_name, settings_file))
+        self.cmd('vmss extension set -g {} --vmss-name {} -n customScript --publisher Microsoft.Azure.Extensions --settings {} --version 2.0'.format(resource_group, vmss_name, settings_file))
         self.cmd('vmss update-instances -g {} -n {} --instance-ids "*"'.format(resource_group, vmss_name))
         self.cmd('vmss update -g {} -n {} --set upgradePolicy.mode=rolling'.format(resource_group, vmss_name))
 
