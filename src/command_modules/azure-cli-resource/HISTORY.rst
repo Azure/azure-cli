@@ -2,6 +2,11 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++
+* group: permit --resource-group/-g options for resource group name.
+
+
 2.0.15 (2017-09-22)
 +++++++++++++++++++
 * policy: support to show built-in policy definition.
