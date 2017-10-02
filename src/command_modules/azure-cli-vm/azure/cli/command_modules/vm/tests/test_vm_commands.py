@@ -2305,6 +2305,8 @@ class VMSSRollingUpgrade(ScenarioTest):
         self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name))
         result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
         self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
+
+        # 'cancel' should fail as we have no active upgrade to cancel
         self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
 
 # endregion

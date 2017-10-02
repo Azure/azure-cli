@@ -276,7 +276,7 @@ helps['vmss wait'] = """
 
 helps['vmss rolling-ugrade'] = """
     type: group
-    short-summary: (Preview) Manage rolling upgrades.
+    short-summary: (PREVIEW) Manage rolling upgrades.
 """
 
 helps['vm convert'] = """

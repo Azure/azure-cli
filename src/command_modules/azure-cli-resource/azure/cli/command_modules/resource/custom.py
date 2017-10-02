@@ -801,7 +801,7 @@ def list_features(client, resource_provider_namespace=None):
 
 
 def register_feature(client, resource_provider_namespace, feature_name):
-    logger.warning("Once the fearure '{}' is registered, invoking 'az provider register -n {}' is required "
+    logger.warning("Once the feature '{}' is registered, invoking 'az provider register -n {}' is required "
                    "to get the change propagated".format(resource_provider_namespace, feature_name))
     return client.register(resource_provider_namespace, feature_name)
 
