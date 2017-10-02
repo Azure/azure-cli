@@ -2279,13 +2279,16 @@ class VMSSRollingUpgrade(ScenarioTest):
         probe_name = 'probe1'
         vmss_name = 'vmss1'
 
-        # we test CLI does provision one successfully and related commands were invoked.
-
+        # set up a LB with the probe for rolling upgrade
         self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
         self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
         self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
         self.cmd('network lb inbound-nat-pool create -g {} --lb-name {} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd'.format(resource_group, lb_name))
+
+        # create a scaleset to use the LB, note, we start with the manual mode as we are not done with the setup yet
         self.cmd('vmss create -g {} -n {} --image ubuntults --admin-username clitester1 --admin-password Testqwer1234! --lb {} --health-probe {}'.format(resource_group, vmss_name, lb_name, probe_name))
+
+        # install the web server
         _, settings_file = tempfile.mkstemp()
         with open(settings_file, 'w') as outfile:
             json.dump({
@@ -2294,14 +2297,18 @@ class VMSSRollingUpgrade(ScenarioTest):
         settings_file = settings_file.replace('\\', '\\\\')
         self.cmd('vmss extension set -g {} --vmss-name {} -n customScript --publisher Microsoft.Azure.Extensions --settings {} --version 2.0'.format(resource_group, vmss_name, settings_file))
         self.cmd('vmss update-instances -g {} -n {} --instance-ids "*"'.format(resource_group, vmss_name))
+
+        # now we are ready for the rolling upgrade mode
         self.cmd('vmss update -g {} -n {} --set upgradePolicy.mode=rolling'.format(resource_group, vmss_name))
 
+        # make sure the web server works
         result = self.cmd('vmss list-instance-connection-info -g {} -n {} -o tsv'.format(resource_group, vmss_name))
         time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
         import requests
         r = requests.get('http://' + result.output.split(':')[0])
         self.assertTrue('Welcome to nginx!' in str(r.content))
 
+        # do some rolling upgrade, maybe nonsense, but we need to test the command anyway
         self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name))
         result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
         self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
