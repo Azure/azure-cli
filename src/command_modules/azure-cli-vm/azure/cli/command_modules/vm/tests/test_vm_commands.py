@@ -1819,10 +1819,9 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
                  ' --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'
-                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 ' --use-unmanaged-disk'
                  .format(os_disk_name, subnet, sku_name, container_name,
-                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB,
-                         self.bepool_name, self.natpool_name))
+                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB, self.bepool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),

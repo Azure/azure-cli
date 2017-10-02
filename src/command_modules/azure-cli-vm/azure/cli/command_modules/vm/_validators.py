@@ -903,7 +903,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         if namespace.load_balancer:
             rg = parse_resource_id(namespace.load_balancer).get('resource_group', namespace.resource_group_name)
             lb_name = parse_resource_id(namespace.load_balancer)['name']
-            lb = get_network_lb(namespace.resource_group_name, namespace.load_balancer)
+            lb = get_network_lb(namespace.resource_group_name, lb_name)
             if lb:
                 namespace.load_balancer_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
@@ -912,9 +912,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    elif not lb.inbound_nat_pools:
+                    elif not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
                         logger.warning("No inbound nat pool was configured on '{}'".format(namespace.load_balancer))
-                    namespace.nat_pool_name = lb.inbound_nat_pools[0].name
+                    else:
+                        namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'

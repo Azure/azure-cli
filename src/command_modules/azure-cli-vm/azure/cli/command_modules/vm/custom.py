@@ -1930,21 +1930,18 @@ def create_vmss(vmss_name, resource_group_name, image,
 
         # set backend address pool id, needed by load balancer or app gateway
         if is_valid_resource_id(network_balancer):
-            backend_address_pool_id = \
-                '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+            backend_address_pool_id = '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+            if nat_pool_name:
+                inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(network_balancer, nat_pool_name)
         else:
             backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
                 network_id_template, balancer_type, network_balancer, backend_pool_name)
-
-        # set inbound nat pool id(load balancer only)
-        inbound_nat_pool_id = None
-        if load_balancer_type:
             if nat_pool_name:
-                inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-                    network_id_template, load_balancer, nat_pool_name)
-            # probe is also applicable on app gateway, we can wire up when needed
-            if health_probe and not is_valid_resource_id(health_probe):
-                health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
+                inbound_nat_pool_id = '{}/{}/{}/inboundNatPools/{}'.format(
+                    network_id_template, balancer_type, network_balancer, nat_pool_name)
+
+        if health_probe and not is_valid_resource_id(health_probe):
+            health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
 
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
