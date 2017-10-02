@@ -113,7 +113,7 @@ register_cli_argument('policy assignment', 'policy', help='name or id of the pol
 
 register_cli_argument('group', 'tag', tag_type)
 register_cli_argument('group', 'tags', tags_type)
-register_cli_argument('group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
+register_cli_argument('group', 'resource_group_name', resource_group_name_type, options_list=['--name', '--resource-group', '-n', '-g'])
 
 register_cli_argument('group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
