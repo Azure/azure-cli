@@ -91,7 +91,7 @@ helps['lock create'] = """
             az lock create --name lockName --resource-group group --lock-type ReadOnly
     """
 helps['lock delete'] = """
-    type: commands
+    type: command
     short-summary: Delete a lock.
     examples:
         - name: Delete a resource-group-level lock
