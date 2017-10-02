@@ -133,6 +133,7 @@ def resource_id(**kwargs):
         - child_type_{level}        Type of the child resource of that level
         - child_name_{level}        Name of the child resource of that level
     '''
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
     rid_builder = ['/subscriptions/{subscription}'.format(**kwargs)]
     try:
         try:

@@ -288,6 +288,20 @@ class TestARM(unittest.TestCase):
                     'child_name_1': 'name2',
                     'child_namespace_2': 'Microsoft.Provider3'
                 }
+            },
+            {
+                'resource_id': '/subscriptions/mySub/resourceGroups/myRg/providers/Microsoft.Provider1'
+                               '/resourceType1/name1',
+                'id_args': {
+                    'subscription': 'mySub',
+                    'resource_group': 'myRg',
+                    'namespace': 'Microsoft.Provider1',
+                    'type': 'resourceType1',
+                    'name': 'name1',
+                    'child_type_1': None,
+                    'child_name_1': 'name2',
+                    'child_namespace_2': 'Microsoft.Provider3'
+                }
             }
         ]
         for test in tests:
