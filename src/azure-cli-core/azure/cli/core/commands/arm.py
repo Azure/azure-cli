@@ -135,7 +135,10 @@ def resource_id(**kwargs):
     '''
     rid_builder = ['/subscriptions/{subscription}'.format(**kwargs)]
     try:
-        rid_builder.append('resourceGroups/{resource_group}'.format(**kwargs))
+        try:
+            rid_builder.append('resourceGroups/{resource_group}'.format(**kwargs))
+        except KeyError:
+            pass
         rid_builder.append('providers/{namespace}'.format(**kwargs))
         rid_builder.append('{type}/{name}'.format(**kwargs))
         count = 1

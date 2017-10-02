@@ -5,7 +5,7 @@
 
 import unittest
 
-from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
+from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 
 
 class TestARM(unittest.TestCase):
@@ -184,6 +184,16 @@ class TestARM(unittest.TestCase):
                     'resource_type': 'resourceType3',
                     'resource_name': 'name3'
                 }
+            },
+            {
+                'resource_id': '/subscriptions/fakesub/providers/Microsoft.Authorization'
+                               '/locks/foo',
+                'expected': {
+                    'name': 'foo',
+                    'type': 'locks',
+                    'namespace': 'Microsoft.Authorization',
+                    'subscription': 'fakesub',
+                }
             }
         ]
         for test in tests:
@@ -196,13 +206,93 @@ class TestARM(unittest.TestCase):
                     self.assertTrue(key not in kwargs and test['expected'][key] is None)
 
         invalid_ids = [
-            '/subscriptions/fakesub/providers/Microsoft.Authorization/locks/foo',
             '/subscriptions/fakesub/resourceGroups/myRg/type1/name1',
             '/subscriptions/fakesub/resourceGroups/myRg/providers/Microsoft.Provider/foo',
             '/subscriptions/fakesub/resourceGroups/myRg/providers/Microsoft.Provider/type/name/type1'
         ]
         for invalid_id in invalid_ids:
             self.assertFalse(is_valid_resource_id(invalid_id))
+
+        tests = [
+            {
+                'resource_id': '/subscriptions/fakesub/resourcegroups/testgroup/providers'
+                               '/Microsoft.Storage/storageAccounts/foo/providers'
+                               '/Microsoft.Authorization/locks/bar',
+                'id_args': {
+                    'name': 'foo',
+                    'type': 'storageAccounts',
+                    'namespace': 'Microsoft.Storage',
+                    'child_name_1': 'bar',
+                    'child_namespace_1': 'Microsoft.Authorization',
+                    'child_type_1': 'locks',
+                    'resource_group': 'testgroup',
+                    'subscription': 'fakesub',
+                }
+            },
+            {
+                'resource_id': '/subscriptions/fakesub/resourcegroups/testgroup/providers'
+                               '/Microsoft.Storage/storageAccounts/foo'
+                               '/locks/bar',
+                'id_args': {
+                    'name': 'foo',
+                    'type': 'storageAccounts',
+                    'namespace': 'Microsoft.Storage',
+                    'child_name_1': 'bar',
+                    'child_type_1': 'locks',
+                    'resource_group': 'testgroup',
+                    'subscription': 'fakesub',
+                }
+            },
+            {
+                'resource_id': '/subscriptions/mySub/resourceGroups/myRg/providers/'
+                               'Microsoft.Provider1/resourceType1/name1/resourceType2/name2/providers/'
+                               'Microsoft.Provider3/resourceType3/name3',
+                'id_args': {
+                    'subscription': 'mySub',
+                    'resource_group': 'myRg',
+                    'namespace': 'Microsoft.Provider1',
+                    'type': 'resourceType1',
+                    'name': 'name1',
+                    'child_type_1': 'resourceType2',
+                    'child_name_1': 'name2',
+                    'child_namespace_2': 'Microsoft.Provider3',
+                    'child_type_2': 'resourceType3',
+                    'child_name_2': 'name3'
+                }
+            },
+            {
+                'resource_id': '/subscriptions/mySub/resourceGroups/myRg/providers/Microsoft.Provider1',
+                'id_args': {
+                    'subscription': 'mySub',
+                    'resource_group': 'myRg',
+                    'namespace': 'Microsoft.Provider1'
+                }
+            },
+            {
+                'resource_id': '/subscriptions/mySub/resourceGroups/myRg',
+                'id_args': {
+                    'subscription': 'mySub',
+                    'resource_group': 'myRg'
+                }
+            },
+            {
+                'resource_id': '/subscriptions/mySub/resourceGroups/myRg/providers/Microsoft.Provider1'
+                               '/resourceType1/name1/resourceType2/name2/providers/Microsoft.Provider3',
+                'id_args': {
+                    'subscription': 'mySub',
+                    'resource_group': 'myRg',
+                    'namespace': 'Microsoft.Provider1',
+                    'type': 'resourceType1',
+                    'name': 'name1',
+                    'child_type_1': 'resourceType2',
+                    'child_name_1': 'name2',
+                    'child_namespace_2': 'Microsoft.Provider3'
+                }
+            }
+        ]
+        for test in tests:
+            rsrc_id = resource_id(**test['id_args'])
+            self.assertEqual(rsrc_id.lower(), test['resource_id'].lower())
 
 
 if __name__ == "__main__":
