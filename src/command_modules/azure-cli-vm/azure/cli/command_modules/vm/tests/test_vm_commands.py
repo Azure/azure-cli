@@ -314,7 +314,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage')
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage')
         ])
         self.cmd('vmss create -g {} -n vmss1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image1), checks=[
@@ -333,9 +333,9 @@ class VMCustomImageTest(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'FromImage'),
             JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
@@ -343,9 +343,9 @@ class VMCustomImageTest(ScenarioTest):
             resource_group, image2))
         self.cmd('vm show -g {} -n vm3'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'FromImage'),
             JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
@@ -1342,7 +1342,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
             JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             JMESPathCheck('storageProfile.dataDisks[0].lun', 1),
             JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 8),
-            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'empty'),
+            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'Empty'),
             JMESPathCheck('storageProfile.dataDisks[0].vhd.uri', vhd_uri),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
         ])
@@ -1360,7 +1360,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
         self.cmd('vm unmanaged-disk attach -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri), checks=[
                 JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
-                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'attach')
+                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'Attach')
         ])
 
 
@@ -1741,7 +1741,6 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
         self.subnet_name = 'vrfsubnet'
         self.lb_name = 'vrflb'
         self.bepool_name = 'mybepool'
-        self.natpool_name = 'mynatpool'
 
     def set_up(self):
         super(VMSSCreateExistingOptions, self).set_up()
@@ -1763,10 +1762,10 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
                  ' --vnet-name {} --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'
-                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 ' --use-unmanaged-disk'
                  .format(os_disk_name, self.vnet_name, self.subnet_name, sku_name, container_name,
                          self.resource_group, vmss_name, self.lb_name, TEST_SSH_KEY_PUB,
-                         self.bepool_name, self.natpool_name))
+                         self.bepool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
@@ -1787,7 +1786,6 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         self.subnet_name = 'vrfsubnet'
         self.lb_name = 'vrflb'
         self.bepool_name = 'mybepool'
-        self.natpool_name = 'mynatpool'
 
     def set_up(self):
         super(VMSSCreateExistingIdsOptions, self).set_up()

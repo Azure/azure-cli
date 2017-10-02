@@ -684,7 +684,7 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
     return storage_resource
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg,
@@ -694,13 +694,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-<<<<<<< HEAD
-                        backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
-=======
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
-                        single_placement_group=None, custom_data=None, secrets=None, zones=None):
->>>>>>> vmss: rolling upgrade support
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
 
     # Build IP configuration
     ip_configuration = {
