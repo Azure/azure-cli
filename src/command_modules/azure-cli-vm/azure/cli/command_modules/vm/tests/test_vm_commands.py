@@ -2309,7 +2309,7 @@ class VMSSRollingUpgrade(ScenarioTest):
         self.assertTrue('Welcome to nginx!' in str(r.content))
 
         # do some rolling upgrade, maybe nonsense, but we need to test the command anyway
-        self.cmd('vmss rolling-upgrade start-os-upgrade -g {} -n {}'.format(resource_group, vmss_name))
+        self.cmd('vmss rolling-upgrade start -g {} -n {}'.format(resource_group, vmss_name))
         result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
         self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
 

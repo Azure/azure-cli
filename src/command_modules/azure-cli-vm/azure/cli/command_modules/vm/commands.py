@@ -343,7 +343,7 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     op_class = 'VirtualMachineScaleSetRollingUpgradesOperations'
     cli_command(__name__, 'vmss rolling-upgrade cancel', mgmt_path.format(op_var, op_class, 'cancel'), cf_rolling_upgrade_commands)
     cli_command(__name__, 'vmss rolling-upgrade get-latest', mgmt_path.format(op_var, op_class, 'get_latest'), cf_rolling_upgrade_commands)
-    cli_command(__name__, 'vmss rolling-upgrade start-os-upgrade', mgmt_path.format(op_var, op_class, 'start_os_upgrade'), cf_rolling_upgrade_commands)
+    cli_command(__name__, 'vmss rolling-upgrade start', mgmt_path.format(op_var, op_class, 'start_os_upgrade'), cf_rolling_upgrade_commands)
 
 # MSI
 cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
