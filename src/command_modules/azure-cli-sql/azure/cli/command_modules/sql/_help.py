@@ -90,6 +90,10 @@ helps['sql db audit-policy update'] = """
         - name: Disable an auditing policy.
           text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
     """
+helps['sql db op'] = """
+    type: group
+    short-summary: Manage operations on a database.
+    """
 helps['sql db replica'] = """
     type: group
     short-summary: Manage replication between databases.
