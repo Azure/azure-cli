@@ -1758,7 +1758,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer=None, load_balancer_sku=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
                 app_gateway_sku=DefaultStr('Standard_Large'), app_gateway_capacity=DefaultInt(10),
-                backend_pool_name=None, nat_pool_name=None, backend_port=None,
+                backend_pool_name=None, nat_pool_name=None, backend_port=None, health_probe=None,
                 public_ip_address=None, public_ip_address_allocation=None,
                 public_ip_address_dns_name=None,
                 public_ip_per_vm=False, vm_domain_name=None, dns_servers=None, nsg=None,
@@ -1930,21 +1930,19 @@ def create_vmss(vmss_name, resource_group_name, image,
 
         if is_valid_resource_id(network_balancer):
             # backend address pool needed by load balancer or app gateway
-            backend_address_pool_id = \
-                '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
-
-            # nat pool only applies to new load balancers
-            inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
-                if load_balancer_type == 'new' else None
+            backend_address_pool_id = '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+            if nat_pool_name:
+                inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(network_balancer, nat_pool_name)
         else:
             # backend address pool needed by load balancer or app gateway
             backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
                 network_id_template, balancer_type, network_balancer, backend_pool_name)
+            if nat_pool_name:
+                inbound_nat_pool_id = '{}/{}/{}/inboundNatPools/{}'.format(
+                    network_id_template, balancer_type, network_balancer, nat_pool_name)
 
-            # nat pool only applies to new load balancers
-            inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-                network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
-                else None
+        if health_probe and not is_valid_resource_id(health_probe):
+            health_probe = '{}/loadBalancers/{}/probes/{}'.format(network_id_template, load_balancer, health_probe)
 
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
@@ -1966,7 +1964,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         os_type, image, admin_password,
                                         ssh_key_value, ssh_dest_key_path,
                                         os_publisher, os_offer, os_sku, os_version,
-                                        backend_address_pool_id, inbound_nat_pool_id,
+                                        backend_address_pool_id, inbound_nat_pool_id, health_probe=health_probe,
                                         single_placement_group=single_placement_group,
                                         custom_data=custom_data, secrets=secrets,
                                         license_type=license_type, zones=zones)

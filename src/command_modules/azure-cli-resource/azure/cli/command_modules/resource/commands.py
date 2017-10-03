@@ -75,7 +75,7 @@ if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-
     # Resource feature commands
     cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
     cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
-    cli_command(__name__, 'feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
+    cli_command(__name__, 'feature register', 'azure.cli.command_modules.resource.custom#register_feature', cf_features)
 
 # Tag commands
 cli_command(__name__, 'tag list', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.list', cf_tags)

@@ -4,6 +4,7 @@ Release History
 ===============
 (unreleased)
 +++++++++++++++++++
+* `vmss create`: (PREVIEW) support rolling upgrade
 * `vm encryption enable`: allow updating encryption settings by rerunning the command
 * `vm create`: expose --os-disk-size-gb
 * `vmss create`: expose --license-type for windows os
