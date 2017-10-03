@@ -63,7 +63,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             checks=[
                 JMESPathCheck('name', 'job'),
                 JMESPathCheck('customToolkitSettings.commandLine',
-                              'echo hi | tee $AZ_LEARNING_OUTPUT_OUTPUT/result.txt'),
+                              'echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt'),
                 JMESPathCheck('executionState', 'queued')])
 
         # Wait for the cluster to be allocated and job completed
@@ -72,7 +72,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         # The job must succeed by this time
         self.cmd('batchai job show -n job -g {0}'.format(resource_group), checks=[
             JMESPathCheck('name', 'job'),
-            JMESPathCheck('customToolkitSettings.commandLine', 'echo hi | tee $AZ_LEARNING_OUTPUT_OUTPUT/result.txt'),
+            JMESPathCheck('customToolkitSettings.commandLine', 'echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt'),
             JMESPathCheck('executionState', 'succeeded'),
             JMESPathCheck('executionInfo.exitCode', 0),
             JMESPathCheck('executionInfo.errors', None),
@@ -173,7 +173,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             checks=[
                 JMESPathCheck('name', 'job'),
                 JMESPathCheck('customToolkitSettings.commandLine',
-                              'echo hi | tee $AZ_LEARNING_OUTPUT_OUTPUT/result.txt'),
+                              'echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt'),
                 JMESPathCheck('executionState', 'queued')])
 
         # Wait for the cluster to scale up and job completed
@@ -182,7 +182,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         # The job must succeed by this time
         self.cmd('batchai job show -n job -g {0}'.format(resource_group), checks=[
             JMESPathCheck('name', 'job'),
-            JMESPathCheck('customToolkitSettings.commandLine', 'echo hi | tee $AZ_LEARNING_OUTPUT_OUTPUT/result.txt'),
+            JMESPathCheck('customToolkitSettings.commandLine', 'echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt'),
             JMESPathCheck('executionState', 'succeeded'),
             JMESPathCheck('executionInfo.exitCode', 0),
             JMESPathCheck('executionInfo.errors', None),
