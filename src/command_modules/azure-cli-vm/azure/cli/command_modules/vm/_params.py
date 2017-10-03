@@ -294,6 +294,7 @@ register_cli_argument('vmss create', 'app_gateway_capacity', help='The number of
 register_cli_argument('vmss create', 'instance_count', help='Number of VMs in the scale set.', type=int)
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
+register_cli_argument('vmss create', 'health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
 register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:

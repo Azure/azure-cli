@@ -314,7 +314,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage')
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage')
         ])
         self.cmd('vmss create -g {} -n vmss1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image1), checks=[
@@ -333,9 +333,9 @@ class VMCustomImageTest(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'FromImage'),
             JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
@@ -343,9 +343,9 @@ class VMCustomImageTest(ScenarioTest):
             resource_group, image2))
         self.cmd('vm show -g {} -n vm3'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage'),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'FromImage'),
             JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
         ])
 
@@ -1342,7 +1342,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
             JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             JMESPathCheck('storageProfile.dataDisks[0].lun', 1),
             JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 8),
-            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'empty'),
+            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'Empty'),
             JMESPathCheck('storageProfile.dataDisks[0].vhd.uri', vhd_uri),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
         ])
@@ -1360,7 +1360,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
         self.cmd('vm unmanaged-disk attach -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri), checks=[
                 JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
-                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'attach')
+                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'Attach')
         ])
 
 
@@ -1741,7 +1741,6 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
         self.subnet_name = 'vrfsubnet'
         self.lb_name = 'vrflb'
         self.bepool_name = 'mybepool'
-        self.natpool_name = 'mynatpool'
 
     def set_up(self):
         super(VMSSCreateExistingOptions, self).set_up()
@@ -1763,10 +1762,10 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
                  ' --vnet-name {} --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'
-                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 ' --use-unmanaged-disk'
                  .format(os_disk_name, self.vnet_name, self.subnet_name, sku_name, container_name,
                          self.resource_group, vmss_name, self.lb_name, TEST_SSH_KEY_PUB,
-                         self.bepool_name, self.natpool_name))
+                         self.bepool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
@@ -1787,7 +1786,6 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         self.subnet_name = 'vrfsubnet'
         self.lb_name = 'vrflb'
         self.bepool_name = 'mybepool'
-        self.natpool_name = 'mynatpool'
 
     def set_up(self):
         super(VMSSCreateExistingIdsOptions, self).set_up()
@@ -1819,10 +1817,9 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
                  ' --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'
-                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 ' --use-unmanaged-disk'
                  .format(os_disk_name, subnet, sku_name, container_name,
-                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB,
-                         self.bepool_name, self.natpool_name))
+                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB, self.bepool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
@@ -2272,6 +2269,52 @@ class VMSSDiskEncryptionTest(ScenarioTest):
             JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
             JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
+
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSSRollingUpgrade(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_rolling_upgrade(self, resource_group):
+        lb_name = 'lb1'
+        probe_name = 'probe1'
+        vmss_name = 'vmss1'
+
+        # set up a LB with the probe for rolling upgrade
+        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
+        self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
+        self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
+        self.cmd('network lb inbound-nat-pool create -g {} --lb-name {} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd'.format(resource_group, lb_name))
+
+        # create a scaleset to use the LB, note, we start with the manual mode as we are not done with the setup yet
+        self.cmd('vmss create -g {} -n {} --image ubuntults --admin-username clitester1 --admin-password Testqwer1234! --lb {} --health-probe {}'.format(resource_group, vmss_name, lb_name, probe_name))
+
+        # install the web server
+        _, settings_file = tempfile.mkstemp()
+        with open(settings_file, 'w') as outfile:
+            json.dump({
+                "commandToExecute": "sudo apt-get install -y nginx",
+            }, outfile)
+        settings_file = settings_file.replace('\\', '\\\\')
+        self.cmd('vmss extension set -g {} --vmss-name {} -n customScript --publisher Microsoft.Azure.Extensions --settings {} --version 2.0'.format(resource_group, vmss_name, settings_file))
+        self.cmd('vmss update-instances -g {} -n {} --instance-ids "*"'.format(resource_group, vmss_name))
+
+        # now we are ready for the rolling upgrade mode
+        self.cmd('vmss update -g {} -n {} --set upgradePolicy.mode=rolling'.format(resource_group, vmss_name))
+
+        # make sure the web server works
+        result = self.cmd('vmss list-instance-connection-info -g {} -n {} -o tsv'.format(resource_group, vmss_name))
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + result.output.split(':')[0])
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+        # do some rolling upgrade, maybe nonsense, but we need to test the command anyway
+        self.cmd('vmss rolling-upgrade start -g {} -n {}'.format(resource_group, vmss_name))
+        result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
+        self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
+
+        # 'cancel' should fail as we have no active upgrade to cancel
+        self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
 
 # endregion
 
