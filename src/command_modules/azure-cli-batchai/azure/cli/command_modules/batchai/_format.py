@@ -18,6 +18,7 @@ def cluster_list_table_format(result):
         row['Idle'] = str(item['nodeStateCounts']['idleNodeCount'])
         row['Running'] = str(item['nodeStateCounts']['runningNodeCount'])
         row['Preparing'] = str(item['nodeStateCounts']['preparingNodeCount'])
+        row['Leaving'] = str(item['nodeStateCounts']['leavingNodeCount'])
         row['Unusable'] = str(item['nodeStateCounts']['unusableNodeCount'])
         table.append(row)
     return table

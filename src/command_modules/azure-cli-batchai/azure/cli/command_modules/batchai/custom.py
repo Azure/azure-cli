@@ -51,7 +51,7 @@ def get_environment_variable_or_die(name):
     """
     value = os.environ.get(name, None)
     if not value:
-        raise CLIError('Please set {0} environment variable.', name)
+        raise CLIError('Please set {0} environment variable.'.format(name))
     return value
 
 

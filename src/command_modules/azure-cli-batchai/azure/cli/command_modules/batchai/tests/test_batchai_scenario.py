@@ -234,7 +234,38 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         ])
 
         # Give file server and cluster to finish preparation.
-        time.sleep(1)
+        time.sleep(NODE_STARTUP_TIME * 2)
+
+        # Check the node in the cluster successfully started - was able to mount nfs and azure filesystem.
+        self.cmd('batchai cluster show -n cluster -g {0}'.format(resource_group),
+                 checks=[JMESPathCheck('nodeStateCounts.idleNodeCount', 1)])
+
+        # Check the file server reports information about public ip.
+        self.cmd('batchai file-server show -n nfs -g {0}'.format(resource_group),
+                 checks=[JMESPathCheckExists('mountSettings.fileServerPublicIp')])
+
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus')
+    def test_batchai_configless_cluster_and_nfs_creation(self, resource_group, storage_account):
+        """Test creation of a cluster and nfs without configuration files."""
+        self._configure_environment(resource_group, storage_account)
+        self.cmd('az storage share create -n share')
+        self.cmd('az batchai file-server create -n nfs -g {0} -l eastus --vm-size STANDARD_D1 --storage-sku '
+                 'Standard_LRS --disk-count 2 --disk-size 10 -u alex -p Password_123'.format(resource_group))
+        self.cmd('az batchai cluster create -n cluster -g {0} -l eastus --afs-name share --nfs nfs '
+                 '-i UbuntuLTS --vm-size STANDARD_D1 --min 1 --max 1 -u alex -p Password_123'.format(resource_group),
+                 checks=[
+                     JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
+                     JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
+                                   'https://{0}.file.core.windows.net/share'.format(storage_account)),
+                     JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'afs'),
+                     JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].credentialsInfo.accountKey', None),
+                     JMESPathCheck('userAccountSettings.adminUserName', 'alex'),
+                     JMESPathCheck('userAccountSettings.adminUserPassword', None),
+                     JMESPathCheck('nodeSetup.mountVolumes.fileServers[0].relativeMountPath', 'nfs')])
+
+        # Give file server and cluster to finish preparation.
+        time.sleep(NODE_STARTUP_TIME * 2)
 
         # Check the node in the cluster successfully started - was able to mount nfs and azure filesystem.
         self.cmd('batchai cluster show -n cluster -g {0}'.format(resource_group),
