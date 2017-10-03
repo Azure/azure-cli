@@ -271,15 +271,13 @@ def list_clusters(client, resource_group=None):
 
 
 def resize_cluster(client, resource_group, cluster_name, target):
-    params = models.ClusterUpdateParameters(scale_settings=models.ScaleSettings(
+    return client.update(resource_group, cluster_name, scale_settings=models.ScaleSettings(
         manual=models.ManualScaleSettings(target)))
-    return client.update(resource_group, cluster_name, params)
 
 
 def set_cluster_auto_scale_parameters(client, resource_group, cluster_name, min_nodes, max_nodes):
-    params = models.ClusterUpdateParameters(scale_settings=models.ScaleSettings(
+    return client.update(resource_group, cluster_name, scale_settings=models.ScaleSettings(
         auto_scale=models.AutoScaleSettings(min_nodes, max_nodes)))
-    return client.update(resource_group, cluster_name, params)
 
 
 def create_job(client, resource_group, job_name, json_file, location=None, cluster_name=None,
