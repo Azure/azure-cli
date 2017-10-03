@@ -74,7 +74,7 @@ class TestBatchAICustom(unittest.TestCase):
             update_user_account_settings(params, 'user', None, None)
 
         # ssh public key from a file.
-        update_user_account_settings(params, 'user', _data_file('id_rsa.pub'), None)
+        update_user_account_settings(params, 'user', _data_file('key.txt'), None)
         self.assertEquals(params.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_update_file_server_create_parameters_with_user_account_settings(self):
@@ -127,7 +127,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params.ssh_configuration.user_account_settings.admin_user_password, 'password')
 
         # ssh public key from a file.
-        update_user_account_settings(params, 'user', _data_file('id_rsa.pub'), None)
+        update_user_account_settings(params, 'user', _data_file('key.txt'), None)
         self.assertEquals(params.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_cluster_parameter_update_with_environment_variables(self):

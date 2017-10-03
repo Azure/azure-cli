@@ -217,9 +217,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 JMESPathCheck('dataDisks.diskSizeInGb', 10)
         ])
         self.cmd('batchai cluster create -n cluster -g {0} -c {1} --nfs nfs --afs-name share -u alex -k {2}'.format(
-            resource_group,
-            os.path.join(path, 'simple_cluster.json').replace('\\', '/'),
-            os.path.join(path, 'id_rsa.pub').replace('\\', '/')),
+            resource_group, _data_file('simple_cluster.json'), _data_file('key.txt')),
             checks=[
                 JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
                 JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
