@@ -19,7 +19,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -129,6 +129,23 @@ def _list_app(app_types, resource_group_name=None):
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
+
+
+def assign_identity(resource_group_name, name, role='Contributor', scope=None):
+    client = web_client_factory()
+    def getter():
+        return _generic_site_operation(resource_group_name, name, 'get')
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
+        return LongRunningOperation()(poller)
+
+    from azure.cli.core.commands.arm import assign_implict_identity
+    assign_implict_identity(getter, setter, role, scope)
+    update_app_settings(resource_group_name, name, ['WEBSITE_DISABLE_MSI=false'])
+    logger.warning("Implict identity has been configured. if needed, you can de-activate it using "
+                   "'az webapp config appsettings set -g '{}' -n '{}' --settings "
+                   "WEBSITE_DISABLE_MSI=true".format(resource_group_name, name))
 
 
 def get_auth_settings(resource_group_name, name, slot=None):

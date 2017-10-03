@@ -144,6 +144,7 @@ cli_command(__name__, 'webapp list-runtimes', custom_path + 'list_runtimes')
 cli_command(__name__, 'webapp auth show', custom_path + 'get_auth_settings')
 cli_command(__name__, 'webapp auth update', custom_path + 'update_auth_settings')
 
+cli_command(__name__, 'webapp assign-identity', custom_path + 'assign_identity')
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'appservice plan create', custom_path + 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
