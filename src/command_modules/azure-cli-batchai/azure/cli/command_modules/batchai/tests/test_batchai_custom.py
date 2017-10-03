@@ -27,6 +27,13 @@ SSH_KEY = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKUDnWeK6rx36apNE9ij1iAXn68FKXL
           'oqM3QKeLiUiyN9Ff1Rq4uYnrqJqcWN1ADfiPGZZjEStOkRgG3V6JrpIN+z0Zl3n+sjrH+CKwrYmyni6D41L'
 
 
+def _data_file(filename):
+    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
+    if not os.path.isfile(filepath):
+        print('File {} does not exist.'.format(filepath))
+    return filepath.replace('\\', '\\\\')
+
+
 class TestBatchAICustom(unittest.TestCase):
     def __init__(self, method):
         super(TestBatchAICustom, self).__init__(method)
@@ -67,8 +74,7 @@ class TestBatchAICustom(unittest.TestCase):
             update_user_account_settings(params, 'user', None, None)
 
         # ssh public key from a file.
-        path = os.path.join(os.path.dirname(__file__), "data", 'id_rsa.pub')
-        update_user_account_settings(params, 'user', path, None)
+        update_user_account_settings(params, 'user', _data_file('id_rsa.pub'), None)
         self.assertEquals(params.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_update_file_server_create_parameters_with_user_account_settings(self):
@@ -121,8 +127,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params.ssh_configuration.user_account_settings.admin_user_password, 'password')
 
         # ssh public key from a file.
-        path = os.path.join(os.path.dirname(__file__), "data", 'id_rsa.pub')
-        update_user_account_settings(params, 'user', path, None)
+        update_user_account_settings(params, 'user', _data_file('id_rsa.pub'), None)
         self.assertEquals(params.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_cluster_parameter_update_with_environment_variables(self):

@@ -21,6 +21,13 @@ NODE_STARTUP_TIME = 10 * 60  # Compute node should start in 10 mins after cluste
 CLUSTER_RESIZE_TIME = 20 * 60  # Cluster should resize in 20 mins after job submitted/completed.
 
 
+def _data_file(filename):
+    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
+    if not os.path.isfile(filepath):
+        print('File {} does not exist.'.format(filepath))
+    return filepath.replace('\\', '\\\\')
+
+
 class BatchAIEndToEndScenariosTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer(location='eastus')
@@ -38,12 +45,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         self._configure_environment(resource_group, storage_account)
         # Create a file share 'share' to be mounted on the cluster
         self.cmd('az storage share create -n share')
-
-        path = os.path.join(os.path.dirname(__file__), "data")
         # Create a cluster
         self.cmd('batchai cluster create -n cluster -g {0} -c {1}'.format(
-            resource_group,
-            os.path.join(path, 'cluster_with_azure_files.json').replace('\\', '/')),
+            resource_group, _data_file('cluster_with_azure_files.json')),
             checks=[
                 JMESPathCheck('name', 'cluster'),
                 JMESPathCheck('allocationState', 'resizing'),
@@ -58,8 +62,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 JMESPathCheck('userAccountSettings.adminUserPassword', None)])
         # Create the first job
         self.cmd('batchai job create -n job --cluster-name cluster -g {0} -c {1}'.format(
-            resource_group,
-            os.path.join(path, 'custom_toolkit_job.json').replace('\\', '/')),
+            resource_group, _data_file('custom_toolkit_job.json')),
             checks=[
                 JMESPathCheck('name', 'job'),
                 JMESPathCheck('customToolkitSettings.commandLine',
@@ -110,8 +113,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
         # Create another job
         self.cmd('batchai job create -n job2 --cluster-name cluster -g {0} -c {1}'.format(
-            resource_group,
-            os.path.join(path, 'custom_toolkit_job.json').replace('\\', '/')))
+            resource_group, _data_file('custom_toolkit_job.json')))
 
         # Wait for the cluster to finish resizing and job execution
         time.sleep(NODE_STARTUP_TIME)
@@ -148,11 +150,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         # Create a file share 'share' to be mounted on the cluster
         self.cmd('az storage share create -n share')
 
-        path = os.path.join(os.path.dirname(__file__), "data")
         # Create a cluster
         self.cmd('batchai cluster create -n cluster -g {0} -c {1}'.format(
-            resource_group,
-            os.path.join(path, 'auto_scale_cluster_with_azure_files.json').replace('\\', '/')),
+            resource_group, _data_file('auto_scale_cluster_with_azure_files.json')),
             checks=[
                 JMESPathCheck('name', 'cluster'),
                 JMESPathCheck('allocationState', 'steady'),
@@ -168,8 +168,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 JMESPathCheck('userAccountSettings.adminUserPassword', None)])
         # Create the job
         self.cmd('batchai job create -n job --cluster-name cluster -g {0} -c {1}'.format(
-            resource_group,
-            os.path.join(path, 'custom_toolkit_job.json').replace('\\', '/')),
+            resource_group, _data_file('custom_toolkit_job.json')),
             checks=[
                 JMESPathCheck('name', 'job'),
                 JMESPathCheck('customToolkitSettings.commandLine',
@@ -210,8 +209,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
         path = os.path.join(os.path.dirname(__file__), "data")
         self.cmd('batchai file-server create -n nfs -g {0} -c {1}'.format(
-            resource_group,
-            os.path.join(path, 'file_server.json').replace('\\', '/')),
+            resource_group, _data_file('file_server.json')),
             checks=[
                 JMESPathCheck('name', 'nfs'),
                 JMESPathCheck('mountSettings.mountPoint', '/mnt/data'),

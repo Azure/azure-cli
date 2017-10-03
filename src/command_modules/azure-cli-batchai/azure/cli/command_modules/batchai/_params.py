@@ -20,7 +20,7 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
     return [r.name for r in result]
 
 
-class SupportedImages(Enum):
+class SupportedImages(Enum):  # pylint: disable=too-few-public-methods
     ubuntu_tls = "UbuntuLTS"
     ubuntu_dsvm = "UbuntuDSVM"
 
@@ -37,8 +37,8 @@ with ParametersContext(command='batchai cluster create') as c:
                help='SSH public key value or path.', arg_group='Admin Account')
     c.argument('password', options_list=('--password', '-p'),
                help='Password.', arg_group='Admin Account')
-    c.argument('image', options_list=('--image', '-i'),
-               help='Operation system.', **enum_choice_list(SupportedImages), arg_group='Nodes')
+    c.argument('image', options_list=('--image', '-i'), arg_group='Nodes',
+               help='Operation system.', **enum_choice_list(SupportedImages))
     c.argument('vm_size', options_list=('--vm-size', '-s'),
                help='VM size (e.g. Standard_NC6 for 1 GPU node)', completer=get_vm_size_completion_list,
                arg_group='Nodes')
