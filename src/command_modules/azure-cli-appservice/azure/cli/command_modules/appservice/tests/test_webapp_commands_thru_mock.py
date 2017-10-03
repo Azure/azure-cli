@@ -50,7 +50,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
     def test_set_source_control_token(self, client_factory_mock):
         client_factory_mock.return_value = self.client
         self.client._client = mock.MagicMock()
-        sc = SourceControl('not-really-needed', name='GitHub', token='veryNiceToken')
+        sc = SourceControl('not-really-needed', source_control_name='GitHub', token='veryNiceToken')
         self.client._client.send.return_value = FakedResponse(200)
         self.client._deserialize = mock.MagicMock()
         self.client._deserialize.return_value = sc
@@ -71,7 +71,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
-        binding = HostNameBinding(webapp.location, name=domain,
+        binding = HostNameBinding(webapp.location,
+                                  domain_id = domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         self.client.web_apps._client = mock.MagicMock()
@@ -255,8 +256,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
         cert1 = Certificate('antarctica', host_names=[test_hostname])
         cert1.thumbprint = 't1'
         faked_web_client.certificates.list_by_resource_group.return_value = [cert1]
-        hostname_binding1 = HostNameBinding('antarctica', name='web1/admin.foo.com',)
-        hostname_binding2 = HostNameBinding('antarctica', name='web1/logs.foo.com')
+        hostname_binding1 = HostNameBinding('antarctica', host_name_binding_name='web1/admin.foo.com')
+        hostname_binding2 = HostNameBinding('antarctica', host_name_binding_name='web1/logs.foo.com')
         site_op_mock.return_value = [hostname_binding1, hostname_binding2]
 
         # action

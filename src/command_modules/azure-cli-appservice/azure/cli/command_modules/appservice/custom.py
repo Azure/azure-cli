@@ -50,7 +50,8 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
-    site_config = SiteConfig(app_settings=[])
+    site_config = SiteConfig()
+    app_settings = [] # appsettings need to be updated after webapp creation
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
@@ -63,7 +64,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
-            site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
+            app_settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=false')
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -79,6 +80,11 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation()(poller)
+    
+    if app_settings:
+        for setting in app_settings:
+            logger.info('Will set appsetting %s', setting)
+        update_app_settings(resource_group_name, name, app_settings)
 
     # Ensure SCC operations follow right after the 'create', no precedent appsetting update commands
     _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url,
@@ -308,12 +314,15 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         # split at the first '=', appsetting should not have '=' in the name
         settings_name, value = name_value.split('=', 1)
         app_settings.properties[settings_name] = value
+    client = web_client_factory()
+    if slot is None:
+        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties) # pylint: disable=line-too-long
+    else:
+        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties) # pylint: disable=line-too-long
 
-    result = _generic_site_operation(resource_group_name, name, 'update_application_settings',
-                                     slot, app_settings)
+
     app_settings_slot_cfg_names = []
     if slot_settings:
-        client = web_client_factory()
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
@@ -338,8 +347,12 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    result = _generic_site_operation(resource_group_name, name,
-                                     'update_application_settings', slot, app_settings)
+
+    if slot is None:
+        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties) # pylint: disable=line-too-long
+    else:
+        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties) # pylint: disable=line-too-long
+
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
 
@@ -368,12 +381,13 @@ def update_connection_strings(resource_group_name, name, connection_string_type,
             value = value[1:-1]
         conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value,
                                                                             connection_string_type)
-
-    result = _generic_site_operation(resource_group_name, name, 'update_connection_strings',
-                                     slot, conn_strings)
+    client = web_client_factory()
+    if slot is None:
+        result = client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties) # pylint: disable=line-too-long
+    else:
+        result = client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties) # pylint: disable=line-too-long
 
     if slot_settings:
-        client = web_client_factory()
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.connection_string_names = slot_cfg_names.connection_string_names or []
@@ -398,8 +412,10 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    return _generic_site_operation(resource_group_name, name, 'update_connection_strings',
-                                   slot, conn_strings)
+    if slot is None:
+        return client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties) # pylint: disable=line-too-long
+    else:
+        return client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties) # pylint: disable=line-too-long
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
@@ -513,7 +529,7 @@ def list_hostnames(resource_group_name, webapp_name, slot=None):
     result = list(_generic_site_operation(resource_group_name, webapp_name,
                                           'list_host_name_bindings', slot))
     for r in result:
-        r.name = r.name.split('/')[-1]
+        r.host_name_binding_name = r.host_name_binding_name.split('/')[-1]
     return result
 
 
@@ -574,10 +590,9 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
-        _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
-                                slot, app_settings)
-        _generic_site_operation(resource_group_name, webapp, 'update_connection_strings',
-                                slot, connection_strings)
+        client.web_apps.update_application_settings_slot(resource_group_name, webapp, slot, str, app_settings.properties) # pylint: disable=line-too-long
+        client.web_apps.update_connection_strings_slot(resource_group_name, webapp, slot, str, connection_strings.properties) # pylint: disable=line-too-long
+
     result.name = result.name.split('/')[-1]
     return result
 
@@ -631,7 +646,7 @@ def update_git_token(git_token=None):
     '''
     client = web_client_factory()
     from azure.mgmt.web.models import SourceControl
-    sc = SourceControl('not-really-needed', name='GitHub', token=git_token or '')
+    sc = SourceControl('not-really-needed', source_control_name='GitHub', token=git_token or '')
     return client.update_source_control('GitHub', sc)
 
 
@@ -809,6 +824,8 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
                    target_name=None, overwrite=None, ignore_hostname_conflict=None, slot=None):
     client = web_client_factory()
     storage_blob_name = backup_name
+    webapp_info = client.web_apps.get(resource_group_name, webapp_name)
+    app_service_plan = webapp_info.server_farm_id.split('/')[-1]
     if not storage_blob_name.lower().endswith('.zip'):
         storage_blob_name += '.zip'
     location = _get_location_from_webapp(client, resource_group_name, webapp_name)
@@ -816,7 +833,8 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
     restore_request = RestoreRequest(location, storage_account_url=storage_account_url,
                                      blob_name=storage_blob_name, overwrite=overwrite,
                                      site_name=target_name, databases=db_setting,
-                                     ignore_conflicting_host_names=ignore_hostname_conflict)
+                                     ignore_conflicting_host_names=ignore_hostname_conflict,
+                                     app_service_plan=app_service_plan)
     if slot:
         return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request, slot)
 
@@ -911,7 +929,7 @@ def set_deployment_user(user_name, password=None):
     Update deployment credentials.(Note, all webapps in your subscription will be impacted)
     '''
     client = web_client_factory()
-    user = User(location='not-really-needed')
+    user = User()
     user.publishing_user_name = user_name
     if password is None:
         try:
@@ -1321,6 +1339,8 @@ class _StackRuntimeHelper(object):
 
     @staticmethod
     def update_site_appsettings(stack, site_config):
+        if site_config.app_settings is None:
+            site_config.app_settings = []
         site_config.app_settings += [NameValuePair(k, v) for k, v in stack['configs'].items()]
         return site_config
 
