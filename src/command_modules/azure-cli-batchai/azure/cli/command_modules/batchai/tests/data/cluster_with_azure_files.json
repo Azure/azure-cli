@@ -1,0 +1,31 @@
+{
+  "location": "eastus",
+  "properties": {
+    "nodeSetup": {
+      "mountVolumes": {
+        "azureFileShares": [
+          {
+            "accountName": "<BATCHAI_AZURE_STORAGE_ACCOUNT>",
+            "azureFileUrl": "https://<BATCHAI_AZURE_STORAGE_ACCOUNT>.file.core.windows.net/share",
+            "credentialsInfo": {
+              "accountKey": "<BATCHAI_AZURE_STORAGE_KEY>"
+            },
+            "directoryMode": "0777",
+            "fileMode": "0777",
+            "relativeMountPath": "azfiles"
+          }
+        ]
+      }
+    },
+    "userAccountSettings": {
+      "adminUserName": "DemoUser",
+      "adminUserPassword": "DemoPa$$w0rd"
+    },
+    "vmSize": "STANDARD_D1",
+    "scaleSettings": {
+      "manual": {
+        "targetNodeCount": 1
+      }
+    }
+  }
+}
