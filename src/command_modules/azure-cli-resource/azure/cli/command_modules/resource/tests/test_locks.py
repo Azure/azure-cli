@@ -169,7 +169,8 @@ class ResourceLockTests(ScenarioTest):
         self.assertIn(lock_name, locks_list)
 
         notes = self.create_random_name('notes', 20)
-        lock = self.cmd('resource lock update -n {} -g {} --resource-type {} --resource-name {} --notes {} ReadOnly'
+        lock = self.cmd('resource lock update -n {} -g {} --resource-type {} --resource-name {} --notes {} '
+                        '--lock-type ReadOnly'
                         .format(lock_name, resource_group, rsrc_type, rsrc_name, notes)).get_output_in_json()
 
         self.assertEqual(lock.get('notes', None), notes)
