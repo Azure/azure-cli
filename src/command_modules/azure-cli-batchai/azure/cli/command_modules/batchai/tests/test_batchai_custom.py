@@ -29,8 +29,6 @@ SSH_KEY = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKUDnWeK6rx36apNE9ij1iAXn68FKXL
 
 def _data_file(filename):
     filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-    if not os.path.isfile(filepath):
-        print('File {} does not exist.'.format(filepath))
     return filepath.replace('\\', '\\\\')
 
 

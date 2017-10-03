@@ -23,8 +23,6 @@ CLUSTER_RESIZE_TIME = 20 * 60  # Cluster should resize in 20 mins after job subm
 
 def _data_file(filename):
     filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
-    if not os.path.isfile(filepath):
-        print('File {} does not exist.'.format(filepath))
     return filepath.replace('\\', '\\\\')
 
 
@@ -207,7 +205,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         # Create a file share 'share' to be mounted on the cluster
         self.cmd('az storage share create -n share')
 
-        path = os.path.join(os.path.dirname(__file__), "data")
         self.cmd('batchai file-server create -n nfs -g {0} -c {1}'.format(
             resource_group, _data_file('file_server.json')),
             checks=[
