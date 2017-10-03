@@ -7,6 +7,7 @@
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
+from azure.cli.core.util import empty_on_404
 
 cli_command(__name__, 'login', 'azure.cli.command_modules.profile.custom#login')
 cli_command(__name__, 'logout', 'azure.cli.command_modules.profile.custom#logout')
@@ -33,3 +34,9 @@ cli_command(__name__, 'account show', _custom_module + 'show_subscription')
 cli_command(__name__, 'account clear', _custom_module + 'account_clear')
 cli_command(__name__, 'account list-locations', _custom_module + 'list_locations')
 cli_command(__name__, 'account get-access-token', _custom_module + 'get_access_token')
+cli_command(__name__, 'account lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'account lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'account lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'account lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'account lock update', _custom_module + 'azure.cli.command_modules.resource.custom#update_lock')

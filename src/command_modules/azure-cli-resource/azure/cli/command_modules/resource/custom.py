@@ -1242,6 +1242,7 @@ def delete_lock(lock_name=None, resource_group_name=None, resource_provider_name
     :param resource_name: Name of a resource that has a lock.
     :type resource_name: str
     """
+    print(ids)
     if ids:
         kwargs_list = []
         for id_arg in ids:
@@ -1290,9 +1291,9 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(lock_name,
+def create_lock(lock_name, level,
                 resource_group_name=None, resource_provider_namespace=None, notes=None,
-                parent_resource_path=None, resource_type=None, resource_name=None, level=None):
+                parent_resource_path=None, resource_type=None, resource_name=None):
     """
     :param name: The name of the lock.
     :type name: str
@@ -1307,8 +1308,6 @@ def create_lock(lock_name,
     :param notes: Notes about this lock.
     :type notes: str
     """
-    if level != 'ReadOnly' and level != 'CanNotDelete':
-        raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
     parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory()
@@ -1388,6 +1387,26 @@ def update_lock(lock_name=None, resource_group_name=None, resource_provider_name
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, lock_name, params)
+
+
+def create_group_lock(lock_name, level, resource_group_name=None, notes=None):
+    return create_lock(lock_name, level, notes=notes)
+
+
+def delete_group_lock(lock_name, resource_group_name=None):
+    return delete_lock(lock_name)
+
+
+def list_group_locks(resource_group_name=None, filter_string=None):
+    return list_locks(filter_string=filter_string)
+
+
+def get_group_lock(lock_name, resource_group_name=None):
+    return get_lock(lock_name)
+
+
+def update_group_lock(lock_name, resource_group_name=None, notes=None, level=None):
+    return update_lock(lock_name, notes=notes, level=level)
 
 
 def create_resource_link(link_id, target_id, notes=None):

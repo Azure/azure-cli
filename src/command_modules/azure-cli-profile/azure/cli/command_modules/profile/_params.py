@@ -5,8 +5,10 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import register_cli_argument
+from azure.mgmt.resource.locks.models import LockLevel
+from azure.cli.core.commands.parameters import enum_choice_list
+from azure.cli.core.commands.parameters import ignore_type
 from .custom import load_subscriptions
-
 
 def get_subscription_id_list(prefix, **kwargs):  # pylint: disable=unused-argument
     subscriptions = load_subscriptions()
@@ -31,3 +33,11 @@ register_cli_argument('account', 'subscription', options_list=('--subscription',
 register_cli_argument('account list', 'all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
 register_cli_argument('account list', 'refresh', help="retrieve up to date subscriptions from server", action='store_true')
 register_cli_argument('account show', 'show_auth_for_sdk', options_list=('--sdk-auth',), action='store_true', help='output result in compatible with Azure SDK auth file')
+register_cli_argument('account lock', 'resource_group_name', ignore_type)
+register_cli_argument('account lock', 'resource_provider_namespace', ignore_type)
+register_cli_argument('account lock', 'parent_resource_path', ignore_type)
+register_cli_argument('account lock', 'resource_type', ignore_type)
+register_cli_argument('account lock', 'resource_name', ignore_type)
+register_cli_argument('account lock', 'ids', ignore_type)
+register_cli_argument('account lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name')
+register_cli_argument('account lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))

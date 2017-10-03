@@ -130,12 +130,14 @@ register_cli_argument('group deployment operation show', 'operation_ids', nargs=
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), help='name of the new resource group', completer=None)
+register_cli_argument('group lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name')
+register_cli_argument('group lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
 register_cli_argument('lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', validator=validate_lock_parameters)
-register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list(LockLevel))
+register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
