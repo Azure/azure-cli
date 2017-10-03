@@ -4,10 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.resource.locks.models import LockLevel
 from azure.cli.core.commands.parameters import enum_choice_list
 from azure.cli.core.commands.parameters import ignore_type
+from azure.cli.command_modules.resource.custom import _parse_lock_id
 from .custom import load_subscriptions
 
 
@@ -18,6 +20,13 @@ def get_subscription_id_list(prefix, **kwargs):  # pylint: disable=unused-argume
         result.append(subscription['id'])
         result.append(subscription['name'])
     return result
+
+
+def validate_subscription_lock(namespace):
+    if getattr(namespace, 'ids', None):
+        for lock_id in getattr(namespace, 'ids'):
+            if not _parse_lock_id(lock_id).get('resource_group_name'):
+                raise CLIError('{} is not a valid subscription-level lock id.'.format(lock_id))
 
 
 register_cli_argument('login', 'password', options_list=('--password', '-p'), help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
@@ -39,5 +48,6 @@ register_cli_argument('account lock', 'resource_provider_namespace', ignore_type
 register_cli_argument('account lock', 'parent_resource_path', ignore_type)
 register_cli_argument('account lock', 'resource_type', ignore_type)
 register_cli_argument('account lock', 'resource_name', ignore_type)
-register_cli_argument('account lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name')
+register_cli_argument('account lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name', validator=validate_subscription_lock)
 register_cli_argument('account lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
+register_cli_argument('account lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')

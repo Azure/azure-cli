@@ -84,18 +84,18 @@ def validate_lock_parameters(namespace):
 
 
 def validate_group_lock(namespace):
-    if not getattr(namespace, 'resource_group_name', None):
-        raise CLIError('Missing required resource_group_name parameter.')
+    if getattr(namespace, 'ids', None):
+        for lock_id in getattr(namespace, 'ids'):
+            lock_id_dict = _parse_lock_id(lock_id)
+            if not lock_id_dict.get('resource_group_name') or lock_id_dict.get('resource_name'):
+                raise CLIError('{} is not a valid group-level lock id.'.format(lock_id))
+    else:
+        if not getattr(namespace, 'resource_group_name', None):
+            raise CLIError('Missing required resource_group_name parameter.')
 
 
 def validate_resource_lock(namespace):
     if getattr(namespace, 'ids', None):
-        if any((getattr(namespace, 'resource_group_name', None),
-                getattr(namespace, 'resource_provider_namespace', None),
-                getattr(namespace, 'parent_resource_path', None),
-                getattr(namespace, 'resource_type', None),
-                getattr(namespace, 'resource_name', None))):
-            raise CLIError('No resource parameter should be provided if ids are given.')
         for lock_id in getattr(namespace, 'ids'):
             lock_id_dict = _parse_lock_id(lock_id)
             if not all((lock_id_dict.get(param)) for param in ['resource_group_name',
@@ -104,7 +104,6 @@ def validate_resource_lock(namespace):
                                                                'resource_name']):
                 raise CLIError('{} is not a valid resource-level lock id.'.format(lock_id))
     else:
-        print(namespace)
         kwargs = {}
         for param in ['resource_group_name', 'resource_type', 'resource_name']:
             if not getattr(namespace, param, None):
@@ -112,5 +111,4 @@ def validate_resource_lock(namespace):
             kwargs[param] = getattr(namespace, param)
         kwargs['resource_provider_namespace'] = getattr(namespace, 'resource_provider_namespace', None)
         kwargs['parent_resource_path'] = getattr(namespace, 'parent_resource_path', None)
-        print(kwargs)
         internal_validate_lock_parameters(**kwargs)

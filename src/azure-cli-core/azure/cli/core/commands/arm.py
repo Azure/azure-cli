@@ -178,8 +178,7 @@ def parse_resource_id(rid):
         result = _populate_alternate_kwargs(result)
     else:
         result = dict(name=rid)
-
-    return result
+    return {key: value for key, value in result.items() if value is not None}
 
 
 def is_valid_resource_id(rid, exception_type=None):
