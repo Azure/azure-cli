@@ -339,7 +339,7 @@ with ParametersContext(command='sql db op') as c:
     c.argument('database_name',
                options_list=('--database', '-d'),
                required=True,
-               help='Name of the database.')
+               help='Name of the Azure SQL Database.')
 
     c.argument('operation_id',
                options_list=('--name', '-n'),
@@ -480,7 +480,7 @@ with ParametersContext(command='sql db tde') as c:
     c.argument('database_name',
                options_list=('--database', '-d'),
                required=True,
-               help='Name of the database.')
+               help='Name of the Azure SQL Database.')
 
 with ParametersContext(command='sql db tde set') as c:
     c.argument('status',
