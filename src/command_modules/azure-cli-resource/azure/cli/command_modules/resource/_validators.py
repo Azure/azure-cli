@@ -75,3 +75,19 @@ def validate_lock_parameters(namespace):
                                       getattr(namespace, 'parent_resource_path', None),
                                       getattr(namespace, 'resource_type', None),
                                       getattr(namespace, 'resource_name', None))
+
+
+def validate_group_lock(namespace):
+    if not getattr(namespace, 'resource_group_name', None):
+        raise CLIError('Missing required resource_group_name parameter.')
+
+
+def validate_resource_lock(namespace):
+    kwargs = {}
+    for param in ['resource_group_name', 'resource_type', 'resource_name']:
+        if not getattr(namespace, param, None):
+            raise CLIError('Missing required {} parameter.')
+        kwargs[param] = getattr(namespace, param)
+    kwargs['resource_provider_namespace'] = getattr(namespace, 'resource_provider_namespace')
+    kwargs['parent_resource_path'] = getattr(namespace, 'parent_resource_path')
+    internal_validate_lock_parameters(**kwargs)

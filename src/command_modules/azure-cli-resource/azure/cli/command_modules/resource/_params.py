@@ -50,6 +50,12 @@ register_cli_argument('resource create', 'properties', options_list=('--properti
 register_cli_argument('resource create', 'is_full_object', action='store_true',
                       help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
 
+register_cli_argument('resource lock', 'resource_group_name', resource_group_name_type)
+register_cli_argument('resource lock', 'resource_name', options_list=('--resource-name'))
+register_cli_argument('resource lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
+register_cli_argument('resource lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock')
+register_cli_argument('resource lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
+
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider register', 'wait', action='store_true', help='wait for the registration to finish')
 register_cli_argument('provider unregister', 'wait', action='store_true', help='wait for unregistration to finish')
@@ -130,6 +136,12 @@ register_cli_argument('group deployment operation show', 'operation_ids', nargs=
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), help='name of the new resource group', completer=None)
+register_cli_argument('group lock', 'resource_group_name', resource_group_name_type)
+register_cli_argument('group lock', 'resource_provider_namespace', ignore_type)
+register_cli_argument('group lock', 'parent_resource_path', ignore_type)
+register_cli_argument('group lock', 'resource_type', ignore_type)
+register_cli_argument('group lock', 'resource_name', ignore_type)
+register_cli_argument('group lock', 'ids', ignore_type)
 register_cli_argument('group lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name')
 register_cli_argument('group lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
 
@@ -141,7 +153,7 @@ register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enu
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
-                      completer=get_resource_types_completion_list,)
+                      completer=get_resource_types_completion_list)
 register_cli_argument('lock', 'resource_name', options_list=('--resource-name'))
 register_cli_argument('lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
 

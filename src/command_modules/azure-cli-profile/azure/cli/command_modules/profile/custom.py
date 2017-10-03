@@ -163,23 +163,3 @@ def logout(username=None):
 def list_locations():
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations()
-
-
-def create_subscription_lock(lock_name, level, notes=None):
-    return create_lock(lock_name, level, notes=notes)
-
-
-def delete_subscription_lock(lock_name):
-    return delete_lock(lock_name)
-
-
-def list_subscription_locks(filter_string=None):
-    return list_locks(filter_string=filter_string)
-
-
-def get_subscription_lock(lock_name):
-    return get_lock(lock_name)
-
-
-def update_subscription_lock(lock_name, notes=None, level=None):
-    return update_lock(lock_name, notes=notes, level=level)

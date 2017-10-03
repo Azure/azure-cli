@@ -39,4 +39,4 @@ cli_command(__name__, 'account lock delete', 'azure.cli.command_modules.resource
 cli_command(__name__, 'account lock list', 'azure.cli.command_modules.resource.custom#list_locks')
 cli_command(__name__, 'account lock show', 'azure.cli.command_modules.resource.custom#get_lock',
             exception_handler=empty_on_404)
-cli_command(__name__, 'account lock update', _custom_module + 'azure.cli.command_modules.resource.custom#update_lock')
+cli_command(__name__, 'account lock update', 'azure.cli.command_modules.resource.custom#update_lock')

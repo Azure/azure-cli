@@ -39,12 +39,12 @@ cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.
 cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
 cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
 cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
-cli_command(__name__, 'group lock create', 'azure.cli.command_modules.resource.custom#create_group_lock')
-cli_command(__name__, 'group lock delete', 'azure.cli.command_modules.resource.custom#delete_group_lock')
-cli_command(__name__, 'group lock list', 'azure.cli.command_modules.resource.custom#list_group_locks')
-cli_command(__name__, 'group lock show', 'azure.cli.command_modules.resource.custom#get_group_lock',
+cli_command(__name__, 'group lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'group lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'group lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'group lock show', 'azure.cli.command_modules.resource.custom#get_lock',
             exception_handler=empty_on_404)
-cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.custom#update_group_lock')
+cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 # Resource commands
 
@@ -67,6 +67,12 @@ cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custo
 cli_command(__name__, 'resource tag', 'azure.cli.command_modules.resource.custom#tag_resource')
 cli_command(__name__, 'resource move', 'azure.cli.command_modules.resource.custom#move_resource')
 cli_command(__name__, 'resource invoke-action', 'azure.cli.command_modules.resource.custom#invoke_resource_action')
+cli_command(__name__, 'resource lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'resource lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'resource lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'resource lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'resource lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 # Resource provider commands
 cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.list', cf_providers)

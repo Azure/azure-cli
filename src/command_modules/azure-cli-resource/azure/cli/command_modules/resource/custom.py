@@ -1242,7 +1242,6 @@ def delete_lock(lock_name=None, resource_group_name=None, resource_provider_name
     :param resource_name: Name of a resource that has a lock.
     :type resource_name: str
     """
-    print(ids)
     if ids:
         kwargs_list = []
         for id_arg in ids:
