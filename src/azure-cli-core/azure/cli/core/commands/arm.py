@@ -179,7 +179,6 @@ def parse_resource_id(rid):
     else:
         result = dict(name=rid)
 
-    # return {key: value for key, value in result.items() if value is not None}
     return result
 
 
@@ -222,8 +221,6 @@ def add_id_parameters(command_table):
                 (dest) fields will also be of type `IterateValue`
                 '''
                 try:
-                    print(arguments)
-                    print(values)
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.id_part]:

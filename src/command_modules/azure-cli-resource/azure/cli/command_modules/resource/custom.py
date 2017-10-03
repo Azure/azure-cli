@@ -1388,26 +1388,6 @@ def update_lock(lock_name=None, resource_group_name=None, resource_provider_name
         resource_name, lock_name, params)
 
 
-def create_group_lock(lock_name, level, resource_group_name=None, notes=None):
-    return create_lock(lock_name, level, notes=notes)
-
-
-def delete_group_lock(lock_name, resource_group_name=None):
-    return delete_lock(lock_name)
-
-
-def list_group_locks(resource_group_name=None, filter_string=None):
-    return list_locks(filter_string=filter_string)
-
-
-def get_group_lock(lock_name, resource_group_name=None):
-    return get_lock(lock_name)
-
-
-def update_group_lock(lock_name, resource_group_name=None, notes=None, level=None):
-    return update_lock(lock_name, notes=notes, level=level)
-
-
 def create_resource_link(link_id, target_id, notes=None):
     """
     :param target_id: The id of the resource link target.

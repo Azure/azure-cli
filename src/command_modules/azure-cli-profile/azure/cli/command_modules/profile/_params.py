@@ -10,6 +10,7 @@ from azure.cli.core.commands.parameters import enum_choice_list
 from azure.cli.core.commands.parameters import ignore_type
 from .custom import load_subscriptions
 
+
 def get_subscription_id_list(prefix, **kwargs):  # pylint: disable=unused-argument
     subscriptions = load_subscriptions()
     result = []
@@ -38,6 +39,5 @@ register_cli_argument('account lock', 'resource_provider_namespace', ignore_type
 register_cli_argument('account lock', 'parent_resource_path', ignore_type)
 register_cli_argument('account lock', 'resource_type', ignore_type)
 register_cli_argument('account lock', 'resource_name', ignore_type)
-register_cli_argument('account lock', 'ids', ignore_type)
 register_cli_argument('account lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name')
 register_cli_argument('account lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))

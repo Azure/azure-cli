@@ -12,6 +12,7 @@ except ImportError:
 
 
 from azure.cli.core.util import CLIError
+from .custom import _parse_lock_id
 
 
 def _validate_deployment_name(namespace):
@@ -62,10 +63,15 @@ def internal_validate_lock_parameters(resource_group_name, resource_provider_nam
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
+        print("here")
+        print("namespace", resource_provider_namespace)
         if len(parts) == 1:
             raise CLIError('A resource namespace is required if --resource-name is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
+        print("there")
+        print(resource_provider_namespace)
+        print(parts)
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')
 
 
@@ -83,11 +89,28 @@ def validate_group_lock(namespace):
 
 
 def validate_resource_lock(namespace):
-    kwargs = {}
-    for param in ['resource_group_name', 'resource_type', 'resource_name']:
-        if not getattr(namespace, param, None):
-            raise CLIError('Missing required {} parameter.')
-        kwargs[param] = getattr(namespace, param)
-    kwargs['resource_provider_namespace'] = getattr(namespace, 'resource_provider_namespace')
-    kwargs['parent_resource_path'] = getattr(namespace, 'parent_resource_path')
-    internal_validate_lock_parameters(**kwargs)
+    if getattr(namespace, 'ids', None):
+        if any((getattr(namespace, 'resource_group_name', None),
+                getattr(namespace, 'resource_provider_namespace', None),
+                getattr(namespace, 'parent_resource_path', None),
+                getattr(namespace, 'resource_type', None),
+                getattr(namespace, 'resource_name', None))):
+            raise CLIError('No resource parameter should be provided if ids are given.')
+        for lock_id in getattr(namespace, 'ids'):
+            lock_id_dict = _parse_lock_id(lock_id)
+            if not all((lock_id_dict.get(param)) for param in ['resource_group_name',
+                                                               'resource_provider_namespace',
+                                                               'resource_type',
+                                                               'resource_name']):
+                raise CLIError('{} is not a valid resource-level lock id.'.format(lock_id))
+    else:
+        print(namespace)
+        kwargs = {}
+        for param in ['resource_group_name', 'resource_type', 'resource_name']:
+            if not getattr(namespace, param, None):
+                raise CLIError('Missing required {} parameter.'.format(param))
+            kwargs[param] = getattr(namespace, param)
+        kwargs['resource_provider_namespace'] = getattr(namespace, 'resource_provider_namespace', None)
+        kwargs['parent_resource_path'] = getattr(namespace, 'parent_resource_path', None)
+        print(kwargs)
+        internal_validate_lock_parameters(**kwargs)

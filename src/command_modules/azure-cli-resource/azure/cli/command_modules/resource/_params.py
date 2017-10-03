@@ -17,7 +17,8 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
 from .custom import (get_policy_completion_list, get_policy_set_completion_list,
                      get_policy_assignment_completion_list, get_resource_types_completion_list,
                      get_providers_completion_list)
-from ._validators import process_deployment_create_namespace, validate_lock_parameters
+from ._validators import (process_deployment_create_namespace, validate_lock_parameters, validate_group_lock,
+                          validate_resource_lock)
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -51,7 +52,7 @@ register_cli_argument('resource create', 'is_full_object', action='store_true',
                       help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
 
 register_cli_argument('resource lock', 'resource_group_name', resource_group_name_type)
-register_cli_argument('resource lock', 'resource_name', options_list=('--resource-name'))
+register_cli_argument('resource lock', 'resource_name', options_list=('--resource-name'), validator=validate_resource_lock)
 register_cli_argument('resource lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
 register_cli_argument('resource lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock')
 register_cli_argument('resource lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
@@ -136,7 +137,7 @@ register_cli_argument('group deployment operation show', 'operation_ids', nargs=
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
 register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), help='name of the new resource group', completer=None)
-register_cli_argument('group lock', 'resource_group_name', resource_group_name_type)
+register_cli_argument('group lock', 'resource_group_name', resource_group_name_type, validator=validate_group_lock)
 register_cli_argument('group lock', 'resource_provider_namespace', ignore_type)
 register_cli_argument('group lock', 'parent_resource_path', ignore_type)
 register_cli_argument('group lock', 'resource_type', ignore_type)

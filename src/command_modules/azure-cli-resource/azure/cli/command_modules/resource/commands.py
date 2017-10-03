@@ -48,6 +48,7 @@ cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.c
 
 # Resource commands
 
+
 def transform_resource_list(result):
     transformed = []
     for r in result:

@@ -119,6 +119,66 @@ class ResourceLockTests(ScenarioTest):
                  .format(lock_name, resource_group, rsrc_name, rsrc_type))
         self._sleep_for_lock_operation()
 
+    @ResourceGroupPreparer(name_prefix='cli_test_group_lock')
+    def test_group_lock_commands(self, resource_group):
+        lock_name = self.create_random_name('cli-test-lock', 48)
+
+        self.cmd('group lock create -n {} -g {} --lock-type CanNotDelete'.format(lock_name, resource_group))
+        self._sleep_for_lock_operation()
+
+        self.cmd('group lock show -g {} -n {}'.format(resource_group, lock_name)).assert_with_checks([
+            JMESPathCheck('name', lock_name),
+            JMESPathCheck('level', 'CanNotDelete')]).get_output_in_json()
+
+        locks_list = self.cmd("group lock list -g {} --query [].name -ojson"
+                              .format(resource_group)).get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        notes = self.create_random_name('notes', 20)
+        lock = self.cmd('group lock update -n {} -g {} --notes {} --lock-type ReadOnly'
+                        .format(lock_name, resource_group, notes)).get_output_in_json()
+
+        self.assertEqual(lock.get('notes', None), notes)
+        self.assertEqual(lock.get('level', None), 'ReadOnly')
+
+        self.cmd('group lock delete -g {} -n {}'.format(resource_group, lock_name))
+        self._sleep_for_lock_operation()
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_lock')
+    def test_resource_lock_commands(self, resource_group):
+        rsrc_name = self.create_random_name('cli.lock.rsrc', 30)
+        rsrc_type = 'Microsoft.Network/virtualNetworks'
+        lock_name = self.create_random_name('cli-test-lock', 74)
+        lock_type = 'CanNotDelete'
+
+        self.cmd('network vnet create -n {} -g {}'.format(rsrc_name, resource_group))
+        self.cmd('resource lock create -n {} -g {} --resource-type {} --resource-name {} --lock-type {}'
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name, lock_type))
+        self._sleep_for_lock_operation()
+
+        self.cmd('resource lock show --name {} -g {} --resource-type {} --resource-name {}'
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name)).assert_with_checks([
+                     JMESPathCheck('name', lock_name),
+                     JMESPathCheck('level', lock_type)])
+
+        list_cmd = "resource lock list -g {} --resource-type {} --resource-name {} " \
+                   "--query [].name -ojson".format(resource_group, rsrc_type, rsrc_name)
+        locks_list = self.cmd(list_cmd).get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        notes = self.create_random_name('notes', 20)
+        lock = self.cmd('resource lock update -n {} -g {} --resource-type {} --resource-name {} --notes {} ReadOnly'
+                        .format(lock_name, resource_group, rsrc_type, rsrc_name, notes)).get_output_in_json()
+
+        self.assertEqual(lock.get('notes', None), notes)
+        self.assertEqual(lock.get('level', None), 'ReadOnly')
+
+        self.cmd('resource lock delete --name {} -g {} --resource-name {} --resource-type {}'
+                 .format(lock_name, resource_group, rsrc_name, rsrc_type))
+        self._sleep_for_lock_operation()
+
     @ResourceGroupPreparer(name_prefix='cli_test_lock_commands_with_ids')
     def test_lock_commands_with_ids(self, resource_group):
         vnet_name = self.create_random_name('cli-lock-vnet', 30)

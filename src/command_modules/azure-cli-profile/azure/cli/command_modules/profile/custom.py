@@ -11,8 +11,6 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.util import CLIError, in_cloud_console
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands.validators import DefaultStr
-from azure.cli.command_modules.resource.custom import (create_lock, delete_lock, list_locks,
-                                                       get_lock, update_lock, _parse_lock_id)
 
 logger = get_az_logger(__name__)
 
