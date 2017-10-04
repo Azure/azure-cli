@@ -36,9 +36,9 @@ def process_deployment_create_namespace(namespace):
     _validate_deployment_name(namespace)
 
 
-def internal_validate_lock_parameters(resource_group_name, resource_provider_namespace,
+def internal_validate_lock_parameters(resource_group, resource_provider_namespace,
                                       parent_resource_path, resource_type, resource_name):
-    if resource_group_name is None:
+    if resource_group is None:
         if resource_name is not None:
             raise CLIError('--resource-name is ignored if --resource-group is not given.')
         if resource_type is not None:
@@ -63,20 +63,15 @@ def internal_validate_lock_parameters(resource_group_name, resource_provider_nam
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
-        print("here")
-        print("namespace", resource_provider_namespace)
         if len(parts) == 1:
             raise CLIError('A resource namespace is required if --resource-name is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
-        print("there")
-        print(resource_provider_namespace)
-        print(parts)
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')
 
 
 def validate_lock_parameters(namespace):
-    internal_validate_lock_parameters(getattr(namespace, 'resource_group_name', None),
+    internal_validate_lock_parameters(getattr(namespace, 'resource_group', None),
                                       getattr(namespace, 'resource_provider_namespace', None),
                                       getattr(namespace, 'parent_resource_path', None),
                                       getattr(namespace, 'resource_type', None),
@@ -87,25 +82,25 @@ def validate_group_lock(namespace):
     if getattr(namespace, 'ids', None):
         for lock_id in getattr(namespace, 'ids'):
             lock_id_dict = _parse_lock_id(lock_id)
-            if not lock_id_dict.get('resource_group_name') or lock_id_dict.get('resource_name'):
+            if not lock_id_dict.get('resource_group') or lock_id_dict.get('resource_name'):
                 raise CLIError('{} is not a valid group-level lock id.'.format(lock_id))
     else:
-        if not getattr(namespace, 'resource_group_name', None):
-            raise CLIError('Missing required resource_group_name parameter.')
+        if not getattr(namespace, 'resource_group', None):
+            raise CLIError('Missing required resource_group parameter.')
 
 
 def validate_resource_lock(namespace):
     if getattr(namespace, 'ids', None):
         for lock_id in getattr(namespace, 'ids'):
             lock_id_dict = _parse_lock_id(lock_id)
-            if not all((lock_id_dict.get(param)) for param in ['resource_group_name',
+            if not all((lock_id_dict.get(param)) for param in ['resource_group',
                                                                'resource_provider_namespace',
                                                                'resource_type',
                                                                'resource_name']):
                 raise CLIError('{} is not a valid resource-level lock id.'.format(lock_id))
     else:
         kwargs = {}
-        for param in ['resource_group_name', 'resource_type', 'resource_name']:
+        for param in ['resource_group', 'resource_type', 'resource_name']:
             if not getattr(namespace, param, None):
                 raise CLIError('Missing required {} parameter.'.format(param))
             kwargs[param] = getattr(namespace, param)

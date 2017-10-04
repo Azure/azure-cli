@@ -236,7 +236,7 @@ class ParseIdTests(unittest.TestCase):
                 'input': "/subscriptions/subId/providers/"
                          "Microsoft.Authorization/locks/sublock",
                 'expected': {
-                    'resource_group_name': None,
+                    'resource_group': None,
                     'resource_provider_namespace': None,
                     'parent_resource_path': None,
                     'resource_type': None,
@@ -248,7 +248,7 @@ class ParseIdTests(unittest.TestCase):
                 'input': "/subscriptions/subId/resourceGroups/examplegroup/providers/"
                          "Microsoft.Authorization/locks/grouplock",
                 'expected': {
-                    'resource_group_name': 'examplegroup',
+                    'resource_group': 'examplegroup',
                     'resource_provider_namespace': None,
                     'parent_resource_path': None,
                     'resource_type': None,
@@ -261,7 +261,7 @@ class ParseIdTests(unittest.TestCase):
                          "Microsoft.Network/virtualNetworks/myvnet/providers/"
                          "Microsoft.Authorization/locks/vnetlock",
                 'expected': {
-                    'resource_group_name': 'mygroup',
+                    'resource_group': 'mygroup',
                     'resource_provider_namespace': 'Microsoft.Network',
                     'parent_resource_path': None,
                     'resource_type': 'virtualNetworks',
@@ -274,7 +274,7 @@ class ParseIdTests(unittest.TestCase):
                          "Microsoft.Network/virtualNetworks/myvnet/subnets/subnet/providers/"
                          "Microsoft.Authorization/locks/subnetlock",
                 'expected': {
-                    'resource_group_name': 'mygroup',
+                    'resource_group': 'mygroup',
                     'resource_provider_namespace': 'Microsoft.Network',
                     'parent_resource_path': 'virtualNetworks/myvnet',
                     'resource_type': 'subnets',
@@ -288,7 +288,7 @@ class ParseIdTests(unittest.TestCase):
                          "Microsoft.Provider2/resourceType2/name2/providers/"
                          "Microsoft.Authorization/locks/somelock",
                 'expected': {
-                    'resource_group_name': 'mygroup',
+                    'resource_group': 'mygroup',
                     'resource_provider_namespace': 'Microsoft.Provider1',
                     'parent_resource_path': 'resourceType1/name1/providers/Microsoft.Provider2',
                     'resource_type': 'resourceType2',
