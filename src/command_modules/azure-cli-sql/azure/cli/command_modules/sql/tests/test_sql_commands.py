@@ -18,6 +18,9 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
+from azure.cli.command_modules.sql.custom import (
+    ClientAuthenticationType,
+    ClientType)
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -1405,6 +1408,46 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('serverName', server),
                      JMESPathCheck('status', 'Completed')])
+
+
+class SqlServerConnectionStringScenarioTest(ScenarioTest):
+
+    def test_sql_db_conn_str(self):
+        # ADO.NET, username/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -u myuser -p mypassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=myuser;Password=mypassword;Encrypt=true;Connection Timeout=30;')
+
+        # ADO.NET, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -u myuser -p mypassword -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=myuser;Password=mypassword;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
+
+        # ADO.NET, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -u myuser -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
+
+        # SqlCmd, username/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -u myuser -p mypassword').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U myuser -P mypassword -N -l 30')
+
+        # SqlCmd, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -u myuser -p mypassword -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U myuser -P mypassword -G -N -l 30')
+
+        # SqlCmd, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -u myuser -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -E -G -N -l 30')
+
+        # JDBC, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -p mypassword').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=myuser@myserver;password=mypassword;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30')
+
+        # JDBC, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -p mypassword -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=myuser;password=mypassword;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword')
+
+        # JDBC, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryIntegrated')
 
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):

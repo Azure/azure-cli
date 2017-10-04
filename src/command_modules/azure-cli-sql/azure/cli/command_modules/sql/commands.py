@@ -58,6 +58,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             c.custom_command('copy', 'db_copy', no_wait_param='raw')
             c.custom_command('restore', 'db_restore', no_wait_param='raw')
             c.command('show', 'get')
+            c.custom_command('show-connection-string', 'db_show_conn_str')
             c.custom_command('list', 'db_list')
             c.command('delete', 'delete', confirmation=True)
             c.generic_update_command('update', 'get', 'create_or_update',

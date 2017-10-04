@@ -8,7 +8,9 @@
 import re
 
 from enum import Enum
+
 from azure.cli.core._profile import Profile
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
@@ -57,6 +59,86 @@ _DEFAULT_SERVER_VERSION = "12.0"
 ###############################################
 #                sql db                       #
 ###############################################
+
+
+class ClientType(Enum):
+    ado_net = 'ado.net'
+    sqlcmd = 'sqlcmd'
+    jdbc = 'jdbc'
+
+
+class ClientAuthenticationType(Enum):
+    sql_password = 'SqlPassword'
+    active_directory_password = 'ADPassword'
+    active_directory_integrated = 'ADIntegrated'
+
+
+def _get_server_dns_suffx():
+    # Allow dns suffix to be overridden by environment variable for testing purposes
+    from os import getenv
+    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX') or get_active_cloud().suffixes.sql_server_hostname
+
+
+def db_show_conn_str(
+        client,
+        database_name,
+        server_name,
+        client_provider,
+        auth_type=ClientAuthenticationType.sql_password.value,
+        user='{your_username}',
+        password='{your password}'):
+
+    server_suffix = _get_server_dns_suffx()
+
+    conn_str_props = {
+        'server': server_name,
+        'server_fqdn': '{}{}'.format(server_name, server_suffix),
+        'server_suffix': server_suffix,
+        'db': database_name,
+        'user': user,
+        'password': password
+    }
+
+    formats = {
+        ClientType.ado_net.value: {
+            ClientAuthenticationType.sql_password.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID={user};'
+                'Password={password};Encrypt=true;Connection Timeout=30;',
+            ClientAuthenticationType.active_directory_password.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID={user};'
+                'Password={password};Encrypt=true;Connection Timeout=30;'
+                'Authentication="Active Directory Password"',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};Encrypt=true;'
+                'Connection Timeout=30;Authentication="Active Directory Integrated"'
+        },
+        ClientType.sqlcmd.value: {
+            ClientAuthenticationType.sql_password.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U {user} -P {password} -N -l 30',
+            ClientAuthenticationType.active_directory_password.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U {user} -P {password} -G -N -l 30',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -E -G -N -l 30',
+        },
+        ClientType.jdbc.value: {
+            ClientAuthenticationType.sql_password.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user={user}@{server};'
+                'password={password};encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30',
+            ClientAuthenticationType.active_directory_password.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user={user};'
+                'password={password};encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
+                'authentication=ActiveDirectoryPassword',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};'
+                'encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
+                'authentication=ActiveDirectoryIntegrated',
+        }
+    }
+
+    return formats[client_provider][auth_type].format(**conn_str_props)
 
 
 # Helper class to bundle up database identity properties
