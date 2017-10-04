@@ -154,8 +154,8 @@ class TestBatchAICustom(unittest.TestCase):
             )))
 
         # No environment variables provided.
-        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = ''
-        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = ''
+        os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
+        os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
             update_cluster_create_parameters_with_env_variables(params)
 
@@ -204,8 +204,9 @@ class TestBatchAICustom(unittest.TestCase):
                                                                                    admin_user_password='password'))
 
         # No environment variables given.
-        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = ''
-        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = ''
+        # No environment variables provided.
+        os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
+        os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
             add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path')
 
@@ -231,8 +232,8 @@ class TestBatchAICustom(unittest.TestCase):
                                                                                    admin_user_password='password'))
 
         # No environment variables given.
-        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = ''
-        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = ''
+        os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
+        os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
             add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path')
 
