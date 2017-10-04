@@ -56,7 +56,7 @@ with ParametersContext(command='batchai cluster create') as c:
                arg_group='File Server Mount')
     c.argument('nfs_mount_path', options_list=('--nfs-mount-path',),
                help='Relative mount path for nfs. The nfs will be available at '
-                    '$AZ_LEARNING_MOUNT_ROOT/<relative_mount_path> folder.',
+                    '$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.',
                arg_group='File Server Mount')
     c.argument('azure_file_share', options_list=('--afs-name',),
                help='Name of the azure file share to mount. Please provide AZURE_BATCHAI_STORAGE_ACCOUNT and '
@@ -65,7 +65,7 @@ with ParametersContext(command='batchai cluster create') as c:
                arg_group='Azure File Share Mount')
     c.argument('afs_mount_path', options_list=('--afs-mount-path',),
                help='Relative mount path for Azure File share. The file share will be available at '
-                    '$AZ_LEARNING_MOUNT_ROOT/<relative_mount_path> folder. If you need to mount more than one Azure '
+                    '$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder. If you need to mount more than one Azure '
                     'Storage container, configure them in a configuration file and use --config option.',
                arg_group='Azure File Share Mount')
     c.argument('container_name', options_list=('--container-name',),
@@ -77,7 +77,7 @@ with ParametersContext(command='batchai cluster create') as c:
                arg_group='Azure Storage Container Mount')
     c.argument('container_mount_path', options_list=('--container-mount-path',),
                help='Relative mount path for Azure Storage container. The container will be available at '
-                    '$AZ_LEARNING_MOUNT_ROOT/<relative_mount_path> folder.',
+                    '$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.',
                arg_group='Azure Storage Container Mount')
     c.argument('json_file', options_list=('--config', '-c'),
                help='A path to a json file containing cluster create parameters '
