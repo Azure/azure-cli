@@ -43,7 +43,7 @@ register_cli_argument('account', 'subscription', options_list=('--subscription',
 register_cli_argument('account list', 'all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
 register_cli_argument('account list', 'refresh', help="retrieve up to date subscriptions from server", action='store_true')
 register_cli_argument('account show', 'show_auth_for_sdk', options_list=('--sdk-auth',), action='store_true', help='output result in compatible with Azure SDK auth file')
-register_cli_argument('account lock', 'resource_group_name', ignore_type)
+register_cli_argument('account lock', 'resource_group', ignore_type)
 register_cli_argument('account lock', 'resource_provider_namespace', ignore_type)
 register_cli_argument('account lock', 'parent_resource_path', ignore_type)
 register_cli_argument('account lock', 'resource_type', ignore_type)
