@@ -137,31 +137,31 @@ class TestBatchAICustom(unittest.TestCase):
             node_setup=NodeSetup(mount_volumes=MountVolumes(
                 azure_file_shares=[AzureFileShareReference(
                     relative_mount_path='azfiles',
-                    account_name='<BATCHAI_AZURE_STORAGE_ACCOUNT>',
-                    azure_file_url='https://<BATCHAI_AZURE_STORAGE_ACCOUNT>.file.core.windows.net/share',
+                    account_name='<AZURE_BATCHAI_STORAGE_ACCOUNT>',
+                    azure_file_url='https://<AZURE_BATCHAI_STORAGE_ACCOUNT>.file.core.windows.net/share',
                     credentials_info=AzureStorageCredentialsInfo(
-                        account_key='<BATCHAI_AZURE_STORAGE_KEY>'
+                        account_key='<AZURE_BATCHAI_STORAGE_KEY>'
                     )
                 )],
                 azure_blob_file_systems=[AzureBlobFileSystemReference(
                     relative_mount_path='blobfs',
                     container_name='container',
-                    account_name='<BATCHAI_AZURE_STORAGE_ACCOUNT>',
+                    account_name='<AZURE_BATCHAI_STORAGE_ACCOUNT>',
                     credentials_info=AzureStorageCredentialsInfo(
-                        account_key='<BATCHAI_AZURE_STORAGE_KEY>'
+                        account_key='<AZURE_BATCHAI_STORAGE_KEY>'
                     )
                 )]
             )))
 
         # No environment variables provided.
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = ''
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = ''
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = ''
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = ''
         with self.assertRaises(CLIError):
             update_cluster_create_parameters_with_env_variables(params)
 
         # Set environment variables and check patching results.
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = 'account'
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = 'key'
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
         update_cluster_create_parameters_with_env_variables(params)
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials_info.account_key, 'key')
@@ -170,8 +170,8 @@ class TestBatchAICustom(unittest.TestCase):
                           'key')
 
         # Test a case when no patching required.
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = 'another_account'
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = 'another_key'
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'another_account'
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'another_key'
         update_cluster_create_parameters_with_env_variables(params)
 
         # Check that no patching has been done.
@@ -204,13 +204,13 @@ class TestBatchAICustom(unittest.TestCase):
                                                                                    admin_user_password='password'))
 
         # No environment variables given.
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = ''
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = ''
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = ''
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = ''
         with self.assertRaises(CLIError):
             add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path')
 
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = 'account'
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = 'key'
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):
@@ -231,13 +231,13 @@ class TestBatchAICustom(unittest.TestCase):
                                                                                    admin_user_password='password'))
 
         # No environment variables given.
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = ''
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = ''
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = ''
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = ''
         with self.assertRaises(CLIError):
             add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path')
 
-        os.environ['BATCHAI_AZURE_STORAGE_ACCOUNT'] = 'account'
-        os.environ['BATCHAI_AZURE_STORAGE_KEY'] = 'key'
+        os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
+        os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):

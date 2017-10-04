@@ -20,8 +20,8 @@ from msrest.serialization import Deserializer
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
 # decision about which storage account to use instead of using his default account specified via AZURE_STORAGE_ACCOUNT
 # and AZURE_STORAGE_KEY.
-BAI_AZURE_STORAGE_ACCOUNT = 'BATCHAI_AZURE_STORAGE_ACCOUNT'
-BAI_AZURE_STORAGE_KEY = 'BATCHAI_AZURE_STORAGE_KEY'
+AZURE_BATCHAI_STORAGE_ACCOUNT = 'AZURE_BATCHAI_STORAGE_ACCOUNT'
+AZURE_BATCHAI_STORAGE_KEY = 'AZURE_BATCHAI_STORAGE_KEY'
 
 # Supported images.
 SUPPORTED_IMAGES = {
@@ -67,26 +67,26 @@ def update_cluster_create_parameters_with_env_variables(params):
             params.node_setup.mount_volumes and \
             params.node_setup.mount_volumes.azure_file_shares:
         for ref in params.node_setup.mount_volumes.azure_file_shares:
-            if ref.account_name == '<{0}>'.format(BAI_AZURE_STORAGE_ACCOUNT):
-                ref.account_name = get_environment_variable_or_die(BAI_AZURE_STORAGE_ACCOUNT)
-            if ref.azure_file_url and '<{0}>'.format(BAI_AZURE_STORAGE_ACCOUNT) in ref.azure_file_url:
+            if ref.account_name == '<{0}>'.format(AZURE_BATCHAI_STORAGE_ACCOUNT):
+                ref.account_name = get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_ACCOUNT)
+            if ref.azure_file_url and '<{0}>'.format(AZURE_BATCHAI_STORAGE_ACCOUNT) in ref.azure_file_url:
                 ref.azure_file_url = ref.azure_file_url.replace(
-                    '<{0}>'.format(BAI_AZURE_STORAGE_ACCOUNT),
-                    get_environment_variable_or_die(BAI_AZURE_STORAGE_ACCOUNT))
+                    '<{0}>'.format(AZURE_BATCHAI_STORAGE_ACCOUNT),
+                    get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_ACCOUNT))
             if ref.credentials_info and ref.credentials_info.account_key == \
-                    '<{0}>'.format(BAI_AZURE_STORAGE_KEY):
-                ref.credentials_info.account_key = get_environment_variable_or_die(BAI_AZURE_STORAGE_KEY)
+                    '<{0}>'.format(AZURE_BATCHAI_STORAGE_KEY):
+                ref.credentials_info.account_key = get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_KEY)
 
     # Patch parameters of blob file system.
     if params.node_setup and \
             params.node_setup.mount_volumes and \
             params.node_setup.mount_volumes.azure_blob_file_systems:
         for ref in params.node_setup.mount_volumes.azure_blob_file_systems:
-            if ref.account_name == '<{0}>'.format(BAI_AZURE_STORAGE_ACCOUNT):
-                ref.account_name = get_environment_variable_or_die(BAI_AZURE_STORAGE_ACCOUNT)
+            if ref.account_name == '<{0}>'.format(AZURE_BATCHAI_STORAGE_ACCOUNT):
+                ref.account_name = get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_ACCOUNT)
             if ref.credentials_info and ref.credentials_info.account_key == \
-                    '<{0}>'.format(BAI_AZURE_STORAGE_KEY):
-                ref.credentials_info.account_key = get_environment_variable_or_die(BAI_AZURE_STORAGE_KEY)
+                    '<{0}>'.format(AZURE_BATCHAI_STORAGE_KEY):
+                ref.credentials_info.account_key = get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_KEY)
 
 
 def update_user_account_settings(params, admin_user_name, ssh_key, password):
@@ -169,11 +169,11 @@ def add_azure_file_share_to_cluster_create_parameters(params, azure_file_share, 
         params.node_setup.mount_volumes.azure_file_shares = []
     params.node_setup.mount_volumes.azure_file_shares.append(models.AzureFileShareReference(
         relative_mount_path=mount_path,
-        account_name=get_environment_variable_or_die(BAI_AZURE_STORAGE_ACCOUNT),
+        account_name=get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_ACCOUNT),
         azure_file_url='https://{0}.file.core.windows.net/{1}'.format(
-            get_environment_variable_or_die(BAI_AZURE_STORAGE_ACCOUNT), azure_file_share),
+            get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_ACCOUNT), azure_file_share),
         credentials_info=models.AzureStorageCredentialsInfo(
-            account_key=get_environment_variable_or_die(BAI_AZURE_STORAGE_KEY))))
+            account_key=get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_KEY))))
 
 
 def add_azure_container_to_cluster_create_parameters(params, container_name, mount_path):
@@ -193,10 +193,10 @@ def add_azure_container_to_cluster_create_parameters(params, container_name, mou
         params.node_setup.mount_volumes.azure_blob_file_systems = []
     params.node_setup.mount_volumes.azure_blob_file_systems.append(models.AzureBlobFileSystemReference(
         relative_mount_path=mount_path,
-        account_name=get_environment_variable_or_die(BAI_AZURE_STORAGE_ACCOUNT),
+        account_name=get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_ACCOUNT),
         container_name=container_name,
         credentials_info=models.AzureStorageCredentialsInfo(
-            account_key=get_environment_variable_or_die(BAI_AZURE_STORAGE_KEY))))
+            account_key=get_environment_variable_or_die(AZURE_BATCHAI_STORAGE_KEY))))
 
 
 def get_image_reference_or_die(image):

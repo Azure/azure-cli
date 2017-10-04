@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-# pylint: disable=line-too-long
 from __future__ import print_function
 
 import os
@@ -274,5 +272,5 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             storage_account, resource_group)).output[:-1]
         self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)
         self.set_env('AZURE_STORAGE_KEY', account_key)
-        self.set_env('BATCHAI_AZURE_STORAGE_ACCOUNT', storage_account)
-        self.set_env('BATCHAI_AZURE_STORAGE_KEY', account_key)
+        self.set_env('AZURE_BATCHAI_STORAGE_ACCOUNT', storage_account)
+        self.set_env('AZURE_BATCHAI_STORAGE_KEY', account_key)

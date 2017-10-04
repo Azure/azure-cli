@@ -5,8 +5,6 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
-
 helps['batchai'] = """
     type: group
     short-summary: Batch AI.

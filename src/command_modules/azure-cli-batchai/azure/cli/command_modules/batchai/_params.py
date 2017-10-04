@@ -5,10 +5,10 @@
 from enum import Enum
 
 from azure.cli.command_modules.vm._actions import get_vm_sizes
-from azure.cli.core.commands.parameters import ignore_type, location_type, resource_group_name_type, enum_choice_list, \
-    get_one_of_subscription_locations
+from azure.cli.core.commands.parameters import (
+    ignore_type, location_type, resource_group_name_type, enum_choice_list, get_one_of_subscription_locations)
 from azure.cli.core.sdk.util import ParametersContext
-from azure.mgmt.storage.v2017_06_01.models import SkuName
+from azure.mgmt.storage.models import SkuName
 
 
 def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
@@ -59,8 +59,8 @@ with ParametersContext(command='batchai cluster create') as c:
                     '$AZ_LEARNING_MOUNT_ROOT/<relative_mount_path> folder.',
                arg_group='File Server Mount')
     c.argument('azure_file_share', options_list=('--afs-name',),
-               help='Name of the azure file share to mount. Please provide BATCHAI_AZURE_STORAGE_ACCOUNT and '
-                    'BATCHAI_AZURE_STORAGE_KEY environment variables containing storage account name and key.',
+               help='Name of the azure file share to mount. Please provide AZURE_BATCHAI_STORAGE_ACCOUNT and '
+                    'AZURE_BATCHAI_STORAGE_KEY environment variables containing storage account name and key.',
                arg_group='Azure File Share Mount')
     c.argument('afs_mount_path', options_list=('--afs-mount-path',),
                help='Relative mount path for Azure File share. The file share will be available at '
@@ -68,8 +68,8 @@ with ParametersContext(command='batchai cluster create') as c:
                     'Storage container, configure them in a configuration file and use --config option.',
                arg_group='Azure File Share Mount')
     c.argument('container_name', options_list=('--container-name',),
-               help='Name of Azure Storage container to mount. Please provide BATCHAI_AZURE_STORAGE_ACCOUNT and '
-                    'BATCHAI_AZURE_STORAGE_KEY environment variables containing storage account name and key. If you '
+               help='Name of Azure Storage container to mount. Please provide AZURE_BATCHAI_STORAGE_ACCOUNT and '
+                    'AZURE_BATCHAI_STORAGE_KEY environment variables containing storage account name and key. If you '
                     'to mount more than one Azure Storage container, configure them in a configuration file and use '
                     '--config option.',
                arg_group='Azure Storage Container Mount')
