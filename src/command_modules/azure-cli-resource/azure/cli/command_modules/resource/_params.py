@@ -17,8 +17,8 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
 from .custom import (get_policy_completion_list, get_policy_set_completion_list,
                      get_policy_assignment_completion_list, get_resource_types_completion_list,
                      get_providers_completion_list)
-from ._validators import (process_deployment_create_namespace, validate_lock_parameters, validate_group_lock,
-                          validate_resource_lock)
+from ._validators import (process_deployment_create_namespace, validate_lock_parameters, validate_subscription_lock,
+                          validate_group_lock, validate_resource_lock)
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -175,3 +175,12 @@ register_cli_argument('managedapp definition create', 'lock_level', **enum_choic
 register_cli_argument('managedapp definition create', 'authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
 register_cli_argument('managedapp definition create', 'createUiDefinition', options_list=('--create-ui-definition', '-c'), help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
 register_cli_argument('managedapp definition create', 'mainTemplate', options_list=('--main-template', '-t'), help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
+
+register_cli_argument('account lock', 'resource_group', ignore_type)
+register_cli_argument('account lock', 'resource_provider_namespace', ignore_type)
+register_cli_argument('account lock', 'parent_resource_path', ignore_type)
+register_cli_argument('account lock', 'resource_type', ignore_type)
+register_cli_argument('account lock', 'resource_name', ignore_type)
+register_cli_argument('account lock', 'lock_name', options_list=('--name', '-n'), help='Name of the lock', id_part='resource_name', validator=validate_subscription_lock)
+register_cli_argument('account lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
+register_cli_argument('account lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')

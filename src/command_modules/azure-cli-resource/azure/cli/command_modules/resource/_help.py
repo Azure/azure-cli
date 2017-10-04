@@ -129,6 +129,58 @@ helps['lock update'] = """
           text: >
             az lock update --name lockName --resource-group group --notes newNotesHere --lock-type CanNotDelete
     """
+helps['account lock'] = """
+    type: group
+    short-summary: Manage Azure locks.
+"""
+helps['account lock create'] = """
+    type: command
+    short-summary: Create a subscription lock.
+    parameters:
+        - name: --notes
+          type: string
+          short-summary: Notes about this lock.
+    examples:
+        - name: Create a read-only subscription level lock.
+          text: >
+            az account lock create --lock-type ReadOnly -n lockName
+    """
+helps['account lock delete'] = """
+    type: command
+    short-summary: Delete a subscription lock.
+    examples:
+        - name: Delete a subscription lock
+          text: >
+            az account lock delete --name lockName
+    """
+helps['account lock list'] = """
+    type: command
+    short-summary: List lock information in the subscription.
+    examples:
+        - name: List out all locks on the subscription level
+          text: >
+            az account lock list
+    """
+helps['account lock show'] = """
+    type: command
+    short-summary: Show the properties of a subscription lock
+    examples:
+        - name: Show a subscription level lock
+          text: >
+            az account lock show -n lockname
+    """
+helps['account lock update'] = """
+    type: command
+    short-summary: Update a subscription lock.
+    parameters:
+        - name: --notes
+          type: string
+          short-summary: Notes about this lock.
+    examples:
+        - name: Update a subscription lock with new notes and type
+          text: >
+            az account lock update --name lockName --notes newNotesHere --lock-type CanNotDelete
+    """
 helps['policy'] = """
     type: group
     short-summary: Manage resource policies.

@@ -27,6 +27,15 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_resource_managedappdefinitions)
 
 
+# Subscription lock commands
+cli_command(__name__, 'account lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'account lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'account lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'account lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'account lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+
+
 # Resource group commands
 def transform_resource_group_list(result):
     return [OrderedDict([('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
@@ -46,9 +55,8 @@ cli_command(__name__, 'group lock show', 'azure.cli.command_modules.resource.cus
             exception_handler=empty_on_404)
 cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
+
 # Resource commands
-
-
 def transform_resource_list(result):
     transformed = []
     for r in result:
