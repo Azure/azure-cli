@@ -61,9 +61,10 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 
 def _authentication_context_factory(tenant, cache):
+    import re
     import adal
     authority_url = CLOUD.endpoints.active_directory
-    is_adfs = authority_url.lower().endswith('/adfs')
+    is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
     if not is_adfs:
         authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None,
