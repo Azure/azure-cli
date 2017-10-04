@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
+++++++++++
+* `account lock`: lock commands to work specifically with subscription locks
+
 2.0.13 (2017-09-22)
 +++++++++++++++++++
 * minor fixes
