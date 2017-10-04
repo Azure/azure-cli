@@ -50,7 +50,7 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=0.4.3',
+    'adal>=0.4.7',
     'applicationinsights',
     'argcomplete>=1.8.0',
     'colorama',
