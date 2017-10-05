@@ -31,7 +31,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-batchai==0.1.0',
+    'azure-mgmt-batchai==0.2.0',
     'azure-cli-core',
     'adal>=0.4.3',
     'mock>=2.0.0'
