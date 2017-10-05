@@ -39,7 +39,7 @@ class TestApplication(unittest.TestCase):
         bep_type = 'backendAddressPools'
         sub = '00000000-0000-0000-0000-000000000000'
         result = resource_id(name=lb, resource_group=rg, namespace=namespace,
-                             type=rtype, subscription=sub, child_type=bep_type, child_name=bep)
+                             type=rtype, subscription=sub, child_type_1=bep_type, child_name_1=bep)
         expected = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep'
         self.assertTrue(is_valid_resource_id(expected))
         self.assertTrue(is_valid_resource_id(result))
@@ -56,7 +56,7 @@ class TestApplication(unittest.TestCase):
         gc_type = 'grandchildType'
         sub = '00000000-0000-0000-0000-000000000000'
         result = resource_id(name=lb, resource_group=rg, namespace=namespace, type=rtype, subscription=sub,
-                             child_type=bep_type, child_name=bep, grandchild_name=grandchild, grandchild_type=gc_type)
+                             child_type_1=bep_type, child_name_1=bep, child_name_2=grandchild, child_type_2=gc_type)
         expected = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/lbrg/providers/Microsoft.Network/loadBalancers/mylb/backendAddressPools/mybep/grandchildType/grandchild'
         self.assertTrue(is_valid_resource_id(expected))
         self.assertTrue(is_valid_resource_id(result))

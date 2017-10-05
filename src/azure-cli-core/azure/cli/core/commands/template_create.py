@@ -61,8 +61,8 @@ def _validate_name_or_id(
             namespace=parent_type.split('/')[0],
             type=parent_type.split('/')[1],
             subscription=get_subscription_id(),
-            child_name=property_value,
-            child_type=property_type)
+            child_name_1=property_value,
+            child_type_1=property_type)
         value_supplied_was_id = False
     else:
         resource_id_parts = dict(

@@ -109,7 +109,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
     register_cli_argument(scope + ' config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
     register_cli_argument(scope + ' config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
-    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
     register_cli_argument(scope + ' deployment user', 'user_name', help='user name')
     register_cli_argument(scope + ' deployment user', 'password', help='password, will prompt if not specified')
     register_cli_argument(scope + ' deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')

@@ -122,7 +122,7 @@ register_cli_argument('vm capture', 'overwrite', action='store_true')
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
-register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name')
+register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1')
 register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
@@ -141,7 +141,7 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss show', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-register_cli_argument('vmss', 'instance_id', id_part='child_name')
+register_cli_argument('vmss', 'instance_id', id_part='child_name_1')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
 register_cli_argument('vmss', 'tags', tags_type)
 register_cli_argument('vmss', 'caching', help='Disk caching policy', **enum_choice_list(CachingTypes))
@@ -195,8 +195,8 @@ register_cli_argument('vm nic', 'nics', nargs='+', help='Names or IDs of NICs.',
 register_cli_argument('vm nic show', 'nic', help='NIC name or ID.', validator=validate_vm_nic)
 
 register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name')
-register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='grandchild_name')
+register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name_1')
+register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
 
 register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 

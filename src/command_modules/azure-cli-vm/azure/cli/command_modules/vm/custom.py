@@ -1239,7 +1239,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
         subnet = network.subnets.get(resource_group_name,
                                      subnet_id['name'],
-                                     subnet_id['child_name'])
+                                     subnet_id['child_name_1'])
         nsg = subnet.network_security_group
 
     if not nsg:
@@ -1276,7 +1276,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         LongRunningOperation('Updating subnet')(network.subnets.create_or_update(
             resource_group_name=resource_group_name,
             virtual_network_name=subnet_id['name'],
-            subnet_name=subnet_id['child_name'],
+            subnet_name=subnet_id['child_name_1'],
             subnet_parameters=subnet
         ))
 
@@ -1501,7 +1501,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
         # loop around inboundnatrule
         instance_addresses = {}
         for rule in lb.inbound_nat_rules:
-            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
+            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name_1']
             instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
                                                                            rule.frontend_port)
 
