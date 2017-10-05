@@ -175,3 +175,5 @@ for command_name in ['lock', 'account lock', 'group lock', 'resource lock']:
     register_cli_argument(command_name, 'lock_name', options_list=('--name', '-n'), help='Name of the lock')
     register_cli_argument(command_name, 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
     register_cli_argument(command_name, 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
+    register_cli_argument(command_name, 'notes', help='Notes about this lock.')
+    

@@ -81,10 +81,6 @@ helps['lock create'] = """
     type: command
     short-summary: Create a lock.
     long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Create a read-only subscription level lock.
           text: >
@@ -120,10 +116,6 @@ helps['lock show'] = """
 helps['lock update'] = """
     type: command
     short-summary: Update a lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Update a resource group level lock with new notes and type
           text: >
@@ -136,10 +128,6 @@ helps['account lock'] = """
 helps['account lock create'] = """
     type: command
     short-summary: Create a subscription lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Create a read-only subscription level lock.
           text: >
@@ -172,10 +160,6 @@ helps['account lock show'] = """
 helps['account lock update'] = """
     type: command
     short-summary: Update a subscription lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Update a subscription lock with new notes and type
           text: >
@@ -542,10 +526,6 @@ helps['group lock'] = """
 helps['group lock create'] = """
     type: command
     short-summary: Create a resource group lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Create a read-only resource group level lock.
           text: >
@@ -578,10 +558,6 @@ helps['group lock show'] = """
 helps['group lock update'] = """
     type: command
     short-summary: Update a resource group lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Update a resource group lock with new notes and type
           text: >
@@ -686,10 +662,6 @@ helps['resource lock'] = """
 helps['resource lock create'] = """
     type: command
     short-summary: Create a resource-level lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Create a read-only resource level lock on a vnet.
           text: >
@@ -722,10 +694,6 @@ helps['resource lock show'] = """
 helps['resource lock update'] = """
     type: command
     short-summary: Update a resource-level lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Update a resource level lock with new notes and type
           text: >
