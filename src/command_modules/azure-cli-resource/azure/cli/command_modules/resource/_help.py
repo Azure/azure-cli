@@ -94,7 +94,7 @@ helps['lock delete'] = """
     type: command
     short-summary: Delete a lock.
     examples:
-        - name: Delete a resource-group-level lock
+        - name: Delete a resource group-level lock
           text: >
             az lock delete --name lockName --resource-group group
     """
@@ -125,13 +125,13 @@ helps['lock update'] = """
           type: string
           short-summary: Notes about this lock.
     examples:
-        - name: Update a resource-group level lock with new notes and type
+        - name: Update a resource group level lock with new notes and type
           text: >
             az lock update --name lockName --resource-group group --notes newNotesHere --lock-type CanNotDelete
     """
 helps['account lock'] = """
     type: group
-    short-summary: Manage Azure locks.
+    short-summary: Manage Azure subscription level locks.
 """
 helps['account lock create'] = """
     type: command
@@ -163,7 +163,7 @@ helps['account lock list'] = """
     """
 helps['account lock show'] = """
     type: command
-    short-summary: Show the properties of a subscription lock
+    short-summary: Show the details of a subscription lock
     examples:
         - name: Show a subscription level lock
           text: >
@@ -537,25 +537,25 @@ helps['group deployment operation'] = """
 """
 helps['group lock'] = """
     type: group
-    short-summary: Manage Azure resource-group locks.
+    short-summary: Manage Azure resource group locks.
 """
 helps['group lock create'] = """
     type: command
-    short-summary: Create a resource-group lock.
+    short-summary: Create a resource group lock.
     parameters:
         - name: --notes
           type: string
           short-summary: Notes about this lock.
     examples:
-        - name: Create a read-only resource-group level lock.
+        - name: Create a read-only resource group level lock.
           text: >
             az account lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
     """
 helps['group lock delete'] = """
     type: command
-    short-summary: Delete a resource-group lock.
+    short-summary: Delete a resource group lock.
     examples:
-        - name: Delete a resource-group lock
+        - name: Delete a resource group lock
           text: >
             az account lock delete --name lockName -g MyResourceGroup
     """
@@ -563,27 +563,27 @@ helps['group lock list'] = """
     type: command
     short-summary: List lock information in the resource-group.
     examples:
-        - name: List out all locks on the resource-group level
+        - name: List out all locks on the resource group level
           text: >
             az account lock list -g MyResourceGroup
     """
 helps['group lock show'] = """
     type: command
-    short-summary: Show the properties of a resource-group lock
+    short-summary: Show the details of a resource group lock
     examples:
-        - name: Show a resource-group level lock
+        - name: Show a resource group level lock
           text: >
             az account lock show -n lockname -g MyResourceGroup
     """
 helps['group lock update'] = """
     type: command
-    short-summary: Update a resource-group lock.
+    short-summary: Update a resource group lock.
     parameters:
         - name: --notes
           type: string
           short-summary: Notes about this lock.
     examples:
-        - name: Update a resource-group lock with new notes and type
+        - name: Update a resource group lock with new notes and type
           text: >
             az account lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
     """
@@ -713,7 +713,7 @@ helps['resource lock list'] = """
     """
 helps['resource lock show'] = """
     type: command
-    short-summary: Show the properties of a resource-level lock
+    short-summary: Show the details of a resource-level lock
     examples:
         - name: Show a resource level lock
           text: >

@@ -81,7 +81,7 @@ def validate_lock_parameters(namespace):
 def validate_subscription_lock(namespace):
     if getattr(namespace, 'ids', None):
         for lock_id in getattr(namespace, 'ids'):
-            if not _parse_lock_id(lock_id).get('resource_group_name'):
+            if _parse_lock_id(lock_id).get('resource_group'):
                 raise CLIError('{} is not a valid subscription-level lock id.'.format(lock_id))
 
 
