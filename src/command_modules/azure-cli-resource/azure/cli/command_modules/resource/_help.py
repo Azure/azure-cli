@@ -529,7 +529,7 @@ helps['group lock create'] = """
     examples:
         - name: Create a read-only resource group level lock.
           text: >
-            az account lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
+            az group lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
     """
 helps['group lock delete'] = """
     type: command
@@ -537,7 +537,7 @@ helps['group lock delete'] = """
     examples:
         - name: Delete a resource group lock
           text: >
-            az account lock delete --name lockName -g MyResourceGroup
+            az group lock delete --name lockName -g MyResourceGroup
     """
 helps['group lock list'] = """
     type: command
@@ -545,7 +545,7 @@ helps['group lock list'] = """
     examples:
         - name: List out all locks on the resource group level
           text: >
-            az account lock list -g MyResourceGroup
+            az group lock list -g MyResourceGroup
     """
 helps['group lock show'] = """
     type: command
@@ -553,7 +553,7 @@ helps['group lock show'] = """
     examples:
         - name: Show a resource group level lock
           text: >
-            az account lock show -n lockname -g MyResourceGroup
+            az group lock show -n lockname -g MyResourceGroup
     """
 helps['group lock update'] = """
     type: command
@@ -561,7 +561,7 @@ helps['group lock update'] = """
     examples:
         - name: Update a resource group lock with new notes and type
           text: >
-            az account lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
+            az group lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
     """
 helps['provider'] = """
     type: group
@@ -665,7 +665,7 @@ helps['resource lock create'] = """
     examples:
         - name: Create a read-only resource level lock on a vnet.
           text: >
-            az account lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 helps['resource lock delete'] = """
     type: command
@@ -673,7 +673,7 @@ helps['resource lock delete'] = """
     examples:
         - name: Delete a resource level lock
           text: >
-            az account lock delete --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock delete --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 helps['resource lock list'] = """
     type: command
@@ -681,7 +681,7 @@ helps['resource lock list'] = """
     examples:
         - name: List out all locks on a vnet
           text: >
-            az account lock list -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock list -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 helps['resource lock show'] = """
     type: command
@@ -689,7 +689,7 @@ helps['resource lock show'] = """
     examples:
         - name: Show a resource level lock
           text: >
-            az account lock show -n lockname -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock show -n lockname -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 helps['resource lock update'] = """
     type: command
@@ -697,5 +697,5 @@ helps['resource lock update'] = """
     examples:
         - name: Update a resource level lock with new notes and type
           text: >
-            az account lock update --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
+            az resource lock update --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
     """
