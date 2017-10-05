@@ -119,6 +119,96 @@ class ResourceLockTests(ScenarioTest):
                  .format(lock_name, resource_group, rsrc_name, rsrc_type))
         self._sleep_for_lock_operation()
 
+    @ResourceGroupPreparer(name_prefix='cli_test_group_lock')
+    def test_group_lock_commands(self, resource_group):
+        lock_name = self.create_random_name('cli-test-lock', 48)
+
+        self.cmd('group lock create -n {} -g {} --lock-type CanNotDelete'.format(lock_name, resource_group))
+        self._sleep_for_lock_operation()
+
+        self.cmd('group lock show -g {} -n {}'.format(resource_group, lock_name)).assert_with_checks([
+            JMESPathCheck('name', lock_name),
+            JMESPathCheck('level', 'CanNotDelete')]).get_output_in_json()
+
+        locks_list = self.cmd("group lock list -g {} --query [].name -ojson"
+                              .format(resource_group)).get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        notes = self.create_random_name('notes', 20)
+        lock = self.cmd('group lock update -n {} -g {} --notes {} --lock-type ReadOnly'
+                        .format(lock_name, resource_group, notes)).get_output_in_json()
+
+        self.assertEqual(lock.get('notes', None), notes)
+        self.assertEqual(lock.get('level', None), 'ReadOnly')
+
+        self.cmd('group lock delete -g {} -n {}'.format(resource_group, lock_name))
+        self._sleep_for_lock_operation()
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_lock')
+    def test_resource_lock_commands(self, resource_group):
+        rsrc_name = self.create_random_name('cli.lock.rsrc', 30)
+        rsrc_type = 'Microsoft.Network/virtualNetworks'
+        lock_name = self.create_random_name('cli-test-lock', 74)
+        lock_type = 'CanNotDelete'
+
+        self.cmd('network vnet create -n {} -g {}'.format(rsrc_name, resource_group))
+        self.cmd('resource lock create -n {} -g {} --resource-type {} --resource-name {} --lock-type {}'
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name, lock_type))
+        self._sleep_for_lock_operation()
+
+        self.cmd('resource lock show --name {} -g {} --resource-type {} --resource-name {}'
+                 .format(lock_name, resource_group, rsrc_type, rsrc_name)).assert_with_checks([
+                     JMESPathCheck('name', lock_name),
+                     JMESPathCheck('level', lock_type)])
+
+        list_cmd = "resource lock list -g {} --resource-type {} --resource-name {} " \
+                   "--query [].name -ojson".format(resource_group, rsrc_type, rsrc_name)
+        locks_list = self.cmd(list_cmd).get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        notes = self.create_random_name('notes', 20)
+        lock = self.cmd('resource lock update -n {} -g {} --resource-type {} --resource-name {} --notes {} '
+                        '--lock-type ReadOnly'
+                        .format(lock_name, resource_group, rsrc_type, rsrc_name, notes)).get_output_in_json()
+
+        self.assertEqual(lock.get('notes', None), notes)
+        self.assertEqual(lock.get('level', None), 'ReadOnly')
+
+        self.cmd('resource lock delete --name {} -g {} --resource-name {} --resource-type {}'
+                 .format(lock_name, resource_group, rsrc_name, rsrc_type))
+        self._sleep_for_lock_operation()
+
+    @record_only()
+    def test_subscription_locks(self):
+        lock_name = self.create_random_name('cli-test-lock', 48)
+        lock = self.cmd('az account lock create -n {} --lock-type CanNotDelete'.format(lock_name)).get_output_in_json()
+        lock_id = lock.get('id')
+
+        locks_list = self.cmd('az account lock list --query [].name').get_output_in_json()
+        self.assertTrue(locks_list)
+        self.assertIn(lock_name, locks_list)
+
+        lock = self.cmd('az account lock show -n {}'.format(lock_name)).get_output_in_json()
+        lock_from_id = self.cmd('az account lock show --ids {}'.format(lock_id)).get_output_in_json()
+
+        self.assertEqual(lock.get('name', None), lock_name)
+        self.assertEqual(lock_from_id.get('name', None), lock_name)
+        self.assertEqual(lock.get('level', None), 'CanNotDelete')
+
+        notes = self.create_random_name('notes', 20)
+        lock = self.cmd('az account lock update -n {} --notes {} --lock-type {}'
+                        .format(lock_name, notes, 'ReadOnly')).get_output_in_json()
+        self.assertEqual(lock.get('notes', None), notes)
+        self.assertEqual(lock.get('level', None), 'ReadOnly')
+
+        lock = self.cmd('az account lock update --ids {} --lock-type {}'
+                        .format(lock_id, 'CanNotDelete')).get_output_in_json()
+        self.assertEqual(lock.get('level', None), 'CanNotDelete')
+
+        self.cmd('az account lock delete -n {}'.format(lock_name))
+
     @ResourceGroupPreparer(name_prefix='cli_test_lock_commands_with_ids')
     def test_lock_commands_with_ids(self, resource_group):
         vnet_name = self.create_random_name('cli-lock-vnet', 30)
@@ -175,7 +265,7 @@ class ParseIdTests(unittest.TestCase):
                 'input': "/subscriptions/subId/providers/"
                          "Microsoft.Authorization/locks/sublock",
                 'expected': {
-                    'resource_group_name': None,
+                    'resource_group': None,
                     'resource_provider_namespace': None,
                     'parent_resource_path': None,
                     'resource_type': None,
@@ -187,7 +277,7 @@ class ParseIdTests(unittest.TestCase):
                 'input': "/subscriptions/subId/resourceGroups/examplegroup/providers/"
                          "Microsoft.Authorization/locks/grouplock",
                 'expected': {
-                    'resource_group_name': 'examplegroup',
+                    'resource_group': 'examplegroup',
                     'resource_provider_namespace': None,
                     'parent_resource_path': None,
                     'resource_type': None,
@@ -200,7 +290,7 @@ class ParseIdTests(unittest.TestCase):
                          "Microsoft.Network/virtualNetworks/myvnet/providers/"
                          "Microsoft.Authorization/locks/vnetlock",
                 'expected': {
-                    'resource_group_name': 'mygroup',
+                    'resource_group': 'mygroup',
                     'resource_provider_namespace': 'Microsoft.Network',
                     'parent_resource_path': None,
                     'resource_type': 'virtualNetworks',
@@ -213,7 +303,7 @@ class ParseIdTests(unittest.TestCase):
                          "Microsoft.Network/virtualNetworks/myvnet/subnets/subnet/providers/"
                          "Microsoft.Authorization/locks/subnetlock",
                 'expected': {
-                    'resource_group_name': 'mygroup',
+                    'resource_group': 'mygroup',
                     'resource_provider_namespace': 'Microsoft.Network',
                     'parent_resource_path': 'virtualNetworks/myvnet',
                     'resource_type': 'subnets',
@@ -227,7 +317,7 @@ class ParseIdTests(unittest.TestCase):
                          "Microsoft.Provider2/resourceType2/name2/providers/"
                          "Microsoft.Authorization/locks/somelock",
                 'expected': {
-                    'resource_group_name': 'mygroup',
+                    'resource_group': 'mygroup',
                     'resource_provider_namespace': 'Microsoft.Provider1',
                     'parent_resource_path': 'resourceType1/name1/providers/Microsoft.Provider2',
                     'resource_type': 'resourceType2',
