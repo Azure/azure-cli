@@ -2316,6 +2316,7 @@ class VMSSRollingUpgrade(ScenarioTest):
         # 'cancel' should fail as we have no active upgrade to cancel
         self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
 
+
 class VMLBIntegrationTesting(ScenarioTest):
 
     @ResourceGroupPreparer()
@@ -2326,9 +2327,9 @@ class VMLBIntegrationTesting(ScenarioTest):
         av_set = 'av1'
         # provision 2 web servers
         self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, av_set))
-        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {}'.format(resource_group, vm1, av_set))
+        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {} --generate-ssh-keys'.format(resource_group, vm1, av_set))
         self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm1))
-        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {}'.format(resource_group, vm2, av_set))
+        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {} --generate-ssh-keys'.format(resource_group, vm2, av_set))
         self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm2))
 
         # provision 1 LB
