@@ -35,19 +35,19 @@ class Test_resource_validators(unittest.TestCase):
             {
                 'test': 'name and group',
                 'name': 'foo',
-                'resource_group_name': 'foo',
+                'resource_group': 'foo',
             },
             {
                 'test': 'name, group, type [compact]',
                 'name': 'foo',
-                'resource_group_name': 'bar',
+                'resource_group': 'bar',
                 'resource_name': 'baz',
                 'resource_type': 'Microsoft.Compute/VirtualMachines'
             },
             {
                 'test': 'name, group, type, namespace',
                 'name': 'foo',
-                'resource_group_name': 'bar',
+                'resource_group': 'bar',
                 'resource_name': 'baz',
                 'resource_type': 'VirtualMachines',
                 'resource_provider_namespace': 'Microsoft.Compute',
@@ -55,7 +55,7 @@ class Test_resource_validators(unittest.TestCase):
             {
                 'test': 'name, group, type, namespace, parent',
                 'name': 'foo',
-                'resource_group_name': 'bar',
+                'resource_group': 'bar',
                 'resource_name': 'baz',
                 'resource_type': 'VirtualMachines',
                 'resource_provider_namespace': 'Microsoft.Compute',
@@ -82,26 +82,26 @@ class Test_resource_validators(unittest.TestCase):
             {
                 'test': 'name and group and type',
                 'name': 'foo',
-                'resource_group_name': 'foo',
+                'resource_group': 'foo',
                 'resource_type': 'bar',
             },
             {
                 'test': 'name, group, no type',
                 'name': 'foo',
-                'resource_group_name': 'bar',
+                'resource_group': 'bar',
                 'resource_name': 'baz',
             },
             {
                 'test': 'name, group, type, namespace',
                 'name': 'foo',
-                'resource_group_name': 'bar',
+                'resource_group': 'bar',
                 'resource_name': 'baz',
                 'resource_provider_namespace': 'Microsoft.Compute',
             },
             {
                 'test': 'name, group, type, namespace, parent',
                 'name': 'foo',
-                'resource_group_name': 'bar',
+                'resource_group': 'bar',
                 'resource_type': 'VirtualMachines',
                 'resource_provider_namespace': 'Microsoft.Compute',
                 'parent_resource_path': 'Foo.Bar/baz',
