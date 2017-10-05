@@ -702,8 +702,24 @@ def process_blob_upload_batch_parameters(namespace):
         raise ValueError('incorrect usage: destination cannot be a blob url')
     else:
         namespace.destination_container_name = identifier.container
-        if not namespace.account_name:
+
+        if namespace.account_name:
+            if namespace.account_name != identifier.account_name:
+                raise ValueError(
+                    'The given storage account name is not consistent with the account name in the destination URI')
+        else:
             namespace.account_name = identifier.account_name
+
+        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
+            validate_client_parameters(namespace)
+
+        # it is possible the account name be overwritten by the connection string
+        if namespace.account_name != identifier.account_name:
+            raise ValueError(
+                'The given storage account name is not consistent with the account name in the destination URI')
+
+        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
+            raise ValueError('Missing storage account credential information.')
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
