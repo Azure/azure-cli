@@ -130,7 +130,7 @@ register_cli_argument('group deployment operation show', 'operation_ids', nargs=
 
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
-register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), help='name of the new resource group', completer=None)
+register_cli_argument('group create', 'rg_name', options_list=['--name', '--resource-group', '-n', '-g'], help='name of the new resource group', completer=None)
 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
