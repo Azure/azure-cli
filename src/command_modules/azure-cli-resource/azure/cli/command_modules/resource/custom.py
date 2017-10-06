@@ -986,31 +986,13 @@ def create_policy_setdefinition(name, definitions, params=None, display_name=Non
 
 
 def get_policy_definition(policy_definition_name):
-    from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
-    try:
-        return _get_custom_or_builtin_policy(policy_client, policy_definition_name)
-    except CloudError as ex:
-        if ex.status_code == 404:
-            # work around for https://github.com/Azure/azure-cli/issues/692
-            policy_id = '/providers/Microsoft.Authorization/policydefinitions/' + policy_definition_name
-            rcf = _resource_client_factory()
-            return rcf.resources.get_by_id(policy_id, policy_client.policy_definitions.api_version)
-        raise
+    return _get_custom_or_builtin_policy(policy_client, policy_definition_name)
 
 
 def get_policy_setdefinition(policy_set_definition_name):
-    from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
-    try:
-        return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, 'setdefinition')
-    except CloudError as ex:
-        if ex.status_code == 404:
-            # work around for https://github.com/Azure/azure-cli/issues/692
-            policy_id = '/providers/Microsoft.Authorization/policysetdefinitions/' + policy_set_definition_name
-            rcf = _resource_client_factory()
-            return rcf.resources.get_by_id(policy_id, policy_client.policy_set_definitions.api_version)
-        raise
+    return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, 'setdefinition')
 
 
 def update_policy_definition(policy_definition_name, rules=None, params=None,
