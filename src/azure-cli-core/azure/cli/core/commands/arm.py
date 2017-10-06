@@ -127,9 +127,13 @@ def resource_id(**kwargs):
         - grandchild_type       Type of the grandchild resource
         - grandchild_name       Name of the grandchild resource
     '''
+    kwargs = {key: value for key, value in kwargs.items() if value is not None}
     rid = '/subscriptions/{subscription}'.format(**kwargs)
     try:
-        rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
+        try:
+            rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
+        except KeyError:
+            pass
         rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
         rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
         try:
@@ -174,7 +178,6 @@ def parse_resource_id(rid):
         result = _populate_alternate_kwargs(result)
     else:
         result = dict(name=rid)
-
     return {key: value for key, value in result.items() if value is not None}
 
 

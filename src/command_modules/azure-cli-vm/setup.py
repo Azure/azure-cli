@@ -32,12 +32,12 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-authorization==0.30.0',
-    'azure-mgmt-compute==3.0.0rc1',
+    'azure-mgmt-compute==3.0.1',
     'azure-mgmt-keyvault==0.40.0',
     'azure-keyvault==0.3.7',
     'azure-mgmt-network==1.5.0rc3',
     'azure-mgmt-resource==1.2.0rc3',
-    'azure-multiapi-storage==0.1.4',
+    'azure-multiapi-storage==0.1.6',
     'azure-cli-core'
 ]
 

@@ -7,7 +7,7 @@ import os
 import os.path
 from fnmatch import fnmatch
 
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -94,9 +94,13 @@ def glob_files_remotely(client, share_name, pattern):
 
 def create_short_lived_container_sas(account_name, account_key, container):
     from datetime import datetime, timedelta
-    SharedAccessSignature, BlobPermissions = get_sdk(ResourceType.DATA_STORAGE,
-                                                     'sharedaccesssignature#SharedAccessSignature',
-                                                     'blob.models#BlobPermissions')
+    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'BlobSharedAccessSignature',
+                                        mod='blob.sharedaccesssignature')
+    else:
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
+                                        mod='sharedaccesssignature')
+    BlobPermissions = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#BlobPermissions')
 
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
@@ -105,13 +109,17 @@ def create_short_lived_container_sas(account_name, account_key, container):
 
 def create_short_lived_share_sas(account_name, account_key, share):
     from datetime import datetime, timedelta
-    SharedAccessSignature, BlobPermissions = get_sdk(ResourceType.DATA_STORAGE,
-                                                     'sharedaccesssignature#SharedAccessSignature',
-                                                     'blob.models#BlobPermissions')
+    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'FileSharedAccessSignature',
+                                        mod='file.sharedaccesssignature')
+    else:
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
+                                        mod='sharedaccesssignature')
+    FilePermission = get_sdk(ResourceType.DATA_STORAGE, 'file.models#FilesPermissions')
 
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
-    return sas.generate_share(share, permission=BlobPermissions(read=True), expiry=expiry, protocol='https')
+    return sas.generate_share(share, permission=FilePermission(read=True), expiry=expiry, protocol='https')
 
 
 def mkdir_p(path):

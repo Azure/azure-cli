@@ -1124,6 +1124,29 @@ class Test_Profile(unittest.TestCase):
             'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
         })
 
+    @mock.patch('azure.cli.core._profile.CLOUD', autospec=True)
+    def test_detect_adfs_authority_url(self, mock_get_cloud):
+        adfs_url_1 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs/'
+        mock_get_cloud.endpoints.active_directory = adfs_url_1
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+
+        # test w/ trailing slash
+        r = profile.auth_ctx_factory('common', None)
+        self.assertEqual(r.authority.url, adfs_url_1)
+
+        # test w/o trailing slash
+        adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
+        mock_get_cloud.endpoints.active_directory = adfs_url_2
+        r = profile.auth_ctx_factory('common', None)
+        self.assertEqual(r.authority.url, adfs_url_2)
+
+        # test w/ regular aad
+        aad_url = 'https://login.microsoftonline.com'
+        mock_get_cloud.endpoints.active_directory = aad_url
+        r = profile.auth_ctx_factory('common', None)
+        self.assertEqual(r.authority.url, aad_url + '/common')
+
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 

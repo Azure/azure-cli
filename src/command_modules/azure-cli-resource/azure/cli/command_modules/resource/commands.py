@@ -27,6 +27,15 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_resource_managedappdefinitions)
 
 
+# Subscription lock commands
+cli_command(__name__, 'account lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'account lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'account lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'account lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'account lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+
+
 # Resource group commands
 def transform_resource_group_list(result):
     return [OrderedDict([('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
@@ -39,10 +48,15 @@ cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.
 cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
 cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
 cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
+cli_command(__name__, 'group lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'group lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'group lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'group lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 
 # Resource commands
-
 def transform_resource_list(result):
     transformed = []
     for r in result:
@@ -62,6 +76,12 @@ cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custo
 cli_command(__name__, 'resource tag', 'azure.cli.command_modules.resource.custom#tag_resource')
 cli_command(__name__, 'resource move', 'azure.cli.command_modules.resource.custom#move_resource')
 cli_command(__name__, 'resource invoke-action', 'azure.cli.command_modules.resource.custom#invoke_resource_action')
+cli_command(__name__, 'resource lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'resource lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'resource lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'resource lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'resource lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 # Resource provider commands
 cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.list', cf_providers)
@@ -75,7 +95,7 @@ if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-
     # Resource feature commands
     cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
     cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
-    cli_command(__name__, 'feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
+    cli_command(__name__, 'feature register', 'azure.cli.command_modules.resource.custom#register_feature', cf_features)
 
 # Tag commands
 cli_command(__name__, 'tag list', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.list', cf_tags)

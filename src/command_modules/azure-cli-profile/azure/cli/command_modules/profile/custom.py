@@ -12,7 +12,6 @@ from azure.cli.core.util import CLIError, in_cloud_console
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands.validators import DefaultStr
 
-
 logger = get_az_logger(__name__)
 
 _CLOUD_CONSOLE_WARNING_TEMPLATE = ("Azure Cloud Shell automatically authenticates the user account it was initially"

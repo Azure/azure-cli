@@ -274,6 +274,11 @@ helps['vmss wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of a scale set is met.
 """
 
+helps['vmss rolling-ugrade'] = """
+    type: group
+    short-summary: (PREVIEW) Manage rolling upgrades.
+"""
+
 helps['vm convert'] = """
     type: command
     short-summary: Convert a VM with unmanaged disks to use managed disks.

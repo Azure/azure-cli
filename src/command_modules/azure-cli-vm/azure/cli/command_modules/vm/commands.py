@@ -10,7 +10,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
-                                                          cf_images, cf_run_commands)
+                                                          cf_images, cf_run_commands,
+                                                          cf_rolling_upgrade_commands)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
@@ -337,6 +338,12 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
     cli_command(__name__, 'vm run-command show', mgmt_path.format(op_var, op_class, 'get'), cf_run_commands)
     cli_command(__name__, 'vm run-command list', mgmt_path.format(op_var, op_class, 'list'), cf_run_commands)
     cli_command(__name__, 'vm run-command invoke', custom_path.format('run_command_invoke'))
+
+    op_var = 'virtual_machine_scale_set_rolling_upgrades_operations'
+    op_class = 'VirtualMachineScaleSetRollingUpgradesOperations'
+    cli_command(__name__, 'vmss rolling-upgrade cancel', mgmt_path.format(op_var, op_class, 'cancel'), cf_rolling_upgrade_commands)
+    cli_command(__name__, 'vmss rolling-upgrade get-latest', mgmt_path.format(op_var, op_class, 'get_latest'), cf_rolling_upgrade_commands)
+    cli_command(__name__, 'vmss rolling-upgrade start', mgmt_path.format(op_var, op_class, 'start_os_upgrade'), cf_rolling_upgrade_commands)
 
 # MSI
 cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
