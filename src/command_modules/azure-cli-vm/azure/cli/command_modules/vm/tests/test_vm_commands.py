@@ -2361,6 +2361,20 @@ class VMLBIntegrationTesting(ScenarioTest):
         r = requests.get('http://' + pip)
         self.assertTrue('Welcome to nginx!' in str(r.content))
 
+
+class VMScaffoldingTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_create_vm_from_existing_nic(self, resource_group):
+        import re
+        self.cmd('network public-ip create -g {} -n my-pip'.format(resource_group))
+        self.cmd('network vnet create -g {} -n my-vnet --subnet-name my-subnet1'.format(resource_group))
+        self.cmd('network nic create -g {} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip'.format(resource_group))
+        self.cmd('network nic ip-config create -n my-ipconfig2 -g {} --nic-name my-nic --private-ip-address-version IPv6'.format(resource_group))
+        self.cmd('vm create -g {} -n vm1 --image ubuntults --nics my-nic --generate-ssh-keys'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1 -d'.format(resource_group)).get_output_in_json()
+        self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
+        self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
+
 # endregion
 
 
