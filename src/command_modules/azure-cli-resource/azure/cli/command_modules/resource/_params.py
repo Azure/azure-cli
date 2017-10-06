@@ -17,7 +17,8 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
 from .custom import (get_policy_completion_list, get_policy_set_completion_list,
                      get_policy_assignment_completion_list, get_resource_types_completion_list,
                      get_providers_completion_list)
-from ._validators import process_deployment_create_namespace, validate_lock_parameters
+from ._validators import (process_deployment_create_namespace, validate_lock_parameters, validate_subscription_lock,
+                          validate_group_lock, validate_resource_lock)
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -134,15 +135,6 @@ register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
-register_cli_argument('lock', 'lock_name', options_list=('--name', '-n'), validator=validate_lock_parameters)
-register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list(LockLevel))
-register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
-register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
-register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
-                      completer=get_resource_types_completion_list,)
-register_cli_argument('lock', 'resource_name', options_list=('--resource-name'))
-register_cli_argument('lock', 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
-
 register_cli_argument('managedapp', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
 register_cli_argument('managedapp', 'application_name', options_list=('--name', '-n'), id_part='name')
 
@@ -159,3 +151,28 @@ register_cli_argument('managedapp definition create', 'lock_level', **enum_choic
 register_cli_argument('managedapp definition create', 'authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
 register_cli_argument('managedapp definition create', 'createUiDefinition', options_list=('--create-ui-definition', '-c'), help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
 register_cli_argument('managedapp definition create', 'mainTemplate', options_list=('--main-template', '-t'), help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
+
+register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
+register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
+register_cli_argument('lock', 'resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list)
+register_cli_argument('lock', 'resource_name', options_list=('--resource-name'), help='Name of the resource being locked.')
+register_cli_argument('lock', 'resource_group', resource_group_name_type, validator=validate_lock_parameters)
+
+register_cli_argument('resource lock', 'resource_group', resource_group_name_type)
+register_cli_argument('resource lock', 'resource_name', options_list=('--resource-name'), validator=validate_resource_lock)
+
+register_cli_argument('group lock', 'resource_group', resource_group_name_type, validator=validate_group_lock)
+
+register_cli_argument('account lock', 'resource_group', ignore_type, validator=validate_subscription_lock)
+
+for scope in ['account', 'group']:
+    register_cli_argument('{} lock'.format(scope), 'resource_provider_namespace', ignore_type)
+    register_cli_argument('{} lock'.format(scope), 'parent_resource_path', ignore_type)
+    register_cli_argument('{} lock'.format(scope), 'resource_type', ignore_type)
+    register_cli_argument('{} lock'.format(scope), 'resource_name', ignore_type)
+
+for command_name in ['lock', 'account lock', 'group lock', 'resource lock']:
+    register_cli_argument(command_name, 'lock_name', options_list=('--name', '-n'), help='Name of the lock')
+    register_cli_argument(command_name, 'level', options_list=('--lock-type', '-t'), **enum_choice_list([LockLevel.can_not_delete, LockLevel.read_only]))
+    register_cli_argument(command_name, 'ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
+    register_cli_argument(command_name, 'notes', help='Notes about this lock.')

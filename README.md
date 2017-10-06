@@ -8,11 +8,7 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our
 
 ## Installation
 
-```bash
-$ curl -L https://aka.ms/InstallAzureCli | bash
-```
-
-Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-az-cli2) for detailed install instructions.
+Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for detailed install instructions.
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md).
 

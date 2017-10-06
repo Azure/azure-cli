@@ -10,7 +10,7 @@ from six import StringIO
 from azure.cli.command_modules.storage._validators import (get_permission_validator, get_datetime_type, datetime,
                                                            ipv4_range_type, resource_type_type, services_type,
                                                            process_blob_source_uri, get_char_options_validator)
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 from azure.cli.testsdk import api_version_constraint
 
 
@@ -83,7 +83,10 @@ class TestStorageValidators(unittest.TestCase):
     def test_services_type(self):
         input = "ttfqbqtf"
         actual = str(services_type(input))
-        expected = "bqtf"
+        if supported_api_version(ResourceType.DATA_STORAGE, max_api='2016-05-31'):
+            expected = "bqtf"
+        else:
+            expected = "bqf"
         self.assertEqual(actual, expected)
 
         input = "everything"

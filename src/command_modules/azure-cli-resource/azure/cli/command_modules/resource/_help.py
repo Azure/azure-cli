@@ -81,20 +81,16 @@ helps['lock create'] = """
     type: command
     short-summary: Create a lock.
     long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
         - name: Create a read-only subscription level lock.
           text: >
             az lock create --name lockName --resource-group group --lock-type ReadOnly
     """
 helps['lock delete'] = """
-    type: commands
+    type: command
     short-summary: Delete a lock.
     examples:
-        - name: Delete a resource-group-level lock
+        - name: Delete a resource group-level lock
           text: >
             az lock delete --name lockName --resource-group group
     """
@@ -120,14 +116,54 @@ helps['lock show'] = """
 helps['lock update'] = """
     type: command
     short-summary: Update a lock.
-    parameters:
-        - name: --notes
-          type: string
-          short-summary: Notes about this lock.
     examples:
-        - name: Update a resource-group level lock with new notes and type
+        - name: Update a resource group level lock with new notes and type
           text: >
             az lock update --name lockName --resource-group group --notes newNotesHere --lock-type CanNotDelete
+    """
+helps['account lock'] = """
+    type: group
+    short-summary: Manage Azure subscription level locks.
+"""
+helps['account lock create'] = """
+    type: command
+    short-summary: Create a subscription lock.
+    examples:
+        - name: Create a read-only subscription level lock.
+          text: >
+            az account lock create --lock-type ReadOnly -n lockName
+    """
+helps['account lock delete'] = """
+    type: command
+    short-summary: Delete a subscription lock.
+    examples:
+        - name: Delete a subscription lock
+          text: >
+            az account lock delete --name lockName
+    """
+helps['account lock list'] = """
+    type: command
+    short-summary: List lock information in the subscription.
+    examples:
+        - name: List out all locks on the subscription level
+          text: >
+            az account lock list
+    """
+helps['account lock show'] = """
+    type: command
+    short-summary: Show the details of a subscription lock
+    examples:
+        - name: Show a subscription level lock
+          text: >
+            az account lock show -n lockname
+    """
+helps['account lock update'] = """
+    type: command
+    short-summary: Update a subscription lock.
+    examples:
+        - name: Update a subscription lock with new notes and type
+          text: >
+            az account lock update --name lockName --notes newNotesHere --lock-type CanNotDelete
     """
 helps['policy'] = """
     type: group
@@ -483,6 +519,50 @@ helps['group deployment operation'] = """
     type: group
     short-summary: Manage deployment operations.
 """
+helps['group lock'] = """
+    type: group
+    short-summary: Manage Azure resource group locks.
+"""
+helps['group lock create'] = """
+    type: command
+    short-summary: Create a resource group lock.
+    examples:
+        - name: Create a read-only resource group level lock.
+          text: >
+            az group lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
+    """
+helps['group lock delete'] = """
+    type: command
+    short-summary: Delete a resource group lock.
+    examples:
+        - name: Delete a resource group lock
+          text: >
+            az group lock delete --name lockName -g MyResourceGroup
+    """
+helps['group lock list'] = """
+    type: command
+    short-summary: List lock information in the resource-group.
+    examples:
+        - name: List out all locks on the resource group level
+          text: >
+            az group lock list -g MyResourceGroup
+    """
+helps['group lock show'] = """
+    type: command
+    short-summary: Show the details of a resource group lock
+    examples:
+        - name: Show a resource group level lock
+          text: >
+            az group lock show -n lockname -g MyResourceGroup
+    """
+helps['group lock update'] = """
+    type: command
+    short-summary: Update a resource group lock.
+    examples:
+        - name: Update a resource group lock with new notes and type
+          text: >
+            az group lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
+    """
 helps['provider'] = """
     type: group
     short-summary: Manage resource providers.
@@ -575,3 +655,47 @@ helps['resource link show'] = """
           text: >
             az resource link show --link-id <link-id>
 """
+helps['resource lock'] = """
+    type: group
+    short-summary: Manage Azure resource level locks.
+"""
+helps['resource lock create'] = """
+    type: command
+    short-summary: Create a resource-level lock.
+    examples:
+        - name: Create a read-only resource level lock on a vnet.
+          text: >
+            az resource lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+    """
+helps['resource lock delete'] = """
+    type: command
+    short-summary: Delete a resource-level lock.
+    examples:
+        - name: Delete a resource level lock
+          text: >
+            az resource lock delete --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+    """
+helps['resource lock list'] = """
+    type: command
+    short-summary: List lock information in the resource-level.
+    examples:
+        - name: List out all locks on a vnet
+          text: >
+            az resource lock list -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+    """
+helps['resource lock show'] = """
+    type: command
+    short-summary: Show the details of a resource-level lock
+    examples:
+        - name: Show a resource level lock
+          text: >
+            az resource lock show -n lockname -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+    """
+helps['resource lock update'] = """
+    type: command
+    short-summary: Update a resource-level lock.
+    examples:
+        - name: Update a resource level lock with new notes and type
+          text: >
+            az resource lock update --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
+    """

@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* Azure Stack: handle adfs authority url with a trailing slash
+
 2.0.17 (2017-09-22)
 +++++++++++++++++++
 * minor fixes

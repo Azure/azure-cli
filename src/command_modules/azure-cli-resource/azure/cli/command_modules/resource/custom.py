@@ -1083,7 +1083,7 @@ def get_policy_assignment_completion_list(prefix, **kwargs):  # pylint: disable=
     return [i.name for i in result]
 
 
-def list_locks(resource_group_name=None,
+def list_locks(resource_group=None,
                resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                resource_name=None, filter_string=None):
     """
@@ -1099,7 +1099,7 @@ def list_locks(resource_group_name=None,
     :type filter_string: str
     """
     lock_client = _resource_lock_client_factory()
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
@@ -1178,14 +1178,14 @@ def _parse_lock_id(id_arg):
     Lock ids look very different from regular resource ids, this function uses a regular expression
     that parses a lock's id and extracts the following parameters if available:
     -lock_name: the lock's name; always present in a lock id
-    -resource_group_name: the name of the resource group; present in group/resource level locks
+    -resource_group: the name of the resource group; present in group/resource level locks
     -resource_provider_namespace: the resource provider; present in resource level locks
     -resource_type: the resource type; present in resource level locks
     -resource_name: the resource name; present in resource level locks
     -parent_resource_path: the resource's parent path; present in child resources such as subnets
     """
     regex = re.compile(
-        '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group_name>[^/]*)'
+        '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group>[^/]*)'
         '(/providers/(?P<resource_provider_namespace>[^/]*)'
         '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
         '/providers/Microsoft.Authorization/locks/(?P<lock_name>[^/]*)')
@@ -1199,7 +1199,7 @@ def _call_subscription_get(lock_client, *args):
     return lock_client.management_locks.get_at_subscription_level(*args)
 
 
-def get_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None,
+def get_lock(lock_name=None, resource_group=None, resource_provider_namespace=None,
              parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
@@ -1218,7 +1218,7 @@ def get_lock(lock_name=None, resource_group_name=None, resource_provider_namespa
 
     lock_client = _resource_lock_client_factory()
 
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
 
     resource_group_name = lock_resource[0]
@@ -1243,7 +1243,7 @@ def get_lock(lock_name=None, resource_group_name=None, resource_provider_namespa
         parent_resource_path or '', resource_type, resource_name, lock_name)
 
 
-def delete_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None,
+def delete_lock(lock_name=None, resource_group=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
@@ -1269,7 +1269,7 @@ def delete_lock(lock_name=None, resource_group_name=None, resource_provider_name
         return results[0] if len(results) == 1 else results
 
     lock_client = _resource_lock_client_factory()
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
@@ -1305,9 +1305,9 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(lock_name,
-                resource_group_name=None, resource_provider_namespace=None, notes=None,
-                parent_resource_path=None, resource_type=None, resource_name=None, level=None):
+def create_lock(lock_name, level,
+                resource_group=None, resource_provider_namespace=None, notes=None,
+                parent_resource_path=None, resource_type=None, resource_name=None):
     """
     :param name: The name of the lock.
     :type name: str
@@ -1322,12 +1322,10 @@ def create_lock(lock_name,
     :param notes: Notes about this lock.
     :type notes: str
     """
-    if level != 'ReadOnly' and level != 'CanNotDelete':
-        raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
     parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory()
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
@@ -1353,7 +1351,7 @@ def _update_lock_parameters(parameters, level, notes):
         parameters.notes = notes
 
 
-def update_lock(lock_name=None, resource_group_name=None, resource_provider_namespace=None, notes=None,
+def update_lock(lock_name=None, resource_group=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None, ids=None):
     """
     Allows updates to the lock-type(level) and the notes of the lock
@@ -1371,7 +1369,7 @@ def update_lock(lock_name=None, resource_group_name=None, resource_provider_name
 
     lock_client = _resource_lock_client_factory()
 
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
 
     resource_group_name = lock_resource[0]

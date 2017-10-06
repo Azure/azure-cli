@@ -3,10 +3,13 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+* File share snapshot
+
 2.0.16 (2017-09-22)
 +++++++++++++++++++
 * `storage account network-rule`: Fixed issue where commands may fail after updating the SDK.
-
 
 2.0.15 (2017-09-11)
 +++++++++++++++++++
@@ -26,7 +29,6 @@ Release History
 * Enable service encryption by customer managed key
 * Breaking change: rename --encryption option to --encryption-services for az storage account create and az storage account update command.
 * Fix #4220: az storage account update encryption - syntax mismatch
-
 
 2.0.12 (2017-08-11)
 +++++++++++++++++++
