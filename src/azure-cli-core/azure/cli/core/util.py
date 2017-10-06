@@ -140,7 +140,7 @@ def read_file_content(file_path, allow_binary=False):
             with open(file_path, 'rb') as input_file:
                 logger.debug("attempting to read file %s as binary", file_path)
                 return base64.b64encode(input_file.read()).decode("utf-8")
-        except:  # pylint: disable=bare-except
+        except Exception:  # pylint: disable=broad-except
             pass
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
