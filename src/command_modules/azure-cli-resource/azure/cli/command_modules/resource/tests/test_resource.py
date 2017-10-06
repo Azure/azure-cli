@@ -697,7 +697,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             JCheck('description', appdef_description),
             JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
             JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
             JCheck('artifacts[0].type', 'Template'),
             JCheck('artifacts[1].name', 'CreateUiDefinition'),
             JCheck('artifacts[1].type', 'Custom')
@@ -716,7 +716,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             JCheck('description', appdef_description),
             JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
             JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
             JCheck('artifacts[0].type', 'Template'),
             JCheck('artifacts[1].name', 'CreateUiDefinition'),
             JCheck('artifacts[1].type', 'Custom')
