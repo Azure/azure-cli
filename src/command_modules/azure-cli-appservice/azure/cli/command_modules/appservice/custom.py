@@ -1279,7 +1279,7 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
                                                    certificate_thumbprint, slot)
 
             query_result = list_hostnames(resource_group_name, name, slot)
-            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+            hostnames_in_webapp = [x.host_name_binding_name.split('/')[-1] for x in query_result]
             to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
             for h in to_update:
                 _update_host_name_ssl_state(resource_group_name, name, webapp.location,

@@ -83,7 +83,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
         result = add_hostname('g1', webapp.name, domain)
 
         # assert
-        self.assertEqual(result.name, domain)
+        self.assertEqual(result.domain_id, domain)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_get_external_ip_from_ase(self, client_factory_mock):
