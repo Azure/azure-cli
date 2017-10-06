@@ -27,8 +27,7 @@ logger = azlogging.get_az_logger(__name__)
 def _get_aad_token(login_server, only_refresh_token, repository=None, permission='*'):
     """Obtains refresh and access tokens for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
-    :param bool only_refresh_token: Whether to ask for only refresh token,
-            or for both refresh and access tokens
+    :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
@@ -124,8 +123,7 @@ def _get_credentials(registry_name,
     :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
-    :param bool only_refresh_token: Whether to ask for only refresh token,
-            or for both refresh and access tokens
+    :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
