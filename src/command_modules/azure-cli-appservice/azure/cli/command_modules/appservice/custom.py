@@ -508,7 +508,7 @@ def _mask_creds_related_appsettings(settings):
 def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     webapp = client.web_apps.get(resource_group_name, webapp_name)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
+    binding = HostNameBinding(webapp.location, name=hostname,
                               site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
@@ -529,7 +529,7 @@ def list_hostnames(resource_group_name, webapp_name, slot=None):
     result = list(_generic_site_operation(resource_group_name, webapp_name,
                                           'list_host_name_bindings', slot))
     for r in result:
-        r.host_name_binding_name = r.host_name_binding_name.split('/')[-1]
+        r.name = r.name.split('/')[-1]
     return result
 
 
@@ -1279,7 +1279,7 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
                                                    certificate_thumbprint, slot)
 
             query_result = list_hostnames(resource_group_name, name, slot)
-            hostnames_in_webapp = [x.host_name_binding_name.split('/')[-1] for x in query_result]
+            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
             to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
             for h in to_update:
                 _update_host_name_ssl_state(resource_group_name, name, webapp.location,

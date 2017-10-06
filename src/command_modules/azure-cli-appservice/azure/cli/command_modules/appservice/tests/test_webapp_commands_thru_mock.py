@@ -256,8 +256,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
         cert1 = Certificate('antarctica', host_names=[test_hostname])
         cert1.thumbprint = 't1'
         faked_web_client.certificates.list_by_resource_group.return_value = [cert1]
-        hostname_binding1 = HostNameBinding('antarctica', host_name_binding_name='web1/admin.foo.com')
-        hostname_binding2 = HostNameBinding('antarctica', host_name_binding_name='web1/logs.foo.com')
+        hostname_binding1 = HostNameBinding('antarctica', name='web1/admin.foo.com')
+        hostname_binding2 = HostNameBinding('antarctica', name='web1/logs.foo.com')
         site_op_mock.return_value = [hostname_binding1, hostname_binding2]
 
         # action
