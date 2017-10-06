@@ -9,8 +9,7 @@ from collections import OrderedDict
 from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import \
-    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
-     deployment_validate_table_format)
+    (cli_generic_update_command, cli_generic_wait_command, deployment_validate_table_format)
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
@@ -111,7 +110,7 @@ def transform_deployments_list(result):
     return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
 
-cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception)
+cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
 if supported_api_version(resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
     cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
