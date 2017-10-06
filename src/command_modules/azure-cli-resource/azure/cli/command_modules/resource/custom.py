@@ -921,12 +921,27 @@ def _resolve_policy_id(policy, policy_set_definition, client):
     policy_id = policy or policy_set_definition
     if not is_valid_resource_id(policy_id):
         if policy:
-            policy_def = client.policy_definitions.get(policy)
+            policy_def = _get_custom_or_builtin_policy(client, policy)
             policy_id = policy_def.id
         else:
-            policy_set_def = client.policy_set_definitions.get(policy_set_definition)
+            policy_set_def = _get_custom_or_builtin_policy(client, policy_set_definition, 'setdefinition')
             policy_id = policy_set_def.id
     return policy_id
+
+
+def _get_custom_or_builtin_policy(client, name, type='definition'):
+    if type != 'definition':
+        policy_set = client.policy_set_definitions.get(name)
+        if not policy_set:
+            return client.policy_set_definitions.get_built_in(name)
+        else:
+            return policy_set
+    else:
+        policy_def = client.policy_definitions.get(name)
+        if not policy_def:
+            return client.policy_definitions.get_built_in(name)
+        else:
+            return policy_def
 
 
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
@@ -974,7 +989,7 @@ def get_policy_definition(policy_definition_name):
     from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
     try:
-        return policy_client.policy_definitions.get(policy_definition_name)
+        return _get_custom_or_builtin_policy(policy_client, policy_definition_name)
     except CloudError as ex:
         if ex.status_code == 404:
             # work around for https://github.com/Azure/azure-cli/issues/692
@@ -988,7 +1003,7 @@ def get_policy_setdefinition(policy_set_definition_name):
     from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
     try:
-        return policy_client.policy_set_definitions.get(policy_set_definition_name)
+        return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, 'setdefinition')
     except CloudError as ex:
         if ex.status_code == 404:
             # work around for https://github.com/Azure/azure-cli/issues/692
@@ -1013,7 +1028,7 @@ def update_policy_definition(policy_definition_name, rules=None, params=None,
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
-    definition = policy_client.policy_definitions.get(policy_definition_name)
+    definition = _get_custom_or_builtin_policy(policy_client, policy_definition_name)
     # pylint: disable=line-too-long,no-member
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(
@@ -1039,7 +1054,7 @@ def update_policy_setdefinition(policy_set_definition_name, definitions=None, pa
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
-    definition = policy_client.policy_set_definitions.get(policy_set_definition_name)
+    definition = _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, 'setdefinition')
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
     parameters = PolicySetDefinition(
