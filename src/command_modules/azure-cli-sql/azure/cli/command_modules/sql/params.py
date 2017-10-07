@@ -344,7 +344,7 @@ with ParametersContext(command='sql db op') as c:
     c.argument('operation_id',
                options_list=('--name', '-n'),
                required=True,
-               help='The operation id.')
+               help='The unique name of the operation to cancel.')
 
 
 #####
