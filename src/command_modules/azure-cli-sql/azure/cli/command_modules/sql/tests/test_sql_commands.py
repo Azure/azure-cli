@@ -5,6 +5,7 @@
 
 import time
 
+from azure.cli.core.util import CLIError
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
@@ -1448,6 +1449,42 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         # JDBC, ADIntegrated
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryIntegrated')
+
+        # PHP PDO, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -u myuser -p mypassword').get_output_in_json()
+        self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "myuser", "mypassword");')
+
+        # PHP PDO, ADPassword
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -u myuser -p mypassword -a ADPassword')
+
+        # PHP PDO, ADIntegrated
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -u myuser -p mypassword -a ADIntegrated')
+
+        # PHP, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php -u myuser -p mypassword').get_output_in_json()
+        self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"myuser@myserver", "PWD"=>"mypassword", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
+
+        # PHP, ADPassword
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -u myuser -p mypassword -a ADPassword')
+
+        # PHP, ADIntegrated
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -u myuser -p mypassword -a ADIntegrated')
+
+        # ODBC, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -p mypassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=myuser@myserver;Pwd=mypassword;Encrypt=yes;TrustServerCertificate=no;')
+
+        # ODBC, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -p mypassword -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=myuser@myserver;Pwd=mypassword;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
+
+        # ODBCP, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryIntegrated')
 
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):

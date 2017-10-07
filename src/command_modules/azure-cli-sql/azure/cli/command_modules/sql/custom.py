@@ -65,7 +65,9 @@ class ClientType(Enum):
     ado_net = 'ado.net'
     sqlcmd = 'sqlcmd'
     jdbc = 'jdbc'
-
+    php_pdo = 'php_pdo'
+    php = 'php'
+    odbc = 'odbc'
 
 class ClientAuthenticationType(Enum):
     sql_password = 'SqlPassword'
@@ -81,9 +83,9 @@ def _get_server_dns_suffx():
 
 def db_show_conn_str(
         client,
-        database_name,
-        server_name,
         client_provider,
+        database_name='{your_db}',
+        server_name='{your_server}',
         auth_type=ClientAuthenticationType.sql_password.value,
         user='{your_username}',
         password='{your password}'):
@@ -135,10 +137,49 @@ def db_show_conn_str(
                 'encrypt=true;trustServerCertificate=false;'
                 'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
                 'authentication=ActiveDirectoryIntegrated',
+        },
+        ClientType.php_pdo.value: {
+            # pylint: disable=line-too-long
+            ClientAuthenticationType.sql_password.value:
+                '$conn = new PDO("sqlsrv:server = tcp:{server_fqdn},1433; Database = {db}; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "{user}", "{password}");',
+            ClientAuthenticationType.active_directory_password.value:
+                CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
+            ClientAuthenticationType.active_directory_integrated.value:
+                CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
+        },
+        ClientType.php.value: {
+            # pylint: disable=line-too-long
+            ClientAuthenticationType.sql_password.value:
+                '$connectionOptions = array("UID"=>"{user}@{server}", "PWD"=>"{password}", "Database"=>{db}, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:{server_fqdn},1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);',
+            ClientAuthenticationType.active_directory_password.value:
+                CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
+            ClientAuthenticationType.active_directory_integrated.value:
+                CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
+        },
+        ClientType.odbc.value: {
+            ClientAuthenticationType.sql_password.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Uid={user}@{server};Pwd={password};Encrypt=yes;'
+                'TrustServerCertificate=no;',
+            ClientAuthenticationType.active_directory_password.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Uid={user}@{server};Pwd={password};Encrypt=yes;'
+                'TrustServerCertificate=no;Authentication=ActiveDirectoryPassword',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Encrypt=yes;TrustServerCertificate=no;'
+                'Authentication=ActiveDirectoryIntegrated',
         }
     }
 
-    return formats[client_provider][auth_type].format(**conn_str_props)
+    f = formats[client_provider][auth_type]
+
+    if type(f) is CLIError:
+        # Error
+        raise f
+
+    # Success
+    return f.format(**conn_str_props)
 
 
 # Helper class to bundle up database identity properties
