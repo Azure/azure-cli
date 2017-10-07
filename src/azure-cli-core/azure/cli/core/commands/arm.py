@@ -39,18 +39,13 @@ def handle_long_running_operation_exception(ex):
         ex,
         fault_type='failed-long-running-operation',
         summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
+
     message = getattr(ex, 'message', ex)
     error_message = 'Deployment failed.'
 
     try:
-        correlation_id = json.loads(ex.response.content.decode())['properties']['correlationId']
+        correlation_id = ex.response.headers['x-ms-correlation-request-id']
         error_message = '{} Correlation ID: {}.'.format(error_message, correlation_id)
-    except:  # pylint: disable=bare-except
-        pass
-
-    try:
-        tracking_id = re.match(r".*(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})", str(message)).group(1)
-        error_message = '{} Tracking ID: {}.'.format(error_message, tracking_id)
     except:  # pylint: disable=bare-except
         pass
 

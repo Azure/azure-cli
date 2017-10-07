@@ -14,8 +14,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_rolling_upgrade_commands)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
-    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
-     deployment_validate_table_format)
+    (cli_generic_update_command, cli_generic_wait_command, deployment_validate_table_format)
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -114,7 +113,7 @@ def transform_sku_for_table_output(skus):
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
+cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait', table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True, no_wait_param='raw')
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm, no_wait_param='raw')
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm, no_wait_param='raw')
@@ -174,7 +173,7 @@ cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wa
 cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'), no_wait_param='no_wait')
 
 # # VM Availability Set
-cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format, no_wait_param='no_wait')
+cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), table_transformer=deployment_validate_table_format, no_wait_param='no_wait')
 
 op_var = 'availability_sets_operations'
 op_class = 'AvailabilitySetsOperations'
@@ -272,7 +271,7 @@ cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_
 
 cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_scale_set_vms_operations', 'VirtualMachineScaleSetVMsOperations', 'list'), cf_vmss_vm)
 
-cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception, table_transformer=deployment_validate_table_format)
+cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait', table_transformer=deployment_validate_table_format)
 cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'),
