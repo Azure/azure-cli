@@ -1482,7 +1482,7 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -p mypassword -a ADPassword').get_output_in_json()
         self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=myuser@myserver;Pwd=mypassword;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
 
-        # ODBCP, ADIntegrated
+        # ODBC, ADIntegrated
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryIntegrated')
 
