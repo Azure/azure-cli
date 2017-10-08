@@ -836,7 +836,7 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
                                      ignore_conflicting_host_names=ignore_hostname_conflict,
                                      app_service_plan=app_service_plan)
     if slot:
-        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request, slot)
+        return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
 
     return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
 
