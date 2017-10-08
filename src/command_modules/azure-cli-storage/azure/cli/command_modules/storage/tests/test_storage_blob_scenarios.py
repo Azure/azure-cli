@@ -24,7 +24,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         source_file = self.create_temp_file(16)
         source_account_info = self.get_account_info(resource_group, source_account)
         source_container = self.create_container(source_account_info)
-        self.storage_cmd('storage blob upload -c {} -n src -f {} -t page', source_account_info,
+        self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', source_account_info,
                          source_container, source_file)
 
         snapshot = self.storage_cmd('storage blob snapshot -c {} -n src', source_account_info,
@@ -41,7 +41,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     def test_storage_blob_no_credentials_scenario(self):
         source_file = self.create_temp_file(1)
         with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
-            self.cmd('storage blob upload -c foo -n bar -f ' + source_file)
+            self.cmd('storage blob upload -c foo -n bar -f "' + source_file + '"')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -65,7 +65,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-        self.storage_cmd('storage blob upload -c {} -f {} -n {} --type {}', account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {}', account_info,
                          container, local_file, blob_name, blob_type)
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
@@ -94,7 +94,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
 
-            self.storage_cmd('storage blob download -n {} -c {} --file {}',
+            self.storage_cmd('storage blob download -n {} -c {} --file "{}"',
                              account_info, blob_name, container, downloaded)
             self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
             self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
@@ -138,7 +138,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
         date = '2016-04-01t12:00z'
 
-        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, local_file)
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
 
         # test lease operations
         self.storage_cmd('storage blob lease acquire --lease-duration 60 -b {} -c {} '
@@ -178,7 +178,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
 
-        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, local_file)
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
 
         snapshot_dt = self.storage_cmd('storage blob snapshot -c {} -n {}', account_info, c, b) \
             .get_output_in_json()['snapshot']
@@ -193,7 +193,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
 
-        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, __file__)
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, __file__)
         self.storage_cmd('storage blob metadata update -n {} -c {} --metadata a=b c=d',
                          account_info, b, c)
         self.storage_cmd('storage blob metadata show -n {} -c {}', account_info, b, c) \
