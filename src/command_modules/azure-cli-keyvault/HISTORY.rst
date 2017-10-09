@@ -2,8 +2,8 @@
 
 Release History
 ===============
-unreleased
-++++++++++
+2.0.12 (2017-10-09)
++++++++++++++++++++
 * Fixed Key Vault authentication issue when using ADFS on Azure Stack. https://github.com/Azure/azure-cli/issues/4448
 
 2.0.11 (2017-09-22)

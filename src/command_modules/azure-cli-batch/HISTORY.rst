@@ -3,7 +3,7 @@
 Release History
 ===============
 
-3.1.5 (Unreleased)
+3.1.5 (2017-10-09)
 ++++++++++++++++++
 * Updated to Batch SDK 4.0.0.
 * Updated --image option of VirtualMachineConfiguration to support ARM image references in addition to publish:offer:sku:version.

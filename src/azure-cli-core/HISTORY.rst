@@ -2,7 +2,7 @@
 
 Release History
 ===============
-(unreleased)
+2.0.18 (2017-10-09)
 +++++++++++++++++++
 * Azure Stack: handle adfs authority url with a trailing slash
 
@@ -10,8 +10,8 @@ Release History
 +++++++++++++++++++
 * minor fixes
 
-unreleased
-++++++++++
+2.0.18 (2017-10-09)
++++++++++++++++++++
 
 * Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
 * More user-friendly handling of invalid cloud configurations
