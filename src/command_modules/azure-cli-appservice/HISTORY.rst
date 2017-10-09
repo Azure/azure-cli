@@ -2,8 +2,8 @@
 
 Release History
 ===============
-unreleased
-++++++++++
+0.1.18 (2017-10-09)
++++++++++++++++++++
 * webapp: added generic update with new command: 'az webapp update'
 
 0.1.17 (2017-09-22)
