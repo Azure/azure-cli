@@ -30,7 +30,8 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-monitor==0.3.0',
-    'azure-mgmt-monitor==0.2.1'
+    'azure-mgmt-monitor==0.3.0',
+    'azure-mgmt-resource==1.2.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
