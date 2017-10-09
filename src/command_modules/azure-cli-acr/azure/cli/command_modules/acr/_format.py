@@ -75,6 +75,7 @@ def _format_group(item):
         if len(item['passwords']) > 1 and 'value' in item['passwords'][1]:
             table_info['PASSWORD2'] = item['passwords'][1]['value']
     # Parse webhook list-events
+    table_info['ID'] = item['id'] if 'id' in item and item['id'] and '/subscriptions/' not in item['id'] else None
     if 'eventRequestMessage' in item and item['eventRequestMessage'] and \
        'content' in item['eventRequestMessage'] and item['eventRequestMessage']['content']:
         requestContent = item['eventRequestMessage']['content']
@@ -89,10 +90,8 @@ def _format_group(item):
             table_info['TIMESTAMP'] = requestContent['timestamp']
     if 'eventResponseMessage' in item and item['eventResponseMessage']:
         responseMessage = item['eventResponseMessage']
-        if 'statusCode' in responseMessage:
-            table_info['RESPONSE STATUS'] = responseMessage['statusCode']
-        if 'reasonPhrase' in responseMessage and responseMessage['reasonPhrase']:
-            table_info['RESPONSE STATUS'] = '{} {}'.format(table_info['RESPONSE STATUS'],
-                                                           responseMessage['reasonPhrase'])
+        if 'statusCode' in responseMessage or 'reasonPhrase' in responseMessage:
+            table_info['RESPONSE STATUS'] = '{} {}'.format(
+                responseMessage['statusCode'], responseMessage['reasonPhrase'])
 
     return OrderedDict(sorted(table_info.items(), key=lambda t: _order_map[t[0]]))
