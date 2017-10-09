@@ -537,6 +537,17 @@ class PolicyScenarioTest(ScenarioTest):
                     JCheck('notScopes[0]', notscope)
                  ])
 
+        # create a policy assignment using a built in policy definition name
+        policy_assignment_name2 = self.create_random_name('azurecli-test-policy-assignment2', 40)
+        built_in_policy = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
+        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
+                 built_in_policy['name'], policy_assignment_name2, policy_assignment_display_name, resource_group),
+                 checks=[
+                    JCheck('name', policy_assignment_name2),
+                    JCheck('displayName', policy_assignment_display_name)
+                 ])
+        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name2, resource_group))
+
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
