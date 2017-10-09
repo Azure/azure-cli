@@ -931,14 +931,18 @@ def _resolve_policy_id(policy, policy_set_definition, client):
 
 def _get_custom_or_builtin_policy(client, name, resourcetype='definition'):
     if resourcetype != 'definition':
-        policy_set = client.policy_set_definitions.get(name)
-        if not policy_set:
-            return client.policy_set_definitions.get_built_in(name)
-        return policy_set
-    policy_def = client.policy_definitions.get(name)
-    if not policy_def:
-        return client.policy_definitions.get_built_in(name)
-    return policy_def
+        try:
+            return client.policy_set_definitions.get(name)
+        except Exception as ex:
+            if ex.response.status_code == 404:
+                return client.policy_set_definitions.get_built_in(name)
+
+    from msrestazure.azure_exceptions import CloudError
+    try:
+        return client.policy_definitions.get(name)
+    except CloudError as ex:
+        if ex.status_code == 404:
+            return client.policy_definitions.get_built_in(name)
 
 
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
