@@ -1102,6 +1102,21 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(token, 'new token')
         self.assertEqual(token_type, token_entry2['tokenType'])
 
+    @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
+    def test_credscache_load_tokens_and_sp_creds_with_secret(self, mock_read_file):
+        mock_read_file.side_effect = ValueError('a bad error for you')
+
+        # action
+        creds_cache = CredsCache(async_persist=False)
+
+        # assert
+        with self.assertRaises(CLIError) as context:
+            creds_cache.load_adal_token_cache()
+
+        self.assertEqual(str(context.exception), "Failed to load token files. You can reset it by running "
+                         "'az account clear' and then 'az login'. Error: a bad error for you")
+        
+
     def test_service_principal_auth_client_secret(self):
         sp_auth = ServicePrincipalAuth('verySecret!')
         result = sp_auth.get_entry_to_persist('sp_id1', 'tenant1')

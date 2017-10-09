@@ -81,7 +81,11 @@ logger.debug('Current cloud config:\n%s', str(CLOUD))
 def _load_tokens_from_file(file_path):
     all_entries = []
     if os.path.isfile(file_path):
-        all_entries = get_file_json(file_path, throw_on_empty=False) or []
+        try:
+            all_entries = get_file_json(file_path, throw_on_empty=False) or []
+        except Exception as ex:
+            raise CLIError("Failed to load token files. You can reset it by running 'az account clear' and then "
+                           "'az login'. Error: {}".format(ex))
     return all_entries
 
 
