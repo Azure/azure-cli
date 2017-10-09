@@ -4,6 +4,7 @@ Release History
 ===============
 (unreleased)
 +++++++++++++++++++
+* `vm show`: fix a bug when using '-d' crashes on missing private ip addresses
 * `vmss create`: (PREVIEW) support rolling upgrade
 * `vm encryption enable`: allow updating encryption settings by rerunning the command
 * `vm create`: expose --os-disk-size-gb

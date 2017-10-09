@@ -72,16 +72,16 @@ def update_cluster_create_parameters_with_env_variables(params):
             if ref.azure_file_url and AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER in ref.azure_file_url:
                 ref.azure_file_url = ref.azure_file_url.replace(
                     AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER, storage_account_name)
-            if ref.credentials_info and ref.credentials_info.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
-                ref.credentials_info.account_key = storage_account_key
-            if not ref.credentials_info:
-                ref.credentials_info = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
+            if ref.credentials and ref.credentials.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
+                ref.credentials.account_key = storage_account_key
+            if not ref.credentials:
+                ref.credentials = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
 
             # Verify that all placeholders are replaced with real values.
             if (ref.account_name == AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER or
                     AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER in ref.azure_file_url):
                 raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)
-            if ref.credentials_info.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
+            if ref.credentials.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
                 raise CLIError(MSG_CONFIGURE_STORAGE_KEY)
 
     # Patch parameters of blob file system.
@@ -91,15 +91,14 @@ def update_cluster_create_parameters_with_env_variables(params):
         for ref in params.node_setup.mount_volumes.azure_blob_file_systems:
             if ref.account_name == AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER:
                 ref.account_name = storage_account_name
-            if ref.credentials_info and ref.credentials_info.account_key == \
-                    AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
-                ref.credentials_info.account_key = storage_account_key
-            if not ref.credentials_info:
-                ref.credentials_info = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
+            if ref.credentials and ref.credentials.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
+                ref.credentials.account_key = storage_account_key
+            if not ref.credentials:
+                ref.credentials = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
             # Verify that all placeholders are replaced with real values.
             if ref.account_name == AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER:
                 raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)
-            if ref.credentials_info.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
+            if ref.credentials.account_key == AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER:
                 raise CLIError(MSG_CONFIGURE_STORAGE_KEY)
 
 
@@ -191,7 +190,7 @@ def add_azure_file_share_to_cluster_create_parameters(params, azure_file_share, 
         relative_mount_path=mount_path,
         account_name=storage_account_name,
         azure_file_url='https://{0}.file.core.windows.net/{1}'.format(storage_account_name, azure_file_share),
-        credentials_info=models.AzureStorageCredentialsInfo(storage_account_key)))
+        credentials=models.AzureStorageCredentialsInfo(storage_account_key)))
 
 
 def add_azure_container_to_cluster_create_parameters(params, container_name, mount_path):
@@ -219,8 +218,7 @@ def add_azure_container_to_cluster_create_parameters(params, container_name, mou
         relative_mount_path=mount_path,
         account_name=storage_account_name,
         container_name=container_name,
-        credentials_info=models.AzureStorageCredentialsInfo(
-            account_key=storage_account_key)))
+        credentials=models.AzureStorageCredentialsInfo(account_key=storage_account_key)))
 
 
 def get_image_reference_or_die(image):

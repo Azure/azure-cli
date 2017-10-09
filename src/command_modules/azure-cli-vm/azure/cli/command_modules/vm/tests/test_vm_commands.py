@@ -2316,6 +2316,65 @@ class VMSSRollingUpgrade(ScenarioTest):
         # 'cancel' should fail as we have no active upgrade to cancel
         self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
 
+
+class VMLBIntegrationTesting(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_vm_lb_integration(self, resource_group):
+        lb_name = 'lb1'
+        vm1 = 'vm1'
+        vm2 = 'vm2'
+        av_set = 'av1'
+        # provision 2 web servers
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, av_set))
+        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {} --generate-ssh-keys'.format(resource_group, vm1, av_set))
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm1))
+        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {} --generate-ssh-keys'.format(resource_group, vm2, av_set))
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm2))
+
+        # provision 1 LB
+        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
+
+        # create LB probe and rule
+        self.cmd('network lb probe create -g {} --lb-name {} -n probe1 --protocol Http --port 80 --path /'.format(resource_group, lb_name))
+        self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol Tcp --frontend-port 80 --backend-port 80'.format(resource_group, lb_name))
+
+        # add 2 vm into BE Pool
+        self.cmd('network nic ip-config address-pool add -g {0} --lb-name {1} --address-pool {1}bepool --nic-name {2}VMNic --ip-config-name ipconfig{2}'.format(resource_group, lb_name, vm1))
+        self.cmd('network nic ip-config address-pool add -g {0} --lb-name {1} --address-pool {1}bepool --nic-name {2}VMNic --ip-config-name ipconfig{2}'.format(resource_group, lb_name, vm2))
+
+        # Create Inbound Nat Rules so each VM can be accessed through SSH
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n inbound-nat-rule1 --frontend-port 50000 --backend-port 22  --protocol Tcp'.format(resource_group, lb_name))
+        self.cmd('network nic ip-config inbound-nat-rule add -g {0} --lb-name {1} --nic-name {2}VMNic --ip-config-name ipconfig{2} --inbound-nat-rule inbound-nat-rule1'.format(resource_group, lb_name, vm1))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n inbound-nat-rule2 --frontend-port 50001 --backend-port 22  --protocol Tcp'.format(resource_group, lb_name))
+        self.cmd('network nic ip-config inbound-nat-rule add -g {0} --lb-name {1} --nic-name {2}VMNic --ip-config-name ipconfig{2} --inbound-nat-rule inbound-nat-rule2'.format(resource_group, lb_name, vm2))
+
+        # install nginx web servers
+        self.cmd('vm run-command invoke -g {} -n {} --command-id RunShellScript --scripts "sudo apt-get install -y nginx"'.format(resource_group, vm1))
+        self.cmd('vm run-command invoke -g {} -n {} --command-id RunShellScript --scripts "sudo apt-get install -y nginx"'.format(resource_group, vm2))
+
+        # ensure all pieces are working together
+        result = self.cmd('network public-ip show -g {} -n PublicIP{}'.format(resource_group, lb_name)).get_output_in_json()
+        pip = result['ipAddress']
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + pip)
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+
+class VMScaffoldingTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_create_vm_from_existing_nic(self, resource_group):
+        import re
+        self.cmd('network public-ip create -g {} -n my-pip'.format(resource_group))
+        self.cmd('network vnet create -g {} -n my-vnet --subnet-name my-subnet1'.format(resource_group))
+        self.cmd('network nic create -g {} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip'.format(resource_group))
+        self.cmd('network nic ip-config create -n my-ipconfig2 -g {} --nic-name my-nic --private-ip-address-version IPv6'.format(resource_group))
+        self.cmd('vm create -g {} -n vm1 --image ubuntults --nics my-nic --generate-ssh-keys'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1 -d'.format(resource_group)).get_output_in_json()
+        self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
+        self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
+
 # endregion
 
 

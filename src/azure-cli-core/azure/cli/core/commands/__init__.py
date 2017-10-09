@@ -598,32 +598,26 @@ def create_command(module_name, name, operation,
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)
-            for _ in range(2):  # for possible retry, we do maximum 2 times.
-                try:
-                    result = op(client, **kwargs) if client else op(**kwargs)
-                    if no_wait_param and kwargs.get(no_wait_param, None):
-                        return None  # return None for 'no-wait'
+            try:
+                result = op(client, **kwargs) if client else op(**kwargs)
+                if no_wait_param and kwargs.get(no_wait_param, None):
+                    return None  # return None for 'no-wait'
 
-                    # apply results transform if specified
-                    if transform_result:
-                        return transform_result(result)
+                # apply results transform if specified
+                if transform_result:
+                    return transform_result(result)
 
-                    # otherwise handle based on return type of results
-                    if _is_poller(result):
-                        return LongRunningOperation('Starting {}'.format(name))(result)
-                    elif _is_paged(result):
-                        return list(result)
-                    return result
-                except Exception as ex:  # pylint: disable=broad-except
-                    rp = _check_rp_not_registered_err(ex)
-                    if rp:
-                        _register_rp(rp)
-                        continue  # retry
-                    if exception_handler:
-                        exception_handler(ex)
-                        return
-                    else:
-                        reraise(*sys.exc_info())
+                # otherwise handle based on return type of results
+                if _is_poller(result):
+                    return LongRunningOperation('Starting {}'.format(name))(result)
+                elif _is_paged(result):
+                    return list(result)
+                return result
+            except Exception as ex:  # pylint: disable=broad-except
+                if exception_handler:
+                    exception_handler(ex)
+                else:
+                    reraise(*sys.exc_info())
         except _load_validation_error_class() as validation_error:
             fault_type = name.replace(' ', '-') + '-validation-error'
             telemetry.set_exception(validation_error, fault_type=fault_type,
@@ -675,31 +669,6 @@ def _user_confirmed(confirmation, command_args):
     except NoTTYException:
         logger.warning('Unable to prompt for confirmation as no tty available. Use --yes.')
         return False
-
-
-def _check_rp_not_registered_err(ex):
-    try:
-        response = json.loads(ex.response.content.decode())
-        if response['error']['code'] == 'MissingSubscriptionRegistration':
-            match = re.match(r".*'(.*)'", response['error']['message'])
-            return match.group(1)
-    except Exception:  # pylint: disable=broad-except
-        pass
-    return None
-
-
-def _register_rp(rp):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
-    logger.warning("Resource provider '%s' used by the command is not "
-                   "registered. We are registering for you", rp)
-    rcf.providers.register(rp)
-    while True:
-        time.sleep(10)
-        rp_info = rcf.providers.get(rp)
-        if rp_info.registration_state == 'Registered':
-            logger.warning("Registration succeeded.")
-            break
 
 
 def _get_cli_argument(command, argname):

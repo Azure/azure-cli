@@ -139,17 +139,13 @@ class TestBatchAICustom(unittest.TestCase):
                     relative_mount_path='azfiles',
                     account_name='<AZURE_BATCHAI_STORAGE_ACCOUNT>',
                     azure_file_url='https://<AZURE_BATCHAI_STORAGE_ACCOUNT>.file.core.windows.net/share',
-                    credentials_info=AzureStorageCredentialsInfo(
-                        account_key='<AZURE_BATCHAI_STORAGE_KEY>'
-                    )
+                    credentials=AzureStorageCredentialsInfo(account_key='<AZURE_BATCHAI_STORAGE_KEY>')
                 )],
                 azure_blob_file_systems=[AzureBlobFileSystemReference(
                     relative_mount_path='blobfs',
                     container_name='container',
                     account_name='<AZURE_BATCHAI_STORAGE_ACCOUNT>',
-                    credentials_info=AzureStorageCredentialsInfo(
-                        account_key='<AZURE_BATCHAI_STORAGE_KEY>'
-                    )
+                    credentials=AzureStorageCredentialsInfo(account_key='<AZURE_BATCHAI_STORAGE_KEY>')
                 )]
             )))
 
@@ -164,9 +160,9 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
         update_cluster_create_parameters_with_env_variables(params)
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
-        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials_info.account_key, 'key')
+        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
         self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
-        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials_info.account_key,
+        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key,
                           'key')
 
         # Test a case when no patching required.
@@ -176,9 +172,9 @@ class TestBatchAICustom(unittest.TestCase):
 
         # Check that no patching has been done.
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
-        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials_info.account_key, 'key')
+        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
         self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
-        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials_info.account_key,
+        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key,
                           'key')
 
     def test_batchai_add_nfs_to_cluster_create_parameters(self):
@@ -223,7 +219,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].azure_file_url,
                           'https://account.file.core.windows.net/share')
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].relative_mount_path, 'relative_path')
-        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials_info.account_key, 'key')
+        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
 
     def test_batchai_add_azure_container_to_cluster_create_parameters(self):
         """Test adding of azure file share into cluster create parameters."""
@@ -251,7 +247,7 @@ class TestBatchAICustom(unittest.TestCase):
                           'container')
         self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].relative_mount_path,
                           'relative_path')
-        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials_info.account_key,
+        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key,
                           'key')
 
     def test_batchai_update_nodes_information(self):

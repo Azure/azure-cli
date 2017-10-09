@@ -180,7 +180,8 @@ def get_vm_details(resource_group_name, vm_name):
         if nic.mac_address:
             mac_addresses.append(nic.mac_address)
         for ip_configuration in nic.ip_configurations:
-            private_ips.append(ip_configuration.private_ip_address)
+            if ip_configuration.private_ip_address:
+                private_ips.append(ip_configuration.private_ip_address)
             if ip_configuration.public_ip_address:
                 res = parse_resource_id(ip_configuration.public_ip_address.id)
                 public_ip_info = network_client.public_ip_addresses.get(res['resource_group'],
