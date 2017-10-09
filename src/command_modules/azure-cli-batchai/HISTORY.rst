@@ -3,7 +3,7 @@
 Release History
 ===============
 
-(unreleased)
+0.1.1 (2017-10-09)
 ++++++++++++++++++
 
 * Initial release of Batch AI module.
