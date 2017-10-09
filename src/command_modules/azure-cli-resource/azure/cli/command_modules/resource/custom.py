@@ -931,12 +931,15 @@ def _resolve_policy_id(policy, policy_set_definition, client):
 
 def _get_custom_or_builtin_policy(client, name, resourcetype='definition'):
     if resourcetype != 'definition':
-        errorObject = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'ErrorResponseException', mod='models')
-        try:
-            return client.policy_set_definitions.get(name)
-        except errorObject as ex:
-            if ex.response.status_code == 404:
-                return client.policy_set_definitions.get_built_in(name)
+        if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+            errorObject = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'ErrorResponseException', mod='models')
+            try:
+                return client.policy_set_definitions.get(name)
+            except errorObject as ex:
+                if ex.response.status_code == 404:
+                    return client.policy_set_definitions.get_built_in(name)
+        raise CLIError('policy set definitions are only supported with api-versions '
+                       '2017-06-01-preview and above')
 
     from msrestazure.azure_exceptions import CloudError
     try:
