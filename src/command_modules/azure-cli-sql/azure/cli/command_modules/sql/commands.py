@@ -12,6 +12,7 @@ from ._util import (
     get_sql_capabilities_operations,
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
+    get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
     get_sql_database_transparent_data_encryption_activities_operations,
     get_sql_database_transparent_data_encryptions_operations,
@@ -88,6 +89,14 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
         # with s.group('sql db service-tier-advisor') as c:
         #     c.command('list', 'list_service_tier_advisors')
         #     c.command('show', 'get_service_tier_advisor')
+
+    database_operations_operations = create_service_adapter('azure.mgmt.sql.operations.database_operations',
+                                                            'DatabaseOperations')
+    with ServiceGroup(__name__, get_sql_database_operations_operations,
+                      database_operations_operations, custom_path) as s:
+        with s.group('sql db op') as c:
+            c.command('list', 'list_by_database')
+            c.command('cancel', 'cancel')
 
     transparent_data_encryptions_operations = create_service_adapter(
         'azure.mgmt.sql.operations.transparent_data_encryptions_operations',

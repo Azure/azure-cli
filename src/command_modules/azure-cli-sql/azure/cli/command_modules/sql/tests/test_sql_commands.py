@@ -305,6 +305,41 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        update_service_objective = 'S1'
+
+        # Create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # Update DB with --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --no-wait'
+                 .format(resource_group, server, database_name, update_service_objective))
+
+        # List operations
+        ops = list(
+            self.cmd('sql db op list -g {} -s {} -d {}'
+                     .format(resource_group, server, database_name, update_service_objective),
+                     checks=[
+                         JMESPathCheck('length(@)', 1),
+                         JMESPathCheck('[0].resourceGroup', resource_group),
+                         JMESPathCheck('[0].databaseName', database_name)
+                     ])
+            .get_output_in_json())
+
+        # Cancel operation
+        self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
+                 .format(resource_group, server, database_name, ops[0]['name']))
+
+
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()

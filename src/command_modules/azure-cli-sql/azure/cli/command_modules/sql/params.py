@@ -332,6 +332,22 @@ with ParametersContext(command='sql db import') as c:
 
 
 #####
+#           sql db op
+#####
+
+with ParametersContext(command='sql db op') as c:
+    c.argument('database_name',
+               options_list=('--database', '-d'),
+               required=True,
+               help='Name of the Azure SQL Database.')
+
+    c.argument('operation_id',
+               options_list=('--name', '-n'),
+               required=True,
+               help='The unique name of the operation to cancel.')
+
+
+#####
 #           sql db replica
 #####
 
@@ -464,7 +480,7 @@ with ParametersContext(command='sql db tde') as c:
     c.argument('database_name',
                options_list=('--database', '-d'),
                required=True,
-               help='Name of the Azure Sql Database.')
+               help='Name of the Azure SQL Database.')
 
 with ParametersContext(command='sql db tde set') as c:
     c.argument('status',
