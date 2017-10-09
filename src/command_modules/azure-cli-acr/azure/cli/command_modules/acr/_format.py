@@ -5,7 +5,7 @@
 
 from collections import OrderedDict
 
-_registry_map = {
+_property_map = {
     'name': 'NAME',
     'resourceGroup': 'RESOURCE GROUP',
     'location': 'LOCATION',
@@ -40,7 +40,12 @@ _order_map = {
     'HEADERS': 45,
     'LIMIT': 51,
     'CURRENT VALUE': 52,
-    'UNIT': 53
+    'UNIT': 53,
+    'ID': 61,
+    'ACTION': 62,
+    'IMAGE': 63,
+    'RESPONSE STATUS': 64,
+    'TIMESTAMP': 65
 }
 
 
@@ -58,16 +63,36 @@ def _format_group(item):
     """Returns an ordered dictionary of the container registry.
     :param dict item: The container registry object
     """
-    registry_info = {_registry_map[key]: str(item[key]) for key in item if key in _registry_map}
+    table_info = {_property_map[key]: str(item[key]) for key in item if key in _property_map}
 
     if 'sku' in item and 'name' in item['sku']:
-        registry_info['SKU'] = item['sku']['name']
+        table_info['SKU'] = item['sku']['name']
     if 'username' in item:
-        registry_info['USERNAME'] = item['username']
+        table_info['USERNAME'] = item['username']
     if 'passwords' in item:
         if item['passwords'] and 'value' in item['passwords'][0]:
-            registry_info['PASSWORD'] = item['passwords'][0]['value']
+            table_info['PASSWORD'] = item['passwords'][0]['value']
         if len(item['passwords']) > 1 and 'value' in item['passwords'][1]:
-            registry_info['PASSWORD2'] = item['passwords'][1]['value']
+            table_info['PASSWORD2'] = item['passwords'][1]['value']
+    # Parse webhook list-events
+    if 'eventRequestMessage' in item and item['eventRequestMessage'] and \
+       'content' in item['eventRequestMessage'] and item['eventRequestMessage']['content']:
+        requestContent = item['eventRequestMessage']['content']
+        if 'action' in requestContent:
+            table_info['ACTION'] = requestContent['action']
+        if 'target' in requestContent and requestContent['target'] and \
+           'repository' in requestContent['target'] and requestContent['target']['repository']:
+            tag = requestContent['target']['tag'] if 'tag' in requestContent['target'] else None
+            table_info['IMAGE'] = '{}:{}'.format(requestContent['target']['repository'], tag) if tag \
+            else requestContent['target']['repository']
+        if 'timestamp' in requestContent:
+            table_info['TIMESTAMP'] = requestContent['timestamp']
+    if 'eventResponseMessage' in item and item['eventResponseMessage']:
+        responseMessage = item['eventResponseMessage']
+        if 'statusCode' in responseMessage:
+            table_info['RESPONSE STATUS'] = responseMessage['statusCode']
+        if 'reasonPhrase' in responseMessage and responseMessage['reasonPhrase']:
+            table_info['RESPONSE STATUS'] = '{} {}'.format(table_info['RESPONSE STATUS'],
+                                                           responseMessage['reasonPhrase'])
 
-    return OrderedDict(sorted(registry_info.items(), key=lambda t: _order_map[t[0]]))
+    return OrderedDict(sorted(table_info.items(), key=lambda t: _order_map[t[0]]))
