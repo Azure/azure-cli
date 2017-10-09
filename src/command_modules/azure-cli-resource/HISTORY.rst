@@ -2,7 +2,7 @@
 
 Release History
 ===============
-unreleased
+2.0.16 (2017-10-09)
 +++++++++++++++++++
 * group: permit --resource-group/-g options for resource group name.
 * `account lock`: lock commands to work specifically with subscription level locks
