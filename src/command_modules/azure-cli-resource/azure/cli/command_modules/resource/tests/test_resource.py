@@ -678,7 +678,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
 
     @ResourceGroupPreparer()
-    def test_managedappdefInline(self, resource_group):
+    def test_managedappdef_inline(self, resource_group):
         location = 'eastus2euap'
         appdef_name = self.create_random_name('testappdefname', 20)
         appdef_display_name = self.create_random_name('test_appdef', 20)
