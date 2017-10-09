@@ -84,8 +84,8 @@ def _format_group(item):
         if 'target' in requestContent and requestContent['target'] and \
            'repository' in requestContent['target'] and requestContent['target']['repository']:
             tag = requestContent['target']['tag'] if 'tag' in requestContent['target'] else None
-            table_info['IMAGE'] = '{}:{}'.format(requestContent['target']['repository'], tag) if tag \
-            else requestContent['target']['repository']
+            table_info['IMAGE'] = '{}:{}'.format(
+                requestContent['target']['repository'], tag) if tag else requestContent['target']['repository']
         if 'timestamp' in requestContent:
             table_info['TIMESTAMP'] = requestContent['timestamp']
     if 'eventResponseMessage' in item and item['eventResponseMessage']:
