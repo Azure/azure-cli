@@ -32,6 +32,10 @@ def get_sql_databases_operations(kwargs):
     return get_sql_management_client(kwargs).databases
 
 
+def get_sql_database_operations_operations(kwargs):
+    return get_sql_management_client(kwargs).database_operations
+
+
 def get_sql_database_blob_auditing_policies_operations(kwargs):
     return get_sql_management_client(kwargs).database_blob_auditing_policies
 
