@@ -102,9 +102,11 @@ for command_group_name in ['mysql', 'postgres']:
     register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'firewall_rule_name', options_list=('--name', '-n'), id_part='child_name',
                           help='The name of the firewall rule.')
     register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'start_ip_address', options_list=('--start-ip-address',),
-                          help='The start IP address of the firewall rule. Must be IPv4 format.')
+                          help='The start IP address of the firewall rule. Must be IPv4 format. Use value'
+                          ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
     register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'end_ip_address', options_list=('--end-ip-address',),
-                          help='The end IP address of the firewall rule. Must be IPv4 format.')
+                          help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
+                          ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
     register_cli_argument('{0} server configuration'.format(command_group_name), 'server_name', options_list=('--server-name', '-s'))
     register_cli_argument('{0} server configuration'.format(command_group_name), 'configuration_name', id_part='child_name', options_list=('--name', '-n'))
