@@ -80,7 +80,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation()(poller)
-    
+
     if app_settings:
         for setting in app_settings:
             logger.info('Will set appsetting %s', setting)
@@ -414,8 +414,8 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
     if slot is None:
         return client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties) # pylint: disable=line-too-long
-    else:
-        return client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties) # pylint: disable=line-too-long
+
+    return client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties) # pylint: disable=line-too-long
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
@@ -613,7 +613,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     else:
         from azure.mgmt.web.models import SiteSourceControl, SourceControl
         if git_token:
-            sc = SourceControl(location, name='GitHub', token=git_token)
+            sc = SourceControl(location, token=git_token)
             client.update_source_control('GitHub', sc)
 
         source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
