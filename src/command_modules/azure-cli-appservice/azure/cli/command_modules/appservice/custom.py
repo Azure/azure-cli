@@ -508,8 +508,7 @@ def _mask_creds_related_appsettings(settings):
 def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     webapp = client.web_apps.get(resource_group_name, webapp_name)
-    binding = HostNameBinding(webapp.location, name=hostname,
-                              site_name=webapp.name)
+    binding = HostNameBinding(webapp.location, site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(resource_group_name, webapp.name, hostname, binding)
 

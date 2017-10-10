@@ -243,31 +243,6 @@ class Test_Webapp_Mocked(unittest.TestCase):
         result = _match_host_names_from_cert(['*.mysite.com', 'mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])
         self.assertEqual(set(['admin.mysite.com', 'log.mysite.com', 'mysite.com']), result)
 
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._update_host_name_ssl_state', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.show_webapp', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    def test_update_host_certs(self, client_mock, show_webapp_mock, host_ssl_update_mock, site_op_mock):
-        faked_web_client = mock.MagicMock()
-        client_mock.return_value = faked_web_client
-        faked_site = Site('antarctica', server_farm_id='/subscriptions/foo/resourceGroups/foo/providers/Microsoft.Web/serverfarms/big_plan')
-        faked_web_client.web_apps.get.side_effect = [faked_site, faked_site]
-        test_hostname = '*.foo.com'
-        cert1 = Certificate('antarctica', host_names=[test_hostname])
-        cert1.thumbprint = 't1'
-        faked_web_client.certificates.list_by_resource_group.return_value = [cert1]
-        hostname_binding1 = HostNameBinding('antarctica', host_name_binding_name='web1/admin.foo.com')
-        hostname_binding2 = HostNameBinding('antarctica', host_name_binding_name='web1/logs.foo.com')
-        site_op_mock.return_value = [hostname_binding1, hostname_binding2]
-
-        # action
-        bind_ssl_cert('rg1', 'myweb', 't1', SslState.sni_enabled)
-
-        # assert
-        self.assertEqual(len(host_ssl_update_mock.call_args_list), 2)
-        host_names_updated = set([x[0][3] for x in host_ssl_update_mock.call_args_list])
-        self.assertEqual(host_names_updated, set(['logs.foo.com', 'admin.foo.com']))
-
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
