@@ -1114,7 +1114,7 @@ class Test_Profile(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             creds_cache.load_adal_token_cache()
 
-        self.assertTrue(re.findall(r'Failed to load token files.+a bad error for you', str(context.exception)))
+        self.assertTrue(re.findall(r'bad error for you', str(context.exception)))
 
     def test_service_principal_auth_client_secret(self):
         sp_auth = ServicePrincipalAuth('verySecret!')
