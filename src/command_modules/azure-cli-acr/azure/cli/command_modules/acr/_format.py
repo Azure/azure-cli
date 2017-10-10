@@ -87,7 +87,7 @@ def _format_group(item):
 
     try:
         # Only show ID if it is not an ARM resource ID
-        table_info['ID'] = item['id'] if '/subscriptions/' not in item['id'] else None
+        table_info['ID'] = item['id'] if '/subscriptions/' not in item['id'].lower() else None
     except (KeyError, TypeError):
         pass
 
