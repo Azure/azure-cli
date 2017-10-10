@@ -72,7 +72,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
         binding = HostNameBinding(webapp.location,
-                                  domain_id = domain,
+                                  domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         self.client.web_apps._client = mock.MagicMock()

@@ -51,7 +51,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     is_linux = plan_info.reserved
     location = plan_info.location
     site_config = SiteConfig()
-    app_settings = [] # appsettings need to be updated after webapp creation
+    app_settings = []  # appsettings need to be updated after webapp creation
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
@@ -316,10 +316,9 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         app_settings.properties[settings_name] = value
     client = web_client_factory()
     if slot is None:
-        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties) # pylint: disable=line-too-long
+        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties)  # pylint: disable=line-too-long
     else:
-        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties) # pylint: disable=line-too-long
-
+        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties)  # pylint: disable=line-too-long
 
     app_settings_slot_cfg_names = []
     if slot_settings:
@@ -349,9 +348,9 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     if slot is None:
-        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties) # pylint: disable=line-too-long
+        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties)  # pylint: disable=line-too-long
     else:
-        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties) # pylint: disable=line-too-long
+        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties)  # pylint: disable=line-too-long
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
@@ -383,9 +382,9 @@ def update_connection_strings(resource_group_name, name, connection_string_type,
                                                                             connection_string_type)
     client = web_client_factory()
     if slot is None:
-        result = client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties) # pylint: disable=line-too-long
+        result = client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties)  # pylint: disable=line-too-long
     else:
-        result = client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties) # pylint: disable=line-too-long
+        result = client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties)  # pylint: disable=line-too-long
 
     if slot_settings:
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
@@ -413,9 +412,9 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
     if slot is None:
-        return client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties) # pylint: disable=line-too-long
+        return client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties)  # pylint: disable=line-too-long
 
-    return client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties) # pylint: disable=line-too-long
+    return client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties)  # pylint: disable=line-too-long
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
@@ -589,8 +588,8 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
-        client.web_apps.update_application_settings_slot(resource_group_name, webapp, slot, str, app_settings.properties) # pylint: disable=line-too-long
-        client.web_apps.update_connection_strings_slot(resource_group_name, webapp, slot, str, connection_strings.properties) # pylint: disable=line-too-long
+        client.web_apps.update_application_settings_slot(resource_group_name, webapp, slot, str, app_settings.properties)  # pylint: disable=line-too-long
+        client.web_apps.update_connection_strings_slot(resource_group_name, webapp, slot, str, connection_strings.properties)  # pylint: disable=line-too-long
 
     result.name = result.name.split('/')[-1]
     return result
