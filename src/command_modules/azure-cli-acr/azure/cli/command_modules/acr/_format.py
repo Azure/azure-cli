@@ -65,33 +65,65 @@ def _format_group(item):
     """
     table_info = {_property_map[key]: str(item[key]) for key in item if key in _property_map}
 
-    if 'sku' in item and 'name' in item['sku']:
+    try:
         table_info['SKU'] = item['sku']['name']
-    if 'username' in item:
+    except (KeyError, TypeError):
+        pass
+
+    try:
         table_info['USERNAME'] = item['username']
-    if 'passwords' in item:
-        if item['passwords'] and 'value' in item['passwords'][0]:
-            table_info['PASSWORD'] = item['passwords'][0]['value']
-        if len(item['passwords']) > 1 and 'value' in item['passwords'][1]:
-            table_info['PASSWORD2'] = item['passwords'][1]['value']
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        table_info['PASSWORD'] = item['passwords'][0]['value']
+    except (KeyError, TypeError, IndexError):
+        pass
+
+    try:
+        table_info['PASSWORD2'] = item['passwords'][1]['value']
+    except (KeyError, TypeError, IndexError):
+        pass
+
+    try:
+        # Only show ID if it is not an ARM resource ID
+        table_info['ID'] = item['id'] if '/subscriptions/' not in item['id'] else None
+    except (KeyError, TypeError):
+        pass
+
     # Parse webhook list-events
-    table_info['ID'] = item['id'] if 'id' in item and item['id'] and '/subscriptions/' not in item['id'] else None
-    if 'eventRequestMessage' in item and item['eventRequestMessage'] and \
-       'content' in item['eventRequestMessage'] and item['eventRequestMessage']['content']:
-        requestContent = item['eventRequestMessage']['content']
-        if 'action' in requestContent:
-            table_info['ACTION'] = requestContent['action']
-        if 'target' in requestContent and requestContent['target'] and \
-           'repository' in requestContent['target'] and requestContent['target']['repository']:
-            tag = requestContent['target']['tag'] if 'tag' in requestContent['target'] else None
-            table_info['IMAGE'] = '{}:{}'.format(
-                requestContent['target']['repository'], tag) if tag else requestContent['target']['repository']
-        if 'timestamp' in requestContent:
-            table_info['TIMESTAMP'] = requestContent['timestamp']
-    if 'eventResponseMessage' in item and item['eventResponseMessage']:
-        responseMessage = item['eventResponseMessage']
-        if 'statusCode' in responseMessage or 'reasonPhrase' in responseMessage:
-            table_info['RESPONSE STATUS'] = '{} {}'.format(
-                responseMessage['statusCode'], responseMessage['reasonPhrase'])
+    try:
+        table_info['ACTION'] = item['eventRequestMessage']['content']['action']
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        table_info['IMAGE'] = item['eventRequestMessage']['content']['target']['repository']
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        tag = item['eventRequestMessage']['content']['target']['tag']
+        if table_info['IMAGE'] and tag:
+            table_info['IMAGE'] = '{}:{}'.format(table_info['IMAGE'], tag)
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        table_info['TIMESTAMP'] = item['eventRequestMessage']['content']['timestamp']
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        table_info['RESPONSE STATUS'] = item['eventResponseMessage']['statusCode']
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        status_code = item['eventResponseMessage']['statusCode']
+        reason_phrase = item['eventResponseMessage']['reasonPhrase']
+        table_info['RESPONSE STATUS'] = '{} {}'.format(status_code, reason_phrase)
+    except (KeyError, TypeError):
+        pass
 
     return OrderedDict(sorted(table_info.items(), key=lambda t: _order_map[t[0]]))
