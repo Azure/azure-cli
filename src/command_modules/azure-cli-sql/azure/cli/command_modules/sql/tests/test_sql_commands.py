@@ -1415,75 +1415,75 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
     def test_sql_db_conn_str(self):
         # ADO.NET, username/password
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -u myuser -p mypassword').get_output_in_json()
-        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=myuser;Password=mypassword;Encrypt=true;Connection Timeout=30;')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=username;Password=password;Encrypt=true;Connection Timeout=30;')
 
         # ADO.NET, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -u myuser -p mypassword -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=myuser;Password=mypassword;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=username;Password=password;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
 
         # ADO.NET, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -u myuser -a ADIntegrated').get_output_in_json()
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
 
         # SqlCmd, username/password
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -u myuser -p mypassword').get_output_in_json()
-        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U myuser -P mypassword -N -l 30')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U username -P password -N -l 30')
 
         # SqlCmd, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -u myuser -p mypassword -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U myuser -P mypassword -G -N -l 30')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U username -P password -G -N -l 30')
 
         # SqlCmd, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -u myuser -a ADIntegrated').get_output_in_json()
-        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -E -G -N -l 30')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -G -N -l 30')
 
         # JDBC, user name/password
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -p mypassword').get_output_in_json()
-        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=myuser@myserver;password=mypassword;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=username@myserver;password=password;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30')
 
         # JDBC, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -p mypassword -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=myuser;password=mypassword;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=username;password=password;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword')
 
         # JDBC, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -u myuser -a ADIntegrated').get_output_in_json()
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryIntegrated')
 
         # PHP PDO, user name/password
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -u myuser -p mypassword').get_output_in_json()
-        self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "myuser", "mypassword");')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo').get_output_in_json()
+        self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "username", "password");')
 
         # PHP PDO, ADPassword
         with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -u myuser -p mypassword -a ADPassword')
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword')
 
         # PHP PDO, ADIntegrated
         with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -u myuser -p mypassword -a ADIntegrated')
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated')
 
         # PHP, user name/password
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php -u myuser -p mypassword').get_output_in_json()
-        self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"myuser@myserver", "PWD"=>"mypassword", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php').get_output_in_json()
+        self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"username@myserver", "PWD"=>"password", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
 
         # PHP, ADPassword
         with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -u myuser -p mypassword -a ADPassword')
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword')
 
         # PHP, ADIntegrated
         with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -u myuser -p mypassword -a ADIntegrated')
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated')
 
         # ODBC, user name/password
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -p mypassword').get_output_in_json()
-        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=myuser@myserver;Pwd=mypassword;Encrypt=yes;TrustServerCertificate=no;')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=username@myserver;Pwd=password;Encrypt=yes;TrustServerCertificate=no;')
 
         # ODBC, ADPassword
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -p mypassword -a ADPassword').get_output_in_json()
-        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=myuser@myserver;Pwd=mypassword;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=username@myserver;Pwd=password;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
 
         # ODBC, ADIntegrated
-        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -u myuser -a ADIntegrated').get_output_in_json()
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryIntegrated')
 
 

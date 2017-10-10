@@ -345,14 +345,6 @@ with ParametersContext(command='sql db show-connection-string') as c:
                arg_group=auth_group,
                help='Type of authentication.',
                **enum_choice_list(ClientAuthenticationType))
-    c.argument('user',
-               options_list=('--user', '-u'),
-               arg_group=auth_group,
-               help='User name to substitute into the connection string.')
-    c.argument('password',
-               options_list=('--password', '-p'),
-               arg_group=auth_group,
-               help='Password to substitute into the connection string.')
 
 
 #####

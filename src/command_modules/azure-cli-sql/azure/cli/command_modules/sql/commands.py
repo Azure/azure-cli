@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands import cli_command
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import (
     create_service_adapter,
@@ -49,6 +50,8 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     #                sql db                       #
     ###############################################
 
+    cli_command(__name__, 'sql db show-connection-string', custom_path.format('db_show_conn_str'), client_factory=None)
+
     database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
                                                  'DatabasesOperations')
 
@@ -58,7 +61,6 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             c.custom_command('copy', 'db_copy', no_wait_param='raw')
             c.custom_command('restore', 'db_restore', no_wait_param='raw')
             c.command('show', 'get')
-            c.custom_command('show-connection-string', 'db_show_conn_str')
             c.custom_command('list', 'db_list')
             c.command('delete', 'delete', confirmation=True)
             c.generic_update_command('update', 'get', 'create_or_update',
