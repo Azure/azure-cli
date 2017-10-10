@@ -938,6 +938,9 @@ def _get_custom_or_builtin_policy(client, name, resourcetype='definition'):
             except errorObject as ex:
                 if ex.response.status_code == 404:
                     return client.policy_set_definitions.get_built_in(name)
+                else:
+                    logger.error('unable to get policy set definition: \'%s\'' % name)
+                    raise ex
         raise CLIError('policy set definitions are only supported with api-versions '
                        '2017-06-01-preview and above')
 
@@ -947,6 +950,9 @@ def _get_custom_or_builtin_policy(client, name, resourcetype='definition'):
     except CloudError as ex:
         if ex.status_code == 404:
             return client.policy_definitions.get_built_in(name)
+        else:
+            logger.error('unable to get policy definition: \'%s\'' % name)
+            raise ex
 
 
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
