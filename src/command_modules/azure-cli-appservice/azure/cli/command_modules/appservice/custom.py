@@ -50,7 +50,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
-    site_config = SiteConfig(app_settings = [])
+    site_config = SiteConfig(app_settings=[])
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
@@ -585,8 +585,8 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
-        _generic_settings_operation(resource_group_name, name, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
-        _generic_settings_operation(resource_group_name, name, 'update_connection_strings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
+        _generic_settings_operation(resource_group_name, webapp, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
+        _generic_settings_operation(resource_group_name, webapp, 'update_connection_strings', connection_strings.properties, slot, client)  # pylint: disable=line-too-long
 
     result.name = result.name.split('/')[-1]
     return result
