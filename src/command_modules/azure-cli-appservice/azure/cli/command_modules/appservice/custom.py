@@ -318,7 +318,9 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         app_settings.properties[settings_name] = value
     client = web_client_factory()
 
-    result = _generic_settings_operation(resource_group_name, name, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
+    result = _generic_settings_operation(resource_group_name, name,
+                                         'update_application_settings',
+                                         app_settings.properties, slot, client)
 
     app_settings_slot_cfg_names = []
     if slot_settings:
@@ -347,7 +349,9 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    result = _generic_settings_operation(resource_group_name, name, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
+    result = _generic_settings_operation(resource_group_name, name, 
+                                         'update_application_settings', 
+                                         app_settings.properties, slot, client)
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
@@ -378,8 +382,10 @@ def update_connection_strings(resource_group_name, name, connection_string_type,
         conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value,
                                                                             connection_string_type)
     client = web_client_factory()
-    _generic_settings_operation(resource_group_name, name, 'update_connection_strings', conn_strings.properties, slot, client)  # pylint: disable=line-too-long
-        
+    result = _generic_settings_operation(resource_group_name, name,
+                                         'update_connection_strings',
+                                         conn_strings.properties, slot, client)
+
     if slot_settings:
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
@@ -406,7 +412,9 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _generic_settings_operation(resource_group_name, name, 'update_connection_strings', conn_strings.properties, slot, client)  # pylint: disable=line-too-long
+    return _generic_settings_operation(resource_group_name, name,
+                                       'update_connection_strings',
+                                       conn_strings.properties, slot, client)
 
 
 
@@ -581,8 +589,12 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
-        _generic_settings_operation(resource_group_name, webapp, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
-        _generic_settings_operation(resource_group_name, webapp, 'update_connection_strings', connection_strings.properties, slot, client)  # pylint: disable=line-too-long
+        _generic_settings_operation(resource_group_name, webapp,
+                                    'update_application_settings',
+                                    app_settings.properties, slot, client)
+        _generic_settings_operation(resource_group_name, webapp,
+                                    'update_connection_strings',
+                                    connection_strings.properties, slot, client)
 
     result.name = result.name.split('/')[-1]
     return result
