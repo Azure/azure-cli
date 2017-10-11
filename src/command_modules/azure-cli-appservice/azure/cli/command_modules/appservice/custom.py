@@ -349,8 +349,8 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    result = _generic_settings_operation(resource_group_name, name, 
-                                         'update_application_settings', 
+    result = _generic_settings_operation(resource_group_name, name,
+                                         'update_application_settings',
                                          app_settings.properties, slot, client)
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)

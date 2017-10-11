@@ -29,7 +29,7 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
     operation = getattr(client.web_apps,
-                operation_name if slot is None else operation_name + '_slot')
+                        operation_name if slot is None else operation_name + '_slot')
     if slot is None:
         return (operation(resource_group_name, name)
                 if extra_parameter is None else operation(resource_group_name,
