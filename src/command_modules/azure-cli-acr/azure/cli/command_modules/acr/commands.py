@@ -66,9 +66,11 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                 'azure.cli.command_modules.acr.webhook#acr_webhook_get_config',
                 table_transformer=output_format)
     cli_command(__name__, 'acr webhook list-events',
-                'azure.cli.command_modules.acr.webhook#acr_webhook_list_events')
+                'azure.cli.command_modules.acr.webhook#acr_webhook_list_events',
+                table_transformer=output_format)
     cli_command(__name__, 'acr webhook ping',
-                'azure.cli.command_modules.acr.webhook#acr_webhook_ping')
+                'azure.cli.command_modules.acr.webhook#acr_webhook_ping',
+                table_transformer=output_format)
     cli_generic_update_command(
         __name__,
         'acr webhook update',
