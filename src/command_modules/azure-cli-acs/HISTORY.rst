@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++
+* fix kubernetes get-credentials
+
 2.0.17 (2017-10-09)
 +++++++++++++++++++
 * minor fixes
