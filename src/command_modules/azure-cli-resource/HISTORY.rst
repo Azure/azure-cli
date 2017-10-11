@@ -2,13 +2,16 @@
 
 Release History
 ===============
+Unreleased
++++++++++++++++++++
+* 'az policy assignment create': policy assignment create command to work with built in policy definitions and policy set definitions
+
 2.0.16 (2017-10-09)
 +++++++++++++++++++
 * group: permit --resource-group/-g options for resource group name.
 * `account lock`: lock commands to work specifically with subscription level locks
 * `group lock`: lock commands to work specifically with group level locks
 * `resource lock`: lock command to work specifically with resource level locks
-* 'az policy assignment create': policy assignment create command to work with built in policy definitions and policy set definitions
 
 2.0.15 (2017-09-22)
 +++++++++++++++++++
