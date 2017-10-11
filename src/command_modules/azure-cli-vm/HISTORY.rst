@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* `vmss create`: expose '--accelerated-networking'
+
 2.0.16 (2017-10-09)
 +++++++++++++++++++
 * `vm show`: fix a bug when using '-d' crashes on missing private ip addresses
