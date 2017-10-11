@@ -28,7 +28,7 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import _generic_site_operation, AUTH_TYPES
+from ._params import _generic_site_operation, _generic_settings_operation, AUTH_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 
 
@@ -77,6 +77,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](match, site_config)
 
+    # Be consistent with portal: any windows webapp should have this even it doesn't use node as the stack
     if not is_linux:
         site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
 
@@ -316,10 +317,8 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         settings_name, value = name_value.split('=', 1)
         app_settings.properties[settings_name] = value
     client = web_client_factory()
-    if slot is None:
-        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties)  # pylint: disable=line-too-long
-    else:
-        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties)  # pylint: disable=line-too-long
+
+    result = _generic_settings_operation(resource_group_name, name, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
 
     app_settings_slot_cfg_names = []
     if slot_settings:
@@ -348,10 +347,7 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    if slot is None:
-        result = client.web_apps.update_application_settings(resource_group_name, name, str, app_settings.properties)  # pylint: disable=line-too-long
-    else:
-        result = client.web_apps.update_application_settings_slot(resource_group_name, name, slot, str, app_settings.properties)  # pylint: disable=line-too-long
+    result = _generic_settings_operation(resource_group_name, name, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
 
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
 
@@ -589,8 +585,8 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         for a in slot_cfg_names.connection_string_names or []:
             connection_strings.properties.pop(a, None)
 
-        client.web_apps.update_application_settings_slot(resource_group_name, webapp, slot, str, app_settings.properties)  # pylint: disable=line-too-long
-        client.web_apps.update_connection_strings_slot(resource_group_name, webapp, slot, str, connection_strings.properties)  # pylint: disable=line-too-long
+        _generic_settings_operation(resource_group_name, name, 'update_application_settings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
+        _generic_settings_operation(resource_group_name, name, 'update_connection_strings', app_settings.properties, slot, client)  # pylint: disable=line-too-long
 
     result.name = result.name.split('/')[-1]
     return result
