@@ -6,7 +6,7 @@ import unittest
 import os
 import time
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
                                              JMESPathCheck, NoneCheck)
@@ -739,13 +739,12 @@ class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
 =======
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location='westus')
-    def test_functionapp_consumption_e2e(self, resource_group):
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_e2e(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappconsumption', 40)
-        storage = self.create_random_name('storage', 24)
 
-        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, resource_group))
         self.cmd('functionapp create -g {} -n {} -c westus -s {}'
-                 .format(resource_group, functionapp_name, storage)).assert_with_checks([
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
                      JMESPathCheckV2('state', 'Running'),
                      JMESPathCheckV2('name', functionapp_name),
                      JMESPathCheckV2('hostNames[0]', functionapp_name + '.azurewebsites.net')])
