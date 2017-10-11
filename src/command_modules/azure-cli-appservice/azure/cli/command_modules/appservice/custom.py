@@ -378,11 +378,8 @@ def update_connection_strings(resource_group_name, name, connection_string_type,
         conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value,
                                                                             connection_string_type)
     client = web_client_factory()
-    if slot is None:
-        result = client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties)  # pylint: disable=line-too-long
-    else:
-        result = client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties)  # pylint: disable=line-too-long
-
+    _generic_settings_operation(resource_group_name, name, 'update_connection_strings', conn_strings.properties, slot, client)  # pylint: disable=line-too-long
+        
     if slot_settings:
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
