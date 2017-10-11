@@ -408,10 +408,9 @@ def delete_connection_strings(resource_group_name, name, setting_names, slot=Non
 
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-    if slot is None:
-        return client.web_apps.update_connection_strings(resource_group_name, name, str, conn_strings.properties)  # pylint: disable=line-too-long
 
-    return client.web_apps.update_connection_strings_slot(resource_group_name, name, slot, str, conn_strings.properties)  # pylint: disable=line-too-long
+    return _generic_settings_operation(resource_group_name, name, 'update_connection_strings', conn_strings.properties, slot, client)  # pylint: disable=line-too-long
+
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
