@@ -173,7 +173,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
         client.web_apps.get.return_value = site
 
         config_source_control('group1', 'myweb', 'http://github.com/repo1', None, None, None,
-                              None, None, 'ASPNet', 'working_directory', 'Gulp','Django',
+                              None, None, 'ASPNet', 'working_directory', 'Gulp', 'Django',
                               'Python 2.7.12 x64', True, 'https://account1.visualstudio.com',
                               None, 'slot1', None, None)
         cd_app_type_details = get_app_type_details('ASPNet', 'working_directory', 'Gulp',
