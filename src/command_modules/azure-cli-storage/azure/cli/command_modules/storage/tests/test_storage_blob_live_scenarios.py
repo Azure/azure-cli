@@ -66,7 +66,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
         self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
                  checks=JMESPathCheck('exists', False))
 
-        self.cmd('storage blob upload -c {} -f {} -n {} --type {}'
+        self.cmd('storage blob upload -c {} -f "{}" -n {} --type {}'
                  .format(container, local_file, blob_name, blob_type))
 
         self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
@@ -77,7 +77,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
-            self.cmd('storage blob download -n {} -c {} --file {}'
+            self.cmd('storage blob download -n {} -c {} --file "{}"'
                      .format(blob_name, container, downloaded))
             self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
             self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
