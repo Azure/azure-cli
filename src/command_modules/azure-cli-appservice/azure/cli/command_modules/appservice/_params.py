@@ -37,6 +37,7 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
     return (m(resource_group_name, name, slot)
             if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
 
+
 def _generic_settings_operation(resource_group_name, name, operation_name, setting_properties, slot=None, client=None):
     client = client or web_client_factory()
     m = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
