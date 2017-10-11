@@ -33,8 +33,6 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                    src_container).output
         src_url = src_url[:src_url.rfind('/')]
 
-        # self.cmd('storage blob download-batch -s {} -d "{}" --pattern {} --account-key {}'.format(
-        #     src_url, local_folder, '*', storage_account_info[0]))
         self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern *',
                          storage_account_info, src_url, local_folder)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
