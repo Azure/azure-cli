@@ -82,7 +82,7 @@ def _load_tokens_from_file(file_path):
     if os.path.isfile(file_path):
         try:
             return get_file_json(file_path, throw_on_empty=False) or []
-        except Exception as ex:
+        except (CLIError, ValueError) as ex:
             raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                            "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
                            "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
