@@ -714,6 +714,7 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
         self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
 
 
+<<<<<<< HEAD
 class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -735,6 +736,22 @@ class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
         ])
 
         self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
+=======
+class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location='westus')
+    def test_functionapp_consumption_e2e(self, resource_group):
+        functionapp_name = self.create_random_name('functionappconsumption', 40)
+        storage = self.create_random_name('storage', 24)
+
+        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, resource_group))
+        self.cmd('functionapp create -g {} -n {} -c westus -s {}'
+                 .format(resource_group, functionapp_name, storage)).assert_with_checks([
+                     JMESPathCheckV2('state', 'Running'),
+                     JMESPathCheckV2('name', functionapp_name),
+                     JMESPathCheckV2('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+>>>>>>> fixed function app test by randomizing name and turned to scenariotest
 
 
 class WebappAuthenticationTest(ScenarioTest):
