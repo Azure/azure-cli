@@ -612,7 +612,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     else:
         from azure.mgmt.web.models import SiteSourceControl, SourceControl
         if git_token:
-            sc = SourceControl(location, token=git_token)
+            sc = SourceControl(location, source_control_name='GitHub', token=git_token)
             client.update_source_control('GitHub', sc)
 
         source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
