@@ -84,8 +84,8 @@ def _get_server_dns_suffx():
 
 def db_show_conn_str(
         client_provider,
-        database_name='databasename',
-        server_name='servername',
+        database_name='<databasename>',
+        server_name='<servername>',
         auth_type=ClientAuthenticationType.sql_password.value):
 
     server_suffix = _get_server_dns_suffx()
@@ -100,11 +100,11 @@ def db_show_conn_str(
     formats = {
         ClientType.ado_net.value: {
             ClientAuthenticationType.sql_password.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};User ID=username;'
-                'Password=password;Encrypt=true;Connection Timeout=30;',
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
+                'Password=<password>;Encrypt=true;Connection Timeout=30;',
             ClientAuthenticationType.active_directory_password.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};User ID=username;'
-                'Password=password;Encrypt=true;Connection Timeout=30;'
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
+                'Password=<password>;Encrypt=true;Connection Timeout=30;'
                 'Authentication="Active Directory Password"',
             ClientAuthenticationType.active_directory_integrated.value:
                 'Server=tcp:{server_fqdn},1433;Database={db};Encrypt=true;'
@@ -112,20 +112,20 @@ def db_show_conn_str(
         },
         ClientType.sqlcmd.value: {
             ClientAuthenticationType.sql_password.value:
-                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U username -P password -N -l 30',
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U <username> -P <password> -N -l 30',
             ClientAuthenticationType.active_directory_password.value:
-                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U username -P password -G -N -l 30',
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U <username> -P <password> -G -N -l 30',
             ClientAuthenticationType.active_directory_integrated.value:
                 'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -G -N -l 30',
         },
         ClientType.jdbc.value: {
             ClientAuthenticationType.sql_password.value:
-                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=username@{server};'
-                'password=password;encrypt=true;trustServerCertificate=false;'
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=<username>@{server};'
+                'password=<password>;encrypt=true;trustServerCertificate=false;'
                 'hostNameInCertificate=*{server_suffix};loginTimeout=30',
             ClientAuthenticationType.active_directory_password.value:
-                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=username;'
-                'password=password;encrypt=true;trustServerCertificate=false;'
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=<username>;'
+                'password=<password>;encrypt=true;trustServerCertificate=false;'
                 'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
                 'authentication=ActiveDirectoryPassword',
             ClientAuthenticationType.active_directory_integrated.value:
@@ -137,7 +137,7 @@ def db_show_conn_str(
         ClientType.php_pdo.value: {
             # pylint: disable=line-too-long
             ClientAuthenticationType.sql_password.value:
-                '$conn = new PDO("sqlsrv:server = tcp:{server_fqdn},1433; Database = {db}; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "username", "password");',
+                '$conn = new PDO("sqlsrv:server = tcp:{server_fqdn},1433; Database = {db}; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");',
             ClientAuthenticationType.active_directory_password.value:
                 CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
             ClientAuthenticationType.active_directory_integrated.value:
@@ -146,7 +146,7 @@ def db_show_conn_str(
         ClientType.php.value: {
             # pylint: disable=line-too-long
             ClientAuthenticationType.sql_password.value:
-                '$connectionOptions = array("UID"=>"username@{server}", "PWD"=>"password", "Database"=>{db}, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:{server_fqdn},1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);',
+                '$connectionOptions = array("UID"=>"<username>@{server}", "PWD"=>"<password>", "Database"=>{db}, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:{server_fqdn},1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);',
             ClientAuthenticationType.active_directory_password.value:
                 CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
             ClientAuthenticationType.active_directory_integrated.value:
@@ -155,11 +155,11 @@ def db_show_conn_str(
         ClientType.odbc.value: {
             ClientAuthenticationType.sql_password.value:
                 'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
-                'Database={db};Uid=username@{server};Pwd=password;Encrypt=yes;'
+                'Database={db};Uid=<username>@{server};Pwd=<password>;Encrypt=yes;'
                 'TrustServerCertificate=no;',
             ClientAuthenticationType.active_directory_password.value:
                 'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
-                'Database={db};Uid=username@{server};Pwd=password;Encrypt=yes;'
+                'Database={db};Uid=<username>@{server};Pwd=<password>;Encrypt=yes;'
                 'TrustServerCertificate=no;Authentication=ActiveDirectoryPassword',
             ClientAuthenticationType.active_directory_integrated.value:
                 'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
