@@ -50,8 +50,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
-    site_config = SiteConfig()
-    app_settings = []  # appsettings need to be updated after webapp creation
+    site_config = SiteConfig(app_settings = [])
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
@@ -64,7 +63,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             site_config.linux_fx_version = runtime
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
-            app_settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=false')
+            site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
@@ -78,13 +77,15 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](match, site_config)
 
+    if not is_linux:
+        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+
+    if site_config.app_settings:
+        for setting in site_config.app_settings:
+            logger.info('Will set appsetting %s', setting)
+
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation()(poller)
-
-    if app_settings:
-        for setting in app_settings:
-            logger.info('Will set appsetting %s', setting)
-        update_app_settings(resource_group_name, name, app_settings)
 
     # Ensure SCC operations follow right after the 'create', no precedent appsetting update commands
     _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url,
