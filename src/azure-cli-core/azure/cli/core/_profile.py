@@ -186,7 +186,7 @@ class Profile(object):
         for t in tokens[1:]:
             decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
         final_tokens = []
-        # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter 
+        # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter
         # as shell should update us with new ones every 10~15 minutes
         for t in decoded_tokens:
             final_tokens.append({
