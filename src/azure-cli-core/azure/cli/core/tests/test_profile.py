@@ -707,6 +707,7 @@ class Test_Profile(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 self.subscriptions = mock.MagicMock()
                 self.subscriptions.list.return_value = [Test_Profile.subscription1]
+                self.config = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
 
@@ -1118,7 +1119,7 @@ class Test_Profile(unittest.TestCase):
         creds_cache = CredsCache(async_persist=False)
 
         # assert
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(CLIError) as context:
             creds_cache.load_adal_token_cache()
 
         self.assertTrue(re.findall(r'bad error for you', str(context.exception)))
