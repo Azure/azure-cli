@@ -536,6 +536,8 @@ class Test_Profile(unittest.TestCase):
 
     def test_cloud_console_login(self):
         import tempfile
+        from datetime import datetime, timedelta
+        from dateutil import parser
         from azure.cli.core.util import get_file_json
         from azure.cli.core._session import Session
 
@@ -543,7 +545,7 @@ class Test_Profile(unittest.TestCase):
         test_dir = tempfile.mkdtemp()
         test_account_file = os.path.join(test_dir, 'azureProfile.json')
         test_account.load(test_account_file)
-        # test_token_file = os.path.join(test_dir, 'accessTokens.json')
+        test_token_file = os.path.join(test_dir, 'accessTokens.json')
 
         os.environ['AZURE_CONFIG_DIR'] = test_dir
 
@@ -574,7 +576,12 @@ class Test_Profile(unittest.TestCase):
             "environmentName": "AzureCloud",
             "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"
         }
+
+        actual = get_file_json(test_token_file)
+
         self.assertEqual([expected_subscription], result_accounts)
+        # sanity check that the expiration time is about 45 minutes away
+        self.assertTrue(parser.parse(actual[0]['expiresOn']) < datetime.now() + timedelta(minutes=45))
 
         # verify the token file
         # expected_arm_token_entry = {
