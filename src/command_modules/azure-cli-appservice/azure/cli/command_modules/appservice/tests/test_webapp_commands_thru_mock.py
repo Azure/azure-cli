@@ -50,7 +50,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
     def test_set_source_control_token(self, client_factory_mock):
         client_factory_mock.return_value = self.client
         self.client._client = mock.MagicMock()
-        sc = SourceControl('not-really-needed', name='GitHub', token='veryNiceToken')
+        sc = SourceControl('not-really-needed', source_control_name='GitHub', token='veryNiceToken')
         self.client._client.send.return_value = FakedResponse(200)
         self.client._deserialize = mock.MagicMock()
         self.client._deserialize.return_value = sc
@@ -71,7 +71,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
-        binding = HostNameBinding(webapp.location, name=domain,
+        binding = HostNameBinding(webapp.location,
+                                  domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         self.client.web_apps._client = mock.MagicMock()
@@ -82,7 +83,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
         result = add_hostname('g1', webapp.name, domain)
 
         # assert
-        self.assertEqual(result.name, domain)
+        self.assertEqual(result.domain_id, domain)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_get_external_ip_from_ase(self, client_factory_mock):
@@ -241,31 +242,6 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         result = _match_host_names_from_cert(['*.mysite.com', 'mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])
         self.assertEqual(set(['admin.mysite.com', 'log.mysite.com', 'mysite.com']), result)
-
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._update_host_name_ssl_state', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.show_webapp', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    def test_update_host_certs(self, client_mock, show_webapp_mock, host_ssl_update_mock, site_op_mock):
-        faked_web_client = mock.MagicMock()
-        client_mock.return_value = faked_web_client
-        faked_site = Site('antarctica', server_farm_id='/subscriptions/foo/resourceGroups/foo/providers/Microsoft.Web/serverfarms/big_plan')
-        faked_web_client.web_apps.get.side_effect = [faked_site, faked_site]
-        test_hostname = '*.foo.com'
-        cert1 = Certificate('antarctica', host_names=[test_hostname])
-        cert1.thumbprint = 't1'
-        faked_web_client.certificates.list_by_resource_group.return_value = [cert1]
-        hostname_binding1 = HostNameBinding('antarctica', name='web1/admin.foo.com',)
-        hostname_binding2 = HostNameBinding('antarctica', name='web1/logs.foo.com')
-        site_op_mock.return_value = [hostname_binding1, hostname_binding2]
-
-        # action
-        bind_ssl_cert('rg1', 'web1', 't1', SslState.sni_enabled)
-
-        # assert
-        self.assertEqual(len(host_ssl_update_mock.call_args_list), 2)
-        host_names_updated = set([x[0][3] for x in host_ssl_update_mock.call_args_list])
-        self.assertEqual(host_names_updated, set(['logs.foo.com', 'admin.foo.com']))
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods

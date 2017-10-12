@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 31 Jul 2017 21:21:46 GMT']
+      date: ['Wed, 11 Oct 2017 20:35:56 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -46,37 +46,37 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 31 Jul 2017 21:21:46 GMT']
+      date: ['Wed, 11 Oct 2017 20:35:56 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"sku": {"name": "S1", "capacity": 1, "tier": "STANDARD"}, "location":
-      "westus", "properties": {"name": "slot-swap-plan2", "perSiteScaling": false}}'
+    body: '{"location": "westus", "properties": {"name": "slot-swap-plan", "perSiteScaling":
+      false}, "sku": {"name": "S1", "capacity": 1, "tier": "STANDARD"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [appservice plan create]
       Connection: [keep-alive]
-      Content-Length: ['148']
+      Content-Length: ['147']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan?api-version=2016-09-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2","name":"slot-swap-plan2","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"slot-swap-plan2","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-023_26230","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan","name":"slot-swap-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":0,"name":"slot-swap-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-083_5788","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1315']
+      content-length: ['1352']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:21:57 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -84,7 +84,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -95,21 +95,21 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan?api-version=2016-09-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2","name":"slot-swap-plan2","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"slot-swap-plan2","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-023_26230","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan","name":"slot-swap-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":0,"name":"slot-swap-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-083_5788","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1315']
+      content-length: ['1352']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:21:58 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -120,32 +120,33 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "West US", "properties": {"reserved": false, "microService":
-      "WebSites", "siteConfig": {"netFrameworkVersion": "v4.6", "localMySqlEnabled":
-      false, "appSettings": []}, "serverFarmId": "slot-swap-plan2", "scmSiteAlsoStopped":
-      false}}'
+    body: 'b''{"location": "West US", "properties": {"microService": "WebSites", "serverFarmId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan",
+      "scmSiteAlsoStopped": false, "siteConfig": {"localMySqlEnabled": false, "netFrameworkVersion":
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "6.9.1"}]},
+      "reserved": false}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['244']
+      Content-Length: ['480']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2","name":"slot-swap-web2","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-swap-web2","state":"Running","hostNames":["slot-swap-web2.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-023.api.azurewebsites.windows.net/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web2","repositorySiteName":"slot-swap-web2","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web2.azurewebsites.net","slot-swap-web2.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web2.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web2.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2","reserved":false,"lastModifiedTimeUtc":"2017-07-31T21:21:59.203","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web2","trafficManagerHostNames":null,"sku":"Standard","premiumAppDeployed":null,"scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.45.234.138,104.45.229.200,104.45.237.98,104.45.233.99","possibleOutboundIpAddresses":null,"containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-023","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web2.azurewebsites.net","slotSwapStatus":null}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web","name":"slot-swap-web","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"slot-swap-web","state":"Running","hostNames":["slot-swap-web.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-083.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web","repositorySiteName":"slot-swap-web","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web.azurewebsites.net","slot-swap-web.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan","reserved":false,"lastModifiedTimeUtc":"2017-10-11T20:36:12.5066667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93","possibleOutboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93,40.85.159.5,13.91.108.158","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-083","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web.azurewebsites.net","slotSwapStatus":null}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2886']
+      content-length: ['2972']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:04 GMT']
-      etag: ['"1D30A430B76D4A0"']
+      date: ['Wed, 11 Oct 2017 20:36:15 GMT']
+      etag: ['"1D342D09411442B"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -153,7 +154,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -165,35 +166,35 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/publishxml?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/publishxml?api-version=2016-08-01
   response:
-    body: {string: '<publishData><publishProfile profileName="slot-swap-web2 - Web
-        Deploy" publishMethod="MSDeploy" publishUrl="slot-swap-web2.scm.azurewebsites.net:443"
-        msdeploySite="slot-swap-web2" userName="$slot-swap-web2" userPWD="qZtud1dSAxgNv3Eq83EgSoxpKQBnf3wEs9PiyPnX2kZ8eKJFvjwbeczdToz5"
-        destinationAppUrl="http://slot-swap-web2.azurewebsites.net" SQLServerDBConnectionString=""
+    body: {string: '<publishData><publishProfile profileName="slot-swap-web - Web
+        Deploy" publishMethod="MSDeploy" publishUrl="slot-swap-web.scm.azurewebsites.net:443"
+        msdeploySite="slot-swap-web" userName="$slot-swap-web" userPWD="pGP3J9r5M6DYYNSfpYwHDdx1HyKrM1wNcBRmqrjGM5ulZz8xTjZbH5PgzDrj"
+        destinationAppUrl="http://slot-swap-web.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="slot-swap-web2
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-023.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="slot-swap-web2\$slot-swap-web2" userPWD="qZtud1dSAxgNv3Eq83EgSoxpKQBnf3wEs9PiyPnX2kZ8eKJFvjwbeczdToz5"
-        destinationAppUrl="http://slot-swap-web2.azurewebsites.net" SQLServerDBConnectionString=""
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="slot-swap-web
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-083.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="slot-swap-web\$slot-swap-web" userPWD="pGP3J9r5M6DYYNSfpYwHDdx1HyKrM1wNcBRmqrjGM5ulZz8xTjZbH5PgzDrj"
+        destinationAppUrl="http://slot-swap-web.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1060']
+      content-length: ['1051']
       content-type: [application/xml]
-      date: ['Mon, 31 Jul 2017 21:22:05 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11998']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -205,387 +206,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/appsettings/list?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/appsettings/list?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['309']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:05 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"name": "appsettings", "type": "Microsoft.Web/sites/config", "location":
-      "West US", "properties": {"s1": "prod"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Length: ['114']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/appsettings?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"s1":"prod"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['320']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:06 GMT']
-      etag: ['"1D30A430F05C7C0"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
-  response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1"]}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['157']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:07 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"name": "slot-swap-web2", "type": "Microsoft.Web/sites", "location": "West
-      US", "properties": {"connectionStringNames": [], "appSettingNames": ["s1", "s1",
-      "s1"]}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Length: ['164']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
-  response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1"]}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['162']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:07 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp deployment slot create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2","name":"slot-swap-web2","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-swap-web2","state":"Running","hostNames":["slot-swap-web2.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-023.api.azurewebsites.windows.net/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web2","repositorySiteName":"slot-swap-web2","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web2.azurewebsites.net","slot-swap-web2.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web2.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web2.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2","reserved":false,"lastModifiedTimeUtc":"2017-07-31T21:22:05.5","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web2","trafficManagerHostNames":null,"sku":"Standard","premiumAppDeployed":null,"scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.45.234.138,104.45.229.200,104.45.237.98,104.45.233.99","possibleOutboundIpAddresses":null,"containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-023","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web2.azurewebsites.net","slotSwapStatus":null}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['2884']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:07 GMT']
-      etag: ['"1D30A430F05C7C0"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: 'b''{"location": "West US", "properties": {"reserved": false, "microService":
-      "WebSites", "siteConfig": {"netFrameworkVersion": "v4.6", "localMySqlEnabled":
-      false}, "serverFarmId": "/subscriptions/8d57ddbd-c779-40ea-b660-1015f4bf027d/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2",
-      "scmSiteAlsoStopped": false}}'''
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp deployment slot create]
-      Connection: [keep-alive]
-      Content-Length: ['404']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging","name":"slot-swap-web2/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-swap-web2(staging)","state":"Running","hostNames":["slot-swap-web2-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-023.api.azurewebsites.windows.net/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web2","repositorySiteName":"slot-swap-web2","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web2-staging.azurewebsites.net","slot-swap-web2-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web2-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web2-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2","reserved":false,"lastModifiedTimeUtc":"2017-07-31T21:22:09.453","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web2__8488","trafficManagerHostNames":null,"sku":"Standard","premiumAppDeployed":null,"scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.45.234.138,104.45.229.200,104.45.237.98,104.45.233.99","possibleOutboundIpAddresses":null,"containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-023","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web2-staging.azurewebsites.net","slotSwapStatus":null}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['2977']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:11 GMT']
-      etag: ['"1D30A430F05C7C0"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings/list?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
         US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['361']
+      content-length: ['346']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"name": "appsettings", "type": "Microsoft.Web/sites/config", "location":
-      "West US", "properties": {"WEBSITE_NODE_DEFAULT_VERSION": "6.9.1", "s1": "slot"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Length: ['155']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","s1":"slot"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['373']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:14 GMT']
-      etag: ['"1D30A43138C6150"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
-  response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1"]}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['162']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:15 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"name": "slot-swap-web2", "type": "Microsoft.Web/sites", "location": "West
-      US", "properties": {"connectionStringNames": [], "appSettingNames": ["s1", "s1",
-      "s1", "s1"]}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings set]
-      Connection: [keep-alive]
-      Content-Length: ['170']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
-  response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1"]}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['167']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:15 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"targetSlot": "staging", "preserveVnet": true}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp deployment slot swap]
-      Connection: [keep-alive]
-      Content-Length: ['47']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/applySlotConfig?api-version=2016-08-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:22:17 GMT']
-      etag: ['"1D30A430F05C7C0"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings list]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings/list?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","s1":"prod"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['373']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:18 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -597,27 +231,62 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
+    body: '{"kind": "<class ''str''>", "properties": {"WEBSITE_NODE_DEFAULT_VERSION":
+      "6.9.1", "s1": "prod"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings set]
+      Connection: [keep-alive]
+      Content-Length: ['96']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/appsettings?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","s1":"prod"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['358']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:18 GMT']
+      etag: ['"1D342D0971A7280"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config appsettings list]
+      CommandName: [webapp config appsettings set]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
   response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
         US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1"]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['167']
+      content-length: ['166']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:22:20 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -628,7 +297,243 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"targetSlot": "staging", "preserveVnet": true}'
+    body: '{"properties": {"appSettingNames": ["s1", "s1", "s1", "s1", "s1"], "connectionStringNames":
+      []}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings set]
+      Connection: [keep-alive]
+      Content-Length: ['96']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1","s1"]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['171']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:20 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web","name":"slot-swap-web","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"slot-swap-web","state":"Running","hostNames":["slot-swap-web.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-083.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web","repositorySiteName":"slot-swap-web","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web.azurewebsites.net","slot-swap-web.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan","reserved":false,"lastModifiedTimeUtc":"2017-10-11T20:36:17.96","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93","possibleOutboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93,40.85.159.5,13.91.108.158","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-083","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web.azurewebsites.net","slotSwapStatus":null}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2967']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:21 GMT']
+      etag: ['"1D342D0971A7280"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"location": "West US", "properties": {"microService": "WebSites", "serverFarmId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan",
+      "scmSiteAlsoStopped": false, "siteConfig": {"localMySqlEnabled": false, "netFrameworkVersion":
+      "v4.6"}, "reserved": false}}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot create]
+      Connection: [keep-alive]
+      Content-Length: ['403']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging","name":"slot-swap-web/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
+        US","properties":{"name":"slot-swap-web(staging)","state":"Running","hostNames":["slot-swap-web-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-083.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web","repositorySiteName":"slot-swap-web","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web-staging.azurewebsites.net","slot-swap-web-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan","reserved":false,"lastModifiedTimeUtc":"2017-10-11T20:36:23.0366667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web__db10","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93","possibleOutboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93,40.85.159.5,13.91.108.158","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-083","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web-staging.azurewebsites.net","slotSwapStatus":null}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3063']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:26 GMT']
+      etag: ['"1D342D0971A7280"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings set]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings/list?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['360']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:27 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"kind": "<class ''str''>", "properties": {"WEBSITE_NODE_DEFAULT_VERSION":
+      "6.9.1", "s1": "slot"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings set]
+      Connection: [keep-alive]
+      Content-Length: ['96']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","s1":"slot"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['372']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:27 GMT']
+      etag: ['"1D342D09CB54835"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings set]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1","s1"]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['171']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"appSettingNames": ["s1", "s1", "s1", "s1", "s1", "s1"],
+      "connectionStringNames": []}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings set]
+      Connection: [keep-alive]
+      Content-Length: ['102']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1","s1","s1"]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['176']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:36:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"preserveVnet": true, "targetSlot": "staging"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -636,115 +541,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['47']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slotsswap?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/applySlotConfig?api-version=2016-08-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:22:21 GMT']
-      etag: ['"1D30A430F05C7C0"']
+      date: ['Wed, 11 Oct 2017 20:36:30 GMT']
+      etag: ['"1D342D0971A7280"']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/operationresults/4271b29c-b6ac-45ad-bb00-07893f239380?api-version=2016-08-01']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp deployment slot swap]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/operationresults/4271b29c-b6ac-45ad-bb00-07893f239380?api-version=2016-08-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:22:37 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/operationresults/4271b29c-b6ac-45ad-bb00-07893f239380?api-version=2016-08-01']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp deployment slot swap]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/operationresults/4271b29c-b6ac-45ad-bb00-07893f239380?api-version=2016-08-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:22:53 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/operationresults/4271b29c-b6ac-45ad-bb00-07893f239380?api-version=2016-08-01']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp deployment slot swap]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/operationresults/4271b29c-b6ac-45ad-bb00-07893f239380?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2","name":"slot-swap-web2","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-swap-web2","state":"Running","hostNames":["slot-swap-web2.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-023.api.azurewebsites.windows.net/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web2","repositorySiteName":"slot-swap-web2","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web2.azurewebsites.net","slot-swap-web2.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web2.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web2.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan2","reserved":false,"lastModifiedTimeUtc":"2017-07-31T21:22:17.487","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web2__8488","trafficManagerHostNames":null,"sku":"Standard","premiumAppDeployed":null,"scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.45.234.138,104.45.229.200,104.45.237.98,104.45.233.99","possibleOutboundIpAddresses":null,"containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-023","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web2.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2017-07-31T21:22:59.772Z","sourceSlotName":"staging","destinationSlotName":"Production"}}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['2993']
-      content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:23:09 GMT']
-      etag: ['"1D30A43162AD9F0"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -755,20 +571,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings/list?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings/list?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"s1":"slot"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","s1":"prod"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['334']
+      content-length: ['372']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:23:11 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -776,7 +592,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11997']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -787,20 +603,20 @@ interactions:
       CommandName: [webapp config appsettings list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
   response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1"]}}'}
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1","s1","s1"]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['167']
+      content-length: ['176']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:23:12 GMT']
+      date: ['Wed, 11 Oct 2017 20:36:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -811,34 +627,187 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: null
+    body: '{"preserveVnet": true, "targetSlot": "staging"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp deployment slot swap]
       Connection: [keep-alive]
-      Content-Length: ['0']
+      Content-Length: ['47']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/resetSlotConfig?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slotsswap?api-version=2016-08-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:23:13 GMT']
-      etag: ['"1D30A43162AD9F0"']
+      date: ['Wed, 11 Oct 2017 20:36:32 GMT']
+      etag: ['"1D342D0971A7280"']
       expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/operationresults/4aa3ac28-0a3f-49b5-9737-cc396369dbe9?api-version=2016-08-01']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot swap]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/operationresults/4aa3ac28-0a3f-49b5-9737-cc396369dbe9?api-version=2016-08-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 11 Oct 2017 20:36:47 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/operationresults/4aa3ac28-0a3f-49b5-9737-cc396369dbe9?api-version=2016-08-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot swap]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/operationresults/4aa3ac28-0a3f-49b5-9737-cc396369dbe9?api-version=2016-08-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 11 Oct 2017 20:37:03 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/operationresults/4aa3ac28-0a3f-49b5-9737-cc396369dbe9?api-version=2016-08-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot swap]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/operationresults/4aa3ac28-0a3f-49b5-9737-cc396369dbe9?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web","name":"slot-swap-web","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"slot-swap-web","state":"Running","hostNames":["slot-swap-web.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-083.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-swap-web","repositorySiteName":"slot-swap-web","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-swap-web.azurewebsites.net","slot-swap-web.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-swap-web.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-swap-web.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-swap-plan","reserved":false,"lastModifiedTimeUtc":"2017-10-11T20:36:30.0966667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-swap-web__db10","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93","possibleOutboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93,40.85.159.5,13.91.108.158","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-083","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-swap-web.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2017-10-11T20:37:16.683Z","sourceSlotName":"staging","destinationSlotName":"Production"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3079']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:37:19 GMT']
+      etag: ['"1D342D09E565B0B"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings list]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings/list?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","s1":"slot"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['372']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:37:19 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config appsettings list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1","s1","s1"]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['176']
+      content-type: [application/json]
+      date: ['Wed, 11 Oct 2017 20:37:19 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -849,19 +818,49 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/resetSlotConfig?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/resetSlotConfig?api-version=2016-08-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:23:14 GMT']
-      etag: ['"1D30A432E6676F0"']
+      date: ['Wed, 11 Oct 2017 20:37:20 GMT']
+      etag: ['"1D342D09E565B0B"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment slot swap]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/resetSlotConfig?api-version=2016-08-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 11 Oct 2017 20:37:21 GMT']
+      etag: ['"1D342D0B9A2E18B"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -879,20 +878,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings/list?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings/list?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['323']
+      content-length: ['360']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:23:15 GMT']
+      date: ['Wed, 11 Oct 2017 20:37:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -911,20 +910,20 @@ interactions:
       CommandName: [webapp config appsettings list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web2/config/slotConfigNames?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-swap-web/config/slotConfigNames?api-version=2016-08-01
   response:
-    body: {string: '{"id":null,"name":"slot-swap-web2","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1"]}}'}
+    body: {string: '{"id":null,"name":"slot-swap-web","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":[],"appSettingNames":["s1","s1","s1","s1","s1","s1"]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['167']
+      content-length: ['176']
       content-type: [application/json]
-      date: ['Mon, 31 Jul 2017 21:23:16 GMT']
+      date: ['Wed, 11 Oct 2017 20:37:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -943,9 +942,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.11
-          msrest_azure/0.4.11 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.12+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.16
+          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
+          AZURECLI/2.0.17+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -954,11 +953,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Mon, 31 Jul 2017 21:23:18 GMT']
+      date: ['Wed, 11 Oct 2017 20:37:22 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdCMlJGNVFIWTNIMlo3V1hFWkU0SjJMWDZUTkJBQ1VLNkFDN3w4RERBNkZCNkZGREQ0ODk0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdXUkFLVUdTNkJFUkJDT1FPU0dZRzNVTkFQVUNPN0JLUkk0QnxCNzM5QzRFMUQxQjI2MDBELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1
