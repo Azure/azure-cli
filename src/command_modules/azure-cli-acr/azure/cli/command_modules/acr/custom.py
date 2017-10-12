@@ -7,29 +7,25 @@ from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 
-from azure.mgmt.containerregistry.v2017_03_01.models import (
-    RegistryUpdateParameters as BasicRegistryUpdateParameters,
-    StorageAccountParameters
-)
-from azure.mgmt.containerregistry.v2017_06_01_preview.models import (
-    RegistryUpdateParameters as ManagedRegistryUpdateParameters,
+from azure.mgmt.containerregistry.v2017_10_01.models import (
+    RegistryUpdateParameters,
+    StorageAccountProperties,
     SkuName,
-    SkuTier,
     Sku
 )
 
-from ._constants import MANAGED_REGISTRY_API_VERSION
 from ._factory import get_acr_service_client
+from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import (
-    get_resource_group_name_by_registry_name,
     arm_deploy_template_new_storage,
     arm_deploy_template_existing_storage,
     arm_deploy_template_managed_storage,
     random_storage_account_name,
     get_registry_by_name,
-    managed_registry_validation,
+    validate_managed_registry,
     validate_sku_update,
-    ensure_storage_account_parameter
+    get_resource_group_name_by_registry_name,
+    get_resource_id_by_storage_account_name
 )
 from ._docker_utils import get_login_credentials
 
@@ -74,10 +70,16 @@ def acr_create(registry_name,
     :param str admin_enabled: Indicates whether the admin user is enabled
     :param str deployment_name: The name of the deployment
     """
+    if sku == SkuName.basic.value and storage_account_name:
+        raise CLIError("Please specify '--sku Basic' without providing an existing storage account "
+                       "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
+                       "to create a Classic registry using storage account `{}`."
+                       .format(storage_account_name, storage_account_name))
+
     client = get_acr_service_client().registries
     admin_user_enabled = admin_enabled == 'true'
 
-    if sku == SkuName.basic.value:
+    if sku == SkuName.classic.value:
         if storage_account_name is None:
             storage_account_name = random_storage_account_name(registry_name)
             logger.warning(
@@ -157,20 +159,6 @@ def acr_show(registry_name, resource_group_name=None):
     return client.get(resource_group_name, registry_name)
 
 
-def acr_update_get(client,  # pylint: disable=unused-argument
-                   registry_name,
-                   resource_group_name=None):
-    """Returns an empty RegistryUpdateParameters object.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    """
-    try:
-        managed_registry_validation(registry_name, resource_group_name)
-        return ManagedRegistryUpdateParameters()
-    except:  # pylint: disable=bare-except
-        return BasicRegistryUpdateParameters()
-
-
 def acr_update_custom(instance,
                       sku=None,
                       storage_account_name=None,
@@ -180,7 +168,8 @@ def acr_update_custom(instance,
         instance.sku = Sku(name=sku)
 
     if storage_account_name is not None:
-        instance.storage_account = StorageAccountParameters(storage_account_name, "")
+        instance.storage_account = StorageAccountProperties(
+            get_resource_id_by_storage_account_name(storage_account_name))
 
     if admin_enabled is not None:
         instance.admin_user_enabled = admin_enabled == 'true'
@@ -189,6 +178,12 @@ def acr_update_custom(instance,
         instance.tags = tags
 
     return instance
+
+
+def acr_update_get(client):  # pylint: disable=unused-argument
+    """Returns an empty RegistryUpdateParameters object.
+    """
+    return RegistryUpdateParameters()
 
 
 def acr_update_set(client,
@@ -202,22 +197,13 @@ def acr_update_set(client,
     """
     registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
 
-    if registry.sku.tier == SkuTier.managed.value:
-        if parameters.sku is not None:
-            validate_sku_update(parameters.sku)
-        if parameters.storage_account is not None:
-            parameters.storage_account = None
-            logger.warning(
-                "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
-                registry_name, registry.sku.name)
-        client = get_acr_service_client(MANAGED_REGISTRY_API_VERSION).registries
-    elif registry.sku.tier == SkuTier.basic.value:
-        if hasattr(parameters, 'sku') and parameters.sku is not None:
-            parameters.sku = None
-            logger.warning(
-                "Updating SKU is not supported for registries in Basic SKU. The specified SKU will be ignored.")
-        if parameters.storage_account is not None:
-            parameters.storage_account = ensure_storage_account_parameter(parameters.storage_account)
+    validate_sku_update(registry.sku.name, parameters.sku)
+
+    if registry.sku.name in MANAGED_REGISTRY_SKU and parameters.storage_account is not None:
+        parameters.storage_account = None
+        logger.warning(
+            "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
+            registry_name, registry.sku.name)
 
     return client.update(resource_group_name, registry_name, parameters)
 
@@ -280,8 +266,8 @@ def acr_show_usage(registry_name, resource_group_name=None):
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
-    _, resource_group_name = managed_registry_validation(
-        registry_name, resource_group_name, "Usage is not supported for registries in Basic SKU.")
-    client = get_acr_service_client(MANAGED_REGISTRY_API_VERSION).registries
+    _, resource_group_name = validate_managed_registry(
+        registry_name, resource_group_name, "Usage is only supported for managed registries.")
+    client = get_acr_service_client().registries
 
     return client.list_usages(resource_group_name, registry_name)
