@@ -1577,6 +1577,16 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
 
 
+class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_accelerated_networking(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd("vmss create -n {0} -g {1} --vm-sku Standard_DS4_v2 --image Win2016Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1".format(vmss_name, resource_group))
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True)
+        ])
+
+
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer()
