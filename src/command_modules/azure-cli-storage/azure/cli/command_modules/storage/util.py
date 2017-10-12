@@ -115,7 +115,7 @@ def create_short_lived_share_sas(account_name, account_key, share):
     else:
         SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
                                         mod='sharedaccesssignature')
-    FilePermission = get_sdk(ResourceType.DATA_STORAGE, 'file.models#FilesPermissions')
+    FilePermission = get_sdk(ResourceType.DATA_STORAGE, 'file.models#FilePermissions')
 
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
