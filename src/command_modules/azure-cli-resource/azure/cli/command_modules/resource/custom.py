@@ -564,7 +564,10 @@ def delete_resource(resource_ids=None, resource_group_name=None,
         for rsrc_utils, id_dict in to_be_deleted:
             try:
                 operations.append(rsrc_utils.delete())
-                logger.debug("deleting", resource_dict_to_id(**id_dict))
+                if id_dict.get("subscription"):
+                    logger.debug("deleting", resource_dict_to_id(**id_dict))
+                else:
+                    logger.debug("deleting", id_dict.get('resource_name'))
             except CloudError as e:
                 # request to delete failed, add parsed id dict back to queue
                 id_dict['exception'] = str(e)
