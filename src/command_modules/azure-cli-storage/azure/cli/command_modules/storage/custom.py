@@ -69,8 +69,8 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-        params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
-                                             virtual_network_rules=None)
+        params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
+                                                 virtual_network_rules=None)
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -131,7 +131,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         params.identity = Identity()
 
     if NetworkRuleSet and (bypass or default_action):
-        acl = instance.network_acls
+        acl = instance.network_rule_set
         if not acl:
             if bypass and not default_action:
                 raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
@@ -142,7 +142,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
                 acl.bypass = bypass
             if default_action:
                 acl.default_action = default_action
-        params.network_acls = acl
+        params.network_rule_set = acl
 
     return params
 
@@ -440,7 +440,7 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
 
 def list_network_rules(client, resource_group_name, storage_account_name):
     sa = client.get_properties(resource_group_name, storage_account_name)
-    rules = sa.network_acls
+    rules = sa.network_rule_set
     delattr(rules, 'bypass')
     delattr(rules, 'default_action')
     return rules
@@ -449,7 +449,7 @@ def list_network_rules(client, resource_group_name, storage_account_name):
 def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet_name=None,  # pylint: disable=unused-argument
                      ip_address=None):
     sa = client.get_properties(resource_group_name, storage_account_name)
-    rules = sa.network_acls
+    rules = sa.network_rule_set
     if subnet:
         from azure.cli.core.commands.arm import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -465,14 +465,14 @@ def add_network_rule(client, resource_group_name, storage_account_name, action='
         rules.ip_rules.append(IpRule(ip_address, action=action))
 
     StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
-    params = StorageAccountUpdateParameters(network_acls=rules)
+    params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, storage_account_name, params)
 
 
 def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, storage_account_name)
-    rules = sa.network_acls
+    rules = sa.network_rule_set
     if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
@@ -480,5 +480,5 @@ def remove_network_rule(client, resource_group_name, storage_account_name, ip_ad
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
 
     StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
-    params = StorageAccountUpdateParameters(network_acls=rules)
+    params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, storage_account_name, params)
