@@ -104,7 +104,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'repo_url', options_list=('--repo-url', '-u'), help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
     register_cli_argument(scope + ' deployment source', 'branch', help='the branch name of the repository')
     register_cli_argument(scope + ' deployment source', 'private_repo_username', arg_group='VSTS CD Provider', help='Username for the private repository')
-    register_cli_argument(scope + ' deployment source', 'private_repo_password', arg_group='VSTS CD Provider', help='Password for private repository. Will prompt if not provided')
+    register_cli_argument(scope + ' deployment source', 'private_repo_password', arg_group='VSTS CD Provider', help='Password for the private repository')
     register_cli_argument(scope + ' deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='Web application framework you used to develop your app', **enum_choice_list(['AspNet', 'AspNetCore', 'NodeJS', 'PHP', 'Python']))
     register_cli_argument(scope + ' deployment source', 'app_working_dir', arg_group='VSTS CD Provider', help='Working directory of the application. Default will be root of the repo')
     register_cli_argument(scope + ' deployment source', 'nodejs_task_runner', arg_group='VSTS CD Provider', help='Task runner for nodejs.', **enum_choice_list(['None', 'Gulp', 'Grunt']))
