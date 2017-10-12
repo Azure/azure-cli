@@ -6,11 +6,11 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [400d1fd8-05c7-11e7-8f8d-480fcf502758]
+      x-ms-client-request-id: [8ae91d3e-a867-11e7-8f58-480fcf502758]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azurecli-webapp-scale?api-version=2017-05-10
   response:
@@ -18,7 +18,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 10 Mar 2017 19:24:58 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:32 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -26,28 +26,29 @@ interactions:
       content-length: ['232']
     status: {code: 200, message: OK}
 - request:
-    body: '{"sku": {"capacity": 1, "tier": "SHARED", "name": "D1"}, "properties":
-      {"perSiteScaling": false, "name": "webapp-scale-plan"}, "location": "westus"}'
+    body: '{"properties": {"perSiteScaling": false, "name": "webapp-scale-plan"},
+      "sku": {"tier": "SHARED", "name": "D1", "capacity": 1}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['148']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4019a452-05c7-11e7-a60f-480fcf502758]
+      x-ms-client-request-id: [8b197e78-a867-11e7-b62b-480fcf502758]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:01 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:36 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -56,8 +57,8 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1182']
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      content-length: ['1214']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -66,20 +67,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [42ac6934-05c7-11e7-9daa-480fcf502758]
+      x-ms-client-request-id: [8dd8c72c-a867-11e7-b63e-480fcf502758]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:03 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:37 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -88,24 +90,24 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1182']
+      content-length: ['1214']
     status: {code: 200, message: OK}
 - request:
-    body: '{"kind": "app", "location": "West US", "type": "Microsoft.Web/serverfarms",
-      "sku": {"capacity": 1, "family": "D", "tier": "STANDARD", "name": "S2", "size":
-      "D1"}, "properties": {"name": "webapp-scale-plan", "perSiteScaling": false,
-      "reserved": false, "targetWorkerCount": 0, "targetWorkerSizeId": 0}, "name":
-      "webapp-scale-plan"}'
+    body: '{"properties": {"reserved": false, "perSiteScaling": false, "name": "webapp-scale-plan",
+      "targetWorkerCount": 0, "targetWorkerSizeId": 0}, "sku": {"family": "D", "tier":
+      "STANDARD", "name": "S2", "capacity": 1, "size": "D1"}, "kind": "app", "location":
+      "West US"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['329']
+      Content-Length: ['263']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [42f9798c-05c7-11e7-91d6-480fcf502758]
+      x-ms-client-request-id: [8e1b888a-a867-11e7-b864-480fcf502758]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
@@ -113,9 +115,9 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Fri, 10 Mar 2017 19:25:04 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:38 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/8d57ddbd-c779-40ea-b660-1015f4bf027d/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/6c743405-0f76-4b0f-9640-8400b75271e6?api-version=2016-09-01']
+      Location: ['https://management.azure.com/subscriptions/0d3ae56c-deaf-4982-b514-33d016d4a683/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/ace9006e-d190-428a-8097-5417a8f66de4?api-version=2016-09-01']
       Pragma: [no-cache]
       Retry-After: ['15']
       Server: [Microsoft-IIS/8.0]
@@ -131,20 +133,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [42f9798c-05c7-11e7-91d6-480fcf502758]
+      x-ms-client-request-id: [8e1b888a-a867-11e7-b864-480fcf502758]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/6c743405-0f76-4b0f-9640-8400b75271e6?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/ace9006e-d190-428a-8097-5417a8f66de4?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Medium","workerSizeId":1,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Medium","currentWorkerSizeId":1,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Medium","workerSizeId":1,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Medium","currentWorkerSizeId":1,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:20 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:54 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -153,7 +156,7 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1187']
+      content-length: ['1215']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -162,20 +165,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d304f22-05c7-11e7-94d8-480fcf502758]
+      x-ms-client-request-id: [9827fe68-a867-11e7-9ac1-480fcf502758]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Medium","workerSizeId":1,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Medium","currentWorkerSizeId":1,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Medium","workerSizeId":1,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Medium","currentWorkerSizeId":1,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:20 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:54 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -184,24 +188,24 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1187']
+      content-length: ['1215']
     status: {code: 200, message: OK}
 - request:
-    body: '{"kind": "app", "location": "West US", "type": "Microsoft.Web/serverfarms",
-      "sku": {"capacity": 1, "family": "S", "tier": "BASIC", "name": "B1", "size":
-      "S2"}, "properties": {"name": "webapp-scale-plan", "perSiteScaling": false,
-      "reserved": false, "targetWorkerCount": 0, "targetWorkerSizeId": 0}, "name":
-      "webapp-scale-plan"}'
+    body: '{"properties": {"reserved": false, "perSiteScaling": false, "name": "webapp-scale-plan",
+      "targetWorkerCount": 0, "targetWorkerSizeId": 0}, "sku": {"family": "S", "tier":
+      "BASIC", "name": "B1", "capacity": 1, "size": "S2"}, "kind": "app", "location":
+      "West US"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['326']
+      Content-Length: ['260']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d983ee6-05c7-11e7-bcbf-480fcf502758]
+      x-ms-client-request-id: [987f8bb8-a867-11e7-84ca-480fcf502758]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
@@ -209,9 +213,9 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Fri, 10 Mar 2017 19:25:22 GMT']
+      Date: ['Tue, 03 Oct 2017 18:20:56 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/8d57ddbd-c779-40ea-b660-1015f4bf027d/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/89a6b750-9e63-4281-ab74-065f50aeb836?api-version=2016-09-01']
+      Location: ['https://management.azure.com/subscriptions/0d3ae56c-deaf-4982-b514-33d016d4a683/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/1bd474b1-cbc3-4968-a084-7292c99842c7?api-version=2016-09-01']
       Pragma: [no-cache]
       Retry-After: ['15']
       Server: [Microsoft-IIS/8.0]
@@ -227,20 +231,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [4d983ee6-05c7-11e7-bcbf-480fcf502758]
+      x-ms-client-request-id: [987f8bb8-a867-11e7-84ca-480fcf502758]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/89a6b750-9e63-4281-ab74-065f50aeb836?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/1bd474b1-cbc3-4968-a084-7292c99842c7?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:38 GMT']
+      Date: ['Tue, 03 Oct 2017 18:21:12 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -249,7 +254,7 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1181']
+      content-length: ['1213']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -258,20 +263,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [581d3178-05c7-11e7-bc88-480fcf502758]
+      x-ms-client-request-id: [a308c8a2-a867-11e7-9de0-480fcf502758]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:39 GMT']
+      Date: ['Tue, 03 Oct 2017 18:21:13 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -280,24 +286,24 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1181']
+      content-length: ['1213']
     status: {code: 200, message: OK}
 - request:
-    body: '{"kind": "app", "location": "West US", "type": "Microsoft.Web/serverfarms",
-      "sku": {"capacity": 2, "family": "B", "tier": "Basic", "name": "B1", "size":
-      "B1"}, "properties": {"name": "webapp-scale-plan", "perSiteScaling": false,
-      "reserved": false, "targetWorkerCount": 0, "targetWorkerSizeId": 0}, "name":
-      "webapp-scale-plan"}'
+    body: '{"properties": {"reserved": false, "perSiteScaling": false, "name": "webapp-scale-plan",
+      "targetWorkerCount": 0, "targetWorkerSizeId": 0}, "sku": {"family": "B", "tier":
+      "Basic", "name": "B1", "capacity": 2, "size": "B1"}, "kind": "app", "location":
+      "West US"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['326']
+      Content-Length: ['260']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [5875b62e-05c7-11e7-acc5-480fcf502758]
+      x-ms-client-request-id: [a3706b80-a867-11e7-a5e2-480fcf502758]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan?api-version=2016-09-01
   response:
@@ -305,16 +311,16 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Fri, 10 Mar 2017 19:25:42 GMT']
+      Date: ['Tue, 03 Oct 2017 18:21:14 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/8d57ddbd-c779-40ea-b660-1015f4bf027d/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/fff7025d-5d6f-40c7-a3e7-c6b4356cec60?api-version=2016-09-01']
+      Location: ['https://management.azure.com/subscriptions/0d3ae56c-deaf-4982-b514-33d016d4a683/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/546da722-126d-4314-b137-5988f8225a32?api-version=2016-09-01']
       Pragma: [no-cache]
       Retry-After: ['15']
       Server: [Microsoft-IIS/8.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -323,20 +329,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
-          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
+          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.17+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [5875b62e-05c7-11e7-acc5-480fcf502758]
+      x-ms-client-request-id: [a3706b80-a867-11e7-a5e2-480fcf502758]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/fff7025d-5d6f-40c7-a3e7-c6b4356cec60?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverFarms/webapp-scale-plan/operationresults/546da722-126d-4314-b137-5988f8225a32?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azurecli-webapp-scale/providers/Microsoft.Web/serverfarms/webapp-scale-plan","name":"webapp-scale-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":2,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":2,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-045_12999","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":2}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-scale-plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":2,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":2,"status":"Ready","webSpace":"azurecli-webapp-scale-WestUSwebspace","subscription":"0d3ae56c-deaf-4982-b514-33d016d4a683","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"azurecli-webapp-scale","reserved":false,"mdmId":"waws-prod-bay-083_5347","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":2}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Fri, 10 Mar 2017 19:25:58 GMT']
+      Date: ['Tue, 03 Oct 2017 18:21:29 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -345,6 +352,6 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1181']
+      content-length: ['1213']
     status: {code: 200, message: OK}
 version: 1
