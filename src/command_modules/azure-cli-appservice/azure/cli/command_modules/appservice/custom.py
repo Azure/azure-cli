@@ -1197,7 +1197,7 @@ def _get_log(url, user_name, password, log_file=None):
         preload_content=False
     )
     if r.status != 200:
-        raise CLIError("Failed to connect to '{}' with status code '{}'".format(url, r.status))
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(url, r.status, r.reason))
     if log_file:  # download logs
         with open(log_file, 'wb') as f:
             while True:
