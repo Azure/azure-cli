@@ -930,25 +930,16 @@ def _resolve_policy_id(policy, policy_set_definition, client):
     return policy_id
 
 
-def _get_custom_or_builtin_policy(client, name, resourcetype='definition'):
-    if resourcetype != 'definition':
-        if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
-            errorObject = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'ErrorResponseException', mod='models')
-            try:
-                return client.policy_set_definitions.get(name)
-            except errorObject as ex:
-                if ex.response.status_code == 404:
-                    return client.policy_set_definitions.get_built_in(name)
-                raise
-        raise CLIError('policy set definitions are only supported with api-versions '
-                       '2017-06-01-preview and above')
-
+def _get_custom_or_builtin_policy(client, name, for_policy_set=False):
+    from msrest.exceptions import HttpOperationError
     from msrestazure.azure_exceptions import CloudError
+    policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
     try:
-        return client.policy_definitions.get(name)
-    except CloudError as ex:
-        if ex.status_code == 404:
-            return client.policy_definitions.get_built_in(name)
+        return policy_operations.get(name)
+    except (CloudError, HttpOperationError) as ex:
+        status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
+        if status_code == 404:
+            return policy_operations.get_built_in(name)
         raise
 
 
