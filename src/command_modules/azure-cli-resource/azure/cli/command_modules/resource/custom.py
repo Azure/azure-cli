@@ -233,7 +233,7 @@ def export_group_as_template(
 
     options = ','.join(export_options) if export_options else None
 
-    result = rcf.resource_groups.export_template(resource_group_name, '*', options=options)
+    result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
