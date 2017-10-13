@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(unreleased)
++++++++++++++++++++
+* webapp: fix a bug that downloaded log file might be invalid
+
 0.1.18 (2017-10-09)
 +++++++++++++++++++
 * webapp: added generic update with new command: 'az webapp update'
