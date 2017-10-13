@@ -44,12 +44,13 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                          target_account_info, target_container, sas, source_account,
                          source_container, snapshot)
 
-        from time import sleep
+        from time import sleep, time
+        start = time()
         while True:
             # poll until copy has succeeded
             blob = self.storage_cmd('storage blob show -c {} -n dst',
                                     target_account_info, target_container).get_output_in_json()
-            if blob["properties"]["copy"]["status"] == "success":
+            if blob["properties"]["copy"]["status"] == "success" or time() - start > 10:
                 break
             sleep(.1)
 
