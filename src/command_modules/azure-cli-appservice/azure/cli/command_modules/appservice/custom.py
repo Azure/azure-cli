@@ -76,11 +76,9 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](match, site_config)
-
-    # Be consistent with portal: any windows webapp should have this even it doesn't use node as the stack
-    if not is_linux:
-        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
-
+        if not match['displayName'].startswith('node'):
+            site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+        
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
