@@ -9,7 +9,7 @@ import sys
 import json
 import base64
 import binascii
-from datetime import datetime, timedelta
+from datetime import date, time, datetime, timedelta
 from enum import Enum
 
 import six
@@ -170,7 +170,7 @@ def todict(obj):  # pylint: disable=too-many-return-statements
         return [todict(a) for a in obj]
     elif isinstance(obj, Enum):
         return obj.value
-    elif isinstance(obj, datetime):
+    elif isinstance(obj, (date, time, datetime)):
         return obj.isoformat()
     elif isinstance(obj, timedelta):
         return str(obj)
