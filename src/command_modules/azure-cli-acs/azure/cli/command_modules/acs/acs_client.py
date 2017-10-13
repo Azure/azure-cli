@@ -58,11 +58,15 @@ def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
     keys = _load_keys(key_filename, allow_agent)
     pkey = keys[0]
     ssh = paramiko.SSHClient()
-    conf = paramiko.SSHConfig()
+    proxy = None
     ssh_config_file = os.path.expanduser("~/.ssh/config")
-    conf.parse(open(ssh_config_file))
-    host_config = conf.lookup(host)
-    proxy = paramiko.ProxyCommand(host_config['proxycommand'])
+    if os.path.exists(ssh_config_file):
+        conf = paramiko.SSHConfig()
+        with open(ssh_config_file) as f:
+            conf.parse(f)
+        host_config = conf.lookup(host)
+        if 'proxycommand' in host_config:
+            proxy = paramiko.ProxyCommand(host_config['proxycommand'])
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(host, username=user, pkey=pkey, sock=proxy)

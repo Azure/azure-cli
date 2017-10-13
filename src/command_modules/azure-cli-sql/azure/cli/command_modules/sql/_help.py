@@ -46,6 +46,13 @@ helps['sql db show'] = """
     type: command
     short-summary: Get the details for a database.
     """
+helps['sql db show-connection-string'] = """
+    type: command
+    short-summary: Generates a connection string to a database.
+    examples:
+        - name: Generate connection string for ado.net
+          text: az sql db show-connection-string -s myserver -n mydb -c ado.net
+    """
 helps['sql db update'] = """
     type: command
     short-summary: Update a database.

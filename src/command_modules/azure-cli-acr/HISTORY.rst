@@ -2,6 +2,13 @@
 
 Release History
 ===============
+
+unreleased
+++++++++++
+* All resource management now points to 2017-10-01 api-version.
+* Bring your own storage SKU is now Classic.
+* Managed registry SKUs are now Basic, Standard, and Premium.
+
 2.0.13 (2017-10-09)
 +++++++++++++++++++
 * minor fixes

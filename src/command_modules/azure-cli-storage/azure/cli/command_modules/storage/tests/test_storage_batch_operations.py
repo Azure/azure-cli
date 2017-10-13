@@ -16,14 +16,14 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         src_container = self.create_container(storage_account_info)
 
         # upload test files to storage account
-        self.storage_cmd('storage blob upload-batch -s {} -d {}',
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {}',
                          storage_account_info, test_dir, src_container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container) \
             .assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # download recursively without pattern
         local_folder = self.create_temp_dir()
-        cmd = 'storage blob download-batch -s {} -d {}'.format(src_container, local_folder)
+        cmd = 'storage blob download-batch -s {} -d "{}"'.format(src_container, local_folder)
         self.storage_cmd(cmd, storage_account_info)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
 
@@ -33,22 +33,20 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                                    src_container).output
         src_url = src_url[:src_url.rfind('/')]
 
-        # self.cmd('storage blob download-batch -s {} -d {} --pattern {} --account-key {}'.format(
-        #     src_url, local_folder, '*', storage_account_info[0]))
-        self.storage_cmd('storage blob download-batch -s {} -d {} --pattern *',
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern *',
                          storage_account_info, src_url, local_folder)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # download recursively with wild card after dir
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage blob download-batch -s {} -d {} --pattern {}',
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}',
                          storage_account_info, src_container, local_folder, 'apple/*')
 
         self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # download recursively with wild card before name
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage blob download-batch -s {} -d {} --pattern {}',
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}',
                          storage_account_info, src_container, local_folder, '*/file_0')
         self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
 
@@ -58,7 +56,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     def test_storage_blob_batch_upload_scenarios(self, test_dir, storage_account_info):
         # upload files without pattern
         container = self.create_container(storage_account_info)
-        self.storage_cmd('storage blob upload-batch -s {} -d {}',
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {}',
                          storage_account_info, test_dir, container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, container) \
             .assert_with_checks(JMESPathCheck('length(@)', 41))
@@ -67,21 +65,21 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(storage_account_info)
         src_url = self.storage_cmd('storage blob url -c {} -n \'\' -otsv', storage_account_info,
                                    container).output.strip()[:-1]
-        self.storage_cmd('storage blob upload-batch -s {} -d {} --pattern apple/*',
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --pattern apple/*',
                          storage_account_info, test_dir, src_url)
         self.storage_cmd('storage blob list -c {}', storage_account_info, container) \
             .assert_with_checks(JMESPathCheck('length(@)', 10))
 
         # upload files with pattern */file_0
         container = self.create_container(storage_account_info)
-        self.storage_cmd('storage blob upload-batch -s {} -d {} --pattern */file_0',
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --pattern */file_0',
                          storage_account_info, test_dir, container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, container) \
             .assert_with_checks(JMESPathCheck('length(@)', 4))
 
         # upload files with pattern nonexists/*
         container = self.create_container(storage_account_info)
-        self.storage_cmd('storage blob upload-batch -s {} -d {} --pattern nonexists/*',
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --pattern nonexists/*',
                          storage_account_info, test_dir, container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, container) \
             .assert_with_checks(JMESPathCheck('length(@)', 0))
@@ -92,12 +90,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     def test_storage_file_batch_download_scenarios(self, test_dir, storage_account_info):
         src_share = self.create_share(storage_account_info)
 
-        self.storage_cmd('storage file upload-batch -s {} -d {}', storage_account_info, test_dir,
+        self.storage_cmd('storage file upload-batch -s "{}" -d {}', storage_account_info, test_dir,
                          src_share)
 
         # download without pattern
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file download-batch -s {} -d {}', storage_account_info, src_share,
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share,
                          local_folder)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
 
@@ -105,19 +103,19 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         local_folder = self.create_temp_dir()
         share_url = self.storage_cmd('storage file url -s {} -p \'\' -otsv', storage_account_info,
                                      src_share).output.strip()[:-1]
-        self.storage_cmd('storage file download-batch -s {} -d {} --pattern apple/*',
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --pattern apple/*',
                          storage_account_info, share_url, local_folder)
         self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # download with pattern */file0
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file download-batch -s {} -d {} --pattern */file_0',
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --pattern */file_0',
                          storage_account_info, src_share, local_folder)
         self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # download with pattern nonexsits/*
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file download-batch -s {} -d {} --pattern nonexists/*',
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --pattern nonexists/*',
                          storage_account_info, src_share, local_folder)
         self.assertEqual(0, sum(len(f) for r, d, f in os.walk(local_folder)))
 
@@ -128,18 +126,18 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # upload without pattern
         src_share = self.create_share(storage_account_info)
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file upload-batch -s {} -d {}', storage_account_info, test_dir,
+        self.storage_cmd('storage file upload-batch -s "{}" -d {}', storage_account_info, test_dir,
                          src_share)
-        self.storage_cmd('storage file download-batch -s {} -d {}', storage_account_info, src_share,
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share,
                          local_folder)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # upload with pattern apple/*
         src_share = self.create_share(storage_account_info)
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file upload-batch -s {} -d {} --pattern apple/*',
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --pattern apple/*',
                          storage_account_info, test_dir, src_share)
-        self.storage_cmd('storage file download-batch -s {} -d {}', storage_account_info, src_share,
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share,
                          local_folder)
         self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
 
@@ -148,18 +146,18 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         local_folder = self.create_temp_dir()
         share_url = self.storage_cmd('storage file url -s {} -p \'\' -otsv', storage_account_info,
                                      src_share).output.strip()[:-1]
-        self.storage_cmd('storage file upload-batch -s {} -d {} --pattern */file_0',
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --pattern */file_0',
                          storage_account_info, test_dir, share_url)
-        self.storage_cmd('storage file download-batch -s {} -d {}', storage_account_info, src_share,
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share,
                          local_folder)
         self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # upload with pattern nonexists/*
         src_share = self.create_share(storage_account_info)
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file upload-batch -s {} -d {} --pattern nonexists/*',
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --pattern nonexists/*',
                          storage_account_info, test_dir, src_share)
-        self.storage_cmd('storage file download-batch -s {} -d {}', storage_account_info, src_share,
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share,
                          local_folder)
         self.assertEqual(0, sum(len(f) for r, d, f in os.walk(local_folder)))
 
@@ -172,11 +170,11 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         src_container = self.create_container(src_account_info)
-        self.storage_cmd('storage blob upload-batch -s {} -d {}', src_account_info, test_dir,
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {}', src_account_info, test_dir,
                          src_container)
 
         src_share = self.create_share(src_account_info)
-        self.storage_cmd('storage file upload-batch -s {} -d {}', src_account_info, test_dir,
+        self.storage_cmd('storage file upload-batch -s "{}" -d {}', src_account_info, test_dir,
                          src_share)
 
         # from blob container to file share with a sas in same account
@@ -235,7 +233,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
 
     def assert_share_file_count(self, account_info, share_name, expect_file_count):
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file download-batch -s {} -d {}', account_info, share_name,
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', account_info, share_name,
                          local_folder)
         self.assertEqual(expect_file_count, sum(len(f) for r, d, f in os.walk(local_folder)))
 

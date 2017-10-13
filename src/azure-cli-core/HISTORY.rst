@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+unreleased
++++++++++++++++++++
+* 2017-03-09-profile is updated to consume MGMT_STORAGE API version '2016-01-01'
+
 2.0.18 (2017-10-09)
 +++++++++++++++++++
 * Azure Stack: handle adfs authority url with a trailing slash
@@ -9,10 +14,6 @@ Release History
 2.0.17 (2017-09-22)
 +++++++++++++++++++
 * minor fixes
-
-2.0.18 (2017-10-09)
-+++++++++++++++++++
-
 * Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
 * More user-friendly handling of invalid cloud configurations
 * `availability-set create`: Fixed issue where this command would not work on Azure Stack.

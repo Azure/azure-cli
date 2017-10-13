@@ -22,14 +22,14 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         source_container = self.create_container(source_account_info)
         target_container = self.create_container(target_account_info)
 
-        self.storage_cmd('storage blob upload -c {} -f {} -n src', source_account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', source_account_info,
                          source_container, source_file)
 
         snapshot = self.storage_cmd('storage blob snapshot -c {} -n src', source_account_info,
                                     source_container).get_output_in_json()['snapshot']
 
         source_file = self.create_temp_file(24, full_random=True)
-        self.storage_cmd('storage blob upload -c {} -f {} -n src', source_account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', source_account_info,
                          source_container, source_file)
 
         from datetime import datetime, timedelta
@@ -45,7 +45,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                          source_container, snapshot)
 
         target_file = self.create_temp_file(1)
-        self.storage_cmd('storage blob download -c {} -n dst -f {}', target_account_info,
+        self.storage_cmd('storage blob download -c {} -n dst -f "{}"', target_account_info,
                          target_container, target_file)
 
         with open(target_file, 'rb') as f:

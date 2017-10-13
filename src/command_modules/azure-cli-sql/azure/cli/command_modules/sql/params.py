@@ -28,6 +28,8 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     StorageKeyType,
     TransparentDataEncryptionStatus)
 from .custom import (
+    ClientAuthenticationType,
+    ClientType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
     validate_subnet
@@ -311,7 +313,7 @@ with ParametersContext(command='sql db export') as c:
     c.expand('parameters', ExportRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth-type',),
+    c.argument('authentication_type', options_list=('--auth-type', '-a'),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
 
@@ -319,7 +321,7 @@ with ParametersContext(command='sql db import') as c:
     c.expand('parameters', ImportExtensionRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth-type',),
+    c.argument('authentication_type', options_list=('--auth-type', '-a'),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
 
@@ -329,6 +331,20 @@ with ParametersContext(command='sql db import') as c:
     # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
     # needed, but we still need to avoid this conflict.
     c.argument('name', options_list=('--not-name',), arg_type=ignore_type)
+
+with ParametersContext(command='sql db show-connection-string') as c:
+    c.argument('client_provider',
+               options_list=('--client', '-c'),
+               help='Type of client connection provider.',
+               **enum_choice_list(ClientType))
+
+    auth_group = 'Authentication'
+
+    c.argument('auth_type',
+               options_list=('--auth-type', '-a'),
+               arg_group=auth_group,
+               help='Type of authentication.',
+               **enum_choice_list(ClientAuthenticationType))
 
 
 #####

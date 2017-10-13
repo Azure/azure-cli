@@ -26,6 +26,11 @@ helps['acr webhook'] = """
     short-summary: Manage webhooks for Azure Container Registries.
     """
 
+helps['acr replication'] = """
+    type: group
+    short-summary: Manage replications for Azure Container Registries.
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if a container registry name is available for use.
@@ -51,12 +56,12 @@ helps['acr create'] = """
     type: command
     short-summary: Creates a container registry.
     examples:
-        - name: Create a managed container registry with the Standard (Preview) SKU.
+        - name: Create a managed container registry with the Standard SKU.
           text: >
-            az acr create -n MyRegistry -g MyResourceGroup --sku Managed_Standard
+            az acr create -n MyRegistry -g MyResourceGroup --sku Standard
         - name: Create a container registry with a new storage account with the Classic SKU.
           text: >
-            az acr create -n MyRegistry -g MyResourceGroup --sku Basic
+            az acr create -n MyRegistry -g MyResourceGroup --sku Classic
 """
 
 helps['acr delete'] = """
@@ -258,4 +263,49 @@ helps['acr webhook list-events'] = """
         - name: List recent events for a webhook.
           text: >
             az acr webhook list-events -n MyWebhook -r MyRegistry
+"""
+
+helps['acr replication list'] = """
+    type: command
+    short-summary: List all of the replications for a container registry.
+    examples:
+        - name: List replications and show the results in a table.
+          text: >
+            az acr replication list -r MyRegistry -o table
+"""
+
+helps['acr replication create'] = """
+    type: command
+    short-summary: Create a replication for a container registry.
+    examples:
+        - name: Create a replication for a container registry.
+          text: >
+            az acr replication create -r MyRegistry -l westus
+"""
+
+helps['acr replication delete'] = """
+    type: command
+    short-summary: Delete a replication from a container registry.
+    examples:
+        - name: Delete a replication from a container registry.
+          text: >
+            az acr replication delete -n MyReplication -r MyRegistry
+"""
+
+helps['acr replication show'] = """
+    type: command
+    short-summary: Get the details of a replication.
+    examples:
+        - name: Get the details of a replication.
+          text: >
+            az acr replication show -n MyReplication -r MyRegistry
+"""
+
+helps['acr replication update'] = """
+    type: command
+    short-summary: Updates a replication.
+    examples:
+        - name: Update tags for a replication
+          text: >
+            az acr replication update -n MyReplication -r MyRegistry --tags key1=value1 key2=value2
 """

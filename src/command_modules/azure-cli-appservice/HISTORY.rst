@@ -5,6 +5,7 @@ Release History
 0.1.18 (2017-10-09)
 +++++++++++++++++++
 * webapp: added generic update with new command: 'az webapp update'
+* webapp: updating tests/code for sdk update
 
 0.1.17 (2017-09-22)
 +++++++++++++++++++
