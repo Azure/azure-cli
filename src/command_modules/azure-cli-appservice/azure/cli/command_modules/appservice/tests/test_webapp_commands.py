@@ -167,12 +167,10 @@ class AppServiceLogTest(LiveScenarioTest):
         # sanity check the traces
         _, log_file = tempfile.mkstemp()
         log_dir = log_file + '-dir'
-        log_file = log_file.replace('\\', '\\\\')
-        self.cmd('webapp log download -g {} -n {} --log-file {}'.format(resource_group, webapp_name, log_file))
+        self.cmd('webapp log download -g {} -n {} --log-file "{}"'.format(resource_group, webapp_name, log_file))
         zip_ref = zipfile.ZipFile(log_file, 'r')
         zip_ref.extractall(log_dir)
-        p = Path(log_dir, r'LogFiles\kudu\trace')
-        self.assertTrue(p.is_dir())
+        self.assertTrue(os.path.isdir(os.path.join(log_dir, 'LogFiles', 'kudu', 'trace')))
 
     @ResourceGroupPreparer()
     def test_download_linux_web_log(self, resource_group):
@@ -188,12 +186,10 @@ class AppServiceLogTest(LiveScenarioTest):
         # sanity check the traces
         _, log_file = tempfile.mkstemp()
         log_dir = log_file + '-dir'
-        log_file = log_file.replace('\\', '\\\\')
-        self.cmd('webapp log download -g {} -n {} --log-file {}'.format(resource_group, webapp_name, log_file))
+        self.cmd('webapp log download -g {} -n {} --log-file "{}"'.format(resource_group, webapp_name, log_file))
         zip_ref = zipfile.ZipFile(log_file, 'r')
         zip_ref.extractall(log_dir)
-        p = Path(log_dir, r'LogFiles\kudu\trace')
-        self.assertTrue(p.is_dir())
+        self.assertTrue(os.path.isdir(os.path.join(log_dir, 'LogFiles', 'kudu', 'trace')))
 
 
 class AppServicePlanSceanrioTest(ScenarioTest):
