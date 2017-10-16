@@ -530,14 +530,19 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
-                          manual_integration=None, git_token=None, slot=None, cd_app_type='AspNet',
-                          app_working_dir=None, nodejs_task_runner=None, python_framework='Django',
-                          python_version='Python 3.5.3 x86', cd_account_create=None, cd_project_url=None, test=None,
+                          manual_integration=None, git_token=None, slot=None, cd_app_type=None,
+                          app_working_dir=None, nodejs_task_runner=None, python_framework=None,
+                          python_version=None, cd_account_create=None, cd_project_url=None, test=None,
                           slot_swap=None, private_repo_username=None, private_repo_password=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
     if cd_project_url:
+        #Add default values
+        cd_app_type = 'AspNet' if cd_app_type is None else cd_app_type
+        python_framework = 'Django' if python_framework is None else python_framework
+        python_version = 'Python 3.5.3 x86' if python_version is None else python_version
+
         webapp_list = None if test is None else list_webapp(resource_group_name)
         vsts_provider = VstsContinuousDeliveryProvider()
         cd_app_type_details = {

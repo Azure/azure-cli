@@ -181,7 +181,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
             'nodejs_task_runner': 'Gulp',
             'python_framework': 'Django',
             'python_version': 'Python 2.7.12 x64'
-        }        
+        }
         cd_manager.setup_continuous_delivery.assert_called_with('slot1', cd_app_type_details,
                                                                 'https://account1.visualstudio.com',
                                                                 True, None, None, None)
