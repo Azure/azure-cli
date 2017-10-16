@@ -78,7 +78,8 @@ class ResourceScenarioTest(ScenarioTest):
             resource_group, vnet_name, subnet_name))
 
         self.cmd('resource list', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
-        self.cmd('resource list -l centralus', checks=JCheck("length([?location == 'centralus']) == length(@)", True))
+        self.cmd('resource list -l southcentralus',
+                 checks=JCheck("length([?location == 'southcentralus']) == length(@)", True))
         self.cmd('resource list --resource-type {}'.format(vnet_type),
                  checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
         self.cmd('resource list --name {}'.format(vnet_name),
