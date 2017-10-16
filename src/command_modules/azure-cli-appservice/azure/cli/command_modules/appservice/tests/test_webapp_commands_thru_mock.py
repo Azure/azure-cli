@@ -22,8 +22,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
                                                          config_source_control,
-                                                         show_webapp,
-                                                         get_app_type_details)
+                                                         show_webapp)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -176,8 +175,13 @@ class Test_Webapp_Mocked(unittest.TestCase):
                               None, None, 'ASPNet', 'working_directory', 'Gulp', 'Django',
                               'Python 2.7.12 x64', True, 'https://account1.visualstudio.com',
                               None, 'slot1', None, None)
-        cd_app_type_details = get_app_type_details('ASPNet', 'working_directory', 'Gulp',
-                                                   'Django', 'Python 2.7.12 x64')
+        cd_app_type_details = {
+            'cd_app_type': 'ASPNet',
+            'app_working_dir': 'working_directory',
+            'nodejs_task_runner': 'Gulp',
+            'python_framework': 'Django',
+            'python_version': 'Python 2.7.12 x64'
+        }        
         cd_manager.setup_continuous_delivery.assert_called_with('slot1', cd_app_type_details,
                                                                 'https://account1.visualstudio.com',
                                                                 True, None, None, None)
