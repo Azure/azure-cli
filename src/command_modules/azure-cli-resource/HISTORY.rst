@@ -6,7 +6,7 @@ Release History
 unreleased
 +++++++++++++++++++
 * `group export`: Fixed incompatibility with most recent version of msrest dependency.
-
+* `az policy assignment create`: policy assignment create command to work with built in policy definitions and policy set definitions.
 
 2.0.16 (2017-10-09)
 +++++++++++++++++++
