@@ -118,7 +118,7 @@ register_cli_argument('group', 'resource_group_name', resource_group_name_type, 
 
 register_cli_argument('group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
-register_cli_argument('group deployment', 'template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+register_cli_argument('group deployment', 'template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system. Supports JSON and YAML")
 register_cli_argument('group deployment', 'template_uri', help='a uri to a remote template file')
 register_cli_argument('group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))
 
