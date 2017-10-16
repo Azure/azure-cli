@@ -5,7 +5,7 @@ Release History
 
 unreleased
 +++++++++++++++++++
-* `group export`: Fixed incompatability with most recent version of msrest dependency.
+* `group export`: Fixed incompatibility with most recent version of msrest dependency.
 
 
 2.0.16 (2017-10-09)
