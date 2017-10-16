@@ -68,7 +68,7 @@ class ResourceGroupNoWaitScenarioTest(VCRTestBase):
 
 
 class ResourceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_rsrc_scenario')
+    @ResourceGroupPreparer(name_prefix='cli_test_rsrc_scenario', location='southcentralus')
     def test_resource_scenario(self, resource_group):
         vnet_name = self.create_random_name('cli-test-vnet', 30)
         subnet_name = self.create_random_name('cli-test-subnet', 30)
@@ -90,7 +90,7 @@ class ResourceScenarioTest(ScenarioTest):
         # check for simple resource with tag
         self.cmd('resource show -n {} -g {} --resource-type {}'.format(vnet_name, resource_group, vnet_type), checks=[
             JCheck('name', vnet_name),
-            JCheck('location', 'westus'),
+            JCheck('location', 'southcentralus'),
             JCheck('resourceGroup', resource_group),
             JCheck('tags', {'cli-test': 'test'})])
 
