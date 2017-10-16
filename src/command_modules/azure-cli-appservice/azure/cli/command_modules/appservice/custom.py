@@ -538,7 +538,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type='
     location = _get_location_from_webapp(client, resource_group_name, name)
 
     if cd_project_url:
-        #Add default values
+        # Add default values
         cd_app_type = 'AspNet' if cd_app_type is None else cd_app_type
         python_framework = 'Django' if python_framework is None else python_framework
         python_version = 'Python 3.5.3 x86' if python_version is None else python_version
