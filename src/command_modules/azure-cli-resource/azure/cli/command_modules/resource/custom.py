@@ -925,7 +925,7 @@ def _resolve_policy_id(policy, policy_set_definition, client):
             policy_def = _get_custom_or_builtin_policy(client, policy)
             policy_id = policy_def.id
         else:
-            policy_set_def = _get_custom_or_builtin_policy(client, policy_set_definition, 'setdefinition')
+            policy_set_def = _get_custom_or_builtin_policy(client, policy_set_definition, True)
             policy_id = policy_set_def.id
     return policy_id
 
@@ -991,7 +991,7 @@ def get_policy_definition(policy_definition_name):
 
 def get_policy_setdefinition(policy_set_definition_name):
     policy_client = _resource_policy_client_factory()
-    return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, 'setdefinition')
+    return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, True)
 
 
 def update_policy_definition(policy_definition_name, rules=None, params=None,
@@ -1035,7 +1035,7 @@ def update_policy_setdefinition(policy_set_definition_name, definitions=None, pa
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
-    definition = _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, 'setdefinition')
+    definition = _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
     parameters = PolicySetDefinition(
