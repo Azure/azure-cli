@@ -215,7 +215,7 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    from subprocess import PIPE, Popen, SubprocessError
+    from subprocess import PIPE, Popen, CalledProcessError
     docker_not_installed = "Please verify if docker is installed."
     docker_not_available = "Please verify if docker daemon is running properly."
 
@@ -224,7 +224,7 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
         returncode = p.wait()
     except OSError:
         raise CLIError(docker_not_installed)
-    except SubprocessError:
+    except CalledProcessError:
         raise CLIError(docker_not_available)
 
     if returncode:
@@ -244,7 +244,7 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
             use_password_stdin = True
     except OSError:
         raise CLIError(docker_not_installed)
-    except SubprocessError:
+    except CalledProcessError:
         raise CLIError(docker_not_available)
 
     if use_password_stdin:
