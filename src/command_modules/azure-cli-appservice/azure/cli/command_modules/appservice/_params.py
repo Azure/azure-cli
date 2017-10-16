@@ -42,11 +42,11 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
 
 def _generic_settings_operation(resource_group_name, name, operation_name, setting_properties, slot=None, client=None):
     client = client or web_client_factory()
-    m = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
+    operation = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
     if slot is None:
-        return m(resource_group_name, name, str, setting_properties)
+        return operation(resource_group_name, name, str, setting_properties)
 
-    return m(resource_group_name, name, slot, str, setting_properties)
+    return operation(resource_group_name, name, slot, str, setting_properties)
 
 
 def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
