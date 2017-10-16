@@ -2,8 +2,9 @@
 
 Release History
 ===============
-(unreleased)
-+++++++++++++++++++
+
+0.1.19
+++++++
 * webapp: fix a bug that downloaded log file might be invalid
 
 0.1.18 (2017-10-09)

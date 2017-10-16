@@ -4,8 +4,15 @@ set -e
 
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
+ls -la $share_folder/build
+
+ALL_MODULES=""
+for f in $share_folder/build/*
+do ALL_MODULES="$ALL_MODULES $f"
+done
+
 pip install -e ./tools
-pip install azure-cli -f $share_folder/build
+pip install $ALL_MODULES
 
 echo '=== List installed packages'
 pip freeze
