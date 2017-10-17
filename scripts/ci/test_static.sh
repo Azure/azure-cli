@@ -37,5 +37,8 @@ python -m automation.commandlint.run
 echo "Verify readme history"
 python -m automation.tests.verify_readme_history
 
+echo "Verify package versions"
+python -m automation.tests.verify_package_versions
+
 echo "Verify default modules"
 azdev verify default-modules $share_folder/build
