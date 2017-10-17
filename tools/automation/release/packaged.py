@@ -38,11 +38,6 @@ class Patch(object):  # pylint: disable=too-few-public-methods
 
 
 PATCHES = [
-    Patch(os.path.join('packaged_releases', 'patches', 'patch_pkg_util.py'),
-          os.path.join('src', 'azure-cli-core', 'azure', 'cli', 'core', '_pkg_util.py')),
-    Patch(os.path.join('packaged_releases', 'patches', 'patch_component_custom.py'),
-          os.path.join('src', 'command_modules', 'azure-cli-component', 'azure', 'cli',
-                       'command_modules', 'component', 'custom.py'))
     ]
 
 
