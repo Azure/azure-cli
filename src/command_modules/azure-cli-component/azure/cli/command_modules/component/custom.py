@@ -9,6 +9,7 @@ from six import StringIO
 from azure.cli.core.util import CLIError
 from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.prompting import prompt_y_n, NoTTYException
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -18,6 +19,13 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 def _deprecate_warning():
     logger.warning("The 'component' commands will be deprecated in the future.")
+    logger.warning("az component and subcommands may not work unless the CLI is installed with pip.")
+    try:
+        ans = prompt_y_n("Are you sure you want to continue?", default='n')
+        if not ans:
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        pass
 
 
 def _verify_not_dev():
