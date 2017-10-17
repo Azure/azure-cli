@@ -2,6 +2,20 @@
 
 Release History
 ===============
+
+0.1.19
+++++++
+* webapp: fix a bug that downloaded log file might be invalid
+
+0.1.18 (2017-10-09)
++++++++++++++++++++
+* webapp: added generic update with new command: 'az webapp update'
+* webapp: updating tests/code for sdk update
+
+0.1.17 (2017-09-22)
++++++++++++++++++++
+* webapp: able to update and show authentication settings using "az webapp auth update/show"
+
 0.1.16 (2017-09-11)
 +++++++++++++++++++
 * webapp: able to create a webapp in a resource group other than the service plan's
@@ -19,6 +33,7 @@ webapp: expose new arguments from 'az webapp delete' to retain app service plan,
 webapp: detect a slot setting correctly 
 webapp: add param --docker-container-logging that goes through the same logic as --web-server-logging
 webapp: add premium v2 sku
+webapp: add new container setting WEBSITES_ENABLE_APP_SERVICE_STORAGE
 
 0.1.13 (2017-08-15)
 +++++++++++++++++++

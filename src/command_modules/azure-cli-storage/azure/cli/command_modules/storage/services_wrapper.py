@@ -9,8 +9,8 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 from ._factory import generic_data_service_factory
 
 Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \
-    get_sdk(ResourceType.DATA_STORAGE,
-            'Logging', 'Metrics', 'CorsRule', 'AccessPolicy', 'RetentionPolicy', mod='models')
+    get_sdk(ResourceType.DATA_STORAGE, 'Logging', 'Metrics', 'CorsRule', 'AccessPolicy', 'RetentionPolicy',
+            mod='common.models')
 
 
 class ServiceProperties(object):

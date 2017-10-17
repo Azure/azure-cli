@@ -23,10 +23,10 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
-from azure.mgmt.resource.managedapplications.models import Appliance
+from azure.mgmt.resource.managedapplications.models import Application
 from azure.mgmt.resource.managedapplications.models import Plan
-from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
-from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
+from azure.mgmt.resource.managedapplications.models import ApplicationDefinition
+from azure.mgmt.resource.managedapplications.models import ApplicationProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
@@ -34,7 +34,9 @@ from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.commands.arm import resource_id as resource_dict_to_id
+
+from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
@@ -80,14 +82,14 @@ def create_resource_group(rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
-def create_appliance(resource_group_name,
-                     appliance_name, managedby_resource_group_id,
-                     location, kind, managedapp_definition_id=None,
-                     plan_name=None, plan_publisher=None, plan_product=None,
-                     plan_version=None, tags=None, parameters=None):
+def create_application(resource_group_name,
+                       application_name, managedby_resource_group_id,
+                       kind, managedapp_definition_id=None, location=None,
+                       plan_name=None, plan_publisher=None, plan_product=None,
+                       plan_version=None, tags=None, parameters=None):
     """ Create a new managed application.
     :param str resource_group_name:the desired resource group name
-    :param str appliance_name:the managed application name
+    :param str application_name:the managed application name
     :param str kind:the managed application kind. can be marketplace or servicecatalog
     :param str plan_name:the managed application package plan name
     :param str plan_publisher:the managed application package plan publisher
@@ -96,7 +98,10 @@ def create_appliance(resource_group_name,
     :param str tags:tags in 'a=b c' format
     """
     racf = _resource_managedapps_client_factory()
-    appliance = Appliance(
+    rcf = _resource_client_factory()
+    if not location:
+        location = rcf.resource_groups.get(resource_group_name).location
+    application = Application(
         location=location,
         managed_resource_group_id=managedby_resource_group_id,
         kind=kind,
@@ -105,88 +110,110 @@ def create_appliance(resource_group_name,
 
     if kind.lower() == 'servicecatalog':
         if managedapp_definition_id:
-            appliance.appliance_definition_id = managedapp_definition_id
+            application.application_definition_id = managedapp_definition_id
         else:
             raise CLIError('--managedapp-definition-id is required if kind is ServiceCatalog')
     elif kind.lower() == 'marketplace':
         if (plan_name is None and plan_product is None and
                 plan_publisher is None and plan_version is None):
-            raise CLIError('--plan-name, --plan-product, --plan-publisher and \
-            --plan-version are all required if kind is MarketPlace')
+            raise CLIError('--plan-name, --plan-product, --plan-publisher and '
+                           '--plan-version are all required if kind is MarketPlace')
         else:
-            appliance.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
+            application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
 
-    applianceParameters = None
+    applicationParameters = None
 
     if parameters:
         if os.path.exists(parameters):
-            applianceParameters = get_file_json(parameters)
+            applicationParameters = get_file_json(parameters)
         else:
-            applianceParameters = shell_safe_json_parse(parameters)
+            applicationParameters = shell_safe_json_parse(parameters)
 
-    appliance.parameters = applianceParameters
+    application.parameters = applicationParameters
 
-    return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
+    return racf.applications.create_or_update(resource_group_name, application_name, application)
 
 
-def show_appliance(resource_group_name=None, appliance_name=None):
+def show_application(resource_group_name=None, application_name=None):
     """ Gets a managed application.
     :param str resource_group_name:the resource group name
-    :param str appliance_name:the managed application name
+    :param str application_name:the managed application name
     """
     racf = _resource_managedapps_client_factory()
-    return racf.appliances.get(resource_group_name, appliance_name)
+    return racf.applications.get(resource_group_name, application_name)
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None):
+def show_applicationdefinition(resource_group_name=None, application_definition_name=None):
     """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
-    :param str appliance_definition_name:the managed application definition name
+    :param str application_definition_name:the managed application definition name
     """
     racf = _resource_managedapps_client_factory()
-    return racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
+    return racf.application_definitions.get(resource_group_name, application_definition_name)
 
 
-def create_appliancedefinition(resource_group_name,
-                               appliance_definition_name, location,
-                               lock_level, package_file_uri, authorizations,
-                               description, display_name, tags=None):
+def create_applicationdefinition(resource_group_name,
+                                 application_definition_name,
+                                 lock_level, authorizations,
+                                 description, display_name,
+                                 package_file_uri=None, create_ui_definition=None,
+                                 main_template=None, location=None, tags=None):
     """ Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
-    :param str appliance_definition_name:the managed application definition name
+    :param str application_definition_name:the managed application definition name
     :param str description:the managed application definition description
     :param str display_name:the managed application definition display name
     :param str package_file_uri:the managed application definition package file uri
+    :param str create_ui_definition:the managed application definition create ui definition
+    :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
+    if(not package_file_uri and not create_ui_definition and
+       not main_template):
+        raise CLIError('usage error: --package-file-uri <url> | '
+                       '--create-ui-definition --main-template')
+    elif package_file_uri:
+        if create_ui_definition or main_template:
+            raise CLIError('usage error: must not specify '
+                           '--create-ui-definition --main-template')
+    elif not package_file_uri:
+        if not create_ui_definition or not main_template:
+            raise CLIError('usage error: must specify '
+                           '--create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory()
+    rcf = _resource_client_factory()
+    if not location:
+        location = rcf.resource_groups.get(resource_group_name).location
     authorizations = authorizations or []
-    applianceAuthList = []
+    applicationAuthList = []
 
     for name_value in authorizations:
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
-        applianceAuth = ApplianceProviderAuthorization(principalId, roleDefinitionId)
-        applianceAuthList.append(applianceAuth)
+        applicationAuth = ApplicationProviderAuthorization(principalId, roleDefinitionId)
+        applicationAuthList.append(applicationAuth)
 
-    applianceDef = ApplianceDefinition(lock_level, applianceAuthList, package_file_uri)
-    applianceDef.display_name = display_name
-    applianceDef.description = description
-    applianceDef.location = location
-    applianceDef.tags = tags
+    applicationDef = ApplicationDefinition(lock_level, applicationAuthList, package_file_uri)
+    applicationDef.display_name = display_name
+    applicationDef.description = description
+    applicationDef.location = location
+    applicationDef.package_file_uri = package_file_uri
+    applicationDef.create_ui_definition = create_ui_definition
+    applicationDef.main_template = main_template
+    applicationDef.tags = tags
 
-    return racf.appliance_definitions.create_or_update(resource_group_name,
-                                                       appliance_definition_name, applianceDef)
+    return racf.application_definitions.create_or_update(resource_group_name,
+                                                         application_definition_name, applicationDef)
 
 
-def list_appliances(resource_group_name=None):
+def list_applications(resource_group_name=None):
     racf = _resource_managedapps_client_factory()
 
     if resource_group_name:
-        appliances = racf.appliances.list_by_resource_group(resource_group_name)
+        applications = racf.applications.list_by_resource_group(resource_group_name)
     else:
-        appliances = racf.appliances.list_by_subscription()
-    return list(appliances)
+        applications = racf.applications.list_by_subscription()
+    return list(applications)
 
 
 def export_group_as_template(
@@ -206,7 +233,7 @@ def export_group_as_template(
 
     options = ','.join(export_options) if export_options else None
 
-    result = rcf.resource_groups.export_template(resource_group_name, '*', options=options)
+    result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
@@ -455,44 +482,155 @@ def create_resource(properties,
     return res.create_resource(properties, location, is_full_object)
 
 
-def show_resource(resource_group_name=None,
+def _get_parsed_resource_ids(resource_ids):
+    """
+    Returns a generator of parsed resource ids. Raise when there is invalid resource id.
+    """
+    if not resource_ids:
+        return None
+
+    for rid in resource_ids:
+        if not is_valid_resource_id(rid):
+            raise CLIError('az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
+
+    return (parse_resource_id(rid) for rid in resource_ids)
+
+
+def _get_rsrc_util_from_parsed_id(parsed_id, api_version):
+    return _ResourceUtils(parsed_id['resource_group'],
+                          parsed_id['resource_namespace'],
+                          parsed_id['resource_parent'],
+                          parsed_id['resource_type'],
+                          parsed_id['resource_name'],
+                          None,
+                          api_version)
+
+
+def _create_parsed_id(resource_group_name=None, resource_provider_namespace=None, parent_resource_path=None,
+                      resource_type=None, resource_name=None):
+    return {
+        'resource_group': resource_group_name,
+        'resource_namespace': resource_provider_namespace,
+        'resource_parent': parent_resource_path,
+        'resource_type': resource_type,
+        'resource_name': resource_name
+    }
+
+
+def _single_or_collection(obj, default=None):
+    if not obj:
+        return default
+
+    if isinstance(obj, list) and len(obj) == 1:
+        return obj[0]
+
+    return obj
+
+
+def show_resource(resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         None, api_version)
-    return res.get_resource()
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(id_dict, api_version).get_resource() for id_dict in parsed_ids])
 
 
-def delete_resource(resource_group_name=None,
+def delete_resource(resource_ids=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                    resource_name=None, resource_id=None, api_version=None):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
-    return res.delete()
+                    resource_name=None, api_version=None):
+    """
+    Deletes the given resource(s).
+    This function allows deletion of ids with dependencies on one another.
+    This is done with multiple passes through the given ids.
+    """
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+    to_be_deleted = [(_get_rsrc_util_from_parsed_id(id_dict, api_version), id_dict) for id_dict in parsed_ids]
+
+    results = []
+    from msrestazure.azure_exceptions import CloudError
+    while to_be_deleted:
+        logger.debug("Start new loop to delete resources.")
+        operations = []
+        failed_to_delete = []
+        for rsrc_utils, id_dict in to_be_deleted:
+            try:
+                operations.append(rsrc_utils.delete())
+                resource = resource_dict_to_id(**id_dict) if id_dict.get("subscription") else resource_name
+                logger.debug("deleting", resource)
+            except CloudError as e:
+                # request to delete failed, add parsed id dict back to queue
+                id_dict['exception'] = str(e)
+                failed_to_delete.append((rsrc_utils, id_dict))
+        to_be_deleted = failed_to_delete
+
+        # stop deleting if none deletable
+        if not operations:
+            break
+
+        # all operations return result before next pass
+        for operation in operations:
+            results.append(operation.result())
+
+    if to_be_deleted:
+        error_msg_builder = ['Some resources failed to be deleted:']
+        for _, id_dict in to_be_deleted:
+            logger.debug(id_dict['exception'])
+            error_msg_builder.append(resource_dict_to_id(**id_dict))
+        raise CLIError(os.linesep.join(error_msg_builder))
+
+    return _single_or_collection(results)
 
 
-def update_resource(parameters,
+def update_resource(parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
-                    parent_resource_path=None, resource_type=None, resource_name=None,
-                    resource_id=None, api_version=None):
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
-    return res.update(parameters)
+                    parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(id_dict, api_version).update(parameters) for id_dict in parsed_ids])
 
 
-def tag_resource(tags,
+def tag_resource(tags, resource_ids=None,
                  resource_group_name=None, resource_provider_namespace=None,
-                 parent_resource_path=None, resource_type=None, resource_name=None,
-                 resource_id=None, api_version=None):
+                 parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
-    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
-                         parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
-    return res.tag(tags)
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(id_dict, api_version).tag(tags) for id_dict in parsed_ids])
+
+
+def invoke_resource_action(action, request_body=None, resource_ids=None,
+                           resource_group_name=None, resource_provider_namespace=None,
+                           parent_resource_path=None, resource_type=None, resource_name=None,
+                           api_version=None):
+    """ Invokes the provided action on an existing resource."""
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    return _single_or_collection([_get_rsrc_util_from_parsed_id(id_dict, api_version)
+                                  .invoke_action(action, request_body) for id_dict in parsed_ids])
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
@@ -637,8 +775,6 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
     """
-    from azure.cli.core.commands.arm import resource_id
-
     # verify all resource ids are valid and under the same group
     resources = []
     for i in ids:
@@ -653,8 +789,8 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
         raise CLIError('All resources should be under the same group')
 
     rcf = _resource_client_factory()
-    target = resource_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
-                         resource_group=destination_group)
+    target = resource_dict_to_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
+                                 resource_group=destination_group)
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
@@ -665,12 +801,26 @@ def list_features(client, resource_provider_namespace=None):
     return client.list_all()
 
 
-def create_policy_assignment(policy, name=None, display_name=None, params=None,
-                             resource_group_name=None, scope=None):
+def register_feature(client, resource_provider_namespace, feature_name):
+    logger.warning("Once the feature '{}' is registered, invoking 'az provider register -n {}' is required "
+                   "to get the change propagated".format(feature_name, resource_provider_namespace))
+    return client.register(resource_provider_namespace, feature_name)
+
+
+def create_policy_assignment(policy=None, policy_set_definition=None,
+                             name=None, display_name=None, params=None,
+                             resource_group_name=None, scope=None, sku=None,
+                             not_scopes=None):
+    """Creates a policy assignment
+    :param not_scopes: Space separated scopes where the policy assignment does not apply.
+    """
+    if bool(policy) == bool(policy_set_definition):
+        raise CLIError('usage error: --policy NAME_OR_ID | '
+                       '--policy-set-definition NAME_OR_ID')
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
-    policy_id = _resolve_policy_id(policy, policy_client)
+    policy_id = _resolve_policy_id(policy, policy_set_definition, policy_client)
 
     if params:
         if os.path.exists(params):
@@ -679,7 +829,26 @@ def create_policy_assignment(policy, name=None, display_name=None, params=None,
             params = shell_safe_json_parse(params)
 
     PolicyAssignment = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment', mod='models')
-    assignment = PolicyAssignment(display_name, policy_id, scope, params if params else None)
+    assignment = PolicyAssignment(display_name, policy_id, scope)
+    assignment.parameters = params if params else None
+
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+        if not_scopes:
+            kwargs_list = []
+            for id_arg in not_scopes.split(' '):
+                if parse_resource_id(id_arg):
+                    kwargs_list.append(id_arg)
+                else:
+                    logger.error('az policy assignment create error: argument --not-scopes: \
+                    invalid notscopes value: \'%s\'' % id_arg)
+                    return
+            assignment.not_scopes = kwargs_list
+        PolicySku = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySku', mod='models')
+        policySku = PolicySku('A0', 'Free')
+        if sku:
+            policySku = policySku if sku.lower() == 'free' else PolicySku('A1', 'Standard')
+        assignment.sku = policySku
+
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
                                                    assignment)
@@ -749,12 +918,29 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
     return scope
 
 
-def _resolve_policy_id(policy, client):
-    policy_id = policy
-    if not is_valid_resource_id(policy):
-        policy_def = client.policy_definitions.get(policy)
-        policy_id = policy_def.id
+def _resolve_policy_id(policy, policy_set_definition, client):
+    policy_id = policy or policy_set_definition
+    if not is_valid_resource_id(policy_id):
+        if policy:
+            policy_def = _get_custom_or_builtin_policy(client, policy)
+            policy_id = policy_def.id
+        else:
+            policy_set_def = _get_custom_or_builtin_policy(client, policy_set_definition, True)
+            policy_id = policy_set_def.id
     return policy_id
+
+
+def _get_custom_or_builtin_policy(client, name, for_policy_set=False):
+    from msrest.exceptions import HttpOperationError
+    from msrestazure.azure_exceptions import CloudError
+    policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
+    try:
+        return policy_operations.get(name)
+    except (CloudError, HttpOperationError) as ex:
+        status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
+        if status_code == 404:
+            return policy_operations.get_built_in(name)
+        raise
 
 
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
@@ -774,7 +960,7 @@ def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
     return shell_safe_json_parse(file_or_string_or_uri)
 
 
-def create_policy_definition(name, rules=None, params=None, display_name=None, description=None):
+def create_policy_definition(name, rules=None, params=None, display_name=None, description=None, mode=None):
     rules = _load_file_string_or_uri(rules, 'rules')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -782,7 +968,30 @@ def create_policy_definition(name, rules=None, params=None, display_name=None, d
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(policy_rule=rules, parameters=params, description=description,
                                   display_name=display_name)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2016-12-01'):
+        parameters.mode = mode
     return policy_client.policy_definitions.create_or_update(name, parameters)
+
+
+def create_policy_setdefinition(name, definitions, params=None, display_name=None, description=None):
+    definitions = _load_file_string_or_uri(definitions, 'definitions')
+    params = _load_file_string_or_uri(params, 'params', False)
+
+    policy_client = _resource_policy_client_factory()
+    PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
+    parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
+                                     display_name=display_name)
+    return policy_client.policy_set_definitions.create_or_update(name, parameters)
+
+
+def get_policy_definition(policy_definition_name):
+    policy_client = _resource_policy_client_factory()
+    return _get_custom_or_builtin_policy(policy_client, policy_definition_name)
+
+
+def get_policy_setdefinition(policy_set_definition_name):
+    policy_client = _resource_policy_client_factory()
+    return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, True)
 
 
 def update_policy_definition(policy_definition_name, rules=None, params=None,
@@ -800,7 +1009,7 @@ def update_policy_definition(policy_definition_name, rules=None, params=None,
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
-    definition = policy_client.policy_definitions.get(policy_definition_name)
+    definition = _get_custom_or_builtin_policy(policy_client, policy_definition_name)
     # pylint: disable=line-too-long,no-member
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(
@@ -811,9 +1020,41 @@ def update_policy_definition(policy_definition_name, rules=None, params=None,
     return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
 
 
+def update_policy_setdefinition(policy_set_definition_name, definitions=None, params=None,
+                                display_name=None, description=None):
+    if definitions:
+        if os.path.exists(definitions):
+            definitions = get_file_json(definitions)
+        else:
+            definitions = shell_safe_json_parse(definitions)
+
+    if params:
+        if os.path.exists(params):
+            params = get_file_json(params)
+        else:
+            params = shell_safe_json_parse(params)
+
+    policy_client = _resource_policy_client_factory()
+    definition = _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, True)
+    # pylint: disable=line-too-long,no-member
+    PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
+    parameters = PolicySetDefinition(
+        policy_definitions=definitions if definitions is not None else definition.policy_definitions,
+        description=description if description is not None else definition.description,
+        display_name=display_name if display_name is not None else definition.display_name,
+        parameters=params if params is not None else definition.parameters)
+    return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
+
+
 def get_policy_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     policy_client = _resource_policy_client_factory()
     result = policy_client.policy_definitions.list()
+    return [i.name for i in result]
+
+
+def get_policy_set_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory()
+    result = policy_client.policy_set_definitions.list()
     return [i.name for i in result]
 
 
@@ -823,7 +1064,7 @@ def get_policy_assignment_completion_list(prefix, **kwargs):  # pylint: disable=
     return [i.name for i in result]
 
 
-def list_locks(resource_group_name=None,
+def list_locks(resource_group=None,
                resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                resource_name=None, filter_string=None):
     """
@@ -839,7 +1080,7 @@ def list_locks(resource_group_name=None,
     :type filter_string: str
     """
     lock_client = _resource_lock_client_factory()
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
@@ -852,7 +1093,7 @@ def list_locks(resource_group_name=None,
         return lock_client.management_locks.list_at_resource_group_level(
             resource_group_name, filter=filter_string)
     return lock_client.management_locks.list_at_resource_level(
-        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, filter=filter_string)
 
 
@@ -913,15 +1154,52 @@ def _validate_lock_params_match_lock(
                 name, _resource_name))
 
 
-def get_lock(name, resource_group_name=None, resource_provider_namespace=None,
-             parent_resource_path=None, resource_type=None, resource_name=None):
+def _parse_lock_id(id_arg):
+    """
+    Lock ids look very different from regular resource ids, this function uses a regular expression
+    that parses a lock's id and extracts the following parameters if available:
+    -lock_name: the lock's name; always present in a lock id
+    -resource_group: the name of the resource group; present in group/resource level locks
+    -resource_provider_namespace: the resource provider; present in resource level locks
+    -resource_type: the resource type; present in resource level locks
+    -resource_name: the resource name; present in resource level locks
+    -parent_resource_path: the resource's parent path; present in child resources such as subnets
+    """
+    regex = re.compile(
+        '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group>[^/]*)'
+        '(/providers/(?P<resource_provider_namespace>[^/]*)'
+        '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
+        '/providers/Microsoft.Authorization/locks/(?P<lock_name>[^/]*)')
+
+    return regex.match(id_arg).groupdict()
+
+
+def _call_subscription_get(lock_client, *args):
+    if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
+        return lock_client.management_locks.get(*args)
+    return lock_client.management_locks.get_at_subscription_level(*args)
+
+
+def get_lock(lock_name=None, resource_group=None, resource_provider_namespace=None,
+             parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
     :type name: str
     """
+    if ids:
+        kwargs_list = []
+        for id_arg in ids:
+            try:
+                kwargs_list.append(_parse_lock_id(id_arg))
+            except AttributeError:
+                logger.error('az lock show: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        results = [get_lock(**kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
+
     lock_client = _resource_lock_client_factory()
 
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
 
     resource_group_name = lock_resource[0]
@@ -929,22 +1207,25 @@ def get_lock(name, resource_group_name=None, resource_provider_namespace=None,
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return lock_client.management_locks.get_at_subscription_level(name)
+        return _call_subscription_get(lock_client, lock_name)
     if resource_name is None:
-        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+        return lock_client.management_locks.get_at_resource_group_level(resource_group_name, lock_name)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
+        lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
+                               resource_type, resource_name)
+        return next((lock for lock in lock_list if lock.name == lock_name), None)
     return lock_client.management_locks.get_at_resource_level(
         resource_group_name, resource_provider_namespace,
-        parent_resource_path or '', resource_type, resource_name, name)
+        parent_resource_path or '', resource_type, resource_name, lock_name)
 
 
-def delete_lock(name,
-                resource_group_name=None, resource_provider_namespace=None,
-                parent_resource_path=None, resource_type=None, resource_name=None):
+def delete_lock(lock_name=None, resource_group=None, resource_provider_namespace=None,
+                parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
     :param name: The name of the lock.
     :type name: str
@@ -957,26 +1238,37 @@ def delete_lock(name,
     :param resource_name: Name of a resource that has a lock.
     :type resource_name: str
     """
+    if ids:
+        kwargs_list = []
+        for id_arg in ids:
+            try:
+                kwargs_list.append(_parse_lock_id(id_arg))
+            except AttributeError:
+                logger.error('az lock delete: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        results = [delete_lock(**kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
+
     lock_client = _resource_lock_client_factory()
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
 
-    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
 
     if resource_group_name is None:
-        return lock_client.management_locks.delete_at_subscription_level(name)
+        return lock_client.management_locks.delete_at_subscription_level(lock_name)
     if resource_name is None:
         return lock_client.management_locks.delete_at_resource_group_level(
-            resource_group_name, name)
+            resource_group_name, lock_name)
     return lock_client.management_locks.delete_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name)
+        resource_name, lock_name)
 
 
 def _extract_lock_params(resource_group_name, resource_provider_namespace,
@@ -994,9 +1286,9 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(name,
-                resource_group_name=None, resource_provider_namespace=None, notes=None,
-                parent_resource_path=None, resource_type=None, resource_name=None, level=None):
+def create_lock(lock_name, level,
+                resource_group=None, resource_provider_namespace=None, notes=None,
+                parent_resource_path=None, resource_type=None, resource_name=None):
     """
     :param name: The name of the lock.
     :type name: str
@@ -1011,12 +1303,10 @@ def create_lock(name,
     :param notes: Notes about this lock.
     :type notes: str
     """
-    if level != 'ReadOnly' and level != 'CanNotDelete':
-        raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
-    parameters = ManagementLockObject(level=level, notes=notes, name=name)
+    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
 
     lock_client = _resource_lock_client_factory()
-    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
                                          resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
@@ -1024,38 +1314,74 @@ def create_lock(name,
     resource_type = lock_resource[3]
 
     if resource_group_name is None:
-        return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)
+        return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, parameters)
 
     if resource_name is None:
         return lock_client.management_locks.create_or_update_at_resource_group_level(
-            resource_group_name, name, parameters)
+            resource_group_name, lock_name, parameters)
 
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
-        resource_name, name, parameters)
+        resource_name, lock_name, parameters)
 
 
-def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
+def _update_lock_parameters(parameters, level, notes):
     if level is not None:
         parameters.level = level
     if notes is not None:
-        parameters.nodes = notes
-    if lock_id is not None:
-        parameters.id = lock_id
-    if lock_type is not None:
-        parameters.type = lock_type
+        parameters.notes = notes
 
 
-def update_lock(name, resource_group_name=None, level=None, notes=None):
+def update_lock(lock_name=None, resource_group=None, resource_provider_namespace=None, notes=None,
+                parent_resource_path=None, resource_type=None, resource_name=None, level=None, ids=None):
+    """
+    Allows updates to the lock-type(level) and the notes of the lock
+    """
+    if ids:
+        kwargs_list = []
+        for id_arg in ids:
+            try:
+                kwargs_list.append(_parse_lock_id(id_arg))
+            except AttributeError:
+                logger.error('az lock update: error: argument --ids: invalid ResourceId value: \'%s\'' % id_arg)
+                return
+        results = [update_lock(level=level, notes=notes, **kwargs) for kwargs in kwargs_list]
+        return results[0] if len(results) == 1 else results
+
     lock_client = _resource_lock_client_factory()
+
+    lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
+                                         resource_type, resource_name)
+
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
+    _validate_lock_params_match_lock(lock_client, lock_name, resource_group_name, resource_provider_namespace,
+                                     parent_resource_path, resource_type, resource_name)
+
     if resource_group_name is None:
-        params = lock_client.management_locks.get(name)
-        _update_lock_parameters(params, level, notes, None, None)
-        return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
-    params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
-    _update_lock_parameters(params, level, notes, None, None)
-    return lock_client.management_locks.create_or_update_at_resource_group_level(
-        resource_group_name, name, params)
+        params = _call_subscription_get(lock_client, lock_name)
+        _update_lock_parameters(params, level, notes)
+        return lock_client.management_locks.create_or_update_at_subscription_level(lock_name, params)
+    if resource_name is None:
+        params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, lock_name)
+        _update_lock_parameters(params, level, notes)
+        return lock_client.management_locks.create_or_update_at_resource_group_level(
+            resource_group_name, lock_name, params)
+    if supported_api_version(ResourceType.MGMT_RESOURCE_LOCKS, max_api='2015-01-01'):
+        lock_list = list_locks(resource_group_name, resource_provider_namespace, parent_resource_path,
+                               resource_type, resource_name)
+        return next((lock for lock in lock_list if lock.name == lock_name), None)
+    else:
+        params = lock_client.management_locks.get_at_resource_level(
+            resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
+            resource_name, lock_name)
+    _update_lock_parameters(params, level, notes)
+    return lock_client.management_locks.create_or_update_at_resource_level(
+        resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
+        resource_name, lock_name, params)
 
 
 def create_resource_link(link_id, target_id, notes=None):
@@ -1138,7 +1464,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
 
         self.resource_group_name = resource_group_name
         self.resource_provider_namespace = resource_provider_namespace
-        self.parent_resource_path = parent_resource_path
+        self.parent_resource_path = parent_resource_path if parent_resource_path else ''
         self.resource_type = resource_type
         self.resource_name = resource_name
         self.resource_id = resource_id
@@ -1165,7 +1491,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         else:
             resource = self.rcf.resources.create_or_update(self.resource_group_name,
                                                            self.resource_provider_namespace,
-                                                           self.parent_resource_path or '',
+                                                           self.parent_resource_path,
                                                            self.resource_type,
                                                            self.resource_name,
                                                            self.api_version,
@@ -1178,7 +1504,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         else:
             resource = self.rcf.resources.get(self.resource_group_name,
                                               self.resource_provider_namespace,
-                                              self.parent_resource_path or '',
+                                              self.parent_resource_path,
                                               self.resource_type,
                                               self.resource_name,
                                               self.api_version)
@@ -1189,7 +1515,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             return self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
         return self.rcf.resources.delete(self.resource_group_name,
                                          self.resource_provider_namespace,
-                                         self.parent_resource_path or '',
+                                         self.parent_resource_path,
                                          self.resource_type,
                                          self.resource_name,
                                          self.api_version)
@@ -1201,7 +1527,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                              parameters)
         return self.rcf.resources.create_or_update(self.resource_group_name,
                                                    self.resource_provider_namespace,
-                                                   self.parent_resource_path or '',
+                                                   self.parent_resource_path,
                                                    self.resource_type,
                                                    self.resource_name,
                                                    self.api_version,
@@ -1225,11 +1551,73 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                              parameters)
         return self.rcf.resources.create_or_update(self.resource_group_name,
                                                    self.resource_provider_namespace,
-                                                   self.parent_resource_path or '',
+                                                   self.parent_resource_path,
                                                    self.resource_type,
                                                    self.resource_name,
                                                    self.api_version,
                                                    parameters)
+
+    def invoke_action(self, action, request_body):
+        """
+        Formats Url if none provided and sends the POST request with the url and request-body.
+        """
+        from msrestazure.azure_operation import AzureOperationPoller
+        query_parameters = {}
+        serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
+        client = self.rcf.resources._client  # pylint: disable=protected-access
+
+        url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
+            '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
+
+        url = client.format_url(
+            url,
+            resourceGroupName=serialize.url(
+                "resource_group_name", self.resource_group_name, 'str',
+                max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            resourceProviderNamespace=serialize.url(
+                "resource_provider_namespace", self.resource_provider_namespace, 'str'),
+            parentResourcePath=serialize.url(
+                "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
+            resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
+            resourceName=serialize.url("resource_name", self.resource_name, 'str'),
+            subscriptionId=serialize.url(
+                "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
+            action=serialize.url("action", action, 'str'))
+
+        # Construct parameters
+        query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.rcf.resources.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid4())
+        if self.rcf.resources.config.accept_language is not None:
+            header_parameters['accept-language'] = serialize.header(
+                "self.config.accept_language", self.rcf.resources.config.accept_language, 'str')
+
+        # Construct and send request
+        def long_running_send():
+            request = client.post(url, query_parameters)
+            return client.send(
+                request, header_parameters, json.loads(request_body) if request_body else None)
+
+        def get_long_running_status(status_link, headers=None):
+            request = client.get(status_link)
+            if headers:
+                request.headers.update(headers)
+            return client.send(request, header_parameters)
+
+        def get_long_running_output(response):
+            from msrestazure.azure_exceptions import CloudError
+            if response.status_code not in [200, 202, 204]:
+                exp = CloudError(response)
+                exp.request_id = response.headers.get('x-ms-request-id')
+                raise exp
+            return response.text
+
+        return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status,
+                                    self.rcf.resources.config.long_running_operation_timeout)
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):

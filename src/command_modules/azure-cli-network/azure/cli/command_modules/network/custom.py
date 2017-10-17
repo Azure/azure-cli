@@ -13,7 +13,7 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
-from azure.cli.core.commands.validators import DefaultStr
+from azure.cli.core.commands.validators import DefaultStr, DefaultInt
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -27,6 +27,8 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
+
+from azure.mgmt.trafficmanager.models import MonitorProtocol
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -202,8 +204,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              None,
-                                                              None))
+                                                              None, None, None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
@@ -263,7 +264,7 @@ def update_ag_authentication_certificate(instance, parent, item_name, cert_data)
 
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
-                                   servers, no_wait=False):
+                                   servers=None, no_wait=False):
     ApplicationGatewayBackendAddressPool = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendAddressPool',
@@ -853,6 +854,22 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 # endregion
 
+# region Application Security Group commands
+
+def create_asg(client, resource_group_name, application_security_group_name, location=None, tags=None):
+    ApplicationSecurityGroup = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationSecurityGroup', mod='models')
+    asg = ApplicationSecurityGroup(location=location, tags=tags)
+    return client.create_or_update(resource_group_name, application_security_group_name, asg)
+
+
+def update_asg(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+# endregion
+
+
 # region Load Balancer subresource commands
 
 def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
@@ -862,7 +879,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
-                         no_wait=False, sku=None):
+                         no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
@@ -905,13 +922,14 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                                                               tags,
                                                               public_ip_address_allocation,
                                                               public_ip_dns_name,
-                                                              sku))
+                                                              sku, public_ip_zone))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
         load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
-        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku)
+        public_ip_id, subnet_id, private_ip_address, private_ip_allocation, sku,
+        frontend_ip_zone)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
     master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
@@ -1006,7 +1024,7 @@ def set_lb_inbound_nat_pool(
 def create_lb_frontend_ip_configuration(
         resource_group_name, load_balancer_name, item_name, public_ip_address=None,
         subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_allocation='dynamic'):
+        private_ip_address_allocation='dynamic', zone=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_config = FrontendIPConfiguration(
@@ -1015,6 +1033,10 @@ def create_lb_frontend_ip_configuration(
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
         subnet=Subnet(subnet) if subnet else None)
+
+    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        new_config.zones = zone
+
     _upsert(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().frontend_ip_configurations, item_name)
@@ -1144,7 +1166,8 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                load_balancer_inbound_nat_rule_ids=None,
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=None,
-               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None):
+               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
+               application_security_groups=None):
     client = _network_client_factory().network_interfaces
     NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
 
@@ -1173,6 +1196,8 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
     }
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         ip_config_args['private_ip_address_version'] = private_ip_address_version
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        ip_config_args['application_security_groups'] = application_security_groups
     ip_config = NetworkInterfaceIPConfiguration(**ip_config_args)
 
     if public_ip_address:
@@ -1213,7 +1238,8 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          private_ip_address=None,
                          private_ip_address_allocation=IPAllocationMethod.dynamic.value,
                          private_ip_address_version=None,
-                         make_primary=False):
+                         make_primary=False,
+                         application_security_groups=None):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
@@ -1238,6 +1264,8 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         new_config_args['private_ip_address_version'] = private_ip_address_version
         new_config_args['primary'] = make_primary
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        new_config_args['application_security_groups'] = application_security_groups
     new_config = NetworkInterfaceIPConfiguration(**new_config_args)
 
     _upsert(nic, 'ip_configurations', new_config, 'name')
@@ -1251,7 +1279,8 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,
                       load_balancer_backend_address_pool_ids=None,
                       load_balancer_inbound_nat_rule_ids=None,
                       private_ip_address=None, private_ip_address_allocation=None,
-                      private_ip_address_version='ipv4', make_primary=False):
+                      private_ip_address_version='ipv4', make_primary=False,
+                      application_security_groups=None):
     if make_primary:
         for config in parent.ip_configurations:
             config.primary = False
@@ -1287,6 +1316,11 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None,
         instance.load_balancer_inbound_nat_rules = None
     elif load_balancer_inbound_nat_rule_ids is not None:
         instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
+
+    if application_security_groups == ['']:
+        instance.application_security_groups = None
+    elif application_security_groups:
+        instance.application_security_groups = application_security_groups
 
     return parent
 
@@ -1377,12 +1411,21 @@ def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name)
         kwargs[plural_name] = None
 
 
+def _handle_asg_property(kwargs, key, asgs):
+    prefix = key.split('_', 1)[0] + '_'
+    if asgs:
+        kwargs[key] = asgs
+        if kwargs[prefix + 'address_prefix'].is_default:
+            kwargs[prefix + 'address_prefix'] = ''
+
+
 def create_nsg_rule_2017_06_01(resource_group_name, network_security_group_name, security_rule_name,
                                priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
                                access=SecurityRuleAccess.allow.value,
                                direction=SecurityRuleDirection.inbound.value,
-                               source_port_ranges='*', source_address_prefixes='*',
-                               destination_port_ranges=80, destination_address_prefixes='*'):
+                               source_port_ranges=DefaultStr('*'), source_address_prefixes=DefaultStr('*'),
+                               destination_port_ranges=DefaultInt(80), destination_address_prefixes=DefaultStr('*'),
+                               source_asgs=None, destination_asgs=None):
     kwargs = {
         'protocol': protocol,
         'direction': direction,
@@ -1403,6 +1446,10 @@ def create_nsg_rule_2017_06_01(resource_group_name, network_security_group_name,
     # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
     kwargs['source_address_prefix'] = kwargs['source_address_prefix'] or ''
     kwargs['destination_address_prefix'] = kwargs['destination_address_prefix'] or ''
+
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        _handle_asg_property(kwargs, 'source_application_security_groups', source_asgs)
+        _handle_asg_property(kwargs, 'destination_application_security_groups', destination_asgs)
 
     settings = SecurityRule(**kwargs)
     ncf = _network_client_factory()
@@ -1448,7 +1495,8 @@ def _update_singular_or_plural_property(instance, val, singular_name, plural_nam
 
 def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=None,
                                destination_address_prefixes=None, access=None, direction=None, description=None,
-                               source_port_ranges=None, destination_port_ranges=None, priority=None):
+                               source_port_ranges=None, destination_port_ranges=None, priority=None,
+                               source_asgs=None, destination_asgs=None):
     # No client validation as server side returns pretty good errors
     instance.protocol = protocol if protocol is not None else instance.protocol
     instance.access = access if access is not None else instance.access
@@ -1468,6 +1516,16 @@ def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=
     # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
     instance.source_address_prefix = instance.source_address_prefix or ''
     instance.destination_address_prefix = instance.destination_address_prefix or ''
+
+    if source_asgs == ['']:
+        instance.source_application_security_groups = None
+    elif source_asgs:
+        instance.source_application_security_groups = source_asgs
+
+    if destination_asgs == ['']:
+        instance.destination_application_security_groups = None
+    elif destination_asgs:
+        instance.destination_application_security_groups = destination_asgs
 
     return instance
 
@@ -1502,7 +1560,7 @@ update_nsg_rule_2017_03_01.__doc__ = SecurityRule.__doc__
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None):
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None):
     client = _network_client_factory().public_ip_addresses
     if not allocation_method:
         allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
@@ -1517,6 +1575,8 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
     }
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+        public_ip_args['zones'] = zone
     if sku:
         public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
@@ -1587,7 +1647,7 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 # pylint: disable=too-many-locals
 def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None):
+                location=None, tags=None, vm_protection=None, ddos_protection=None):
     client = _network_client_factory().virtual_networks
     tags = tags or {}
     vnet = VirtualNetwork(
@@ -1597,10 +1657,13 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
             vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
     if subnet_name:
         vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
+        vnet.enable_ddos_protection = ddos_protection
+        vnet.enable_vm_protection = vm_protection
     return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(instance, vnet_prefixes=None, dns_servers=None):
+def update_vnet(instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     if vnet_prefixes:
@@ -1609,6 +1672,10 @@ def update_vnet(instance, vnet_prefixes=None, dns_servers=None):
         instance.dhcp_options.dns_servers = None
     elif dns_servers:
         instance.dhcp_options.dns_servers = dns_servers
+    if ddos_protection is not None:
+        instance.enable_ddos_protection = ddos_protection
+    if vm_protection is not None:
+        instance.enable_vm_protection = vm_protection
     return instance
 
 
@@ -2216,6 +2283,23 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
+def _validate_ipv6_address_prefixes(prefixes):
+    from ipaddress import ip_network, IPv6Network
+    prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
+    version = None
+    for prefix in prefixes:
+        try:
+            network = ip_network(prefix)
+            if version is None:
+                version = type(network)
+            else:
+                if not isinstance(network, version):
+                    raise CLIError("usage error: '{}' incompatible mix of IPv4 and IPv6 address prefixes.".format(prefixes))
+        except ValueError:
+            raise CLIError("usage error: prefix '{}' is not recognized as an IPv4 or IPv6 address prefix.".format(prefix))
+    return version == IPv6Network
+
+
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
@@ -2235,56 +2319,78 @@ def create_express_route_peering(
     :param str customer_asn: Autonomous system number of the customer.
     :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
     """
-    ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType = get_sdk(
-        ResourceType.MGMT_NETWORK,
-        'ExpressRouteCircuitPeering',
-        'ExpressRouteCircuitPeeringConfig',
-        'ExpressRouteCircuitPeeringType',
-        mod='models')
+    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType,
+     RouteFilter) = get_sdk(
+         ResourceType.MGMT_NETWORK,
+         'ExpressRouteCircuitPeering',
+         'ExpressRouteCircuitPeeringConfig',
+         'ExpressRouteCircuitPeeringType',
+         'RouteFilter',
+         mod='models')
 
-    # TODO: Remove workaround when issue #1574 is fixed in the service
-    # region Issue #1574 workaround
-    circuit = _network_client_factory().express_route_circuits.get(
-        resource_group_name, circuit_name)
-    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
-       circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
-        raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
-    for peering in circuit.peerings:
-        if peering.vlan_id == vlan_id:
-            raise CLIError(
-                "VLAN ID '{}' already in use by peering '{}'".format(vlan_id, peering.name))
-    # endregion
-
-    peering_config = ExpressRouteCircuitPeeringConfig(
-        advertised_public_prefixes=advertised_public_prefixes,
-        customer_asn=customer_asn,
-        routing_registry_name=routing_registry_name) \
-        if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
         secondary_peer_address_prefix=secondary_peer_address_prefix,
-        shared_key=shared_key,
-        microsoft_peering_config=peering_config)
+        shared_key=shared_key)
+
+    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value:
+        peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
+            advertised_public_prefixes=advertised_public_prefixes,
+            customer_asn=customer_asn,
+            routing_registry_name=routing_registry_name)
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01') and route_filter:
-        RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
         peering.route_filter = RouteFilter(id=route_filter)
-    return client.create_or_update(
-        resource_group_name, circuit_name, peering_type, peering)
+
+    return client.create_or_update(resource_group_name, circuit_name, peering_type, peering)
+
+
+def _create_or_update_ipv6_peering(config, primary_peer_address_prefix, secondary_peer_address_prefix, route_filter,
+                                   advertised_public_prefixes, customer_asn, routing_registry_name):
+    if config:
+        # update scenario
+        if primary_peer_address_prefix:
+            config.primary_peer_address_prefix = primary_peer_address_prefix
+
+        if secondary_peer_address_prefix:
+            config.secondary_peer_address_prefix = secondary_peer_address_prefix
+
+        if route_filter:
+            RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+            config.route_filter = RouteFilter(id=route_filter)
+
+        if advertised_public_prefixes:
+            config.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
+
+        if customer_asn:
+            config.microsoft_peering_config.customer_asn = customer_asn
+
+        if routing_registry_name:
+            config.microsoft_peering_config.routing_registry_name = routing_registry_name
+    else:
+        # create scenario
+
+        IPv6Config, MicrosoftPeeringConfig = get_sdk(ResourceType.MGMT_NETWORK, 'Ipv6ExpressRouteCircuitPeeringConfig',
+                                                     'ExpressRouteCircuitPeeringConfig', mod='models')
+        microsoft_config = MicrosoftPeeringConfig(advertised_public_prefixes=advertised_public_prefixes,
+                                                  customer_asn=customer_asn,
+                                                  routing_registry_name=routing_registry_name)
+        config = IPv6Config(primary_peer_address_prefix=primary_peer_address_prefix,
+                            secondary_peer_address_prefix=secondary_peer_address_prefix,
+                            microsoft_peering_config=microsoft_config,
+                            route_filter=route_filter)
+
+    return config
 
 
 def update_express_route_peering(instance, peer_asn=None, primary_peer_address_prefix=None,
                                  secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
                                  advertised_public_prefixes=None, customer_asn=None,
-                                 routing_registry_name=None):
+                                 routing_registry_name=None, route_filter=None, ip_version='IPv4'):
+
+    # update settings common to all peering types
     if peer_asn is not None:
         instance.peer_asn = peer_asn
-
-    if primary_peer_address_prefix is not None:
-        instance.primary_peer_address_prefix = primary_peer_address_prefix
-
-    if secondary_peer_address_prefix is not None:
-        instance.secondary_peer_address_prefix = secondary_peer_address_prefix
 
     if vlan_id is not None:
         instance.vlan_id = vlan_id
@@ -2292,19 +2398,37 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
     if shared_key is not None:
         instance.shared_key = shared_key
 
-    try:
-        if advertised_public_prefixes is not None:
-            instance.microsoft_peering_config.advertised_public_prefixes = \
-                advertised_public_prefixes
+    if ip_version == 'IPv6':
+        # update is the only way to add IPv6 peering options
+        instance.ipv6_peering_config = _create_or_update_ipv6_peering(instance.ipv6_peering_config,
+                                                                      primary_peer_address_prefix,
+                                                                      secondary_peer_address_prefix, route_filter,
+                                                                      advertised_public_prefixes, customer_asn,
+                                                                      routing_registry_name)
+    else:
+        # IPv4 Microsoft Peering (or non-Microsoft Peering)
+        if primary_peer_address_prefix is not None:
+            instance.primary_peer_address_prefix = primary_peer_address_prefix
 
-        if customer_asn is not None:
-            instance.microsoft_peering_config.customer_asn = customer_asn
+        if secondary_peer_address_prefix is not None:
+            instance.secondary_peer_address_prefix = secondary_peer_address_prefix
 
-        if routing_registry_name is not None:
-            instance.routing_registry_name = routing_registry_name
-    except AttributeError:
-        raise CLIError("--advertised-public-prefixes, --customer-asn and "
-                       "--routing-registry-name are only applicable for 'MicrosoftPeering'")
+        if route_filter is not None:
+            RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+            instance.route_filter = RouteFilter(id=route_filter)
+
+        try:
+            if advertised_public_prefixes is not None:
+                instance.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
+
+            if customer_asn is not None:
+                instance.microsoft_peering_config.customer_asn = customer_asn
+
+            if routing_registry_name is not None:
+                instance.microsoft_peering_config.routing_registry_name = routing_registry_name
+        except AttributeError:
+            raise CLIError('--advertised-public-prefixes, --customer-asn and --routing-registry-name are only '
+                           'applicable for Microsoft Peering.')
 
     return instance
 
@@ -2421,14 +2545,14 @@ def list_traffic_manager_profiles(resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
-        return client.list_by_in_resource_group(resource_group_name)
+        return client.list_by_resource_group(resource_group_name)
 
-    return client.list_all()
+    return client.list_by_subscription()
 
 
 def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path='/',
-                                   monitor_port=80, monitor_protocol='http', status='enabled',
+                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value, status='enabled',
                                    ttl=30, tags=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
@@ -2521,17 +2645,36 @@ def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_t
 # region DNS Commands
 
 def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
-                    if_none_match=False):
-    kwargs = {
-        'resource_group_name': resource_group_name,
-        'zone_name': zone_name,
-        'parameters': Zone(location=location, tags=tags)
-    }
+                    if_none_match=False, zone_type=None, resolution_vnets=None, registration_vnets=None):
+    zone = Zone(location=location, tags=tags)
 
-    if if_none_match:
-        kwargs['if_none_match'] = '*'
+    if hasattr(zone, 'zone_type'):
+        zone.zone_type = zone_type
+        zone.registration_virtual_networks = registration_vnets
+        zone.resolution_virtual_networks = resolution_vnets
 
-    return client.create_or_update(**kwargs)
+    return client.create_or_update(resource_group_name, zone_name, zone, if_none_match='*' if if_none_match else None)
+
+
+def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
+
+    if tags is not None:
+        instance.tags = tags
+
+    if zone_type:
+        instance.zone_type = zone_type
+
+    if resolution_vnets == ['']:
+        instance.resolution_virtual_networks = None
+    elif resolution_vnets:
+        instance.resolution_virtual_networks = resolution_vnets
+
+    if registration_vnets == ['']:
+        instance.registration_virtual_networks = None
+    elif registration_vnets:
+        instance.registration_virtual_networks = registration_vnets
+
+    return instance
 
 
 def list_dns_zones(resource_group_name=None):

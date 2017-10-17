@@ -8,6 +8,7 @@ import json
 import os
 import unittest
 import mock
+import re
 
 from copy import deepcopy
 
@@ -535,6 +536,8 @@ class Test_Profile(unittest.TestCase):
 
     def test_cloud_console_login(self):
         import tempfile
+        from datetime import datetime, timedelta
+        from dateutil import parser
         from azure.cli.core.util import get_file_json
         from azure.cli.core._session import Session
 
@@ -542,7 +545,7 @@ class Test_Profile(unittest.TestCase):
         test_dir = tempfile.mkdtemp()
         test_account_file = os.path.join(test_dir, 'azureProfile.json')
         test_account.load(test_account_file)
-        # test_token_file = os.path.join(test_dir, 'accessTokens.json')
+        test_token_file = os.path.join(test_dir, 'accessTokens.json')
 
         os.environ['AZURE_CONFIG_DIR'] = test_dir
 
@@ -573,7 +576,12 @@ class Test_Profile(unittest.TestCase):
             "environmentName": "AzureCloud",
             "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"
         }
+
+        actual = get_file_json(test_token_file)
+
         self.assertEqual([expected_subscription], result_accounts)
+        # sanity check that the expiration time is about 45 minutes away
+        self.assertTrue(parser.parse(actual[0]['expiresOn']) < datetime.now() + timedelta(minutes=45))
 
         # verify the token file
         # expected_arm_token_entry = {
@@ -699,6 +707,7 @@ class Test_Profile(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 self.subscriptions = mock.MagicMock()
                 self.subscriptions.list.return_value = [Test_Profile.subscription1]
+                self.config = mock.MagicMock()
 
         mock_get_client_class.return_value = ClientStub
 
@@ -1102,6 +1111,19 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual(token, 'new token')
         self.assertEqual(token_type, token_entry2['tokenType'])
 
+    @mock.patch('azure.cli.core._profile.get_file_json', autospec=True)
+    def test_credscache_good_error_on_file_corruption(self, mock_read_file):
+        mock_read_file.side_effect = ValueError('a bad error for you')
+
+        # action
+        creds_cache = CredsCache(async_persist=False)
+
+        # assert
+        with self.assertRaises(CLIError) as context:
+            creds_cache.load_adal_token_cache()
+
+        self.assertTrue(re.findall(r'bad error for you', str(context.exception)))
+
     def test_service_principal_auth_client_secret(self):
         sp_auth = ServicePrincipalAuth('verySecret!')
         result = sp_auth.get_entry_to_persist('sp_id1', 'tenant1')
@@ -1123,6 +1145,29 @@ class Test_Profile(unittest.TestCase):
             'certificateFile': test_cert_file,
             'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
         })
+
+    @mock.patch('azure.cli.core._profile.CLOUD', autospec=True)
+    def test_detect_adfs_authority_url(self, mock_get_cloud):
+        adfs_url_1 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs/'
+        mock_get_cloud.endpoints.active_directory = adfs_url_1
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock, use_global_creds_cache=False)
+
+        # test w/ trailing slash
+        r = profile.auth_ctx_factory('common', None)
+        self.assertEqual(r.authority.url, adfs_url_1)
+
+        # test w/o trailing slash
+        adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
+        mock_get_cloud.endpoints.active_directory = adfs_url_2
+        r = profile.auth_ctx_factory('common', None)
+        self.assertEqual(r.authority.url, adfs_url_2)
+
+        # test w/ regular aad
+        aad_url = 'https://login.microsoftonline.com'
+        mock_get_cloud.endpoints.active_directory = aad_url
+        r = profile.auth_ctx_factory('common', None)
+        self.assertEqual(r.authority.url, aad_url + '/common')
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods

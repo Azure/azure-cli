@@ -10,7 +10,7 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
-from ._client_factory import cf_web_client, cf_plans
+from ._client_factory import cf_web_client, cf_plans, cf_webapps
 
 
 def deprecate(argv):
@@ -73,6 +73,11 @@ cli_command(__name__, 'webapp delete', custom_path + 'delete_webapp')
 cli_command(__name__, 'webapp stop', custom_path + 'stop_webapp')
 cli_command(__name__, 'webapp start', custom_path + 'start_webapp')
 cli_command(__name__, 'webapp restart', custom_path + 'restart_webapp')
+cli_generic_update_command(__name__, 'webapp update', 'azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.get',
+                           'azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.create_or_update',
+                           custom_function_op=custom_path + 'update_webapp',
+                           setter_arg_name='site_envelope', factory=cf_webapps)
+
 cli_command(__name__, 'webapp traffic-routing set', custom_path + 'set_traffic_routing')
 cli_command(__name__, 'webapp traffic-routing show', custom_path + 'show_traffic_routing')
 cli_command(__name__, 'webapp traffic-routing clear', custom_path + 'clear_traffic_routing')
@@ -134,6 +139,10 @@ cli_command(__name__, 'webapp deployment container show-cd-url',
             custom_path + 'show_container_cd_url')
 cli_command(__name__, 'webapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
 cli_command(__name__, 'webapp list-runtimes', custom_path + 'list_runtimes')
+
+cli_command(__name__, 'webapp auth show', custom_path + 'get_auth_settings')
+cli_command(__name__, 'webapp auth update', custom_path + 'update_auth_settings')
+
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'appservice plan create', custom_path + 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))

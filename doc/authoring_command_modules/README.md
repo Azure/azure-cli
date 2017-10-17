@@ -170,18 +170,24 @@ Submitting Pull Requests
 
 Modify the `HISTORY.rst` for all changed modules.
 
-Add your change log to the 'unreleased' heading in the file.
-
-If that heading doesn't exist yet, create it.
-
 This will be the release notes for the next release.
 
 e.g.:  
 ```
-unreleased
-----------
+.. :changelog:
+
+Release History
+===============
+
+0.0.2
++++++
 
 * This is my change.
+
+0.0.1
++++++
+
+* This is the changelog from a prev. release.
 
 ```
 

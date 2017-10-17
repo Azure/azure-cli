@@ -42,8 +42,8 @@ def _authorization_management_client(**_):
 
 def _resource_managedapps_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.managedapplications import ManagedApplicationClient
-    return get_mgmt_service_client(ManagedApplicationClient)
+    from azure.mgmt.resource.managedapplications import ApplicationClient
+    return get_mgmt_service_client(ApplicationClient)
 
 
 def cf_resource_groups(_):
@@ -78,6 +78,10 @@ def cf_policy_definitions(_):
     return _resource_policy_client_factory().policy_definitions
 
 
+def cf_policy_set_definitions(_):
+    return _resource_policy_client_factory().policy_set_definitions
+
+
 def cf_management_locks(_):
     return _resource_lock_client_factory().management_locks
 
@@ -87,8 +91,8 @@ def cf_resource_links():
 
 
 def cf_resource_managedapplications(_):
-    return _resource_managedapps_client_factory().appliances
+    return _resource_managedapps_client_factory().applications
 
 
 def cf_resource_managedappdefinitions(_):
-    return _resource_managedapps_client_factory().appliance_definitions
+    return _resource_managedapps_client_factory().application_definitions

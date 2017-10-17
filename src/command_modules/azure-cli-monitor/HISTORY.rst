@@ -2,6 +2,15 @@
 
 Release History
 ===============
+
+0.0.11
+++++++
+* Add action-group commands
+
+0.0.10 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
 0.0.9 (2017-08-28)
 ++++++++++++++++++
 * minor fixes

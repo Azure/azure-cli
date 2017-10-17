@@ -2,6 +2,19 @@
 
 Release History
 ===============
+
+2.0.18
+++++++
+* fix kubernetes get-credentials
+
+2.0.17 (2017-10-09)
++++++++++++++++++++
+* minor fixes
+
+2.0.16 (2017-09-22)
++++++++++++++++++++
+* add orchestrator-release option for acs preview regions
+
 2.0.15 (2017-09-11)
 +++++++++++++++++++
 * add acs list-locations command

@@ -9,7 +9,7 @@ import sys
 import json
 import base64
 import binascii
-from datetime import datetime, timedelta
+from datetime import date, time, datetime, timedelta
 from enum import Enum
 
 import six
@@ -132,16 +132,16 @@ def read_file_content(file_path, allow_binary=False):
             with codecs_open(file_path, encoding=encoding) as f:
                 logger.debug("attempting to read file %s as %s", file_path, encoding)
                 return f.read()
-        except UnicodeDecodeError:
-            if allow_binary:
-                with open(file_path, 'rb') as input_file:
-                    logger.debug("attempting to read file %s as binary", file_path)
-                    return base64.b64encode(input_file.read()).decode("utf-8")
-            else:
-                raise
-        except UnicodeError:
+        except (UnicodeError, UnicodeDecodeError):
             pass
 
+    if allow_binary:
+        try:
+            with open(file_path, 'rb') as input_file:
+                logger.debug("attempting to read file %s as binary", file_path)
+                return base64.b64encode(input_file.read()).decode("utf-8")
+        except Exception:  # pylint: disable=broad-except
+            pass
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
@@ -170,7 +170,7 @@ def todict(obj):  # pylint: disable=too-many-return-statements
         return [todict(a) for a in obj]
     elif isinstance(obj, Enum):
         return obj.value
-    elif isinstance(obj, datetime):
+    elif isinstance(obj, (date, time, datetime)):
         return obj.isoformat()
     elif isinstance(obj, timedelta):
         return str(obj)

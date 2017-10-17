@@ -16,13 +16,13 @@ from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
+     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import \
     (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk,
+     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
      process_disk_encryption_namespace, process_assign_identity_namespace)
 
 
@@ -38,6 +38,16 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
         location = get_one_of_subscription_locations()
     result = get_vm_sizes(location)
     return [r.name for r in result]
+
+
+def get_vm_run_command_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    from ._client_factory import _compute_client_factory
+    try:
+        location = parsed_args.location
+    except AttributeError:
+        location = get_one_of_subscription_locations()
+    result = _compute_client_factory().virtual_machine_run_commands.list(location)
+    return [r.id for r in result]
 
 
 # REUSABLE ARGUMENT DEFINITIONS
@@ -62,6 +72,11 @@ register_cli_argument('vm', 'size', completer=get_vm_size_completion_list)
 for scope in ['vm', 'disk', 'snapshot', 'image']:
     register_cli_argument(scope, 'tags', tags_type)
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
+
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
+    c.register_cli_argument('vm', 'zone', zone_type)
+    c.register_cli_argument('disk', 'zone', zone_type, options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
+    c.register_cli_argument('vmss', 'zones', zones_type)
 
 for item in ['show', 'list']:
     register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')
@@ -91,11 +106,13 @@ register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit num
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
-register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int,
                       help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
 register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview') as c:
+    c.register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')
@@ -256,11 +273,14 @@ register_cli_argument('vm assign-identity', 'vm_name', existing_vm_name, validat
 register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, validator=process_assign_identity_namespace)
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
+register_cli_argument('vm create', 'os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
 register_cli_argument('vm create', 'nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
 register_cli_argument('vm create', 'nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', **enum_choice_list(['RDP', 'SSH']))
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
+    c.register_cli_argument('vm create', 'application_security_groups', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'], arg_group='Network Balancer')
@@ -274,6 +294,7 @@ register_cli_argument('vmss create', 'app_gateway_capacity', help='The number of
 register_cli_argument('vmss create', 'instance_count', help='Number of VMs in the scale set.', type=int)
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
+register_cli_argument('vmss create', 'health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
 register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
@@ -283,10 +304,13 @@ with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
     c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')
     c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
     c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')
+    c.register_cli_argument('vmss create', 'accelerated_networking', action='store_true', help="enable accelerated networking", arg_group='Network')
 
-register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
-register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
-register_cli_argument('vm encryption', 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
+for scope in ['vm encryption', 'vmss encryption']:
+    register_cli_argument(scope, 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
+    register_cli_argument(scope, 'force', action='store_true', help='continue by ignoring client side validation errors')
+    register_cli_argument(scope, 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
+register_cli_argument('vmss encryption', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
@@ -327,3 +351,7 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+
+register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
+register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
+register_cli_argument('vm run-command', 'command_id', completer=get_vm_run_command_completion_list, help="The run command id")

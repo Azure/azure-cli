@@ -21,6 +21,7 @@ from azure.common import AzureMissingResourceHttpError
 
 from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
+from .sdkutil import get_table_data_type
 from ._factory import get_storage_data_service_client
 from ._validators import \
     (get_datetime_type, get_file_path_validator, validate_metadata,
@@ -37,44 +38,35 @@ from ._validators import \
      get_source_file_or_blob_service_client, process_blob_source_uri,
      get_char_options_validator, validate_bypass, validate_subnet, page_blob_tier_validator, blob_tier_validator)
 
+DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService = get_sdk(ResourceType.DATA_STORAGE,
+                                                                               'DeleteSnapshot',
+                                                                               'BlockBlobService',
+                                                                               'PageBlobService',
+                                                                               'AppendBlobService',
+                                                                               mod='blob')
 
-DeleteSnapshot, BlockBlobService, \
-    PageBlobService, AppendBlobService = get_sdk(ResourceType.DATA_STORAGE,
-                                                 'DeleteSnapshot',
-                                                 'BlockBlobService',
-                                                 'PageBlobService',
-                                                 'AppendBlobService',
-                                                 mod='blob')
+BlobContentSettings, ContainerPermissions, BlobPermissions, PublicAccess = get_sdk(ResourceType.DATA_STORAGE,
+                                                                                   'ContentSettings',
+                                                                                   'ContainerPermissions',
+                                                                                   'BlobPermissions',
+                                                                                   'PublicAccess',
+                                                                                   mod='blob.models')
 
+FileContentSettings, SharePermissions, FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                                                                 'ContentSettings',
+                                                                 'SharePermissions',
+                                                                 'FilePermissions',
+                                                                 mod='file.models')
 
-BlobContentSettings, ContainerPermissions, \
-    BlobPermissions, PublicAccess = get_sdk(ResourceType.DATA_STORAGE,
-                                            'ContentSettings',
-                                            'ContainerPermissions',
-                                            'BlobPermissions',
-                                            'PublicAccess',
-                                            mod='blob.models')
+TableService, TablePayloadFormat = get_table_data_type('table', 'TableService', 'TablePayloadFormat')
 
-FileContentSettings, SharePermissions, \
-    FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
-                              'ContentSettings',
-                              'SharePermissions',
-                              'FilePermissions',
-                              mod='file.models')
+AccountPermissions = get_sdk(ResourceType.DATA_STORAGE, 'common.models#AccountPermissions')
 
-TableService, TablePayloadFormat = get_sdk(ResourceType.DATA_STORAGE,
-                                           'TableService',
-                                           'TablePayloadFormat',
-                                           mod='table')
-
-AccountPermissions, BaseBlobService, \
-    FileService, QueueService, QueuePermissions = get_sdk(ResourceType.DATA_STORAGE,
-                                                          'models#AccountPermissions',
-                                                          'blob.baseblobservice#BaseBlobService',
-                                                          'file#FileService',
-                                                          'queue#QueueService',
-                                                          'queue.models#QueuePermissions')
-
+BaseBlobService, FileService, QueueService, QueuePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                                                                       'blob.baseblobservice#BaseBlobService',
+                                                                       'file#FileService',
+                                                                       'queue#QueueService',
+                                                                       'queue.models#QueuePermissions')
 
 # UTILITY
 
@@ -572,6 +564,9 @@ register_cli_argument('storage share policy', 'container_name', share_name_type)
 register_cli_argument('storage share policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(FileService, 'container_name', 'get_share_acl'))
 
 register_cli_argument('storage share list', 'marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
+register_cli_argument('storage share delete', 'delete_snapshots',
+                      help='Specify the deletion strategy when the share has snapshots.',
+                      **enum_choice_list(list(delete_snapshot_types.keys())))
 
 register_cli_argument('storage directory', 'directory_name', directory_type, options_list=('--name', '-n'))
 

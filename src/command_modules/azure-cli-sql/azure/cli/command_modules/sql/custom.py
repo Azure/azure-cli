@@ -3,18 +3,29 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=C0302
+
+import re
+
 from enum import Enum
+
 from azure.cli.core._profile import Profile
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
 from azure.cli.core.util import CLIError
+from azure.mgmt.sql.models.server_key import ServerKey
+from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
+from azure.mgmt.sql.models.resource_identity import ResourceIdentity
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
     DatabaseEdition,
+    IdentityType,
     ReplicationRole,
     SecurityAlertPolicyState,
+    ServerKeyType,
     ServiceObjectiveName,
     StorageKeyType
 )
@@ -50,6 +61,123 @@ _DEFAULT_SERVER_VERSION = "12.0"
 ###############################################
 
 
+class ClientType(Enum):
+    ado_net = 'ado.net'
+    sqlcmd = 'sqlcmd'
+    jdbc = 'jdbc'
+    php_pdo = 'php_pdo'
+    php = 'php'
+    odbc = 'odbc'
+
+
+class ClientAuthenticationType(Enum):
+    sql_password = 'SqlPassword'
+    active_directory_password = 'ADPassword'
+    active_directory_integrated = 'ADIntegrated'
+
+
+def _get_server_dns_suffx():
+    # Allow dns suffix to be overridden by environment variable for testing purposes
+    from os import getenv
+    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=get_active_cloud().suffixes.sql_server_hostname)
+
+
+def db_show_conn_str(
+        client_provider,
+        database_name='<databasename>',
+        server_name='<servername>',
+        auth_type=ClientAuthenticationType.sql_password.value):
+
+    server_suffix = _get_server_dns_suffx()
+
+    conn_str_props = {
+        'server': server_name,
+        'server_fqdn': '{}{}'.format(server_name, server_suffix),
+        'server_suffix': server_suffix,
+        'db': database_name
+    }
+
+    formats = {
+        ClientType.ado_net.value: {
+            ClientAuthenticationType.sql_password.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
+                'Password=<password>;Encrypt=true;Connection Timeout=30;',
+            ClientAuthenticationType.active_directory_password.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
+                'Password=<password>;Encrypt=true;Connection Timeout=30;'
+                'Authentication="Active Directory Password"',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};Encrypt=true;'
+                'Connection Timeout=30;Authentication="Active Directory Integrated"'
+        },
+        ClientType.sqlcmd.value: {
+            ClientAuthenticationType.sql_password.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U <username> -P <password> -N -l 30',
+            ClientAuthenticationType.active_directory_password.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U <username> -P <password> -G -N -l 30',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -G -N -l 30',
+        },
+        ClientType.jdbc.value: {
+            ClientAuthenticationType.sql_password.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=<username>@{server};'
+                'password=<password>;encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30',
+            ClientAuthenticationType.active_directory_password.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=<username>;'
+                'password=<password>;encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
+                'authentication=ActiveDirectoryPassword',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};'
+                'encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
+                'authentication=ActiveDirectoryIntegrated',
+        },
+        ClientType.php_pdo.value: {
+            # pylint: disable=line-too-long
+            ClientAuthenticationType.sql_password.value:
+                '$conn = new PDO("sqlsrv:server = tcp:{server_fqdn},1433; Database = {db}; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");',
+            ClientAuthenticationType.active_directory_password.value:
+                CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
+            ClientAuthenticationType.active_directory_integrated.value:
+                CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
+        },
+        ClientType.php.value: {
+            # pylint: disable=line-too-long
+            ClientAuthenticationType.sql_password.value:
+                '$connectionOptions = array("UID"=>"<username>@{server}", "PWD"=>"<password>", "Database"=>{db}, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:{server_fqdn},1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);',
+            ClientAuthenticationType.active_directory_password.value:
+                CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
+            ClientAuthenticationType.active_directory_integrated.value:
+                CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
+        },
+        ClientType.odbc.value: {
+            ClientAuthenticationType.sql_password.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Uid=<username>@{server};Pwd=<password>;Encrypt=yes;'
+                'TrustServerCertificate=no;',
+            ClientAuthenticationType.active_directory_password.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Uid=<username>@{server};Pwd=<password>;Encrypt=yes;'
+                'TrustServerCertificate=no;Authentication=ActiveDirectoryPassword',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Encrypt=yes;TrustServerCertificate=no;'
+                'Authentication=ActiveDirectoryIntegrated',
+        }
+    }
+
+    f = formats[client_provider][auth_type]
+
+    if isinstance(f, Exception):
+        # Error
+        raise f
+
+    # Success
+    return f.format(**conn_str_props)
+
+
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
     def __init__(self, database_name, server_name, resource_group_name):
@@ -57,12 +185,20 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
         self.server_name = server_name
         self.resource_group_name = resource_group_name
 
+    def id(self):
+        return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
+            quote(get_subscription_id()),
+            quote(self.resource_group_name),
+            quote(self.server_name),
+            quote(self.database_name))
+
 
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
 # the user doesn't need to specify location.
 def _db_dw_create(
         client,
         db_id,
+        raw,
         kwargs):
 
     # Determine server location
@@ -75,6 +211,7 @@ def _db_dw_create(
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name,
         database_name=db_id.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
@@ -85,6 +222,7 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Verify edition
@@ -96,6 +234,7 @@ def db_create(
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -104,6 +243,7 @@ def _db_create_special(
         client,
         source_db,
         dest_db,
+        raw,
         kwargs):
 
     # Determine server location
@@ -112,19 +252,14 @@ def _db_create_special(
         resource_group_name=dest_db.resource_group_name)
 
     # Set create mode properties
-    subscription_id = get_subscription_id()
-    kwargs['source_database_id'] = (
-        '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'
-        .format(quote(subscription_id),
-                quote(source_db.resource_group_name),
-                quote(source_db.server_name),
-                quote(source_db.database_name)))
+    kwargs['source_database_id'] = source_db.id()
 
     # Create
     return client.create_or_update(
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name,
         database_name=dest_db.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
@@ -137,6 +272,7 @@ def db_copy(
         dest_name,
         dest_server_name=None,
         dest_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -150,6 +286,7 @@ def db_copy(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
+        raw,
         kwargs)
 
 
@@ -162,6 +299,7 @@ def db_create_replica(
         # Replica must have the same database name as the source db
         partner_server_name,
         partner_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -175,29 +313,39 @@ def db_create_replica(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
+        raw,
         kwargs)
 
 
-# Creates a database from a database point in time backup.
+# Creates a database from a database point in time backup or deleted database backup.
 # Wrapper function to make create mode more convenient.
 def db_restore(
         client,
         database_name,
         server_name,
         resource_group_name,
-        restore_point_in_time,
         dest_name,
+        restore_point_in_time=None,
+        source_database_deletion_date=None,
+        raw=False,
         **kwargs):
 
+    if not (restore_point_in_time or source_database_deletion_date):
+        raise CLIError('Either --time or --deleted-time must be specified.')
+
     # Set create mode properties
-    kwargs['create_mode'] = 'PointInTimeRestore'
+    is_deleted = source_database_deletion_date is not None
+
     kwargs['restore_point_in_time'] = restore_point_in_time
+    kwargs['source_database_deletion_date'] = source_database_deletion_date
+    kwargs['create_mode'] = 'Restore' if is_deleted else 'PointInTimeRestore'
 
     return _db_create_special(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(dest_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -656,6 +804,7 @@ def dw_create(
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Set edition
@@ -665,6 +814,7 @@ def dw_create(
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -810,11 +960,45 @@ def elastic_pool_list_capabilities(
 #                sql server                   #
 ###############################################
 
+def server_create(
+        client,
+        resource_group_name,
+        server_name,
+        assign_identity=False,
+        **kwargs):
+
+    if assign_identity:
+        kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    # Create
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+# Lists servers in a resource group or subscription
+def server_list(
+        client,
+        resource_group_name=None):
+
+    if resource_group_name:
+        # List all servers in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all servers in the subscription
+    return client.list()
+
 
 # Update server. Custom update function to apply parameters to instance.
 def server_update(
         instance,
-        administrator_login_password=None):
+        administrator_login_password=None,
+        assign_identity=False):
+
+    # Once assigned, the identity cannot be removed
+    if instance.identity is None and assign_identity:
+        instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     # Apply params to instance
     instance.administrator_login_password = (
@@ -908,6 +1092,105 @@ def firewall_rule_update(
         resource_group_name=resource_group_name,
         start_ip_address=start_ip_address or instance.start_ip_address,
         end_ip_address=end_ip_address or instance.end_ip_address)
+
+
+#####
+#           sql server key
+#####
+
+
+def server_key_create(
+        client,
+        resource_group_name,
+        server_name,
+        kid=None):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name,
+        parameters=ServerKey(
+            server_key_type=ServerKeyType.azure_key_vault.value,
+            uri=kid
+        )
+    )
+
+
+def server_key_get(
+        client,
+        resource_group_name,
+        server_name,
+        kid):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def server_key_delete(
+        client,
+        resource_group_name,
+        server_name,
+        kid):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+# The SQL server key API requires that the server key has a specific name
+# based on the vault, key and key version.
+def _get_server_key_name_from_uri(uri):
+
+    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+
+    if match is None:
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    vault = uri.split('.')[0].split('/')[-1]
+    key = uri.split('/')[-2]
+    version = uri.split('/')[-1]
+    return '{}_{}_{}'.format(vault, key, version)
+
+
+#####
+#           sql server encryption-protector
+#####
+
+
+def encryption_protector_update(
+        client,
+        resource_group_name,
+        server_name,
+        server_key_type,
+        kid=None):
+
+    if server_key_type == ServerKeyType.service_managed.value:
+        key_name = 'ServiceManaged'
+    else:
+        if kid is None:
+            raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
+        else:
+            key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters=EncryptionProtector(
+            server_key_type=server_key_type,
+            server_key_name=key_name
+        )
+    )
+
 
 #####
 #           sql server vnet-rule validate

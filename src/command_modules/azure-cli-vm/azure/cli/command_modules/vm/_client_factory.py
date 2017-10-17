@@ -74,3 +74,11 @@ def cf_snapshots(_):
 
 def cf_images(_):
     return _compute_client_factory().images
+
+
+def cf_run_commands(_):
+    return _compute_client_factory().virtual_machine_run_commands
+
+
+def cf_rolling_upgrade_commands(_):
+    return _compute_client_factory().virtual_machine_scale_set_rolling_upgrades

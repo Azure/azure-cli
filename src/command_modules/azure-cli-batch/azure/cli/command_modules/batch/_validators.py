@@ -264,14 +264,17 @@ def validate_pool_settings(ns, parser):
             ns.version = 'latest'
             try:
                 ns.publisher, ns.offer, ns.sku = ns.image.split(':', 2)
+                try:
+                    ns.sku, ns.version = ns.sku.split(':', 1)
+                except ValueError:
+                    pass
             except ValueError:
-                message = ("Incorrect format for VM image URN. Should be in the format: \n"
-                           "'publisher:offer:sku[:version]'")
-                raise ValueError(message)
-            try:
-                ns.sku, ns.version = ns.sku.split(':', 1)
-            except ValueError:
-                pass
+                if '/' not in ns.image:
+                    message = ("Incorrect format for VM image. Should be in the format: \n"
+                               "'publisher:offer:sku[:version]' OR a URL to an ARM image.")
+                    raise ValueError(message)
+
+                ns.virtual_machine_image_id = ns.image
             del ns.image
         groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
         parser.parse_mutually_exclusive(ns, True, groups)

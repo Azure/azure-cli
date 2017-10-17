@@ -2,6 +2,22 @@
 
 Release History
 ===============
+
+3.1.6
++++++
+* minor fixes
+
+
+3.1.5 (2017-10-09)
+++++++++++++++++++
+* Updated to Batch SDK 4.0.0.
+* Updated --image option of VirtualMachineConfiguration to support ARM image references in addition to publish:offer:sku:version.
+* Now supports the new CLI extension model for Batch Extensions commands - support for old component model has been removed.
+
+3.1.4 (2017-09-22)
+++++++++++++++++++
+* minor fixes
+
 3.1.3 (2017-09-11)
 ++++++++++++++++++
 * minor fixes

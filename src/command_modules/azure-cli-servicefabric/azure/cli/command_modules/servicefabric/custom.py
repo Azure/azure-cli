@@ -121,7 +121,7 @@ SEC_CERTIFICATE_THUMBPRINT = "secCertificateThumbprint"
 SEC_CERTIFICATE_URL_VALUE = "secCertificateUrlValue"
 
 os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
-          'UbuntuServer1604': '16.04',
+          'UbuntuServer1604': '16.04-LTS',
           'WindowsServer2016DatacenterwithContainers': '2016-Datacenter-with-Containers',
           'WindowsServer2016Datacenter': '2016-Datacenter'}
 
@@ -190,7 +190,7 @@ def new_cluster(client,
         vault_name = resource_group_name
         name = ""
         for n in vault_name:
-            if n.isalpha() or n == '-':
+            if n.isalpha() or n == '-' or n.isdigit():
                 name += n
             if len(name) >= 21:
                 break
@@ -230,7 +230,7 @@ def new_cluster(client,
         output_file = result[3]
 
         linux = None
-        if vm_os == '16.04':
+        if vm_os == '16.04-LTS':
             linux = True
         template = _modify_template(linux)
         parameters = _set_parameters_for_default_template(cluster_location=location,
@@ -913,7 +913,7 @@ def add_cluster_node_type(client,
         name = ""
         vhds = []
         for n in storage_name:
-            if n.isalpha():
+            if n.isalpha() or n.isdigit():
                 name += n
             if len(name) >= 21:
                 break
@@ -1292,7 +1292,7 @@ def _get_certificate_name(resource_group_name):
     certificate_name = resource_group_name
     name = ""
     for n in certificate_name:
-        if n.isalpha() or n == '-':
+        if n.isalpha() or n == '-' or n.isdigit():
             name += n
     certificate_name = name
     import datetime
@@ -1431,16 +1431,16 @@ def import_certificate(vault_base_url, certificate_name, certificate_data,
     return result
 
 
-def _download_secret(vault_base_url, secret_name, file_path, encoding=None, secret_version=''):  # pylint: disable=unused-argument
+def _download_secret(vault_base_url, secret_name, pem_path, pfx_path, encoding=None, secret_version=''):  # pylint: disable=unused-argument
     client = _get_keyVault_not_arm_client()
     secret = client.get_secret(vault_base_url, secret_name, secret_version)
     secret_value = secret.value
-    if file_path is not None:
+    if pem_path:
         try:
             import base64
             decoded = base64.b64decode(secret_value)
             p12 = crypto.load_pkcs12(decoded)
-            f_pem = open(file_path, 'wb')
+            f_pem = open(pem_path, 'wb')
             f_pem.write(crypto.dump_privatekey(
                 crypto.FILETYPE_PEM, p12.get_privatekey()))
             f_pem.write(crypto.dump_certificate(
@@ -1452,8 +1452,20 @@ def _download_secret(vault_base_url, secret_name, file_path, encoding=None, secr
                         crypto.FILETYPE_PEM, cert))
             f_pem.close()
         except Exception as ex:  # pylint: disable=broad-except
-            if os.path.isfile(file_path):
-                os.remove(file_path)
+            if os.path.isfile(pem_path):
+                os.remove(pem_path)
+            raise ex
+
+    if pfx_path:
+        try:
+            import base64
+            decoded = base64.b64decode(secret_value)
+            p12 = crypto.load_pkcs12(decoded)
+            with open(pfx_path, 'wb') as f:
+                f.write(decoded)
+        except Exception as ex:  # pylint: disable=broad-except
+            if os.path.isfile(pfx_path):
+                os.remove(pfx_path)
             raise ex
 
 
@@ -1520,12 +1532,15 @@ def _create_self_signed_key_vault_certificate(vault_base_url, certificate_name, 
 
             raise CLIError('{}'.format(message))
 
+    pem_output_folder = None
     if certificate_output_folder is not None:
-        certificate_output_folder = os.path.join(
+        pem_output_folder = os.path.join(
             certificate_output_folder, certificate_name + '.pem')
+        pfx_output_folder = os.path.join(
+            certificate_output_folder, certificate_name + '.pfx')
         _download_secret(vault_base_url, certificate_name,
-                         certificate_output_folder)
-    return client.get_certificate(vault_base_url, certificate_name, ''), certificate_output_folder
+                         pem_output_folder, pfx_output_folder)
+    return client.get_certificate(vault_base_url, certificate_name, ''), pem_output_folder
 
 
 _create_self_signed_key_vault_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__

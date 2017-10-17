@@ -153,3 +153,26 @@ with ParametersContext(command='monitor activity-log list') as c:
     c.argument('end_time', arg_group=filter_arg_group_name)
     c.argument('caller', arg_group=filter_arg_group_name)
     c.argument('status', arg_group=filter_arg_group_name)
+
+
+register_cli_argument('monitor action-group', 'action_group_name', options_list=('--name', '-n'), id_part='name')
+
+with ParametersContext(command='monitor action-group create') as c:
+    from .validators import process_action_group_detail_for_creation
+    from .actions import ActionGroupReceiverParameterAction
+
+    c.extra('receivers', options_list=('--action', '-a'), nargs='+', arg_group='Actions',
+            action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
+    c.extra('short_name')
+    c.extra('tags')
+    c.ignore('action_group')
+
+with ParametersContext(command='monitor action-group update') as c:
+    c.extra('add_receivers', options_list=('--add-action', '-a'), nargs='+', arg_group='Actions',
+            action=ActionGroupReceiverParameterAction)
+    c.extra('remove_receivers', options_list=('--remove-action', '-r'), nargs='+', arg_group='Actions')
+    c.ignore('action_group')
+
+with ParametersContext(command='monitor action-group enable-receiver') as c:
+    c.register_alias('receiver_name', ('--name', '-n'))
+    c.register_alias('action_group_name', options_list='--action-group')

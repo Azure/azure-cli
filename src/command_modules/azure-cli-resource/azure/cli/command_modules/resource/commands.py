@@ -9,8 +9,7 @@ from collections import OrderedDict
 from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import \
-    (cli_generic_update_command, cli_generic_wait_command, handle_long_running_operation_exception,
-     deployment_validate_table_format)
+    (cli_generic_update_command, cli_generic_wait_command, deployment_validate_table_format)
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
@@ -21,9 +20,19 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_deployments,
                                                                 cf_deployment_operations,
                                                                 cf_policy_definitions,
+                                                                cf_policy_set_definitions,
                                                                 cf_resource_links,
                                                                 cf_resource_managedapplications,
                                                                 cf_resource_managedappdefinitions)
+
+
+# Subscription lock commands
+cli_command(__name__, 'account lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'account lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'account lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'account lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'account lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 
 # Resource group commands
@@ -38,10 +47,15 @@ cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.
 cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
 cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
 cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
+cli_command(__name__, 'group lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'group lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'group lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'group lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 
 # Resource commands
-
 def transform_resource_list(result):
     transformed = []
     for r in result:
@@ -60,6 +74,13 @@ cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custo
 cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custom#list_resources', table_transformer=transform_resource_list)
 cli_command(__name__, 'resource tag', 'azure.cli.command_modules.resource.custom#tag_resource')
 cli_command(__name__, 'resource move', 'azure.cli.command_modules.resource.custom#move_resource')
+cli_command(__name__, 'resource invoke-action', 'azure.cli.command_modules.resource.custom#invoke_resource_action')
+cli_command(__name__, 'resource lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'resource lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'resource lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'resource lock show', 'azure.cli.command_modules.resource.custom#get_lock',
+            exception_handler=empty_on_404)
+cli_command(__name__, 'resource lock update', 'azure.cli.command_modules.resource.custom#update_lock')
 
 # Resource provider commands
 cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.list', cf_providers)
@@ -71,9 +92,10 @@ cli_command(__name__, 'provider operation show', 'azure.cli.command_modules.reso
 
 if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
     # Resource feature commands
-    cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
-    cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
-    cli_command(__name__, 'feature register', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.register', cf_features)
+    feature_table_transform = '{Name:name, RegistrationState:properties.state}'
+    cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features, table_transformer='[].' + feature_table_transform)
+    cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404, table_transformer=feature_table_transform)
+    cli_command(__name__, 'feature register', 'azure.cli.command_modules.resource.custom#register_feature', cf_features)
 
 # Tag commands
 cli_command(__name__, 'tag list', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.list', cf_tags)
@@ -89,7 +111,7 @@ def transform_deployments_list(result):
     return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
 
-cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait', exception_handler=handle_long_running_operation_exception)
+cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
 if supported_api_version(resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
     cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
@@ -121,8 +143,15 @@ cli_command(__name__, 'policy assignment show', 'azure.cli.command_modules.resou
 cli_command(__name__, 'policy definition create', 'azure.cli.command_modules.resource.custom#create_policy_definition')
 cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.delete', cf_policy_definitions)
 cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
-cli_command(__name__, 'policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions, exception_handler=empty_on_404)
+cli_command(__name__, 'policy definition show', 'azure.cli.command_modules.resource.custom#get_policy_definition', exception_handler=empty_on_404)
 cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
+
+if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
+    cli_command(__name__, 'policy set-definition create', 'azure.cli.command_modules.resource.custom#create_policy_setdefinition')
+    cli_command(__name__, 'policy set-definition delete', 'azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.delete', cf_policy_set_definitions)
+    cli_command(__name__, 'policy set-definition list', 'azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.list', cf_policy_set_definitions)
+    cli_command(__name__, 'policy set-definition show', 'azure.cli.command_modules.resource.custom#get_policy_setdefinition', exception_handler=empty_on_404)
+    cli_command(__name__, 'policy set-definition update', 'azure.cli.command_modules.resource.custom#update_policy_setdefinition')
 
 cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
 cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
@@ -137,12 +166,12 @@ cli_command(__name__, 'resource link list', 'azure.cli.command_modules.resource.
 cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resource.custom#update_resource_link')
 
 if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
-    cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_appliance')
-    cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#AppliancesOperations.delete', cf_resource_managedapplications)
-    cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
-    cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_appliances')
+    cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_application')
+    cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.delete', cf_resource_managedapplications)
+    cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_application', exception_handler=empty_on_404)
+    cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_applications')
 
-    cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
-    cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedappdefinitions)
-    cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
-    cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)
+    cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_applicationdefinition')
+    cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.delete', cf_resource_managedappdefinitions)
+    cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_applicationdefinition')
+    cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)

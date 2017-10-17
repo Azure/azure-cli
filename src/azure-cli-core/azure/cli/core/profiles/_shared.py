@@ -26,25 +26,17 @@ PROFILE_TYPE = object()
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
-    MGMT_STORAGE = ('azure.mgmt.storage',
-                    'StorageManagementClient')
-    MGMT_COMPUTE = ('azure.mgmt.compute.compute',
-                    'ComputeManagementClient')
-    MGMT_NETWORK = ('azure.mgmt.network',
-                    'NetworkManagementClient')
-    MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features',
-                              'FeatureClient')
-    MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links',
-                           'ManagementLinkClient')
-    MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks',
-                           'ManagementLockClient')
-    MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy',
-                            'PolicyClient')
-    MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources',
-                               'ResourceManagementClient')
-    MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions',
-                                   'SubscriptionClient')
+    MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
+    MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
+    MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
+    MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
+    MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
+    MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
+    MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
+    MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
+    MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
+    DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -61,18 +53,19 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-06-01',
-        ResourceType.MGMT_NETWORK: '2017-08-01',
+        ResourceType.MGMT_NETWORK: '2017-09-01',
         ResourceType.MGMT_COMPUTE: '2017-03-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-04-17'
+        ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
-        ResourceType.MGMT_STORAGE: '2015-06-15',
+        ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_COMPUTE: '2016-03-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',

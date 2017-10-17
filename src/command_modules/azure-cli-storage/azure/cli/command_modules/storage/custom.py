@@ -14,19 +14,18 @@ from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.command_modules.storage.util import guess_content_type
 from azure.cli.core.application import APPLICATION
+from .sdkutil import get_table_data_type
 
-Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
-                                                                    'Logging',
-                                                                    'Metrics',
-                                                                    'CorsRule',
-                                                                    'AccessPolicy',
-                                                                    'RetentionPolicy',
-                                                                    mod='models')
+Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \
+    get_sdk(ResourceType.DATA_STORAGE, 'Logging', 'Metrics', 'CorsRule', 'AccessPolicy', 'RetentionPolicy',
+            mod='common.models')
 
-BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, TableService, QueueService = \
+BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, QueueService = \
     get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService', 'blob.baseblobservice#BaseBlobService',
-            'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties', 'table#TableService',
+            'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties',
             'queue#QueueService')
+
+TableService = get_table_data_type('table', 'TableService')
 
 
 def _update_progress(current, total):
@@ -52,7 +51,7 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
         'AccessTier',
         'Identity',
         'Encryption',
-        'StorageNetworkAcls',
+        'VirtualNetworkRules',
         mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
@@ -70,8 +69,8 @@ def create_storage_account(resource_group_name, account_name, sku, location=None
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-        params.network_acls = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
-                                             virtual_network_rules=None)
+        params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
+                                                 virtual_network_rules=None)
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -98,7 +97,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         'AccessTier',
         'Identity',
         'Encryption',
-        'StorageNetworkAcls',
+        'VirtualNetworkRules',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -132,7 +131,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         params.identity = Identity()
 
     if NetworkRuleSet and (bypass or default_action):
-        acl = instance.network_acls
+        acl = instance.network_rule_set
         if not acl:
             if bypass and not default_action:
                 raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
@@ -143,16 +142,17 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
                 acl.bypass = bypass
             if default_action:
                 acl.default_action = default_action
-        params.network_acls = acl
+        params.network_rule_set = acl
 
     return params
 
 
 @transfer_doc(FileService.list_directories_and_files)
-def list_share_files(client, share_name, directory_name=None, timeout=None,
-                     exclude_dir=False):
-    generator = client.list_directories_and_files(share_name, directory_name,
-                                                  timeout=timeout)
+def list_share_files(client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
+    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
+        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
+    else:
+        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout)
     if exclude_dir:
         return list(f for f in generator if isinstance(f.properties, FileProperties))
 
@@ -440,7 +440,7 @@ def get_metrics(services='bfqt', interval='both', timeout=None):
 
 def list_network_rules(client, resource_group_name, storage_account_name):
     sa = client.get_properties(resource_group_name, storage_account_name)
-    rules = sa.network_acls
+    rules = sa.network_rule_set
     delattr(rules, 'bypass')
     delattr(rules, 'default_action')
     return rules
@@ -449,7 +449,7 @@ def list_network_rules(client, resource_group_name, storage_account_name):
 def add_network_rule(client, resource_group_name, storage_account_name, action='Allow', subnet=None, vnet_name=None,  # pylint: disable=unused-argument
                      ip_address=None):
     sa = client.get_properties(resource_group_name, storage_account_name)
-    rules = sa.network_acls
+    rules = sa.network_rule_set
     if subnet:
         from azure.cli.core.commands.arm import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -465,14 +465,14 @@ def add_network_rule(client, resource_group_name, storage_account_name, action='
         rules.ip_rules.append(IpRule(ip_address, action=action))
 
     StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
-    params = StorageAccountUpdateParameters(network_acls=rules)
+    params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, storage_account_name, params)
 
 
 def remove_network_rule(client, resource_group_name, storage_account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, storage_account_name)
-    rules = sa.network_acls
+    rules = sa.network_rule_set
     if subnet:
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
@@ -480,5 +480,5 @@ def remove_network_rule(client, resource_group_name, storage_account_name, ip_ad
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
 
     StorageAccountUpdateParameters = get_sdk(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', mod='models')
-    params = StorageAccountUpdateParameters(network_acls=rules)
+    params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, storage_account_name, params)

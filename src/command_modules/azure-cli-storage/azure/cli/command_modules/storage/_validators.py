@@ -11,12 +11,13 @@ from datetime import datetime, timedelta
 from azure.cli.core.util import CLIError
 from azure.cli.core._profile import CLOUD
 from azure.cli.core._config import az_config
-from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally, guess_content_type
+from .sdkutil import get_table_data_type
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -44,10 +45,14 @@ def _query_account_key(account_name):
 
 
 def _create_short_lived_blob_sas(account_name, account_key, container, blob):
-    SharedAccessSignature, BlobPermissions = \
-        get_sdk(ResourceType.DATA_STORAGE,
-                'sharedaccesssignature#SharedAccessSignature',
-                'blob.models#BlobPermissions')
+    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'BlobSharedAccessSignature',
+                                        mod='blob.sharedaccesssignature')
+    else:
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
+                                        mod='sharedaccesssignature')
+
+    BlobPermissions = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#BlobPermissions')
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
@@ -55,10 +60,13 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
-    SharedAccessSignature, BlobPermissions = \
-        get_sdk(ResourceType.DATA_STORAGE,
-                'sharedaccesssignature#SharedAccessSignature',
-                'blob.models#BlobPermissions')
+    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'FileSharedAccessSignature',
+                                        mod='file.sharedaccesssignature')
+    else:
+        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
+                                        mod='sharedaccesssignature')
+    BlobPermissions = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#BlobPermissions')
     # if dir is empty string change it to None
     directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -70,7 +78,7 @@ def _create_short_lived_file_sas(account_name, account_key, share, directory_nam
 # region PARAMETER VALIDATORS
 
 def validate_accept(namespace):
-    TablePayloadFormat = get_sdk(ResourceType.DATA_STORAGE, 'table#TablePayloadFormat')
+    TablePayloadFormat = get_table_data_type('table', 'TablePayloadFormat')
     if namespace.accept:
         formats = {
             'none': TablePayloadFormat.JSON_NO_METADATA,
@@ -521,7 +529,7 @@ def get_permission_validator(permission_class):
 
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    TablePermissions = get_sdk(ResourceType.DATA_STORAGE, 'table#TablePermissions')
+    TablePermissions = get_table_data_type('table', 'TablePermissions')
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
@@ -694,8 +702,24 @@ def process_blob_upload_batch_parameters(namespace):
         raise ValueError('incorrect usage: destination cannot be a blob url')
     else:
         namespace.destination_container_name = identifier.container
-        if not namespace.account_name:
+
+        if namespace.account_name:
+            if namespace.account_name != identifier.account_name:
+                raise ValueError(
+                    'The given storage account name is not consistent with the account name in the destination URI')
+        else:
             namespace.account_name = identifier.account_name
+
+        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
+            validate_client_parameters(namespace)
+
+        # it is possible the account name be overwritten by the connection string
+        if namespace.account_name != identifier.account_name:
+            raise ValueError(
+                'The given storage account name is not consistent with the account name in the destination URI')
+
+        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
+            raise ValueError('Missing storage account credential information.')
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
@@ -849,7 +873,7 @@ def ipv4_range_type(string):
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
-    ResourceTypes = get_sdk(ResourceType.DATA_STORAGE, 'models#ResourceTypes')
+    ResourceTypes = get_sdk(ResourceType.DATA_STORAGE, 'common.models#ResourceTypes')
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
@@ -858,7 +882,7 @@ def resource_type_type(string):
 def services_type(string):
     ''' Validates that services string contains only a combination
     of (b)lob, (q)ueue, (t)able, (f)ile '''
-    Services = get_sdk(ResourceType.DATA_STORAGE, 'models#Services')
+    Services = get_sdk(ResourceType.DATA_STORAGE, 'common.models#Services')
     if set(string) - set("bqtf"):
         raise ValueError
     return Services(_str=''.join(set(string)))

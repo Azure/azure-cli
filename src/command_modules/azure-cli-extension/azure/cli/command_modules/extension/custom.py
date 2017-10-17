@@ -2,25 +2,26 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import sys
 import os
 import tempfile
 import shutil
-import logging
 import zipfile
 import traceback
+from subprocess import check_output, STDOUT, CalledProcessError
 
 import requests
 from wheel.install import WHEEL_INFO_RE
 
-from six import StringIO
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
-
 import azure.cli.core.azlogging as azlogging
+
+from ._homebrew_patch import HomebrewPipPatch
 
 
 logger = azlogging.get_az_logger(__name__)
@@ -31,23 +32,18 @@ OUT_KEY_TYPE = 'extensionType'
 OUT_KEY_METADATA = 'metadata'
 
 
-def _run_pip(pip, pip_exec_args):
-    log_stream = StringIO()
-    log_handler = logging.StreamHandler(log_stream)
-    log_handler.setFormatter(logging.Formatter('%(name)s : %(message)s'))
-
-    pip.logger.handlers = []
-    pip.logger.addHandler(log_handler)
-
-    # Don't propagate to root logger as we catch the pip logs in our own log stream
-    pip.logger.propagate = False
-    logger.debug('Running pip: %s %s', pip, pip_exec_args)
-    status_code = pip.main(pip_exec_args)
-
-    log_output = log_stream.getvalue()
-    logger.debug(log_output)
-    log_stream.close()
-    return status_code
+def _run_pip(pip_exec_args):
+    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
+    logger.debug('Running: %s', cmd)
+    try:
+        log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
+        logger.debug(log_output)
+        returncode = 0
+    except CalledProcessError as e:
+        logger.debug(e.output)
+        logger.debug(e)
+        returncode = e.returncode
+    return returncode
 
 
 def _whl_download_from_url(url_parse_result, ext_file):
@@ -62,13 +58,13 @@ def _whl_download_from_url(url_parse_result, ext_file):
 
 
 def _validate_whl_cli_compat(azext_metadata):
-    is_compatible, cli_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_version, min_required, max_required)
+    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI version {} and this extension " \
-                          "requires ".format(cli_version)
+                          "You have CLI core version {} and this extension " \
+                          "requires ".format(cli_core_version)
         if min_required and max_required:
             min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
         elif min_required:
@@ -89,7 +85,6 @@ def _validate_whl_extension(ext_file):
 
 
 def _add_whl_ext(source):  # pylint: disable=too-many-statements
-    import pip
     url_parse_result = urlparse(source)
     is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
     logger.debug('Extension source is url? %s', is_url)
@@ -130,7 +125,8 @@ def _add_whl_ext(source):  # pylint: disable=too-many-statements
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
     logger.debug('Executing pip with args: %s', pip_args)
-    pip_status_code = _run_pip(pip, pip_args)
+    with HomebrewPipPatch():
+        pip_status_code = _run_pip(pip_args)
     if pip_status_code > 0:
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
         shutil.rmtree(extension_path, ignore_errors=True)

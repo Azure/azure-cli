@@ -7,6 +7,7 @@
 from collections import namedtuple
 import unittest
 import tempfile
+from datetime import date, time, datetime
 
 from azure.cli.core.util import \
     (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex,
@@ -52,6 +53,24 @@ class TestUtils(unittest.TestCase):
         the_input = {'a': mo}
         actual = todict(the_input)
         expected = {'a': {'a': 'x', 'b': 'y'}}
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_dict_with_date(self):
+        the_input = date(2017, 10, 13)
+        actual = todict(the_input)
+        expected = the_input.isoformat()
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_dict_with_datetime(self):
+        the_input = datetime(2017, 10, 13, 1, 23, 45)
+        actual = todict(the_input)
+        expected = the_input.isoformat()
+        self.assertEqual(actual, expected)
+
+    def test_application_todict_dict_with_time(self):
+        the_input = time(1, 23, 45)
+        actual = todict(the_input)
+        expected = the_input.isoformat()
         self.assertEqual(actual, expected)
 
     def test_load_json_from_file(self):
