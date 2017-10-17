@@ -45,12 +45,13 @@ DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService = get_sdk(R
                                                                                'AppendBlobService',
                                                                                mod='blob')
 
-BlobContentSettings, ContainerPermissions, BlobPermissions, PublicAccess = get_sdk(ResourceType.DATA_STORAGE,
-                                                                                   'ContentSettings',
-                                                                                   'ContainerPermissions',
-                                                                                   'BlobPermissions',
-                                                                                   'PublicAccess',
-                                                                                   mod='blob.models')
+BlobContentSettings, ContainerPermissions, BlobPermissions, PublicAccess, DeletePermanent = get_sdk(ResourceType.DATA_STORAGE,
+                                                                                                    'ContentSettings',
+                                                                                                    'ContainerPermissions',
+                                                                                                    'BlobPermissions',
+                                                                                                    'PublicAccess',
+                                                                                                    'DeleteType.Permanent',
+                                                                                                    mod='blob.models')
 
 FileContentSettings, SharePermissions, FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
                                                                  'ContentSettings',
@@ -392,13 +393,18 @@ register_cli_argument('storage blob incremental-copy start', 'container_name', c
 register_cli_argument('storage blob incremental-copy start', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob incremental-copy start', 'source_lease_id', arg_group='Copy Source')
 
+register_cli_argument('storage blob service-properties delete-policy update', 'enable', **enum_choice_list(['true', 'false']), help='Enables/disables soft-delete.')
+register_cli_argument('storage blob service-properties delete-policy update', 'days_retained', type=int, help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
+register_cli_argument('storage blob service-properties delete-policy update', 'versions_retained', type=int, help='Number of older version snapshots to be retained. Must be in range [1,10].')
+
 register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
+register_cli_argument('storage blob delete', 'delete_type', options_list=('--permanent'), action='store_const', const=DeletePermanent)
 
 register_cli_argument('storage blob exists', 'blob_name', required=True)
 
 with CommandContext('storage blob list') as c:
     c.reg_arg('include',
-              help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.',
+              help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.',
               validator=validate_included_datasets)
     c.reg_arg('num_results', type=int)
     c.reg_arg('marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745

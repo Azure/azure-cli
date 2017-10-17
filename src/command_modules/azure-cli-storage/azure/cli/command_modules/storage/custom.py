@@ -16,14 +16,16 @@ from azure.cli.command_modules.storage.util import guess_content_type
 from azure.cli.core.application import APPLICATION
 from .sdkutil import get_table_data_type
 
-Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \
+Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy, DeleteRetentionPolicy = \
     get_sdk(ResourceType.DATA_STORAGE, 'Logging', 'Metrics', 'CorsRule', 'AccessPolicy', 'RetentionPolicy',
-            mod='common.models')
+            'DeleteRetentionPolicy', mod='common.models')
 
 BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, QueueService = \
     get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService', 'blob.baseblobservice#BaseBlobService',
             'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties',
             'queue#QueueService')
+
+DeleteType, IncludeDeleted = get_sdk(ResourceType.DATA_STORAGE, 'DeleteType.Permanent', 'Include.DELETED', mod='blob.models')
 
 TableService = get_table_data_type('table', 'TableService')
 
@@ -298,6 +300,23 @@ def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', ti
                                                  premium_page_blob_tier=tier, timeout=timeout)
     else:
         raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def set_delete_policy(client, enable=None, days_retained=None, versions_retained=None):
+    policy = client.get_blob_service_properties().delete_retention_policy
+
+    if enable is not None:
+        policy.enabled = enable == 'true'
+    if days_retained is not None:
+        policy.days = days_retained
+    if versions_retained is not None:
+        policy.retained_versions_per_blob = versions_retained
+
+    if policy.enabled and not all((policy.retained_versions_per_blob, policy.days)):
+        raise CLIError("must specify days-retained and versions-retained")
+
+    client.set_blob_service_properties(delete_retention_policy=policy)
+    return client.get_blob_service_properties().delete_retention_policy
 
 
 def _get_service_container_type(client):
