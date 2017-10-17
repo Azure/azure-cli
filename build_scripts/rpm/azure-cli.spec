@@ -9,8 +9,7 @@
 %define name           azure-cli
 %define release        1%{?dist}
 %define version        %{getenv:CLI_VERSION}
-%define source_sha256  %{getenv:CLI_DOWNLOAD_SHA256}
-%define source_url     https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_%{version}.tar.gz
+%define repo_path      %{getenv:REPO_PATH}
 %define venv_url       https://pypi.python.org/packages/source/v/virtualenv/virtualenv-15.0.0.tar.gz
 %define venv_sha256    70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19
 %define cli_lib_dir    %{_libdir}/az
@@ -20,7 +19,6 @@ License:        MIT
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
-Source0:        %{source_url}
 Url:            https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 BuildArch:      x86_64
 Requires:       python
@@ -40,11 +38,6 @@ A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
 tmp_venv_archive=$(mktemp)
 tmp_source_archive=$(mktemp)
 
-# Download, Extract Source
-wget %{source_url} -qO $tmp_source_archive
-echo "%{source_sha256}  $tmp_source_archive" | sha256sum -c -
-tar -xvzf $tmp_source_archive -C %{_builddir}
-
 # Download, Extract Virtualenv
 wget %{venv_url} -qO $tmp_venv_archive
 echo "%{venv_sha256}  $tmp_venv_archive" | sha256sum -c -
@@ -55,13 +48,16 @@ tar -xvzf $tmp_venv_archive -C %{_builddir}
 python %{_builddir}/virtualenv-15.0.0/virtualenv.py --python python %{buildroot}%{cli_lib_dir}
 
 # Build the wheels from the source
-source_dir=%{_builddir}/azure-cli_packaged_%{version}
+source_dir=%{repo_path}
 dist_dir=$(mktemp -d)
 for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; \
 do cd $d; %{buildroot}%{cli_lib_dir}/bin/python setup.py bdist_wheel -d $dist_dir; cd -; done;
 
+[ -d $source_dir/privates ] && cp $source_dir/privates/*.whl $dist_dir
+
 # Install the CLI
-%{buildroot}%{cli_lib_dir}/bin/pip install azure-cli --find-links $dist_dir
+all_modules=`find $dist_dir -name "*.whl"`
+%{buildroot}%{cli_lib_dir}/bin/pip install $all_modules
 %{buildroot}%{cli_lib_dir}/bin/pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
 # Fix up %{buildroot} appearing in some files...

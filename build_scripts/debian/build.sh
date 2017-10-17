@@ -11,19 +11,16 @@ set -ex
 
 if [ -z "$1" ]
   then
-    echo "First argument should be path to executable debian directory creator."
+    echo "Argument should be path to local repo."
     exit 1
 fi
 
-local_repo=$2 
-if [ -z "$local_repo" ]
-  then
-    : "${CLI_DOWNLOAD_SHA256:?CLI_DOWNLOAD_SHA256 environment variable not set.}"
-fi
+local_repo=$1
 
 sudo apt-get update
 
-debian_directory_creator=$1
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+debian_directory_creator=$script_dir/dir_creator.sh
 
 # Install dependencies for the build
 sudo apt-get install -y libssl-dev libffi-dev python3-dev debhelper
@@ -31,30 +28,15 @@ sudo apt-get install -y libssl-dev libffi-dev python3-dev debhelper
 tmp_pkg_dir=$(mktemp -d)
 working_dir=$(mktemp -d)
 cd $working_dir
-if [ -z "$local_repo" ]
+source_dir=$local_repo
+deb_file=$local_repo/../azure-cli_${CLI_VERSION}-1_all.deb
+az_completion_file=$source_dir/az.completion
+# clean up old build output
+if [ -d "$source_dir/debian" ]
   then
-    source_archive=$working_dir/azure-cli-${CLI_VERSION}.tar.gz
-    source_dir=$working_dir/azure-cli-${CLI_VERSION}
-    deb_file=$working_dir/azure-cli_${CLI_VERSION}-1_all.deb
-    az_completion_file=$source_dir/az.completion
-    wget https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_${CLI_VERSION}.tar.gz -qO $source_archive
-    echo "$CLI_DOWNLOAD_SHA256  $source_archive" | sha256sum -c -
-    mkdir $source_dir
-    # Extract archive
-    archive_extract_dir=$(mktemp -d)
-    tar -xvzf $source_archive -C $archive_extract_dir
-    cp -r $archive_extract_dir/azure-cli_packaged_${CLI_VERSION}/* $source_dir
-  else
-    source_dir=$local_repo
-    deb_file=$local_repo/../azure-cli_${CLI_VERSION}-1_all.deb
-    az_completion_file=$source_dir/packaged_releases/az.completion
-    # clean up old build output
-    if [ -d "$source_dir/debian" ]
-      then
-        rm -rf $source_dir/debian
-    fi
-    cp $local_repo/privates/*.whl $tmp_pkg_dir
+    rm -rf $source_dir/debian
 fi
+[ -d $local_repo/privates ] && cp $local_repo/privates/*.whl $tmp_pkg_dir
 
 # Build Python from source and include
 python_dir=$(mktemp -d)
@@ -74,7 +56,8 @@ make install
 # It does not affect the built .deb file though.
 $source_dir/python_env/bin/pip3 install wheel
 for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; do cd $d; $source_dir/python_env/bin/python3 setup.py bdist_wheel -d $tmp_pkg_dir; cd -; done;
-$source_dir/python_env/bin/pip3 install azure-cli --find-links $tmp_pkg_dir
+all_modules=`find $tmp_pkg_dir -name "*.whl"`
+$source_dir/python_env/bin/pip3 install $all_modules
 $source_dir/python_env/bin/pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 # WORKAROUND: Newer versions of cryptography do not work on Bash on Windows / WSL - see https://github.com/Azure/azure-cli/issues/4154
 # If you *have* to use a newer version of cryptography in the future, verify that it works on WSL also.

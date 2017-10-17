@@ -26,6 +26,12 @@ def exec_command(command):
 print('Running dev setup...')
 print('Root directory \'{}\'\n'.format(root_dir))
 
+# install private whls if there are any
+privates_dir = os.path.join(root_dir, 'privates')
+if os.path.isdir(privates_dir) and os.listdir(privates_dir):
+    whl_list = ' '.join([os.path.join(privates_dir, f) for f in os.listdir(privates_dir)])
+    exec_command('pip install {}'.format(whl_list))
+
 # install general requirements
 exec_command('pip install -r requirements.txt')
 
