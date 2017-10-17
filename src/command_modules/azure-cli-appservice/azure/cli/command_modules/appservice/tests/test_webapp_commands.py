@@ -832,5 +832,20 @@ class WebappUpdateTest(ScenarioTest):
                      JMESPathCheckV2('clientAffinityEnabled', False)])
 
 
+class WebappZipDeployScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_zipDeploy')
+    def test_deploy_zip(self, resource_group):
+        webapp_name = self.create_random_name('webapp-zipDeploy-test', 40)
+        plan_name = self.create_random_name('webapp-zipDeploy-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'test.zip')
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
+            JMESPathCheckV2('status', 4),
+            JMESPathCheckV2('deployer', 'Zip-Push'),
+            JMESPathCheckV2('message', 'Created via zip push deployment'),
+            JMESPathCheckV2('complete', True)])
+
+
 if __name__ == '__main__':
     unittest.main()
