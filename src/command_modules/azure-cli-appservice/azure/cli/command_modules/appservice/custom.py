@@ -598,21 +598,42 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     return result
 
 
-def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,  # pylint: disable=too-many-locals
-                          git_token=None, manual_integration=None, slot=None, cd_provider=None,
-                          cd_app_type=None, cd_account=None, cd_account_must_exist=None):
+def config_source_control(resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
+                          manual_integration=None, git_token=None, slot=None, cd_app_type=None,
+                          app_working_dir=None, nodejs_task_runner=None, python_framework=None,
+                          python_version=None, cd_account_create=None, cd_project_url=None, test=None,
+                          slot_swap=None, private_repo_username=None, private_repo_password=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
-    if cd_provider == 'vsts':
-        create_account = not cd_account_must_exist
+    if cd_project_url:
+        # Add default values
+        cd_app_type = 'AspNet' if cd_app_type is None else cd_app_type
+        python_framework = 'Django' if python_framework is None else python_framework
+        python_version = 'Python 3.5.3 x86' if python_version is None else python_version
+
+        webapp_list = None if test is None else list_webapp(resource_group_name)
         vsts_provider = VstsContinuousDeliveryProvider()
+        cd_app_type_details = {
+            'cd_app_type': cd_app_type,
+            'app_working_dir': app_working_dir,
+            'nodejs_task_runner': nodejs_task_runner,
+            'python_framework': python_framework,
+            'python_version': python_version
+        }
         status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
-                                                         branch, git_token, slot, cd_app_type,
-                                                         cd_account, create_account, location)
+                                                         branch, git_token, slot_swap, cd_app_type_details,
+                                                         cd_project_url, cd_account_create, location, test,
+                                                         private_repo_username, private_repo_password, webapp_list)
         logger.warning(status.status_message)
         return status
     else:
+        non_vsts_params = [cd_app_type, app_working_dir, nodejs_task_runner, python_framework,
+                           python_version, cd_account_create, test, slot_swap]
+        if any(non_vsts_params):
+            raise CLIError('Following parameters are of no use when cd_project_url is None: ' +
+                           'cd_app_type, app_working_dir, nodejs_task_runner, python_framework,' +
+                           'python_version, cd_account_create, test, slot_swap')
         from azure.mgmt.web.models import SiteSourceControl, SourceControl
         if git_token:
             sc = SourceControl(location, source_control_name='GitHub', token=git_token)
