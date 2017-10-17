@@ -76,10 +76,9 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](match, site_config)
-
-    # Be consistent with portal: any windows webapp should have this even it doesn't use node as the stack
-    if not is_linux:
-        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+        # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
+        if not match['displayName'].startswith('node'):
+            site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
@@ -815,10 +814,8 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
                                      keep_at_least_one_backup, retention_period_in_days)
     backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
                                    storage_account_url=storage_account_url, databases=db_setting)
-    if slot:
-        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name, backup_request, slot)
-
-    return client.web_apps.update_backup_configuration(resource_group_name, webapp_name, backup_request)
+    return _generic_site_operation(resource_group_name, webapp_name, 'update_backup_configuration',
+                                   slot, backup_request)
 
 
 def restore_backup(resource_group_name, webapp_name, storage_account_url, backup_name,
@@ -1157,7 +1154,7 @@ def get_streaming_log(resource_group_name, name, provider=None, slot=None):
 
     client = web_client_factory()
     user, password = _get_site_credential(client, resource_group_name, name)
-    t = threading.Thread(target=_stream_trace, args=(streaming_url, user, password))
+    t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
     t.daemon = True
     t.start()
 
@@ -1168,12 +1165,9 @@ def get_streaming_log(resource_group_name, name, provider=None, slot=None):
 def download_historical_logs(resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    import requests
-    r = requests.get(url, stream=True)
-    with open(log_file, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
+    client = web_client_factory()
+    user_name, password = _get_site_credential(client, resource_group_name, name)
+    _get_log(url, user_name, password, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
 
@@ -1183,7 +1177,7 @@ def _get_site_credential(client, resource_group_name, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 
-def _stream_trace(streaming_url, user_name, password):
+def _get_log(url, user_name, password, log_file=None):
     import sys
     import certifi
     import urllib3
@@ -1198,16 +1192,27 @@ def _stream_trace(streaming_url, user_name, password):
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',
-        streaming_url,
+        url,
         headers=headers,
         preload_content=False
     )
-    for chunk in r.stream():
-        if chunk:
-            # Extra encode() and decode for stdout which does not surpport 'utf-8'
-            print(chunk.decode(encoding='utf-8', errors='replace')
-                  .encode(std_encoding, errors='replace')
-                  .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
+    if r.status != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            url, r.status, r.reason))
+    if log_file:  # download logs
+        with open(log_file, 'wb') as f:
+            while True:
+                data = r.read(1024)
+                if not data:
+                    break
+                f.write(data)
+    else:  # streaming
+        for chunk in r.stream():
+            if chunk:
+                # Extra encode() and decode for stdout which does not surpport 'utf-8'
+                print(chunk.decode(encoding='utf-8', errors='replace')
+                      .encode(std_encoding, errors='replace')
+                      .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
     r.release_conn()
 
 

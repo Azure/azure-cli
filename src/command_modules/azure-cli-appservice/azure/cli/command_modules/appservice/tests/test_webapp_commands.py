@@ -5,8 +5,10 @@
 import unittest
 import os
 import time
+import tempfile
+import requests
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
                                              JMESPathCheck, NoneCheck)
@@ -107,9 +109,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
-        import time
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-        import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
@@ -121,7 +121,6 @@ class WebappQuickCreateTest(ScenarioTest):
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
-        import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
@@ -137,9 +136,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.10"'.format(resource_group, webapp_name, plan))
-        import time
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-        import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Hello world' in str(r.content))
@@ -153,6 +150,46 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('webapp create -g {} -n webInOtherRG --plan {}'.format(resource_group2, plan_id), checks=[
             JMESPathCheckV2('name', 'webInOtherRG')
         ])
+
+
+# Test Framework is not able to handle binary file format, hence, only run live
+class AppServiceLogTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    def test_download_win_web_log(self, resource_group):
+        import zipfile
+        from pathlib import Path
+        webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
+        plan = self.create_random_name(prefix='win-log', length=24)
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
+        time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+
+        # sanity check the traces
+        _, log_file = tempfile.mkstemp()
+        log_dir = log_file + '-dir'
+        self.cmd('webapp log download -g {} -n {} --log-file "{}"'.format(resource_group, webapp_name, log_file))
+        zip_ref = zipfile.ZipFile(log_file, 'r')
+        zip_ref.extractall(log_dir)
+        self.assertTrue(os.path.isdir(os.path.join(log_dir, 'LogFiles', 'kudu', 'trace')))
+
+    @ResourceGroupPreparer()
+    def test_download_linux_web_log(self, resource_group):
+        import zipfile
+        from pathlib import Path
+        webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
+        plan = self.create_random_name(prefix='linux-log', length=24)
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        # load the site to produce a few traces
+        requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+
+        # sanity check the traces
+        _, log_file = tempfile.mkstemp()
+        log_dir = log_file + '-dir'
+        self.cmd('webapp log download -g {} -n {} --log-file "{}"'.format(resource_group, webapp_name, log_file))
+        zip_ref = zipfile.ZipFile(log_file, 'r')
+        zip_ref.extractall(log_dir)
+        self.assertTrue(os.path.isdir(os.path.join(log_dir, 'LogFiles', 'kudu', 'trace')))
 
 
 class AppServicePlanSceanrioTest(ScenarioTest):
@@ -682,7 +719,6 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[-1].databases[0].name', database_name)
         ]
         self.cmd('webapp config backup list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=list_checks)
-        import time
         time.sleep(900)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
         self.cmd('webapp config backup restore -g {} --webapp-name {} --container-url "{}" --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))

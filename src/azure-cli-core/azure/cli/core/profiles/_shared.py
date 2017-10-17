@@ -65,7 +65,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
-        ResourceType.MGMT_STORAGE: '2015-06-15',
+        ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_COMPUTE: '2016-03-30',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',

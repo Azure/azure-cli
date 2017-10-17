@@ -687,11 +687,9 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
-                        public_ip_per_vm, vm_domain_name, dns_servers, nsg,
-                        admin_username, authentication_type,
-                        storage_profile, os_disk_name,
-                        os_caching, data_caching, storage_sku, data_disk_sizes_gb,
-                        image_data_disks, os_type,
+                        public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
+                        admin_username, authentication_type, storage_profile, os_disk_name,
+                        os_caching, data_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
@@ -807,8 +805,12 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
     }
 
-    if dns_servers:
-        nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+        if dns_servers:
+            nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
+
+        if accelerated_networking:
+            nic_config['properties']['enableAcceleratedNetworking'] = True
 
     if nsg:
         nic_config['properties']['networkSecurityGroup'] = {'id': nsg}

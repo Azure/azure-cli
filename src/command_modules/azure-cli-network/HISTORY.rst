@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.17
+++++++
+* minor fixes
+
 2.0.16 (2017-10-09)
 +++++++++++++++++++
 * `application-gateway address-pool create`: `--server` argument is not optional to allow creation of empty address pools.

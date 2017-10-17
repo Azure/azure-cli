@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    cli_command(__name__, 'taskhelp deploy-arm-template',
-                'azure.cli.command_modules.taskhelp.custom#deploy_arm_template')
+def get_resource_group_location(name):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+
+    # pylint: disable=no-member
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups.get(name).location

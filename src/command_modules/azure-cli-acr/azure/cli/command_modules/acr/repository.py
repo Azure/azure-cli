@@ -12,7 +12,7 @@ from azure.cli.core.prompting import NoTTYException, prompt_y_n
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 
-from ._utils import managed_registry_validation
+from ._utils import validate_managed_registry
 from ._docker_utils import get_access_credentials
 
 
@@ -248,7 +248,7 @@ def acr_repository_delete(registry_name,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    _, resource_group_name = managed_registry_validation(
+    _, resource_group_name = validate_managed_registry(
         registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
 
     login_server, username, password = get_access_credentials(

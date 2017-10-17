@@ -92,8 +92,9 @@ cli_command(__name__, 'provider operation show', 'azure.cli.command_modules.reso
 
 if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
     # Resource feature commands
-    cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
-    cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
+    feature_table_transform = '{Name:name, RegistrationState:properties.state}'
+    cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features, table_transformer='[].' + feature_table_transform)
+    cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404, table_transformer=feature_table_transform)
     cli_command(__name__, 'feature register', 'azure.cli.command_modules.resource.custom#register_feature', cf_features)
 
 # Tag commands
