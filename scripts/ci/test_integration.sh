@@ -6,10 +6,7 @@ set -e
 
 ls -la $share_folder/build
 
-ALL_MODULES=""
-for f in $share_folder/build/*
-do ALL_MODULES="$ALL_MODULES $f"
-done
+ALL_MODULES=find $share_folder/build/ -name "*.whl"
 
 pip install -e ./tools
 pip install $ALL_MODULES
