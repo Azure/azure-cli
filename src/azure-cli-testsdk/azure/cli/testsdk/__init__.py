@@ -19,4 +19,4 @@ __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'Storage
            'live_only', 'record_only', 'StringCheck', 'StringContainCheck', 'get_sha1_hash', 'KeyVaultPreparer',
            'JMESPathCheckGreaterThan', 'api_version_constraint', 'get_active_api_profile', 'create_random_name']
 
-__version__ = '0.1.0+dev'
+__version__ = '0.1.0'
