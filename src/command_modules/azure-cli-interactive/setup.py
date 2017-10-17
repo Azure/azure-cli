@@ -14,7 +14,7 @@ except ImportError:
     cmdclass = {}
 
 # Version is also defined in azclishell.__init__.py.
-VERSION = "0.3.10+dev"
+VERSION = "0.3.11"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [

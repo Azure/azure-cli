@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+0.0.11
+++++++
 * Add action-group commands
 
 0.0.10 (2017-09-22)
