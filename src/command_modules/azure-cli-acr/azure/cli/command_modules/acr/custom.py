@@ -229,6 +229,7 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
+    # pylint: disable=no-name-in-module
     from subprocess import PIPE, Popen, SubprocessError
     docker_not_installed = "Please verify if docker is installed."
     docker_not_available = "Please verify if docker daemon is running properly."

@@ -60,7 +60,7 @@ _DEFAULT_SERVER_VERSION = "12.0"
 #                sql db                       #
 ###############################################
 
-
+# pylint: disable=too-few-public-methods
 class ClientType(Enum):
     ado_net = 'ado.net'
     sqlcmd = 'sqlcmd'

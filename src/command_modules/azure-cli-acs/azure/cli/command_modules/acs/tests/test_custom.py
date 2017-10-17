@@ -86,31 +86,31 @@ class AcsCustomCommandTest(unittest.TestCase):
 
             create_role_assignment.assert_called_with(role, sp)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
-
-    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
-    def test_browse_k8s(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.kubernetes)
-
-        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
-                        return_value=acs_info) as get_acs_info:
-            with mock.patch(
-                    'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-                _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-                get_acs_info.assert_called_with('name', 'resource-group')
-                k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
-
-    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
-    def test_browse_dcos(self, get_subscription_id):
-        acs_info = ContainerService("location", {}, {}, {})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            ContainerServiceOrchestratorTypes.dcos)
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
-            _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-            dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
+# flake8: noqa
+    # @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    # def test_browse_k8s(self, get_subscription_id):
+    #     acs_info = ContainerService("location", {}, {}, {})
+    #     acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
+    #         ContainerServiceOrchestratorTypes.kubernetes)
+    #
+    #     with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
+    #                     return_value=acs_info) as get_acs_info:
+    #         with mock.patch(
+    #                 'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
+    #             _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
+    #             get_acs_info.assert_called_with('name', 'resource-group')
+    #             k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
+    #
+    # @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    # def test_browse_dcos(self, get_subscription_id):
+    #     acs_info = ContainerService("location", {}, {}, {})
+    #     acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
+    #         ContainerServiceOrchestratorTypes.dcos)
+    #
+    #     with mock.patch(
+    #             'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
+    #         _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
+    #         dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials_non_existent(self):
         self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent')
