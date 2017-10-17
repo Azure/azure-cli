@@ -108,6 +108,7 @@ cli_storage_data_plane_command('storage container policy update', custom_path + 
 # blob commands
 cli_storage_data_plane_command('storage blob list', block_blob_path + 'list_blobs', factory, transform=transform_storage_list_output, table_transformer=transform_blob_output)
 cli_storage_data_plane_command('storage blob delete', block_blob_path + 'delete_blob', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
+cli_storage_data_plane_command('storage blob undelete', block_blob_path + 'undelete_blob', factory, transform=create_boolean_result_output_transformer('undeleted'))
 cli_storage_data_plane_command('storage blob generate-sas', block_blob_path + 'generate_blob_shared_access_signature', factory)
 cli_storage_data_plane_command('storage blob url', block_blob_path + 'make_blob_url', factory, transform=transform_url)
 cli_storage_data_plane_command('storage blob snapshot', block_blob_path + 'snapshot_blob', factory)
