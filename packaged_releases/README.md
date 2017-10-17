@@ -74,16 +74,3 @@ Follow the instructions in the `debian`, `docker`, `windows`, `rpm` and `homebre
 ---------------------
 
 Modify the packaged release history with release notes on this release and create a PR for this change.
-
-
-------------
-
-
-Info on Patches
----------------
-The `patch_*` files in the `patches` subdirectory are useful when creating the patches in the Homebrew formula.
-
-Currently, two patches are applied:  
-1. The packaged installs do not support `az component` so we patch this module with appropriate messages.  
-2. The CLI has a feature that checks PyPI for a command module if it's not installed and the user attempts to run it. This patch disables this as components cannot be installed in packaged installs.  
-

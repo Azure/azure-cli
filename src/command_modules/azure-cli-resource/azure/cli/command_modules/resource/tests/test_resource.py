@@ -67,63 +67,48 @@ class ResourceGroupNoWaitScenarioTest(VCRTestBase):
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
 
 
-class ResourceScenarioTest(ResourceGroupVCRTestBase):
-    def test_resource_scenario(self):
-        self.execute()
+class ResourceScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_rsrc_scenario', location='southcentralus')
+    def test_resource_scenario(self, resource_group):
+        vnet_name = self.create_random_name('cli-test-vnet', 30)
+        subnet_name = self.create_random_name('cli-test-subnet', 30)
+        vnet_type = 'Microsoft.Network/virtualNetworks'
 
-    def __init__(self, test_method):
-        super(ResourceScenarioTest, self).__init__(__file__, test_method,
-                                                   resource_group='cli_test_resource_scenario')
-        self.vnet_name = 'cli-test-vnet1'
-        self.subnet_name = 'cli-test-subnet1'
-
-    def set_up(self):
-        super(ResourceScenarioTest, self).set_up()
-
-    def body(self):
-        s = self
-        rg = self.resource_group
-        vnet_count = s.cmd(
-            "resource list --query \"length([?name=='{}'])\"".format(self.vnet_name)) or 0
         self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(
-            self.resource_group, self.vnet_name, self.subnet_name))
-        vnet_count += 1
+            resource_group, vnet_name, subnet_name))
 
-        s.cmd('resource list',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
-        s.cmd('resource list -l centralus',
-              checks=JMESPathCheck("length([?location == 'centralus']) == length(@)", True))
-        s.cmd('resource list --resource-type Microsoft.Network/virtualNetworks',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
-        s.cmd('resource list --name {}'.format(self.vnet_name),
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
-        s.cmd('resource list --tag cli-test',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
-        s.cmd('resource list --tag cli-test=test',
-              checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
+        self.cmd('resource list', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
+        self.cmd('resource list -l southcentralus',
+                 checks=JCheck("length([?location == 'southcentralus']) == length(@)", True))
+        self.cmd('resource list --resource-type {}'.format(vnet_type),
+                 checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
+        self.cmd('resource list --name {}'.format(vnet_name),
+                 checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
+        self.cmd('resource list --tag cli-test', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
+        self.cmd('resource list --tag cli-test=test', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
 
         # check for simple resource with tag
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(
-            self.vnet_name, rg), checks=[
-            JMESPathCheck('name', self.vnet_name),
-            JMESPathCheck('location', 'westus'),
-            JMESPathCheck('resourceGroup', rg),
-            JMESPathCheck('tags', {'cli-test': 'test'})
-        ])
+        self.cmd('resource show -n {} -g {} --resource-type {}'.format(vnet_name, resource_group, vnet_type), checks=[
+            JCheck('name', vnet_name),
+            JCheck('location', 'southcentralus'),
+            JCheck('resourceGroup', resource_group),
+            JCheck('tags', {'cli-test': 'test'})])
+
         # check for child resource
-        s.cmd(
+        self.cmd(
             'resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{}'
-            ' --resource-type subnets'.format(
-                self.subnet_name, self.resource_group, self.vnet_name), checks=[
-                JMESPathCheck('name', self.subnet_name),
-                JMESPathCheck('resourceGroup', rg),
-            ])
+            ' --resource-type subnets'.format(subnet_name, resource_group, vnet_name), checks=[
+                JCheck('name', subnet_name),
+                JCheck('resourceGroup', resource_group)])
 
         # clear tag and verify
-        s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'
-              .format(self.vnet_name, rg))
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'
-              .format(self.vnet_name, rg), checks=JMESPathCheck('tags', {}))
+        self.cmd('resource tag -n {} -g {} --resource-type {} --tags'.format(vnet_name, resource_group, vnet_type))
+        self.cmd('resource show -n {} -g {} --resource-type {}'
+                 .format(vnet_name, resource_group, vnet_type), checks=JCheck('tags', {}))
+
+        # delete resource and verify
+        self.cmd('resource delete -n {} -g {} --resource-type {}'.format(vnet_name, resource_group, vnet_type))
+        self.cmd('resource list', checks=JCheck("length([?name=='{}'])".format(vnet_name), 0))
 
 
 class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
@@ -536,6 +521,17 @@ class PolicyScenarioTest(ScenarioTest):
                     JCheck('sku.tier', 'Standard'),
                     JCheck('notScopes[0]', notscope)
                  ])
+
+        # create a policy assignment using a built in policy definition name
+        policy_assignment_name2 = self.create_random_name('azurecli-test-policy-assignment2', 40)
+        built_in_policy = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
+        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
+                 built_in_policy['name'], policy_assignment_name2, policy_assignment_display_name, resource_group),
+                 checks=[
+                    JCheck('name', policy_assignment_name2),
+                    JCheck('displayName', policy_assignment_display_name)
+                 ])
+        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name2, resource_group))
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath

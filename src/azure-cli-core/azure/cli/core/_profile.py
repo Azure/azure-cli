@@ -186,11 +186,13 @@ class Profile(object):
         for t in tokens[1:]:
             decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
         final_tokens = []
+        # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter
+        # as shell should update us with new ones every 10~15 minutes
         for t in decoded_tokens:
             final_tokens.append({
                 '_clientId': _CLIENT_ID,
-                'expiresIn': '3600',
-                'expiresOn': str(datetime.utcnow() + timedelta(seconds=3600 * 24)),
+                'expiresIn': '2700',
+                'expiresOn': str(datetime.now() + timedelta(seconds=2700)),
                 'userId': t['unique_name'].split('#')[-1],
                 '_authority': CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
                 'resource': t['aud'],

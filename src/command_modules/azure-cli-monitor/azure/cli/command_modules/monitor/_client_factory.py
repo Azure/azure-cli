@@ -31,6 +31,10 @@ def cf_log_profiles(kwargs):
     return cf_monitor(kwargs).log_profiles
 
 
+def cf_action_groups(kwargs):
+    return cf_monitor(kwargs).action_groups
+
+
 # DATA CLIENT FACTORIES
 def cf_monitor_data(_):
     from azure.monitor import MonitorClient

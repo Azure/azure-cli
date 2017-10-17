@@ -3,6 +3,11 @@
 Release History
 ===============
 
+3.1.6
++++++
+* minor fixes
+
+
 3.1.5 (2017-10-09)
 ++++++++++++++++++
 * Updated to Batch SDK 4.0.0.

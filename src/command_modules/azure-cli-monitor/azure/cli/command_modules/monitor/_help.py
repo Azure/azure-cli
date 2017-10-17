@@ -207,3 +207,57 @@ helps['monitor activity-log'] = """
     type: group
     short-summary: Manage activity logs.
 """
+
+helps['monitor action-group'] = """
+    type: group
+    short-summary: Manage action groups
+"""
+
+helps['monitor action-group list'] = """
+    type: command
+    short-summary: List action groups under a resource group or the current subscription
+    parameters:
+        - name: --resource-group -g
+          type: string
+          short-summary: Name of the resource group under which the action groups are being listed. If it is omitted,
+                         all the action groups under the current subscription are listed.
+"""
+
+helps['monitor action-group show'] = """
+    type: command
+    short-summary: Show the details of an action group
+"""
+
+helps['monitor action-group create'] = """
+    type: command
+    short-summary: Create a new action group
+    parameters:
+        - name: --action -a
+          short-summary: Add receivers to the action group during the creation
+          long-summary: |
+            Usage:   --action TYPE NAME [ARG ...]
+            Email:   --action email bob bob@contoso.com
+            SMS:     --action sms charli 1 5551234567
+            Webhook: --action webhook alert_hook https://www.contoso.com/alert
+            Multiple actions can be specified by using more than one `--action` argument.
+        - name: --short-name
+          short-summary: The short name of the action group
+"""
+
+helps['monitor action-group update'] = """
+    type: command
+    short-summary: Update an action group
+    parameters:
+        - name: --short-name
+          short-summary: Update the group short name of the action group
+        - name: --add-action -a
+          short-summary: Add receivers to the action group
+          long-summary: |
+            Usage:   --add-action TYPE NAME [ARG ...]
+            Email:   --add-action email bob bob@contoso.com
+            SMS:     --add-action sms charli 1 5551234567
+            Webhook: --add-action https://www.contoso.com/alert
+            Multiple actions can be specified by using more than one `--add-action` argument.
+        - name: --remove-action -r
+          short-summary: Remove receivers from the action group. Accept space separated list of receiver names.
+"""
