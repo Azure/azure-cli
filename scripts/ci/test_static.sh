@@ -4,6 +4,7 @@ set -e
 
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
+pip install ./privates/azure_mgmt_containerservice-2.0.0-py2.py3-none-any.whl
 pip install pylint flake8
 pip install azure-cli-fulltest -f $share_folder/build
 
