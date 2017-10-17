@@ -22,17 +22,17 @@ platform=`uname`
 
 for each in $(find src -name __init__.py); do
     if [ "$platform" == "Darwin" ]; then
-        sed -i "" "s/^__version__ = [\"']\(.*\)+dev[\"']/__version__ = \"\1+dev.$version\"/" $each
+        sed -i "" "s/^__version__ = [\"']\(.*\)[\"']/__version__ = \"\1.dev$version\"/" $each
     else
-        sed -i "s/^__version__ = [\"']\(.*\)+dev[\"']/__version__ = \"\1+dev.$version\"/" $each
+        sed -i "s/^__version__ = [\"']\(.*\)[\"']/__version__ = \"\1.dev$version\"/" $each
     fi
 done
 
 for each in $(find src -name setup.py); do
     if [ "$platform" == "Darwin" ]; then
-        sed -i "" "s/^VERSION = [\"']\(.*\)+dev[\"']/VERSION = \"\1+dev.$version\"/" $each
+        sed -i "" "s/^VERSION = [\"']\(.*\)[\"']/VERSION = \"\1.dev$version\"/" $each
     else
-        sed -i "s/^VERSION = [\"']\(.*\)+dev[\"']/VERSION = \"\1+dev.$version\"/" $each
+        sed -i "s/^VERSION = [\"']\(.*\)[\"']/VERSION = \"\1.dev$version\"/" $each
     fi
 done
 

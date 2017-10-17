@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.14
+++++++
+* Minor fixes
+
 2.0.13 (2017-10-09)
 +++++++++++++++++++
 * Adding support for SQL Transparent Data Encryption (TDE) and TDE with Bring Your Own Key
