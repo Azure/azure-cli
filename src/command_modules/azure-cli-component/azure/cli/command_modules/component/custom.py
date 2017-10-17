@@ -20,9 +20,12 @@ COMPONENT_PREFIX = 'azure-cli-'
 def _deprecate_warning():
     logger.warning("The 'component' commands will be deprecated in the future.")
     logger.warning("az component and subcommands may not work unless the CLI is installed with pip.")
-    ans = prompt_y_n("Are you sure you want to continue?", default='n')
-    if not ans:
-        raise CLIError('Operation cancelled.')
+    try:
+        ans = prompt_y_n("Are you sure you want to continue?", default='n')
+        if not ans:
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        pass
 
 
 def _verify_not_dev():
