@@ -491,11 +491,11 @@ def get_file_path_validator(default_file_param=None):
 def validate_included_datasets(namespace):
     if namespace.include:
         include = namespace.include
-        if set(include) - set('cms'):
-            help_string = '(c)opy-info (m)etadata (s)napshots'
+        if set(include) - set('cmsd'):
+            help_string = '(c)opy-info (m)etadata (s)napshots (d)eleted'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         Include = get_sdk(ResourceType.DATA_STORAGE, 'blob#Include')
-        namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
+        namespace.include = Include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
 def validate_key(namespace):

@@ -119,6 +119,9 @@ cli_storage_data_plane_command('storage blob upload', custom_path + 'upload_blob
 cli_storage_data_plane_command('storage blob metadata show', block_blob_path + 'get_blob_metadata', factory, exception_handler=_dont_fail_not_exist)
 cli_storage_data_plane_command('storage blob metadata update', block_blob_path + 'set_blob_metadata', factory)
 cli_storage_data_plane_command('storage blob service-properties show', base_blob_path + 'get_blob_service_properties', factory, exception_handler=_dont_fail_not_exist)
+cli_storage_data_plane_command('storage blob service-properties delete-policy show', base_blob_path + 'get_blob_service_properties', factory,
+                               transform=lambda x: x.delete_retention_policy, exception_handler=_dont_fail_not_exist)
+cli_storage_data_plane_command('storage blob service-properties delete-policy update', custom_path + 'set_delete_policy', factory)
 cli_storage_data_plane_command('storage blob lease acquire', block_blob_path + 'acquire_blob_lease', factory)
 cli_storage_data_plane_command('storage blob lease renew', block_blob_path + 'renew_blob_lease', factory)
 cli_storage_data_plane_command('storage blob lease release', block_blob_path + 'release_blob_lease', factory)
