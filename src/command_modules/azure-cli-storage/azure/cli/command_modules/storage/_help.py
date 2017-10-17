@@ -200,6 +200,18 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
+helps['storage blob service-properties delete-policy'] = """
+    type: group
+    short-summary: Manage storage blob delete-policy service properties.
+"""
+helps['storage blob service-properties delete-policy show'] = """
+    type: command
+    short-summary: Show the storage blob delete-policy.
+"""
+helps['storage blob service-properties delete-policy update'] = """
+    type: command
+    short-summary: Update the storage blob delete-policy.
+"""
 helps['storage blob set-tier'] = """
     type: command
     short-summary: Set the block or page tiers on the blob.
