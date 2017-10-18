@@ -7,31 +7,18 @@ Building the RPM package
 On a build machine (e.g. new CentOS 7 VM) run the following.
 
 Install dependencies required to build:
+Required for rpm build tools & required to build the CLI.
 ```
-# Required for rpm build tools.
-sudo yum install -y gcc rpm-build rpm-devel rpmlint make python bash coreutils diffutils patch rpmdevtools
-
-# Required to build the CLI.
-sudo yum install -y gcc python libffi-devel python-devel openssl-devel
+sudo yum install -y gcc git rpm-build rpm-devel rpmlint make bash coreutils diffutils patch rpmdevtools python libffi-devel python-devel openssl-devel
 ```
 
-Set up directory structure for build:
+Build example:
+Note: use the full path to the repo path, not a relative path.
 ```
-mkdir -p ~/rpmbuild/
-cd ~/rpmbuild/
-mkdir -p BUILD RPMS SOURCES SPECS SRPMS
-> SPECS/azure-cli.spec; vi SPECS/azure-cli.spec
-```
-
-Set the CLI version and SHA256 for the archive:
-```
+git clone https://github.com/azure/azure-cli
 export CLI_VERSION=2.0.16
-export CLI_DOWNLOAD_SHA256=22c048d2911c13738c6b901a741ea655f277e0d9eb756c4fb9aee6bb6c2b0109
-```
-
-RPM Build:
-```
-rpmbuild -v -bb --clean SPECS/azure-cli.spec
+export REPO_PATH=~/azure-cli
+rpmbuild -v -bb --clean azure-cli/build_scripts/rpm/azure-cli.spec
 ```
 
 Verification
