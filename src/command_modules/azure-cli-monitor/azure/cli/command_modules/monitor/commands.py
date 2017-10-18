@@ -6,12 +6,15 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
+from azure.cli.core.sdk.util import ServiceGroup, create_service_adapter
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._client_factory import \
     (cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles,
-     cf_autoscale, cf_diagnostics, cf_activity_log)
+     cf_autoscale, cf_diagnostics, cf_activity_log, cf_action_groups)
 from ._exception_handler import monitor_exception_handler
+
+from .transformers import (action_group_list_table)
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     def monitor_command(*args, **kwargs):
@@ -91,3 +94,19 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     monitor_command(__name__, 'monitor activity-log list', custom_path + 'list_activity_log', cf_activity_log)
 
     # endregion
+
+    action_group_operations = create_service_adapter(
+        'azure.mgmt.monitor.operations.action_groups_operations', 'ActionGroupsOperations')
+    ag_custom_path = '.'.join(__name__.split('.')[:-1] + ['action_groups']) + '#{}'
+
+    with ServiceGroup(__name__, cf_action_groups, action_group_operations, ag_custom_path) as s:
+        with s.group('monitor action-group') as c:
+            c.command('show', 'get', table_transformer=action_group_list_table)
+            c.command('create', 'create_or_update', table_transformer=action_group_list_table)
+            c.command('delete', 'delete')
+            c.command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
+            c.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
+            c.generic_update_command('update', 'get', 'create_or_update', 'update_action_groups',
+                                     setter_arg_name='action_group',
+                                     table_transformer=action_group_list_table,
+                                     exception_handler=monitor_exception_handler)

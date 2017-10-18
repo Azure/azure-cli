@@ -2,8 +2,9 @@
 
 Release History
 ===============
-(unreleased)
-+++++++++++++++++++
+
+2.0.17
+++++++
 * `vmss create`: expose '--accelerated-networking'
 
 2.0.16 (2017-10-09)

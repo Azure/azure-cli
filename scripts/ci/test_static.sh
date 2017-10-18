@@ -4,8 +4,12 @@ set -e
 
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
+ls -la $share_folder/build
+
+ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
+
 pip install pylint flake8
-pip install azure-cli-fulltest -f $share_folder/build
+pip install $ALL_MODULES
 
 echo '=== List installed packages'
 pip freeze
@@ -32,6 +36,9 @@ python -m automation.commandlint.run
 
 echo "Verify readme history"
 python -m automation.tests.verify_readme_history
+
+echo "Verify package versions"
+python -m automation.tests.verify_package_versions
 
 echo "Verify default modules"
 azdev verify default-modules $share_folder/build

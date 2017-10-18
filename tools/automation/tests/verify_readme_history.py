@@ -51,11 +51,26 @@ def check_history_headings(mod_path):
             writer=None, writer_name='null',
             settings=None, settings_spec=None, settings_overrides={},
             config_section=None, enable_exit_status=None)
-        if pub.writer.document.children[0].rawsource == RELEASE_HISTORY_TITLE:
-            return True
-        else:
+        # Check first heading is Release History
+        if pub.writer.document.children[0].rawsource != RELEASE_HISTORY_TITLE:
             print("Expected '{}' as first heading in HISTORY.rst".format(RELEASE_HISTORY_TITLE))
             return False
+        all_versions = [t['names'][0] for t in pub.writer.document.children if t['names']]
+        # Check that no headings contain 'unreleased'. We don't require it any more
+        if any('unreleased' in v.lower() for v in all_versions):
+            print("We no longer require 'unreleased' in headings. Use the appropriate version number instead.")
+            return False
+        # Check that the current package version has a history entry
+        if not all_versions:
+            print("Unable to get versions from {}. Check formatting. e.g. there should be a new line after the 'Release History' heading.".format(history_path))
+            return False
+        first_version_history = all_versions[0]
+        actual_version = subprocess.check_output('python setup.py --version'.split(), cwd=mod_path, universal_newlines=True)
+        actual_version = actual_version.strip()
+        if first_version_history != actual_version:
+            print("No heading for version {} in {}".format(actual_version, history_path))
+            return False
+        return True
 
 
 def check_readme_render(mod_path):

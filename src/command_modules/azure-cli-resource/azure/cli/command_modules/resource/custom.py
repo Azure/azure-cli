@@ -233,7 +233,7 @@ def export_group_as_template(
 
     options = ','.join(export_options) if export_options else None
 
-    result = rcf.resource_groups.export_template(resource_group_name, '*', options=options)
+    result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
@@ -922,12 +922,25 @@ def _resolve_policy_id(policy, policy_set_definition, client):
     policy_id = policy or policy_set_definition
     if not is_valid_resource_id(policy_id):
         if policy:
-            policy_def = client.policy_definitions.get(policy)
+            policy_def = _get_custom_or_builtin_policy(client, policy)
             policy_id = policy_def.id
         else:
-            policy_set_def = client.policy_set_definitions.get(policy_set_definition)
+            policy_set_def = _get_custom_or_builtin_policy(client, policy_set_definition, True)
             policy_id = policy_set_def.id
     return policy_id
+
+
+def _get_custom_or_builtin_policy(client, name, for_policy_set=False):
+    from msrest.exceptions import HttpOperationError
+    from msrestazure.azure_exceptions import CloudError
+    policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
+    try:
+        return policy_operations.get(name)
+    except (CloudError, HttpOperationError) as ex:
+        status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
+        if status_code == 404:
+            return policy_operations.get_built_in(name)
+        raise
 
 
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
@@ -972,31 +985,13 @@ def create_policy_setdefinition(name, definitions, params=None, display_name=Non
 
 
 def get_policy_definition(policy_definition_name):
-    from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
-    try:
-        return policy_client.policy_definitions.get(policy_definition_name)
-    except CloudError as ex:
-        if ex.status_code == 404:
-            # work around for https://github.com/Azure/azure-cli/issues/692
-            policy_id = '/providers/Microsoft.Authorization/policydefinitions/' + policy_definition_name
-            rcf = _resource_client_factory()
-            return rcf.resources.get_by_id(policy_id, policy_client.policy_definitions.api_version)
-        raise
+    return _get_custom_or_builtin_policy(policy_client, policy_definition_name)
 
 
 def get_policy_setdefinition(policy_set_definition_name):
-    from msrestazure.azure_exceptions import CloudError
     policy_client = _resource_policy_client_factory()
-    try:
-        return policy_client.policy_set_definitions.get(policy_set_definition_name)
-    except CloudError as ex:
-        if ex.status_code == 404:
-            # work around for https://github.com/Azure/azure-cli/issues/692
-            policy_id = '/providers/Microsoft.Authorization/policysetdefinitions/' + policy_set_definition_name
-            rcf = _resource_client_factory()
-            return rcf.resources.get_by_id(policy_id, policy_client.policy_set_definitions.api_version)
-        raise
+    return _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, True)
 
 
 def update_policy_definition(policy_definition_name, rules=None, params=None,
@@ -1014,7 +1009,7 @@ def update_policy_definition(policy_definition_name, rules=None, params=None,
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
-    definition = policy_client.policy_definitions.get(policy_definition_name)
+    definition = _get_custom_or_builtin_policy(policy_client, policy_definition_name)
     # pylint: disable=line-too-long,no-member
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
     parameters = PolicyDefinition(
@@ -1040,7 +1035,7 @@ def update_policy_setdefinition(policy_set_definition_name, definitions=None, pa
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory()
-    definition = policy_client.policy_set_definitions.get(policy_set_definition_name)
+    definition = _get_custom_or_builtin_policy(policy_client, policy_set_definition_name, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicySetDefinition', mod='models')
     parameters = PolicySetDefinition(

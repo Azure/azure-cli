@@ -3,9 +3,13 @@
 Release History
 ===============
 
-unreleased
-+++++++++++++++++++
+2.0.20
+++++++
 * 2017-03-09-profile is updated to consume MGMT_STORAGE API version '2016-01-01'
+
+2.0.19
+++++++
+* skipped version to align package versions with azure-cli
 
 2.0.18 (2017-10-09)
 +++++++++++++++++++

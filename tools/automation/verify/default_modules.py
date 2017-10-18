@@ -20,10 +20,6 @@ from automation.utilities.display import print_heading
 AZURE_CLI_PATH = os.path.join(get_repo_root(), 'src', 'azure-cli')
 AZURE_CLI_SETUP_PY = os.path.join(AZURE_CLI_PATH, 'setup.py')
 
-# This is a list of modules that we do not want to be installed by default.
-# Add your modules to this list if you don't want it to be installed when the CLI is installed.
-MODULES_TO_EXCLUDE = ['azure-cli-taskhelp']
-
 
 def get_cli_dependencies(build_folder):
     azure_cli_wheel = glob.glob(build_folder.rstrip('/') + '/azure_cli-*.whl')[0]
@@ -50,13 +46,8 @@ def verify_default_modules(args):
         print('Unable to get the CLI dependencies for {}'.format(AZURE_CLI_SETUP_PY), file=sys.stderr)
         sys.exit(1)
     for modname, _ in all_command_modules:
-        if modname in cli_deps and modname in MODULES_TO_EXCLUDE:
-            errors_list.append("{} is a dependency of azure-cli BUT is marked as should be excluded.".format(modname))
-        if modname not in cli_deps and modname not in MODULES_TO_EXCLUDE:
-            errors_list.append("{} is not included to be installed by default! If this is a mistake, modify {}. "
-                               "Otherwise, modify this script ({}) to exclude the module.".format(modname,
-                                                                                                  AZURE_CLI_SETUP_PY,
-                                                                                                  __file__))
+        if modname not in cli_deps:
+            errors_list.append("{} is not included to be installed by default! Modify {}.".format(modname, AZURE_CLI_SETUP_PY))
     if errors_list:
         print_heading('Errors whilst verifying default modules list in {}!'.format(AZURE_CLI_SETUP_PY))
         print('\n'.join(errors_list), file=sys.stderr)
