@@ -18,7 +18,7 @@ Note: use the full path to the repo path, not a relative path.
 git clone https://github.com/azure/azure-cli
 cd azure-cli
 export CLI_VERSION=2.0.16
-export REPO_PATH=~/azure-cli
+export REPO_PATH=$(pwd)
 rpmbuild -v -bb --clean build_scripts/rpm/azure-cli.spec
 ```
 
