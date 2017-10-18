@@ -22,6 +22,9 @@ from azure.cli.core.commands.parameters import (
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
 from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key, validate_list_of_integers
+from azure.cli.command_modules.acs._validators import validate_k8s_client_version
+from azure.cli.command_modules.acs._validators import validate_k8s_version
+from azure.cli.command_modules.acs._validators import validate_linux_host_name
 
 
 def _compute_client_factory(**_):
@@ -68,6 +71,8 @@ regionsInProd = ["australiasoutheast", "northeurope", "brazilsouth", "australiae
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
+
+k8s_version_arg_type = CliArgumentType(options_list=('--kubernetes-version', '-k'), metavar='KUBERNETES_VERSION')
 
 storageProfileTypes = ["StorageAccount", "ManagedDisks"]
 
@@ -141,3 +146,37 @@ register_cli_argument('acs kubernetes get-credentials', 'ssh_key_file',
 register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
 register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
 register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
+
+# Managed Clusters flags configuration
+register_cli_argument('aks', 'name', help='Resource name for the managed cluster', arg_type=name_arg_type)
+register_cli_argument('aks', 'resource_group', arg_type=resource_group_name_type)
+register_cli_argument('aks', 'tags', tags_type)
+
+register_cli_argument('aks create', 'ssh_key_value', required=False,
+                      help='SSH key file value or key file path.', type=file_type,
+                      default=os.path.join('~', '.ssh', 'id_rsa.pub'), completer=FilesCompleter(),
+                      validator=validate_ssh_key)
+register_cli_argument('aks create', 'name', arg_type=name_arg_type, validator=validate_linux_host_name)
+register_extra_cli_argument('aks create', 'generate_ssh_keys', action='store_true',
+                            help='Generate SSH public and private key files if missing',
+                            validator=validate_create_parameters)
+register_cli_argument('aks create', 'kubernetes_version', arg_type=k8s_version_arg_type,
+                      validator=validate_k8s_version)
+register_cli_argument('aks create', 'admin_username', options_list=('--admin-username', '-u'))
+register_cli_argument('aks create', 'agent_vm_size', options_list=('--agent-vm-size', '-s'),
+                      completer=get_vm_size_completion_list)
+register_cli_argument('aks create', 'agent_count', type=int, options_list=('--agent-count', '-c'))
+register_cli_argument('aks create', 'dns_name_prefix', options_list=('--dns-name-prefix', '-p'))
+register_cli_argument('aks get-credentials', 'path', options_list=('--file', '-f',),
+                      default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
+                      type=file_type, completer=FilesCompleter())
+register_cli_argument('aks get-credentials', 'admin', options_list=('--admin', '-a'), default=False)
+register_cli_argument('aks scale', 'agent_count', type=int, options_list=('--agent-count', '-c'))
+register_cli_argument('aks upgrade', 'kubernetes_version', arg_type=k8s_version_arg_type,
+                      validator=validate_k8s_version)
+register_cli_argument('aks upgrade', 'name', arg_type=name_arg_type, validator=validate_linux_host_name)
+register_cli_argument('aks wait', 'resource_name', options_list=('--name', '-n'))
+register_cli_argument('aks install-cli', 'install_location', options_list=('--install-location',),
+                      default=_get_default_install_location('kubectl'))
+register_cli_argument('aks install-cli', 'client_version', options_list=('--client-version',),
+                      validator=validate_k8s_client_version)
