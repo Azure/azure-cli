@@ -11,7 +11,6 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathChec
 
 # flake8: noqa
 
-@unittest.skip("Need to refactor SP reuse so this will pass.")
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_aks_create_default_service(self, resource_group, resource_group_location):
@@ -83,7 +82,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # upgrade
         new_k8s_version = '1.8.1'
-        upgrade_cmd = 'aks upgrade -g {} -n {} --kubernetes-version {}'
+        upgrade_cmd = 'aks upgrade -g {} -n {} --kubernetes-version {} --yes'
         self.cmd(upgrade_cmd.format(resource_group, aks_name, new_k8s_version), checks=[
             JMESPathCheck('properties.provisioningState', 'Succeeded')
         ])
