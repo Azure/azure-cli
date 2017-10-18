@@ -1209,7 +1209,7 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     ssh_config = ContainerServiceSshConfiguration(
         [ContainerServiceSshPublicKey(key_data=ssh_key_value)])
     agent_pool_profile = ContainerServiceAgentPoolProfile(
-        name,
+        'agentpool1',  # Must be 12 chars or less before ACS RP adds to it
         count=int(agent_count),
         vm_size=agent_vm_size,
         dns_prefix=dns_name_prefix,
