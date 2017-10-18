@@ -148,7 +148,8 @@ Now the user may identify the target IP config by specifying either the resource
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- The supported values for `id_part` are: `name` and `child_name_{level}`; for example, `child_name_2` is the name of the child two levels under the resource correspond to `name`.
+- The supported resource-name values for `id_part` are: `name` and `child_name_{level}`; for example, `child_name_2` is the name of the child two levels under the resource correspond to `name`.
+- Values also available are `child_type_{level}`, `child_namespace_{level}`, and `child_parent_{level}`. Note that these values may not exist for the particular id being parsed.
 
 
 Generic Update Commands
