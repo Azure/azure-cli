@@ -192,7 +192,7 @@ class AppServiceLogTest(LiveScenarioTest):
         self.assertTrue(os.path.isdir(os.path.join(log_dir, 'LogFiles', 'kudu', 'trace')))
 
 
-class AppServicePlanSceanrioTest(ScenarioTest):
+class AppServicePlanScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_retain_plan(self, resource_group):
         webapp_name = 'webapp-quick'
