@@ -32,6 +32,33 @@ def aks_show_table_format(result):
     return OrderedDict({k: result.get(k) for k in columns})
 
 
+def aks_get_versions_table_format(result):
+    """Format get-versions upgrade results as a summary for display with "-o table"."""
+    properties = result.get('properties', {})
+    master = properties.get('controlPlaneProfile', {})
+    result['masterVersion'] = master.get('kubernetesVersion', 'unknown')
+    result['masterUpgrades'] = ', '.join(master.get('upgrades', []))
+
+    agents = properties.get('agentPoolProfiles', [])
+    versions, upgrades = [], []
+    for agent in agents:
+        version = agent.get('kubernetesVersion', 'unknown')
+        upgrade = ', '.join(agent.get('upgrades', []))
+        name = agent.get('name')
+        if name:  # multiple agent pools, presumably
+            version = "{}: {}".format(name, version)
+            upgrade = "{}: {}".format(name, upgrades)
+        versions.append(version)
+        upgrades.append(upgrade)
+
+    result['agentPoolVersion'] = ', '.join(versions)
+    result['agentPoolUpgrades'] = ', '.join(upgrades)
+
+    columns = ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'agentPoolVersion', 'agentPoolUpgrades']
+    # put results in an ordered dict so the headers are predictable
+    return OrderedDict({k: result.get(k) for k in columns})
+
+
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'acs show', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory, exception_handler=empty_on_404)
     cli_command(__name__, 'acs delete', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.delete', _acs_client_factory)
@@ -66,7 +93,8 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-08-31-profile'):
     cli_command(__name__, 'aks get-credentials',
                 'azure.cli.command_modules.acs.custom#aks_get_credentials', _aks_client_factory)
     cli_command(__name__, 'aks get-versions',
-                'azure.cli.command_modules.acs.custom#aks_get_versions', _aks_client_factory)
+                'azure.cli.command_modules.acs.custom#aks_get_versions', _aks_client_factory,
+                table_transformer=aks_get_versions_table_format)
     cli_command(__name__, 'aks install-cli',
                 'azure.cli.command_modules.acs.custom#k8s_install_cli')
     cli_command(__name__, 'aks list',
