@@ -7,21 +7,15 @@ Updating the Debian package
 On a build machine (e.g. new Ubuntu 14.04 VM), run the build script.
 
 For example:
-
-First copy the build scripts onto the build machine.
 ```
-> ~/debian_build.sh; editor ~/debian_build.sh
-> ~/debian_dir_creator.sh; editor ~/debian_dir_creator.sh
-chmod +x ~/debian_build.sh ~/debian_dir_creator.sh
-```
-
-Then execute it with the appropriate environment variable values.
-```
+git clone https://github.com/azure/azure-cli
+cd azure-cli
 export CLI_VERSION=2.0.9 \
-  && export CLI_DOWNLOAD_SHA256=e74150b2db2975e8b17710eb7ef270ded16e6a8c27f77929544533f6b4c33b76 \
   && export BUILD_ARTIFACT_DIR=$(mktemp -d)\
-  && ~/debian_build.sh ~/debian_dir_creator.sh
+  && build_scripts/debian/build.sh $(pwd)
 ```
+
+Note: The paths above have to be full paths, not relative otherwise the build will fail.
 
 Now you have built the package, upload the package to the apt repository.
 
