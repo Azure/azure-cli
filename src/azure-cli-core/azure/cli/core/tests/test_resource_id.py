@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 import unittest
 from six import StringIO
-from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
+from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
 
 
 class TestApplication(unittest.TestCase):

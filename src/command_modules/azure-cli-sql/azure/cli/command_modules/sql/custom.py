@@ -1200,7 +1200,7 @@ def encryption_protector_update(
 
 
 def validate_subnet(namespace):
-    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id
 
     subnet = namespace.virtual_network_subnet_id
     subnet_is_id = is_valid_resource_id(subnet)

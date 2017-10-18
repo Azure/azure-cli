@@ -20,14 +20,9 @@ from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
+from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 logger = azlogging.get_az_logger(__name__)
-
-regex = re.compile(
-    '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*)')
-
-children_regex = re.compile('(/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
 
 def handle_long_running_operation_exception(ex):
@@ -82,114 +77,6 @@ def deployment_validate_table_format(result):
         success_result['correlationId'] = result['properties']['correlationId']
         return success_result
     return result
-
-
-def _get_parent_from_parts(kwargs):
-    '''
-    Get the parent given all the children parameters.
-    '''
-    parent = ''
-    if kwargs['last_child_num'] is not None:
-        parent_builder = ['{type}/{name}'.format(**kwargs)]
-        for index in range(1, kwargs['last_child_num']):
-            parent_builder.append('/providers/{{child_namespace_{0}}}/{{child_type_{0}}}/{{child_name_{0}}}'
-                                  .format(index).format(**kwargs))
-        parent_builder.append('/providers/{{child_namespace_{}}}'.format(kwargs['last_child_num']).format(**kwargs))
-        parent = ''.join(parent_builder)
-
-    parent = parent.replace('/providers/None', '')
-    return '{}/'.format(parent) if parent and not parent.endswith('/') else parent
-
-
-def _populate_alternate_kwargs(kwargs):
-    """ Translates the parsed arguments into a format used by generic ARM commands
-    such as the resource and lock commands. """
-
-    resource_namespace = kwargs['namespace']
-    resource_type = kwargs.get('child_type_{}'.format(kwargs['last_child_num'])) or kwargs['type']
-    resource_name = kwargs.get('child_name_{}'.format(kwargs['last_child_num'])) or kwargs['name']
-
-    kwargs['resource_parent'] = _get_parent_from_parts(kwargs)
-    kwargs['resource_namespace'] = resource_namespace
-    kwargs['resource_type'] = resource_type
-    kwargs['resource_name'] = resource_name
-    return kwargs
-
-
-def resource_id(**kwargs):
-    '''Create a valid resource id string from the given parts. Children start at level 1.
-    The method accepts the following keyword arguments:
-        - subscription              Subscription id
-        - resource_group            Name of resource group
-        - namespace                 Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                      Type of the resource (i.e. virtualMachines)
-        - name                      Name of the resource (or parent if child_name is also specified)
-        - child_namespace_{level}   Namespace for the child resoure of that level (optional)
-        - child_type_{level}        Type of the child resource of that level
-        - child_name_{level}        Name of the child resource of that level
-    '''
-    kwargs = {k: v for k, v in kwargs.items() if v is not None}
-    rid_builder = ['/subscriptions/{subscription}'.format(**kwargs)]
-    try:
-        try:
-            rid_builder.append('resourceGroups/{resource_group}'.format(**kwargs))
-        except KeyError:
-            pass
-        rid_builder.append('providers/{namespace}'.format(**kwargs))
-        rid_builder.append('{type}/{name}'.format(**kwargs))
-        count = 1
-        while True:
-            try:
-                rid_builder.append('providers/{{child_namespace_{}}}'.format(count).format(**kwargs))
-            except KeyError:
-                pass
-            rid_builder.append('{{child_type_{0}}}/{{child_name_{0}}}'.format(count).format(**kwargs))
-            count += 1
-    except KeyError:
-        pass
-    return '/'.join(rid_builder)
-
-
-def parse_resource_id(rid):
-    '''Build a dictionary with the following key/value pairs (if found)
-        - subscription          Subscription id
-        - resource_group        Name of resource group
-        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                  Type of the root resource (i.e. virtualMachines)
-        - name                  Name of the root resource
-        - child_namespace_{level}   Namespace for the child resoure of that level (optional)
-        - child_type_{level}        Type of the child resource of that level
-        - child_name_{level}        Name of the child resource of that level
-        - resource_parent       Computed parent in the following pattern: providers/{namespace}/{parent}/{type}/{name}
-        - resource_namespace    Same as namespace. Note that this may be different than the target resource's namespace.
-        - resource_type         Type of the target resource (not the parent)
-        - resource_name         Name of the target resource (not the parent)
-    '''
-    if not rid:
-        return {}
-    m = regex.match(rid)
-    if m:
-        result = m.groupdict()
-        children = children_regex.finditer(result["children"])
-        count = None
-        for count, child in enumerate(children):
-            result.update({key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
-        result["last_child_num"] = count + 1 if isinstance(count, int) else None
-        result = _populate_alternate_kwargs(result)
-    else:
-        result = dict(name=rid)
-    return {key: value for key, value in result.items() if value is not None}
-
-
-def is_valid_resource_id(rid, exception_type=None):
-    is_valid = False
-    try:
-        is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
-    except KeyError:
-        pass
-    if not is_valid and exception_type:
-        raise exception_type()
-    return is_valid
 
 
 class ResourceId(str):

@@ -8,7 +8,7 @@ import base64
 import socket
 import os
 
-from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
+from msrestazure.tools import is_valid_resource_id, resource_id
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
 from azure.cli.core.util import CLIError
@@ -719,7 +719,7 @@ def load_cert_file(param_name):
 
 
 def get_network_watcher_from_vm(namespace):
-    from azure.cli.core.commands.arm import parse_resource_id
+    from msrestazure.tools import parse_resource_id
 
     compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.vm)['name']
@@ -739,7 +739,7 @@ def get_network_watcher_from_resource(namespace):
 def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
     def _validator(namespace):
-        from azure.cli.core.commands.arm import parse_resource_id
+        from msrestazure.tools import parse_resource_id
 
         location = namespace.location
         network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_watchers
@@ -757,7 +757,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
 
 def process_nw_test_connectivity_namespace(namespace):
-    from azure.cli.core.commands.arm import parse_resource_id
+    from msrestazure.tools import parse_resource_id
 
     compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.source_resource)['name']
@@ -798,7 +798,7 @@ def process_nw_flow_log_set_namespace(namespace):
 
 
 def process_nw_flow_log_show_namespace(namespace):
-    from azure.cli.core.commands.arm import parse_resource_id
+    from msrestazure.tools import parse_resource_id
 
     if not is_valid_resource_id(namespace.nsg):
         namespace.nsg = resource_id(

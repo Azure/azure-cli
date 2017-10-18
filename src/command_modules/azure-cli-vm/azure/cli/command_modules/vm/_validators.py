@@ -9,10 +9,10 @@ import os
 import re
 
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import resource_id, parse_resource_id, is_valid_resource_id
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set)
 from azure.cli.core.util import CLIError, hash_string

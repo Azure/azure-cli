@@ -8,11 +8,11 @@ import platform
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.arm import (
+from azure.cli.core.commands.arm import resource_exists
+from msrestazure.tools import (
     is_valid_resource_id,
     parse_resource_id,
-    resource_id,
-    resource_exists)
+    resource_id)
 
 
 def get_folded_parameter_help_string(

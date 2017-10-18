@@ -1188,7 +1188,7 @@ class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
     def body(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        from msrestazure.tools import resource_id, is_valid_resource_id
         subscription_id = get_subscription_id()
         rg = self.resource_group
 
@@ -1809,7 +1809,7 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
     def body(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        from msrestazure.tools import resource_id, is_valid_resource_id
         subscription_id = get_subscription_id()
         rg = self.resource_group
         vmss_name = 'vrfvmss'

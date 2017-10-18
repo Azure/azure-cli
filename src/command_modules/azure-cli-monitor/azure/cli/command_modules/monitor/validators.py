@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse_resource_id
+from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 from azure.cli.core.util import CLIError
 
 

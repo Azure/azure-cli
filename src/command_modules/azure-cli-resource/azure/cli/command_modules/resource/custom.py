@@ -33,10 +33,10 @@ from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_cho
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
-from azure.cli.core.commands.arm import resource_id as resource_dict_to_id
-
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
+
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from msrestazure.tools import resource_id as resource_dict_to_id
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,

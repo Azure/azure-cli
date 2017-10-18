@@ -7,8 +7,8 @@ import os
 import datetime
 import dateutil.parser
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import resource_id, is_valid_resource_id
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 from azure.mgmt.devtestlabs.models.gallery_image_reference import GalleryImageReference
 from azure.mgmt.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
 from azure.mgmt.devtestlabs.models.shared_public_ip_address_configuration import \

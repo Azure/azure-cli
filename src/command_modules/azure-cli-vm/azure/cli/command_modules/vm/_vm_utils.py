@@ -6,7 +6,7 @@
 import json
 import os
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.arm import parse_resource_id
+from msrestazure.tools import parse_resource_id
 
 
 def read_content_if_is_file(string_or_file):
