@@ -3,11 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-# This Dockerfile uses the latest code from the Git repo.
-#   Clone the repo then run 'docker build' with this Dockerfile file to get the latest versions of
-#   *all* CLI modules as in the Git repo.
-
 FROM python:3.5.2-alpine
+
+ARG CLI_VERSION
+
+# Metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+LABEL org.label-schema.schema-version="1.0" \
+      org.label-schema.vendor="Microsoft" \
+      org.label-schema.name="Azure CLI 2.0" \
+      org.label-schema.version=$CLI_VERSION \
+      org.label-schema.license="MIT" \
+      org.label-schema.description="The Azure CLI 2.0 is the new Azure CLI and is applicable when you use the Resource Manager deployment model." \
+      org.label-schema.url="https://docs.microsoft.com/en-us/cli/azure/overview" \
+      org.label-schema.usage="https://docs.microsoft.com/en-us/cli/azure/install-az-cli2#docker" \
+      org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
+      org.label-schema.docker.cmd="docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>"
 
 WORKDIR azure-cli
 COPY . /azure-cli
@@ -29,26 +41,15 @@ RUN wget https://github.com/jmespath/jp/releases/download/0.1.2/jp-linux-amd64 -
 # 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
 RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
-    do cd $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
+    do cd $d; echo $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
     done; \
-    MODULE_NAMES=""; \
-    for f in $TMP_PKG_DIR/*; \
-    do MODULE_NAMES="$MODULE_NAMES $f"; \
-    done; \
-    pip install --no-cache-dir $MODULE_NAMES; \
+    [ -d privates ] && cp privates/*.whl $TMP_PKG_DIR; \
+    all_modules=`find $TMP_PKG_DIR -name "*.whl"`; \
+    pip install --no-cache-dir $all_modules; \
     pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
 
 # Tab completion
-RUN echo -e "\
-_python_argcomplete() {\n\
-    local IFS='\v'\n\
-    COMPREPLY=( \$(IFS=\"\$IFS\"                   COMP_LINE=\"\$COMP_LINE\"                   COMP_POINT=\"\$COMP_POINT\"                   _ARGCOMPLETE_COMP_WORDBREAKS=\"\$COMP_WORDBREAKS\"                   _ARGCOMPLETE=1                   \"\$1\" 8>&1 9>&2 1>/dev/null 2>/dev/null) )\n\
-    if [[ \$? != 0 ]]; then\n\
-        unset COMPREPLY\n\
-    fi\n\
-}\n\
-complete -o nospace -F _python_argcomplete \"az\"\n\
-" > ~/.bashrc
+RUN cat /azure-cli/az.completion > ~/.bashrc
 
 WORKDIR /
 

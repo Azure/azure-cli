@@ -3,10 +3,10 @@ SetLocal EnableDelayedExpansion
 echo build a msi installer using local cli sources and python executables. You need to have curl.exe, unzip.exe and msbuild.exe available under PATH
 echo.
 
-set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin"
+set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;"
 
-if "%CLIVERSION%"=="" (
-    echo Please set the CLIVERSION environment variable, e.g. 2.0.13
+if "%CLI_VERSION%"=="" (
+    echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
 set PYTHON_VERSION=3.6.1
@@ -66,7 +66,9 @@ if exist %TEMP_SCRATCH_FOLDER% (
 )
 mkdir %TEMP_SCRATCH_FOLDER%
 
-copy %REPO_ROOT%\privates\*.whl %TEMP_SCRATCH_FOLDER%
+if exist %REPO_ROOT%\privates (
+    copy %REPO_ROOT%\privates\*.whl %TEMP_SCRATCH_FOLDER%
+)
 
 ::ensure wix is available
 if exist %WIX_DIR% (
@@ -88,25 +90,47 @@ if not exist %WIX_DIR% (
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 :: Build & install all the packages with bdist_wheel
-%BUILDING_DIR%\python %~dp0build-packages.py %TEMP_SCRATCH_FOLDER% %REPO_ROOT%
+%BUILDING_DIR%\python.exe -m pip install wheel
+echo Building CLI packages...
+set CLI_SRC=%REPO_ROOT%\src
+for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg) do (
+   pushd %%a
+   %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
+   popd
+)
+pushd %CLI_SRC%\command_modules
+for /D %%a in (*) do (
+   pushd %CLI_SRC%\command_modules\%%a
+   %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
+   popd
+)
+popd
+echo Built CLI packages successfully.
+
 if %errorlevel% neq 0 goto ERROR
-:: Install them to the temp folder so to be packaged 
-%BUILDING_DIR%\python.exe -m pip install -f %TEMP_SCRATCH_FOLDER% --no-cache-dir azure-cli
+
+
+set ALL_MODULES=
+for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
+    set ALL_MODULES=!ALL_MODULES! %%i
+)
+echo All modules: %ALL_MODULES%
+%BUILDING_DIR%\python.exe -m pip install --no-cache-dir %ALL_MODULES%
 %BUILDING_DIR%\python.exe -m pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
-copy %REPO_ROOT%\packaged_releases\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
+copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
-copy %REPO_ROOT%\packaged_releases\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
-copy %REPO_ROOT%\packaged_releases\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
+copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
+copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 del %BUILDING_DIR%\Scripts\pip.exe
 del %BUILDING_DIR%\Scripts\pip3.exe
 del %BUILDING_DIR%\Scripts\pip3.6.exe
 if %errorlevel% neq 0 goto ERROR
 
 echo Building MSI...
-msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\packaged_releases\windows\azure-cli.wixproj
+msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
 
 start %OUTPUT_DIR%
 
