@@ -2,6 +2,9 @@
 
 Release History
 ===============
+Unreleased
+++++++
+* webapp: fix --web-server-logging to accept storage logging
 
 0.1.19
 ++++++
