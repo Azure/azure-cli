@@ -37,13 +37,15 @@ def aks_get_versions_table_format(result):
     properties = result.get('properties', {})
     master = properties.get('controlPlaneProfile', {})
     result['masterVersion'] = master.get('kubernetesVersion', 'unknown')
-    result['masterUpgrades'] = ', '.join(master.get('upgrades', []))
+    master_upgrades = master.get('upgrades', [])
+    result['masterUpgrades'] = ', '.join(master_upgrades) if master_upgrades else 'None available'
 
     agents = properties.get('agentPoolProfiles', [])
     versions, upgrades = [], []
     for agent in agents:
         version = agent.get('kubernetesVersion', 'unknown')
-        upgrade = ', '.join(agent.get('upgrades', []))
+        agent_upgrades = agent.get('upgrades', [])
+        upgrade = ', '.join(agent_upgrades) if agent_upgrades else 'None available'
         name = agent.get('name')
         if name:  # multiple agent pools, presumably
             version = "{}: {}".format(name, version)
