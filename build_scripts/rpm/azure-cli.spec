@@ -36,7 +36,6 @@ A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
 %prep
 # Create some tmp files
 tmp_venv_archive=$(mktemp)
-tmp_source_archive=$(mktemp)
 
 # Download, Extract Virtualenv
 wget %{venv_url} -qO $tmp_venv_archive
