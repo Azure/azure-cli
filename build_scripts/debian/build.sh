@@ -55,7 +55,12 @@ make install
 # note: This installation step could happen in debian/rules but was unable to escape $ char.
 # It does not affect the built .deb file though.
 $source_dir/python_env/bin/pip3 install wheel
-for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; do cd $d; $source_dir/python_env/bin/python3 setup.py bdist_wheel -d $tmp_pkg_dir; cd -; done;
+for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-nspkg \
+  $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/;
+  do cd $d;
+  $source_dir/python_env/bin/python3 setup.py bdist_wheel -d $tmp_pkg_dir;
+  cd -;
+done;
 all_modules=`find $tmp_pkg_dir -name "*.whl"`
 $source_dir/python_env/bin/pip3 install $all_modules
 $source_dir/python_env/bin/pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
