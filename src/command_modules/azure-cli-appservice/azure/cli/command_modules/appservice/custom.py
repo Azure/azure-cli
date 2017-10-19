@@ -1045,11 +1045,11 @@ def _open_page_in_browser(url):
 # TODO: expose new blob suport
 def config_diagnostics(resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
-                       detailed_error_messages=None, failed_request_tracing=None,
-                       slot=None):
+                       docker_container_logging=None, detailed_error_messages=None,
+                       sas_url=None, failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig,
-                                       FileSystemHttpLogsConfig, EnabledConfig)
+                                       SiteLogsConfig, AzureBlobStorageHttpLogsConfig,
+                                       HttpLogsConfig, FileSystemHttpLogsConfig, EnabledConfig)
     client = web_client_factory()
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
@@ -1065,11 +1065,19 @@ def config_diagnostics(resource_group_name, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    if web_server_logging is not None:
-        enabled = web_server_logging
-        # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
-        fs_server_log = FileSystemHttpLogsConfig(100, 3, enabled)
-        http_logs = HttpLogsConfig(fs_server_log)
+    logs_enabled = (web_server_logging if web_server_logging is not None
+                    else docker_container_logging)
+
+    # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
+    filesystem_log_config = FileSystemHttpLogsConfig(100, 3, logs_enabled == 'filesystem')
+    az_blob_storage_log_config = AzureBlobStorageHttpLogsConfig(None, 3, False)
+
+    if logs_enabled == 'storage':
+        if sas_url is None:
+            raise CLIError("sas url cannot be null if storage is selected!")
+        az_blob_storage_log_config = AzureBlobStorageHttpLogsConfig(sas_url, 3, True)
+
+    http_logs = HttpLogsConfig(filesystem_log_config, az_blob_storage_log_config)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(detailed_error_messages))
