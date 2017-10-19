@@ -50,7 +50,7 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
                 setattr(namespace, id_part, id_dict.get(id_part))
             setattr(namespace, 'resource_provider_namespace', id_dict.get('resource_namespace'))
             setattr(namespace, 'parent_resource_path', id_dict.get('resource_parent').strip('/'))
-            
+
         if resource_type is not None:
             raise CLIError('--resource-type is ignored if --resource-group is not given.')
         if resource_provider_namespace is not None:

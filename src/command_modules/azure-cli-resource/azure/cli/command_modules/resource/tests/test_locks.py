@@ -267,7 +267,6 @@ class ResourceLockTests(ScenarioTest):
                              .format(subnet_name, subnetaddress,
                                      vnet_name, resource_group)).get_output_in_json().get('id')
 
-
         self.cmd('resource lock create -n {} --resource {} --lock-type CanNotDelete'.format(vnet_lock_name, vnet_id))
         self.cmd('lock create -n {} --resource {} --lock-type CanNotDelete'.format(subnet_lock_name, subnet_id))
 
@@ -278,7 +277,7 @@ class ResourceLockTests(ScenarioTest):
 
         self.cmd('resource lock delete --name {} --resource {}'.format(vnet_lock_name, vnet_id))
         self.cmd('lock delete --name {} --resource {}'.format(subnet_lock_name, subnet_id))
-        
+
         self._sleep_for_lock_operation()
 
     def _sleep_for_lock_operation(self):

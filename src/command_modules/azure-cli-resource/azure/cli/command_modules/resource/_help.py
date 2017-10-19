@@ -679,7 +679,7 @@ helps['resource lock delete'] = """
             az resource lock delete --name lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
         - name: Delete a resource level lock on a vnet using a vnet id.
           text: >
-            az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet
+            az resource lock delete -n lockName --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet
     """
 helps['resource lock list'] = """
     type: command
