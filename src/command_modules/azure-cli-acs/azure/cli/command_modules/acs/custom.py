@@ -512,8 +512,11 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             api_version = "2017-01-31"
 
     if orchestrator_type.lower() == 'kubernetes':
-        _ensure_service_principal(service_principal, client_secret, subscription_id,
-                                  dns_name_prefix, location, name)
+        principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
+                                                  dns_name_prefix, location, name)
+        client_secret = principal_obj.get("client_secret")
+        service_principal = principal_obj.get("service_principal")
+
     elif windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
 
@@ -1211,16 +1214,13 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
         agent_pool_profile.os_disk_size_gb = int(agent_osdisk_size)
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
-    _ensure_service_principal(service_principal=service_principal, client_secret=client_secret,
-                              subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                              location=location, name=name)
-    principal_obj = load_acs_service_principal(subscription_id)
-    if not client_secret:
-        client_secret = principal_obj.get("client_secret")
-    if not service_principal:
-        service_principal = principal_obj.get("service_principal")
+    principal_obj = _ensure_service_principal(service_principal=service_principal, client_secret=client_secret,
+                                              subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                              location=location, name=name)
     service_principal_profile = ContainerServiceServicePrincipalProfile(
-        client_id=service_principal, secret=client_secret, key_vault_secret_ref=None)
+        client_id=principal_obj.get("service_principal"),
+        secret=principal_obj.get("client_secret"),
+        key_vault_secret_ref=None)
 
     props = ManagedClusterProperties(
         dns_prefix=dns_name_prefix,
@@ -1378,11 +1378,12 @@ def _ensure_service_principal(service_principal=None,
             if not _add_role_assignment('Contributor', service_principal):
                 logger.warning('Could not create a service principal with the right permissions. '
                                'Are you an Owner on this project?')
-            store_acs_service_principal(subscription_id, client_secret, service_principal)
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
+    store_acs_service_principal(subscription_id, client_secret, service_principal)
+    return load_acs_service_principal(subscription_id)
 
 
 def _remove_nulls(managed_clusters):
