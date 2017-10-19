@@ -123,6 +123,10 @@ register_cli_argument('acs dcos install-cli', 'install_location',
 register_cli_argument('acs kubernetes install-cli', 'install_location',
                       options_list=('--install-location',),
                       default=_get_default_install_location('kubectl'))
+register_cli_argument('acs kubernetes install-cli', 'tool', help='The tool to install, options include kubectl, helm and dcos')
+register_cli_argument('acs kubernetes install-helm', 'install_location',
+                      options_list=('--install-location',),
+                      default=_get_default_install_location('helm'))
 
 # TODO: Make this derive from the cluster object, instead of just preset values
 register_cli_argument('acs kubernetes get-credentials', 'dns_prefix')
