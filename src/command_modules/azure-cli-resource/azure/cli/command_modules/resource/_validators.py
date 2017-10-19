@@ -42,7 +42,6 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
         if resource_name is not None:
             from msrestazure.tools import parse_resource_id, is_valid_resource_id
             if not is_valid_resource_id(resource_name):
-                print(namespace)
                 raise CLIError('--resource is not a valid resource ID. '
                                '--resource as a resource name is ignored if --resource-group is not given.')
             # resource-name is an ID, populate namespace
@@ -50,7 +49,7 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
             for id_part in ['resource_name', 'resource_type', 'resource_group']:
                 setattr(namespace, id_part, id_dict.get(id_part))
             setattr(namespace, 'resource_provider_namespace', id_dict.get('resource_namespace'))
-            setattr(namespace, 'parent_resource_path', id_dict.get('resource_parent'))
+            setattr(namespace, 'parent_resource_path', id_dict.get('resource_parent').strip('/'))
             
         if resource_type is not None:
             raise CLIError('--resource-type is ignored if --resource-group is not given.')
@@ -118,8 +117,8 @@ def validate_resource_lock(namespace):
                                                                'resource_name']):
                 raise CLIError('{} is not a valid resource-level lock id.'.format(lock_id))
     else:
-        if not getattr(namespace, 'resource_type', None):
-            raise CLIError('Missing required {} parameter.'.format('resource_type'))
+        if not getattr(namespace, 'resource_name', None):
+            raise CLIError('Missing required {} parameter.'.format('resource_name'))
         kwargs = {}
         for param in ['resource_group', 'resource_name', 'resource_provider_namespace', 'parent_resource_path',
                       'resource_type']:
