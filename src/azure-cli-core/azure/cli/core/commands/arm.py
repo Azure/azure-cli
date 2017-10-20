@@ -20,7 +20,6 @@ from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -82,6 +81,7 @@ def deployment_validate_table_format(result):
 class ResourceId(str):
 
     def __new__(cls, val):
+        from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(val):
             raise ValueError()
         return str.__new__(cls, val)
@@ -106,6 +106,7 @@ def add_id_parameters(command_table):
                 Since the id value is expected to be of type `IterateValue`, all the backing
                 (dest) fields will also be of type `IterateValue`
                 '''
+                from msrestazure.tools import parse_resource_id
                 try:
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)

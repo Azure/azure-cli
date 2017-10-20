@@ -9,10 +9,6 @@ import platform
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_exists
-from msrestazure.tools import (
-    is_valid_resource_id,
-    parse_resource_id,
-    resource_id)
 
 
 def get_folded_parameter_help_string(
@@ -50,6 +46,7 @@ def get_folded_parameter_help_string(
 def _validate_name_or_id(
         resource_group_name, property_value, property_type, parent_value, parent_type):
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
     has_parent = parent_type is not None
     if is_valid_resource_id(property_value):
         resource_id_parts = parse_resource_id(property_value)
@@ -91,6 +88,7 @@ def get_folded_parameter_validator(
 
     # construct the validator
     def validator(namespace):
+        from msrestazure.tools import resource_id
         type_field_name = '{}_type'.format(property_name)
         property_val = getattr(namespace, property_name, None)
         parent_val = getattr(namespace, parent_name, None) if parent_name else None
