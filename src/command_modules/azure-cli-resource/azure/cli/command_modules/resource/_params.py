@@ -159,7 +159,7 @@ register_cli_argument('lock', 'resource_name', options_list=('--resource', '--re
 register_cli_argument('lock', 'resource_group', resource_group_name_type, validator=validate_lock_parameters)
 
 register_cli_argument('resource lock', 'resource_group', resource_group_name_type)
-register_cli_argument('resource lock', 'resource_name', options_list=('--resource', '--resource-name'), validator=validate_resource_lock)
+register_cli_argument('resource lock', 'resource_name', options_list=('--resource', '--resource-name'), help='Name or ID of the resource being locked. If an ID is given, other resource arguments should not be given.', validator=validate_resource_lock)
 
 register_cli_argument('group lock', 'resource_group', resource_group_name_type, validator=validate_group_lock)
 

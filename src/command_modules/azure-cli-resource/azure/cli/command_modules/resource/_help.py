@@ -63,19 +63,6 @@ helps['managedapp list'] = """
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
-    parameters:
-        - name: --resource-type
-          type: string
-          text: The name of the resource type. May have a provider namespace.
-        - name: --resource-provider-namespace
-          type: string
-          text: The name of the resource provider.
-        - name: --parent-resource-path
-          type: string
-          text: The path to the parent resource of the resource being locked.
-        - name: --resource
-          type: string
-          text: The name of the resource this lock applies to.
 """
 helps['lock create'] = """
     type: command
