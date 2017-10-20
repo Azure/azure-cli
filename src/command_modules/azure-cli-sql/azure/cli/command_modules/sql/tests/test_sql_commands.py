@@ -1695,7 +1695,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         addressPrefix = '10.0.1.0/24'
         endpoint = 'Microsoft.Sql'
 
-        # Vnet 1
+        # Vnet 1 without service endpoints to test ignore-missing-vnet-service-endpoint feature
         self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
         self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {}'
                  .format(rg, vnetName1, subnetName, addressPrefix))
@@ -1723,33 +1723,35 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                  .format(vnet_rule_1, rg, server),
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
-                     JMESPathCheck('resourceGroup', rg)])
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', True)])
 
         # test sql server vnet-rule create using subnet id
-        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} -i'
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
                  .format(vnet_rule_2, rg, server, vnet_id_1),
                  checks=[
                      JMESPathCheck('name', vnet_rule_2),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', False)])
 
         # test sql server vnet-rule update rule 1 with vnet 2
         self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {}'
                  .format(vnet_rule_1, rg, server, vnet_id_2),
-
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', False)])
 
         #test sql server vnet-rule update rule 2 with vnet 1 and ignore-missing-vnet-service-endpoint flag
         self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {} -i'
                  .format(vnet_rule_2, rg, server, vnet_id_1),
-
                  checks=[
                      JMESPathCheck('name', vnet_rule_2),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', True)])
 
         # test sql server vnet-rule list
         self.cmd('sql server vnet-rule list -g {} --server {}'
