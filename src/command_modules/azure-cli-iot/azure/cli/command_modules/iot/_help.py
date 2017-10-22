@@ -8,6 +8,25 @@ from azure.cli.core.help_files import helps
 helps['iot'] = """
     type: group
     short-summary: (PREVIEW) Manage Internet of Things (IoT) assets.
+    
+    long-summary: 'Welcome to Azure CLI 2.0 IoT documentation! 
+
+    Azure CLI 2.0 IoT includes commands for creating Azure IoT Hub resources and managing devices out of the box, including the following features: 
+
+            1. Managing IoT hub instances (CRUD and configuration) 
+            2. Managing Jobs 
+            3. Managing devices 
+
+    In order to get the full IoT capability, you also need to install the IoT Extension for Azure CLI 2.0.
+
+    The new IoT extension enhances the set of commands to interact with devices, such as simulating devices or interacting with device twins. The below new features are included in the extention.
+
+            1. Simulating devices supporting amqp, mqtt and http protocols 
+            2. Sending message to devices 
+            3. Working with device twins 
+            4. Invoking device methods 
+
+    To enable the IoT extension, first you need to have Azure CLI 2.0 installed. Then, you can check out this documentation https://github.com/Azure/azure-iot-cli-extension/blob/master/README.md, which presents multiple ways to install Azure CLI 2.0.'
 """
 
 helps['iot device'] = """
