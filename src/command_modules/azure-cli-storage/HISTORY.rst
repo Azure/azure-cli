@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.19
+++++++
+* `storage account create`: defaults --sku to 'Standard_RAGRS'
+
 2.0.18
 ++++++
 * Minor fixes
