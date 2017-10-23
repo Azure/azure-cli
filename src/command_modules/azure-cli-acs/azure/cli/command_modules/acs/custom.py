@@ -1121,7 +1121,7 @@ def aks_browse(client, resource_group_name, name, disable_browser=False):
         aks_get_credentials(client, resource_group_name, name, admin=False, path=browse_path)
         # find the dashboard pod's name
         dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--namespace", "kube-system", "--output", "name",
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
              "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
         if dashboard_pod:
