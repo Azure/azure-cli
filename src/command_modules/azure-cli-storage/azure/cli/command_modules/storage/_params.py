@@ -332,7 +332,8 @@ with CommandContext('storage account create') as c:
               **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
     c.reg_arg('tags', tags_type)
     c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
-    c.reg_arg('sku', help='The storage account SKU.', default=enum_default(ResourceType.MGMT_STORAGE, 'SkuName', 'standard_ragrs'), **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
+    c.reg_arg('sku', help='The storage account SKU.', default=enum_default(ResourceType.MGMT_STORAGE, 'SkuName', 'standard_ragrs'),
+              **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
 
 with CommandContext('storage account update') as c:
     register_common_storage_account_options(c)
