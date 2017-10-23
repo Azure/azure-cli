@@ -61,7 +61,7 @@ helps['aks create'] = """
         - name: Create a Kubernetes cluster with a specific version
           text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.1
         - name: Create a Kubernetes cluster with a larger agent pool count
-          text: az aks create -g MyResourceGroup -n MyManagedCluster --agent-count 7
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
 """
 helps['aks delete'] = """
     type: command

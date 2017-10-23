@@ -1143,9 +1143,9 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
                location=None,
                admin_username="azureuser",
                kubernetes_version="1.7.7",
-               agent_vm_size="Standard_D2_v2",
-               agent_osdisk_size=0,
-               agent_count=3,
+               node_vm_size="Standard_D2_v2",
+               node_osdisk_size=0,
+               node_count=3,
                service_principal=None, client_secret=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
@@ -1163,12 +1163,12 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     :param kubernetes_version: The version of Kubernetes to use for creating
      the cluster, such as '1.7.7' or '1.8.1'.
     :type kubernetes_version: str
-    :param agent_count: the default number of agents for the agent pools.
-    :type agent_count: int
-    :param agent_vm_size: The size of the Virtual Machine.
-    :type agent_vm_size: str
-    :param agent_osdisk_size: The osDisk size in GB of agent pool Virtual Machine
-    :type agent_osdisk_size: int
+    :param node_count: the default number of nodes for the node pools.
+    :type node_count: int
+    :param node_vm_size: The size of the Virtual Machine.
+    :type node_vm_size: str
+    :param node_osdisk_size: The osDisk size in GB of node pool Virtual Machine
+    :type node_osdisk_size: int
     :param service_principal: The service principal used for cluster authentication
      to Azure APIs. If not specified, it is created for you and stored in the
      ${HOME}/.azure directory.
@@ -1203,15 +1203,15 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     ssh_config = ContainerServiceSshConfiguration(
         [ContainerServiceSshPublicKey(key_data=ssh_key_value)])
     agent_pool_profile = ContainerServiceAgentPoolProfile(
-        'agentpool1',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(agent_count),
-        vm_size=agent_vm_size,
+        'nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+        count=int(node_count),
+        vm_size=node_vm_size,
         dns_prefix=dns_name_prefix,
         os_type="Linux",
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks
     )
-    if agent_osdisk_size:
-        agent_pool_profile.os_disk_size_gb = int(agent_osdisk_size)
+    if node_osdisk_size:
+        agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
     principal_obj = _ensure_service_principal(service_principal=service_principal, client_secret=client_secret,
@@ -1296,17 +1296,17 @@ def aks_show(client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(client, resource_group_name, name, agent_count, no_wait=False):
-    """Scale the agent pool in a managed Kubernetes cluster.
-    :param agent_count: The desired number of agent nodes.
-    :type agent_count: int
+def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
+    """Scale the node pool in a managed Kubernetes cluster.
+    :param node_count: The desired number of nodes.
+    :type node_count: int
     :param no_wait: Start upgrading but return immediately instead of waiting
      until the managed cluster is upgraded.
     :type no_wait: bool
     """
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.properties.agent_pool_profiles[0].count = int(agent_count)  # pylint: disable=no-member
+    instance.properties.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
 
     # null out the service principal because otherwise validation complains
     instance.properties.service_principal_profile = None

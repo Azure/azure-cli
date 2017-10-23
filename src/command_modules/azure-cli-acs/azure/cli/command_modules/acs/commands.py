@@ -60,10 +60,10 @@ def aks_get_versions_table_format(result):
         versions.append(version)
         upgrades.append(upgrade)
 
-    result['agentPoolVersion'] = ', '.join(versions)
-    result['agentPoolUpgrades'] = ', '.join(upgrades)
+    result['nodePoolVersion'] = ', '.join(versions)
+    result['nodePoolUpgrades'] = ', '.join(upgrades)
 
-    columns = ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'agentPoolVersion', 'agentPoolUpgrades']
+    columns = ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']
     # put results in an ordered dict so the headers are predictable
     table_row = OrderedDict()
     for k in columns:

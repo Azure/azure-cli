@@ -163,9 +163,9 @@ register_extra_cli_argument('aks create', 'generate_ssh_keys', action='store_tru
 register_cli_argument('aks create', 'kubernetes_version', arg_type=k8s_version_arg_type,
                       validator=validate_k8s_version)
 register_cli_argument('aks create', 'admin_username', options_list=('--admin-username', '-u'))
-register_cli_argument('aks create', 'agent_vm_size', options_list=('--agent-vm-size', '-s'),
+register_cli_argument('aks create', 'node_vm_size', options_list=('--node-vm-size', '-s'),
                       completer=get_vm_size_completion_list)
-register_cli_argument('aks create', 'agent_count', type=int, options_list=('--agent-count', '-c'))
+register_cli_argument('aks create', 'node_count', type=int, options_list=('--node-count', '-c'))
 register_cli_argument('aks create', 'dns_name_prefix', options_list=('--dns-name-prefix', '-p'))
 register_cli_argument('aks delete', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
 register_cli_argument('aks get-credentials', 'path', options_list=('--file', '-f',),
@@ -173,7 +173,7 @@ register_cli_argument('aks get-credentials', 'path', options_list=('--file', '-f
                       type=file_type, completer=FilesCompleter())
 register_cli_argument('aks get-credentials', 'admin', options_list=('--admin', '-a'), default=False)
 register_cli_argument('aks get-versions', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
-register_cli_argument('aks scale', 'agent_count', type=int, options_list=('--agent-count', '-c'))
+register_cli_argument('aks scale', 'node_count', type=int, options_list=('--node-count', '-c'))
 register_cli_argument('aks upgrade', 'kubernetes_version', arg_type=k8s_version_arg_type,
                       validator=validate_k8s_version)
 register_cli_argument('aks upgrade', 'name', arg_type=name_arg_type, validator=validate_linux_host_name)

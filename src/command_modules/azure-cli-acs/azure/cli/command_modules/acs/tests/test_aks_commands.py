@@ -41,7 +41,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # scale-up
-        self.cmd('aks scale -g {} -n {} --agent-count 5'.format(resource_group, aks_name), checks=[
+        self.cmd('aks scale -g {} -n {} --node-count 5'.format(resource_group, aks_name), checks=[
             JMESPathCheck('properties.agentPoolProfiles[0].count', 5)
         ])
 
