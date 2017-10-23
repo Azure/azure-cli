@@ -63,6 +63,10 @@ helps['aks create'] = """
         - name: Create a Kubernetes cluster with a larger agent pool count
           text: az aks create -g MyResourceGroup -n MyManagedCluster --agent-count 7
 """
+helps['aks delete'] = """
+    type: command
+    short-summary: Delete a managed Kubernetes cluster.
+"""
 helps['aks get-versions'] = """
     type: command
     short-summary: Get versions available to upgrade a managed Kubernetes cluster.
@@ -71,7 +75,7 @@ helps['aks install-cli'] = """
     type: command
     short-summary: Download and install kubectl, the Kubernetes command line tool.
 """
-helps['aks delete'] = """
+helps['aks wait'] = """
     type: command
-    short-summary: Delete a managed Kubernetes cluster.
+    short-summary: Wait for a Kubernetes cluster to reach a desired state.
 """
