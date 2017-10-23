@@ -36,7 +36,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import APPLICATION
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regionsInPreview, regionsInProd
-from azure.cli.core.util import CLIError, shell_safe_json_parse
+from azure.cli.core.util import CLIError, shell_safe_json_parse, truncate_text
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
@@ -1186,8 +1186,8 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     try:
         if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
             raise ValueError()
-    except:
-        shortened_key = '{} ... {}'.format(ssh_key_value[:30], ssh_key_value[-30:]).strip()
+    except (TypeError, ValueError):
+        shortened_key = truncate_text(ssh_key_value)
         raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
     subscription_id = _get_subscription_id()
@@ -1232,15 +1232,6 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
 
     return client.create_or_update(
         resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
-
-
-def aks_delete(client, resource_group_name, name, no_wait=False, **kwargs):  # pylint: disable=unused-argument
-    """Delete a managed Kubernetes cluster.
-    :param no_wait: Start deleting but return immediately instead of waiting
-     until the managed cluster is deleted.
-    :type no_wait: bool
-    """
-    return client.delete(resource_group_name, name, raw=no_wait)
 
 
 def aks_get_credentials(client, resource_group_name, name, admin=False,
@@ -1290,12 +1281,6 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
                 logger.warning('Failed to merge credentials to kube config file: %s', ex)
 
 
-def aks_get_versions(client, resource_group_name, name):
-    """Get versions available to upgrade a managed Kubernetes cluster.
-    """
-    return client.get_upgrade_profile(resource_group_name, name)
-
-
 def aks_list(client, resource_group_name=None):
     """List managed Kubernetes clusters."""
     if resource_group_name:
@@ -1339,7 +1324,6 @@ def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=F
     :type no_wait: bool
     """
     instance = client.get(resource_group_name, name)
-    instance.properties.kubernetes_release = None
     instance.properties.kubernetes_version = kubernetes_version
 
     # null out the service principal because otherwise validation complains

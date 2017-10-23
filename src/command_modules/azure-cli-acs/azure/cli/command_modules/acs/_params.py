@@ -167,10 +167,12 @@ register_cli_argument('aks create', 'agent_vm_size', options_list=('--agent-vm-s
                       completer=get_vm_size_completion_list)
 register_cli_argument('aks create', 'agent_count', type=int, options_list=('--agent-count', '-c'))
 register_cli_argument('aks create', 'dns_name_prefix', options_list=('--dns-name-prefix', '-p'))
+register_cli_argument('aks delete', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
 register_cli_argument('aks get-credentials', 'path', options_list=('--file', '-f',),
                       default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                       type=file_type, completer=FilesCompleter())
 register_cli_argument('aks get-credentials', 'admin', options_list=('--admin', '-a'), default=False)
+register_cli_argument('aks get-versions', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
 register_cli_argument('aks scale', 'agent_count', type=int, options_list=('--agent-count', '-c'))
 register_cli_argument('aks upgrade', 'kubernetes_version', arg_type=k8s_version_arg_type,
                       validator=validate_k8s_version)

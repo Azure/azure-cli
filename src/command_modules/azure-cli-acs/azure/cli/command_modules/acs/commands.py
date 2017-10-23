@@ -99,13 +99,13 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                 'azure.cli.command_modules.acs.custom#aks_browse', _aks_client_factory)
     cli_command(__name__, 'aks create',
                 'azure.cli.command_modules.acs.custom#aks_create', _aks_client_factory, no_wait_param='no_wait')
-    cli_command(__name__, 'aks delete',
-                'azure.cli.command_modules.acs.custom#aks_delete', _aks_client_factory, no_wait_param='no_wait',
+    cli_command(__name__, 'aks delete', 'azure.mgmt.containerservice.operations.managed_clusters_operations' +
+                '#ManagedClustersOperations.delete', _aks_client_factory, no_wait_param='raw',
                 confirmation='Are you sure you want to perform this operation?')
     cli_command(__name__, 'aks get-credentials',
                 'azure.cli.command_modules.acs.custom#aks_get_credentials', _aks_client_factory)
-    cli_command(__name__, 'aks get-versions',
-                'azure.cli.command_modules.acs.custom#aks_get_versions', _aks_client_factory,
+    cli_command(__name__, 'aks get-versions', 'azure.mgmt.containerservice.operations.managed_clusters_operations' +
+                '#ManagedClustersOperations.get_upgrade_profile', _aks_client_factory,
                 table_transformer=aks_get_versions_table_format)
     cli_command(__name__, 'aks install-cli',
                 'azure.cli.command_modules.acs.custom#k8s_install_cli')
