@@ -4,9 +4,6 @@ set -e
 
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
-# remove this by public release
-pip install ./privates/azure_mgmt_containerservice-2.0.0-py2.py3-none-any.whl
-
 ls -la $share_folder/build
 
 ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
