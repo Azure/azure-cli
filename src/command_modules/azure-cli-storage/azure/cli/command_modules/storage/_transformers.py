@@ -105,6 +105,9 @@ def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
-    return result
+    from six.moves.urllib.parse import quote, urlparse, urlunparse
+    url_parts = urlparse(result)
+    quoted_path = quote(url_parts.path, '/()$=\',~')
+    return urlunparse(url_parts[:2] + (quoted_path,) + url_parts[3:])
 
 # endregion
