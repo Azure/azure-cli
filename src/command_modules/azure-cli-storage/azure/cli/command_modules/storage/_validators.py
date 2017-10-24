@@ -296,7 +296,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
 
-    from six.moves.urllib.parse import quote
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,
