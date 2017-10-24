@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* Minor fixes
+
 2.0.20
 ++++++
 * 2017-03-09-profile is updated to consume MGMT_STORAGE API version '2016-01-01'
