@@ -34,7 +34,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
 
-    'azure-mgmt-documentdb==0.1.3',
+    'azure-mgmt-cosmosdb==0.2.1',
     'azure-cli-core',
     'pydocumentdb>=2.0.1'
 ]

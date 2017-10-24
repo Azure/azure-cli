@@ -72,7 +72,7 @@ def get_document_client_factory(kwargs):
     return client
 
 
-def cf_documentdb(**_):
+def cf_cosmosdb(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.documentdb import DocumentDB
-    return get_mgmt_service_client(DocumentDB)
+    from azure.mgmt.cosmosdb import CosmosDB
+    return get_mgmt_service_client(CosmosDB)
