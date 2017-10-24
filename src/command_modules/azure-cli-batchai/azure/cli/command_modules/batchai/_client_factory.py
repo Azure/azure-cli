@@ -18,9 +18,5 @@ def job_client_factory(_):
     return batchai_client_factory().jobs
 
 
-def file_client_factory(_):
-    return batchai_client_factory().jobs
-
-
 def file_server_client_factory(_):
     return batchai_client_factory().file_servers
