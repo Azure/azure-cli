@@ -5,6 +5,7 @@
 
 import os
 import os.path
+import re
 
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
@@ -52,3 +53,40 @@ def validate_create_parameters(namespace):
         raise CLIError('--name has no value')
     if namespace.dns_name_prefix is not None and not namespace.dns_name_prefix:
         raise CLIError('--dns-prefix has no value')
+
+
+def validate_k8s_version(namespace):
+    """Validates a string as a possible Kubernetes version."""
+    k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+    found = k8s_release_regex.findall(namespace.kubernetes_version)
+    if found:
+        namespace.kubernetes_version = found[0]
+    else:
+        raise CLIError('--kubernetes-version should be the full version number, '
+                       'such as "1.7.7" or "1.8.1"')
+
+
+def validate_k8s_client_version(namespace):
+    """Validates a string as a possible Kubernetes version."""
+    k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*|latest)$')
+    found = k8s_release_regex.findall(namespace.client_version)
+    if found:
+        namespace.client_version = found[0]
+    else:
+        raise CLIError('--client-version should be the full version number '
+                       '(such as "1.7.7" or "1.8.1") or "latest"')
+
+
+def validate_linux_host_name(namespace):
+    """Validates a string as a legal host name component.
+
+    This validation will also occur server-side in the ARM API, but that may take
+    a minute or two before the user sees it. So it's more user-friendly to validate
+    in the CLI pre-flight.
+    """
+    # https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    found = rfc1123_regex.findall(namespace.name)
+    if not found:
+        raise CLIError('--name cannot exceed 63 characters and can only contain '
+                       'letters, numbers, or dashes (-).')

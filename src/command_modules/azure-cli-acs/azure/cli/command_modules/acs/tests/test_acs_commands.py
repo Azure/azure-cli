@@ -8,20 +8,23 @@ import tempfile
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
                                RoleBasedServicePrincipalPreparer, JMESPathCheck)
 
+# flake8: noqa
 
 class AzureContainerServiceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_acs_create_default_service(self, resource_group, resource_group_location):
         loc = resource_group_location
+        # override loc to westus2
+        loc = 'westus2'
         ssh_pubkey_file = self.generate_ssh_keys()
 
         acs_name = self.create_random_name('cliacstest', 16)
-        dns_prefix = self.create_random_name('cliasdns', 16)
+        dns_prefix = self.create_random_name('cliacsdns', 16)
 
         # create
         ssh_pubkey_file = ssh_pubkey_file.replace('\\', '\\\\')
-        create_cmd = 'acs create -g {} -n {} --dns-prefix {} --ssh-key-value {}'
-        self.cmd(create_cmd.format(resource_group, acs_name, dns_prefix, ssh_pubkey_file),
+        create_cmd = 'acs create -g {} -n {} --dns-prefix {} --ssh-key-value {} -l {}'
+        self.cmd(create_cmd.format(resource_group, acs_name, dns_prefix, ssh_pubkey_file, loc),
                  checks=[JMESPathCheck('properties.outputs.masterFQDN.value',
                                        '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, loc)),
                          JMESPathCheck('properties.outputs.agentFQDN.value',
