@@ -25,7 +25,7 @@ DEPENDENCIES = [
     'autopep8>=1.2.4',
     'pylint>=1.7.1'
     'coverage>=4.2',
-    'flake8>=3.2.1',
+    'flake8==3.5.0',
     'pycodestyle>=2.2.0',
     'nose>=1.3.7',
     'readme_renderer>=17.2',
