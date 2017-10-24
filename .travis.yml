@@ -25,3 +25,16 @@ jobs:
     - stage: verify
       script: ./scripts/ci/test_static.sh
       env: PURPOSE='Static Check'
+      python: 3.6
+    - stage: verify
+      script: ./scripts/ci/test_integration.sh
+      env: PURPOSE='Integration'
+      python: 3.6
+    - stage: verify
+      script: ./scripts/ci/test_integration.sh
+      env: PURPOSE='Integration'
+      python: 2.7
+    - stage: publish
+      script: ./scripts/ci/publish.sh
+      python: 3.6
+      if: branch = dev and type = push
