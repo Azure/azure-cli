@@ -253,7 +253,8 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
                                  source_container, source_sas, source_blob_name):
-    source_blob_url = source_blob_service.make_blob_url(source_container, source_blob_name,
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    source_blob_url = source_blob_service.make_blob_url(source_container, quote(source_blob_name, '/()$=\',~'),
                                                         sas_token=source_sas)
 
     try:
@@ -267,8 +268,9 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
                                  source_share, source_sas, source_file_dir, source_file_name):
     source_file_dir = source_file_dir if source_file_dir else None
-    file_url = source_file_service.make_file_url(source_share, source_file_dir, source_file_name,
-                                                 sas_token=source_sas)
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    file_url = source_file_service.make_file_url(source_share, quote(source_file_dir, '/()$=\',~'),
+                                                 quote(source_file_name, '/()$=\',~'), sas_token=source_sas)
 
     blob_name = os.path.join(source_file_dir, source_file_name) \
         if source_file_dir else source_file_name
