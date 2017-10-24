@@ -52,7 +52,7 @@ def get_document_client_factory(kwargs):
 
         if name and resource_group and not key:
             # if resource group name is provided find key
-            keys = cf_documentdb().database_accounts.list_keys(resource_group, name)
+            keys = cf_cosmosdb().database_accounts.list_keys(resource_group, name)
             key = keys.primary_master_key
 
         url_connection = _get_url_connection(url_connection, name)
