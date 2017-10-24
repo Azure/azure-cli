@@ -72,7 +72,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     # 1. First validate arguments
 
     if not aad_client_cert_thumbprint and not aad_client_secret:
-        raise CLIError('Please provide either --aad-client-id or --aad-client-cert-thumbprint')
+        raise CLIError('Please provide either --aad-client-cert-thumbprint or --aad-client-secret ')
 
     if volume_type is None:
         if vm.storage_profile.data_disks:
