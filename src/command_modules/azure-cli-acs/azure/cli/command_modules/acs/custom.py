@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+import base64
 import binascii
 import errno
 import json
@@ -16,6 +17,7 @@ import random
 import string
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import webbrowser
@@ -33,21 +35,30 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import APPLICATION
 from azure.cli.command_modules.acs import acs_client, proxy
-from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.acs._params import regionsInPreview, regionsInProd
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
+from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.mgmt.containerservice.models import ContainerServiceServicePrincipalProfile
+from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.models import ManagedCluster
+from azure.mgmt.containerservice.models import ManagedClusterProperties
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
 from azure.mgmt.authorization.models import RoleAssignmentProperties
+
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
@@ -73,23 +84,6 @@ def which(binary):
 
 def _resource_client_factory():
     return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
-
-
-def cf_providers():
-    return _resource_client_factory().providers
-
-
-def register_providers():
-    providers = cf_providers()
-
-    namespaces = ['Microsoft.Network', 'Microsoft.Compute', 'Microsoft.Storage']
-    for namespace in namespaces:
-        state = providers.get(resource_provider_namespace=namespace)
-        if state.registration_state != 'Registered':  # pylint: disable=no-member
-            logger.info('registering %s', namespace)
-            providers.register(resource_provider_namespace=namespace)
-        else:
-            logger.info('%s is already registered', namespace)
 
 
 def wait_then_open(url):
@@ -285,13 +279,15 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
 
 
 def k8s_install_cli(client_version='latest', install_location=None):
-    """ Downloads the kubectl command line from Kubernetes """
+    """Install kubectl, a command-line interface for Kubernetes clusters."""
 
     if client_version == 'latest':
         context = _ssl_context()
         version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt',
                           context=context).read()
         client_version = version.decode('UTF-8').strip()
+    else:
+        client_version = "v%s" % client_version
 
     file_url = ''
     system = platform.system()
@@ -311,17 +307,8 @@ def k8s_install_cli(client_version='latest', install_location=None):
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as err:
-        raise CLIError('Connection error while attempting to download client ({})'.format(err))
-
-
-def _validate_service_principal(client, sp_id):
-    # discard the result, we're trusting this to throw if it can't find something
-    try:
-        show_service_principal(client.service_principals, sp_id)
-    except:  # pylint: disable=bare-except
-        raise CLIError(
-            'Failed to validate service principal, if this persists try deleting $HOME/.azure/acsServicePrincipal.json')
+    except IOError as ex:
+        raise CLIError('Connection error while attempting to download client ({})'.format(ex))
 
 
 def _build_service_principal(client, name, url, client_secret):
@@ -358,7 +345,7 @@ def _add_role_assignment(role, service_principal, delay=2):
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
             # Sleep for a while to get role assignment propagated
-            time.sleep(delay + delay * x)
+            time.sleep(20)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -501,14 +488,13 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
-    if ssh_key_value is not None and not _is_valid_ssh_rsa_public_key(ssh_key_value):
+    if ssh_key_value is not None and not is_valid_ssh_rsa_public_key(ssh_key_value):
         raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(ssh_key_value))
 
     subscription_id = _get_subscription_id()
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    register_providers()
     groups = _resource_client_factory().resource_groups
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
@@ -526,37 +512,10 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             api_version = "2017-01-31"
 
     if orchestrator_type.lower() == 'kubernetes':
-        # TODO: This really needs to be broken out and unit tested.
-        client = _graph_client_factory()
-        if not service_principal:
-            # --service-principal not specified, try to load it from local disk
-            principalObj = load_acs_service_principal(subscription_id)
-            if principalObj:
-                service_principal = principalObj.get('service_principal')
-                client_secret = principalObj.get('client_secret')
-                _validate_service_principal(client, service_principal)
-            else:
-                # Nothing to load, make one.
-                if not client_secret:
-                    client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
-                salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-                url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
-
-                service_principal = _build_service_principal(client, name, url, client_secret)
-                if not service_principal:
-                    raise CLIError('Could not create a service principal with the right permissions. '
-                                   'Are you an Owner on this project?')
-                logger.info('Created a service principal: %s', service_principal)
-                store_acs_service_principal(subscription_id, client_secret, service_principal)
-            # Either way, update the role assignment, this fixes things if we fail part-way through
-            if not _add_role_assignment('Contributor', service_principal):
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-        else:
-            # --service-principal specfied, validate --client-secret was too
-            if not client_secret:
-                raise CLIError('--client-secret is required if --service-principal is specified')
-            _validate_service_principal(client, service_principal)
+        principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
+                                                  dns_name_prefix, location, name)
+        client_secret = principal_obj.get("client_secret")
+        service_principal = principal_obj.get("service_principal")
 
     elif windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
@@ -866,9 +825,6 @@ def merge_kubernetes_configurations(existing_file, addition_file):
     except yaml.parser.ParserError as ex:
         raise CLIError('Error parsing {} ({})'.format(existing_file, str(ex)))
 
-    if existing is None:
-        raise CLIError('failed to load existing configuration from {}'.format(existing_file))
-
     try:
         with open(addition_file) as stream:
             addition = yaml.safe_load(stream)
@@ -883,13 +839,20 @@ def merge_kubernetes_configurations(existing_file, addition_file):
     if addition is None:
         raise CLIError('failed to load additional configuration from {}'.format(addition_file))
 
-    _handle_merge(existing, addition, 'clusters')
-    _handle_merge(existing, addition, 'users')
-    _handle_merge(existing, addition, 'contexts')
-    existing['current-context'] = addition['current-context']
+    if existing is None:
+        existing = addition
+    else:
+        _handle_merge(existing, addition, 'clusters')
+        _handle_merge(existing, addition, 'users')
+        _handle_merge(existing, addition, 'contexts')
+        existing['current-context'] = addition['current-context']
 
     with open(existing_file, 'w+') as stream:
         yaml.dump(existing, stream, default_flow_style=True)
+
+    current_context = addition.get('current-context', 'UNKNOWN')
+    msg = 'Merged "{}" as current context in {}'.format(current_context, existing_file)
+    print(msg)
 
 
 def _get_host_name(acs_info):
@@ -1138,3 +1101,312 @@ def _update_dict(dict1, dict2):
     cp = dict1.copy()
     cp.update(dict2)
     return cp
+
+
+def aks_browse(client, resource_group_name, name, disable_browser=False):
+    """
+    Open a web browser to the dashboard for a managed Kubernetes cluster.
+
+    :param disable_browser: If true, don't launch a web browser after establishing the
+     kubectl port-forward
+    :type disable_browser: bool
+    """
+    if not which('kubectl'):
+        raise CLIError('Can not find kubectl executable in PATH')
+
+    proxy_url = 'http://127.0.0.1:8001/'
+    with tempfile.NamedTemporaryFile(mode='w+t') as kube_config:
+        browse_path = kube_config.name
+        # TODO: need to add an --admin option?
+        aks_get_credentials(client, resource_group_name, name, admin=False, path=browse_path)
+        # find the dashboard pod's name
+        dashboard_pod = subprocess.check_output(
+            ["kubectl", "get", "pods", "--namespace", "kube-system", "--output", "name",
+             "--selector", "k8s-app=kubernetes-dashboard"],
+            universal_newlines=True)
+        if dashboard_pod:
+            # remove the "pods/" prefix from the name
+            dashboard_pod = str(dashboard_pod)[5:].strip()
+        else:
+            raise CLIError("Couldn't find the Kubernetes dashboard pod.")
+        # launch kubectl port-forward locally to access the remote dashboard
+        logger.warning('Proxy running on {}'.format(proxy_url))
+        logger.warning('Press CTRL+C to close the tunnel...')
+        if not disable_browser:
+            wait_then_open_async(proxy_url)
+        subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                         "port-forward", dashboard_pod, "8001:9090"])
+
+
+def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
+               dns_name_prefix=None,
+               location=None,
+               admin_username="azureuser",
+               kubernetes_version="1.7.7",
+               agent_vm_size="Standard_D2_v2",
+               agent_osdisk_size=0,
+               agent_count=3,
+               service_principal=None, client_secret=None,
+               tags=None,
+               generate_ssh_keys=False,  # pylint: disable=unused-argument
+               no_wait=False):
+    """Create a managed Kubernetes cluster.
+    :type dns_name_prefix: str
+    :param location: Location for VM resources.
+    :type location: str
+    :param ssh_key_value: Configure all linux machines with the SSH RSA
+     public key string.  Your key should include three parts, for example
+    'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm
+    :type ssh_key_value: str
+    :param admin_username: User name for the Linux Virtual Machines.
+    :type admin_username: str
+    :param kubernetes_version: The version of Kubernetes to use for creating
+     the cluster, such as '1.7.7' or '1.8.1'.
+    :type kubernetes_version: str
+    :param agent_count: the default number of agents for the agent pools.
+    :type agent_count: int
+    :param agent_vm_size: The size of the Virtual Machine.
+    :type agent_vm_size: str
+    :param agent_osdisk_size: The osDisk size in GB of agent pool Virtual Machine
+    :type agent_osdisk_size: int
+    :param service_principal: The service principal used for cluster authentication
+     to Azure APIs. If not specified, it is created for you and stored in the
+     ${HOME}/.azure directory.
+    :type service_principal: str
+    :param client_secret: The secret associated with the service principal. If
+     --service-principal is specified, then secret should also be specified. If
+     --service-principal is not specified, the secret is auto-generated for you
+     and stored in ${HOME}/.azure/ directory.
+    :param tags: Tags object.
+    :type tags: object
+    :param no_wait: Start creating but return immediately instead of waiting
+     until the managed cluster is created.
+    :type no_wait: bool
+    """
+    try:
+        if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
+            raise ValueError()
+    except:
+        shortened_key = '{} ... {}'.format(ssh_key_value[:30], ssh_key_value[-30:]).strip()
+        raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
+
+    subscription_id = _get_subscription_id()
+    if not dns_name_prefix:
+        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
+
+    groups = _resource_client_factory().resource_groups
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    rg = groups.get(resource_group_name)
+    if location is None:
+        location = rg.location  # pylint:disable=no-member
+
+    ssh_config = ContainerServiceSshConfiguration(
+        [ContainerServiceSshPublicKey(key_data=ssh_key_value)])
+    agent_pool_profile = ContainerServiceAgentPoolProfile(
+        'agentpool1',  # Must be 12 chars or less before ACS RP adds to it
+        count=int(agent_count),
+        vm_size=agent_vm_size,
+        dns_prefix=dns_name_prefix,
+        os_type="Linux",
+        storage_profile=ContainerServiceStorageProfileTypes.managed_disks
+    )
+    if agent_osdisk_size:
+        agent_pool_profile.os_disk_size_gb = int(agent_osdisk_size)
+
+    linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
+    principal_obj = _ensure_service_principal(service_principal=service_principal, client_secret=client_secret,
+                                              subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                              location=location, name=name)
+    service_principal_profile = ContainerServiceServicePrincipalProfile(
+        client_id=principal_obj.get("service_principal"),
+        secret=principal_obj.get("client_secret"),
+        key_vault_secret_ref=None)
+
+    props = ManagedClusterProperties(
+        dns_prefix=dns_name_prefix,
+        kubernetes_version=kubernetes_version,
+        agent_pool_profiles=[agent_pool_profile],
+        linux_profile=linux_profile,
+        service_principal_profile=service_principal_profile)
+    mc = ManagedCluster(location=location, tags=tags, properties=props)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
+
+
+def aks_delete(client, resource_group_name, name, no_wait=False, **kwargs):  # pylint: disable=unused-argument
+    """Delete a managed Kubernetes cluster.
+    :param no_wait: Start deleting but return immediately instead of waiting
+     until the managed cluster is deleted.
+    :type no_wait: bool
+    """
+    return client.delete(resource_group_name, name, raw=no_wait)
+
+
+def aks_get_credentials(client, resource_group_name, name, admin=False,
+                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
+    """Get credentials to access a managed Kubernetes cluster.
+    :param path: A kubectl config file to create or update. Use "-" to print YAML
+     to stdout instead
+    :type path: str
+    :param admin: Get the "clusterAdmin" kubectl config instead of the default "clusterUser"
+    :type admin: bool
+    """
+    mc = aks_show(client, resource_group_name, name)
+    access_profiles = mc.properties.access_profiles
+    if not access_profiles:
+        msg = "No Kubernetes access profiles found. Cluster provisioning state is \"{}\"."
+        raise CLIError(msg.format(mc.properties.provisioning_state))
+    else:
+        access_profiles = access_profiles.as_dict()
+        access_profile = access_profiles.get('cluster_admin' if admin else 'cluster_user')
+        encoded_kubeconfig = access_profile.get('kube_config')
+        kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
+
+        # Special case for printing to stdout
+        if path == "-":
+            print(kubeconfig)
+            return
+
+        # ensure that at least an empty ~/.kube/config exists
+        directory = os.path.dirname(path)
+        if not os.path.exists(directory):
+            try:
+                os.makedirs(directory)
+            except OSError as ex:
+                if ex.errno != errno.EEXIST:
+                    raise
+        if not os.path.exists(path):
+            with open(path, 'w+t'):
+                pass
+
+        # merge the new kubeconfig into the existing one
+        with tempfile.NamedTemporaryFile(mode='w+t') as additional_file:
+            additional_file.write(kubeconfig)
+            additional_file.flush()
+            try:
+                merge_kubernetes_configurations(path, additional_file.name)
+            except yaml.YAMLError as ex:
+                logger.warning('Failed to merge credentials to kube config file: %s', ex)
+
+
+def aks_get_versions(client, resource_group_name, name):
+    """Get versions available to upgrade a managed Kubernetes cluster.
+    """
+    return client.get_upgrade_profile(resource_group_name, name)
+
+
+def aks_list(client, resource_group_name=None):
+    """List managed Kubernetes clusters."""
+    if resource_group_name:
+        managed_clusters = client.list_by_resource_group(resource_group_name)
+    else:
+        managed_clusters = client.list()
+    return _remove_nulls(list(managed_clusters))
+
+
+def aks_show(client, resource_group_name, name):
+    """Show a managed Kubernetes cluster."""
+    mc = client.get(resource_group_name, name)
+    return _remove_nulls([mc])[0]
+
+
+def aks_scale(client, resource_group_name, name, agent_count, no_wait=False):
+    """Scale the agent pool in a managed Kubernetes cluster.
+    :param agent_count: The desired number of agent nodes.
+    :type agent_count: int
+    :param no_wait: Start upgrading but return immediately instead of waiting
+     until the managed cluster is upgraded.
+    :type no_wait: bool
+    """
+    instance = client.get(resource_group_name, name)
+    # TODO: change this approach when we support multiple agent pools.
+    instance.properties.agent_pool_profiles[0].count = int(agent_count)  # pylint: disable=no-member
+
+    # null out the service principal because otherwise validation complains
+    instance.properties.service_principal_profile = None
+
+    return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
+
+
+def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
+    """Upgrade a managed Kubernetes cluster to a newer version.
+    :param kubernetes_version: The version of Kubernetes to upgrade the cluster to,
+    such as '1.7.7' or '1.8.1'.
+    :type kubernetes_version: str
+    :param no_wait: Start upgrading but return immediately instead of waiting
+     until the managed cluster is upgraded.
+    :type no_wait: bool
+    """
+    instance = client.get(resource_group_name, name)
+    instance.properties.kubernetes_release = None
+    instance.properties.kubernetes_version = kubernetes_version
+
+    # null out the service principal because otherwise validation complains
+    instance.properties.service_principal_profile = None
+
+    return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
+
+
+def _ensure_service_principal(service_principal=None,
+                              client_secret=None,
+                              subscription_id=None,
+                              dns_name_prefix=None,
+                              location=None,
+                              name=None):
+    # TODO: This really needs to be unit tested.
+    client = _graph_client_factory()
+    if not service_principal:
+        # --service-principal not specified, try to load it from local disk
+        principal_obj = load_acs_service_principal(subscription_id)
+        if principal_obj:
+            service_principal = principal_obj.get('service_principal')
+            client_secret = principal_obj.get('client_secret')
+        else:
+            # Nothing to load, make one.
+            if not client_secret:
+                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+
+            service_principal = _build_service_principal(client, name, url, client_secret)
+            if not service_principal:
+                raise CLIError('Could not create a service principal with the right permissions. '
+                               'Are you an Owner on this project?')
+            logger.info('Created a service principal: %s', service_principal)
+            # add role first before save it
+            if not _add_role_assignment('Contributor', service_principal):
+                logger.warning('Could not create a service principal with the right permissions. '
+                               'Are you an Owner on this project?')
+    else:
+        # --service-principal specfied, validate --client-secret was too
+        if not client_secret:
+            raise CLIError('--client-secret is required if --service-principal is specified')
+    store_acs_service_principal(subscription_id, client_secret, service_principal)
+    return load_acs_service_principal(subscription_id)
+
+
+def _remove_nulls(managed_clusters):
+    """
+    Remove some often-empty fields from a list of ManagedClusters, so the JSON representation
+    doesn't contain distracting null fields.
+
+    This works around a quirk of the SDK for python behavior. These fields are not sent
+    by the server, but get recreated by the CLI's own "to_dict" serialization.
+    """
+    attrs = ['tags']
+    ap_attrs = ['dns_prefix', 'fqdn', 'os_disk_size_gb', 'ports', 'vnet_subnet_id']
+    sp_attrs = ['key_vault_secret_ref', 'secret']
+    for managed_cluster in managed_clusters:
+        for attr in attrs:
+            if getattr(managed_cluster, attr, None) is None:
+                delattr(managed_cluster, attr)
+        props = managed_cluster.properties
+        for ap_profile in props.agent_pool_profiles:
+            for attr in ap_attrs:
+                if getattr(ap_profile, attr, None) is None:
+                    delattr(ap_profile, attr)
+        for attr in sp_attrs:
+            if getattr(props.service_principal_profile, attr, None) is None:
+                delattr(props.service_principal_profile, attr)
+    return managed_clusters
