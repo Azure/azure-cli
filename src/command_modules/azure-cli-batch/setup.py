@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "3.0.3+dev"
+VERSION = "3.1.6"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -33,8 +33,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-batch==3.0.0',
-    'azure-mgmt-batch==4.0.0',
+    'azure-batch==4.0.0',
+    'azure-batch-extensions>=1.0,<1.1',
+    'azure-mgmt-batch==4.1.0',
     'azure-mgmt-keyvault==0.40.0',
     'azure-cli-core'
 ]

@@ -9,7 +9,7 @@ import sys
 import json
 import base64
 import binascii
-from datetime import datetime, timedelta
+from datetime import date, time, datetime, timedelta
 from enum import Enum
 
 import six
@@ -63,6 +63,7 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
 def show_version_info_exit(out_file):
     import platform
     from pip import get_installed_distributions
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
     installed_dists = get_installed_distributions(local_only=True)
 
     cli_info = None
@@ -84,9 +85,18 @@ def show_version_info_exit(out_file):
     print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]),
           file=out_file)
     print(file=out_file)
+    extensions = get_extensions()
+    if extensions:
+        print('Extensions:', file=out_file)
+        print('\n'.join(['{} ({})'.format(c.name, c.version) for c in extensions]),
+              file=out_file)
+        print(file=out_file)
+    print("Python location '{}'".format(sys.executable), file=out_file)
+    print("Extensions directory '{}'".format(EXTENSIONS_DIR), file=out_file)
+    print(file=out_file)
     print('Python ({}) {}'.format(platform.system(), sys.version), file=out_file)
     print(file=out_file)
-    print("Python location '{}'".format(sys.executable), file=out_file)
+    print('Legal docs and information: aka.ms/AzureCliLegal', file=out_file)
     print(file=out_file)
     sys.exit(0)
 
@@ -122,16 +132,16 @@ def read_file_content(file_path, allow_binary=False):
             with codecs_open(file_path, encoding=encoding) as f:
                 logger.debug("attempting to read file %s as %s", file_path, encoding)
                 return f.read()
-        except UnicodeDecodeError:
-            if allow_binary:
-                with open(file_path, 'rb') as input_file:
-                    logger.debug("attempting to read file %s as binary", file_path)
-                    return base64.b64encode(input_file.read()).decode("utf-8")
-            else:
-                raise
-        except UnicodeError:
+        except (UnicodeError, UnicodeDecodeError):
             pass
 
+    if allow_binary:
+        try:
+            with open(file_path, 'rb') as input_file:
+                logger.debug("attempting to read file %s as binary", file_path)
+                return base64.b64encode(input_file.read()).decode("utf-8")
+        except Exception:  # pylint: disable=broad-except
+            pass
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
@@ -160,7 +170,7 @@ def todict(obj):  # pylint: disable=too-many-return-statements
         return [todict(a) for a in obj]
     elif isinstance(obj, Enum):
         return obj.value
-    elif isinstance(obj, datetime):
+    elif isinstance(obj, (date, time, datetime)):
         return obj.isoformat()
     elif isinstance(obj, timedelta):
         return str(obj)
@@ -232,3 +242,8 @@ def hash_string(value, length=16, force_lower=False):
     while len(digest) < length:
         digest = digest + digest
     return digest[:length]
+
+
+def in_cloud_console():
+    import os
+    return os.environ.get('ACC_CLOUD', None)

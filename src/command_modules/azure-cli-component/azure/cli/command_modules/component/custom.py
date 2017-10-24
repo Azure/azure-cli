@@ -9,6 +9,7 @@ from six import StringIO
 from azure.cli.core.util import CLIError
 from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.prompting import prompt_y_n, NoTTYException
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -16,16 +17,20 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 
-def _verify_not_dev():
-    from azure.cli.core import __version__ as core_version
-    dev_version = core_version.endswith('+dev')
-    if dev_version:
-        raise CLIError('This operation is not available in the developer version of the CLI.')
+def _deprecate_warning():
+    logger.warning("The 'component' commands will be deprecated in the future.")
+    logger.warning("az component and subcommands may not work unless the CLI is installed with pip.")
+    try:
+        ans = prompt_y_n("Are you sure you want to continue?", default='n')
+        if not ans:
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        pass
 
 
 def list_components():
     """ List the installed components """
-    _verify_not_dev()
+    _deprecate_warning()
     import pip
     return sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''), 'version': dist.version}
                    for dist in pip.get_installed_distributions(local_only=True)
@@ -53,7 +58,7 @@ def _get_first_party_pypi_command_modules():
 
 def list_available_components():
     """ List publicly available components that can be installed """
-    _verify_not_dev()
+    _deprecate_warning()
     import pip
     available_components = []
     installed_component_names = [dist.key.replace(COMPONENT_PREFIX, '') for dist in
@@ -74,7 +79,7 @@ def list_available_components():
 
 def remove(component_name):
     """ Remove a component """
-    _verify_not_dev()
+    _deprecate_warning()
     if component_name in ['nspkg', 'core']:
         raise CLIError("This component cannot be removed, it is required for the CLI to function.")
     import pip
@@ -166,7 +171,7 @@ def update(private=False,
            additional_components=None,
            allow_third_party=False):
     """ Update the CLI and all installed components """
-    _verify_not_dev()
+    _deprecate_warning()
     import pip
     # Update the CLI itself
     package_list = [CLI_PACKAGE_NAME]

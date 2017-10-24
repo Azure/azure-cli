@@ -12,10 +12,10 @@ helps['billing'] = """
 
 helps['billing invoice'] = """
     type: group
-    short-summary: Get billing invoices of the subscription.
+    short-summary: Get billing invoices for a subscription.
 """
 
 helps['billing period'] = """
     type: group
-    short-summary: Get billing periods of the subscription.
+    short-summary: Get billing periods for a subscription.
 """

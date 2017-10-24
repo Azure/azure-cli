@@ -3,8 +3,44 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+2.0.18
+++++++
+* Minor fixes
+
+2.0.17 (2017-10-09)
++++++++++++++++++++
+* File share snapshot
+
+2.0.16 (2017-09-22)
++++++++++++++++++++
+* `storage account network-rule`: Fixed issue where commands may fail after updating the SDK.
+
+2.0.15 (2017-09-11)
++++++++++++++++++++
+* minor fixes
+
+2.0.14 (2017-08-31)
++++++++++++++++++++
+* `storage account create`: Fix issue where storage accounts could not be created in regions that don't
+  support the NetworkACLs feature.
+* Deduce content type and content encoding during blob and file upload if neither content type and content encoding are specified.
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* Enable set blob tier
+* `storage account create/update`: Add `--bypass` and `--default-action` arguments to support service tunneling.
+* `storage account network-rule`: Added commands to add VNET rules and IP based rules.
+* Enable service encryption by customer managed key
+* Breaking change: rename --encryption option to --encryption-services for az storage account create and az storage account update command.
+* Fix #4220: az storage account update encryption - syntax mismatch
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
+* Enable create storage account with system assigned identity
+* Enable update storage account with system assigned identity
+
+2.0.11 (2017-07-27)
++++++++++++++++++++
 * Remove --marker option from storage blob list, storage container list, and storage share list commands. The change is a part of the solution to issue #3745. This is technically a breaking change. However since the removed options never works, the impact is limited.
 * Enable create https only storage account.
 

@@ -64,7 +64,7 @@ def metadata_item_format(value):
         data_name, data_value = value.split('=')
     except ValueError:
         message = ("Incorrectly formatted metadata. "
-                   "Argmuent values should be in the format a=b c=d")
+                   "Argument values should be in the format a=b c=d")
         raise ValueError(message)
     return {'name': data_name, 'value': data_value}
 
@@ -74,8 +74,8 @@ def environment_setting_format(value):
     try:
         env_name, env_value = value.split('=')
     except ValueError:
-        message = ("Incorrectly formatted enviroment settings. "
-                   "Argmuent values should be in the format a=b c=d")
+        message = ("Incorrectly formatted environment settings. "
+                   "Argument values should be in the format a=b c=d")
         raise ValueError(message)
     return {'name': env_name, 'value': env_value}
 
@@ -103,7 +103,7 @@ def task_id_ranges_format(value):
         start, end = [int(i) for i in value.split('-')]
     except ValueError:
         message = ("Incorrectly formatted task ID range. "
-                   "Argmuent values should be numbers in the format 'start-end'")
+                   "Argument values should be numbers in the format 'start-end'")
         raise ValueError(message)
     return {'start': start, 'end': end}
 
@@ -111,10 +111,10 @@ def task_id_ranges_format(value):
 def resource_file_format(value):
     """Space separated resource references in filename=blobsource format."""
     try:
-        file_name, blob_source = value.split('=')
+        file_name, blob_source = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted resource reference. "
-                   "Argmuent values should be in the format filename=blobsource")
+                   "Argument values should be in the format filename=blobsource")
         raise ValueError(message)
     return {'file_path': file_name, 'blob_source': blob_source}
 
@@ -264,14 +264,17 @@ def validate_pool_settings(ns, parser):
             ns.version = 'latest'
             try:
                 ns.publisher, ns.offer, ns.sku = ns.image.split(':', 2)
+                try:
+                    ns.sku, ns.version = ns.sku.split(':', 1)
+                except ValueError:
+                    pass
             except ValueError:
-                message = ("Incorrect format for VM image URN. Should be in the format: \n"
-                           "'publisher:offer:sku[:version]'")
-                raise ValueError(message)
-            try:
-                ns.sku, ns.version = ns.sku.split(':', 1)
-            except ValueError:
-                pass
+                if '/' not in ns.image:
+                    message = ("Incorrect format for VM image. Should be in the format: \n"
+                               "'publisher:offer:sku[:version]' OR a URL to an ARM image.")
+                    raise ValueError(message)
+
+                ns.virtual_machine_image_id = ns.image
             del ns.image
         groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
         parser.parse_mutually_exclusive(ns, True, groups)

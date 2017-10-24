@@ -24,6 +24,31 @@ from ._client_factory import _compute_client_factory
 logger = azlogging.get_az_logger(__name__)
 
 
+def validate_asg_names_or_ids(namespace):
+    from azure.cli.core.profiles import get_sdk, ResourceType
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    ApplicationSecurityGroup = get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationSecurityGroup', mod='models')
+
+    resource_group = namespace.resource_group_name
+    subscription_id = get_subscription_id()
+    names_or_ids = getattr(namespace, 'application_security_groups')
+    ids = []
+
+    if names_or_ids == [""] or not names_or_ids:
+        return
+
+    for val in names_or_ids:
+        if not is_valid_resource_id(val):
+            val = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group,
+                namespace='Microsoft.Network', type='applicationSecurityGroups',
+                name=val
+            )
+        ids.append(ApplicationSecurityGroup(id=val))
+    setattr(namespace, 'application_security_groups', ids)
+
+
 def validate_nsg_name(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
@@ -157,32 +182,36 @@ def _parse_image_argument(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
-        compute_client = _compute_client_factory()
-        if namespace.os_version.lower() == 'latest':
-            top_one = compute_client.virtual_machine_images.list(namespace.location,
-                                                                 namespace.os_publisher,
-                                                                 namespace.os_offer,
-                                                                 namespace.os_sku,
-                                                                 top=1,
-                                                                 orderby='name desc')
-            if not top_one:
-                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
+        try:
+            compute_client = _compute_client_factory()
+            if namespace.os_version.lower() == 'latest':
+                top_one = compute_client.virtual_machine_images.list(namespace.location,
+                                                                     namespace.os_publisher,
+                                                                     namespace.os_offer,
+                                                                     namespace.os_sku,
+                                                                     top=1,
+                                                                     orderby='name desc')
+                if not top_one:
+                    raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
 
-            image_version = top_one[0].name
-        else:
-            image_version = namespace.os_version
+                image_version = top_one[0].name
+            else:
+                image_version = namespace.os_version
 
-        image = compute_client.virtual_machine_images.get(namespace.location,
-                                                          namespace.os_publisher,
-                                                          namespace.os_offer,
-                                                          namespace.os_sku,
-                                                          image_version)
+            image = compute_client.virtual_machine_images.get(namespace.location,
+                                                              namespace.os_publisher,
+                                                              namespace.os_offer,
+                                                              namespace.os_sku,
+                                                              image_version)
 
-        # pylint: disable=no-member
-        if image.plan:
-            namespace.plan_name = image.plan.name
-            namespace.plan_product = image.plan.product
-            namespace.plan_publisher = image.plan.publisher
+            # pylint: disable=no-member
+            if image.plan:
+                namespace.plan_name = image.plan.name
+                namespace.plan_product = image.plan.product
+                namespace.plan_publisher = image.plan.publisher
+        except CloudError as ex:
+            logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
+                           "will be skipped", namespace.image, ex.message)
         return 'urn'
 
     # 4 - check if a fully-qualified ID (assumes it is an image ID)
@@ -310,7 +339,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
                 forbidden.remove(prop)
 
     # set default storage SKU if not provided and using an image based OS
-    if not namespace.storage_sku and namespace.storage_profile not in [StorageProfile.ManagedSpecializedOSDisk, StorageProfile.SASpecializedOSDisk]:  # pylint: disable=line-too-long
+    if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
@@ -526,6 +555,12 @@ def _validate_vm_create_nsg(namespace):
         logger.debug('new NSG will be created')
 
 
+def _validate_vmss_create_nsg(namespace):
+    if namespace.nsg:
+        namespace.nsg = _get_resource_id(namespace.nsg, namespace.resource_group_name,
+                                         'networkSecurityGroups', 'Microsoft.Network')
+
+
 def _validate_vm_create_public_ip(namespace):
     if namespace.public_ip_address:
         if check_existence(namespace.public_ip_address, namespace.resource_group_name,
@@ -648,7 +683,7 @@ def _validate_admin_username(username, os_type):
     disallowed_user_names = [
         "administrator", "admin", "user", "user1", "test", "user2",
         "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm",
-        "admin2", "aspnet", "backup", "console", "david", "guest", "john",
+        "admin2", "aspnet", "backup", "console", "guest",
         "owner", "root", "server", "sql", "support", "support_388945a0",
         "sys", "test2", "test3", "user4", "user5"]
     if username.lower() in disallowed_user_names:
@@ -702,21 +737,16 @@ def validate_ssh_key(namespace):
     namespace.ssh_key_value = content
 
 
-def _validate_vm_vmss_msi(namespace):
-    if namespace.assign_identity:
-        _resolve_msi_role_and_scope(namespace)
+def _validate_vm_vmss_msi(namespace, from_set_command=False):
+    if from_set_command or namespace.assign_identity:
+        if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
+            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
+                namespace.identity_role))
+        # keep 'identity_role' for output as logical name is more readable
+        if namespace.identity_scope:
+            setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
-
-
-def _resolve_msi_role_and_scope(namespace):
-    if not namespace.identity_scope:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        subscription_id = get_subscription_id()
-        namespace.identity_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id,
-                                                                                namespace.resource_group_name)
-    # keep 'identity_role' for output as logical name is more readable
-    setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
 
 
 def _resolve_role_id(role, scope):
@@ -833,12 +863,13 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         if namespace.application_gateway:
             client = get_network_client().application_gateways
             try:
-                client.get(namespace.resource_group_name, namespace.application_gateway)
+                rg = parse_resource_id(namespace.application_gateway).get(
+                    'resource_group', namespace.resource_group_name)
+                ag_name = parse_resource_id(namespace.application_gateway)['name']
+                client.get(rg, ag_name)
                 namespace.app_gateway_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
-                    _get_default_address_pool(namespace.resource_group_name,
-                                              namespace.application_gateway,
-                                              'application_gateways')
+                    _get_default_address_pool(rg, ag_name, 'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
             except CloudError:
                 namespace.app_gateway_type = 'new'
@@ -859,7 +890,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
                 required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
-        forbidden = ['nat_pool_name', 'load_balancer']
+        forbidden = ['nat_pool_name', 'load_balancer', 'health_probe']
         validate_parameter_set(namespace, required, forbidden, description='network balancer: application gateway')
 
     elif balancer_type == 'loadBalancer':
@@ -870,13 +901,21 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         validate_parameter_set(namespace, required, forbidden, description='network balancer: load balancer')
 
         if namespace.load_balancer:
-            if check_existence(namespace.load_balancer, namespace.resource_group_name,
-                               'Microsoft.Network', 'loadBalancers'):
+            rg = parse_resource_id(namespace.load_balancer).get('resource_group', namespace.resource_group_name)
+            lb_name = parse_resource_id(namespace.load_balancer)['name']
+            lb = get_network_lb(namespace.resource_group_name, lb_name)
+            if lb:
                 namespace.load_balancer_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
-                    _get_default_address_pool(namespace.resource_group_name,
-                                              namespace.load_balancer,
-                                              'load_balancers')
+                    _get_default_address_pool(rg, lb_name, 'load_balancers')
+                if not namespace.nat_pool_name:
+                    if len(lb.inbound_nat_pools) > 1:
+                        raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
+                            '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
+                    elif not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
+                        logger.warning("No inbound nat pool was configured on '{}'".format(namespace.load_balancer))
+                    else:
+                        namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'
@@ -895,6 +934,14 @@ def get_network_client():
     return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
 
 
+def get_network_lb(resource_group_name, lb_name):
+    network_client = get_network_client()
+    try:
+        return network_client.load_balancers.get(resource_group_name, lb_name)
+    except CloudError:
+        return None
+
+
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
@@ -902,8 +949,12 @@ def process_vmss_create_namespace(namespace):
     _validate_vmss_create_load_balancer_or_app_gateway(namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
+    _validate_vmss_create_nsg(namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(namespace)
+
+    if namespace.license_type and namespace.os_type.lower() != 'windows':
+        raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
@@ -1001,5 +1052,5 @@ def process_disk_encryption_namespace(namespace):
 
 
 def process_assign_identity_namespace(namespace):
-    _resolve_msi_role_and_scope(namespace)
+    _validate_vm_vmss_msi(namespace, from_set_command=True)
 # endregion

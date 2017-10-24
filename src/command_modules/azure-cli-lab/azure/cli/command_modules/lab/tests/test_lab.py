@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk.vcr_test_base import (
-    ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck)
+from azure.cli.testsdk.vcr_test_base import ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck
+from azure.cli.testsdk import record_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 TEMPLATE = '{}/lab_template.json'.format(TEST_DIR)
@@ -19,6 +19,7 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
         super(LabGalleryVMMgmtScenarioTest, self).__init__(__file__, test_method,
                                                            resource_group='cliautomation')
 
+    @record_only()
     def test_lab_gallery_vm_mgmt(self):
         self.execute()
 
@@ -109,6 +110,7 @@ class LabEnvironmentMgmtScenarioTest(ResourceGroupVCRTestBase):
         super(LabEnvironmentMgmtScenarioTest, self).__init__(__file__, test_method,
                                                              resource_group='cliautomation01')
 
+    @record_only()
     def test_lab_environment_mgmt(self):
         self.execute()
 

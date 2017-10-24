@@ -100,8 +100,7 @@ def get_data_service_client(service_type, account_name, account_key, connection_
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
     except ValueError as exc:
-        _ERROR_STORAGE_MISSING_INFO = \
-            get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
+        _ERROR_STORAGE_MISSING_INFO = get_sdk(ResourceType.DATA_STORAGE, 'common._error#_ERROR_STORAGE_MISSING_INFO')
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
         else:

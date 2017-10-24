@@ -2,7 +2,32 @@
 
 Release History
 ===============
-(unreleased)
+
+2.0.15
+++++++
+* minor fixes
+
+2.0.14 (2017-10-09)
++++++++++++++++++++
+* minor fixes
+
+2.0.13 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+2.0.12 (2017-09-11)
++++++++++++++++++++
+* minor fixes
+
+2.0.11 (2017-08-28)
++++++++++++++++++++
+* login: expose `--msi` and `--msi-port` to login using Virtual machine's identity
+
+2.0.10 (2017-08-11)
++++++++++++++++++++
+* account list: add `--refresh` to sycn up the latest subscriptions from server
+
+2.0.9 (2017-07-27)
 ++++++++++++++++++
 support login inside a VM with a managed identity
 

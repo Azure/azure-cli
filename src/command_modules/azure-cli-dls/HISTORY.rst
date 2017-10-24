@@ -2,6 +2,32 @@
 
 Release History
 ===============
+
+0.0.16
+++++++
+* minor fixes
+
+0.0.15 (2017-10-09)
++++++++++++++++++++
+* minor fixes
+
+0.0.14 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+0.0.13 (2017-08-28)
++++++++++++++++++++
+* minor fixes
+
+0.0.12 (2017-08-11)
++++++++++++++++++++
+* Enable progress controller (#4072)
+
+
+0.0.11 (2017-07-27)
++++++++++++++++++++
+* Allow finer grained chunking for Data Lake Store transfer (#4014)
+
 0.0.10 (2017-07-07)
 +++++++++++++++++++
 * Add support for user managed key vault key rotation in `dls account update`

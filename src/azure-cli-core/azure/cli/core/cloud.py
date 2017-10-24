@@ -87,7 +87,9 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         val = object.__getattribute__(self, name)
         if val is None:
             raise CloudEndpointNotSetException("The endpoint '{}' for this cloud "
-                                               "is not set but is used.".format(name))
+                                               "is not set but is used.\n"
+                                               "{} may be corrupt or invalid.\nResolve the error or delete this file "
+                                               "and try again.".format(name, CLOUD_CONFIG_FILE))
         return val
 
 
@@ -110,7 +112,9 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         val = object.__getattribute__(self, name)
         if val is None:
             raise CloudSuffixNotSetException("The suffix '{}' for this cloud "
-                                             "is not set but is used.".format(name))
+                                             "is not set but is used.\n"
+                                             "{} may be corrupt or invalid.\nResolve the error or delete this file "
+                                             "and try again.".format(name, CLOUD_CONFIG_FILE))
         return val
 
 
@@ -238,23 +242,12 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def init_known_clouds(force=False):
-    config = get_config_parser()
-    config.read(CLOUD_CONFIG_FILE)
-    stored_cloud_names = config.sections()
-    for c in KNOWN_CLOUDS:
-        if force or c.name not in stored_cloud_names:
-            _config_add_cloud(config, c, overwrite=force)
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
-        config.write(configfile)
-
-
 def get_clouds():
     clouds = []
-    # load the config again as it may have changed
     config = get_config_parser()
+    # Start off with known clouds and apply config file on top of current config
+    for c in KNOWN_CLOUDS:
+        _config_add_cloud(config, c)
     config.read(CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
@@ -291,7 +284,13 @@ def get_cloud(cloud_name):
 
 
 def get_active_cloud():
-    return get_cloud(get_active_cloud_name())
+    try:
+        return get_cloud(get_active_cloud_name())
+    except CloudNotRegisteredException as err:
+        logger.warning(err)
+        logger.warning("Resetting active cloud to'%s'.", AZURE_PUBLIC_CLOUD.name)
+        _set_active_cloud(AZURE_PUBLIC_CLOUD.name)
+        return get_cloud(AZURE_PUBLIC_CLOUD.name)
 
 
 def get_cloud_subscription(cloud_name):
@@ -309,9 +308,16 @@ def set_cloud_subscription(cloud_name, subscription):
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     if subscription:
+        try:
+            config.add_section(cloud_name)
+        except configparser.DuplicateSectionError:
+            pass
         config.set(cloud_name, 'subscription', subscription)
     else:
-        config.remove_option(cloud_name, 'subscription')
+        try:
+            config.remove_option(cloud_name, 'subscription')
+        except configparser.NoSectionError:
+            pass
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

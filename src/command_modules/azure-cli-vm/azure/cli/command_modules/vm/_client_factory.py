@@ -21,7 +21,7 @@ def cf_ni(_):
     return ni
 
 
-def cf_public_ip_addresses(_):
+def cf_public_ip_addresses():
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     public_ip_ops = get_mgmt_service_client(ResourceType.MGMT_NETWORK).public_ip_addresses
@@ -74,3 +74,11 @@ def cf_snapshots(_):
 
 def cf_images(_):
     return _compute_client_factory().images
+
+
+def cf_run_commands(_):
+    return _compute_client_factory().virtual_machine_run_commands
+
+
+def cf_rolling_upgrade_commands(_):
+    return _compute_client_factory().virtual_machine_scale_set_rolling_upgrades

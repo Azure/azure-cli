@@ -16,14 +16,21 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _get_extension_instance_name)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
-from azure.cli.command_modules.vm.disk_encryption import (enable,
-                                                          disable,
-                                                          _check_encrypt_is_supported)
-from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
-                                       OperatingSystemTypes, InstanceViewStatus,
-                                       VirtualMachineExtensionInstanceView,
-                                       VirtualMachineExtension, ImageReference,
-                                       DiskCreateOptionTypes, CachingTypes)
+
+
+from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, _check_encrypt_is_supported,
+                                                          encrypt_vmss, decrypt_vmss)
+from azure.cli.core.profiles import get_sdk, ResourceType
+
+NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
+    VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
+    VirtualMachineScaleSetVMProfile, VirtualMachineScaleSetOSProfile, LinuxConfiguration, \
+    CachingTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
+                           'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
+                           'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
+                           'VirtualMachineScaleSetVMProfile', 'VirtualMachineScaleSetOSProfile', 'LinuxConfiguration',
+                           'CachingTypes',
+                           mod='models')
 
 
 class Test_Vm_Custom(unittest.TestCase):
@@ -226,13 +233,13 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # throw when VM has disks, but no --volume-type is specified
         with self.assertRaises(CLIError) as context:
-            enable('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
+            encrypt_vm('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
 
         self.assertTrue("supply --volume-type" in str(context.exception))
 
         # throw when no AAD client secrets
         with self.assertRaises(CLIError) as context:
-            enable('rg1', 'vm1', 'client_id', faked_keyvault)
+            encrypt_vm('rg1', 'vm1', 'client_id', faked_keyvault)
 
         self.assertTrue("--aad-client-id or --aad-client-cert-thumbprint" in str(context.exception))
 
@@ -255,19 +262,40 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # throw on disabling encryption on OS disk of a linux VM
         with self.assertRaises(CLIError) as context:
-            disable('rg1', 'vm1', 'OS')
+            decrypt_vm('rg1', 'vm1', 'OS')
 
-        self.assertTrue("Only data disk is supported to disable on Linux VM" in str(context.exception))
+        self.assertTrue("Only Data disks can have encryption disabled in a Linux VM." in str(context.exception))
 
         # throw on disabling encryption on data disk, but os disk is also encrypted
         with self.assertRaises(CLIError) as context:
-            disable('rg1', 'vm1', 'DATA')
+            decrypt_vm('rg1', 'vm1', 'DATA')
 
         self.assertTrue("Disabling encryption on data disk can render the VM unbootable" in str(context.exception))
 
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
-        disable('rg1', 'vm1', 'DATA')
+        decrypt_vm('rg1', 'vm1', 'DATA')
+
+    def test_encryption_distro_check(self):
+        image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+        self.assertEqual(None, msg)
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2n')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+        self.assertEqual(None, msg)
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        result, msg = _check_encrypt_is_supported(image, 'all')
+        self.assertFalse(result)
+        self.assertEqual(msg,
+                         "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
 
     def test_encryption_distro_check(self):
         image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')

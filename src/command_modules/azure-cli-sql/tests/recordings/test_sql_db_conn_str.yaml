@@ -1,0 +1,591 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['326']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 24 Mar 2017 00:49:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"administratorLogin": "admin123", "administratorLoginPassword":
+      "SecretPassword123"}, "location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Length: ['123']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":"SecretPassword123","externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['695']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:47 GMT']
+      preference-applied: [return-content]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:48 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:50 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:51 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:53 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:55 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:56 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:49:58 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:01 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:02 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:03 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:04 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:06 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:08 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:09 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:09 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:12 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:14 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql db show-connection-string]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 sqlmanagementclient/0.4.0 Azure-SDK-For-Python AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers","location":"West
+        US","kind":"v12.0","properties":{"fullyQualifiedDomainName":"clitestserver000002.database.windows.net","administratorLogin":"admin123","administratorLoginPassword":null,"externalAdministratorLogin":null,"externalAdministratorSid":null,"version":"12.0","state":"Ready"}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['680']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 24 Mar 2017 00:50:15 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/2.0.1+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2016-09-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 24 Mar 2017 00:50:16 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc3Qzk4MjBEQkNDRUI5NDQwMTRCMzU0QjkxNzMzQzc0NEI5Mnw2NkE3QTk5MjlGOTlFNzMzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2016-09-01']
+      pragma: [no-cache]
+      retry-after: ['15']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 202, message: Accepted}
+version: 1

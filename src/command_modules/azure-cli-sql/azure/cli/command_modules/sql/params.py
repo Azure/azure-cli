@@ -5,10 +5,11 @@
 
 import itertools
 from enum import Enum
-from azure.cli.core.commands import CliArgumentType
+from azure.cli.core.commands import CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
-    ignore_type)
+    ignore_type,
+    get_resource_name_completion_list)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
@@ -23,10 +24,15 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CreateMode,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
-    StorageKeyType)
+    ServerKeyType,
+    StorageKeyType,
+    TransparentDataEncryptionStatus)
 from .custom import (
+    ClientAuthenticationType,
+    ClientType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
+    validate_subnet
 )
 
 #####
@@ -114,16 +120,8 @@ def _configure_db_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
-    # Make restore point in time required for restore mode only
-    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore]:
-        patches = {
-            'restore_point_in_time': patch_arg_make_required
-        }
-    else:
-        patches = {}
-
     # Include all Database params as a starting point. We will filter from there.
-    cmd.expand('parameters', Database, patches=patches)
+    cmd.expand('parameters', Database)
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.
@@ -143,12 +141,10 @@ def _configure_db_create_params(
     if create_mode != CreateMode.default or engine != Engine.db:
         cmd.ignore('sample_name')
 
-    # Only applicable to point in time restore create mode.
+    # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         cmd.ignore('restore_point_in_time')
-
-    # Only applicable to restore create mode. However using this from CLI isn't tested yet.
-    cmd.ignore('source_database_deletion_date')
+        cmd.ignore('source_database_deletion_date')
 
     # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
@@ -183,7 +179,6 @@ with ParametersContext(command='sql db') as c:
     c.argument('server_name', arg_type=server_param_type)
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective',))
-
     c.argument('max_size_bytes', options_list=('--max-size',),
                type=SizeWithUnitConverter('B', result_type=int),
                help='The max storage size of the database. Only the following'
@@ -251,11 +246,21 @@ with ParametersContext(command='sql db restore') as c:
     c.argument('dest_name',
                help='Name of the database that will be created as the restore destination.')
 
+    restore_point_arg_group = 'Restore Point'
+
     c.argument('restore_point_in_time',
                options_list=('--time', '-t'),
+               arg_group=restore_point_arg_group,
                help='The point in time of the source database that will be restored to create the'
                ' new database. Must be greater than or equal to the source database\'s'
-               ' earliestRestoreDate value.')
+               ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified.')
+
+    c.argument('source_database_deletion_date',
+               options_list=('--deleted-time',),
+               arg_group=restore_point_arg_group,
+               help='If specified, restore from a deleted database instead of from an existing database.'
+               ' Must match the deleted time of a deleted database in the same server.'
+               ' Either --time or --deleted-time (or both) must be specified.')
 
     c.argument('edition',
                help='The edition for the new database.')
@@ -308,7 +313,7 @@ with ParametersContext(command='sql db export') as c:
     c.expand('parameters', ExportRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth-type',),
+    c.argument('authentication_type', options_list=('--auth-type', '-a'),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
 
@@ -316,7 +321,7 @@ with ParametersContext(command='sql db import') as c:
     c.expand('parameters', ImportExtensionRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth-type',),
+    c.argument('authentication_type', options_list=('--auth-type', '-a'),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
 
@@ -326,6 +331,36 @@ with ParametersContext(command='sql db import') as c:
     # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
     # needed, but we still need to avoid this conflict.
     c.argument('name', options_list=('--not-name',), arg_type=ignore_type)
+
+with ParametersContext(command='sql db show-connection-string') as c:
+    c.argument('client_provider',
+               options_list=('--client', '-c'),
+               help='Type of client connection provider.',
+               **enum_choice_list(ClientType))
+
+    auth_group = 'Authentication'
+
+    c.argument('auth_type',
+               options_list=('--auth-type', '-a'),
+               arg_group=auth_group,
+               help='Type of authentication.',
+               **enum_choice_list(ClientAuthenticationType))
+
+
+#####
+#           sql db op
+#####
+
+with ParametersContext(command='sql db op') as c:
+    c.argument('database_name',
+               options_list=('--database', '-d'),
+               required=True,
+               help='Name of the Azure SQL Database.')
+
+    c.argument('operation_id',
+               options_list=('--name', '-n'),
+               required=True,
+               help='The unique name of the operation to cancel.')
 
 
 #####
@@ -453,6 +488,23 @@ with ParametersContext(command='sql db threat-policy update') as c:
 
     # TODO: use server default
 
+#####
+#           sql db transparent-data-encryption
+#####
+
+with ParametersContext(command='sql db tde') as c:
+    c.argument('database_name',
+               options_list=('--database', '-d'),
+               required=True,
+               help='Name of the Azure SQL Database.')
+
+with ParametersContext(command='sql db tde set') as c:
+    c.argument('status',
+               options_list=('--status'),
+               required=True,
+               help='Status of the transparent data encryption.',
+               **enum_choice_list(TransparentDataEncryptionStatus))
+
 ###############################################
 #                sql dw                       #
 ###############################################
@@ -579,6 +631,11 @@ with ParametersContext(command='sql server create') as c:
         'administrator_login_password': patch_arg_make_required
     })
 
+    c.argument('assign_identity',
+               options_list=('--assign-identity', '-i'),
+               help='Generate and assign an Azure Active Directory Identity for this server'
+               'for use with key management services like Azure KeyVault.')
+
     # 12.0 is the only server version allowed and it's already the default.
     c.ignore('version')
 
@@ -588,6 +645,10 @@ with ParametersContext(command='sql server create') as c:
 
 with ParametersContext(command='sql server update') as c:
     c.argument('administrator_login_password', help='The administrator login password.')
+    c.argument('assign_identity',
+               options_list=('--assign_identity', '-i'),
+               help='Generate and assign an Azure Active Directory Identity for this server'
+               'for use with key management services like Azure KeyVault.')
 
 
 #####
@@ -618,9 +679,7 @@ with ParametersContext(command='sql server ad-admin create') as c:
 with ParametersContext(command='sql server firewall-rule') as c:
     # Help text needs to be specified because 'sql server firewall-rule update' is a custom
     # command.
-    c.argument('server_name',
-               options_list=('--server', '-s'),
-               help='The name of the Azure SQL server.')
+    c.argument('server_name', arg_type=server_param_type)
 
     c.argument('firewall_rule_name',
                options_list=('--name', '-n'),
@@ -635,3 +694,61 @@ with ParametersContext(command='sql server firewall-rule') as c:
                options_list=('--end-ip-address',),
                help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
                ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+
+
+#####
+#           sql server key
+#####
+
+
+with ParametersContext(command='sql server key') as c:
+    c.argument('server_name', arg_type=server_param_type)
+    c.argument('key_name', options_list=('--name', '-n'))
+    c.argument('kid',
+               options_list=('--kid', '-k'),
+               required=True,
+               help='The Azure Key Vault key identifier of the server key. An example key identifier is '
+               '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+
+#####
+#           sql server tde-key
+#####
+
+
+with ParametersContext(command='sql server tde-key') as c:
+    c.argument('server_name', arg_type=server_param_type)
+
+with ParametersContext(command='sql server tde-key set') as c:
+    c.argument('kid',
+               options_list=('--kid', '-k'),
+               help='The Azure Key Vault key identifier of the server key to be made encryption protector.'
+               'An example key identifier is '
+               '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+    c.argument('server_key_type',
+               options_list=('--server-key-type', '-t'),
+               help='The type of the server key',
+               **enum_choice_list(ServerKeyType))
+
+
+#####
+#           sql server vnet-rule
+#####
+
+
+with ParametersContext(command='sql server vnet-rule') as c:
+    # Help text needs to be specified because 'sql server vnet-rule create' is a custom
+    # command.
+    c.argument('server_name',
+               options_list=('--server', '-s'), completer=get_resource_name_completion_list('Microsoft.SQL/servers'))
+
+    c.argument('virtual_network_rule_name',
+               options_list=('--name', '-n'))
+
+    c.argument('virtual_network_subnet_id',
+               options_list=('--subnet'),
+               help='Name or ID of the subnet that allows access to an Azure Sql Server. '
+               'If subnet name is provided, --vnet-name must be provided.')
+
+register_extra_cli_argument('sql server vnet-rule create', 'vnet_name', options_list=('--vnet-name'),
+                            help='The virtual network name', validator=validate_subnet)

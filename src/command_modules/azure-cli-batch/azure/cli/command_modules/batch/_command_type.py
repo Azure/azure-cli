@@ -160,7 +160,7 @@ def find_return_type(model):
     :returns: str
     """
     # Search for :rtype: in the docstring
-    pattern = r":rtype: (.*?)\n(\s*:rtype:|\s*:raises:|\"\"\")"
+    pattern = r':rtype: (.*?)( or)?\n.*(:raises:)?'
     return_type = re.search(pattern, model.__doc__, re.DOTALL)
     if return_type:
         return re.sub(r"\n\s*", "", return_type.group(1))
@@ -308,7 +308,7 @@ class BatchArgumentTree(object):
                 return []
         siblings = self._get_siblings(path)
         if not siblings:
-            raise ValueError("Invalid argmuent dependency tree")  # TODO
+            raise ValueError("Invalid argument dependency tree")  # TODO
         dependencies = self._arg_tree[siblings[0]]['dependencies']
         for child_arg in children:
             if child_arg in required_args:
@@ -893,9 +893,9 @@ def validate_client_parameters(namespace):
                 raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
     else:
         if not namespace.account_name:
-            raise ValueError("Specify batch account in command line or enviroment variable.")
+            raise ValueError("Specify batch account in command line or environment variable.")
         if not namespace.account_endpoint:
-            raise ValueError("Specify batch endpoint in command line or enviroment variable.")
+            raise ValueError("Specify batch endpoint in command line or environment variable.")
 
     if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None

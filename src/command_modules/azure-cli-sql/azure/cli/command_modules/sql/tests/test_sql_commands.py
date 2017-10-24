@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
+
+from azure.cli.core.util import CLIError
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
@@ -16,7 +19,11 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-
+from azure.cli.command_modules.sql.custom import (
+    ClientAuthenticationType,
+    ClientType)
+from datetime import datetime, timedelta
+from time import sleep
 
 # Constants
 server_name_prefix = 'clitestserver'
@@ -58,69 +65,84 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer()
-    def test_sql_server_mgmt(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
         server1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        rg = resource_group
-        loc = resource_group_location
+        loc = 'westeurope'
         user = admin_login
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, server1, loc, user, admin_passwords[0]),
+                 .format(resource_group_1, server1, loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity', None)])
 
         # test list sql server should be 1
-        self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
 
         # test update sql server
-        self.cmd('sql server update -g {} --name {} --admin-password {}'
-                 .format(rg, server1, admin_passwords[1]),
+        self.cmd('sql server update -g {} --name {} --admin-password {} -i'
+                 .format(resource_group_1, server1, admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
-        # test create another sql server
-        self.cmd('sql server create -g {} --name {} -l {} '
+        # test update without identity parameter, validate identity still exists
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                 .format(resource_group_1, server1, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
+
+        # test create another sql server, with identity this time
+        self.cmd('sql server create -g {} --name {} -l {} -i '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, server2, loc, user, admin_passwords[0]),
+                 .format(resource_group_2, server2, loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server2),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('resourceGroup', resource_group_2),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
-        # test list sql server should be 2
-        self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 2)])
+        # test list sql server in that group should be 1
+        self.cmd('sql server list -g {}'.format(resource_group_2), checks=[JMESPathCheck('length(@)', 1)])
+
+        # test list sql server in the subscription should be at least 2
+        self.cmd('sql server list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
-                 .format(rg, server1),
+                 .format(resource_group_1, server1),
                  checks=[
                      JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
         self.cmd('sql server list-usages -g {} -n {}'
-                 .format(rg, server1),
+                 .format(resource_group_1, server1),
                  checks=[JMESPathCheck('[0].resourceName', server1)])
 
         # test delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(rg, server1), checks=NoneCheck())
+                 .format(resource_group_1, server1), checks=NoneCheck())
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(rg, server2), checks=NoneCheck())
+                 .format(resource_group_2, server2), checks=NoneCheck())
 
         # test list sql server should be 0
-        self.cmd('sql server list -g {}'.format(rg), checks=[NoneCheck()])
+        self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
 
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
@@ -287,6 +309,41 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        update_service_objective = 'S1'
+
+        # Create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # Update DB with --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --no-wait'
+                 .format(resource_group, server, database_name, update_service_objective))
+
+        # List operations
+        ops = list(
+            self.cmd('sql db op list -g {} -s {} -d {}'
+                     .format(resource_group, server, database_name, update_service_objective),
+                     checks=[
+                         JMESPathCheck('length(@)', 1),
+                         JMESPathCheck('[0].resourceGroup', resource_group),
+                         JMESPathCheck('[0].databaseName', database_name)
+                     ])
+            .get_output_in_json())
+
+        # Cancel operation
+        self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
+                 .format(resource_group, server, database_name, ops[0]['name']))
+
+
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -368,13 +425,36 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  ])
 
 
+def _get_earliest_restore_date(db):
+    return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+
+
+def _get_deleted_date(deleted_db):
+    return datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+
+
+def _create_db_wait_for_first_backup(test, rg, server, database_name):
+    # create db
+    db = test.cmd('sql db create -g {} --server {} --name {}'
+                  .format(rg, server, database_name),
+                  checks=[
+                      JMESPathCheck('resourceGroup', rg),
+                      JMESPathCheck('name', database_name),
+                      JMESPathCheck('status', 'Online')]).get_output_in_json()
+
+    # Wait until earliestRestoreDate is in the past. When run live, this will take at least
+    # 10 minutes. Unforunately there's no way to speed this up.
+    earliest_restore_date = _get_earliest_restore_date(db)
+    while datetime.utcnow() <= earliest_restore_date:
+        sleep(10)  # seconds
+
+    return db
+
+
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_db_restore(self, resource_group, resource_group_location, server):
-        from datetime import datetime
-        from time import sleep
-
         rg = resource_group
         database_name = 'cliautomationdb01'
 
@@ -386,48 +466,98 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         restore_pool_database_name = 'cliautomationdb01restore2'
         elastic_pool = 'cliautomationpool1'
 
-        # create db
-        db = self.cmd('sql db create -g {} --server {} --name {}'
-                      .format(rg, server, database_name),
-                      checks=[
-                          JMESPathCheck('resourceGroup', rg),
-                          JMESPathCheck('name', database_name),
-                          JMESPathCheck('status', 'Online')])
-
         # create elastic pool
         self.cmd('sql elastic-pool create -g {} -s {} -n {}'
                  .format(rg, server, elastic_pool))
 
-        # Wait until earliestRestoreDate is in the past. When run live, this will take at least
-        # 10 minutes. Unforunately there's no way to speed this up.
-        earliest_restore_date = datetime.strptime(db.get_output_in_json()['earliestRestoreDate'],
-                                                  "%Y-%m-%dT%H:%M:%S.%f+00:00")
-        while datetime.utcnow() <= earliest_restore_date:
-            sleep(10)  # seconds
+        # Create database and wait for first backup to exist
+        _create_db_wait_for_first_backup(self, rg, server, database_name)
 
         # Restore to standalone db
-        db = self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
-                      ' --service-objective {} --edition {}'
-                      .format(rg, server, database_name, datetime.utcnow().isoformat(),
-                              restore_standalone_database_name, restore_service_objective,
-                              restore_edition),
-                      checks=[
-                          JMESPathCheck('resourceGroup', rg),
-                          JMESPathCheck('name', restore_standalone_database_name),
-                          JMESPathCheck('requestedServiceObjectiveName',
-                                        restore_service_objective),
-                          JMESPathCheck('status', 'Online')])
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                 ' --service-objective {} --edition {}'
+                 .format(rg, server, database_name, datetime.utcnow().isoformat(),
+                         restore_standalone_database_name, restore_service_objective,
+                         restore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_standalone_database_name),
+                     JMESPathCheck('requestedServiceObjectiveName',
+                                   restore_service_objective),
+                     JMESPathCheck('status', 'Online')])
 
         # Restore to db into pool
-        db = self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
-                      ' --elastic-pool {}'
-                      .format(rg, server, database_name, datetime.utcnow().isoformat(),
-                              restore_pool_database_name, elastic_pool),
-                      checks=[
-                          JMESPathCheck('resourceGroup', rg),
-                          JMESPathCheck('name', restore_pool_database_name),
-                          JMESPathCheck('elasticPoolName', elastic_pool),
-                          JMESPathCheck('status', 'Online')])
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                 ' --elastic-pool {}'
+                 .format(rg, server, database_name, datetime.utcnow().isoformat(),
+                         restore_pool_database_name, elastic_pool),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_pool_database_name),
+                     JMESPathCheck('elasticPoolName', elastic_pool),
+                     JMESPathCheck('status', 'Online')])
+
+
+class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
+        rg = resource_group
+        database_name = 'cliautomationdb01'
+
+        # Standalone db
+        restore_service_objective = 'S1'
+        restore_edition = 'Standard'
+        restore_database_name1 = 'cliautomationdb01restore1'
+        restore_database_name2 = 'cliautomationdb01restore2'
+
+        # Create database and wait for first backup to exist
+        _create_db_wait_for_first_backup(self, rg, server, database_name)
+
+        # Delete database
+        self.cmd('sql db delete -g {} -s {} -n {} --yes'.format(rg, server, database_name))
+
+        # Wait for deleted database to become visible. When run live, this will take around
+        # 5-10 minutes. Unforunately there's no way to speed this up. Use timeout to ensure
+        # test doesn't loop forever if there's a bug.
+        start_time = datetime.now()
+        timeout = timedelta(0, 15 * 60)  # 15 minutes timeout
+
+        while True:
+            deleted_dbs = list(self.cmd('sql db list-deleted -g {} -s {}'.format(rg, server)).get_output_in_json())
+
+            if deleted_dbs:
+                # Deleted db found, stop polling
+                break
+
+            # Deleted db not found, sleep (if running live) and then poll again.
+            if self.is_live:
+                self.assertTrue(datetime.now() < start_time + timeout, 'Deleted db not found before timeout expired.')
+                sleep(10)  # seconds
+
+        deleted_db = deleted_dbs[0]
+
+        # Restore deleted to latest point in time
+        self.cmd('sql db restore -g {} -s {} -n {} --deleted-time {} --dest-name {}'
+                 ' --service-objective {} --edition {}'
+                 .format(rg, server, database_name, _get_deleted_date(deleted_db).isoformat(),
+                         restore_database_name1, restore_service_objective,
+                         restore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_database_name1),
+                     JMESPathCheck('requestedServiceObjectiveName',
+                                   restore_service_objective),
+                     JMESPathCheck('status', 'Online')])
+
+        # Restore deleted to earlier point in time
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --deleted-time {} --dest-name {}'
+                 .format(rg, server, database_name, _get_earliest_restore_date(deleted_db).isoformat(),
+                         _get_deleted_date(deleted_db).isoformat(), restore_database_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', restore_database_name2),
+                     JMESPathCheck('status', 'Online')])
 
 
 class SqlServerDbSecurityScenarioTest(ScenarioTest):
@@ -470,7 +600,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update audit policy - enable
         state_enabled = 'Enabled'
-        key
         retention_days = 30
         audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
@@ -1315,3 +1444,313 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('serverName', server),
                      JMESPathCheck('status', 'Completed')])
+
+
+class SqlServerConnectionStringScenarioTest(ScenarioTest):
+
+    def test_sql_db_conn_str(self):
+        # ADO.NET, username/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;')
+
+        # ADO.NET, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
+
+        # ADO.NET, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
+
+        # SqlCmd, username/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U <username> -P <password> -N -l 30')
+
+        # SqlCmd, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -U <username> -P <password> -G -N -l 30')
+
+        # SqlCmd, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'sqlcmd -S tcp:myserver.database.windows.net,1433 -d mydb -G -N -l 30')
+
+        # JDBC, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=<username>@myserver;password=<password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30')
+
+        # JDBC, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;user=<username>;password=<password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword')
+
+        # JDBC, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c jdbc -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'jdbc:sqlserver://myserver.database.windows.net:1433;database=mydb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryIntegrated')
+
+        # PHP PDO, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo').get_output_in_json()
+        self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");')
+
+        # PHP PDO, ADPassword
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword')
+
+        # PHP PDO, ADIntegrated
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated')
+
+        # PHP, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php').get_output_in_json()
+        self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"<username>@myserver", "PWD"=>"<password>", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
+
+        # PHP, ADPassword
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword')
+
+        # PHP, ADIntegrated
+        with self.assertRaises(CLIError):
+            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated')
+
+        # ODBC, user name/password
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=<username>@myserver;Pwd=<password>;Encrypt=yes;TrustServerCertificate=no;')
+
+        # ODBC, ADPassword
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -a ADPassword').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Uid=<username>@myserver;Pwd=<password>;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryPassword')
+
+        # ODBC, ADIntegrated
+        conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc -a ADIntegrated').get_output_in_json()
+        self.assertEqual(conn_str, 'Driver={ODBC Driver 13 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryIntegrated')
+
+
+class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
+    def wait_for_encryption_scan(self, rg, sn, db_name):
+        active_scan = True
+        retry_attempts = 5
+        while active_scan:
+            tdeactivity = self.cmd('sql db tde list-activity -g {} -s {} -d {}'
+                                   .format(rg, sn, db_name)).get_output_in_json()
+
+            # if tdeactivity is an empty array, there is no ongoing encryption scan
+            active_scan = (len(tdeactivity) > 0)
+            time.sleep(10)
+            retry_attempts -= 1
+            if retry_attempts <= 0:
+                raise CliTestError("Encryption scan still ongoing: {}.".format(tdeactivity))
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_tde(self, resource_group, server):
+        rg = resource_group
+        sn = server
+        db_name = self.create_random_name("sqltdedb", 20)
+
+        # create database
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(rg, sn, db_name))
+
+        # validate encryption is on by default
+        self.cmd('sql db tde show -g {} -s {} -d {}'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Enabled')])
+
+        self.wait_for_encryption_scan(rg, sn, db_name)
+
+        # disable encryption
+        self.cmd('sql db tde set -g {} -s {} -d {} --status Disabled'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Disabled')])
+
+        self.wait_for_encryption_scan(rg, sn, db_name)
+
+        # validate encryption is disabled
+        self.cmd('sql db tde show -g {} -s {} -d {}'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Disabled')])
+
+        # enable encryption
+        self.cmd('sql db tde set -g {} -s {} -d {} --status Enabled'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Enabled')])
+
+        self.wait_for_encryption_scan(rg, sn, db_name)
+
+        # validate encryption is enabled
+        self.cmd('sql db tde show -g {} -s {} -d {}'
+                 .format(rg, sn, db_name),
+                 checks=[JMESPathCheck('status', 'Enabled')])
+
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_tdebyok(self, resource_group, server):
+        resource_prefix = 'sqltdebyok'
+
+        # add identity to server
+        server_resp = self.cmd('sql server update -g {} -n {} -i'
+                               .format(resource_group, server)).get_output_in_json()
+        server_identity = server_resp['identity']['principalId']
+
+        # create db
+        db_name = self.create_random_name(resource_prefix, 20)
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(resource_group, server, db_name))
+
+        # create vault and acl server identity
+        vault_name = self.create_random_name(resource_prefix, 24)
+        self.cmd('keyvault create -g {} -n {}'
+                 .format(resource_group, vault_name))
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, server_identity))
+
+        # create key
+        key_name = self.create_random_name(resource_prefix, 32)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
+        kid = key_resp['key']['kid']
+
+        # add server key
+        server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
+                                   .format(resource_group, server, kid),
+                                   checks=[
+                                       JMESPathCheck('uri', kid),
+                                       JMESPathCheck('serverKeyType', 'AzureKeyVault')])
+        server_key_name = server_key_resp.get_output_in_json()['name']
+
+        # validate show key
+        self.cmd('sql server key show -g {} -s {} -k {}'
+                 .format(resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('name', server_key_name)])
+
+        # validate list key (should return 2 items)
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # validate encryption protector is service managed via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # update encryption protector to akv key
+        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {}'
+                 .format(resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('serverKeyName', server_key_name),
+                     JMESPathCheck('uri', kid)])
+
+        # validate encryption protector is akv via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('serverKeyName', server_key_name),
+                     JMESPathCheck('uri', kid)])
+
+        # update encryption protector to service managed
+        self.cmd('sql server tde-key set -g {} -s {} -t ServiceManaged'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # validate encryption protector is service managed via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # delete server key
+        self.cmd('sql server key delete -g {} -s {} -k {}'
+                 .format(resource_group, server, kid))
+
+        # wait for key to be deleted
+        time.sleep(10)
+
+        # validate deleted server key via list (should return 1 item)
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+
+class SqlServerVnetMgmtScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
+        rg = resource_group
+        vnet_rule_1 = 'rule1'
+        vnet_rule_2 = 'rule2'
+
+        # Create vnet's - vnet1 and vnet2
+
+        vnetName1 = 'vnet1'
+        vnetName2 = 'vnet2'
+        subnetName = 'subnet1'
+        addressPrefix = '10.0.1.0/24'
+        endpoint = 'Microsoft.Sql'
+
+        # Vnet 1
+        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+                 .format(rg, vnetName1, subnetName, addressPrefix, endpoint),
+                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
+                         .format(subnetName, vnetName1, rg)).get_output_in_json()
+        vnet_id_1 = vnet1['id']
+
+        # Vnet 2
+        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName2))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+                 .format(rg, vnetName2, subnetName, addressPrefix, endpoint),
+                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+
+        vnet2 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
+                         .format(subnetName, vnetName2, rg)).get_output_in_json()
+        vnet_id_2 = vnet2['id']
+
+        # test sql server vnet-rule create using subnet name and vnet name
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {}'
+                 .format(vnet_rule_1, rg, server, subnetName, vnetName1))
+
+        # test sql server vnet-rule show rule 1
+        self.cmd('sql server vnet-rule show --name {} -g {} --server {}'
+                 .format(vnet_rule_1, rg, server),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        # test sql server vnet-rule create using subnet id
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
+                 .format(vnet_rule_2, rg, server, vnet_id_1),
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_2),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+
+        # test sql server vnet-rule update rule 1 with vnet 2
+        self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {}'
+                 .format(vnet_rule_1, rg, server, vnet_id_2),
+
+                 checks=[
+                     JMESPathCheck('name', vnet_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
+
+        # test sql server vnet-rule list
+        self.cmd('sql server vnet-rule list -g {} --server {}'
+                 .format(rg, server), checks=[JMESPathCheck('length(@)', 2)])
+
+        # test sql server vnet-rule delete rule 1
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
+                 .format(vnet_rule_1, rg, server), checks=NoneCheck())
+
+        # test sql server vnet-rule delete rule 2
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
+                 .format(vnet_rule_2, rg, server), checks=NoneCheck())

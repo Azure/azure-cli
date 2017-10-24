@@ -12,6 +12,7 @@ except ImportError:
 
 
 from azure.cli.core.util import CLIError
+from .custom import _parse_lock_id
 
 
 def _validate_deployment_name(namespace):
@@ -35,9 +36,9 @@ def process_deployment_create_namespace(namespace):
     _validate_deployment_name(namespace)
 
 
-def internal_validate_lock_parameters(resource_group_name, resource_provider_namespace,
+def internal_validate_lock_parameters(resource_group, resource_provider_namespace,
                                       parent_resource_path, resource_type, resource_name):
-    if resource_group_name is None:
+    if resource_group is None:
         if resource_name is not None:
             raise CLIError('--resource-name is ignored if --resource-group is not given.')
         if resource_type is not None:
@@ -70,8 +71,46 @@ def internal_validate_lock_parameters(resource_group_name, resource_provider_nam
 
 
 def validate_lock_parameters(namespace):
-    internal_validate_lock_parameters(getattr(namespace, 'resource_group_name', None),
+    internal_validate_lock_parameters(getattr(namespace, 'resource_group', None),
                                       getattr(namespace, 'resource_provider_namespace', None),
                                       getattr(namespace, 'parent_resource_path', None),
                                       getattr(namespace, 'resource_type', None),
                                       getattr(namespace, 'resource_name', None))
+
+
+def validate_subscription_lock(namespace):
+    if getattr(namespace, 'ids', None):
+        for lock_id in getattr(namespace, 'ids'):
+            if _parse_lock_id(lock_id).get('resource_group'):
+                raise CLIError('{} is not a valid subscription-level lock id.'.format(lock_id))
+
+
+def validate_group_lock(namespace):
+    if getattr(namespace, 'ids', None):
+        for lock_id in getattr(namespace, 'ids'):
+            lock_id_dict = _parse_lock_id(lock_id)
+            if not lock_id_dict.get('resource_group') or lock_id_dict.get('resource_name'):
+                raise CLIError('{} is not a valid group-level lock id.'.format(lock_id))
+    else:
+        if not getattr(namespace, 'resource_group', None):
+            raise CLIError('Missing required resource_group parameter.')
+
+
+def validate_resource_lock(namespace):
+    if getattr(namespace, 'ids', None):
+        for lock_id in getattr(namespace, 'ids'):
+            lock_id_dict = _parse_lock_id(lock_id)
+            if not all((lock_id_dict.get(param)) for param in ['resource_group',
+                                                               'resource_provider_namespace',
+                                                               'resource_type',
+                                                               'resource_name']):
+                raise CLIError('{} is not a valid resource-level lock id.'.format(lock_id))
+    else:
+        kwargs = {}
+        for param in ['resource_group', 'resource_type', 'resource_name']:
+            if not getattr(namespace, param, None):
+                raise CLIError('Missing required {} parameter.'.format(param))
+            kwargs[param] = getattr(namespace, param)
+        kwargs['resource_provider_namespace'] = getattr(namespace, 'resource_provider_namespace', None)
+        kwargs['parent_resource_path'] = getattr(namespace, 'parent_resource_path', None)
+        internal_validate_lock_parameters(**kwargs)

@@ -93,3 +93,33 @@ class AlertRemoveAction(argparse._AppendAction):
         if _type not in ['email', 'webhook']:
             raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
+
+
+class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=protected-access
+    def __call__(self, parser, namespace, values, option_string=None):
+        type_name = values[0]
+        type_properties = values[1:]
+
+        try:
+            super(MultiObjectsDeserializeAction, self).__call__(parser,
+                                                                namespace,
+                                                                self.get_deserializer(type_name)(*type_properties),
+                                                                option_string)
+        except KeyError:
+            raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+        except TypeError:
+            raise ValueError(
+                'usage error: Failed to parse "{}" as object of type "{}".'.format(' '.join(values), type_name))
+        except ValueError as ex:
+            raise ValueError(
+                'usage error: Failed to parse "{}" as object of type "{}". {}'.format(
+                    ' '.join(values), type_name, str(ex)))
+
+    def get_deserializer(self, type_name):
+        raise NotImplementedError()
+
+
+class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
+    def get_deserializer(self, type_name):
+        from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver
+        return {'email': EmailReceiver, 'sms': SmsReceiver, 'webhook': WebhookReceiver}[type_name]

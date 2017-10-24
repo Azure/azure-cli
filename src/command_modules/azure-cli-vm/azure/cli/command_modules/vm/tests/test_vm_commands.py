@@ -14,12 +14,14 @@ import mock
 import uuid
 
 import six
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck, MOCKED_SUBSCRIPTION_ID)
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.checkers import NoneCheck as NoneCheckV2
 
@@ -278,14 +280,19 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
-class VMWindowsLicenseTest(ScenarioTest):
+class VMVMSSWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_windows_vm_license_type(self, resource_group):
+    def test_windows_vm_vmss_license_type(self, resource_group):
         vm_name = 'winvm'
+        vmss_name = 'winvmss'
         self.cmd('vm create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server'.format(resource_group, vm_name))
         self.cmd('vm show -g {} -n {}'.format(resource_group, vm_name), checks=[
             JMESPathCheckV2('licenseType', 'Windows_Server')
+        ])
+        self.cmd('vmss create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1'.format(resource_group, vmss_name))
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.licenseType', 'Windows_Server')
         ])
 
 
@@ -307,7 +314,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
         self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage')
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage')
         ])
         self.cmd('vmss create -g {} -n vmss1 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image1), checks=[
@@ -319,22 +326,36 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {} -n {} --source {}'.format(resource_group, image2, prepared_vm), checks=[
             JMESPathCheckV2('name', image2)
         ])
+
         self.cmd('vm create -g {} -n vm2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image2), checks=[
                 JMESPathCheckV2('resourceGroup', resource_group)  # spot check enusing the VM was created
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
-            JMESPathCheckV2('storageProfile.osDisk.createOption', 'fromImage'),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'fromImage')
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'FromImage'),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
+
+        self.cmd('vm create -g {} -n vm3 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --storage-sku Premium_LRS'.format(
+            resource_group, image2))
+        self.cmd('vm show -g {} -n vm3'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.imageReference.resourceGroup', resource_group),
+            JMESPathCheckV2('storageProfile.osDisk.createOption', 'FromImage'),
+            JMESPathCheckV2("length(storageProfile.dataDisks)", 1),
+            JMESPathCheckV2("storageProfile.dataDisks[0].createOption", 'FromImage'),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS')
+        ])
+
         self.cmd('vmss create -g {} -n vmss2 --image {} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password'.format(
             resource_group, image2), checks=[
             JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', resource_group),
             JMESPathCheckV2('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             JMESPathCheckV2("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 1),
-            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage')
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage'),
+            JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
 
@@ -418,12 +439,15 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('disk create -g {} -n {} --source {}'.format(resource_group, data_disk, data_snapshot))
 
         # rebuild a new vm
-        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
+        # (os disk can be resized)
+        self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --data-disk-sizes-gb 3 --os-disk-size-gb 100 --os-type linux'.format(resource_group, os_disk, data_disk), checks=[
             JMESPathCheckV2('powerState', 'VM running'),
         ])
         self.cmd('vm show -g {} -n vm2'.format(resource_group), checks=[
             JMESPathCheckV2('length(storageProfile.dataDisks)', 2),
-            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3)
+            JMESPathCheckV2('storageProfile.dataDisks[0].diskSizeGb', 3),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheckV2('storageProfile.osDisk.diskSizeGb', 100)
         ])
 
     @ResourceGroupPreparer()
@@ -442,6 +466,23 @@ class VMAttachDisksOnCreate(ScenarioTest):
         # rebuild a new vm
         self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --attach-data-disks {} --os-type linux --use-unmanaged-disk'.format(
             resource_group, os_disk_vhd, data_disk_vhd), checks=[JMESPathCheckV2('powerState', 'VM running')])
+
+
+class VMOSDiskSize(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_set_os_disk_size(self, resource_group):
+        # test unmanaged disk
+        storage_name = self.create_random_name(prefix='cli', length=12)
+        self.cmd('vm create -g {} -n vm --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --use-unmanaged-disk --storage-account {}'.format(resource_group, storage_name))
+        result = self.cmd('storage blob list --account-name {} --container-name vhds'.format(storage_name)).get_output_in_json()
+        self.assertTrue(result[0]['properties']['contentLength'] > 75000000000)
+
+        # test managed disk
+        self.cmd('vm create -g {} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75'.format(resource_group))
+        self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
+            JMESPathCheckV2('storageProfile.osDisk.diskSizeGb', 75)
+        ])
 
 
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
@@ -628,46 +669,71 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         ])
 
 
-class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
+class VMAvailSetScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(VMAvailSetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_avail_set')
-        self.location = 'westus'
-        self.name = 'availset-test'
-
-    def test_vm_availset(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('vm availability-set create -g {} -n {}'.format(
-            self.resource_group, self.name), checks=[
-                JMESPathCheck('name', self.name),
-                JMESPathCheck('platformFaultDomainCount', 2),
-                JMESPathCheck('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheck('sku.name', 'Aligned')
+    @ResourceGroupPreparer()
+    def test_vm_availset(self, resource_group):
+        name = 'availset-test'
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('sku.name', 'Aligned')
         ])
 
         # create with explict UD count
-        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
-            self.resource_group), checks=[
-                JMESPathCheck('platformFaultDomainCount', 2),
-                JMESPathCheck('platformUpdateDomainCount', 2),
-                JMESPathCheck('sku.name', 'Aligned')
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group), checks=[
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('platformUpdateDomainCount', 2),
+                JMESPathCheckV2('sku.name', 'Aligned')
         ])
-        self.cmd('vm availability-set delete -g {} -n avset2'.format(self.resource_group))
+        self.cmd('vm availability-set delete -g {} -n avset2'.format(resource_group))
 
-        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(self.resource_group, self.name),
-                 checks=JMESPathCheck('tags.test', 'success'))
-        self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', self.name),
+        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(resource_group, name),
+                 checks=JMESPathCheckV2('tags.test', 'success'))
+        self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('[0].name', name),
         ])
         self.cmd('vm availability-set list-sizes -g {} -n {}'.format(
-            self.resource_group, self.name), checks=JMESPathCheck('type(@)', 'array'))
+            resource_group, name), checks=JMESPathCheckV2('type(@)', 'array'))
         self.cmd('vm availability-set show -g {} -n {}'.format(
-            self.resource_group, self.name), checks=[JMESPathCheck('name', self.name)])
-        self.cmd('vm availability-set delete -g {} -n {}'.format(self.resource_group, self.name))
-        self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[JMESPathCheck('length(@)', 0)])
+            resource_group, name), checks=[JMESPathCheckV2('name', name)])
+        self.cmd('vm availability-set delete -g {} -n {}'.format(resource_group, name))
+        self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
+
+
+# once https://github.com/Azure/azure-cli/issues/4127 is fixed, switch back to a regular ScenarioTest
+class VMAvailSetLiveScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_availset_convert(self, resource_group):
+        name = 'availset-test'
+        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 3),
+                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheckV2('sku.name', 'Classic')
+        ])
+
+        # the conversion should auto adjust the FD from 3 to 2 as 'westus2' only offers 2
+        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name), checks=[
+                JMESPathCheckV2('name', name),
+                JMESPathCheckV2('platformFaultDomainCount', 2),
+                JMESPathCheckV2('sku.name', 'Aligned')
+        ])
+
+
+class ComputeListSkusScenarioTest(LiveScenarioTest):
+
+    def test_list_compute_skus_table_output(self):
+        result = self.cmd('vm list-skus -l westus -otable')
+        lines = result.output.split('\n')
+        # 1st line is header
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Size', 'Tier'])
+        # spot check the first 3 entries
+        self.assertEqual(lines[3].split(), ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3'])
+        self.assertEqual(lines[4].split(), ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3'])
+        self.assertEqual(lines[5].split(), ['virtualMachines', 'westus', 'Standard_DS1_v2', 'DS1_v2', 'Standard'])
 
 
 class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
@@ -763,53 +829,43 @@ class VMExtensionImageSearchScenarioTest(VCRTestBase):
         assert len(result) == 1
 
 
-class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+class VMCreateUbuntuScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_ubuntu')
-        self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu2'
-        self.admin_username = 'ubuntu'
-        self.location = 'westus'
-        self.vm_names = ['cli-test-vm2']
-        self.vm_image = 'UbuntuLTS'
-        self.auth_type = 'ssh'
-
-    def test_vm_create_ubuntu(self):
-        self.execute()
-
-    def set_up(self):
-        super(VMCreateUbuntuScenarioTest, self).set_up()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_vm_create_ubuntu(self, resource_group, resource_group_location):
+        admin_username = 'ubuntu'
+        vm_names = ['cli-test-vm2']
+        vm_image = 'UbuntuLTS'
+        auth_type = 'ssh'
         self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
-            rg=self.resource_group,
-            admin=self.admin_username,
-            vm_name=self.vm_names[0],
-            image=self.vm_image,
-            auth_type=self.auth_type,
+            rg=resource_group,
+            admin=admin_username,
+            vm_name=vm_names[0],
+            image=vm_image,
+            auth_type=auth_type,
             ssh_key=TEST_SSH_KEY_PUB,
-            location=self.location
+            location=resource_group_location
         ))
 
-        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_names[0]), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('osProfile.adminUsername', self.admin_username),
-            JMESPathCheck('osProfile.computerName', self.vm_names[0]),
-            JMESPathCheck('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
-            JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
-            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
-            JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=resource_group, vm_name=vm_names[0]), checks=[
+            JMESPathCheckV2('provisioningState', 'Succeeded'),
+            JMESPathCheckV2('osProfile.adminUsername', admin_username),
+            JMESPathCheckV2('osProfile.computerName', vm_names[0]),
+            JMESPathCheckV2('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            JMESPathCheckV2('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+            JMESPathCheckV2('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheckV2('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
         self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
-            rg=self.resource_group,
-            admin=self.admin_username,
-            vm_name=self.vm_names[0],
-            image=self.vm_image,
-            auth_type=self.auth_type,
+            rg=resource_group,
+            admin=admin_username,
+            vm_name=vm_names[0],
+            image=vm_image,
+            auth_type=auth_type,
             ssh_key=TEST_SSH_KEY_PUB,
-            location=self.location
+            location=resource_group_location
         ))
 
 
@@ -1218,14 +1274,16 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
         disk_name2 = 'd2'
         self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1 --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name))
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2 --sku standard_lrs'.format(
             self.resource_group, self.vm_name, disk_name2))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 2),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
             JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             JMESPathCheck('storageProfile.dataDisks[1].name', disk_name2),
             JMESPathCheck('storageProfile.dataDisks[1].lun', 2),
+            JMESPathCheck('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             JMESPathCheck('storageProfile.dataDisks[1].caching', 'None')
         ])
         self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
@@ -1239,10 +1297,11 @@ class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 0),
         ])
-        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite'.format(
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --caching ReadWrite --sku standard_lrs'.format(
             self.resource_group, self.vm_name, disk_name))
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
-            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite')
+            JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
 
 
@@ -1283,7 +1342,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
             JMESPathCheck('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             JMESPathCheck('storageProfile.dataDisks[0].lun', 1),
             JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 8),
-            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'empty'),
+            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'Empty'),
             JMESPathCheck('storageProfile.dataDisks[0].vhd.uri', vhd_uri),
             JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
         ])
@@ -1301,7 +1360,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
         self.cmd('vm unmanaged-disk attach -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri), checks=[
                 JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
-                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'attach')
+                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'Attach')
         ])
 
 
@@ -1359,8 +1418,7 @@ class VMSSCreateAndModify(ResourceGroupVCRTestBase):
         self.cmd('vmss create --admin-password testPassword0 --name {} -g {} --admin-username myadmin --image Win2012R2Datacenter --instance-count {}'
                  .format(vmss_name, self.resource_group, instance_count))
 
-        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group),
-                 )
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group))
 
         self.cmd('vmss list', checks=JMESPathCheck('type(@)', 'array'))
 
@@ -1451,7 +1509,9 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
             JMESPathCheck('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
             JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
-            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3)
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
         self.cmd('vmss disk detach -g {} -n {} --lun 1'.format(self.resource_group, vmss_name))
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
@@ -1494,19 +1554,20 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
     @ResourceGroupPreparer()
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
         vmss_name = 'vmss1'
-        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --vm-domain-name clitestnewnetwork --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5".format(vmss_name, resource_group, TEST_SSH_KEY_PUB), checks=[
-            JMESPathCheckV2('vmss.provisioningState', 'Succeeded')
-        ])
-        self.cmd("vmss show -n {0} -g {1}".format(vmss_name, resource_group), checks=[
+        nsg_nam = 'testnsg'
+        nsg_result = self.cmd('network nsg create -g {} -n {}'.format(resource_group, nsg_nam)).get_output_in_json()
+        self.cmd("vmss create -n {0} -g {1} --image Debian --admin-username clittester --ssh-key-value '{2}' --vm-domain-name clitestnewnetwork --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {3}".format(
+            vmss_name, resource_group, TEST_SSH_KEY_PUB, nsg_nam), checks=[JMESPathCheckV2('vmss.provisioningState', 'Succeeded')])
+        result = self.cmd("vmss show -n {0} -g {1}".format(vmss_name, resource_group), checks=[
             JMESPathCheckV2('length(virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers)', 2),
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers[0]', '10.0.0.6'),
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers[1]', '10.0.0.5'),
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].networkSecurityGroup.id', nsg_result['NewNSG']['id'])
         ])
         # spot check we have the domain name and have a public ip
-        result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group), checks=[
-            JMESPathCheckV2('[0].dnsSettings.domainNameLabel', 'vm0.clitestnewnetwork'),
-        ]).get_output_in_json()
+        result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group)).get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
+        self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith('.clitestnewnetwork'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
     def test_vmss_existing_lb(self, resource_group):
@@ -1514,6 +1575,16 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         lb_name = 'lb1'
         self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
         self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
+
+
+class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_accelerated_networking(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd("vmss create -n {0} -g {1} --vm-sku Standard_DS4_v2 --image Win2016Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1".format(vmss_name, resource_group))
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), checks=[
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True)
+        ])
 
 
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -1680,7 +1751,6 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
         self.subnet_name = 'vrfsubnet'
         self.lb_name = 'vrflb'
         self.bepool_name = 'mybepool'
-        self.natpool_name = 'mynatpool'
 
     def set_up(self):
         super(VMSSCreateExistingOptions, self).set_up()
@@ -1702,10 +1772,10 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
                  ' --vnet-name {} --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'
-                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 ' --use-unmanaged-disk'
                  .format(os_disk_name, self.vnet_name, self.subnet_name, sku_name, container_name,
                          self.resource_group, vmss_name, self.lb_name, TEST_SSH_KEY_PUB,
-                         self.bepool_name, self.natpool_name))
+                         self.bepool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
@@ -1726,7 +1796,6 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         self.subnet_name = 'vrfsubnet'
         self.lb_name = 'vrflb'
         self.bepool_name = 'mybepool'
-        self.natpool_name = 'mynatpool'
 
     def set_up(self):
         super(VMSSCreateExistingIdsOptions, self).set_up()
@@ -1758,10 +1827,9 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
                  ' --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'
-                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 ' --use-unmanaged-disk'
                  .format(os_disk_name, subnet, sku_name, container_name,
-                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB,
-                         self.bepool_name, self.natpool_name))
+                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB, self.bepool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),
             JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
@@ -1883,12 +1951,49 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk'.format(resource_group, vmss_name))
 
 
+class VMSSILBSceanrioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_with_ilb(self, resource_group):
+        vmss_name = 'vmss1'
+        self.cmd('vmss create -g {} -n {} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""'.format(resource_group, vmss_name))
+        # list connection information should fail
+        with self.assertRaises(CLIError) as err:
+            self.cmd('vmss list-instance-connection-info -g {} -n {}'.format(resource_group, vmss_name))
+        self.assertTrue('internal load balancer' in str(err.exception))
+
+
+@api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01')
+class VMSSLoadBalancerWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lb_sku')
+    def test_vmss_lb_sku(self, resource_group):
+
+        kwargs = {
+            'rg': resource_group,
+            'vmss': 'vmss1',
+            'lb': 'lb1',
+            'ip': 'pubip1',
+            'sku': 'standard',
+            'location': 'eastus2'
+        }
+
+        self.cmd('vmss create -g {rg} -l {location} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!'.format(**kwargs))
+        self.cmd('network lb show -g {rg} -n {lb}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip show -g {rg} -n {ip}'.format(**kwargs), checks=[
+            JMESPathCheckV2('sku.name', 'Standard'),
+            JMESPathCheckV2('publicIpAllocationMethod', 'Static')
+        ])
+
+
 class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_vm_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
         vm1 = 'vm1'
         vm1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}'.format(subscription_id, resource_group, vm1)
         vm2 = 'vm2'
@@ -1902,10 +2007,9 @@ class MSIScenarioTest(ScenarioTest):
                  uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create a linux vm with default configuration
-            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
+            self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vm1, default_scope), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),
                 JMESPathCheckV2('identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
-                JMESPathCheckV2('identity.subscription', subscription_id),
                 JMESPathCheckV2('identity.port', 50342)
             ])
 
@@ -1918,12 +2022,12 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm create -g {} -n {} --image Win2016Datacenter --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2, vm1_id), checks=[
                 JMESPathCheckV2('identity.role', 'reader'),
                 JMESPathCheckV2('identity.scope', vm1_id),
-                JMESPathCheckV2('identity.subscription', subscription_id),
                 JMESPathCheckV2('identity.port', 50342)
             ])
 
             self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
                 JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -1933,12 +2037,12 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm assign-identity -g {} -n {} --scope {} --role reader --port 50343'.format(resource_group, vm3, vm1_id), checks=[
                 JMESPathCheckV2('role', 'reader'),
                 JMESPathCheckV2('scope', vm1_id),
-                JMESPathCheckV2('subscription', subscription_id),
                 JMESPathCheckV2('port', 50343)
             ])
 
             self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm3), checks=[
                 JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50343)
             ])
 
@@ -1946,6 +2050,7 @@ class MSIScenarioTest(ScenarioTest):
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
         vmss1 = 'vmss11'
         vmss1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachineScaleSets/{}'.format(subscription_id, resource_group, vmss1)
         vmss2 = 'vmss2'
@@ -1958,15 +2063,15 @@ class MSIScenarioTest(ScenarioTest):
                  uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C124')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
+            self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vmss1, default_scope), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'Contributor'),
                 JMESPathCheckV2('vmss.identity.scope', '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)),
-                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
                 JMESPathCheckV2('vmss.identity.port', 50342)
             ])
 
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -1974,11 +2079,11 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss create -g {} -n {} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {} --role reader --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2, vmss1_id), checks=[
                 JMESPathCheckV2('vmss.identity.role', 'reader'),
                 JMESPathCheckV2('vmss.identity.scope', vmss1_id),
-                JMESPathCheckV2('vmss.identity.subscription', subscription_id),
                 JMESPathCheckV2('vmss.identity.port', 50342)
             ])
             self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForWindows'),
+                JMESPathCheckV2('[0].publisher', 'Microsoft.ManagedIdentity'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
 
@@ -1991,7 +2096,6 @@ class MSIScenarioTest(ScenarioTest):
                 self.cmd('vmss assign-identity -g {} -n {} --scope "{}" --role reader --port 50343'.format(resource_group, vmss3, vmss1_id), checks=[
                     JMESPathCheckV2('role', 'reader'),
                     JMESPathCheckV2('scope', vmss1_id),
-                    JMESPathCheckV2('subscription', subscription_id),
                     JMESPathCheckV2('port', 50343)
                 ])
 
@@ -1999,6 +2103,62 @@ class MSIScenarioTest(ScenarioTest):
                     JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
                     JMESPathCheckV2('[0].settings.port', 50343)
                 ])
+
+    @ResourceGroupPreparer()
+    def test_msi_no_scope(self, resource_group):
+        vm1 = 'vm1'
+        vmss1 = 'vmss1'
+        vm2 = 'vm2'
+        vmss2 = 'vmss2'
+
+        # create a linux vm with identity but w/o a role assignment (--scope "")
+        self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm1), checks=[
+            JMESPathCheckV2('identity.scope', ''),
+            JMESPathCheckV2('identity.port', 50342)
+        ])
+        # the extension should still get provisioned
+        self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm1), checks=[
+            JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        # create a vmss with identity but w/o a role assignment (--scope "")
+        self.cmd('vmss create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss1), checks=[
+            JMESPathCheckV2('vmss.identity.scope', ''),
+            JMESPathCheckV2('vmss.identity.port', 50342)
+        ])
+
+        # the extension should still get provisioned
+        self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss1), checks=[
+            JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        # create a vm w/o identity
+        self.cmd('vm create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vm2))
+        # assign identity but w/o a role assignment
+        self.cmd('vm assign-identity -g {} -n {}'.format(resource_group, vm2), checks=[
+            JMESPathCheckV2('scope', ''),
+            JMESPathCheckV2('port', 50342)
+        ])
+        # the extension should still get provisioned
+        self.cmd('vm extension list -g {} --vm-name {}'.format(resource_group, vm2), checks=[
+            JMESPathCheckV2('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
+            JMESPathCheckV2('[0].settings.port', 50342)
+        ])
+
+        self.cmd('vmss create -g {} -n {} --image debian --admin-username admin123 --admin-password PasswordPassword1!'.format(resource_group, vmss2))
+        # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
+        if self.is_live:
+            self.cmd('vmss assign-identity -g {} -n {}'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('scope', ''),
+                JMESPathCheckV2('port', 50342)
+            ])
+
+            self.cmd('vmss extension list -g {} --vmss-name {}'.format(resource_group, vmss2), checks=[
+                JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
+                JMESPathCheckV2('[0].settings.port', 50342)
+            ])
 
 
 class VMLiveScenarioTest(LiveScenarioTest):
@@ -2018,6 +2178,212 @@ class VMLiveScenarioTest(LiveScenarioTest):
         self.assertTrue('Succeeded: {}VMNic (Microsoft.Network/networkInterfaces)'.format(vm_name) in lines)
         self.assertTrue('Succeeded: {} (Microsoft.Compute/virtualMachines)'.format(vm_name) in lines)
 
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMZoneScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_vm_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        vm_name = 'vm123'
+        ip_name = 'vm123ip'
+        self.cmd('vm create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zone {} --public-ip-address {}'.format(resource_group, vm_name, zones, ip_name), checks=[
+            JMESPathCheckV2('zones', zones)
+        ])
+        self.cmd('network public-ip show -g {} -n {}'.format(resource_group, ip_name),
+                 checks=JMESPathCheckV2('zones[0]', zones))
+        # Test VM's specific table output
+        result = self.cmd('vm show -g {} -n {} -otable'.format(resource_group, vm_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, zones]).issubset(table_output))
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_vmss_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        vmss_name = 'vmss123'
+        self.cmd('vmss create -g {} -n {} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {}'.format(resource_group, vmss_name, zones))
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        result = self.cmd('vmss show -g {} -n {} -otable'.format(resource_group, vmss_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, vmss_name, zones]).issubset(table_output))
+        result = self.cmd('vmss list -g {} -otable'.format(resource_group, vmss_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, vmss_name, zones]).issubset(table_output))
+
+    @ResourceGroupPreparer(location='eastus2')
+    def test_disk_create_zones(self, resource_group, resource_group_location):
+        zones = '2'
+        disk_name = 'disk123'
+        size = 1
+        self.cmd('disk create -g {} -n {} --size-gb {} --zone {}'.format(resource_group, disk_name, size, zones), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        self.cmd('disk show -g {} -n {}'.format(resource_group, disk_name), checks=[
+            JMESPathCheckV2('zones[0]', zones)
+        ])
+        result = self.cmd('disk show -g {} -n {} -otable'.format(resource_group, disk_name))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group, resource_group_location, disk_name, zones, str(size), 'Premium_LRS']).issubset(table_output))
+        result = self.cmd('disk list -g {} -otable'.format(resource_group))
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group, resource_group_location, disk_name, zones]).issubset(table_output))
+
+
+class VMRunCommandScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_run_command_e2e(self, resource_group, resource_group_location):
+        vm = 'test-run-command-vm'
+        self.cmd('vm run-command list -l ' + resource_group_location)
+        self.cmd('vm run-command show --command-id RunShellScript -l ' + resource_group_location)
+        public_ip = self.cmd('vm create -g {} -n {} --image ubuntults --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm)).get_output_in_json()['publicIpAddress']
+
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm))
+        self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"'.format(resource_group, vm))
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + public_ip)
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+    @ResourceGroupPreparer()
+    def test_run_command_with_parameters(self, resource_group):
+        vm = 'test-run-command-vm2'
+        self.cmd('vm create -g {} -n {} --image debian --admin-username clitest1 --admin-password Test12345678!!'.format(resource_group, vm))
+        self.cmd('vm run-command invoke -g {} -n{} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world'.format(resource_group, vm))
+
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSSDiskEncryptionTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')  # the feature is only available in canary, should rollout to public soon
+    def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
+        vault_name = self.create_random_name('vault', 10)
+        vmss_name = 'vmss1'
+        self.cmd('keyvault create -g {} -n {} --enabled-for-disk-encryption "true"'.format(resource_group, vault_name))
+        self.cmd('vmss create -g {} -n {} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption enable -g {} -n {} --disk-encryption-keyvault {}'.format(resource_group, vmss_name, vault_name))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted')
+        ])
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+        self.cmd('vmss encryption disable -g {} -n {}'.format(resource_group, vmss_name))
+        self.cmd('vmss update-instances -g {} -n {}  --instance-ids "*"'.format(resource_group, vmss_name))
+        self.cmd('vmss encryption show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted')
+        ])
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss_name), checks=[
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
+            JMESPathCheckV2('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
+        ])
+
+
+@api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
+class VMSSRollingUpgrade(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vmss_rolling_upgrade(self, resource_group):
+        lb_name = 'lb1'
+        probe_name = 'probe1'
+        vmss_name = 'vmss1'
+
+        # set up a LB with the probe for rolling upgrade
+        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
+        self.cmd('network lb probe create -g {} --lb-name {} -n {} --protocol http --port 80 --path /'.format(resource_group, lb_name, probe_name))
+        self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {}'.format(resource_group, lb_name, probe_name))
+        self.cmd('network lb inbound-nat-pool create -g {} --lb-name {} -n nat-pool1 --backend-port 22 --frontend-port-range-start 50000 --frontend-port-range-end 50119 --protocol Tcp --frontend-ip-name LoadBalancerFrontEnd'.format(resource_group, lb_name))
+
+        # create a scaleset to use the LB, note, we start with the manual mode as we are not done with the setup yet
+        self.cmd('vmss create -g {} -n {} --image ubuntults --admin-username clitester1 --admin-password Testqwer1234! --lb {} --health-probe {}'.format(resource_group, vmss_name, lb_name, probe_name))
+
+        # install the web server
+        _, settings_file = tempfile.mkstemp()
+        with open(settings_file, 'w') as outfile:
+            json.dump({
+                "commandToExecute": "sudo apt-get install -y nginx",
+            }, outfile)
+        settings_file = settings_file.replace('\\', '\\\\')
+        self.cmd('vmss extension set -g {} --vmss-name {} -n customScript --publisher Microsoft.Azure.Extensions --settings {} --version 2.0'.format(resource_group, vmss_name, settings_file))
+        self.cmd('vmss update-instances -g {} -n {} --instance-ids "*"'.format(resource_group, vmss_name))
+
+        # now we are ready for the rolling upgrade mode
+        self.cmd('vmss update -g {} -n {} --set upgradePolicy.mode=rolling'.format(resource_group, vmss_name))
+
+        # make sure the web server works
+        result = self.cmd('vmss list-instance-connection-info -g {} -n {} -o tsv'.format(resource_group, vmss_name))
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + result.output.split(':')[0])
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+        # do some rolling upgrade, maybe nonsense, but we need to test the command anyway
+        self.cmd('vmss rolling-upgrade start -g {} -n {}'.format(resource_group, vmss_name))
+        result = self.cmd('vmss rolling-upgrade get-latest -g {} -n {}'.format(resource_group, vmss_name)).get_output_in_json()
+        self.assertTrue(('policy' in result) and ('progress' in result))  # spot check that it is about rolling upgrade
+
+        # 'cancel' should fail as we have no active upgrade to cancel
+        self.cmd('vmss rolling-upgrade cancel -g {} -n {}'.format(resource_group, vmss_name), expect_failure=True)
+
+
+class VMLBIntegrationTesting(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_vm_lb_integration(self, resource_group):
+        lb_name = 'lb1'
+        vm1 = 'vm1'
+        vm2 = 'vm2'
+        av_set = 'av1'
+        # provision 2 web servers
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, av_set))
+        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {} --generate-ssh-keys'.format(resource_group, vm1, av_set))
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm1))
+        self.cmd('vm create -g {} -n {} --image ubuntults --public-ip-address "" --availability-set {} --generate-ssh-keys'.format(resource_group, vm2, av_set))
+        self.cmd('vm open-port -g {} -n {} --port 80'.format(resource_group, vm2))
+
+        # provision 1 LB
+        self.cmd('network lb create -g {} -n {}'.format(resource_group, lb_name))
+
+        # create LB probe and rule
+        self.cmd('network lb probe create -g {} --lb-name {} -n probe1 --protocol Http --port 80 --path /'.format(resource_group, lb_name))
+        self.cmd('network lb rule create -g {} --lb-name {} -n rule1 --protocol Tcp --frontend-port 80 --backend-port 80'.format(resource_group, lb_name))
+
+        # add 2 vm into BE Pool
+        self.cmd('network nic ip-config address-pool add -g {0} --lb-name {1} --address-pool {1}bepool --nic-name {2}VMNic --ip-config-name ipconfig{2}'.format(resource_group, lb_name, vm1))
+        self.cmd('network nic ip-config address-pool add -g {0} --lb-name {1} --address-pool {1}bepool --nic-name {2}VMNic --ip-config-name ipconfig{2}'.format(resource_group, lb_name, vm2))
+
+        # Create Inbound Nat Rules so each VM can be accessed through SSH
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n inbound-nat-rule1 --frontend-port 50000 --backend-port 22  --protocol Tcp'.format(resource_group, lb_name))
+        self.cmd('network nic ip-config inbound-nat-rule add -g {0} --lb-name {1} --nic-name {2}VMNic --ip-config-name ipconfig{2} --inbound-nat-rule inbound-nat-rule1'.format(resource_group, lb_name, vm1))
+        self.cmd('network lb inbound-nat-rule create -g {} --lb-name {} -n inbound-nat-rule2 --frontend-port 50001 --backend-port 22  --protocol Tcp'.format(resource_group, lb_name))
+        self.cmd('network nic ip-config inbound-nat-rule add -g {0} --lb-name {1} --nic-name {2}VMNic --ip-config-name ipconfig{2} --inbound-nat-rule inbound-nat-rule2'.format(resource_group, lb_name, vm2))
+
+        # install nginx web servers
+        self.cmd('vm run-command invoke -g {} -n {} --command-id RunShellScript --scripts "sudo apt-get install -y nginx"'.format(resource_group, vm1))
+        self.cmd('vm run-command invoke -g {} -n {} --command-id RunShellScript --scripts "sudo apt-get install -y nginx"'.format(resource_group, vm2))
+
+        # ensure all pieces are working together
+        result = self.cmd('network public-ip show -g {} -n PublicIP{}'.format(resource_group, lb_name)).get_output_in_json()
+        pip = result['ipAddress']
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + pip)
+        self.assertTrue('Welcome to nginx!' in str(r.content))
+
+
+class VMScaffoldingTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_create_vm_from_existing_nic(self, resource_group):
+        import re
+        self.cmd('network public-ip create -g {} -n my-pip'.format(resource_group))
+        self.cmd('network vnet create -g {} -n my-vnet --subnet-name my-subnet1'.format(resource_group))
+        self.cmd('network nic create -g {} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip'.format(resource_group))
+        self.cmd('network nic ip-config create -n my-ipconfig2 -g {} --nic-name my-nic --private-ip-address-version IPv6'.format(resource_group))
+        self.cmd('vm create -g {} -n vm1 --image ubuntults --nics my-nic --generate-ssh-keys'.format(resource_group))
+        result = self.cmd('vm show -g {} -n vm1 -d'.format(resource_group)).get_output_in_json()
+        self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
+        self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
 
 # endregion
 

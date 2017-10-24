@@ -2,6 +2,27 @@
 
 Release History
 ===============
+
+2.0.13
+++++++
+* minor fixes
+
+2.0.12 (2017-10-09)
++++++++++++++++++++
+* Fixed Key Vault authentication issue when using ADFS on Azure Stack. https://github.com/Azure/azure-cli/issues/4448
+
+2.0.11 (2017-09-22)
++++++++++++++++++++
+* Update azure-keyvault SDK to 0.3.6
+
+2.0.10 (2017-09-11)
++++++++++++++++++++
+* `keyvault set-policy`: Fix issue where permissions were case sensitive.
+
+2.0.9 (2017-08-31)
+++++++++++++++++++
+* `keyvault secret download`: Fix bug when trying to automatically resolve secret encoding.
+
 2.0.8 (2017-07-07)
 ++++++++++++++++++
 * minor fixes

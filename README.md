@@ -8,18 +8,14 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our
 
 ## Installation
 
-```bash
-$ curl -L https://aka.ms/InstallAzureCli | bash
-```
-
-Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-az-cli2) for detailed install instructions.
+Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for detailed install instructions.
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md).
 
 ### Developer Installation (see below)
 
 - [Docker](#docker)
-- [Nightly Builds](#nightly-builds)
+- [Edge Builds](#edge-builds)
 - [Developer Setup](#developer-setup)
 
 ## Usage
@@ -131,30 +127,26 @@ $ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>
 
 See our [Docker tags](https://hub.docker.com/r/azuresdk/azure-cli-python/tags/) for available versions.
 
-### Nightly Builds
+### Edge Builds
 
-Install nightly builds with pip in a virtual environment.
-
-```bash
-$ pip install --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
-```
-
-To upgrade your current nightly build pass the `--upgrade` option.
+If you want to get the latest build from the master branch, you can use our "edge" builds feed. Here's an example of 
+installing edge dev builds with pip in a virtual environment.
 
 ```bash
-$ pip install --upgrade --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
+$ virtualenv env
+$ . env/bin/activate
+$ pip install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge
 ```
 
-- Builds happen at 21:00:00 PDT each night. They are published shortly afterwards.
-- Whilst all command modules are built each night, not all are included on install.
-- Install additional components with:  
-    ```
-    $ export AZURE_COMPONENT_PACKAGE_INDEX_URL=https://azureclinightly.blob.core.windows.net/packages
-    ```  
-    ```
-    $ az component update --add <component_name> --private
-    ```
-- To view the list of installed packages, run ``az component list``
+To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
+the feed is frequently updated.
+
+```bash
+$ pip install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir
+```
+
+The edge build is generated for each push to the `master` branch as a part of the Travis CI build. The version of the edge build follows 
+
 
 ## Developer Setup
 If you would like to setup a development environment and contribute to the CLI, see 

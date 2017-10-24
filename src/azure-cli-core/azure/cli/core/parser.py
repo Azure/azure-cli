@@ -11,7 +11,6 @@ import argcomplete
 import azure.cli.core.telemetry as telemetry
 import azure.cli.core._help as _help
 from azure.cli.core.util import CLIError
-from azure.cli.core._pkg_util import handle_module_not_installed
 
 import azure.cli.core.azlogging as azlogging
 
@@ -54,6 +53,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         # or description for a command. We better stash it away before handing it off for
         # "normal" argparse handling...
         self._description = kwargs.pop('description', None)
+        self.command_source = kwargs.pop('_command_source', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
     def load_command_table(self, command_table):
@@ -81,7 +81,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                                   parents=self.parents,
                                                   conflict_handler='error',
                                                   help_file=metadata.help,
-                                                  formatter_class=fc)
+                                                  formatter_class=fc,
+                                                  _command_source=metadata.command_source)
 
             argument_validators = []
             argument_groups = {}
@@ -143,27 +144,12 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 self.subparsers[tuple(path[0:length])] = parent_subparser
         return parent_subparser
 
-    def _handle_command_package_error(self, err_msg):  # pylint: disable=no-self-use
-        if err_msg and err_msg.startswith('argument _command_package: invalid choice:'):
-            import re
-            try:
-                possible_module = re.search("argument _command_package: invalid choice: '(.+?)'",
-                                            err_msg).group(1)
-                handle_module_not_installed(possible_module)
-            except AttributeError:
-                # regular expression pattern match failed so unable to retrieve
-                # module name
-                pass
-            except Exception as e:  # pylint: disable=broad-except
-                logger.debug('Unable to handle module not installed: %s', str(e))
-
     def validation_error(self, message):
         telemetry.set_user_fault('validation error')
         return super(AzCliCommandParser, self).error(message)
 
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
-        self._handle_command_package_error(message)
         args = {'prog': self.prog, 'message': message}
         logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)

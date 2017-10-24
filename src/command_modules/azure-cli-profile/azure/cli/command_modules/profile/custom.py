@@ -8,21 +8,27 @@ from __future__ import print_function
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core import get_az_logger
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, in_cloud_console
 from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.commands.validators import DefaultStr
 
 logger = get_az_logger(__name__)
 
+_CLOUD_CONSOLE_WARNING_TEMPLATE = ("Azure Cloud Shell automatically authenticates the user account it was initially"
+                                   " launched under, as a result 'az %s' is disabled.")
 
-def load_subscriptions(all_clouds=False):
+
+def load_subscriptions(all_clouds=False, refresh=False):
     profile = Profile()
+    if refresh:
+        subscriptions = profile.refresh_accounts()
     subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
 
-def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds=all)
+    subscriptions = load_subscriptions(all_clouds=all, refresh=refresh)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
@@ -79,32 +85,39 @@ def account_clear():
 
 
 def login(username=None, password=None, service_principal=None, tenant=None,
-          allow_no_subscriptions=False):
+          allow_no_subscriptions=False, msi=False, msi_port=DefaultStr(50342)):
     """Log in to access Azure subscriptions"""
     import os
     import re
     from adal.adal_error import AdalError
     import requests
+
+    # quick argument usage check
+    if (any([username, password, service_principal, tenant, allow_no_subscriptions]) and
+            any([msi, not getattr(msi_port, 'is_default', None)])):
+        raise CLIError("usage error: '--msi/--msi-port' are not applicable with other arguments")
+
     interactive = False
 
     profile = Profile()
 
+    if in_cloud_console():
+        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
+        if console_tokens:
+            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
+        logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'login')
+        return
+
+    if msi:
+        return profile.find_subscriptions_in_vm_with_msi(msi_port)
+
     if username:
         if not password:
-            # in a VM with managed service identity?
-            result = profile.init_if_in_msi_env(username)
-            if result:
-                return result
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
-        # in a cloud console?
-        console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
-        if console_tokens:
-            return profile.find_subscriptions_in_cloud_console(re.split(';|,', console_tokens))
-
         interactive = True
 
     try:
@@ -135,6 +148,10 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
 def logout(username=None):
     """Log out to remove access to Azure subscriptions"""
+    if in_cloud_console():
+        logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'logout')
+        return
+
     profile = Profile()
     if not username:
         username = profile.get_current_account_user()

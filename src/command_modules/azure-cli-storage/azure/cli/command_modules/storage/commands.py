@@ -24,10 +24,11 @@ from azure.cli.command_modules.storage._transformers import \
      transform_logging_list_output, transform_metrics_list_output,
      transform_url, transform_storage_list_output, transform_container_permission_output,
      create_boolean_result_output_transformer)
-from azure.cli.core.commands import cli_command
+from azure.cli.core.commands import cli_command, VersionConstraint
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import supported_api_version, get_sdk, ResourceType
+from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
+from .sdkutil import cosmosdb_table_exists
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'
@@ -35,13 +36,16 @@ file_service_path = 'azure.multiapi.storage.file.fileservice#FileService.'
 block_blob_path = 'azure.multiapi.storage.blob.blockblobservice#BlockBlobService.'
 page_blob_path = 'azure.multiapi.storage.blob.pageblobservice#PageBlobService.'
 base_blob_path = 'azure.multiapi.storage.blob.baseblobservice#BaseBlobService.'
-table_path = 'azure.multiapi.storage.table.tableservice#TableService.'
 queue_path = 'azure.multiapi.storage.queue.queueservice#QueueService.'
+
+if cosmosdb_table_exists():
+    table_path = 'azure.multiapi.cosmosdb.table.tableservice#TableService.'
+else:
+    table_path = 'azure.multiapi.storage.table.tableservice#TableService.'
 
 
 def _dont_fail_not_exist(ex):
-    AzureMissingResourceHttpError = \
-        get_sdk(ResourceType.DATA_STORAGE, '_error#AzureMissingResourceHttpError')
+    AzureMissingResourceHttpError = get_sdk(ResourceType.DATA_STORAGE, 'common._error#AzureMissingResourceHttpError')
     if isinstance(ex, AzureMissingResourceHttpError):
         return None
     else:
@@ -59,6 +63,11 @@ cli_command(__name__, 'storage account show-connection-string', custom_path + 's
 cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
 
+with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
+    c.cli_command(__name__, 'storage account network-rule add', custom_path + 'add_network_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule remove', custom_path + 'remove_network_rule', factory)
+    c.cli_command(__name__, 'storage account network-rule list', custom_path + 'list_network_rules', factory)
+
 if supported_api_version(ResourceType.MGMT_STORAGE, max_api='2015-06-15'):
     cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')
 else:
@@ -70,7 +79,7 @@ if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
                                mgmt_path + 'update', factory,
                                custom_function_op=custom_path + 'update_storage_account')
 
-cli_storage_data_plane_command('storage account generate-sas', 'azure.multiapi.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
+cli_storage_data_plane_command('storage account generate-sas', 'azure.multiapi.storage.common#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
 
 # container commands
 factory = blob_data_service_factory
@@ -93,7 +102,8 @@ cli_storage_data_plane_command('storage container policy create', custom_path + 
 cli_storage_data_plane_command('storage container policy delete', custom_path + 'delete_acl_policy', factory)
 cli_storage_data_plane_command('storage container policy show', custom_path + 'get_acl_policy', factory, exception_handler=_dont_fail_not_exist)
 cli_storage_data_plane_command('storage container policy list', custom_path + 'list_acl_policies', factory, table_transformer=transform_acl_list_output)
-cli_storage_data_plane_command('storage container policy update', custom_path + 'set_acl_policy', factory)
+cli_storage_data_plane_command('storage container policy update', custom_path + 'set_acl_policy', factory,
+                               resource_type=ResourceType.DATA_STORAGE, min_api='2017-04-17')
 
 # blob commands
 cli_storage_data_plane_command('storage blob list', block_blob_path + 'list_blobs', factory, transform=transform_storage_list_output, table_transformer=transform_blob_output)
@@ -119,6 +129,7 @@ cli_storage_data_plane_command('storage blob copy start-batch', 'azure.cli.comma
 cli_storage_data_plane_command('storage blob copy cancel', block_blob_path + 'abort_copy_blob', factory)
 cli_storage_data_plane_command('storage blob upload-batch', 'azure.cli.command_modules.storage.blob#storage_blob_upload_batch', factory)
 cli_storage_data_plane_command('storage blob download-batch', 'azure.cli.command_modules.storage.blob#storage_blob_download_batch', factory)
+cli_storage_data_plane_command('storage blob set-tier', custom_path + 'set_blob_tier', factory)
 
 # page blob commands
 cli_storage_data_plane_command('storage blob incremental-copy start',
@@ -143,6 +154,7 @@ cli_storage_data_plane_command('storage share policy delete', custom_path + 'del
 cli_storage_data_plane_command('storage share policy show', custom_path + 'get_acl_policy', factory)
 cli_storage_data_plane_command('storage share policy list', custom_path + 'list_acl_policies', factory, table_transformer=transform_acl_list_output)
 cli_storage_data_plane_command('storage share policy update', custom_path + 'set_acl_policy', factory)
+cli_storage_data_plane_command('storage share snapshot', file_service_path + 'snapshot_share', factory, resource_type=ResourceType.DATA_STORAGE, min_api='2017-04-17')
 
 # directory commands
 cli_storage_data_plane_command('storage directory create', file_service_path + 'create_directory', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
@@ -175,7 +187,7 @@ cli_storage_data_plane_command('storage file copy start-batch', 'azure.cli.comma
 # table commands
 factory = table_data_service_factory
 cli_storage_data_plane_command('storage table generate-sas', table_path + 'generate_table_shared_access_signature', factory)
-cli_storage_data_plane_command('storage table stats', table_path + 'get_table_service_stats', factory)
+cli_storage_data_plane_command('storage table stats', table_path + 'get_table_service_stats', factory, resource_type=ResourceType.DATA_STORAGE, min_api='2016-05-31')
 cli_storage_data_plane_command('storage table list', table_path + 'list_tables', factory, transform=transform_storage_list_output)
 cli_storage_data_plane_command('storage table create', table_path + 'create_table', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage table exists', table_path + 'exists', factory, transform=create_boolean_result_output_transformer('exists'))
@@ -197,10 +209,7 @@ cli_storage_data_plane_command('storage entity delete', table_path + 'delete_ent
 # queue commands
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', queue_path + 'generate_queue_shared_access_signature', factory)
-
-if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
-    cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory)
-
+cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory, resource_type=ResourceType.DATA_STORAGE, min_api='2016-05-31')
 cli_storage_data_plane_command('storage queue list', queue_path + 'list_queues', factory, transform=transform_storage_list_output)
 cli_storage_data_plane_command('storage queue create', queue_path + 'create_queue', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage queue delete', queue_path + 'delete_queue', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)

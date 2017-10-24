@@ -41,12 +41,12 @@ build_script:
       }
       $fileCommitMap | ConvertTo-Json | Out-File "$env:APPVEYOR_BUILD_FOLDER\doc\sphinx\doc_commit_map.json"
   - cd doc\sphinx 
-  - make xml
+  - make xmlwithversion
   - mkdir %TEMP%\azure-cli-xml2yml
   - cd %TEMP%\azure-cli-xml2yml
   - nuget install azure.cli.doc.xml2yml -Source https://ci.appveyor.com/nuget/azure-docs-cli-pre-process
   - cd azure.cli.doc.xml2yml*\tools
-  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml\ind.xml" -d "%TEMP%\azure-cli-xml2yml\yml-output" -r "https://github.com/%APPVEYOR_REPO_NAME%" -b "%APPVEYOR_REPO_BRANCH%" -c "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\doc_commit_map.json" -v 1
+  - AzCliDocPreprocessor -s "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\_build\xml" -d "%TEMP%\azure-cli-xml2yml\yml-output" -r "https://github.com/%APPVEYOR_REPO_NAME%" -b "%APPVEYOR_REPO_BRANCH%" -c "%APPVEYOR_BUILD_FOLDER%\doc\sphinx\doc_commit_map.json" -v 1
 
 artifacts:
   - path: doc\sphinx\_build
@@ -57,9 +57,19 @@ on_success:
   - git config --global user.email "%GIT_USER_EMAIL%"
   - git config --global user.name "%GIT_USER_NAME%"
   - git clone --depth 5 -q --branch=%TARGET_BRANCH% %GIT_CONTENT_REPO_URL% %TEMP%\azure-cli-content
-  - if exist %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% ((cd %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER%) & (del %FILES_TO_DELETE% /f /q) & (for /d %%p IN (*) do rmdir "%%p" /s /q))
+  - ps: |
+      $folders = Get-ChildItem -Path "$env:TEMP\azure-cli-content" -Directory
+      ForEach($folder in $folders)
+      {
+          $folderPath = [System.IO.Path]::Combine("$env:TEMP\azure-cli-content", $folder)
+          $subFolders = Get-ChildItem -Path $folderPath -Directory -Name
+          if ($subFolders -contains "$env:YML_OUTPUT_FOLDER" -and $subFolders -contains "$env:CONCEPTUAL_DOC_FOLDER")
+          {
+              $docsRefAutogenFolder = [System.IO.Path]::Combine($folderPath, "$env:YML_OUTPUT_FOLDER")
+              Get-ChildItem -Path $docsRefAutogenFolder | Remove-Item -Force -Recurse
+          }
+      }
   - cd %TEMP%\azure-cli-content
-  - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content\%YML_OUTPUT_FOLDER% /e & IF !ERRORLEVEL! EQU 1 (exit 0) ELSE (IF !ERRORLEVEL! EQU 3 (exit 0) ELSE (exit 1))
-  - ps: .\merge-toc.ps1 "$env:YML_OUTPUT_FOLDER" "$env:CONCEPTUAL_DOC_FOLDER"
+  - SETLOCAL EnableDelayedExpansion & robocopy %TEMP%\azure-cli-xml2yml\yml-output %TEMP%\azure-cli-content /e & IF !ERRORLEVEL! EQU 1 (exit 0) ELSE (IF !ERRORLEVEL! EQU 3 (exit 0) ELSE (exit 1))
   - git add -A
   - git diff --quiet --exit-code --cached || git commit -m "Update Document Content" && git push origin %TARGET_BRANCH% && appveyor AddMessage "Document Updated"

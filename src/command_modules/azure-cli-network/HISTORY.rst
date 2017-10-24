@@ -3,10 +3,56 @@
 Release History
 ===============
 
-unreleased
+2.0.17
+++++++
+* minor fixes
+
+2.0.16 (2017-10-09)
++++++++++++++++++++
+* `application-gateway address-pool create`: `--server` argument is not optional to allow creation of empty address pools.
+* `traffic-manager`: Updates to support latest features.
+
+
+2.0.15 (2017-09-22)
++++++++++++++++++++
+* `lb/public-ip`: Add availability zone support.
+* `express-route`: Add support for IPv6 Microsoft Peering
+* Add `asg` application security group commands.
+* `nic create`: Added `--application-security-groups` support.
+* `nic ip-config create/update`: Added `--application-security-groups` support.
+* `nsg rule create/update`: Added `--source-asgs` and `--destination-asgs` support.
+* `vnet create/update`: Added `--ddos-protection` and `--vm-protection` support.
+* Added command: `vnet-gateway vpn-client show-url`
+
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* `vnet-gateway`: Added commands `list-bgp-peer-status`, `list-learned-routes` and `list-advertised-routes`
+* `vnet-gateway`: Added command `vpn-client generate`.
+
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* BC `vnet list-private-access-services`: renamed to `vnet list-endpoint-services`
+* BC `vnet subnet create/update`: renamed `--private-access-services` to `--service-endpoints`
+* `nsg rule create/update`: Add support for multiple IP ranges and port ranges.
+* `lb create`: Added support for SKU.
+* `public-ip create`: Added support for SKU.
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
+* `lb`: fixed issue where the certain child resource names did not resolve correctly when omitted
+* `application-gateway {subresource} delete`: Fixed issue where `--no-wait` was not honored.
+* `application-gateway http-settings update`: Fix issue where `--connection-draining-timeout` could not be turned off.
+* `[Network] Fix error - unexpected keyword argument 'sa_data_size_kilobyes'` : Fix where `az network vpn-connection ipsec-policy add` unexpected keyword argument 'sa_data_size_kilobyes'
+
+2.0.11 (2017-07-27)
 +++++++++++++++++++
 * Added `list-private-access-services` command
 * `vnet subnet create/update`: Added `--private-access-services` argument.
+* `application-gateway redirect-config create`: Fix issue where create command would fail. Fix issue where `--no-wait`
+  would not work with update command.
+* `application-gateway url-path-map rule create`: Fix issue where certain parameters which should accept names or IDs
+  would only accept IDs.
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++

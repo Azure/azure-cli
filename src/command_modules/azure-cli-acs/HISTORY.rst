@@ -2,11 +2,44 @@
 
 Release History
 ===============
-unreleased
+
+2.0.18
+++++++
+* fix kubernetes get-credentials
+
+2.0.17 (2017-10-09)
++++++++++++++++++++
+* minor fixes
+
+2.0.16 (2017-09-22)
++++++++++++++++++++
+* add orchestrator-release option for acs preview regions
+
+2.0.15 (2017-09-11)
++++++++++++++++++++
+* add acs list-locations command
+* make ssh-key-file come with expected default value
+
+2.0.14 (2017-08-28)
++++++++++++++++++++
+* correct preview regions
+* format default dns_name_prefix properly
+* optimize acs command output
+
+2.0.13 (2017-08-15)
++++++++++++++++++++
+* correct sshMaster0 port number for kubernetes
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
+* add preview regions
+
+2.0.11 (2017-07-27)
 +++++++++++++++++++
 * api version 2017-07-01 support
 * update dcos and swarm to use latest api version instead of 2016-03-30
 * expose orchestrator DockerCE
+* fix help message
 
 2.0.10 (2017-07-07)
 +++++++++++++++++++

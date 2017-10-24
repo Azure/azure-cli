@@ -2,8 +2,56 @@
 
 Release History
 ===============
-(unreleased)
+
+2.0.17
+++++++
+* `vmss create`: expose '--accelerated-networking'
+
+2.0.16 (2017-10-09)
 +++++++++++++++++++
+* `vm show`: fix a bug when using '-d' crashes on missing private ip addresses
+* `vmss create`: (PREVIEW) support rolling upgrade
+* `vm encryption enable`: allow updating encryption settings by rerunning the command
+* `vm create`: expose --os-disk-size-gb
+* `vmss create`: expose --license-type for windows os
+
+2.0.15 (2017-09-22)
++++++++++++++++++++
+* `vm/vmss/disk create`: support availability zone
+* `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
+* `vm create`: Added `--asgs` support.
+* `vm run-command`: support to run commands on remote VMs
+* `vmss encryption`: (PREVIEW) support vmss disk encryptions
+* `vm perform-maintenance`: support to perform maintenance on a vm
+
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* msi: don't assign access unless `--scope` is provided
+* msi: use the same extension naming as portal does
+* msi: remove the useless `subscription` from the `vm/vmss create` commands output
+* `vm/vmss create`: fix a bug that the storage sku is not applied on data disks coming with an image
+* `vm format-secret`: Fix issue where `--secrets` would not accept newline separated IDs.
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* `vmss get-instance-view`: Fix issue where extra, erroneous information was displayed when using `--instance-id *`
+* `vmss create`: Added support for `--lb-sku`
+* `vm/vmss create`: remove human names from the admin name blacklist
+* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image. 
+* `vmss create`: fix a crash when create a scaleset with an internal LB
+* `vm availability-set create`: Fix issue where --no-wait argument did not work.
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
+* availability-set: expose fault domain count on convert
+* vm: expose 'az vm list-skus' command
+* vm/vmss: support to assign identity w/o creating role assignments
+* vm: apply storage sku on attaching data disks
+* vm: remove default os-disk name and storage SKU when using managed disks.
+
+2.0.11 (2017-07-27)
++++++++++++++++++++
+* vmss: support configuring nsg
 * vmss: fix a bug that dns server is not configured right.
 * vm/vmss: support managed service identity
 * `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.

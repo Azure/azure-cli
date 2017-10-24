@@ -98,34 +98,34 @@ The repo has a launch.json file that will launch the version of Python that is f
 
 ## Running Tests:
 #### Command line
-##### Windows:
   Provided your PYTHONPATH was set correctly, you can run the tests from your `<root clone>` directory.
 
-  To test the core of the CLI:
+##### Windows:
+
+  To run the CLI tests:
   ```BatchFile
-  python -m unittest discover -s src/azure-cli/azure/cli/tests
+  <clone root>\tools\scripts\run_tests.bat [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
-  To test the command modules:
+  To check the CLI and command modules for style errors:
   ```BatchFile
-  python scripts/command_modules/test.py
+  <clone root>\tools\scripts\check_style.bat [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
 
-  To check or pylint errors in the core of the CLI:
-  ```BatchFile
-  pylint src/azure
+##### OSX/Ubuntu (bash):
+
+  To run the CLI tests:
+  ```Shell
+   <clone root>/tools/scripts/run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
-  To check the command modules for pylint errors:
-  ```Batch
-  python scripts/command_modules/pylint.py
+  To check the CLI and command modules for style errors:
+  ```Shell
+   <clone root>/tools/scripts/check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
-
-  Additionally, you can run pylint tests for the core CLI and all command modules using the `lintall.bat` script, and run tests for the core CLI and all command modules using the `testall.bat` script.
 
 #### VS Code
   Under construction...
 
 #### Visual Studio
   Select `Test > Windows > Test Explorer` and click `Run All` in the Test Explorer pane.
-

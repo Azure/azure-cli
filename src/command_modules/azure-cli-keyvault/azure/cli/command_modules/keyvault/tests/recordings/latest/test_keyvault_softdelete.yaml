@@ -1,80 +1,107 @@
 interactions:
 - request:
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_keyvault_sd000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001","name":"cli_test_keyvault_sd000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [d31284b4-4fc9-11e7-9e7a-5065f34efe31]
     method: GET
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/me?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/$metadata#directoryObjects/Microsoft.DirectoryServices.User/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"7541419d-883d-452f-a823-56aa8bf0749f","deletionTimestamp":null,"accountEnabled":true,"signInNames":[],"assignedLicenses":[],"assignedPlans":[],"city":null,"companyName":null,"country":null,"creationType":"Invitation","department":null,"dirSyncEnabled":null,"displayName":"azkvtest","facsimileTelephoneNumber":null,"givenName":null,"immutableId":null,"isCompromised":null,"jobTitle":null,"lastDirSyncTime":null,"mail":"azkvtest@sschaab.onmicrosoft.com","mailNickname":"azkvtest_sschaab.onmicrosoft.com#EXT#","mobile":null,"onPremisesDistinguishedName":null,"onPremisesSecurityIdentifier":null,"otherMails":["azkvtest@sschaab.onmicrosoft.com"],"passwordPolicies":null,"passwordProfile":null,"physicalDeliveryOfficeName":null,"postalCode":null,"preferredLanguage":null,"provisionedPlans":[],"provisioningErrors":[],"proxyAddresses":["smtp:azkvtest_sschaab.onmicrosoft.com#EXT#@microsoft.onmicrosoft.com","SMTP:azkvtest@sschaab.onmicrosoft.com"],"refreshTokensValidFromDateTime":"2017-06-12T23:40:43Z","showInAddressList":false,"sipProxyAddress":null,"state":null,"streetAddress":null,"surname":null,"telephoneNumber":null,"usageLocation":null,"userPrincipalName":"azkvtest_sschaab.onmicrosoft.com#EXT#@microsoft.onmicrosoft.com","userType":"Guest"}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.User/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"5963f50c-7c43-405c-af7e-53294de76abd","deletionTimestamp":null,"accountEnabled":true,"assignedLicenses":[],"assignedPlans":[],"city":null,"companyName":null,"country":null,"creationType":null,"department":null,"dirSyncEnabled":null,"displayName":"Admin2","employeeId":null,"facsimileTelephoneNumber":null,"givenName":"Admin2","immutableId":null,"isCompromised":null,"jobTitle":null,"lastDirSyncTime":null,"mail":null,"mailNickname":"admin2","mobile":null,"onPremisesDistinguishedName":null,"onPremisesSecurityIdentifier":null,"otherMails":["destanko@microsoft.com"],"passwordPolicies":"None","passwordProfile":null,"physicalDeliveryOfficeName":null,"postalCode":null,"preferredLanguage":"en-US","provisionedPlans":[],"provisioningErrors":[],"proxyAddresses":[],"refreshTokensValidFromDateTime":"2017-09-06T17:11:13Z","showInAddressList":null,"signInNames":[],"sipProxyAddress":null,"state":null,"streetAddress":null,"surname":"Admin2","telephoneNumber":null,"usageLocation":null,"userIdentities":[],"userPrincipalName":"admin2@AzureSDKTeam.onmicrosoft.com","userType":"Member"}'}
     headers:
-      Access-Control-Allow-Origin: ['*']
-      Cache-Control: [no-cache]
-      Content-Length: ['1477']
-      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      DataServiceVersion: [3.0;]
-      Date: ['Mon, 12 Jun 2017 23:49:50 GMT']
-      Duration: ['764746']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [auMH3trGGPxUnEra3OEObugLKMuiyORtWJYLQ+Ri0fc=]
-      ocp-aad-session-key: [MbhLiJbXz4kQIoc_IiLHO5BAHk4sD-rcWNyK5lJEEWq1MlbRDZhsuYTt5vR5azhkxIiRZ--F_juVBF0InSRVnAN6fUoa9j8yxBtZJj9EuIqHwYapvN42piz_RWlHVrqJ.pinYxFJCFJh1qEjVPS8jvR0cWdIu6vWfob4oIuHNyok]
-      request-id: [ee960350-e1e2-4c7f-acfa-089df00eccf6]
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1309']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 08 Sep 2017 19:05:01 GMT']
+      duration: ['1146640']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [mXAYcbEGDXPGTLgRCKl3Y9JNd8ph+Zl34K70uZzuBPw=]
+      ocp-aad-session-key: [Y9I5dRAUNwYrMCm19pMTFZeGYWw-KxPx4G1brfkzVDrm-i-GpmKhCYXU0zeP4mWLUaPHDXItSctzrwnZmt2DglVW9ayuKyLXgL64dNHzTG4606DBO2uBijTVpd_8-2rc.7RG_Yi_HCwBKAs2QY5vilUJZi_6GGpntmvUvPd_znEs]
+      pragma: [no-cache]
+      request-id: [f9c70d4a-01f1-4035-b539-9ca8e026f532]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"sku": {"family": "A", "name": "premium"},
-      "enableSoftDelete": true, "accessPolicies": [{"permissions": {"keys": ["get",
-      "create", "delete", "list", "update", "import", "backup", "restore", "recover"],
-      "storage": ["get", "list", "delete", "set", "update", "regeneratekey", "setsas",
-      "listsas", "getsas", "deletesas"], "certificates": ["get", "list", "delete",
-      "create", "import", "update", "managecontacts", "getissuers", "listissuers",
-      "setissuers", "deleteissuers", "manageissuers", "recover"], "secrets": ["get",
-      "list", "set", "delete", "backup", "restore", "recover"]}, "objectId": "7541419d-883d-452f-a823-56aa8bf0749f",
-      "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}], "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}}'
+    body: '{"properties": {"enableSoftDelete": true, "accessPolicies": [{"permissions":
+      {"secrets": ["get", "list", "set", "delete", "backup", "restore", "recover"],
+      "keys": ["get", "create", "delete", "list", "update", "import", "backup", "restore",
+      "recover"], "certificates": ["get", "list", "delete", "create", "import", "update",
+      "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
+      "manageissuers", "recover"], "storage": ["get", "list", "delete", "set", "update",
+      "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}, "objectId": "5963f50c-7c43-405c-af7e-53294de76abd",
+      "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}], "sku": {"family": "A",
+      "name": "premium"}, "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}, "location":
+      "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault create]
       Connection: [keep-alive]
       Content-Length: ['771']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [d33723ac-4fc9-11e7-adf8-5065f34efe31]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2016-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete","name":"cli-kv-test-softdelete","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"7541419d-883d-452f-a823-56aa8bf0749f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"secrets":["get","list","set","delete","backup","restore","recover"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"vaultUri":"https://cli-kv-test-softdelete.vault.azure.net"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"5963f50c-7c43-405c-af7e-53294de76abd","permissions":{"secrets":["get","list","set","delete","backup","restore","recover"],"keys":["get","create","delete","list","update","import","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:49:52 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['1031']
-      x-ms-keyvault-service-version: [1.0.0.164]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      cache-control: [no-cache]
+      content-length: ['1092']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:03 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -83,29 +110,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [e617b178-4fc9-11e7-a7d3-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys?api-version=2016-10-01
   response:
     body: {string: ''}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['0']
-      Date: ['Mon, 12 Jun 2017 23:50:22 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      WWW-Authenticate: ['Bearer authorization="https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 08 Sep 2017 19:05:34 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      www-authenticate: ['Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
           resource="https://vault.azure.net"']
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 401, message: Unauthorized}
 - request:
     body: null
@@ -114,160 +140,157 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [e617b178-4fc9-11e7-a7d3-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys?api-version=2016-10-01
   response:
     body: {string: '{"value":null,"nextLink":null}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['30']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:22 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['30']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:35 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault set-policy]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e6c1d1fe-4fc9-11e7-8de3-5065f34efe31]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azkv-pytest/providers/Microsoft.KeyVault/vaults/pytest-shared-vault","name":"pytest-shared-vault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-keyvault-cert_birq_/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-cert1","name":"cli-test-keyvault-cert1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-keyvault-secret_0w5u_/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-secret","name":"cli-test-keyvault-secret","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete","name":"cli-kv-test-softdelete","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/cli-vault","name":"cli-vault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/froyo","name":"froyo","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/softserve","name":"softserve","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/tempvault2","name":"tempvault2","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/tempvault3","name":"tempvault3","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/tempvault4","name":"tempvault4","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}}]}'}
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sdsfc2fkseod2tkh2uclvg76eiiqyl2gbxeheunmyug5ifeipqe4764lw/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-gvgzqo","name":"cli-test-keyvault-gvgzqo","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sp_with_kv_existing_certkvg22v5fsol3lqdivew2w3dkv7qe2tcbcp7wmjxb53/providers/Microsoft.KeyVault/vaults/clitestemcd3ylngb6xyfjjh","name":"clitestemcd3ylngb6xyfjjh","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sp_with_kv_new_certxgwr3fn6lyna6zrxeastkyrtqvlylxcx4eylctfborrrthj/providers/Microsoft.KeyVault/vaults/clitestuznjfpcwnzpbea5ff","name":"clitestuznjfpcwnzpbea5ff","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab786","name":"cliautomationlab786","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"9f45d4bf-7e01-4684-9438-37c712728db1","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation01/providers/Microsoft.KeyVault/vaults/cliautomationlab6073","name":"cliautomationlab6073","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"72f1b266-2a21-4f0a-af01-934c93c72e6e","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg4mlozagf3pwtonk2fy32dz2fektoa5zcrvjis2bthl5uq7euxewj7saj52y5z5ydw/providers/Microsoft.KeyVault/vaults/vmkeyvault5sf56op5ih","name":"vmkeyvault5sf56op5ih","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgf3taitsxo7e7papbgdn77qjvbmonegm72h4xxj4ejfnnr3zs5v37lu2v4yuhngcgt/providers/Microsoft.KeyVault/vaults/vmkeyvaultwga4pgpqfg","name":"vmkeyvaultwga4pgpqfg","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rguewohnkhvsl75xdfx66o4y3evlji7jv3n6f7bqhjowvumyyqknlgyouo3hatlnzsj/providers/Microsoft.KeyVault/vaults/vmlinuxkvhfrbfprtn5q","name":"vmlinuxkvhfrbfprtn5q","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-kv/providers/Microsoft.KeyVault/vaults/tjptestkv1","name":"tjptestkv1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}}]}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:23 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Vary: [Accept-Encoding]
-      content-length: ['2296']
+      cache-control: [no-cache]
+      content-length: ['3054']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:34 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault set-policy]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e6d473da-4fc9-11e7-8e5c-5065f34efe31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2016-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete","name":"cli-kv-test-softdelete","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"7541419d-883d-452f-a823-56aa8bf0749f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"secrets":["get","list","set","delete","backup","restore","recover"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"vaultUri":"https://cli-kv-test-softdelete.vault.azure.net/"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"5963f50c-7c43-405c-af7e-53294de76abd","permissions":{"secrets":["get","list","set","delete","backup","restore","recover"],"keys":["get","create","delete","list","update","import","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net/"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:24 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['1032']
-      x-ms-keyvault-service-version: [1.0.0.164]
+      cache-control: [no-cache]
+      content-length: ['1093']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"sku": {"family": "A", "name": "premium"},
-      "enableSoftDelete": true, "enabledForDeployment": false, "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-      "accessPolicies": [{"permissions": {"keys": ["get", "create", "delete", "list",
-      "update", "import", "backup", "restore", "recover", "purge"], "certificates":
+    body: 'b''{"tags": {}, "properties": {"enableSoftDelete": true, "enabledForDeployment":
+      false, "vaultUri": "https://cli-test-keyvault-000002.vault.azure.net/", "sku":
+      {"family": "A", "name": "premium"}, "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      "accessPolicies": [{"permissions": {"secrets": ["get", "list", "set", "delete",
+      "backup", "restore", "recover", "purge"], "keys": ["get", "create", "delete",
+      "list", "update", "import", "backup", "restore", "recover", "purge"], "certificates":
       ["get", "list", "delete", "create", "import", "update", "managecontacts", "getissuers",
-      "listissuers", "setissuers", "deleteissuers", "manageissuers", "recover", "purge"],
-      "secrets": ["get", "list", "set", "delete", "backup", "restore", "recover",
-      "purge"]}, "objectId": "7541419d-883d-452f-a823-56aa8bf0749f", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}],
-      "vaultUri": "https://cli-kv-test-softdelete.vault.azure.net/"}, "tags": {}}'
+      "listissuers", "setissuers", "deleteissuers", "manageissuers", "recover", "purge"]},
+      "objectId": "5963f50c-7c43-405c-af7e-53294de76abd", "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"}]},
+      "location": "westus"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault set-policy]
       Connection: [keep-alive]
-      Content-Length: ['788']
+      Content-Length: ['790']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e717a538-4fc9-11e7-82d3-5065f34efe31]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2016-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete","name":"cli-kv-test-softdelete","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"7541419d-883d-452f-a823-56aa8bf0749f","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover","purge"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover","purge"],"secrets":["get","list","set","delete","backup","restore","recover","purge"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"vaultUri":"https://cli-kv-test-softdelete.vault.azure.net/"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"5963f50c-7c43-405c-af7e-53294de76abd","permissions":{"secrets":["get","list","set","delete","backup","restore","recover","purge"],"keys":["get","create","delete","list","update","import","backup","restore","recover","purge"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover","purge"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net/"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:23 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['951']
-      x-ms-keyvault-service-version: [1.0.0.164]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      cache-control: [no-cache]
+      content-length: ['1012']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"attributes": {"enabled": true}, "value": "ABC123", "tags": {"file-encoding":
-      "utf-8"}}'
+    body: '{"tags": {"file-encoding": "utf-8"}, "value": "ABC123", "attributes": {"enabled":
+      true}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['88']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [e75ee246-4fc9-11e7-b036-5065f34efe31]
     method: PUT
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1?api-version=2016-10-01
   response:
-    body: {string: '{"value":"ABC123","id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1/4b09b6078ad040bc8466ea42352492eb","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
+    body: {string: '{"value":"ABC123","id":"https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/9801276346384a859940b94151b93a96","attributes":{"enabled":true,"created":1504897538,"updated":1504897538,"recoveryLevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['266']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:24 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['268']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -277,28 +300,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [e7902290-4fc9-11e7-ad04-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1?api-version=2016-10-01
   response:
-    body: {string: '{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets/secret1","deletedDate":1497311425,"scheduledPurgeDate":1505087425,"id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1/4b09b6078ad040bc8466ea42352492eb","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
+    body: {string: '{"recoveryId":"https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1","deletedDate":1504897537,"scheduledPurgeDate":1512673537,"id":"https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/9801276346384a859940b94151b93a96","attributes":{"enabled":true,"created":1504897538,"updated":1504897538,"recoveryLevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['391']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:25 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['395']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:38 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -307,119 +329,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [e7cb14fe-4fc9-11e7-919e-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:25 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [e9b5ec5e-4fc9-11e7-a696-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:27 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [eba64840-4fc9-11e7-af17-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:32 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [ed958ff6-4fc9-11e7-96b0-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets/secret1","deletedDate":1497311425,"scheduledPurgeDate":1505087425,"id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['386']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:34 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -428,28 +360,213 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [edc0051a-4fc9-11e7-8b14-5065f34efe31]
     method: POST
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1/4b09b6078ad040bc8466ea42352492eb","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
+    body: {string: '{"error":{"code":"Conflict","message":"Secret secret1 is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['249']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:35 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['129']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret secret1 is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['129']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret secret1 is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['129']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:44 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret secret1 is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['129']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:47 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret secret1 is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['129']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:51 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret secret1 is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['129']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/9801276346384a859940b94151b93a96","attributes":{"enabled":true,"created":1504897538,"updated":1504897538,"recoveryLevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['251']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -458,29 +575,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [edfe7e62-4fc9-11e7-8103-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:35 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:05:58 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -488,29 +605,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [eff21136-4fc9-11e7-b547-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:39 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -518,29 +635,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [f1e034ac-4fc9-11e7-b51b-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:42 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -548,29 +665,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [f3cdb5da-4fc9-11e7-94ef-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:44 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -578,58 +695,27 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [f5c07c2c-4fc9-11e7-9549-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"value":"ABC123","id":"https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/9801276346384a859940b94151b93a96","attributes":{"enabled":true,"created":1504897538,"updated":1504897538,"recoveryLevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:47 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['268']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:11 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [f7b03b1e-4fc9-11e7-806a-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['244']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:52 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -639,28 +725,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [f7d50858-4fc9-11e7-a70d-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1?api-version=2016-10-01
   response:
-    body: {string: '{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets/secret1","deletedDate":1497311450,"scheduledPurgeDate":1505087450,"id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1/4b09b6078ad040bc8466ea42352492eb","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
+    body: {string: '{"recoveryId":"https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1","deletedDate":1504897571,"scheduledPurgeDate":1512673571,"id":"https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/9801276346384a859940b94151b93a96","attributes":{"enabled":true,"created":1504897538,"updated":1504897538,"recoveryLevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['391']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:50 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['395']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -669,119 +754,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [f8147f6c-4fc9-11e7-82b4-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:53 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:11 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [fa037712-4fc9-11e7-95d1-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:56 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [fbf9887a-4fc9-11e7-8ceb-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:50:58 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [fdee6c6c-4fc9-11e7-8f1b-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets/secret1","deletedDate":1497311450,"scheduledPurgeDate":1505087450,"id":"https://cli-kv-test-softdelete.vault.azure.net/secrets/secret1","attributes":{"enabled":true,"created":1497311424,"updated":1497311424,"recoverylevel":"Recoverable+Purgeable"},"tags":{"file-encoding":"utf-8"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['386']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:05 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -790,27 +785,211 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [ffe971d2-4fc9-11e7-a733-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['121']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['121']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:15 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['121']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:17 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['121']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Secret is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['121']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:26 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedsecrets/secret1?api-version=2016-10-01
   response:
     body: {string: ''}
     headers:
-      Cache-Control: [no-cache]
-      Date: ['Mon, 12 Jun 2017 23:51:05 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      date: ['Fri, 08 Sep 2017 19:06:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/secrets/secret1/?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"SecretNotFound","message":"Secret not found:
+        secret1"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: '{"attributes": {"enabled": true}, "kty": "RSA"}'
     headers:
@@ -819,28 +998,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['47']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [002b4640-4fca-11e7-951d-5065f34efe31]
     method: POST
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys/key1/create?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/create?api-version=2016-10-01
   response:
-    body: {string: '{"key":{"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1/58a0f648b8184b749cf05d5ffaf39937","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"tPse6GzqtNMuXqUXyyT4v9XmsgtMNRAKrY9M2XWQUrzuvW1-ia_s29xiRReX5e-h4EexBw_s-VMY3Q2AG4Wka4X8F_unp_moljXybnnVtBnIfDHqDqLts53FRm_-z7wcW9kFyc7JzTI8Y8egpLbCDbw1Sf4CvGtJs2ln3Vyfre-aU_jDSVw53uR6xIyB7deBb7u1AYyyW8BNmBEqjrzCug6iZnlXYGcsiK5GDayrMN4OF6g3OpHU1SCoE_1CaZlk6zY0WREuZOZq6y95ToSbajwfYQqrn6J-SNJIagrYbO0Wd3m-D-NaqM7f6TrJvU5gOuj_z6Jwe6fD4cwmn00O-Q","e":"AQAB"},"attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}'}
+    body: {string: '{"key":{"kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/key1/1b6ac08c757348cea8f74561d640c5bd","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"zGYPoZDOL-_WXZZLV8n02pQ0xDP71WKBDLkcg3zXRi1wL7LL6s2C8yl0CQiICgEvwGzieJPy6f5ymXtieWAICmkzK7b5Njf7KUbHn3U3m28r2glugz8yrvdbYEyqswMou6YJfHqlIQsBqrx6rguEfPy9h55pIanGSbiwGbjs8jVAuJkPkDecBjbkdvGeWM_4nXBxbSoHBOFEYP6tOejple68a3QJcatsGK4Tt7JUIn1PqI0PgysCN0Ts-7_3tMXpWIGhDr8f4EE1_CxRH9DBDPvTC903UqKaQyRRCSCOnknM4aqAb-kVJCqeJYxbHHCJ5XfikloH42bua_QfC-Xhkw","e":"AQAB"},"attributes":{"enabled":true,"created":1504897589,"updated":1504897589,"recoveryLevel":"Recoverable+Purgeable"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['661']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:07 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['663']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -850,28 +1028,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [00cae3a6-4fca-11e7-9f43-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys/key1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1?api-version=2016-10-01
   response:
-    body: {string: '{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedkeys/key1","deletedDate":1497311468,"scheduledPurgeDate":1505087468,"key":{"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1/58a0f648b8184b749cf05d5ffaf39937","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"tPse6GzqtNMuXqUXyyT4v9XmsgtMNRAKrY9M2XWQUrzuvW1-ia_s29xiRReX5e-h4EexBw_s-VMY3Q2AG4Wka4X8F_unp_moljXybnnVtBnIfDHqDqLts53FRm_-z7wcW9kFyc7JzTI8Y8egpLbCDbw1Sf4CvGtJs2ln3Vyfre-aU_jDSVw53uR6xIyB7deBb7u1AYyyW8BNmBEqjrzCug6iZnlXYGcsiK5GDayrMN4OF6g3OpHU1SCoE_1CaZlk6zY0WREuZOZq6y95ToSbajwfYQqrn6J-SNJIagrYbO0Wd3m-D-NaqM7f6TrJvU5gOuj_z6Jwe6fD4cwmn00O-Q","e":"AQAB"},"attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}'}
+    body: {string: '{"recoveryId":"https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1","deletedDate":1504897589,"scheduledPurgeDate":1512673589,"key":{"kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/key1/1b6ac08c757348cea8f74561d640c5bd","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"zGYPoZDOL-_WXZZLV8n02pQ0xDP71WKBDLkcg3zXRi1wL7LL6s2C8yl0CQiICgEvwGzieJPy6f5ymXtieWAICmkzK7b5Njf7KUbHn3U3m28r2glugz8yrvdbYEyqswMou6YJfHqlIQsBqrx6rguEfPy9h55pIanGSbiwGbjs8jVAuJkPkDecBjbkdvGeWM_4nXBxbSoHBOFEYP6tOejple68a3QJcatsGK4Tt7JUIn1PqI0PgysCN0Ts-7_3tMXpWIGhDr8f4EE1_CxRH9DBDPvTC903UqKaQyRRCSCOnknM4aqAb-kVJCqeJYxbHHCJ5XfikloH42bua_QfC-Xhkw","e":"AQAB"},"attributes":{"enabled":true,"created":1504897589,"updated":1504897589,"recoveryLevel":"Recoverable+Purgeable"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['797']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:08 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['801']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -880,179 +1057,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [0118ed48-4fca-11e7-9bfe-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"KeyNotFound","message":"Key not found: key1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:09 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [0306fe36-4fca-11e7-bde3-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:10 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [04fd54a4-4fca-11e7-9e5f-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:14 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [06ed2558-4fca-11e7-a1e1-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:17 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [08db15b8-4fca-11e7-a857-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:20 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [0ad22c24-4fca-11e7-b817-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedkeys/key1","deletedDate":1497311468,"scheduledPurgeDate":1505087468,"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1","attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['342']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:25 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -1061,28 +1087,89 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [0b123e10-4fca-11e7-85fc-5065f34efe31]
     method: POST
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys/key1/recover?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1/recover?api-version=2016-10-01
   response:
-    body: {string: '{"key":{"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1/58a0f648b8184b749cf05d5ffaf39937","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"tPse6GzqtNMuXqUXyyT4v9XmsgtMNRAKrY9M2XWQUrzuvW1-ia_s29xiRReX5e-h4EexBw_s-VMY3Q2AG4Wka4X8F_unp_moljXybnnVtBnIfDHqDqLts53FRm_-z7wcW9kFyc7JzTI8Y8egpLbCDbw1Sf4CvGtJs2ln3Vyfre-aU_jDSVw53uR6xIyB7deBb7u1AYyyW8BNmBEqjrzCug6iZnlXYGcsiK5GDayrMN4OF6g3OpHU1SCoE_1CaZlk6zY0WREuZOZq6y95ToSbajwfYQqrn6J-SNJIagrYbO0Wd3m-D-NaqM7f6TrJvU5gOuj_z6Jwe6fD4cwmn00O-Q","e":"AQAB"},"attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}'}
+    body: {string: '{"error":{"code":"Conflict","message":"Key key1 is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['661']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:27 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['123']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key key1 is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['123']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:33 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: POST
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1/recover?api-version=2016-10-01
+  response:
+    body: {string: '{"key":{"kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/key1/1b6ac08c757348cea8f74561d640c5bd","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"zGYPoZDOL-_WXZZLV8n02pQ0xDP71WKBDLkcg3zXRi1wL7LL6s2C8yl0CQiICgEvwGzieJPy6f5ymXtieWAICmkzK7b5Njf7KUbHn3U3m28r2glugz8yrvdbYEyqswMou6YJfHqlIQsBqrx6rguEfPy9h55pIanGSbiwGbjs8jVAuJkPkDecBjbkdvGeWM_4nXBxbSoHBOFEYP6tOejple68a3QJcatsGK4Tt7JUIn1PqI0PgysCN0Ts-7_3tMXpWIGhDr8f4EE1_CxRH9DBDPvTC903UqKaQyRRCSCOnknM4aqAb-kVJCqeJYxbHHCJ5XfikloH42bua_QfC-Xhkw","e":"AQAB"},"attributes":{"enabled":true,"created":1504897589,"updated":1504897589,"recoveryLevel":"Recoverable+Purgeable"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['663']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1091,29 +1178,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [0ba02922-4fca-11e7-91fb-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"KeyNotFound","message":"Key not found: key1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:25 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:06:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -1121,29 +1207,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [0d91ac12-4fca-11e7-9f33-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"KeyNotFound","message":"Key not found: key1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:28 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -1151,118 +1236,27 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [0f7e07d0-4fca-11e7-92a8-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"key":{"kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/key1/1b6ac08c757348cea8f74561d640c5bd","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"zGYPoZDOL-_WXZZLV8n02pQ0xDP71WKBDLkcg3zXRi1wL7LL6s2C8yl0CQiICgEvwGzieJPy6f5ymXtieWAICmkzK7b5Njf7KUbHn3U3m28r2glugz8yrvdbYEyqswMou6YJfHqlIQsBqrx6rguEfPy9h55pIanGSbiwGbjs8jVAuJkPkDecBjbkdvGeWM_4nXBxbSoHBOFEYP6tOejple68a3QJcatsGK4Tt7JUIn1PqI0PgysCN0Ts-7_3tMXpWIGhDr8f4EE1_CxRH9DBDPvTC903UqKaQyRRCSCOnknM4aqAb-kVJCqeJYxbHHCJ5XfikloH42bua_QfC-Xhkw","e":"AQAB"},"attributes":{"enabled":true,"created":1504897589,"updated":1504897589,"recoveryLevel":"Recoverable+Purgeable"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:32 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['663']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [117589a6-4fca-11e7-9484-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:36 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [137976dc-4fca-11e7-90fc-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:38 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [15691a1a-4fca-11e7-8dca-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1","attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['206']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:41 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1272,28 +1266,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [158e70cc-4fca-11e7-bbe9-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/keys/key1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1?api-version=2016-10-01
   response:
-    body: {string: '{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedkeys/key1","deletedDate":1497311502,"scheduledPurgeDate":1505087502,"key":{"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1/58a0f648b8184b749cf05d5ffaf39937","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"tPse6GzqtNMuXqUXyyT4v9XmsgtMNRAKrY9M2XWQUrzuvW1-ia_s29xiRReX5e-h4EexBw_s-VMY3Q2AG4Wka4X8F_unp_moljXybnnVtBnIfDHqDqLts53FRm_-z7wcW9kFyc7JzTI8Y8egpLbCDbw1Sf4CvGtJs2ln3Vyfre-aU_jDSVw53uR6xIyB7deBb7u1AYyyW8BNmBEqjrzCug6iZnlXYGcsiK5GDayrMN4OF6g3OpHU1SCoE_1CaZlk6zY0WREuZOZq6y95ToSbajwfYQqrn6J-SNJIagrYbO0Wd3m-D-NaqM7f6TrJvU5gOuj_z6Jwe6fD4cwmn00O-Q","e":"AQAB"},"attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}'}
+    body: {string: '{"recoveryId":"https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1","deletedDate":1504897650,"scheduledPurgeDate":1512673650,"key":{"kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/key1/1b6ac08c757348cea8f74561d640c5bd","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"zGYPoZDOL-_WXZZLV8n02pQ0xDP71WKBDLkcg3zXRi1wL7LL6s2C8yl0CQiICgEvwGzieJPy6f5ymXtieWAICmkzK7b5Njf7KUbHn3U3m28r2glugz8yrvdbYEyqswMou6YJfHqlIQsBqrx6rguEfPy9h55pIanGSbiwGbjs8jVAuJkPkDecBjbkdvGeWM_4nXBxbSoHBOFEYP6tOejple68a3QJcatsGK4Tt7JUIn1PqI0PgysCN0Ts-7_3tMXpWIGhDr8f4EE1_CxRH9DBDPvTC903UqKaQyRRCSCOnknM4aqAb-kVJCqeJYxbHHCJ5XfikloH42bua_QfC-Xhkw","e":"AQAB"},"attributes":{"enabled":true,"created":1504897589,"updated":1504897589,"recoveryLevel":"Recoverable+Purgeable"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['797']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:42 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['801']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1302,179 +1295,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [15c0ae7e-4fca-11e7-9538-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"KeyNotFound","message":"Key not found: key1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:40 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [17b6cb94-4fca-11e7-ab66-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:47 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [19ac3480-4fca-11e7-8b47-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:49 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [1ba13908-4fca-11e7-a969-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:52 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [1d93631c-4fca-11e7-b63a-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:55 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [1f904ffe-4fca-11e7-9b45-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedkeys/key1","deletedDate":1497311502,"scheduledPurgeDate":1505087502,"kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/key1","attributes":{"enabled":true,"created":1497311467,"updated":1497311467,"recoverylevel":"Recoverable+Purgeable"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['342']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:58 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -1483,32 +1325,308 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [1fe33bb6-4fca-11e7-a912-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:34 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:44 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:46 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Key is currently being
+        deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['118']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedkeys/key1?api-version=2016-10-01
   response:
     body: {string: ''}
     headers:
-      Cache-Control: [no-cache]
-      Date: ['Mon, 12 Jun 2017 23:51:59 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      date: ['Fri, 08 Sep 2017 19:07:56 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 204, message: No Content}
 - request:
-    body: '{"policy": {"key_props": {"exportable": true, "reuse_key": false, "key_size":
-      2048, "kty": "RSA"}, "secret_props": {"contentType": "application/x-pem-file"},
-      "issuer": {"name": "Self"}}, "attributes": {"enabled": true, "nbf": 1477593836,
-      "exp": 1509130436}, "value": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCRUPFgOvovNJ0e\nXSHlcm2V9w/ECwzMc31BaN2xBmWjegmqixv9GN3GWMgUQ9zC9k9bxd491Awa55Sq\nht86TL8Q3Fcn8fXuhWbX/gNAO8h5tfuQVA1zB5bVxEQsCNmmLrpgNhLYO+excyCJ\nocqidQostSQfcXU7qJtifpgmRt5oW3WhmpVsnAugS8y8vbCGJXdKqLCZXjL/H0aa\n+r/Z3BzQ+BglULKYshSBinxbYe+1GJ/028/50y/MPf9iFiiS9xtspOtSzd1e+NA5\nG+pCMppJHars9D/FavTewI1zJa9jPxtrwr8L3nEmy9gv6v1474XNYaagtQNjdU0b\nAV3EDfn9AgMBAAECggEADJtGjXAgYzb/yHIQ7jxamG96DSpePmBoheOok+J3r9J3\nAzYVRARDvSDXnrZycPF4WgBU8u0x7aWYhqCzvfWJf9d1si/yA3LMRMGzG3/0OOba\nP5+jGQ8X/UyNE3rjEuEr5wvZ36t2wrS3pmkEUMqxisZeL2Ii5v2OGWHdJjjws4HW\nP9pBGjcgxUP7UKPLQExHb9oUswh66Z+K9o10ZwArPYhnhc546vPlbHqO5bTS/Rza\nPd+c/h7PrrqwSBavm5mdjcHwqr5JjhE4OzbS4HkiYVnpx4OPRcgR0vWE6cG+0zg5\n4AROSM9kvrGflIqn2EAojRAz5S6wHMk7pImk4kAdSwKBgQC/wVsEruzUj3p7DvXc\nXRo8juRrWztrmOvp0GwhsVIVaF0Fr2lqCEGgOqqj5IEfue0UaCNCW3I73rRSYaNe\nnJ7PGZMYmLkzwcvGTEeV9CRqOgvKvbf3RiCpkKeLz3dil8AGdyVlwAJmq8Fn+IMT\nrwGaw3/UHTRMnse6JPoQ+k4KMwKBgQDCAI4Mlq5K7WSH1zNKSLgII9KnfHHkusNU\n88hpaVReXmxU7uQIC02nbtYl2oM3I/Lz9Otk/nPIbh4g9LKmju5Gi1S2wchInDfP\nKwgPoClM6/VM4e6CS9qq/FvJdLu2228AxcdSoIwGmrkbiTtGNedO4CdBa3/vacac\nuD0iD/gbDwKBgQC+mXzVHOJ/LdZ6txYe4dQQWaAmLdrUSn5EPE0e+Fg0uzWrTv4i\nzO4eS/INUjYeyPokjJZvgOH9LJJkSHTQuDEKfcs+aZ+9GGZqRqvpG3GOvP+3l/hi\nKyyQHx7K039BWsEeLBPaHY7FavelVtlDGXMo2CYZOqYfervgBJ0jfwlPDQKBgCuC\nSFlWadxwBT3Z66zbRjq9Hf9mD30Gzcv9qJLLhpprfsxFj2qmblIAr5JpwUfajiBc\na3aJApqO577oYjCsmY/Eq8kZCLwQHQwfUH2ApAKWYLtPaFhcfrweQM+bmIXYDLsV\noDBNxVmt1ZnxWxPR/wBXkTZAz7538I0xXLSI9FHNAoGBAJ/2ck5G+pKVHJA9sFoO\nwpB1jimZNmZjw2Fiu7u33IQSq1oMijD/M8qLFlnquetBrjniW55ViR89HMe+5Bwt\nnZ+Pq6xDKnzxRyyFWGM8lp+JDMMj1xOHIYil+aFgZyWm6/VzN24vdp2eYRYWBdMT\nP8mukpnNhytmI1/4ozaU+wai\n-----END
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys/key1/?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"KeyNotFound","message":"Key not found: key1"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:55 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
+- request:
+    body: '{"policy": {"secret_props": {"contentType": "application/x-pem-file"},
+      "key_props": {"key_size": 2048, "exportable": true, "reuse_key": false, "kty":
+      "RSA"}, "issuer": {"name": "Self"}}, "attributes": {"nbf": 1477593836, "enabled":
+      true, "exp": 1509130436}, "value": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCRUPFgOvovNJ0e\nXSHlcm2V9w/ECwzMc31BaN2xBmWjegmqixv9GN3GWMgUQ9zC9k9bxd491Awa55Sq\nht86TL8Q3Fcn8fXuhWbX/gNAO8h5tfuQVA1zB5bVxEQsCNmmLrpgNhLYO+excyCJ\nocqidQostSQfcXU7qJtifpgmRt5oW3WhmpVsnAugS8y8vbCGJXdKqLCZXjL/H0aa\n+r/Z3BzQ+BglULKYshSBinxbYe+1GJ/028/50y/MPf9iFiiS9xtspOtSzd1e+NA5\nG+pCMppJHars9D/FavTewI1zJa9jPxtrwr8L3nEmy9gv6v1474XNYaagtQNjdU0b\nAV3EDfn9AgMBAAECggEADJtGjXAgYzb/yHIQ7jxamG96DSpePmBoheOok+J3r9J3\nAzYVRARDvSDXnrZycPF4WgBU8u0x7aWYhqCzvfWJf9d1si/yA3LMRMGzG3/0OOba\nP5+jGQ8X/UyNE3rjEuEr5wvZ36t2wrS3pmkEUMqxisZeL2Ii5v2OGWHdJjjws4HW\nP9pBGjcgxUP7UKPLQExHb9oUswh66Z+K9o10ZwArPYhnhc546vPlbHqO5bTS/Rza\nPd+c/h7PrrqwSBavm5mdjcHwqr5JjhE4OzbS4HkiYVnpx4OPRcgR0vWE6cG+0zg5\n4AROSM9kvrGflIqn2EAojRAz5S6wHMk7pImk4kAdSwKBgQC/wVsEruzUj3p7DvXc\nXRo8juRrWztrmOvp0GwhsVIVaF0Fr2lqCEGgOqqj5IEfue0UaCNCW3I73rRSYaNe\nnJ7PGZMYmLkzwcvGTEeV9CRqOgvKvbf3RiCpkKeLz3dil8AGdyVlwAJmq8Fn+IMT\nrwGaw3/UHTRMnse6JPoQ+k4KMwKBgQDCAI4Mlq5K7WSH1zNKSLgII9KnfHHkusNU\n88hpaVReXmxU7uQIC02nbtYl2oM3I/Lz9Otk/nPIbh4g9LKmju5Gi1S2wchInDfP\nKwgPoClM6/VM4e6CS9qq/FvJdLu2228AxcdSoIwGmrkbiTtGNedO4CdBa3/vacac\nuD0iD/gbDwKBgQC+mXzVHOJ/LdZ6txYe4dQQWaAmLdrUSn5EPE0e+Fg0uzWrTv4i\nzO4eS/INUjYeyPokjJZvgOH9LJJkSHTQuDEKfcs+aZ+9GGZqRqvpG3GOvP+3l/hi\nKyyQHx7K039BWsEeLBPaHY7FavelVtlDGXMo2CYZOqYfervgBJ0jfwlPDQKBgCuC\nSFlWadxwBT3Z66zbRjq9Hf9mD30Gzcv9qJLLhpprfsxFj2qmblIAr5JpwUfajiBc\na3aJApqO577oYjCsmY/Eq8kZCLwQHQwfUH2ApAKWYLtPaFhcfrweQM+bmIXYDLsV\noDBNxVmt1ZnxWxPR/wBXkTZAz7538I0xXLSI9FHNAoGBAJ/2ck5G+pKVHJA9sFoO\nwpB1jimZNmZjw2Fiu7u33IQSq1oMijD/M8qLFlnquetBrjniW55ViR89HMe+5Bwt\nnZ+Pq6xDKnzxRyyFWGM8lp+JDMMj1xOHIYil+aFgZyWm6/VzN24vdp2eYRYWBdMT\nP8mukpnNhytmI1/4ozaU+wai\n-----END
       PRIVATE KEY-----\n-----BEGIN CERTIFICATE-----\nMIIDJDCCAgygAwIBAgIQc/Rvc7SNT/iJre6II78vpTANBgkqhkiG9w0BAQsFADAP\nMQ0wCwYDVQQDEwRUZXN0MB4XDTE2MTAyNzE4NDM1NloXDTE3MTAyNzE4NTM1Nlow\nDzENMAsGA1UEAxMEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nAJFQ8WA6+i80nR5dIeVybZX3D8QLDMxzfUFo3bEGZaN6CaqLG/0Y3cZYyBRD3ML2\nT1vF3j3UDBrnlKqG3zpMvxDcVyfx9e6FZtf+A0A7yHm1+5BUDXMHltXERCwI2aYu\numA2Etg757FzIImhyqJ1Ciy1JB9xdTuom2J+mCZG3mhbdaGalWycC6BLzLy9sIYl\nd0qosJleMv8fRpr6v9ncHND4GCVQspiyFIGKfFth77UYn/Tbz/nTL8w9/2IWKJL3\nG2yk61LN3V740Dkb6kIymkkdquz0P8Vq9N7AjXMlr2M/G2vCvwvecSbL2C/q/Xjv\nhc1hpqC1A2N1TRsBXcQN+f0CAwEAAaN8MHowDgYDVR0PAQH/BAQDAgWgMAkGA1Ud\nEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaA\nFJh9TmNuesqccgmdVu7WD6bYiurmMB0GA1UdDgQWBBSYfU5jbnrKnHIJnVbu1g+m\n2Irq5jANBgkqhkiG9w0BAQsFAAOCAQEAj0vTtSCjSQIZagzOvjTtZvnKH6E0q0zX\n+MAtJnS8Cb/XVPEW0FqN5TLXvvaktjKCDHSPmYwneTjV3hjNe+jB03R1Z2auxnsc\njSfLT4+tthrCiHTLX+WrR+F3SwOX/cVFGiU0z1IcJe5m49qiUJ6kemHaa6umgfGX\nHbnCqzR76WkhDJWFz9MXFFvFTRGE+267sliQf8PrKr65oOEVZV/E+SInQdm+H1LY\nWAbig4UxHN8UQ54G9mdW1e/uRumAT73uty+C0O8VQvNvsco2HAiPOtDce4CJleZx\niAv6z0Y6PKRYb4xw+xnmqpC8ks1T93JFaniHl53cqRNbXy5t9t9Cag==\n-----END
       CERTIFICATE-----"}'
     headers:
@@ -1517,28 +1635,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['3170']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [203c1dcc-4fca-11e7-bc24-5065f34efe31]
     method: POST
-    uri: https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1/import?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/import?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1/e7b92e0dc86746ada3ec5aa9651cd5aa","kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/cert1/e7b92e0dc86746ada3ec5aa9651cd5aa","sid":"https://cli-kv-test-softdelete.vault.azure.net/secrets/cert1/e7b92e0dc86746ada3ec5aa9651cd5aa","x5t":"lDc9zly8mcTcjym-jyov2aJhNDA","cer":"MIIDJDCCAgygAwIBAgIQc/Rvc7SNT/iJre6II78vpTANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDEwRUZXN0MB4XDTE2MTAyNzE4NDM1NloXDTE3MTAyNzE4NTM1NlowDzENMAsGA1UEAxMEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJFQ8WA6+i80nR5dIeVybZX3D8QLDMxzfUFo3bEGZaN6CaqLG/0Y3cZYyBRD3ML2T1vF3j3UDBrnlKqG3zpMvxDcVyfx9e6FZtf+A0A7yHm1+5BUDXMHltXERCwI2aYuumA2Etg757FzIImhyqJ1Ciy1JB9xdTuom2J+mCZG3mhbdaGalWycC6BLzLy9sIYld0qosJleMv8fRpr6v9ncHND4GCVQspiyFIGKfFth77UYn/Tbz/nTL8w9/2IWKJL3G2yk61LN3V740Dkb6kIymkkdquz0P8Vq9N7AjXMlr2M/G2vCvwvecSbL2C/q/Xjvhc1hpqC1A2N1TRsBXcQN+f0CAwEAAaN8MHowDgYDVR0PAQH/BAQDAgWgMAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFJh9TmNuesqccgmdVu7WD6bYiurmMB0GA1UdDgQWBBSYfU5jbnrKnHIJnVbu1g+m2Irq5jANBgkqhkiG9w0BAQsFAAOCAQEAj0vTtSCjSQIZagzOvjTtZvnKH6E0q0zX+MAtJnS8Cb/XVPEW0FqN5TLXvvaktjKCDHSPmYwneTjV3hjNe+jB03R1Z2auxnscjSfLT4+tthrCiHTLX+WrR+F3SwOX/cVFGiU0z1IcJe5m49qiUJ6kemHaa6umgfGXHbnCqzR76WkhDJWFz9MXFFvFTRGE+267sliQf8PrKr65oOEVZV/E+SInQdm+H1LYWAbig4UxHN8UQ54G9mdW1e/uRumAT73uty+C0O8VQvNvsco2HAiPOtDce4CJleZxiAv6z0Y6PKRYb4xw+xnmqpC8ks1T93JFaniHl53cqRNbXy5t9t9Cag==","attributes":{"enabled":true,"nbf":1477593836,"exp":1509130436,"created":1497311519,"updated":1497311519,"recoverylevel":"Recoverable+Purgeable"},"policy":{"id":"https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":false},"secret_props":{"contentType":"application/x-pem-file"},"x509_props":{"subject":"CN=Test","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["digitalSignature","keyEncipherment"],"validity_months":13,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"lifetime_percentage":80},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1497311519,"updated":1497311519}}}'}
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/4a4dc890893b426e9bda0edf2d9ca7ae","kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/cert1/4a4dc890893b426e9bda0edf2d9ca7ae","sid":"https://cli-test-keyvault-000002.vault.azure.net/secrets/cert1/4a4dc890893b426e9bda0edf2d9ca7ae","x5t":"lDc9zly8mcTcjym-jyov2aJhNDA","cer":"MIIDJDCCAgygAwIBAgIQc/Rvc7SNT/iJre6II78vpTANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDEwRUZXN0MB4XDTE2MTAyNzE4NDM1NloXDTE3MTAyNzE4NTM1NlowDzENMAsGA1UEAxMEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJFQ8WA6+i80nR5dIeVybZX3D8QLDMxzfUFo3bEGZaN6CaqLG/0Y3cZYyBRD3ML2T1vF3j3UDBrnlKqG3zpMvxDcVyfx9e6FZtf+A0A7yHm1+5BUDXMHltXERCwI2aYuumA2Etg757FzIImhyqJ1Ciy1JB9xdTuom2J+mCZG3mhbdaGalWycC6BLzLy9sIYld0qosJleMv8fRpr6v9ncHND4GCVQspiyFIGKfFth77UYn/Tbz/nTL8w9/2IWKJL3G2yk61LN3V740Dkb6kIymkkdquz0P8Vq9N7AjXMlr2M/G2vCvwvecSbL2C/q/Xjvhc1hpqC1A2N1TRsBXcQN+f0CAwEAAaN8MHowDgYDVR0PAQH/BAQDAgWgMAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFJh9TmNuesqccgmdVu7WD6bYiurmMB0GA1UdDgQWBBSYfU5jbnrKnHIJnVbu1g+m2Irq5jANBgkqhkiG9w0BAQsFAAOCAQEAj0vTtSCjSQIZagzOvjTtZvnKH6E0q0zX+MAtJnS8Cb/XVPEW0FqN5TLXvvaktjKCDHSPmYwneTjV3hjNe+jB03R1Z2auxnscjSfLT4+tthrCiHTLX+WrR+F3SwOX/cVFGiU0z1IcJe5m49qiUJ6kemHaa6umgfGXHbnCqzR76WkhDJWFz9MXFFvFTRGE+267sliQf8PrKr65oOEVZV/E+SInQdm+H1LYWAbig4UxHN8UQ54G9mdW1e/uRumAT73uty+C0O8VQvNvsco2HAiPOtDce4CJleZxiAv6z0Y6PKRYb4xw+xnmqpC8ks1T93JFaniHl53cqRNbXy5t9t9Cag==","attributes":{"enabled":true,"nbf":1477593836,"exp":1509130436,"created":1504897678,"updated":1504897678,"recoveryLevel":"Recoverable+Purgeable"},"policy":{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":false},"secret_props":{"contentType":"application/x-pem-file"},"x509_props":{"subject":"CN=Test","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["digitalSignature","keyEncipherment"],"validity_months":13,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"lifetime_percentage":80},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1504897678,"updated":1504897678}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['2187']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:51:58 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['2195']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:58 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1548,28 +1665,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [20de0eca-4fca-11e7-a68b-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1?api-version=2016-10-01
   response:
-    body: {string: '{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates/cert1","deletedDate":1497311520,"scheduledPurgeDate":1505087520,"id":"https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1/e7b92e0dc86746ada3ec5aa9651cd5aa","kid":"https://cli-kv-test-softdelete.vault.azure.net/keys/cert1/e7b92e0dc86746ada3ec5aa9651cd5aa","sid":"https://cli-kv-test-softdelete.vault.azure.net/secrets/cert1/e7b92e0dc86746ada3ec5aa9651cd5aa","x5t":"lDc9zly8mcTcjym-jyov2aJhNDA","cer":"MIIDJDCCAgygAwIBAgIQc/Rvc7SNT/iJre6II78vpTANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDEwRUZXN0MB4XDTE2MTAyNzE4NDM1NloXDTE3MTAyNzE4NTM1NlowDzENMAsGA1UEAxMEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJFQ8WA6+i80nR5dIeVybZX3D8QLDMxzfUFo3bEGZaN6CaqLG/0Y3cZYyBRD3ML2T1vF3j3UDBrnlKqG3zpMvxDcVyfx9e6FZtf+A0A7yHm1+5BUDXMHltXERCwI2aYuumA2Etg757FzIImhyqJ1Ciy1JB9xdTuom2J+mCZG3mhbdaGalWycC6BLzLy9sIYld0qosJleMv8fRpr6v9ncHND4GCVQspiyFIGKfFth77UYn/Tbz/nTL8w9/2IWKJL3G2yk61LN3V740Dkb6kIymkkdquz0P8Vq9N7AjXMlr2M/G2vCvwvecSbL2C/q/Xjvhc1hpqC1A2N1TRsBXcQN+f0CAwEAAaN8MHowDgYDVR0PAQH/BAQDAgWgMAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFJh9TmNuesqccgmdVu7WD6bYiurmMB0GA1UdDgQWBBSYfU5jbnrKnHIJnVbu1g+m2Irq5jANBgkqhkiG9w0BAQsFAAOCAQEAj0vTtSCjSQIZagzOvjTtZvnKH6E0q0zX+MAtJnS8Cb/XVPEW0FqN5TLXvvaktjKCDHSPmYwneTjV3hjNe+jB03R1Z2auxnscjSfLT4+tthrCiHTLX+WrR+F3SwOX/cVFGiU0z1IcJe5m49qiUJ6kemHaa6umgfGXHbnCqzR76WkhDJWFz9MXFFvFTRGE+267sliQf8PrKr65oOEVZV/E+SInQdm+H1LYWAbig4UxHN8UQ54G9mdW1e/uRumAT73uty+C0O8VQvNvsco2HAiPOtDce4CJleZxiAv6z0Y6PKRYb4xw+xnmqpC8ks1T93JFaniHl53cqRNbXy5t9t9Cag==","attributes":{"enabled":true,"nbf":1477593836,"exp":1509130436,"created":1497311519,"updated":1497311519,"recoverylevel":"Recoverable+Purgeable"},"policy":{"id":"https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":false},"secret_props":{"contentType":"application/x-pem-file"},"x509_props":{"subject":"CN=Test","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["digitalSignature","keyEncipherment"],"validity_months":13,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"lifetime_percentage":80},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1497311519,"updated":1497311519}}}'}
+    body: {string: '{"recoveryId":"https://cli-test-keyvault-000002.vault.azure.net/deletedcertificates/cert1","deletedDate":1504897678,"scheduledPurgeDate":1512673678,"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/4a4dc890893b426e9bda0edf2d9ca7ae","kid":"https://cli-test-keyvault-000002.vault.azure.net/keys/cert1/4a4dc890893b426e9bda0edf2d9ca7ae","sid":"https://cli-test-keyvault-000002.vault.azure.net/secrets/cert1/4a4dc890893b426e9bda0edf2d9ca7ae","x5t":"lDc9zly8mcTcjym-jyov2aJhNDA","cer":"MIIDJDCCAgygAwIBAgIQc/Rvc7SNT/iJre6II78vpTANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDEwRUZXN0MB4XDTE2MTAyNzE4NDM1NloXDTE3MTAyNzE4NTM1NlowDzENMAsGA1UEAxMEVGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJFQ8WA6+i80nR5dIeVybZX3D8QLDMxzfUFo3bEGZaN6CaqLG/0Y3cZYyBRD3ML2T1vF3j3UDBrnlKqG3zpMvxDcVyfx9e6FZtf+A0A7yHm1+5BUDXMHltXERCwI2aYuumA2Etg757FzIImhyqJ1Ciy1JB9xdTuom2J+mCZG3mhbdaGalWycC6BLzLy9sIYld0qosJleMv8fRpr6v9ncHND4GCVQspiyFIGKfFth77UYn/Tbz/nTL8w9/2IWKJL3G2yk61LN3V740Dkb6kIymkkdquz0P8Vq9N7AjXMlr2M/G2vCvwvecSbL2C/q/Xjvhc1hpqC1A2N1TRsBXcQN+f0CAwEAAaN8MHowDgYDVR0PAQH/BAQDAgWgMAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFJh9TmNuesqccgmdVu7WD6bYiurmMB0GA1UdDgQWBBSYfU5jbnrKnHIJnVbu1g+m2Irq5jANBgkqhkiG9w0BAQsFAAOCAQEAj0vTtSCjSQIZagzOvjTtZvnKH6E0q0zX+MAtJnS8Cb/XVPEW0FqN5TLXvvaktjKCDHSPmYwneTjV3hjNe+jB03R1Z2auxnscjSfLT4+tthrCiHTLX+WrR+F3SwOX/cVFGiU0z1IcJe5m49qiUJ6kemHaa6umgfGXHbnCqzR76WkhDJWFz9MXFFvFTRGE+267sliQf8PrKr65oOEVZV/E+SInQdm+H1LYWAbig4UxHN8UQ54G9mdW1e/uRumAT73uty+C0O8VQvNvsco2HAiPOtDce4CJleZxiAv6z0Y6PKRYb4xw+xnmqpC8ks1T93JFaniHl53cqRNbXy5t9t9Cag==","attributes":{"enabled":true,"nbf":1477593836,"exp":1509130436,"created":1504897678,"updated":1504897678,"recoveryLevel":"Recoverable+Purgeable"},"policy":{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":false},"secret_props":{"contentType":"application/x-pem-file"},"x509_props":{"subject":"CN=Test","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["digitalSignature","keyEncipherment"],"validity_months":13,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"lifetime_percentage":80},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1504897678,"updated":1504897678}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['2332']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:00 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['2342']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:58 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1578,119 +1694,29 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [211a441a-4fca-11e7-bc17-5065f34efe31]
     method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/?api-version=2016-10-01
   response:
-    body: {string: '{"value":[],"nextLink":null}'}
+    body: {string: '{"error":{"code":"CertificateNotFound","message":"Certificate
+        not found: cert1"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:01 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      content-length: ['81']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:58 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [230c41a4-4fca-11e7-9643-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:04 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [24fbc18a-4fca-11e7-be54-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['28']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:08 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
-      accept-language: [en-US]
-      x-ms-client-request-id: [26ea3528-4fca-11e7-abb3-5065f34efe31]
-    method: GET
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates?api-version=2016-10-01
-  response:
-    body: {string: '{"value":[{"recoveryId":"https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates/cert1","deletedDate":1497311520,"scheduledPurgeDate":1505087520,"id":"https://cli-kv-test-softdelete.vault.azure.net/certificates/cert1","x5t":"lDc9zly8mcTcjym-jyov2aJhNDA","attributes":{"enabled":true,"nbf":1477593836,"exp":1509130436,"created":1497311519,"updated":1497311519,"recoverylevel":"Recoverable+Purgeable"}}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['429']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:09 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
-    status: {code: 200, message: OK}
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
 - request:
     body: null
     headers:
@@ -1699,26 +1725,149 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultclient/0.4.0.developer Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [271be836-4fca-11e7-8560-5065f34efe31]
     method: DELETE
-    uri: https://cli-kv-test-softdelete.vault.azure.net/deletedcertificates/cert1?api-version=2016-10-01
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedcertificates/cert1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Certificate is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:07:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedcertificates/cert1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Certificate is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:02 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedcertificates/cert1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Certificate is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedcertificates/cert1?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"Conflict","message":"Certificate is currently
+        being deleted.","innererror":{"code":"ObjectIsBeingDeleted"}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:09 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/deletedcertificates/cert1?api-version=2016-10-01
   response:
     body: {string: ''}
     headers:
-      Cache-Control: [no-cache]
-      Date: ['Mon, 12 Jun 2017 23:52:10 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000;includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
+      date: ['Fri, 08 Sep 2017 19:08:11 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.813]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -1727,184 +1876,237 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultclient/0.3.4 Azure-SDK-For-Python]
       accept-language: [en-US]
-      x-ms-client-request-id: [27555d8a-4fca-11e7-99ad-5065f34efe31]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/cert1/?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"CertificateNotFound","message":"Certificate
+        not found: cert1"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['81']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.821]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
+      accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azkv-pytest/providers/Microsoft.KeyVault/vaults/pytest-shared-vault","name":"pytest-shared-vault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-keyvault-cert_birq_/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-cert1","name":"cli-test-keyvault-cert1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete","name":"cli-kv-test-softdelete","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/cli-vault","name":"cli-vault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/froyo","name":"froyo","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/softserve","name":"softserve","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/tempvault2","name":"tempvault2","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/tempvault3","name":"tempvault3","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ssrg/providers/Microsoft.KeyVault/vaults/tempvault4","name":"tempvault4","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}}]}'}
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sdsfc2fkseod2tkh2uclvg76eiiqyl2gbxeheunmyug5ifeipqe4764lw/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-gvgzqo","name":"cli-test-keyvault-gvgzqo","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sp_with_kv_existing_certkvg22v5fsol3lqdivew2w3dkv7qe2tcbcp7wmjxb53/providers/Microsoft.KeyVault/vaults/clitestemcd3ylngb6xyfjjh","name":"clitestemcd3ylngb6xyfjjh","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sp_with_kv_new_certxgwr3fn6lyna6zrxeastkyrtqvlylxcx4eylctfborrrthj/providers/Microsoft.KeyVault/vaults/clitestuznjfpcwnzpbea5ff","name":"clitestuznjfpcwnzpbea5ff","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab786","name":"cliautomationlab786","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"9f45d4bf-7e01-4684-9438-37c712728db1","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation01/providers/Microsoft.KeyVault/vaults/cliautomationlab6073","name":"cliautomationlab6073","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"72f1b266-2a21-4f0a-af01-934c93c72e6e","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg4mlozagf3pwtonk2fy32dz2fektoa5zcrvjis2bthl5uq7euxewj7saj52y5z5ydw/providers/Microsoft.KeyVault/vaults/vmkeyvault5sf56op5ih","name":"vmkeyvault5sf56op5ih","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgf3taitsxo7e7papbgdn77qjvbmonegm72h4xxj4ejfnnr3zs5v37lu2v4yuhngcgt/providers/Microsoft.KeyVault/vaults/vmkeyvaultwga4pgpqfg","name":"vmkeyvaultwga4pgpqfg","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rguewohnkhvsl75xdfx66o4y3evlji7jv3n6f7bqhjowvumyyqknlgyouo3hatlnzsj/providers/Microsoft.KeyVault/vaults/vmlinuxkvhfrbfprtn5q","name":"vmlinuxkvhfrbfprtn5q","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-kv/providers/Microsoft.KeyVault/vaults/tjptestkv1","name":"tjptestkv1","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}}]}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:12 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Vary: [Accept-Encoding]
-      content-length: ['2029']
+      cache-control: [no-cache]
+      content-length: ['3054']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:13 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault delete]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [276c1a30-4fca-11e7-b761-5065f34efe31]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-kv-sd/providers/Microsoft.KeyVault/vaults/cli-kv-test-softdelete?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_sd000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2016-10-01
   response:
     body: {string: ''}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['0']
-      Date: ['Mon, 12 Jun 2017 23:52:13 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-service-version: [1.0.0.164]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 08 Sep 2017 19:08:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault purge]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [284c1fb6-4fca-11e7-936a-5065f34efe31]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/deletedVaults/cli-kv-test-softdelete/purge?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/deletedVaults/cli-test-keyvault-000002/purge?api-version=2016-10-01
   response:
     body: {string: ''}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['0']
-      Date: ['Mon, 12 Jun 2017 23:52:14 GMT']
-      Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/6d8e19c2-3a60-481f-8ebb-118dc3007c5d/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjMyOTA4MzM1OTE2OTI3OXwyRTlFNjdGQzVFNTM0MkVEOTBBODJDRTVEM0JGMTQ1Qw?api-version=2016-10-01']
-      Pragma: [no-cache]
-      Retry-After: ['5']
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-service-version: [1.0.0.164]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 08 Sep 2017 19:08:14 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjQwNDk0NDk3NDQ1Nzk1M3xCQTJBQTI4OEM4Q0Y0QTFBQjlBNUZENUM1N0I4NjI3RQ?api-version=2016-10-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault purge]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [284c1fb6-4fca-11e7-936a-5065f34efe31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjMyOTA4MzM1OTE2OTI3OXwyRTlFNjdGQzVFNTM0MkVEOTBBODJDRTVEM0JGMTQ1Qw?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjQwNDk0NDk3NDQ1Nzk1M3xCQTJBQTI4OEM4Q0Y0QTFBQjlBNUZENUM1N0I4NjI3RQ?api-version=2016-10-01
   response:
-    body: {string: '{"createdDateTime":"2017-06-12 23:52:13Z","status":"NotStarted"}'}
+    body: {string: '{"createdDateTime":"2017-09-08 19:08:16Z","status":"NotStarted"}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['64']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:18 GMT']
-      Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/6d8e19c2-3a60-481f-8ebb-118dc3007c5d/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjMyOTA4MzM1OTE2OTI3OXwyRTlFNjdGQzVFNTM0MkVEOTBBODJDRTVEM0JGMTQ1Qw?api-version=2016-10-01']
-      Pragma: [no-cache]
-      Retry-After: ['5']
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-service-version: [1.0.0.164]
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:20 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjQwNDk0NDk3NDQ1Nzk1M3xCQTJBQTI4OEM4Q0Y0QTFBQjlBNUZENUM1N0I4NjI3RQ?api-version=2016-10-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault purge]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [284c1fb6-4fca-11e7-936a-5065f34efe31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjMyOTA4MzM1OTE2OTI3OXwyRTlFNjdGQzVFNTM0MkVEOTBBODJDRTVEM0JGMTQ1Qw?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjQwNDk0NDk3NDQ1Nzk1M3xCQTJBQTI4OEM4Q0Y0QTFBQjlBNUZENUM1N0I4NjI3RQ?api-version=2016-10-01
   response:
-    body: {string: '{"createdDateTime":"2017-06-12 23:52:13Z","status":"NotStarted"}'}
+    body: {string: '{"createdDateTime":"2017-09-08 19:08:16Z","status":"NotStarted"}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['64']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:24 GMT']
-      Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/6d8e19c2-3a60-481f-8ebb-118dc3007c5d/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjMyOTA4MzM1OTE2OTI3OXwyRTlFNjdGQzVFNTM0MkVEOTBBODJDRTVEM0JGMTQ1Qw?api-version=2016-10-01']
-      Pragma: [no-cache]
-      Retry-After: ['5']
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-keyvault-service-version: [1.0.0.164]
+      cache-control: [no-cache]
+      content-length: ['64']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:25 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjQwNDk0NDk3NDQ1Nzk1M3xCQTJBQTI4OEM4Q0Y0QTFBQjlBNUZENUM1N0I4NjI3RQ?api-version=2016-10-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault purge]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.8
-          msrest_azure/0.4.7 keyvaultmanagementclient/0.40.0.developer Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.7+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [284c1fb6-4fca-11e7-936a-5065f34efe31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjMyOTA4MzM1OTE2OTI3OXwyRTlFNjdGQzVFNTM0MkVEOTBBODJDRTVEM0JGMTQ1Qw?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/locations/westus/operationResults/VVR8MDYzNjQwNDk0NDk3NDQ1Nzk1M3xCQTJBQTI4OEM4Q0Y0QTFBQjlBNUZENUM1N0I4NjI3RQ?api-version=2016-10-01
   response:
-    body: {string: '{"createdDateTime":"2017-06-12 23:52:13Z","lastActionDateTime":"2017-06-12
-        23:52:28Z","status":"Succeeded"}'}
+    body: {string: '{"createdDateTime":"2017-09-08 19:08:16Z","lastActionDateTime":"2017-09-08
+        19:08:28Z","status":"Succeeded"}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 12 Jun 2017 23:52:29 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [no-cache]
       content-length: ['107']
-      x-ms-keyvault-service-version: [1.0.0.164]
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 08 Sep 2017 19:08:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.179]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
+          msrest_azure/0.4.13 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.15+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_keyvault_sd000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 08 Sep 2017 19:08:32 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGS0VZVkFVTFQ6NUZTRFo1U0k1VkkyNEVTRTZZS0taSFI0M3wzQUVCNzA1MEZDN0I3NEVDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+    status: {code: 202, message: Accepted}
 version: 1

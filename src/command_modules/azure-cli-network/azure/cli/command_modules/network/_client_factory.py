@@ -20,6 +20,10 @@ def cf_application_gateways(_):
     return _network_client_factory().application_gateways
 
 
+def cf_application_security_groups(_):
+    return _network_client_factory().application_security_groups
+
+
 def cf_express_route_circuit_authorizations(_):
     return _network_client_factory().express_route_circuit_authorizations
 
@@ -60,8 +64,8 @@ def cf_packet_capture(_):
     return _network_client_factory().packet_captures
 
 
-def cf_private_access(_):
-    return _network_client_factory().available_private_access_services
+def cf_endpoint_service(_):
+    return _network_client_factory().available_endpoint_services
 
 
 def cf_public_ip_addresses(_):

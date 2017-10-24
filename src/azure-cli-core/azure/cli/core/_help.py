@@ -9,6 +9,8 @@ import sys
 import textwrap
 
 from azure.cli.core.help_files import _load_help_file
+from azure.cli.core.commands import ExtensionCommandSource
+import azure.cli.core.azlogging as azlogging
 
 __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'CommandHelpFile']
 
@@ -27,6 +29,8 @@ The data is collected by Microsoft.
 
 You can change your telemetry settings with `az configure`.
 """
+
+logger = azlogging.get_az_logger(__name__)
 
 
 def show_privacy_statement():
@@ -72,6 +76,7 @@ def print_welcome_message():
 
 
 def print_detailed_help(help_file):
+    _print_extensions_msg(help_file)
     _print_header(help_file)
 
     if help_file.type == 'command':
@@ -175,6 +180,13 @@ class ArgumentGroupRegistry(object):  # pylint: disable=too-few-public-methods
         return "%06d" % key
 
 
+def _print_extensions_msg(help_file):
+    if help_file.type != 'command':
+        return
+    if help_file.command_source and isinstance(help_file.command_source, ExtensionCommandSource):
+        logger.warning(help_file.command_source.get_command_warn_msg())
+
+
 def _print_header(help_file):
     indent = 0
     _print_indent('')
@@ -206,9 +218,7 @@ def _print_groups(help_file):
         _print_indent('')
 
     indent = 1
-    max_name_length = max(len(c.name) for c in help_file.children) \
-        if help_file.children \
-        else 0
+    max_name_length = max(len(c.name) for c in help_file.children) if help_file.children else 0
     subgroups = [c for c in help_file.children if isinstance(c, GroupHelpFile)]
     subcommands = [c for c in help_file.children if c not in subgroups]
 
@@ -363,6 +373,7 @@ class CommandHelpFile(HelpFile):  # pylint: disable=too-few-public-methods
     def __init__(self, delimiters, parser):
         super(CommandHelpFile, self).__init__(delimiters)
         self.type = 'command'
+        self.command_source = getattr(parser, 'command_source', None)
 
         self.parameters = []
 

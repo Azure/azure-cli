@@ -29,7 +29,7 @@ class MonitorTests(ScenarioTest):
         webhook2 = 'https://contoso.com/alerts'
         self.cmd('monitor alert create -g {} -n {} --target {} --condition "Percentage CPU > 90 avg 5m"'.format(resource_group, rule1, vm_id), checks=[
             JMESPathCheck('actions[0].customEmails', []),
-            JMESPathCheck('actions[0].sendToServiceOwners', None),
+            JMESPathCheck('actions[0].sendToServiceOwners', False),
             JMESPathCheck('alertRuleResourceName', rule1),
             JMESPathCheck('condition.dataSource.metricName', 'Percentage CPU'),
             JMESPathCheck('condition.dataSource.resourceUri', vm_id),
@@ -39,14 +39,14 @@ class MonitorTests(ScenarioTest):
         ])
         self.cmd('monitor alert create -g {} -n {} --target {} --target-namespace Microsoft.Compute --target-type virtualMachines --disabled --condition "Percentage CPU >= 60 avg 1h" --description "Test Rule 2" -a email test1@contoso.com test2@contoso.com test3@contoso.com'.format(resource_group, rule2, vm), checks=[
             JMESPathCheck('length(actions[0].customEmails)', 3),
-            JMESPathCheck('actions[0].sendToServiceOwners', None),
+            JMESPathCheck('actions[0].sendToServiceOwners', False),
             JMESPathCheck('alertRuleResourceName', rule2),
             JMESPathCheck('condition.dataSource.metricName', 'Percentage CPU'),
             JMESPathCheck('condition.dataSource.resourceUri', vm_id),
             JMESPathCheck('condition.threshold', 60.0),
             JMESPathCheck('condition.timeAggregation', 'Average'),
             JMESPathCheck('condition.windowSize', '1:00:00'),
-            JMESPathCheck('isEnabled', None),
+            JMESPathCheck('isEnabled', False),
             JMESPathCheck('description', 'Test Rule 2')
         ])
         self.cmd('monitor alert create -g {} -n {} --target {} --condition "Percentage CPU >= 99 avg 5m" --action webhook {} --action webhook {} apiKey=value'.format(resource_group, rule3, vm_id, webhook1, webhook2), checks=[

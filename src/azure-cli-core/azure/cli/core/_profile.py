@@ -15,8 +15,8 @@ from enum import Enum
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import CLIError, get_file_json
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
+from azure.cli.core.util import CLIError, get_file_json, in_cloud_console
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -56,13 +56,15 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
-_MSI_ACCOUNT_NAME = 'MSI'
+_MSI_ACCOUNT_NAME = 'MSI@'
+_TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 
 def _authentication_context_factory(tenant, cache):
+    import re
     import adal
     authority_url = CLOUD.endpoints.active_directory
-    is_adfs = authority_url.lower().endswith('/adfs')
+    is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
     if not is_adfs:
         authority_url = authority_url + '/' + (tenant or _COMMON_TENANT)
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None,
@@ -71,17 +73,20 @@ def _authentication_context_factory(tenant, cache):
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
-init_known_clouds(force=True)
 CLOUD = get_active_cloud()
 
 logger.debug('Current cloud config:\n%s', str(CLOUD))
 
 
 def _load_tokens_from_file(file_path):
-    all_entries = []
     if os.path.isfile(file_path):
-        all_entries = get_file_json(file_path, throw_on_empty=False) or []
-    return all_entries
+        try:
+            return get_file_json(file_path, throw_on_empty=False) or []
+        except (CLIError, ValueError) as ex:
+            raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
+                           "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
+                           "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+    return []
 
 
 def _delete_file(file_path):
@@ -181,11 +186,13 @@ class Profile(object):
         for t in tokens[1:]:
             decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
         final_tokens = []
+        # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter
+        # as shell should update us with new ones every 10~15 minutes
         for t in decoded_tokens:
             final_tokens.append({
                 '_clientId': _CLIENT_ID,
-                'expiresIn': '3600',
-                'expiresOn': str(datetime.utcnow() + timedelta(seconds=3600 * 24)),
+                'expiresIn': '2700',
+                'expiresOn': str(datetime.now() + timedelta(seconds=2700)),
                 'userId': t['unique_name'].split('#')[-1],
                 '_authority': CLOUD.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
                 'resource': t['aud'],
@@ -235,7 +242,7 @@ class Profile(object):
             s.id = '/subscriptions/' + t
             s.subscription = t
             s.tenant_id = t
-            s.display_name = 'N/A(tenant level account)'
+            s.display_name = _TENANT_LEVEL_ACCOUNT_NAME
             result.append(s)
         return result
 
@@ -248,22 +255,25 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def init_if_in_msi_env(self, user):
-        _, subscription_id = Profile.split_msi_user_info(user)
-        if subscription_id is None:
-            return None
-        logger.info('MSI: environment was detected. Now trying to initialize a local account...')
-        tenant_id = Profile.get_msi_tenant_id(CLOUD.endpoints.resource_manager, subscription_id)
-        s = Profile._new_account()
-        s.id = '/subscriptions/' + subscription_id
-        s.tenant_id = tenant_id
-        s.display_name = _MSI_ACCOUNT_NAME
-        consolidated = Profile._normalize_properties(user, [s], False)
+    def find_subscriptions_in_vm_with_msi(self, msi_port):
+        import jwt
+        _, token, _ = Profile.get_msi_token(CLOUD.endpoints.active_directory_resource_id, msi_port)
+        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        tenant = decode['tid']
+
+        subscription_finder = SubscriptionFinder(self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
+        if not subscriptions:
+            raise CLIError('No access was configured for the VM, hence no subscriptions were found')
+        consolidated = Profile._normalize_properties('VM', subscriptions, is_service_principal=True)
+        for s in consolidated:
+            # use a special name to trigger a special token acquisition
+            s[_SUBSCRIPTION_NAME] = "{}{}".format(_MSI_ACCOUNT_NAME, msi_port)
         self._set_subscriptions(consolidated)
-        # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def _set_subscriptions(self, new_subscriptions):
+    def _set_subscriptions(self, new_subscriptions, merge=True):
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
         active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
@@ -271,27 +281,31 @@ class Profile(object):
         default_sub_id = None
 
         # merge with existing ones
-        dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
+        if merge:
+            dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
+        else:
+            dic = collections.OrderedDict()
+
         dic.update((x[_SUBSCRIPTION_ID], x) for x in new_subscriptions)
         subscriptions = list(dic.values())
+        if subscriptions:
+            if active_one:
+                new_active_one = next(
+                    (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id),
+                    None)
 
-        if active_one:
-            new_active_one = next(
-                (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id),
-                None)
+                for s in subscriptions:
+                    s[_IS_DEFAULT_SUBSCRIPTION] = False
 
-            for s in subscriptions:
-                s[_IS_DEFAULT_SUBSCRIPTION] = False
-
-            if not new_active_one:
+                if not new_active_one:
+                    new_active_one = Profile._pick_working_subscription(new_subscriptions)
+            else:
                 new_active_one = Profile._pick_working_subscription(new_subscriptions)
-        else:
-            new_active_one = Profile._pick_working_subscription(new_subscriptions)
 
-        new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
-        default_sub_id = new_active_one[_SUBSCRIPTION_ID]
+            new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
+            default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
-        set_cloud_subscription(active_cloud.name, default_sub_id)
+            set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
     @staticmethod
@@ -310,8 +324,8 @@ class Profile(object):
                   x[_ENVIRONMENT_NAME] == active_cloud.name]
 
         if len(result) != 1:
-            raise CLIError("The subscription of '{}' does not exist or has more than"
-                           " one match in cloud '{}'.".format(subscription, active_cloud.name))
+            raise CLIError("The subscription of '{}' {} in cloud '{}'.".format(
+                subscription, "doesn't exist" if not result else 'has more than one match', active_cloud.name))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False
@@ -378,9 +392,8 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 
         def _retrieve_token():
-            if account[_SUBSCRIPTION_NAME] == _MSI_ACCOUNT_NAME:
-                port, _ = Profile.split_msi_user_info(username_or_sp_id)
-                return Profile.get_msi_token(resource, CLOUD.endpoints.active_directory, account[_TENANT_ID], port)
+            if account[_SUBSCRIPTION_NAME].startswith(_MSI_ACCOUNT_NAME):
+                return Profile.get_msi_token(resource, account[_SUBSCRIPTION_NAME][len(_MSI_ACCOUNT_NAME):])
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -402,7 +415,7 @@ class Profile(object):
         if user_type == _USER:
             _, _, token_entry = self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry[_REFRESH_TOKEN], token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
+            return None, token_entry.get(_REFRESH_TOKEN), token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
 
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
@@ -421,6 +434,57 @@ class Profile(object):
         return (creds,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
+
+    def refresh_accounts(self, subscription_finder=None):
+        subscriptions = self.load_cached_subscriptions()
+        to_refresh = [s for s in subscriptions if not s[_SUBSCRIPTION_NAME].startswith(_MSI_ACCOUNT_NAME)]
+        not_to_refresh = [s for s in subscriptions if s not in to_refresh]
+
+        from azure.cli.core._debug import allow_debug_adal_connection
+        allow_debug_adal_connection()
+        subscription_finder = subscription_finder or SubscriptionFinder(self.auth_ctx_factory,
+                                                                        self._creds_cache.adal_token_cache)
+        refreshed_list = set()
+        result = []
+        for s in to_refresh:
+            user_name = s[_USER_ENTITY][_USER_NAME]
+            if user_name in refreshed_list:
+                continue
+            refreshed_list.add(user_name)
+            is_service_principal = (s[_USER_ENTITY][_USER_TYPE] == _SERVICE_PRINCIPAL)
+            tenant = s[_TENANT_ID]
+            subscriptions = []
+            try:
+                if is_service_principal:
+                    sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(user_name))
+                    subscriptions = subscription_finder.find_from_service_principal_id(user_name, sp_auth, tenant,
+                                                                                       self._ad_resource_uri)
+                else:
+                    subscriptions = subscription_finder.find_from_user_account(user_name, None, None,
+                                                                               self._ad_resource_uri)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
+                               "modified. You can run 'az login' later to explictly refresh them", user_name, ex)
+                result += deepcopy([r for r in to_refresh if r[_USER_ENTITY][_USER_NAME] == user_name])
+                continue
+
+            if not subscriptions:
+                if s[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME:
+                    subscriptions = Profile._build_tenant_level_accounts([s[_TENANT_ID]])
+
+                if not subscriptions:
+                    continue
+
+            consolidated = Profile._normalize_properties(subscription_finder.user_id,
+                                                         subscriptions,
+                                                         is_service_principal)
+            result += consolidated
+
+        if self._creds_cache.adal_token_cache.has_state_changed:
+            self._creds_cache.persist_cached_creds()
+
+        result = result + not_to_refresh
+        self._set_subscriptions(result, merge=False)
 
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
         from collections import OrderedDict
@@ -473,40 +537,11 @@ class Profile(object):
         return installation_id
 
     @staticmethod
-    def split_msi_user_info(user):
-        import uuid
-        parts = user.split('@')
-        if len(parts) == 2:
-            try:
-                uuid.UUID(parts[0])  # valid subscription id?
-                int(parts[1])  # valid port?
-                return parts[1], parts[0]
-            except ValueError:
-                pass
-        return None, None
-
-    @staticmethod
-    def get_msi_tenant_id(arm_endpoint, subscription_id):
-        import re
-        import requests
-        url = '{}/subscriptions/{}?api-version=2014-04-01'.format(arm_endpoint.rstrip('/'), subscription_id)
-        logger.debug('MSI: Retrieving tenant id by invoking GET from %s', url)
-        result = requests.get(url)
-        if result.status_code != 401:
-            raise CLIError('Failed to retrieve the tenant id of subscription {}'.format(subscription_id))
-        exp = r'.+authorization_uri="(.*?)".+'
-        r = re.match(exp, result.headers['www-authenticate'])
-        tenant_id = r.group(1).split('/')[-1]
-        logger.debug('MSI: Got tenant id: %s', tenant_id)
-        return tenant_id
-
-    @staticmethod
-    def get_msi_token(resource, aad_endpoint, tenant_id, port):
+    def get_msi_token(resource, port):
         import requests
         import time
         request_uri = 'http://localhost:{}/oauth2/token'.format(port)
         payload = {
-            'authority': '{}/{}'.format(aad_endpoint, tenant_id),
             'resource': resource
         }
 
@@ -515,7 +550,7 @@ class Profile(object):
         while True:
             err = None
             try:
-                result = requests.post(request_uri, data=payload)
+                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
                 logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
                 if result.status_code != 200:
                     err = result.text
@@ -561,11 +596,11 @@ class SubscriptionFinder(object):
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        token_entry = context.acquire_token_with_username_password(
-            resource,
-            username,
-            password,
-            _CLIENT_ID)
+        if password:
+            token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
+        else:  # when refresh account, we will leverage local cached tokens
+            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:
@@ -594,7 +629,7 @@ class SubscriptionFinder(object):
         self.tenants = [tenant]
         return result
 
-    #  only occur inside cloud console
+    #  only occur inside cloud console or VM with identity
     def find_from_raw_token(self, tenant, token):
         # decode the token, so we know the tenant
         result = self._find_using_specific_tenant(tenant, token)
@@ -688,7 +723,8 @@ class CredsCache(object):
         context = self._auth_ctx_factory(tenant, cache=self.adal_token_cache)
         token_entry = context.acquire_token(resource, username, _CLIENT_ID)
         if not token_entry:
-            raise CLIError("Could not retrieve token from local cache, please run 'az login'.")
+            raise CLIError("Could not retrieve token from local cache.{}".format(
+                " Please run 'az login'." if not in_cloud_console() else ''))
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()

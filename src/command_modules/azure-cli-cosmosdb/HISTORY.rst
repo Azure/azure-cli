@@ -3,7 +3,19 @@
 Release History
 ===============
 
-unreleased
+0.1.14
+++++++
+* minor fixes
+
+0.1.13 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+0.1.12 (2017-08-28)
++++++++++++++++++++
+* minor fixes
+
+0.1.11 (2017-07-27)
 +++++++++++++++++++
 * Minor fix allowing Creation of Collection with custom partition key
 

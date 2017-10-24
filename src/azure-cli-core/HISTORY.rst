@@ -2,7 +2,45 @@
 
 Release History
 ===============
-(unreleased)
+
+2.0.20
+++++++
+* 2017-03-09-profile is updated to consume MGMT_STORAGE API version '2016-01-01'
+
+2.0.19
+++++++
+* skipped version to align package versions with azure-cli
+
+2.0.18 (2017-10-09)
++++++++++++++++++++
+* Azure Stack: handle adfs authority url with a trailing slash
+
+2.0.17 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+* Address problems with 'AzureCloud' clouds.config file in concurrent scenarios
+* More user-friendly handling of invalid cloud configurations
+* `availability-set create`: Fixed issue where this command would not work on Azure Stack.
+
+2.0.16 (2017-09-11)
++++++++++++++++++++
+* Enable command module to set its own correlation ID in telemetry
+* Fix json dump issue when telemetry is set to diagnostics mode
+
+2.0.15 (2017-08-31)
++++++++++++++++++++
+* minor fixes
+
+2.0.14 (2017-08-28)
++++++++++++++++++++
+
+* Add legal note to --version
+
+2.0.13 (2017-08-11)
++++++++++++++++++++
+* fixes issue where `three_state_flag` would not work correctly if custom labels were used.
+
+2.0.12 (2017-07-27)
 +++++++++++++++++++
 * output sdk auth info for service principals with certificates
 

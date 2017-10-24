@@ -90,7 +90,7 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0+dev"
+VERSION = "1.0.0"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',

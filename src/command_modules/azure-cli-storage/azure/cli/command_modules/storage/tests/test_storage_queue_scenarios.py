@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck, api_version_constraint)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
+                               JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from azure.cli.core.profiles import ResourceType
 
 
@@ -13,12 +13,6 @@ from azure.cli.core.profiles import ResourceType
 class StorageQueueScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
-    def test_storage_queue_stats(self, storage_account):
-        self.cmd('storage queue stats --account-name {}'.format(storage_account),
-                 checks=JMESPathCheck('geoReplication.status', 'live'))
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
     def test_storage_queue_general_scenario(self, resource_group, storage_account):
         account_key = self.get_account_key(resource_group, storage_account)
 
@@ -62,11 +56,16 @@ class StorageQueueScenarioTests(ScenarioTest):
         self.assertIn(policy, acl)
         self.assertEqual(1, len(acl))
 
-        self.cmd('storage queue policy show -q {} -n {}'.format(queue, policy), checks=[
+        returned_permissions = self.cmd('storage queue policy show -q {} -n {}'.format(queue, policy), checks=[
             JMESPathCheck('start', '2016-01-01T00:00:00+00:00'),
             JMESPathCheck('expiry', '2016-05-01T00:00:00+00:00'),
-            JMESPathCheck('permission', 'rpau')
-        ])
+            JMESPathCheckExists('permission')
+        ]).get_output_in_json()['permission']
+
+        self.assertIn('r', returned_permissions)
+        self.assertIn('p', returned_permissions)
+        self.assertIn('a', returned_permissions)
+        self.assertIn('u', returned_permissions)
 
         self.cmd('storage queue policy update -q {} -n {} --permission ra'.format(queue, policy))
         self.cmd('storage queue policy show -q {} -n {}'.format(queue, policy),
@@ -111,6 +110,10 @@ class StorageQueueScenarioTests(ScenarioTest):
                  checks=JMESPathCheck('deleted', True))
         self.cmd('storage queue exists -n {}'.format(queue),
                  checks=JMESPathCheck('exists', False))
+
+        # check status of the queue
+        queue_status = self.cmd('storage queue stats').get_output_in_json()
+        self.assertIn(queue_status['geoReplication']['status'], ('live', 'unavailable'))
 
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
