@@ -344,8 +344,6 @@ def _add_role_assignment(role, service_principal, delay=2):
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
-            # Sleep for a while to get role assignment propagated
-            time.sleep(20)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -739,7 +737,17 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
                 "value": client_secret
             }
         }
-    return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+
+    # Due to SPN replication latency, we do a few retries here
+    maxRetry = 30
+    for i in range(0, maxRetry):
+        try:
+            return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+        except CloudError as ex:
+            if i != maxRetry - 1 and 'is not valid according to the validation procedure' in ex.message:
+                time.sleep(3)
+            else:
+                raise ex
 
 
 def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
@@ -1230,8 +1238,17 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
         service_principal_profile=service_principal_profile)
     mc = ManagedCluster(location=location, tags=tags, properties=props)
 
-    return client.create_or_update(
-        resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
+    # Due to SPN replication latency, we do a few retries here
+    maxRetry = 30
+    for i in range(0, maxRetry):
+        try:
+            return client.create_or_update(
+                resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
+        except CloudError as ex:
+            if i != maxRetry - 1 and 'The credentials in ServicePrincipalProfile were invalid' in ex.message:
+                time.sleep(3)
+            else:
+                raise ex
 
 
 def aks_delete(client, resource_group_name, name, no_wait=False, **kwargs):  # pylint: disable=unused-argument
