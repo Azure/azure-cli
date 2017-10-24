@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_webapp_authentication000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 03 Oct 2017 20:45:57 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_webapp_authentication000001?api-version=2017-05-10
@@ -46,15 +46,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 03 Oct 2017 20:45:58 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"perSiteScaling": false, "name": "webapp-authentication-plan000003"},
-      "location": "westus", "sku": {"capacity": 1, "name": "S1", "tier": "STANDARD"}}'''
+    body: 'b''{"location": "westus", "properties": {"name": "webapp-authentication-plan000003",
+      "perSiteScaling": false}, "sku": {"capacity": 1, "name": "S1", "tier": "STANDARD"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -62,21 +62,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['173']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003","name":"webapp-authentication-plan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"webapp-authentication-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_authentication000001-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_authentication000001","reserved":false,"mdmId":"waws-prod-bay-085_1465","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-authentication-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_authentication000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_authentication000001","reserved":false,"mdmId":"waws-prod-bay-017_22912","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1430']
+      content-length: ['1431']
       content-type: [application/json]
-      date: ['Tue, 03 Oct 2017 20:46:07 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -84,7 +84,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -95,21 +95,21 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003","name":"webapp-authentication-plan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"webapp-authentication-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_authentication000001-WestUSwebspace","subscription":"8d57ddbd-c779-40ea-b660-1015f4bf027d","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_authentication000001","reserved":false,"mdmId":"waws-prod-bay-085_1465","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"webapp-authentication-plan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_webapp_authentication000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_webapp_authentication000001","reserved":false,"mdmId":"waws-prod-bay-017_22912","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1430']
+      content-length: ['1431']
       content-type: [application/json]
-      date: ['Tue, 03 Oct 2017 20:46:07 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -120,32 +120,32 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"properties": {"microService": "WebSites", "scmSiteAlsoStopped":
-      false, "reserved": false, "siteConfig": {"netFrameworkVersion": "v4.6", "localMySqlEnabled":
-      false}, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003"},
-      "location": "West US"}\'''''
+    body: 'b''b\''{"location": "West US", "properties": {"reserved": false, "serverFarmId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003",
+      "scmSiteAlsoStopped": false, "siteConfig": {"netFrameworkVersion": "v4.6", "localMySqlEnabled":
+      false, "appSettings": []}}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['429']
+      Content-Length: ['420']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/sites/webapp-authentication-test000002?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/sites/webapp-authentication-test000002","name":"webapp-authentication-test000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-authentication-test000002","state":"Running","hostNames":["webapp-authentication-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_authentication000001-WestUSwebspace","selfLink":"https://waws-prod-bay-085.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_authentication000001-WestUSwebspace/sites/webapp-authentication-test000002","repositorySiteName":"webapp-authentication-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-authentication-test000002.azurewebsites.net","webapp-authentication-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-authentication-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-authentication-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003","reserved":false,"lastModifiedTimeUtc":"2017-10-03T20:46:12.9333333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-authentication-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.40.53.219,104.42.226.43,104.42.227.57,104.42.228.164,104.42.230.5","possibleOutboundIpAddresses":"104.40.53.219,104.42.226.43,104.42.227.57,104.42.228.164,104.42.230.5,104.42.229.180,104.42.227.131","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-085","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_authentication000001","defaultHostName":"webapp-authentication-test000002.azurewebsites.net","slotSwapStatus":null}}'}
+        US","properties":{"name":"webapp-authentication-test000002","state":"Running","hostNames":["webapp-authentication-test000002.azurewebsites.net"],"webSpace":"cli_test_webapp_authentication000001-WestUSwebspace","selfLink":"https://waws-prod-bay-017.api.azurewebsites.windows.net/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_webapp_authentication000001-WestUSwebspace/sites/webapp-authentication-test000002","repositorySiteName":"webapp-authentication-test000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-authentication-test000002.azurewebsites.net","webapp-authentication-test000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-authentication-test000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-authentication-test000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/serverfarms/webapp-authentication-plan000003","reserved":false,"lastModifiedTimeUtc":"2017-10-24T20:14:15.777","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-authentication-test000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"23.101.206.54,23.101.194.183,23.101.206.60,23.101.205.197","possibleOutboundIpAddresses":"23.101.206.54,23.101.194.183,23.101.206.60,23.101.205.197","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-017","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_webapp_authentication000001","defaultHostName":"webapp-authentication-test000002.azurewebsites.net","slotSwapStatus":null}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3334']
+      content-length: ['3272']
       content-type: [application/json]
-      date: ['Tue, 03 Oct 2017 20:46:36 GMT']
-      etag: ['"1D33C88A6A31200"']
+      date: ['Tue, 24 Oct 2017 20:14:23 GMT']
+      etag: ['"1D34D04AA913F90"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -153,7 +153,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -165,9 +165,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/sites/webapp-authentication-test000002/publishxml?api-version=2016-08-01
@@ -175,13 +175,13 @@ interactions:
     body: {string: '<publishData><publishProfile profileName="webapp-authentication-test000002
         - Web Deploy" publishMethod="MSDeploy" publishUrl="webapp-authentication-test000002.scm.azurewebsites.net:443"
         msdeploySite="webapp-authentication-test000002" userName="$webapp-authentication-test000002"
-        userPWD="ev9btBgkqo9kaBZhjbjoPBK8tyLPPtkc3eS5xQHJcJp7nlwnkmZgRKailA1z" destinationAppUrl="http://webapp-authentication-test000002.azurewebsites.net"
+        userPWD="mg8HRdnrg2AvnpbhlZsvEDqb7gx2N4jZHiruE0NMJhj1Q2Y8uw8s6DbGQLh7" destinationAppUrl="http://webapp-authentication-test000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="webapp-authentication-test000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-085.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-017.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-authentication-test000002\$webapp-authentication-test000002"
-        userPWD="ev9btBgkqo9kaBZhjbjoPBK8tyLPPtkc3eS5xQHJcJp7nlwnkmZgRKailA1z" destinationAppUrl="http://webapp-authentication-test000002.azurewebsites.net"
+        userPWD="mg8HRdnrg2AvnpbhlZsvEDqb7gx2N4jZHiruE0NMJhj1Q2Y8uw8s6DbGQLh7" destinationAppUrl="http://webapp-authentication-test000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>'}
@@ -189,13 +189,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1294']
       content-type: [application/xml]
-      date: ['Tue, 03 Oct 2017 20:46:36 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11998']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -207,9 +207,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/sites/webapp-authentication-test000002/config/authsettings/list?api-version=2016-08-01
@@ -220,7 +220,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['906']
       content-type: [application/json]
-      date: ['Tue, 03 Oct 2017 20:46:37 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -240,9 +240,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/sites/webapp-authentication-test000002/config/authsettings/list?api-version=2016-08-01
@@ -253,7 +253,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['906']
       content-type: [application/json]
-      date: ['Tue, 03 Oct 2017 20:46:37 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -265,12 +265,12 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"tokenRefreshExtensionHours": 7.2, "facebookAppId": "facebook_id",
-      "clientSecret": "aad_secret", "defaultProvider": "Facebook", "allowedAudiences":
-      ["audience1"], "tokenStoreEnabled": false, "enabled": true, "issuer": "issuer_url",
-      "clientId": "aad_client_id", "runtimeVersion": "v5.0", "facebookAppSecret":
-      "facebook_secret", "facebookOAuthScopes": ["public_profile", "email"], "unauthenticatedClientAction":
-      "RedirectToLoginPage"}}'
+    body: '{"properties": {"tokenStoreEnabled": false, "unauthenticatedClientAction":
+      "RedirectToLoginPage", "runtimeVersion": "v5.0", "facebookAppId": "facebook_id",
+      "allowedAudiences": ["audience1"], "facebookOAuthScopes": ["public_profile",
+      "email"], "enabled": true, "clientId": "aad_client_id", "tokenRefreshExtensionHours":
+      7.2, "clientSecret": "aad_secret", "facebookAppSecret": "facebook_secret", "defaultProvider":
+      "Facebook", "issuer": "issuer_url"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -278,9 +278,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['449']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 websitemanagementclient/0.32.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 websitemanagementclient/0.33.0 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_webapp_authentication000001/providers/Microsoft.Web/sites/webapp-authentication-test000002/config/authsettings?api-version=2016-08-01
@@ -291,8 +291,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1066']
       content-type: [application/json]
-      date: ['Tue, 03 Oct 2017 20:46:37 GMT']
-      etag: ['"1D33C88B637B7C0"']
+      date: ['Tue, 24 Oct 2017 20:14:27 GMT']
+      etag: ['"1D34D04B1F46C30"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -300,7 +300,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -312,9 +312,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.15
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.15
+          msrest_azure/0.4.11 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_webapp_authentication000001?api-version=2017-05-10
@@ -323,11 +323,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 03 Oct 2017 20:46:38 GMT']
+      date: ['Tue, 24 Oct 2017 20:14:27 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGV0VCQVBQOjVGQVVUSEVOVElDQVRJT05CVTZRTzZMU1hVM3w0NEY0OTE0RjU5RUUzNURBLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGV0VCQVBQOjVGQVVUSEVOVElDQVRJT05SV0ZERjRZUVdNU3w2NTIwMTQwQjk3NDNFMERBLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 202, message: Accepted}
 version: 1
