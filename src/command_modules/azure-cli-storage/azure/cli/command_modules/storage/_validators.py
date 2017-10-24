@@ -296,17 +296,13 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
 
-    import sys
-    if sys.version_info >= (3,):
-        from urllib.parse import quote as url_quote
-    else:
-        from urllib2 import quote as url_quote
+    from six.moves.urllib.parse import quote
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,
         'blob' if valid_blob_source else 'file',
         container if valid_blob_source else share,
-        url_quote(blob if valid_blob_source else path, '/()$=\',~'),
+        quote(blob if valid_blob_source else path, '/()$=\',~'),
         '?' if query_params else '',
         '&'.join(query_params),
         CLOUD.suffixes.storage_endpoint)
