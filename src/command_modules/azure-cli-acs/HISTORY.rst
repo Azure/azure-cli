@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.19
+++++++
+* Call "agent" a "node" in AKS to match documentation.
+
 2.0.18
 ++++++
 * fix kubernetes get-credentials

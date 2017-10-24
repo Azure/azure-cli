@@ -36,7 +36,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import APPLICATION
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regionsInPreview, regionsInProd
-from azure.cli.core.util import CLIError, shell_safe_json_parse
+from azure.cli.core.util import CLIError, shell_safe_json_parse, truncate_text
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
@@ -1121,7 +1121,7 @@ def aks_browse(client, resource_group_name, name, disable_browser=False):
         aks_get_credentials(client, resource_group_name, name, admin=False, path=browse_path)
         # find the dashboard pod's name
         dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--namespace", "kube-system", "--output", "name",
+            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
              "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
         if dashboard_pod:
@@ -1143,9 +1143,9 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
                location=None,
                admin_username="azureuser",
                kubernetes_version="1.7.7",
-               agent_vm_size="Standard_D2_v2",
-               agent_osdisk_size=0,
-               agent_count=3,
+               node_vm_size="Standard_D2_v2",
+               node_osdisk_size=0,
+               node_count=3,
                service_principal=None, client_secret=None,
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
@@ -1163,12 +1163,12 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     :param kubernetes_version: The version of Kubernetes to use for creating
      the cluster, such as '1.7.7' or '1.8.1'.
     :type kubernetes_version: str
-    :param agent_count: the default number of agents for the agent pools.
-    :type agent_count: int
-    :param agent_vm_size: The size of the Virtual Machine.
-    :type agent_vm_size: str
-    :param agent_osdisk_size: The osDisk size in GB of agent pool Virtual Machine
-    :type agent_osdisk_size: int
+    :param node_count: the default number of nodes for the node pools.
+    :type node_count: int
+    :param node_vm_size: The size of the Virtual Machine.
+    :type node_vm_size: str
+    :param node_osdisk_size: The osDisk size in GB of node pool Virtual Machine
+    :type node_osdisk_size: int
     :param service_principal: The service principal used for cluster authentication
      to Azure APIs. If not specified, it is created for you and stored in the
      ${HOME}/.azure directory.
@@ -1186,8 +1186,8 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     try:
         if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
             raise ValueError()
-    except:
-        shortened_key = '{} ... {}'.format(ssh_key_value[:30], ssh_key_value[-30:]).strip()
+    except (TypeError, ValueError):
+        shortened_key = truncate_text(ssh_key_value)
         raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
     subscription_id = _get_subscription_id()
@@ -1203,15 +1203,15 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     ssh_config = ContainerServiceSshConfiguration(
         [ContainerServiceSshPublicKey(key_data=ssh_key_value)])
     agent_pool_profile = ContainerServiceAgentPoolProfile(
-        'agentpool1',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(agent_count),
-        vm_size=agent_vm_size,
+        'nodepool1',  # Must be 12 chars or less before ACS RP adds to it
+        count=int(node_count),
+        vm_size=node_vm_size,
         dns_prefix=dns_name_prefix,
         os_type="Linux",
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks
     )
-    if agent_osdisk_size:
-        agent_pool_profile.os_disk_size_gb = int(agent_osdisk_size)
+    if node_osdisk_size:
+        agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
     principal_obj = _ensure_service_principal(service_principal=service_principal, client_secret=client_secret,
@@ -1232,15 +1232,6 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
 
     return client.create_or_update(
         resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
-
-
-def aks_delete(client, resource_group_name, name, no_wait=False, **kwargs):  # pylint: disable=unused-argument
-    """Delete a managed Kubernetes cluster.
-    :param no_wait: Start deleting but return immediately instead of waiting
-     until the managed cluster is deleted.
-    :type no_wait: bool
-    """
-    return client.delete(resource_group_name, name, raw=no_wait)
 
 
 def aks_get_credentials(client, resource_group_name, name, admin=False,
@@ -1290,12 +1281,6 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
                 logger.warning('Failed to merge credentials to kube config file: %s', ex)
 
 
-def aks_get_versions(client, resource_group_name, name):
-    """Get versions available to upgrade a managed Kubernetes cluster.
-    """
-    return client.get_upgrade_profile(resource_group_name, name)
-
-
 def aks_list(client, resource_group_name=None):
     """List managed Kubernetes clusters."""
     if resource_group_name:
@@ -1311,17 +1296,17 @@ def aks_show(client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(client, resource_group_name, name, agent_count, no_wait=False):
-    """Scale the agent pool in a managed Kubernetes cluster.
-    :param agent_count: The desired number of agent nodes.
-    :type agent_count: int
+def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
+    """Scale the node pool in a managed Kubernetes cluster.
+    :param node_count: The desired number of nodes.
+    :type node_count: int
     :param no_wait: Start upgrading but return immediately instead of waiting
      until the managed cluster is upgraded.
     :type no_wait: bool
     """
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.properties.agent_pool_profiles[0].count = int(agent_count)  # pylint: disable=no-member
+    instance.properties.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
 
     # null out the service principal because otherwise validation complains
     instance.properties.service_principal_profile = None
@@ -1339,7 +1324,6 @@ def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=F
     :type no_wait: bool
     """
     instance = client.get(resource_group_name, name)
-    instance.properties.kubernetes_release = None
     instance.properties.kubernetes_version = kubernetes_version
 
     # null out the service principal because otherwise validation complains

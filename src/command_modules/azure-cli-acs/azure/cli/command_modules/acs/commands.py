@@ -17,11 +17,15 @@ from ._client_factory import _aks_client_factory
 
 def aks_list_table_format(results):
     """"Format a list of managed clusters as summary results for display with "-o table"."""
-    return [aks_show_table_format(r) for r in results]
+    return [_aks_table_format(r) for r in results]
 
 
 def aks_show_table_format(result):
     """Format a managed cluster as summary results for display with "-o table"."""
+    return [_aks_table_format(result)]
+
+
+def _aks_table_format(result):
     # move some nested properties up to top-level values
     properties = result.get('properties', {})
     promoted = ['kubernetesVersion', 'provisioningState', 'fqdn']
@@ -29,7 +33,10 @@ def aks_show_table_format(result):
 
     columns = ['name', 'location', 'resourceGroup'] + promoted
     # put results in an ordered dict so the headers are predictable
-    return OrderedDict({k: result.get(k) for k in columns})
+    table_row = OrderedDict()
+    for k in columns:
+        table_row[k] = result.get(k)
+    return table_row
 
 
 def aks_get_versions_table_format(result):
@@ -53,15 +60,19 @@ def aks_get_versions_table_format(result):
         versions.append(version)
         upgrades.append(upgrade)
 
-    result['agentPoolVersion'] = ', '.join(versions)
-    result['agentPoolUpgrades'] = ', '.join(upgrades)
+    result['nodePoolVersion'] = ', '.join(versions)
+    result['nodePoolUpgrades'] = ', '.join(upgrades)
 
-    columns = ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'agentPoolVersion', 'agentPoolUpgrades']
+    columns = ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']
     # put results in an ordered dict so the headers are predictable
-    return OrderedDict({k: result.get(k) for k in columns})
+    table_row = OrderedDict()
+    for k in columns:
+        table_row[k] = result.get(k)
+    return [table_row]
 
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
+    # Container services commands
     cli_command(__name__, 'acs show', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory, exception_handler=empty_on_404)
     cli_command(__name__, 'acs delete', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.delete', _acs_client_factory)
 
@@ -83,19 +94,18 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'acs kubernetes install-cli', 'azure.cli.command_modules.acs.custom#k8s_install_cli')
     cli_command(__name__, 'acs kubernetes get-credentials', 'azure.cli.command_modules.acs.custom#k8s_get_credentials')
 
-
-if not supported_api_version(PROFILE_TYPE, max_api='2017-08-31-profile'):
+    # Managed clusters commands
     cli_command(__name__, 'aks browse',
                 'azure.cli.command_modules.acs.custom#aks_browse', _aks_client_factory)
     cli_command(__name__, 'aks create',
                 'azure.cli.command_modules.acs.custom#aks_create', _aks_client_factory, no_wait_param='no_wait')
-    cli_command(__name__, 'aks delete',
-                'azure.cli.command_modules.acs.custom#aks_delete', _aks_client_factory, no_wait_param='no_wait',
+    cli_command(__name__, 'aks delete', 'azure.mgmt.containerservice.operations.managed_clusters_operations' +
+                '#ManagedClustersOperations.delete', _aks_client_factory, no_wait_param='raw',
                 confirmation='Are you sure you want to perform this operation?')
     cli_command(__name__, 'aks get-credentials',
                 'azure.cli.command_modules.acs.custom#aks_get_credentials', _aks_client_factory)
-    cli_command(__name__, 'aks get-versions',
-                'azure.cli.command_modules.acs.custom#aks_get_versions', _aks_client_factory,
+    cli_command(__name__, 'aks get-versions', 'azure.mgmt.containerservice.operations.managed_clusters_operations' +
+                '#ManagedClustersOperations.get_upgrade_profile', _aks_client_factory,
                 table_transformer=aks_get_versions_table_format)
     cli_command(__name__, 'aks install-cli',
                 'azure.cli.command_modules.acs.custom#k8s_install_cli')
