@@ -768,7 +768,7 @@ for item in ['record_type', 'record_set_type']:
 register_cli_argument('network dns record-set create', 'ttl', help='Record set TTL (time-to-live)')
 register_cli_argument('network dns record-set create', 'if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
-for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']:
     register_cli_argument('network dns record-set {} add-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
     register_cli_argument('network dns record-set {} remove-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
     register_cli_argument('network dns record-set {} remove-record'.format(item), 'keep_empty_record_set', action='store_true', help='Keep the empty record set if the last record is removed.')
@@ -778,6 +778,9 @@ register_cli_argument('network dns record-set soa', 'relative_record_set_name', 
 
 register_cli_argument('network dns record-set a', 'ipv4_address', options_list=('--ipv4-address', '-a'), help='IPV4 address in string notation.')
 register_cli_argument('network dns record-set aaaa', 'ipv6_address', options_list=('--ipv6-address', '-a'), help='IPV6 address in string notation.')
+register_cli_argument('network dns record-set caa', 'value', help='Value of the CAA record.')
+register_cli_argument('network dns record-set caa', 'flags', help='Integer flags for the record.', type=int)
+register_cli_argument('network dns record-set caa', 'tag', help='Record tag')
 register_cli_argument('network dns record-set cname', 'cname', options_list=('--cname', '-c'), help='Canonical name.')
 register_cli_argument('network dns record-set mx', 'exchange', options_list=('--exchange', '-e'), help='Exchange metric.')
 register_cli_argument('network dns record-set mx', 'preference', options_list=('--preference', '-p'), help='Preference metric.')

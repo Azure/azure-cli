@@ -21,7 +21,7 @@ from azure.cli.command_modules.network._util import _get_property, _set_param
 
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
-from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
+from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord,
                                    NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
@@ -2688,7 +2688,7 @@ def list_dns_zones(resource_group_name=None):
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl, metadata=metadata)
+    record_set = RecordSet(ttl=ttl, metadata=metadata)
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_set_type, record_set, if_match=if_match,
                                 if_none_match='*' if if_none_match else None)
@@ -2714,6 +2714,7 @@ def _type_to_property_name(key):
     type_dict = {
         'a': 'arecords',
         'aaaa': 'aaaa_records',
+        'caa': 'caa_records',
         'cname': 'cname_record',
         'mx': 'mx_records',
         'ns': 'ns_records',
@@ -2765,6 +2766,8 @@ def export_zone(resource_group_name, zone_name):
                 record_obj.update({'ip': record.ipv6_address})
             elif record_type == 'a':
                 record_obj.update({'ip': record.ipv4_address})
+            elif record_type == 'caa':
+                record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname})
             elif record_type == 'mx':
@@ -2801,6 +2804,8 @@ def _build_record(data):
             return AaaaRecord(data['ip'])
         elif record_type == 'a':
             return ARecord(data['ip'])
+        elif record_type == 'caa':
+            return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
         elif record_type == 'cname':
             return CnameRecord(data['alias'])
         elif record_type == 'mx':
@@ -2861,8 +2866,7 @@ def import_zone(resource_group_name, zone_name, file_name):
                     if record_set_type != 'soa' and relative_record_set_name != origin:
                         relative_record_set_name = record_set_name[:-(len(origin) + 2)]
 
-                    record_set = RecordSet(
-                        name=relative_record_set_name, type=record_set_type, ttl=record_set_ttl)
+                    record_set = RecordSet(ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname'])
@@ -2921,6 +2925,12 @@ def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_addre
     record_type = 'a'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             'arecords')
+
+
+def add_dns_caa_record(resource_group_name, zone_name, record_set_name, value, flags=None, tag=None):
+    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record_type = 'caa'
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
@@ -3010,6 +3020,14 @@ def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_ad
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_caa_record(resource_group_name, zone_name, record_set_name, value,
+                          flags=None, tag=None, keep_empty_record_set=False):
+    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record_type = 'caa'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname,
                             keep_empty_record_set=False):
     record = CnameRecord(cname=cname)
@@ -3077,7 +3095,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)
+        record_set = RecordSet(ttl=3600)
 
     _add_record(record_set, record, record_type, is_list)
 
