@@ -31,7 +31,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-containerinstance==0.1.0',
+    'azure-mgmt-containerinstance==0.2.0',
     'azure-cli-core',
     'pyyaml',
 ]

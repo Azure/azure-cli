@@ -15,7 +15,7 @@ import azure.cli.core.commands.arm  # pylint: disable=unused-import
 
 IP_ADDRESS_TYPES = ['Public']
 OS_TYPES = ['Windows', 'Linux']
-
+RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
 
 def environment_variables_format(value):
     """Space separated values in 'key=value' format."""
@@ -38,10 +38,16 @@ register_cli_argument('container create', 'cpu', type=int, help='The required nu
 register_cli_argument('container create', 'memory', type=float, help='The required memory of the containers in GB')
 register_cli_argument('container create', 'os_type', help='The OS type of the containers', **enum_choice_list(OS_TYPES))
 register_cli_argument('container create', 'ip_address', help='The IP address type of the container group', **enum_choice_list(IP_ADDRESS_TYPES))
+register_cli_argument('container create', 'ports', type=int, nargs='+', help='The ports to open')
+register_cli_argument('container create', 'restart_policy', help='Restart policy for all containers within the container group', **enum_choice_list(RESTART_POLICIES))
 register_cli_argument('container create', 'command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
 register_cli_argument('container create', 'environment_variables', nargs='+', options_list=('--environment-variables', '-e'), type=environment_variables_format, help='A list of environment variable for the container. Space separated values in \'key=value\' format.')
 register_cli_argument('container create', 'registry_login_server', arg_group='Image Registry', help='The container image registry login server')
 register_cli_argument('container create', 'registry_username', arg_group='Image Registry', help='The username to log in container image registry server')
 register_cli_argument('container create', 'registry_password', arg_group='Image Registry', help='The password to log in container image registry server')
+register_cli_argument('container create', 'azure_file_volume_share_name', arg_group='Azure File Volume', help='The name of the Azure File share to be mounted as a volume')
+register_cli_argument('container create', 'azure_file_volume_account_name', arg_group='Azure File Volume', help='The name of the storage account that contains the Azure File share')
+register_cli_argument('container create', 'azure_file_volume_account_key', arg_group='Azure File Volume', help='The storage account access key used to access the Azure File share')
+register_cli_argument('container create', 'azure_file_volume_mount_path', arg_group='Azure File Volume', help='The path within the container where the volume should be mounted. Must not contain colon (:).')
 
 register_cli_argument('container logs', 'container_name', help='The container name to tail the logs')

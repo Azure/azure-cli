@@ -6,11 +6,12 @@
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import shlex
-from azure.cli.core.prompting import prompt_pass, NoTTYException
+from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                                  ImageRegistryCredential, ResourceRequirements, ResourceRequests,
-                                                 ContainerGroupNetworkProtocol, OperatingSystemTypes)
+                                                 ContainerGroupNetworkProtocol, OperatingSystemTypes, Volume,
+                                                 AzureFileVolume, VolumeMount)
 
 
 ACR_SERVER_SUFFIX = ".azurecr.io/"
@@ -40,14 +41,19 @@ def create_container(client,
                      location=None,
                      cpu=1,
                      memory=1.5,
-                     port=80,
+                     restart_policy='Always',
+                     ports=[80],
                      os_type='Linux',
                      ip_address=None,
                      command_line=None,
                      environment_variables=None,
                      registry_login_server=None,
                      registry_username=None,
-                     registry_password=None):
+                     registry_password=None,
+                     azure_file_volume_share_name=None,
+                     azure_file_volume_account_name=None,
+                     azure_file_volume_account_key=None,
+                     azure_file_volume_mount_path=None):
     """"Create a container group. """
 
     container_resource_requirements = None
@@ -59,7 +65,7 @@ def create_container(client,
     if registry_login_server is not None:
         if registry_username is None:
             try:
-                registry_username = prompt_pass(msg='Image registry username: ')
+                registry_username = prompt(msg='Image registry username: ')
             except NoTTYException:
                 raise CLIError('Please specify --username in non-interactive mode.')
         if registry_password is None:
@@ -90,24 +96,54 @@ def create_container(client,
     if command_line is not None:
         command = shlex.split(command_line)
 
+    azure_file_volume = None
+    if azure_file_volume_share_name is not None:
+        if azure_file_volume_account_name is None:
+            try:
+                azure_file_volume_account_name = prompt(msg='Azure File storage account name: ')
+            except NoTTYException:
+                raise CLIError('Please specify --azure_file_volume_account_name in non-interactive mode.')
+        if azure_file_volume_account_key is None:
+            try:
+                azure_file_volume_account_key = prompt_pass(msg='Azure File storage account key: ')
+            except NoTTYException:
+                raise CLIError('Please specify --azure_file_volume_account_key in non-interactive mode.')
+
+        azure_file_volume = AzureFileVolume(share_name=azure_file_volume_share_name,
+                                            storage_account_name=azure_file_volume_account_name,
+                                            storage_account_key=azure_file_volume_account_key)
+
+    volumes = None
+    if azure_file_volume is not None:
+        volumes = [Volume(name='azurefile', azure_file=azure_file_volume)]
+
+    volume_mounts = None
+    if azure_file_volume_mount_path is not None:
+        if volumes is None:
+            raise CLIError('Please specify --azure_file_volume_share_name --azure_file_volume_account_name --azure_file_volume_account_key to enable Azure File volume mount.')
+        volume_mounts = [VolumeMount(name='azurefile', mount_path=azure_file_volume_mount_path)]
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
                           command=command,
-                          ports=[ContainerPort(port=port)],
-                          environment_variables=environment_variables)
+                          ports=[ContainerPort(port=p) for p in ports],
+                          environment_variables=environment_variables,
+                          volume_mounts=volume_mounts)
 
     cgroup_ip_address = None
     if ip_address is not None and ip_address.lower() == 'public':
-        cgroup_ip_address = IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=port)])
+        cgroup_ip_address = IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
 
     cgroup_os_type = OperatingSystemTypes.linux if os_type.lower() == "linux" else OperatingSystemTypes.windows
 
     cgroup = ContainerGroup(location=location,
                             containers=[container],
                             os_type=cgroup_os_type,
+                            restart_policy=restart_policy,
                             ip_address=cgroup_ip_address,
-                            image_registry_credentials=image_registry_credentials)
+                            image_registry_credentials=image_registry_credentials,
+                            volumes=volumes)
 
     return client.container_groups.create_or_update(resource_group_name, name, cgroup)
 
