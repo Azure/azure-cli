@@ -17,6 +17,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p, guess_content_type)
+from azure.cli.command_modules.storage.url_quote_util import quote, quote_url_path
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -253,9 +254,8 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
                                  source_container, source_sas, source_blob_name):
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
     source_blob_name = source_blob_name.encode('utf-8')
-    source_blob_url = source_blob_service.make_blob_url(source_container, quote(source_blob_name, '/()$=\',~'),
+    source_blob_url = source_blob_service.make_blob_url(source_container, quote(source_blob_name),
                                                         sas_token=source_sas)
 
     try:
@@ -268,7 +268,6 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
                                  source_share, source_sas, source_file_dir, source_file_name):
-    from six.moves.urllib.parse import quote, urlparse, urlunparse  # pylint: disable=import-error
     try:
         file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
                                                      sas_token=source_sas)
@@ -277,9 +276,7 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
         source_file_name = source_file_name.encode('utf-8')
         file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
                                                      sas_token=source_sas)
-    url_parts = urlparse(file_url)
-    quoted_path = quote(url_parts.path, '/()$=\',~')
-    file_url = urlunparse(url_parts[:2] + (quoted_path,) + url_parts[3:])
+    file_url = quote_url_path(file_url)
 
     blob_name = os.path.join(source_file_dir, source_file_name) \
         if source_file_dir else source_file_name

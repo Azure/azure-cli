@@ -17,7 +17,7 @@ class StorageCopyTests(StorageScenarioMixin, LiveScenarioTest):
         dst_container = self.create_container(storage_account_info)
 
         source_file = self.create_temp_file(16, full_random=False)
-        blobs = ['blobğşŞ', 'blobÉ']
+        blobs = ['blobğşŞ', 'blobÉ®']
 
         for blob_name in blobs:
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', storage_account_info,
