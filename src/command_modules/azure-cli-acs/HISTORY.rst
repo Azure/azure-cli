@@ -6,6 +6,7 @@ Release History
 2.0.19
 ++++++
 * Call "agent" a "node" in AKS to match documentation.
+* Deprecate --orchestrator-release option in acs create
 
 2.0.18
 ++++++
