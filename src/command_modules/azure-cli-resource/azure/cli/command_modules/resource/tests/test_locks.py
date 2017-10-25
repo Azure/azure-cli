@@ -253,6 +253,33 @@ class ResourceLockTests(ScenarioTest):
         my_locks = self.cmd("az lock list -g {} -ojson".format(resource_group)).get_output_in_json()
         self.assertFalse(my_locks)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lock_with_resource_id')
+    def test_lock_with_resource_id(self, resource_group):
+        vnet_name = self.create_random_name('cli-lock-vnet', 30)
+        subnet_name = self.create_random_name('cli-lock-subnet', 30)
+        vnet_lock_name = self.create_random_name('cli-test-lock', 50)
+        subnet_lock_name = self.create_random_name('cli-test-lock', 20)
+
+        vnet = self.cmd('network vnet create -n {} -g {}'.format(vnet_name, resource_group)).get_output_in_json()
+        vnet_id = vnet.get('newVNet').get('id')
+        subnetaddress = vnet.get('newVNet').get('addressSpace').get('addressPrefixes')[0]
+        subnet_id = self.cmd('network vnet subnet create -n {} --address-prefix {} --vnet-name {} -g {}'
+                             .format(subnet_name, subnetaddress,
+                                     vnet_name, resource_group)).get_output_in_json().get('id')
+
+        self.cmd('resource lock create -n {} --resource {} --lock-type CanNotDelete'.format(vnet_lock_name, vnet_id))
+        self.cmd('lock create -n {} --resource {} --lock-type CanNotDelete'.format(subnet_lock_name, subnet_id))
+
+        self.cmd('resource lock show --name {} --resource {}'
+                 .format(vnet_lock_name, vnet_id)).assert_with_checks([JMESPathCheck('name', vnet_lock_name)])
+        self.cmd('lock show --name {} --resource {}'
+                 .format(subnet_lock_name, subnet_id)).assert_with_checks([JMESPathCheck('name', subnet_lock_name)])
+
+        self.cmd('resource lock delete --name {} --resource {}'.format(vnet_lock_name, vnet_id))
+        self.cmd('lock delete --name {} --resource {}'.format(subnet_lock_name, subnet_id))
+
+        self._sleep_for_lock_operation()
+
     def _sleep_for_lock_operation(self):
         if self.is_live:
             sleep(5)
