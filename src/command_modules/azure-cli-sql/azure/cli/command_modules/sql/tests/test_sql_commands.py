@@ -1728,11 +1728,11 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # test sql server vnet-rule create using subnet id
         self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
-                 .format(vnet_rule_2, rg, server, vnet_id_1),
+                 .format(vnet_rule_2, rg, server, vnet_id_2),
                  checks=[
                      JMESPathCheck('name', vnet_rule_2),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1),
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2),
                      JMESPathCheck('ignoreMissingVnetServiceEndpoint', False)])
 
         # test sql server vnet-rule update rule 1 with vnet 2
@@ -1744,7 +1744,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('virtualNetworkSubnetId', vnet_id_2),
                      JMESPathCheck('ignoreMissingVnetServiceEndpoint', False)])
 
-        #test sql server vnet-rule update rule 2 with vnet 1 and ignore-missing-vnet-service-endpoint flag
+        # test sql server vnet-rule update rule 2 with vnet 1 and ignore-missing-vnet-service-endpoint flag
         self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {} -i'
                  .format(vnet_rule_2, rg, server, vnet_id_1),
                  checks=[
