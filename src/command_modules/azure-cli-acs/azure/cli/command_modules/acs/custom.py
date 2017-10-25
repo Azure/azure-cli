@@ -1289,13 +1289,17 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
                 pass
 
         # merge the new kubeconfig into the existing one
-        with tempfile.NamedTemporaryFile(mode='w+t') as additional_file:
+        fd, temp_path = tempfile.mkstemp()
+        additional_file = os.fdopen(fd, 'w+t')
+        try:
             additional_file.write(kubeconfig)
             additional_file.flush()
-            try:
-                merge_kubernetes_configurations(path, additional_file.name)
-            except yaml.YAMLError as ex:
-                logger.warning('Failed to merge credentials to kube config file: %s', ex)
+            merge_kubernetes_configurations(path, temp_path)
+        except yaml.YAMLError as ex:
+            logger.warning('Failed to merge credentials to kube config file: %s', ex)
+        finally:
+            additional_file.close()
+            os.remove(temp_path)
 
 
 def aks_list(client, resource_group_name=None):
