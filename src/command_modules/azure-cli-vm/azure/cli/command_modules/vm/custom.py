@@ -2116,6 +2116,56 @@ def get_vm_format_secret(secrets, certificate_store=None):
     return formatted
 
 
+def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
+    from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
+    VaultSecretGroup, SourceVault, VaultCertificate = get_sdk(ResourceType.MGMT_COMPUTE, 'VaultSecretGroup',
+                                                              'SourceVault', 'VaultCertificate', mod='models')
+    vm = get_vm(resource_group_name, vm_name)
+
+    if '://' not in certificate:  # has a cert name rather a full url?
+        keyvault_client = create_keyvault_data_plane_client()
+        cert_info = keyvault_client.get_certificate(get_key_vault_base_url(parse_resource_id(keyvault)['name']), certificate, '')
+        certificate = cert_info.sid
+
+    if not _is_linux_vm(vm):
+        certificate_store=certificate_store or 'My'
+    elif certificate_store:
+        raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
+    vault_cert = VaultCertificate(certificate_url=certificate, certificate_store=certificate_store)
+    vault_secret_group = next((x for x in vm.os_profile.secrets if x.source_vault and x.source_vault.id.lower()==keyvault.lower()), None)
+    if vault_secret_group:
+        vault_secret_group.vault_certificates.append(vault_cert)
+    else:
+        vault_secret_group = VaultSecretGroup(source_vault=SourceVault(keyvault), vault_certificates=[vault_cert])
+        vm.os_profile.secrets.append(vault_secret_group)
+    vm = set_vm(vm)
+    return vm.os_profile.secrets
+
+
+def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
+    vm = get_vm(resource_group_name, vm_name)
+    to_keep = vm.os_profile.secrets
+    keyvault_matched = []
+    if keyvault:
+        keyvault = keyvault.lower()
+        keyvault_matched = [x for x in to_keep if x.source_vault and x.source_vault.id.lower() == keyvault]
+
+    if keyvault and not certificate:
+        to_keep = [x for x in to_keep if x not in keyvault_matched]
+    elif certificate:
+        temp = keyvault_matched if keyvault else to_keep
+        cert_url_pattern = certificate.lower()
+        if '://' not in cert_url_pattern:  # just a cert name?
+            cert_url_pattern = '/' + cert_url_pattern + '/'
+        for x in temp:
+            x.vault_certificates = [v for v in x.vault_certificates if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())]
+        to_keep = [x for x in to_keep if x.vault_certificates]
+
+    vm.os_profile.secrets = to_keep
+    vm = set_vm(vm)
+    return vm.os_profile.secrets
+
+
 def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
                        identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models')

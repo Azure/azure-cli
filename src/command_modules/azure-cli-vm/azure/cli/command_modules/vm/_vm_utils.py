@@ -76,3 +76,18 @@ def check_existence(value, resource_group, provider_namespace, resource_type,
         return True
     except CloudError:
         return False
+
+
+def create_keyvault_data_plane_client():
+    from azure.cli.core._profile import Profile
+
+    def get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+    return KeyVaultClient(KeyVaultAuthentication(get_token))
+
+def get_key_vault_base_url(vault_name):
+    from azure.cli.core._profile import CLOUD
+    suffix = CLOUD.suffixes.keyvault_dns
+    return 'https://{}{}'.format(vault_name, suffix)

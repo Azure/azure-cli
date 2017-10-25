@@ -58,6 +58,11 @@ def validate_nsg_name(namespace):
         or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
+def process_vm_secret_namespace(namespace):
+    namespace.keyvault = _get_resource_id(namespace.keyvault, namespace.resource_group_name,
+                                          'vaults', 'Microsoft.KeyVault')
+
+
 def _get_resource_group_from_vault_name(vault_name):
     """
     Fetch resource group from vault name
@@ -72,6 +77,7 @@ def _get_resource_group_from_vault_name(vault_name):
         if id_comps['name'] == vault_name:
             return id_comps['resource_group']
     return None
+
 
 
 def _get_resource_id(val, resource_group, resource_type, resource_namespace):

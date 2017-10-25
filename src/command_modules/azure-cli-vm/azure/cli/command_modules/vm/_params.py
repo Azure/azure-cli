@@ -23,7 +23,8 @@ from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
      process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
-     process_disk_encryption_namespace, process_assign_identity_namespace)
+     process_disk_encryption_namespace, process_assign_identity_namespace,
+     process_vm_secret_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -351,6 +352,9 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+register_cli_argument('vm secret', 'keyvault', validator=process_vm_secret_namespace, help='keyvault name or id')  # TODO better help text
+register_cli_argument('vm secret', 'certificate', help='keyvault cert name or its secret full url') # TODO better help text
+register_cli_argument('vm secret', 'certificate_store', help='windows certificate store. Default: My') # TODO better help text and validation
 
 register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
 register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
