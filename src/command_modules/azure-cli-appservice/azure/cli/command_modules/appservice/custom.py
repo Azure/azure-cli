@@ -1067,13 +1067,13 @@ def config_diagnostics(resource_group_name, name, level=None,
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
     if  server_logging_option:
-        # TODO: az_blob_storage_log_config currently not in use, will be impelemented later
-        filesystem_log_config, az_blob_storage_log_config = None, None
+        # TODO: az blob storage log config currently not in use, will be impelemented later
+        filesystem_log_config = None
         turned_on = server_logging_option != 'off'
         if server_logging_option in ['filesystem', 'off']:
             # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
             filesystem_log_config = FileSystemHttpLogsConfig(100, 3, enabled=turned_on)
-        http_logs = HttpLogsConfig(filesystem_log_config, az_blob_storage_log_config)
+        http_logs = HttpLogsConfig(filesystem_log_config, None)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(detailed_error_messages))
