@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -18,11 +19,9 @@ class StorageCopyTests(StorageScenarioMixin, ScenarioTest):
         source_file = self.create_temp_file(16, full_random=False)
         blobs = ['blobğşŞ', 'blobÉ']
 
-        print("stuff")
         for blob_name in blobs:
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', storage_account_info,
                              src_container, source_file, blob_name)
-            print("morestuff")
             self.storage_cmd('storage blob exists -c {} -n {}', storage_account_info,
                              src_container, blob_name).assert_with_checks(JMESPathCheck('exists', True))
             url = self.storage_cmd('storage blob url -n {} -c {}', storage_account_info,
@@ -37,7 +36,6 @@ class StorageCopyTests(StorageScenarioMixin, ScenarioTest):
                          storage_account_info, dst_container, src_container).assert_with_checks(
                              JMESPathCheck('length(@)', 2))
 
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_file_copy_non_ascii(self, storage_account_info):
@@ -46,7 +44,6 @@ class StorageCopyTests(StorageScenarioMixin, ScenarioTest):
 
         source_dir = self.create_temp_dir()
         files = ['fileğşŞ', 'file的Φ']
-
         for file_name in files:
             with open(os.path.join(source_dir, file_name), 'wb') as temp_file:
                 temp_file.write(bytearray([0] * 1024))

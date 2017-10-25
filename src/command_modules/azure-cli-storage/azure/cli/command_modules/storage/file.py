@@ -202,6 +202,7 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     Copy a blob to file share and create the directory if needed.
     """
     from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    blob_name = blob_name.encode('utf-8')
     blob_url = blob_service.make_blob_url(container, quote(blob_name, '/()$=\',~'), sas_token=sas)
     full_path = os.path.join(destination_dir, blob_name) if destination_dir else blob_name
     file_name = os.path.basename(full_path)
@@ -224,10 +225,20 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     """
     Copy a file from one file share to another
     """
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
-    file_url = source_file_service.make_file_url(
-        source_share, quote(source_file_dir, '/()$=\',~') if source_file_dir else None,
-        quote(source_file_name, '/()$=\',~'), sas_token=sas)
+    from six.moves.urllib.parse import quote, urlparse, urlunparse  # pylint: disable=import-error
+    try:
+        file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
+                                                     sas_token=sas)
+    except UnicodeEncodeError:
+        source_file_dir = source_file_dir.encode('utf-8')
+        source_file_name = source_file_name.encode('utf-8')
+        file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
+                                                     sas_token=sas)
+
+    url_parts = urlparse(file_url)
+    quoted_path = quote(url_parts.path, '/()$=\',~')
+    file_url = urlunparse(url_parts[:2] + (quoted_path,) + url_parts[3:])
+
     full_path = os.path.join(destination_dir, source_file_dir, source_file_name) \
         if destination_dir else os.path.join(source_file_dir, source_file_name)
     file_name = os.path.basename(full_path)
