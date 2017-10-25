@@ -30,7 +30,15 @@ def _graph_client_factory(**_):
     return client
 
 
-def _acs_client_factory(_):
+def _svc_client_factory():
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.containerservice import ContainerServiceClient
-    return get_mgmt_service_client(ContainerServiceClient).container_services
+    return get_mgmt_service_client(ContainerServiceClient)
+
+
+def _acs_client_factory(_):
+    return _svc_client_factory().container_services
+
+
+def _aks_client_factory(_):
+    return _svc_client_factory().managed_clusters

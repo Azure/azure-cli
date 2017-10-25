@@ -39,8 +39,8 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, location=None, kind=None, tags=None,
-                           custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
+def create_storage_account(resource_group_name, account_name, sku=None, location=None, kind=None,
+                           tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            bypass=None, default_action=None, assign_identity=False):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
         ResourceType.MGMT_STORAGE,
