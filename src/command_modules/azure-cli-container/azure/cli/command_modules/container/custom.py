@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
+# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument,too-many-branches,too-many-statements
 
 import shlex
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
@@ -42,7 +42,7 @@ def create_container(client,
                      cpu=1,
                      memory=1.5,
                      restart_policy='Always',
-                     ports=[80],
+                     ports=None,
                      os_type='Linux',
                      ip_address=None,
                      command_line=None,
@@ -55,6 +55,9 @@ def create_container(client,
                      azure_file_volume_account_key=None,
                      azure_file_volume_mount_path=None):
     """"Create a container group. """
+
+    if ports is None:
+        ports = []
 
     container_resource_requirements = None
     if cpu is not None or memory is not None:

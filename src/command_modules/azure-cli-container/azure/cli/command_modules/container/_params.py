@@ -17,6 +17,7 @@ IP_ADDRESS_TYPES = ['Public']
 OS_TYPES = ['Windows', 'Linux']
 RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
 
+
 def environment_variables_format(value):
     """Space separated values in 'key=value' format."""
     try:
