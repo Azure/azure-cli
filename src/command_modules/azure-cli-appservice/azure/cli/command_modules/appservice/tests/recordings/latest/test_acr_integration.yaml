@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['331']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:12:22 GMT']
+      date: ['Tue, 24 Oct 2017 23:27:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 201, message: Created}
 - request:
     body: 'b''{"name": "webappacrtest000003", "type": "Microsoft.ContainerRegistry/registries"}'''
@@ -47,7 +47,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:12:25 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -75,29 +75,30 @@ interactions:
       cache-control: [no-cache]
       content-length: ['331']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:12:24 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"mode": "Incremental", "parameters": {"registryLocation":
-      {"value": "japanwest"}, "adminUserEnabled": {"value": true}, "registryName":
-      {"value": "webappacrtest000003"}, "registrySku": {"value": "Basic"}}, "template":
-      {"contentVersion": "1.0.0.0", "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "parameters": {"registryApiVersion": {"metadata": {"description": "The API version
-      of the container registry."}, "defaultValue": "2017-10-01", "type": "string"},
-      "registryLocation": {"metadata": {"description": "The location of the container
-      registry. This cannot be changed after the resource is created."}, "type": "string"},
-      "adminUserEnabled": {"metadata": {"description": "The value that indicates whether
-      the admin user is enabled."}, "defaultValue": false, "type": "bool"}, "registryName":
-      {"metadata": {"description": "The name of the container registry."}, "type":
-      "string"}, "registrySku": {"metadata": {"description": "The SKU of the container
-      registry."}, "defaultValue": "Standard", "type": "string"}}, "resources": [{"properties":
-      {"adminUserEnabled": "[parameters(\''adminUserEnabled\'')]"}, "type": "Microsoft.ContainerRegistry/registries",
-      "name": "[parameters(\''registryName\'')]", "location": "[parameters(\''registryLocation\'')]",
-      "sku": {"name": "[parameters(\''registrySku\'')]"}, "apiVersion": "[parameters(\''registryApiVersion\'')]"}]}}}'''
+    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {"registryLocation": {"metadata": {"description": "The location
+      of the container registry. This cannot be changed after the resource is created."},
+      "type": "string"}, "adminUserEnabled": {"metadata": {"description": "The value
+      that indicates whether the admin user is enabled."}, "type": "bool", "defaultValue":
+      false}, "registryApiVersion": {"metadata": {"description": "The API version
+      of the container registry."}, "type": "string", "defaultValue": "2017-10-01"},
+      "registrySku": {"metadata": {"description": "The SKU of the container registry."},
+      "type": "string", "defaultValue": "Standard"}, "registryName": {"metadata":
+      {"description": "The name of the container registry."}, "type": "string"}},
+      "contentVersion": "1.0.0.0", "resources": [{"apiVersion": "[parameters(\''registryApiVersion\'')]",
+      "name": "[parameters(\''registryName\'')]", "sku": {"name": "[parameters(\''registrySku\'')]"},
+      "type": "Microsoft.ContainerRegistry/registries", "location": "[parameters(\''registryLocation\'')]",
+      "properties": {"adminUserEnabled": "[parameters(\''adminUserEnabled\'')]"}}]},
+      "parameters": {"adminUserEnabled": {"value": true}, "registryLocation": {"value":
+      "japanwest"}, "registrySku": {"value": "Basic"}, "registryName": {"value": "webappacrtest000003"}},
+      "mode": "Incremental"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -112,17 +113,17 @@ interactions:
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.ContainerRegistry_289","name":"Microsoft.ContainerRegistry_289","properties":{"templateHash":"16153049453996813682","parameters":{"registryApiVersion":{"type":"String","value":"2017-10-01"},"registryLocation":{"type":"String","value":"japanwest"},"adminUserEnabled":{"type":"Bool","value":true},"registryName":{"type":"String","value":"webappacrtest000003"},"registrySku":{"type":"String","value":"Basic"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-10-24T20:12:28.4548384Z","duration":"PT0.9221112S","correlationId":"221befb9-e8fb-4f38-a164-51e8f507c1aa","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries","locations":["japanwest"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.ContainerRegistry_262","name":"Microsoft.ContainerRegistry_262","properties":{"templateHash":"10307076311243535625","parameters":{"registryLocation":{"type":"String","value":"japanwest"},"adminUserEnabled":{"type":"Bool","value":true},"registryApiVersion":{"type":"String","value":"2017-10-01"},"registrySku":{"type":"String","value":"Basic"},"registryName":{"type":"String","value":"webappacrtest000003"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-10-24T23:28:08.694761Z","duration":"PT1.2826963S","correlationId":"206933f2-e2eb-4f82-b216-899f70de212c","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries","locations":["japanwest"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.ContainerRegistry_289/operationStatuses/08586927309379448875?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.ContainerRegistry_262/operationStatuses/08586927191980655506?api-version=2017-05-10']
       cache-control: [no-cache]
-      content-length: ['941']
+      content-length: ['940']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:12:28 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -137,14 +138,14 @@ interactions:
           AZURECLI/2.0.21]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586927309379448875?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586927191980655506?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:00 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -165,12 +166,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.ContainerRegistry_289","name":"Microsoft.ContainerRegistry_289","properties":{"templateHash":"16153049453996813682","parameters":{"registryApiVersion":{"type":"String","value":"2017-10-01"},"registryLocation":{"type":"String","value":"japanwest"},"adminUserEnabled":{"type":"Bool","value":true},"registryName":{"type":"String","value":"webappacrtest000003"},"registrySku":{"type":"String","value":"Basic"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-10-24T20:12:35.6586852Z","duration":"PT8.125958S","correlationId":"221befb9-e8fb-4f38-a164-51e8f507c1aa","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries","locations":["japanwest"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/Microsoft.ContainerRegistry_262","name":"Microsoft.ContainerRegistry_262","properties":{"templateHash":"10307076311243535625","parameters":{"registryLocation":{"type":"String","value":"japanwest"},"adminUserEnabled":{"type":"Bool","value":true},"registryApiVersion":{"type":"String","value":"2017-10-01"},"registrySku":{"type":"String","value":"Basic"},"registryName":{"type":"String","value":"webappacrtest000003"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-10-24T23:28:17.3274313Z","duration":"PT9.9153666S","correlationId":"206933f2-e2eb-4f82-b216-899f70de212c","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries","locations":["japanwest"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003"}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1187']
+      content-length: ['1188']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:02 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -191,12 +192,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003?api-version=2017-10-01
   response:
-    body: {string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003","name":"webappacrtest000003","location":"japanwest","tags":{},"properties":{"loginServer":"webappacrtest000003.azurecr.io","creationDate":"2017-10-24T20:12:30.1310653Z","provisioningState":"Succeeded","adminUserEnabled":true}}'}
+    body: {string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003","name":"webappacrtest000003","location":"japanwest","tags":{},"properties":{"loginServer":"webappacrtest000003.azurecr.io","creationDate":"2017-10-24T23:28:10.9928024Z","provisioningState":"Succeeded","adminUserEnabled":true}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['547']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:03 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -224,16 +225,16 @@ interactions:
       cache-control: [no-cache]
       content-length: ['331']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:03 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"location": "japanwest", "properties": {"reserved": true, "perSiteScaling":
-      false, "name": "acrtestplan000002"}, "sku": {"capacity": 1, "name": "S1", "tier":
-      "STANDARD"}}'''
+    body: 'b''{"sku": {"tier": "STANDARD", "name": "S1", "capacity": 1}, "properties":
+      {"perSiteScaling": false, "reserved": true, "name": "acrtestplan000002"}, "location":
+      "japanwest"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -250,12 +251,12 @@ interactions:
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplan000002","name":"acrtestplan000002","type":"Microsoft.Web/serverfarms","kind":"linux","location":"Japan
         West","properties":{"serverFarmId":0,"name":"acrtestplan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"Japan
-        West","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"mdmId":"waws-prod-os1-009_190","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        West","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"mdmId":"waws-prod-os1-009_193","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1393']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:18 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:54 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -263,7 +264,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -283,12 +284,12 @@ interactions:
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplan000002","name":"acrtestplan000002","type":"Microsoft.Web/serverfarms","kind":"linux","location":"Japan
         West","properties":{"serverFarmId":0,"name":"acrtestplan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"Japan
-        West","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"mdmId":"waws-prod-os1-009_190","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        West","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"mdmId":"waws-prod-os1-009_193","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1393']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:19 GMT']
+      date: ['Tue, 24 Oct 2017 23:28:56 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -299,10 +300,10 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"location": "Japan West", "properties": {"reserved": false, "serverFarmId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplan000002",
-      "scmSiteAlsoStopped": false, "siteConfig": {"netFrameworkVersion": "v4.6", "localMySqlEnabled":
-      false, "appSettings": [], "linuxFxVersion": "node|6.4"}}}\'''''
+    body: 'b''b\''{"properties": {"siteConfig": {"localMySqlEnabled": false, "netFrameworkVersion":
+      "v4.6", "linuxFxVersion": "node|6.4", "appSettings": []}, "scmSiteAlsoStopped":
+      false, "reserved": false, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplan000002"},
+      "location": "Japan West"}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -318,13 +319,13 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webappacrtest000003?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webappacrtest000003","name":"webappacrtest000003","type":"Microsoft.Web/sites","kind":"app","location":"Japan
-        West","properties":{"name":"webappacrtest000003","state":"Running","hostNames":["webappacrtest000003.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-009.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/webappacrtest000003","repositorySiteName":"webappacrtest000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webappacrtest000003.azurewebsites.net","webappacrtest000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webappacrtest000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webappacrtest000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplan000002","reserved":true,"lastModifiedTimeUtc":"2017-10-24T20:13:24.4833333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webappacrtest000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211","possibleOutboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211,104.215.58.230","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-009","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webappacrtest000003.azurewebsites.net","slotSwapStatus":null}}'}
+        West","properties":{"name":"webappacrtest000003","state":"Running","hostNames":["webappacrtest000003.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-009.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/webappacrtest000003","repositorySiteName":"webappacrtest000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webappacrtest000003.azurewebsites.net","webappacrtest000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webappacrtest000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webappacrtest000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/acrtestplan000002","reserved":true,"lastModifiedTimeUtc":"2017-10-24T23:29:00.5133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webappacrtest000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211","possibleOutboundIpAddresses":"104.215.58.230,104.215.53.202,104.215.62.87,104.215.51.91,104.215.63.211,104.215.58.230","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-009","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webappacrtest000003.azurewebsites.net","slotSwapStatus":null}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['3125']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:28 GMT']
-      etag: ['"1D34D048C190195"']
+      date: ['Tue, 24 Oct 2017 23:29:04 GMT']
+      etag: ['"1D34D1FDF6B0215"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -332,7 +333,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -353,13 +354,13 @@ interactions:
   response:
     body: {string: '<publishData><publishProfile profileName="webappacrtest000003
         - Web Deploy" publishMethod="MSDeploy" publishUrl="webappacrtest000003.scm.azurewebsites.net:443"
-        msdeploySite="webappacrtest000003" userName="$webappacrtest000003" userPWD="nKi5kYnrvvhSSXztWCKFTbZd3rg1js1lm4wcpEK5Wzx9ruEMZ64APhEYt9ni"
+        msdeploySite="webappacrtest000003" userName="$webappacrtest000003" userPWD="5cJJqM8zHtjNLwHcqCNdQpK8HY9Pppp3jRwDYk9HP8M9SQA3XZsmuNThhBsg"
         destinationAppUrl="http://webappacrtest000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webappacrtest000003
         - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-009.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webappacrtest000003\$webappacrtest000003"
-        userPWD="nKi5kYnrvvhSSXztWCKFTbZd3rg1js1lm4wcpEK5Wzx9ruEMZ64APhEYt9ni" destinationAppUrl="http://webappacrtest000003.azurewebsites.net"
+        userPWD="5cJJqM8zHtjNLwHcqCNdQpK8HY9Pppp3jRwDYk9HP8M9SQA3XZsmuNThhBsg" destinationAppUrl="http://webappacrtest000003.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>'}
@@ -367,7 +368,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1150']
       content-type: [application/xml]
-      date: ['Tue, 24 Oct 2017 20:13:31 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -396,7 +397,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['390']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:32 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -417,12 +418,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003?api-version=2017-10-01
   response:
-    body: {string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003","name":"webappacrtest000003","location":"japanwest","tags":{},"properties":{"loginServer":"webappacrtest000003.azurecr.io","creationDate":"2017-10-24T20:12:30.1310653Z","provisioningState":"Succeeded","adminUserEnabled":true}}'}
+    body: {string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003","name":"webappacrtest000003","location":"japanwest","tags":{},"properties":{"loginServer":"webappacrtest000003.azurecr.io","creationDate":"2017-10-24T23:28:10.9928024Z","provisioningState":"Succeeded","adminUserEnabled":true}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['547']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:32 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -446,19 +447,19 @@ interactions:
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003/listCredentials?api-version=2017-10-01
   response:
-    body: {string: '{"username":"webappacrtest000003","passwords":[{"name":"password","value":"zygktRow4EtURkCVvXCjpH2d+2BnL2Xp"},{"name":"password2","value":"aUlHNPxNxgmmcHZyb=moRtj5sGIenhtT"}]}'}
+    body: {string: '{"username":"webappacrtest000003","passwords":[{"name":"password","value":"Qte3fdiZNZH5xHNKpJLb=/nafvgBNikO"},{"name":"password2","value":"fFXuP03DpZDJSDVSZ1Ksy+QF=W4=n9R2"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:34 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -480,7 +481,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['390']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:34 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -501,12 +502,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003?api-version=2017-10-01
   response:
-    body: {string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003","name":"webappacrtest000003","location":"japanwest","tags":{},"properties":{"loginServer":"webappacrtest000003.azurecr.io","creationDate":"2017-10-24T20:12:30.1310653Z","provisioningState":"Succeeded","adminUserEnabled":true}}'}
+    body: {string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003","name":"webappacrtest000003","location":"japanwest","tags":{},"properties":{"loginServer":"webappacrtest000003.azurecr.io","creationDate":"2017-10-24T23:28:10.9928024Z","provisioningState":"Succeeded","adminUserEnabled":true}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['547']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:35 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -530,19 +531,19 @@ interactions:
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/webappacrtest000003/listCredentials?api-version=2017-10-01
   response:
-    body: {string: '{"username":"webappacrtest000003","passwords":[{"name":"password","value":"zygktRow4EtURkCVvXCjpH2d+2BnL2Xp"},{"name":"password2","value":"aUlHNPxNxgmmcHZyb=moRtj5sGIenhtT"}]}'}
+    body: {string: '{"username":"webappacrtest000003","passwords":[{"name":"password","value":"Qte3fdiZNZH5xHNKpJLb=/nafvgBNikO"},{"name":"password2","value":"fFXuP03DpZDJSDVSZ1Ksy+QF=W4=n9R2"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['180']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 24 Oct 2017 20:13:36 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -565,7 +566,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['2441']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:39 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -597,7 +598,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['322']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:39 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -605,7 +606,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11997']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11998']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -631,8 +632,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['367']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:44 GMT']
-      etag: ['"1D34D0496104695"']
+      date: ['Tue, 24 Oct 2017 23:29:15 GMT']
+      etag: ['"1D34D1FE85536E0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -640,22 +641,22 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"publishingUsername": "$webappacrtest000003", "autoHealRules":
-      {}, "experiments": {"rampUpRules": []}, "logsDirectorySizeLimit": 35, "defaultDocuments":
+    body: 'b''{"properties": {"experiments": {"rampUpRules": []}, "netFrameworkVersion":
+      "v4.0", "publishingUsername": "$webappacrtest000003", "virtualApplications":
+      [{"preloadEnabled": false, "physicalPath": "site\\\\wwwroot", "virtualPath":
+      "/"}], "localMySqlEnabled": false, "alwaysOn": false, "pythonVersion": "", "defaultDocuments":
       ["Default.htm", "Default.html", "Default.asp", "index.htm", "index.html", "iisstart.htm",
-      "default.aspx", "index.php", "hostingstart.html"], "netFrameworkVersion": "v4.0",
-      "pythonVersion": "", "loadBalancing": "LeastRequests", "use32BitWorkerProcess":
-      true, "linuxFxVersion": "DOCKER|webappacrtest000003.azurecr.io/image-name:latest",
-      "virtualApplications": [{"virtualPath": "/", "preloadEnabled": false, "physicalPath":
-      "site\\\\wwwroot"}], "numberOfWorkers": 1, "vnetName": "", "detailedErrorLoggingEnabled":
-      false, "httpLoggingEnabled": false, "webSocketsEnabled": false, "scmType": "None",
-      "localMySqlEnabled": false, "managedPipelineMode": "Integrated", "remoteDebuggingEnabled":
-      false, "alwaysOn": false, "appCommandLine": "", "autoHealEnabled": false, "requestTracingEnabled":
-      false, "phpVersion": "", "nodeVersion": ""}}'''
+      "default.aspx", "index.php", "hostingstart.html"], "httpLoggingEnabled": false,
+      "linuxFxVersion": "DOCKER|webappacrtest000003.azurecr.io/image-name:latest",
+      "appCommandLine": "", "scmType": "None", "autoHealEnabled": false, "nodeVersion":
+      "", "requestTracingEnabled": false, "detailedErrorLoggingEnabled": false, "use32BitWorkerProcess":
+      true, "loadBalancing": "LeastRequests", "logsDirectorySizeLimit": 35, "autoHealRules":
+      {}, "vnetName": "", "phpVersion": "", "numberOfWorkers": 1, "managedPipelineMode":
+      "Integrated", "remoteDebuggingEnabled": false, "webSocketsEnabled": false}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -676,8 +677,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['2479']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:46 GMT']
-      etag: ['"1D34D0498E79C80"']
+      date: ['Tue, 24 Oct 2017 23:29:18 GMT']
+      etag: ['"1D34D1FE9EF2ACB"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -685,7 +686,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -710,7 +711,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['367']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:47 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -718,13 +719,13 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11997']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"WEBSITES_ENABLE_APP_SERVICE_STORAGE": "false", "DOCKER_REGISTRY_SERVER_URL":
-      "https://webappacrtest000003.azurecr.io", "DOCKER_REGISTRY_SERVER_PASSWORD":
-      "zygktRow4EtURkCVvXCjpH2d+2BnL2Xp", "DOCKER_REGISTRY_SERVER_USERNAME": "webappacrtest000003"},
+    body: 'b''{"properties": {"DOCKER_REGISTRY_SERVER_URL": "https://webappacrtest000003.azurecr.io",
+      "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "false", "DOCKER_REGISTRY_SERVER_PASSWORD":
+      "Qte3fdiZNZH5xHNKpJLb=/nafvgBNikO", "DOCKER_REGISTRY_SERVER_USERNAME": "webappacrtest000003"},
       "kind": "<class \''str\''>"}'''
     headers:
       Accept: [application/json]
@@ -741,13 +742,13 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webappacrtest000003/config/appsettings?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webappacrtest000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
-        West","properties":{"WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_URL":"https://webappacrtest000003.azurecr.io","DOCKER_REGISTRY_SERVER_PASSWORD":"zygktRow4EtURkCVvXCjpH2d+2BnL2Xp","DOCKER_REGISTRY_SERVER_USERNAME":"webappacrtest000003"}}'}
+        West","properties":{"DOCKER_REGISTRY_SERVER_URL":"https://webappacrtest000003.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_PASSWORD":"Qte3fdiZNZH5xHNKpJLb=/nafvgBNikO","DOCKER_REGISTRY_SERVER_USERNAME":"webappacrtest000003"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['572']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:49 GMT']
-      etag: ['"1D34D049AF4014B"']
+      date: ['Tue, 24 Oct 2017 23:29:23 GMT']
+      etag: ['"1D34D1FECDBDD75"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -755,7 +756,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -775,12 +776,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webappacrtest000003/config/appsettings/list?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webappacrtest000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"Japan
-        West","properties":{"WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_URL":"https://webappacrtest000003.azurecr.io","DOCKER_REGISTRY_SERVER_PASSWORD":"zygktRow4EtURkCVvXCjpH2d+2BnL2Xp","DOCKER_REGISTRY_SERVER_USERNAME":"webappacrtest000003"}}'}
+        West","properties":{"DOCKER_REGISTRY_SERVER_URL":"https://webappacrtest000003.azurecr.io","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false","DOCKER_REGISTRY_SERVER_PASSWORD":"Qte3fdiZNZH5xHNKpJLb=/nafvgBNikO","DOCKER_REGISTRY_SERVER_USERNAME":"webappacrtest000003"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['572']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:50 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -812,7 +813,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['165']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:53 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -843,7 +844,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['2497']
       content-type: [application/json]
-      date: ['Tue, 24 Oct 2017 20:13:59 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -873,11 +874,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 24 Oct 2017 20:14:01 GMT']
+      date: ['Tue, 24 Oct 2017 23:29:30 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdKUUdSWUVFVFJHNlZGN0dOVzdKWVBJUVE1WVVTSzRYUTQ1T3w5OTFFRjFFMUM0MEM1N0UzLUpBUEFOV0VTVCIsImpvYkxvY2F0aW9uIjoiamFwYW53ZXN0In0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdESEtCSVVTQUQ1TDVNTTRXN1pTUkVSUFNRUTVFUVVDN0hMR3wyMjkxMjY3QjYxMUNFREY4LUpBUEFOV0VTVCIsImpvYkxvY2F0aW9uIjoiamFwYW53ZXN0In0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 202, message: Accepted}
 version: 1
