@@ -2,8 +2,8 @@
 
 Release History
 ===============
-(unreleased)
-++++++++++++
+0.1.20
+++++++
 * webapp: use azure-mgmt-web 0.34.1
 
 0.1.19
