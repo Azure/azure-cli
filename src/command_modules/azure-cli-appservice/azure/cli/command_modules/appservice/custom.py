@@ -1065,19 +1065,19 @@ def config_diagnostics(resource_group_name, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    logs_enabled = (web_server_logging if web_server_logging is not None
-                    else docker_container_logging)
-
-    # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
-    filesystem_log_config = FileSystemHttpLogsConfig(100, 3, logs_enabled == 'filesystem')
-    az_blob_storage_log_config = AzureBlobStorageHttpLogsConfig(None, 3, False)
-
-    if logs_enabled == 'storage':
-        if sas_url is None:
-            raise CLIError("sas url cannot be null if storage is selected!")
-        az_blob_storage_log_config = AzureBlobStorageHttpLogsConfig(sas_url, 3, True)
-
-    http_logs = HttpLogsConfig(filesystem_log_config, az_blob_storage_log_config)
+    server_logging_option = web_server_logging or docker_container_logging
+    if  server_logging_option:
+        filesystem_log_config, az_blob_storage_log_config = None, None
+        turned_on = server_logging_option != 'off'
+        if server_logging_option in ['filesystem', 'off']:
+            # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
+            filesystem_log_config = FileSystemHttpLogsConfig(100, 3, enabled=turned_on)
+        if server_logging_option in ['storage', 'off']:
+            if turned_on and sas_url is None:
+                raise CLIError("sas url cannot be null if storage is selected!")
+            az_blob_storage_log_config = AzureBlobStorageHttpLogsConfig(sas_url, 3,
+                                                                        enabled=turned_on)
+        http_logs = HttpLogsConfig(filesystem_log_config, az_blob_storage_log_config)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(detailed_error_messages))

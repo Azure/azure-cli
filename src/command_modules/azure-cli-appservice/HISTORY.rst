@@ -3,10 +3,13 @@
 Release History
 ===============
 
+0.1.20
+++++++
+* webapp: fix --web-server-logging to accept storage logging
+
 0.1.19
 ++++++
 * webapp: fix a bug that downloaded log file might be invalid
-* webapp: fix --web-server-logging to accept storage logging
 
 0.1.18 (2017-10-09)
 +++++++++++++++++++
