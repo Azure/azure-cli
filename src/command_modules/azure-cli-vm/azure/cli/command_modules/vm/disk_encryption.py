@@ -48,7 +48,10 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                key_encryption_keyvault=None,
                key_encryption_key=None,
                key_encryption_algorithm='RSA-OAEP',
-               volume_type=None):
+               volume_type=None,
+               encrypt_format_all=False,
+               extension_name=None,
+               extension_publisher=None):
     '''
     Enable disk encryption on OS disk, Data disks, or both
     :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
@@ -66,7 +69,9 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
-    extension = vm_extension_info[os_type]
+    extension = vm_extension_info[os_type].copy()
+    extension['name'] = extension_name or extension['name']
+    extension['publisher'] = extension_publisher or extension['publisher']
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
     vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
 
@@ -111,7 +116,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
         'AADClientCertThumbprint': aad_client_cert_thumbprint,
         'KeyVaultURL': disk_encryption_keyvault_url,
         'VolumeType': volume_type,
-        'EncryptionOperation': 'EnableEncryption',
+        'EncryptionOperation': 'EnableEncryption' if not encrypt_format_all else 'EnableEncryptionFormatAll',
         'KeyEncryptionKeyURL': key_encryption_key,
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
@@ -181,7 +186,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                        "the encryption will finish shortly")
 
 
-def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
+def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False, extension_name=None, extension_publisher=None):
     '''
     Disable disk encryption on OS disk, Data disks, or both
     '''
@@ -211,7 +216,9 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
             raise CLIError("VM has data disks, please specify --volume-type")
 
     # sequence_version should be incremented since encryptions occurred before
-    extension = vm_extension_info[os_type]
+    extension = vm_extension_info[os_type].copy()
+    extension['name'] = extension_name or extension['name']
+    extension['publisher'] = extension_publisher or extension['publisher']
     sequence_version = uuid.uuid4()
 
     # 2. update the disk encryption extension
@@ -249,7 +256,7 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
     set_vm(vm)
 
 
-def show_vm_encryption_status(resource_group_name, vm_name):
+def show_vm_encryption_status(resource_group_name, vm_name, extension_name=None, extension_publisher=None):
     '''show the encryption status'''
     encryption_status = {
         'osDisk': 'NotEncrypted',
@@ -264,7 +271,9 @@ def show_vm_encryption_status(resource_group_name, vm_name):
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     encryption_status['osType'] = os_type
-    extension = vm_extension_info[os_type]
+    extension = vm_extension_info[os_type].copy()
+    extension['name'] = extension_name or extension['name']
+    extension['publisher'] = extension_publisher or extension['publisher']
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
                                                                      vm_name,
                                                                      extension['name'],

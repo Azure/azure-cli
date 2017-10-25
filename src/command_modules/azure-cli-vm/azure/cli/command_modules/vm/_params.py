@@ -312,6 +312,7 @@ for scope in ['vm encryption', 'vmss encryption']:
     register_cli_argument(scope, 'force', action='store_true', help='continue by ignoring client side validation errors')
     register_cli_argument(scope, 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
 register_cli_argument('vmss encryption', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+register_cli_argument('vm encryption enable', 'encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
