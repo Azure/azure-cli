@@ -1146,7 +1146,7 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
                location=None,
                admin_username="azureuser",
                kubernetes_version="1.7.7",
-               node_vm_size="Standard_D2_v2",
+               node_vm_size="Standard_D1_v2",
                node_osdisk_size=0,
                node_count=3,
                service_principal=None, client_secret=None,

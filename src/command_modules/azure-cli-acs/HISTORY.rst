@@ -5,8 +5,9 @@ Release History
 
 2.0.19
 ++++++
-* Call "agent" a "node" in AKS to match documentation.
-* Deprecate --orchestrator-release option in acs create
+* call "agent" a "node" in AKS to match documentation
+* deprecate --orchestrator-release option in acs create
+* change default VM size for AKS to Standard_D1_v2
 
 2.0.18
 ++++++
