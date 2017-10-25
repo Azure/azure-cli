@@ -579,7 +579,7 @@ def load_acs_service_principals(config_path):
         return None
 
 
-# pylint: disable-msg=too-many-arguments
+# pylint: disable-msg=too-many-statements
 def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
             admin_username="azureuser", api_version=None, orchestrator_type="DCOS", orchestrator_release="",
             master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
