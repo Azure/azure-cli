@@ -112,7 +112,7 @@ register_cli_argument('acs create', 'agent_storage_profile', help=_get_feature_i
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, set the default osType of agent pools to be Windows.')
 register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
 
-register_cli_argument('acs create', 'orchestrator_release', options_list=('--orchestrator-release',), help=_get_feature_in_preview_message() + 'Use Orchestrator Release to specify the major.minor part of the semantic version for your choice of orchestrator. For example, you can specify 1.7, which will resolve to 1.7.x based on ACS latest well tested batch version')
+register_cli_argument('acs create', 'orchestrator_version', options_list=('--orchestrator-version',), help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)

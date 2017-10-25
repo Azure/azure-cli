@@ -401,7 +401,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                agent_ports=None,
                agent_storage_profile="",
                orchestrator_type="DCOS",
-               orchestrator_release="", service_principal=None, client_secret=None, tags=None,
+               orchestrator_version="", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
                validate=False, no_wait=False):
     """Create a new Acs.
@@ -522,7 +522,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                    ssh_key_value, admin_username=admin_username,
                    api_version=api_version,
                    orchestrator_type=orchestrator_type,
-                   orchestrator_release=orchestrator_release,
+                   orchestrator_version=orchestrator_version,
                    master_profile=master_profile,
                    master_vm_size=master_vm_size,
                    master_osdisk_size=master_osdisk_size,
@@ -581,7 +581,7 @@ def load_acs_service_principals(config_path):
 
 # pylint: disable-msg=too-many-statements
 def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-            admin_username="azureuser", api_version=None, orchestrator_type="DCOS", orchestrator_release="",
+            admin_username="azureuser", api_version=None, orchestrator_type="DCOS", orchestrator_version="",
             master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
             master_vnet_subnet_id="", master_first_consecutive_static_ip="", master_storage_profile="",
             agent_profiles=None, agent_count=3, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
@@ -697,7 +697,7 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
         },
     }
     if api_version == "2017-07-01":
-        properties["orchestratorProfile"]["orchestratorRelease"] = orchestrator_release
+        properties["orchestratorProfile"]["orchestratorVersion"] = orchestrator_version
 
     if windows_profile is not None:
         properties["windowsProfile"] = windows_profile
