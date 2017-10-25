@@ -344,8 +344,6 @@ def _add_role_assignment(role, service_principal, delay=2):
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
-            # Sleep for a while to get role assignment propagated
-            time.sleep(20)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -581,7 +579,7 @@ def load_acs_service_principals(config_path):
         return None
 
 
-# pylint: disable-msg=too-many-arguments
+# pylint: disable-msg=too-many-statements
 def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
             admin_username="azureuser", api_version=None, orchestrator_type="DCOS", orchestrator_release="",
             master_profile=None, master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1,
@@ -739,7 +737,20 @@ def _create(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key
                 "value": client_secret
             }
         }
-    return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+
+    # Due to SPN replication latency, we do a few retries here
+    maxRetry = 30
+    retry_exception = Exception(None)
+    for _ in range(0, maxRetry):
+        try:
+            return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+        except CloudError as ex:
+            retry_exception = ex
+            if 'is not valid according to the validation procedure' in ex.message:
+                time.sleep(3)
+            else:
+                raise ex
+    raise retry_exception
 
 
 def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
@@ -1230,8 +1241,20 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
         service_principal_profile=service_principal_profile)
     mc = ManagedCluster(location=location, tags=tags, properties=props)
 
-    return client.create_or_update(
-        resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
+    # Due to SPN replication latency, we do a few retries here
+    maxRetry = 30
+    retry_exception = Exception(None)
+    for _ in range(0, maxRetry):
+        try:
+            return client.create_or_update(
+                resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
+        except CloudError as ex:
+            retry_exception = ex
+            if 'The credentials in ServicePrincipalProfile were invalid' in ex.message:
+                time.sleep(3)
+            else:
+                raise ex
+    raise retry_exception
 
 
 def aks_get_credentials(client, resource_group_name, name, admin=False,
