@@ -9,13 +9,14 @@ from azure.cli.core.commands.parameters import (enum_choice_list,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import CLIError
+from azure.mgmt.containerinstance.models import (ContainerGroupRestartPolicy, OperatingSystemTypes)
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 
 # pylint: disable=line-too-long
 
 IP_ADDRESS_TYPES = ['Public']
-OS_TYPES = ['Windows', 'Linux']
-RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
+OS_TYPES = [OperatingSystemTypes.windows, OperatingSystemTypes.linux]
+RESTART_POLICIES = [ContainerGroupRestartPolicy.always, ContainerGroupRestartPolicy.on_failure, ContainerGroupRestartPolicy.never]
 
 
 def environment_variables_format(value):

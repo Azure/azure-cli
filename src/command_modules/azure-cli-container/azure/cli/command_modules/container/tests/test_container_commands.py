@@ -5,8 +5,6 @@
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer)
 
-# pylint: disable=line-too-long
-
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
     # Test create container with image, os type, ip address type, port, cpu,

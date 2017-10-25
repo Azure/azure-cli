@@ -3,16 +3,13 @@
 Release History
 ===============
 
-0.1.14
+0.1.13
 ++++++
+* minor fixes
 * Added support to open multiple ports
 * Added container group restart policy
 * Added support to mount Azure File share as a volume
 * Updated helper docs
-
-0.1.13
-++++++
-* minor fixes
 
 0.1.12
 ++++++

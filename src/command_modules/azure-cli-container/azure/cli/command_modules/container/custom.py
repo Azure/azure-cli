@@ -11,7 +11,7 @@ from azure.cli.core.util import CLIError
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                                  ImageRegistryCredential, ResourceRequirements, ResourceRequests,
                                                  ContainerGroupNetworkProtocol, OperatingSystemTypes, Volume,
-                                                 AzureFileVolume, VolumeMount)
+                                                 AzureFileVolume, VolumeMount, ContainerGroupRestartPolicy)
 
 
 ACR_SERVER_SUFFIX = ".azurecr.io/"
@@ -41,9 +41,9 @@ def create_container(client,
                      location=None,
                      cpu=1,
                      memory=1.5,
-                     restart_policy='Always',
+                     restart_policy=ContainerGroupRestartPolicy.always,
                      ports=None,
-                     os_type='Linux',
+                     os_type=OperatingSystemTypes.linux,
                      ip_address=None,
                      command_line=None,
                      environment_variables=None,
@@ -56,22 +56,21 @@ def create_container(client,
                      azure_file_volume_mount_path=None):
     """"Create a container group. """
 
-    if ports is None:
-        ports = []
+    ports = ports or []
 
     container_resource_requirements = None
-    if cpu is not None or memory is not None:
+    if cpu or memory:
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
         container_resource_requirements = ResourceRequirements(requests=container_resource_requests)
 
     image_registry_credentials = None
-    if registry_login_server is not None:
-        if registry_username is None:
+    if registry_login_server:
+        if not registry_username:
             try:
                 registry_username = prompt(msg='Image registry username: ')
             except NoTTYException:
                 raise CLIError('Please specify --username in non-interactive mode.')
-        if registry_password is None:
+        if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
@@ -80,7 +79,7 @@ def create_container(client,
                                                               username=registry_username,
                                                               password=registry_password)]
     elif ACR_SERVER_SUFFIX in image:
-        if registry_password is None:
+        if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
@@ -88,25 +87,23 @@ def create_container(client,
 
         acr_server = image.split("/")[0] if image.split("/") else None
         acr_username = image.split(ACR_SERVER_SUFFIX)[0] if image.split(ACR_SERVER_SUFFIX) else None
-        if acr_server is not None and acr_username is not None:
+        if acr_server and acr_username:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
                                                                   username=acr_username,
                                                                   password=registry_password)]
         else:
             raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --registry-server and --registry-username.')
 
-    command = None
-    if command_line is not None:
-        command = shlex.split(command_line)
+    command = shlex.split(command_line) if command_line else None
 
     azure_file_volume = None
-    if azure_file_volume_share_name is not None:
-        if azure_file_volume_account_name is None:
+    if azure_file_volume_share_name:
+        if not azure_file_volume_account_name:
             try:
                 azure_file_volume_account_name = prompt(msg='Azure File storage account name: ')
             except NoTTYException:
                 raise CLIError('Please specify --azure_file_volume_account_name in non-interactive mode.')
-        if azure_file_volume_account_key is None:
+        if not azure_file_volume_account_key:
             try:
                 azure_file_volume_account_key = prompt_pass(msg='Azure File storage account key: ')
             except NoTTYException:
@@ -116,14 +113,13 @@ def create_container(client,
                                             storage_account_name=azure_file_volume_account_name,
                                             storage_account_key=azure_file_volume_account_key)
 
-    volumes = None
-    if azure_file_volume is not None:
-        volumes = [Volume(name='azurefile', azure_file=azure_file_volume)]
+    volumes = [Volume(name='azurefile', azure_file=azure_file_volume)] if azure_file_volume else None
 
     volume_mounts = None
-    if azure_file_volume_mount_path is not None:
-        if volumes is None:
-            raise CLIError('Please specify --azure_file_volume_share_name --azure_file_volume_account_name --azure_file_volume_account_key to enable Azure File volume mount.')
+    if azure_file_volume_mount_path:
+        if not volumes:
+            raise CLIError('Please specify --azure_file_volume_share_name --azure_file_volume_account_name --azure_file_volume_account_key '
+                           'to enable Azure File volume mount.')
         volume_mounts = [VolumeMount(name='azurefile', mount_path=azure_file_volume_mount_path)]
 
     container = Container(name=name,
@@ -135,14 +131,12 @@ def create_container(client,
                           volume_mounts=volume_mounts)
 
     cgroup_ip_address = None
-    if ip_address is not None and ip_address.lower() == 'public':
+    if ip_address and ip_address.lower() == 'public':
         cgroup_ip_address = IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
-
-    cgroup_os_type = OperatingSystemTypes.linux if os_type.lower() == "linux" else OperatingSystemTypes.windows
 
     cgroup = ContainerGroup(location=location,
                             containers=[container],
-                            os_type=cgroup_os_type,
+                            os_type=os_type,
                             restart_policy=restart_policy,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
