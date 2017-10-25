@@ -5,10 +5,7 @@ Release History
 0.1.20
 ++++++
 * webapp: use azure-mgmt-web 0.34.1
-
-0.1.20
-++++++
-* webapp: fix --web-server-logging to accept storage logging
+* webapp: add
 
 0.1.19
 ++++++

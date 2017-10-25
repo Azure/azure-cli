@@ -163,7 +163,6 @@ register_cli_argument('webapp log config', 'detailed_error_messages', help='conf
 register_cli_argument('webapp log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
 register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(['off', 'storage', 'filesystem']))
-register_cli_argument('webapp log config', 'sas_url', help='configure SAS Url, only applicable when --web-server-logging is set to \'storage\'')
 register_cli_argument('webapp log config', 'docker_container_logging', help='configure gathering STDOUT and STDERR output from container', **enum_choice_list(['off', 'filesystem']))
 
 register_cli_argument('webapp log tail', 'provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
@@ -196,7 +195,6 @@ register_cli_argument('webapp config set', 'java_container', help="The java cont
 register_cli_argument('webapp config set', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('webapp config set', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
-register_cli_argument('webapp config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('webapp config backup', 'webapp_name', help='The name of the webapp')
 register_cli_argument('webapp config backup', 'db_name', help='Name of the database in the backup', arg_group='Database')
 register_cli_argument('webapp config backup', 'db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
