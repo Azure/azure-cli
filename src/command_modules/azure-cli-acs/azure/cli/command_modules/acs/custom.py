@@ -1118,27 +1118,26 @@ def aks_browse(client, resource_group_name, name, disable_browser=False):
         raise CLIError('Can not find kubectl executable in PATH')
 
     proxy_url = 'http://127.0.0.1:8001/'
-    with tempfile.NamedTemporaryFile(mode='w+t') as kube_config:
-        browse_path = kube_config.name
-        # TODO: need to add an --admin option?
-        aks_get_credentials(client, resource_group_name, name, admin=False, path=browse_path)
-        # find the dashboard pod's name
-        dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
-             "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True)
-        if dashboard_pod:
-            # remove the "pods/" prefix from the name
-            dashboard_pod = str(dashboard_pod)[5:].strip()
-        else:
-            raise CLIError("Couldn't find the Kubernetes dashboard pod.")
-        # launch kubectl port-forward locally to access the remote dashboard
-        logger.warning('Proxy running on {}'.format(proxy_url))
-        logger.warning('Press CTRL+C to close the tunnel...')
-        if not disable_browser:
-            wait_then_open_async(proxy_url)
-        subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                         "port-forward", dashboard_pod, "8001:9090"])
+    _, browse_path = tempfile.mkstemp()
+    # TODO: need to add an --admin option?
+    aks_get_credentials(client, resource_group_name, name, admin=False, path=browse_path)
+    # find the dashboard pod's name
+    dashboard_pod = subprocess.check_output(
+        ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
+         "--selector", "k8s-app=kubernetes-dashboard"],
+        universal_newlines=True)
+    if dashboard_pod:
+        # remove the "pods/" prefix from the name
+        dashboard_pod = str(dashboard_pod)[5:].strip()
+    else:
+        raise CLIError("Couldn't find the Kubernetes dashboard pod.")
+    # launch kubectl port-forward locally to access the remote dashboard
+    logger.warning('Proxy running on {}'.format(proxy_url))
+    logger.warning('Press CTRL+C to close the tunnel...')
+    if not disable_browser:
+        wait_then_open_async(proxy_url)
+    subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                     "port-forward", dashboard_pod, "8001:9090"])
 
 
 def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
