@@ -62,6 +62,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     :param str disk_encryption_keyvault:the KeyVault where generated encryption key will be placed
     :param str key_encryption_key: KeyVault key name or URL used to encrypt the disk encryption key
     :param str key_encryption_keyvault: the KeyVault containing the key encryption key
+    :param str extension_name: The extension name. Specify this parameter only to override the default values "AzureDiskEncryption" for Windows and "AzureDiskEncryptionForLinux" for Linux.
+    :param str extension_publisher: The extension publisher name. Specify this parameter only to override the default value "Microsoft.Azure.Security".
     used to encrypt the disk encryption key. If missing, CLI will use --disk-encryption-keyvault
     '''
     # pylint: disable=no-member
@@ -189,6 +191,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
 def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False, extension_name=None, extension_publisher=None):
     '''
     Disable disk encryption on OS disk, Data disks, or both
+    :param str extension_name: The extension name. Specify this parameter only to override the default values "AzureDiskEncryption" for Windows and "AzureDiskEncryptionForLinux" for Linux.
+    :param str extension_publisher: The extension publisher name. Specify this parameter only to override the default value "Microsoft.Azure.Security".
     '''
     compute_client = _compute_client_factory()
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
@@ -257,7 +261,11 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False, exte
 
 
 def show_vm_encryption_status(resource_group_name, vm_name, extension_name=None, extension_publisher=None):
-    '''show the encryption status'''
+    '''
+    show the encryption status
+    :param str extension_name: The extension name. Specify this parameter only to override the default values "AzureDiskEncryption" for Windows and "AzureDiskEncryptionForLinux" for Linux.
+    :param str extension_publisher: The extension publisher name. Specify this parameter only to override the default value "Microsoft.Azure.Security".
+    '''
     encryption_status = {
         'osDisk': 'NotEncrypted',
         'osDiskEncryptionSettings': None,
