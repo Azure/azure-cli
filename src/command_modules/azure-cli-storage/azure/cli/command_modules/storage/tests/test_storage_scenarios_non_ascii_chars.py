@@ -5,11 +5,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
+from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
 from .storage_test_util import StorageScenarioMixin
 
 
-class StorageCopyTests(StorageScenarioMixin, ScenarioTest):
+class StorageCopyTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_copy_non_ascii(self, storage_account_info):
