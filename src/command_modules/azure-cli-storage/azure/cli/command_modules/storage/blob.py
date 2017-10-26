@@ -18,7 +18,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p, guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import (encode_for_url, encode_url_path,
-                                                              make_encoded_file_url_and_names)
+                                                              make_encoded_file_url_and_params)
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -270,7 +270,7 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
                                  source_share, source_sas, source_file_dir, source_file_name):
     file_url, source_file_dir, source_file_name = \
-        make_encoded_file_url_and_names(source_file_service, source_share, source_file_dir,
+        make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
                                         source_file_name, source_sas)
 
     blob_name = os.path.join(source_file_dir, source_file_name) \

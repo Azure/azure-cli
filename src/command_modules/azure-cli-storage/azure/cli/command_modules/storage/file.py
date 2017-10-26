@@ -17,7 +17,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_short_lived_container_sas,
                                                     create_short_lived_share_sas, guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import (encode_for_url, encode_url_path,
-                                                              make_encoded_file_url_and_names)
+                                                              make_encoded_file_url_and_params)
 
 
 def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False, validate_content=False,
@@ -227,7 +227,7 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     Copy a file from one file share to another
     """
     file_url, source_file_dir, source_file_name = \
-        make_encoded_file_url_and_names(source_file_service, source_share, source_file_dir,
+        make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
                                         source_file_name, sas)
 
     full_path = os.path.join(destination_dir, source_file_dir, source_file_name) \

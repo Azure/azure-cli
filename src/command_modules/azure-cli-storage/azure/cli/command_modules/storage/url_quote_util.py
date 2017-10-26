@@ -23,10 +23,10 @@ def encode_url_path(url, safe=SAFE_CHARS):
     return urlunparse(url_parts[:2] + (quoted_path,) + url_parts[3:])
 
 
-def make_encoded_file_url_and_names(file_service, share, file_dir, file_name, sas_token, safe=SAFE_CHARS):
+def make_encoded_file_url_and_params(file_service, share, file_dir, file_name, sas_token, safe=SAFE_CHARS):
     """
-    Makes the file url using the service. Encodes the file directory and name if needed and returns url, dir, file
-    as a tuple. This is needed to account for encoding differences between python 2 and 3.
+    Makes the file url using the service. Converts the file directory and name into byte-strings if needed and returns
+    (url, dir, file) as a tuple. This is needed to account for strng encoding differences between python 2 and 3.
     """
     try:
         file_url = file_service.make_file_url(share, file_dir, file_name, sas_token=sas_token)
