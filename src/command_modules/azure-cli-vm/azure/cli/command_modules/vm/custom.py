@@ -2124,15 +2124,17 @@ def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certifica
 
     if '://' not in certificate:  # has a cert name rather a full url?
         keyvault_client = create_keyvault_data_plane_client()
-        cert_info = keyvault_client.get_certificate(get_key_vault_base_url(parse_resource_id(keyvault)['name']), certificate, '')
+        cert_info = keyvault_client.get_certificate(get_key_vault_base_url(parse_resource_id(keyvault)['name']),
+                                                    certificate, '')
         certificate = cert_info.sid
 
     if not _is_linux_vm(vm):
-        certificate_store=certificate_store or 'My'
+        certificate_store = certificate_store or 'My'
     elif certificate_store:
         raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
     vault_cert = VaultCertificate(certificate_url=certificate, certificate_store=certificate_store)
-    vault_secret_group = next((x for x in vm.os_profile.secrets if x.source_vault and x.source_vault.id.lower()==keyvault.lower()), None)
+    vault_secret_group = next((x for x in vm.os_profile.secrets
+                               if x.source_vault and x.source_vault.id.lower() == keyvault.lower()), None)
     if vault_secret_group:
         vault_secret_group.vault_certificates.append(vault_cert)
     else:
@@ -2158,7 +2160,8 @@ def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
         if '://' not in cert_url_pattern:  # just a cert name?
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
-            x.vault_certificates = [v for v in x.vault_certificates if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())]
+            x.vault_certificates = ([v for v in x.vault_certificates
+                                     if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
         to_keep = [x for x in to_keep if x.vault_certificates]
 
     vm.os_profile.secrets = to_keep

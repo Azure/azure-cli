@@ -79,7 +79,6 @@ def _get_resource_group_from_vault_name(vault_name):
     return None
 
 
-
 def _get_resource_id(val, resource_group, resource_type, resource_namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):

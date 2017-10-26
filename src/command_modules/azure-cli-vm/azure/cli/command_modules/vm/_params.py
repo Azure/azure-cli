@@ -352,9 +352,9 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
-register_cli_argument('vm secret', 'keyvault', validator=process_vm_secret_namespace, help='keyvault name or id')  # TODO better help text
-register_cli_argument('vm secret', 'certificate', help='keyvault cert name or its secret full url') # TODO better help text
-register_cli_argument('vm secret', 'certificate_store', help='windows certificate store. Default: My') # TODO better help text and validation
+register_cli_argument('vm secret', 'keyvault', validator=process_vm_secret_namespace, help='Keyvault ID, name if in the same resource group')
+register_cli_argument('vm secret', 'certificate', help='keyvault certificate name or its secret full url')
+register_cli_argument('vm secret', 'certificate_store', help='Windows certificate store names. Default: My')
 
 register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
 register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")

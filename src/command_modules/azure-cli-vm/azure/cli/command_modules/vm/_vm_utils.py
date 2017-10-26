@@ -87,6 +87,7 @@ def create_keyvault_data_plane_client():
     from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
     return KeyVaultClient(KeyVaultAuthentication(get_token))
 
+
 def get_key_vault_base_url(vault_name):
     from azure.cli.core._profile import CLOUD
     suffix = CLOUD.suffixes.keyvault_dns
