@@ -131,7 +131,7 @@ def show_nic_ip_config(resource_group_name, nic_name, ip_config_name):
 register_cli_command('network nic ip-config show', ...#show_nic_ip_config, ...)
 
 register_cli_argument('network nic ip-config', 'nic_name', id_part='name', help='The NIC name.')
-register_cli_argument('network nic ip-config', 'ip_config_name', id_part='child_name', options_list=('--name', '-n'), help='The IP config name.')
+register_cli_argument('network nic ip-config', 'ip_config_name', id_part='child_name_1', options_list=('--name', '-n'), help='The IP config name.')
 ```
 The help output becomes:
 ```
@@ -148,7 +148,8 @@ Now the user may identify the target IP config by specifying either the resource
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- The supported values for `id_part` are: `name`, `child_name`, and `grandchild_name`.
+- The supported resource-name values for `id_part` are: `name` and `child_name_{level}`; for example, `child_name_2` is the name of the child two levels under the resource correspond to `name`.
+- Values also available are `child_type_{level}`, `child_namespace_{level}`, and `child_parent_{level}`. Note that these values may not exist for the particular id being parsed.
 
 
 Generic Update Commands

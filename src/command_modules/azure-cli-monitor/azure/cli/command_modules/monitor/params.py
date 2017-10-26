@@ -70,7 +70,7 @@ register_resource_parameter('monitor alert update', 'target', 'Target Resource',
 
 for item in ['show-incident', 'list-incidents']:
     register_cli_argument('monitor alert {}'.format(item), 'rule_name', options_list=['--rule-name'], id_part='name')
-    register_cli_argument('monitor alert {}'.format(item), 'incident_name', name_arg_type, id_part='child_name')
+    register_cli_argument('monitor alert {}'.format(item), 'incident_name', name_arg_type, id_part='child_name_1')
 
 register_cli_argument('monitor alert list-incidents', 'rule_name', options_list=['--rule-name'], id_part=None)
 

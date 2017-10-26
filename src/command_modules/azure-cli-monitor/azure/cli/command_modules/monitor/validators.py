@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse_resource_id
+from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 from azure.cli.core.util import CLIError
 
 
@@ -61,8 +61,8 @@ def validate_diagnostic_settings(namespace):
                                                         namespace='microsoft.ServiceBus',
                                                         type='namespaces',
                                                         name=namespace.namespace,
-                                                        child_type='AuthorizationRules',
-                                                        child_name=namespace.rule_name)
+                                                        child_type_1='AuthorizationRules',
+                                                        child_name_1=namespace.rule_name)
         else:
             resource_dict = parse_resource_id(namespace.namespace)
             namespace.service_bus_rule_id = resource_id(subscription=resource_dict['subscription'],
@@ -70,8 +70,8 @@ def validate_diagnostic_settings(namespace):
                                                         namespace=resource_dict['namespace'],
                                                         type=resource_dict['type'],
                                                         name=resource_dict['name'],
-                                                        child_type='AuthorizationRules',
-                                                        child_name=namespace.rule_name)
+                                                        child_type_1='AuthorizationRules',
+                                                        child_name_1=namespace.rule_name)
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         if namespace.resource_group is None:

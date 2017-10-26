@@ -28,7 +28,7 @@ def _query_account_key(account_name):
     scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
-        from azure.cli.core.commands.arm import parse_resource_id
+        from msrestazure.tools import parse_resource_id
         rg = parse_resource_id(acc.id)['resource_group']
 
         (StorageAccountKeys, StorageAccountListKeysResult) = get_sdk(
@@ -813,7 +813,7 @@ def process_metric_update_namespace(namespace):
 
 
 def validate_subnet(namespace):
-    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.subnet
@@ -829,8 +829,8 @@ def validate_subnet(namespace):
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=vnet,
-            child_type='subnets',
-            child_name=subnet)
+            child_type_1='subnets',
+            child_name_1=subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 

@@ -23,12 +23,6 @@ from azure.cli.core.profiles import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
-regex = re.compile(
-    '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-    '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-    '((/providers/(?P<grandchild_namespace>[^/]*))?/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
-
 
 def handle_long_running_operation_exception(ex):
     import json
@@ -84,112 +78,10 @@ def deployment_validate_table_format(result):
     return result
 
 
-def _populate_alternate_kwargs(kwargs):
-    """ Translates the parsed arguments into a format used by generic ARM commands
-    such as the resource and lock commands. """
-    parent = ''
-    has_child = all(kwargs[x] is not None for x in ['child_name', 'child_type'])
-    has_grandchild = all(kwargs[x] is not None for x in ['grandchild_name', 'grandchild_type'])
-    resource_namespace = kwargs['namespace']
-    resource_type = kwargs['grandchild_type'] or kwargs['child_type'] or kwargs['type']
-    resource_name = kwargs['grandchild_name'] or kwargs['child_name'] or kwargs['name']
-    if has_grandchild:
-        parent = '{type}/{name}/providers/{child_namespace}/{child_type}/{child_name}/providers/{grandchild_namespace}'.format(**kwargs)  # pylint: disable=line-too-long
-    elif has_child:
-        parent = '{type}/{name}/providers/{child_namespace}'.format(**kwargs)
-    parent = parent.replace('providers/None', '')
-    parent = '{}/'.format(parent) if parent and not parent.endswith('/') else parent
-
-    kwargs['resource_parent'] = parent
-    kwargs['resource_namespace'] = resource_namespace
-    kwargs['resource_type'] = resource_type
-    kwargs['resource_name'] = resource_name
-    return kwargs
-
-
-def resource_id(**kwargs):
-    '''Create a valid resource id string from the given parts
-    The method accepts the following keyword arguments:
-        - subscription          Subscription id
-        - resource_group        Name of resource group
-        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                  Type of the resource (i.e. virtualMachines)
-        - name                  Name of the resource (or parent if child_name is also specified)
-        - child_namespace       Namespace for the child resoure (optional)
-        - child_type            Type of the child resource
-        - child_name            Name of the child resource
-        - grandchild_namespace  Namespace for the grandchild resource (optional)
-        - grandchild_type       Type of the grandchild resource
-        - grandchild_name       Name of the grandchild resource
-    '''
-    kwargs = {key: value for key, value in kwargs.items() if value is not None}
-    rid = '/subscriptions/{subscription}'.format(**kwargs)
-    try:
-        try:
-            rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
-        rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
-        try:
-            rid = '/'.join((rid, 'providers/{child_namespace}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
-        try:
-            rid = '/'.join((rid, 'providers/{grandchild_namespace}'.format(**kwargs)))
-        except KeyError:
-            pass
-        rid = '/'.join((rid, '{grandchild_type}/{grandchild_name}'.format(**kwargs)))
-    except KeyError:
-        pass
-    return rid
-
-
-def parse_resource_id(rid):
-    '''Build a dictionary with the following key/value pairs (if found)
-        - subscription          Subscription id
-        - resource_group        Name of resource group
-        - namespace             Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type                  Type of the root resource (i.e. virtualMachines)
-        - name                  Name of the root resource
-        - child_namespace       Namespace for the child resoure (optional)
-        - child_type            Type of the child resource
-        - child_name            Name of the child resource
-        - grandchild_namespace  Namespace for the grandchild resource (optional)
-        - grandchild_type       Type of the grandchild resource
-        - grandchild_name       Name of the grandchild resource
-        - resource_parent       Computed parent in the following pattern: providers/{namespace}/{parent}/{type}/{name}
-        - resource_namespace    Same as namespace. Note that this may be different than the target resource's namespace.
-        - resource_type         Type of the target resource (not the parent)
-        - resource_name         Name of the target resource (not the parent)
-    '''
-    if not rid:
-        return {}
-
-    m = regex.match(rid)
-    if m:
-        result = m.groupdict()
-        result = _populate_alternate_kwargs(result)
-    else:
-        result = dict(name=rid)
-    return {key: value for key, value in result.items() if value is not None}
-
-
-def is_valid_resource_id(rid, exception_type=None):
-    is_valid = False
-    try:
-        is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
-    except KeyError:
-        pass
-    if not is_valid and exception_type:
-        raise exception_type()
-    return is_valid
-
-
 class ResourceId(str):
 
     def __new__(cls, val):
+        from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(val):
             raise ValueError()
         return str.__new__(cls, val)
@@ -214,6 +106,7 @@ def add_id_parameters(command_table):
                 Since the id value is expected to be of type `IterateValue`, all the backing
                 (dest) fields will also be of type `IterateValue`
                 '''
+                from msrestazure.tools import parse_resource_id
                 try:
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
