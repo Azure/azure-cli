@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.18
+++++++
+* vm : expose 'vm secrt add/remove'
 
 2.0.18
 ++++++
