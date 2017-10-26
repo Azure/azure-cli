@@ -17,7 +17,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p, guess_content_type)
-from azure.cli.command_modules.storage.url_quote_util import quote, quote_url_path
+from azure.cli.command_modules.storage.url_quote_util import (encode_for_url, encode_url_path,
+                                                              make_encoded_file_url_and_names)
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -255,7 +256,7 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
                                  source_container, source_sas, source_blob_name):
     source_blob_name = source_blob_name.encode('utf-8')
-    source_blob_url = source_blob_service.make_blob_url(source_container, quote(source_blob_name),
+    source_blob_url = source_blob_service.make_blob_url(source_container, encode_for_url(source_blob_name),
                                                         sas_token=source_sas)
 
     try:
@@ -268,15 +269,9 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
                                  source_share, source_sas, source_file_dir, source_file_name):
-    try:
-        file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
-                                                     sas_token=source_sas)
-    except UnicodeEncodeError:
-        source_file_dir = source_file_dir.encode('utf-8')
-        source_file_name = source_file_name.encode('utf-8')
-        file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
-                                                     sas_token=source_sas)
-    file_url = quote_url_path(file_url)
+    file_url, source_file_dir, source_file_name = \
+        make_encoded_file_url_and_names(source_file_service, source_share, source_file_dir,
+                                        source_file_name, source_sas)
 
     blob_name = os.path.join(source_file_dir, source_file_name) \
         if source_file_dir else source_file_name

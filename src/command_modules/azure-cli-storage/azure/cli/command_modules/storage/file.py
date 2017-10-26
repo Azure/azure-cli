@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas,
                                                     create_short_lived_share_sas, guess_content_type)
-from azure.cli.command_modules.storage.url_quote_util import quote, quote_url_path
+from azure.cli.command_modules.storage.url_quote_util import (encode_for_url, encode_url_path,
+                                                              make_encoded_file_url_and_names)
 
 
 def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False, validate_content=False,
@@ -203,7 +204,7 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     Copy a blob to file share and create the directory if needed.
     """
     blob_name = blob_name.encode('utf-8')
-    blob_url = blob_service.make_blob_url(container, quote(blob_name), sas_token=sas)
+    blob_url = blob_service.make_blob_url(container, encode_for_url(blob_name), sas_token=sas)
     full_path = os.path.join(destination_dir, blob_name) if destination_dir else blob_name
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
@@ -225,15 +226,9 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     """
     Copy a file from one file share to another
     """
-    try:
-        file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
-                                                     sas_token=sas)
-    except UnicodeEncodeError:
-        source_file_dir = source_file_dir.encode('utf-8')
-        source_file_name = source_file_name.encode('utf-8')
-        file_url = source_file_service.make_file_url(source_share, source_file_dir or None, source_file_name,
-                                                     sas_token=sas)
-    file_url = quote_url_path(file_url)
+    file_url, source_file_dir, source_file_name = \
+        make_encoded_file_url_and_names(source_file_service, source_share, source_file_dir,
+                                        source_file_name, sas)
 
     full_path = os.path.join(destination_dir, source_file_dir, source_file_name) \
         if destination_dir else os.path.join(source_file_dir, source_file_name)
