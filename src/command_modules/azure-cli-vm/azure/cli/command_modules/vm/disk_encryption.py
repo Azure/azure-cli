@@ -190,7 +190,12 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                        "the encryption will finish shortly")
 
 
-def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False, extension_name=None, extension_publisher=None):
+def decrypt_vm(resource_group_name,
+               vm_name,
+               volume_type=None,
+               force=False,
+               extension_name=None,
+               extension_publisher=None):
     '''
     Disable disk encryption on OS disk, Data disks, or both
     :param str extension_name: The extension name. Specify this parameter only to override the
