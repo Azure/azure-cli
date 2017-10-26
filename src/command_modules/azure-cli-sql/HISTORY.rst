@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* Added az sql server dns-alias commands.
+
 2.0.20
 ++++++
 * Added az sql db rename
