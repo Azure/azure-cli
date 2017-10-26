@@ -5,7 +5,7 @@ Release History
 
 2.0.18
 ++++++
-* refactored code to use parse_id tools from msrestazure
+* Refactored code to use parse_id tools from msrestazure.
 
 2.0.17
 ++++++
