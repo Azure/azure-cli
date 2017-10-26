@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.13
+++++++
+* refactored code to use parse_id tools from msrestazure
+
 0.0.12
 ++++++
 * minor fixes
