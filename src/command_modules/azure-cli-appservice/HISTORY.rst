@@ -5,7 +5,8 @@ Release History
 0.1.20
 ++++++
 * webapp: use azure-mgmt-web 0.34.1
-* webapp: add
+* webapp: add --docker-container-logging
+* webapp: removing the 'storage' option from --web-server-logging since this is not working
 
 0.1.19
 ++++++
