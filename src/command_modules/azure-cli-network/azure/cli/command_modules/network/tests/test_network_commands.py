@@ -1914,9 +1914,20 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         base_record_sets = 2
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[JMESPathCheck('numberOfRecordSets', base_record_sets)])
 
-        args = {'a': '--ipv4-address 10.0.0.10', 'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1', 'cname': '--cname mycname', 'mx': '--exchange 12 --preference 13', 'ns': '--nsdname foobar.com', 'ptr': '--ptrdname foobar.com', 'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123', 'srv': '--port 1234 --priority 1 --target target.com --weight 50', 'txt': '--value some_text'}
+        args = {
+            'a': '--ipv4-address 10.0.0.10',
+            'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
+            'caa': '--flags 0 --tag foo --value "my value"',
+            'cname': '--cname mycname',
+            'mx': '--exchange 12 --preference 13',
+            'ns': '--nsdname foobar.com',
+            'ptr': '--ptrdname foobar.com',
+            'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
+            'srv': '--port 1234 --priority 1 --target target.com --weight 50',
+            'txt': '--value some_text'
+        }
 
-        record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
 
         for t in record_types:
             # test creating the record set and then adding records
@@ -1953,22 +1964,18 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2} -y'.format('a', rg, zone_name))
         self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'.format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
 
-        self.cmd('network dns zone delete -g {} -n {} -y'.format(rg, zone_name), checks=JMESPathCheck('status', 'Succeeded'))
+        self.cmd('network dns zone delete -g {} -n {} -y'.format(rg, zone_name), checks=NoneCheck())
 
 
-class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method, resource_group='cli_dns_zone_import_export')
+class NetworkZoneImportExportTest(ScenarioTest):
 
-    def test_network_dns_zone_import_export(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone_import_export')
+    def test_network_dns_zone_import_export(self, resource_group):
         zone_name = 'myzone.com'
         zone_file_path = os.path.join(TEST_DIR, 'zone_files', 'zone1.txt')
 
-        self.cmd('network dns zone import -n {} -g {} --file-name "{}"'.format(zone_name, self.resource_group, zone_file_path))
-        self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
+        self.cmd('network dns zone import -n {} -g {} --file-name "{}"'.format(zone_name, resource_group, zone_file_path))
+        self.cmd('network dns zone export -n {} -g {}'.format(zone_name, resource_group))
 
 # TODO: Troubleshoot VNET gateway issue and re-enable
 # class NetworkWatcherScenarioTest(ScenarioTest):

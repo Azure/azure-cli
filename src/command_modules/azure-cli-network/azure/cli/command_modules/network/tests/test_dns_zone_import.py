@@ -46,6 +46,14 @@ class TestDnsZoneImport(unittest.TestCase):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['ip'], records_to_check[i][1])
 
+    def _check_caa(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['caa']))
+        for i, record in enumerate(zone[name]['caa']):
+            self.assertEqual(record['ttl'], records_to_check[i][0])
+            self.assertEqual(record['flags'], records_to_check[i][1])
+            self.assertEqual(record['tag'], records_to_check[i][2])
+            self.assertEqual(record['value'], records_to_check[i][3])
+
     def _check_cname(self, zone, name, ttl, alias):
         record = zone[name]['cname']
         self.assertEqual(record['ttl'], ttl)
@@ -117,6 +125,14 @@ class TestDnsZoneImport(unittest.TestCase):
         ])
         self._check_txt(zone, 'mytxtrs.' + zn, [(3600, 2, 'hi')])
         self._check_srv(zone, 'mysrv.' + zn, [(3600, 1, 2, 1234, 'target.contoso.com.')])
+        self._check_caa(zone, 'caa1.' + zn, [
+            (60, 0, 'issue', 'ca1.contoso.com'),
+            (60, 128, 'iodef', 'mailto:test@contoso.com')
+        ])
+        self._check_caa(zone, 'caa2.' + zn, [
+            (60, 0, 'issue', 'ca1.contoso.com'),
+            (60, 45, 'tag56', 'test test test')
+        ])
 
     def test_zone_file_2(self):
         zn = 'mytestzone.com.'

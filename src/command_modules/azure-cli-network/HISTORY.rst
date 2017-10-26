@@ -5,7 +5,8 @@ Release History
 
 2.0.18
 ++++++
-* Minor fixes.
+* `dns`: Add support for CAA records.
+
 
 2.0.17
 ++++++

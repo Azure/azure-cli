@@ -2872,9 +2872,10 @@ def import_zone(resource_group_name, zone_name, file_name):
                             is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
-    for rs in record_sets.values():
+    for key, rs in record_sets.items():
+        rs_type = key.rsplit('.', 1)[1].lower()
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs.type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
         except TypeError:
             record_count = 1
         total_records += record_count
@@ -2883,31 +2884,31 @@ def import_zone(resource_group_name, zone_name, file_name):
     client = get_mgmt_service_client(DnsManagementClient)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
     client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
-    for rs in record_sets.values():
+    for key, rs in record_sets.items():
 
-        rs.type = rs.type.lower()
-        rs.name = '@' if rs.name == origin else rs.name
+        rs_type = key.rsplit('.', 1)[1].lower()
+        rs_name = key.rsplit('.', 1)[0].lower()
+        rs_name = '@' if rs_name == origin else rs_name
 
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs.type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
         except TypeError:
             record_count = 1
-        if rs.name == '@' and rs.type == 'soa':
+        if rs_name == '@' and rs_type == 'soa':
             root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
             rs.soa_record.host = root_soa.soa_record.host
-            rs.name = '@'
-        elif rs.name == '@' and rs.type == 'ns':
+            rs_name = '@'
+        elif rs_name == '@' and rs_type == 'ns':
             root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
             root_ns.ttl = rs.ttl
             rs = root_ns
-            rs.type = rs.type.rsplit('/', 1)[1]
+            rs_type = rs.type.rsplit('/', 1)[1]
         try:
             client.record_sets.create_or_update(
-                resource_group_name, zone_name, rs.name, rs.type, rs)
+                resource_group_name, zone_name, rs_name, rs_type, rs)
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
-                  .format(cum_records, total_records, record_count, rs.type, rs.name),
-                  file=sys.stderr)
+                  .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
         except CloudError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
@@ -2927,7 +2928,7 @@ def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_addre
                             'arecords')
 
 
-def add_dns_caa_record(resource_group_name, zone_name, record_set_name, value, flags=None, tag=None):
+def add_dns_caa_record(resource_group_name, zone_name, record_set_name, value, flags, tag):
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
@@ -3021,7 +3022,7 @@ def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_ad
 
 
 def remove_dns_caa_record(resource_group_name, zone_name, record_set_name, value,
-                          flags=None, tag=None, keep_empty_record_set=False):
+                          flags, tag, keep_empty_record_set=False):
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
