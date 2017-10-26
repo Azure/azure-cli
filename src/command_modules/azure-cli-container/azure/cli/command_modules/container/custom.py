@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument,too-many-branches,too-many-statements
+# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import shlex
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
@@ -14,7 +14,8 @@ from azure.mgmt.containerinstance.models import (ContainerGroup, Container, Cont
                                                  AzureFileVolume, VolumeMount, ContainerGroupRestartPolicy)
 
 
-ACR_SERVER_SUFFIX = ".azurecr.io/"
+ACR_SERVER_SUFFIX = '.azurecr.io/'
+AZURE_FILE_VOLUME_NAME = 'azurefile'
 
 
 def list_containers(client, resource_group_name=None):
@@ -54,15 +55,57 @@ def create_container(client,
                      azure_file_volume_account_name=None,
                      azure_file_volume_account_key=None,
                      azure_file_volume_mount_path=None):
-    """"Create a container group. """
+    """Create a container group. """
 
     ports = ports or []
 
-    container_resource_requirements = None
+    container_resource_requirements = create_resource_requirements(cpu=cpu, memory=memory)
+
+    image_registry_credentials = create_image_registry_credentials(registry_login_server=registry_login_server,
+                                                                   registry_username=registry_username,
+                                                                   registry_password=registry_password,
+                                                                   image=image)
+
+    command = shlex.split(command_line) if command_line else None
+
+    azure_file_volume = create_azure_file_volume(azure_file_volume_share_name=azure_file_volume_share_name,
+                                                 azure_file_volume_account_name=azure_file_volume_account_name,
+                                                 azure_file_volume_account_key=azure_file_volume_account_key)
+
+    azure_file_volume_mount = create_azure_file_volume_mount(azure_file_volume=azure_file_volume,
+                                                             azure_file_volume_mount_path=azure_file_volume_mount_path)
+
+    container = Container(name=name,
+                          image=image,
+                          resources=container_resource_requirements,
+                          command=command,
+                          ports=[ContainerPort(port=p) for p in ports],
+                          environment_variables=environment_variables,
+                          volume_mounts=azure_file_volume_mount)
+
+    cgroup_ip_address = create_ip_address(ip_address, ports)
+
+    cgroup = ContainerGroup(location=location,
+                            containers=[container],
+                            os_type=os_type,
+                            restart_policy=restart_policy,
+                            ip_address=cgroup_ip_address,
+                            image_registry_credentials=image_registry_credentials,
+                            volumes=azure_file_volume)
+
+    return client.container_groups.create_or_update(resource_group_name, name, cgroup)
+
+
+def create_resource_requirements(cpu, memory):
+    """Create resource requirements. """
     if cpu or memory:
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
-        container_resource_requirements = ResourceRequirements(requests=container_resource_requests)
+        return ResourceRequirements(requests=container_resource_requests)
+    return None
 
+
+def create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):
+    """Create image registry credentials. """
     image_registry_credentials = None
     if registry_login_server:
         if not registry_username:
@@ -94,8 +137,11 @@ def create_container(client,
         else:
             raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --registry-server and --registry-username.')
 
-    command = shlex.split(command_line) if command_line else None
+    return image_registry_credentials
 
+
+def create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_account_name, azure_file_volume_account_key):
+    """Create Azure File volume. """
     azure_file_volume = None
     if azure_file_volume_share_name:
         if not azure_file_volume_account_name:
@@ -113,36 +159,25 @@ def create_container(client,
                                             storage_account_name=azure_file_volume_account_name,
                                             storage_account_key=azure_file_volume_account_key)
 
-    volumes = [Volume(name='azurefile', azure_file=azure_file_volume)] if azure_file_volume else None
+    return [Volume(name=AZURE_FILE_VOLUME_NAME, azure_file=azure_file_volume)] if azure_file_volume else None
 
-    volume_mounts = None
+
+def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
+    """Create Azure File volume mount. """
     if azure_file_volume_mount_path:
-        if not volumes:
+        if not azure_file_volume:
             raise CLIError('Please specify --azure_file_volume_share_name --azure_file_volume_account_name --azure_file_volume_account_key '
                            'to enable Azure File volume mount.')
-        volume_mounts = [VolumeMount(name='azurefile', mount_path=azure_file_volume_mount_path)]
+        return [VolumeMount(name=AZURE_FILE_VOLUME_NAME, mount_path=azure_file_volume_mount_path)]
 
-    container = Container(name=name,
-                          image=image,
-                          resources=container_resource_requirements,
-                          command=command,
-                          ports=[ContainerPort(port=p) for p in ports],
-                          environment_variables=environment_variables,
-                          volume_mounts=volume_mounts)
+    return None
 
-    cgroup_ip_address = None
+
+def create_ip_address(ip_address, ports):
+    """Create IP address. """
     if ip_address and ip_address.lower() == 'public':
-        cgroup_ip_address = IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
-
-    cgroup = ContainerGroup(location=location,
-                            containers=[container],
-                            os_type=os_type,
-                            restart_policy=restart_policy,
-                            ip_address=cgroup_ip_address,
-                            image_registry_credentials=image_registry_credentials,
-                            volumes=volumes)
-
-    return client.container_groups.create_or_update(resource_group_name, name, cgroup)
+        return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
+    return None
 
 
 def container_logs(client, resource_group_name, name, container_name=None):
