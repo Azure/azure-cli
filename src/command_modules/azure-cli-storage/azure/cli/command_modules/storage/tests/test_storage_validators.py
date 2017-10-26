@@ -203,7 +203,6 @@ class TestGetSourceClientValidator(unittest.TestCase):
         self.assertIsNotNone(ns.source_client)
         self.assertEqual(ns.source_client.account_name, 'other_name')
 
-
         # source share name given, validator does not change namespace aside from ensuring source-client none
         ns = Namespace(account_key='my_storage_key', account_name='storage_name', connection_string=None,
                        dryrun=False, pattern='*', sas_token=None, source_account_key=None, source_account_name=None,
@@ -229,7 +228,6 @@ class TestGetSourceClientValidator(unittest.TestCase):
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNotNone(ns.source_client)
         self.assertEqual(ns.source_client.account_name, 'other_name')
-
 
         # bad argument combinations
         with self.assertRaises(ValueError):
