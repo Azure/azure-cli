@@ -42,9 +42,9 @@ def create_container(client,
                      location=None,
                      cpu=1,
                      memory=1.5,
-                     restart_policy=ContainerGroupRestartPolicy.always,
+                     restart_policy='Always',
                      ports=None,
-                     os_type=OperatingSystemTypes.linux,
+                     os_type='Linux',
                      ip_address=None,
                      command_line=None,
                      environment_variables=None,
@@ -148,12 +148,12 @@ def create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_acc
             try:
                 azure_file_volume_account_name = prompt(msg='Azure File storage account name: ')
             except NoTTYException:
-                raise CLIError('Please specify --azure_file_volume_account_name in non-interactive mode.')
+                raise CLIError('Please specify --azure-file-volume-account-name in non-interactive mode.')
         if not azure_file_volume_account_key:
             try:
                 azure_file_volume_account_key = prompt_pass(msg='Azure File storage account key: ')
             except NoTTYException:
-                raise CLIError('Please specify --azure_file_volume_account_key in non-interactive mode.')
+                raise CLIError('Please specify --azure-file-volume-account-key in non-interactive mode.')
 
         azure_file_volume = AzureFileVolume(share_name=azure_file_volume_share_name,
                                             storage_account_name=azure_file_volume_account_name,
@@ -166,7 +166,7 @@ def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_pa
     """Create Azure File volume mount. """
     if azure_file_volume_mount_path:
         if not azure_file_volume:
-            raise CLIError('Please specify --azure_file_volume_share_name --azure_file_volume_account_name --azure_file_volume_account_key '
+            raise CLIError('Please specify --azure-file-volume-share-name --azure-file-volume-account-name --azure-file-volume-account-key '
                            'to enable Azure File volume mount.')
         return [VolumeMount(name=AZURE_FILE_VOLUME_NAME, mount_path=azure_file_volume_mount_path)]
 
