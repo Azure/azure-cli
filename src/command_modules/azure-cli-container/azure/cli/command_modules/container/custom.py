@@ -10,8 +10,7 @@ from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                                  ImageRegistryCredential, ResourceRequirements, ResourceRequests,
-                                                 ContainerGroupNetworkProtocol, OperatingSystemTypes, Volume,
-                                                 AzureFileVolume, VolumeMount, ContainerGroupRestartPolicy)
+                                                 ContainerGroupNetworkProtocol, Volume, AzureFileVolume, VolumeMount)
 
 
 ACR_SERVER_SUFFIX = '.azurecr.io/'
