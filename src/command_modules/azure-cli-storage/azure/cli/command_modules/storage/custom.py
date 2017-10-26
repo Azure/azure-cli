@@ -451,7 +451,7 @@ def add_network_rule(client, resource_group_name, storage_account_name, action='
     sa = client.get_properties(resource_group_name, storage_account_name)
     rules = sa.network_rule_set
     if subnet:
-        from azure.cli.core.commands.arm import is_valid_resource_id
+        from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = get_sdk(ResourceType.MGMT_STORAGE, 'VirtualNetworkRule', mod='models')

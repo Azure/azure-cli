@@ -8,10 +8,10 @@ from collections import Counter, OrderedDict
 import mock
 
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import DefaultStr, DefaultInt
 

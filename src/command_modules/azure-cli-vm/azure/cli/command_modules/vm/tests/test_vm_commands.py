@@ -1188,13 +1188,13 @@ class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
     def body(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        from msrestazure.tools import resource_id, is_valid_resource_id
         subscription_id = get_subscription_id()
         rg = self.resource_group
 
         av_set = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Compute', type='availabilitySets', name=self.availset_name)
         pub_ip = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIpAddresses', name=self.pubip_name)
-        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name=self.vnet_name, child_name_1=self.subnet_name)
         nsg = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='networkSecurityGroups', name=self.nsg_name)
 
         assert is_valid_resource_id(av_set)
@@ -1809,7 +1809,7 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
     def body(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        from msrestazure.tools import resource_id, is_valid_resource_id
         subscription_id = get_subscription_id()
         rg = self.resource_group
         vmss_name = 'vrfvmss'
@@ -1817,7 +1817,7 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         container_name = 'vrfcontainer'
         sku_name = 'Standard_A3'
 
-        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name=self.vnet_name, child_name_1=self.subnet_name)
         lb = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='loadBalancers', name=self.lb_name)
 
         assert is_valid_resource_id(subnet)
