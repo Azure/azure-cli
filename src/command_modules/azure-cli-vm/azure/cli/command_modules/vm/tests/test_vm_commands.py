@@ -7,6 +7,7 @@
 import json
 import os
 import platform
+import re
 import tempfile
 import time
 import unittest
@@ -2393,14 +2394,23 @@ class VMSecretTest(ScenarioTest):
         keyvault = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.KeyVault/vaults/vm-secret-kv'
         certificate = 'vm-secrt-cert'
 
-        vm = 'vm1'
+        # under playback, keyvault id need to adjust to use mock subscription
+        test_keyvault_id = re.sub('[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}', self.get_subscription_id(), keyvault)
 
+        vm = 'vm1'
         self.cmd('vm create -g {} -n {} --image rhel --use-unmanaged-disk'.format(resource_group, vm))
-        self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate))
+        self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].sourceVault.id', test_keyvault_id),
+            JMESPathCheckV2('length([0].vaultCertificates)', 1),
+            JMESPathCheckV2('[0].vaultCertificates[0].certificateUrl', 'https://vm-secret-kv.vault.azure.net/secrets/vm-secrt-cert/e489595485004fe39d89669491d1d461'),
+        ])
         self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm))
         self.cmd('vm secret delete -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate))
 
-        self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm))
+        self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm), checks=[
+            JMESPathCheckV2('length([])', 0)
+        ])
 # endregion
 
 
