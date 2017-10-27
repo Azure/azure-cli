@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 from .storage_test_util import StorageScenarioMixin
 
 

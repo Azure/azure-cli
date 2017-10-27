@@ -10,6 +10,8 @@ Tools to encode url components using python quoting. This is needed to make non-
 from six.moves.urllib.parse import urlparse, urlunparse  # pylint: disable=import-error
 from six.moves.urllib.parse import quote as url_quote  # pylint: disable=import-error
 
+# Safe characters taken from the sdk:
+# https://github.com/Azure/azure-multiapi-storage-python/blob/d4329a838f7d2fa6f0dab584274fd1bd3e77bcc4/azure/multiapi/storage/v2017_04_17/common/_serialization.py#L83
 SAFE_CHARS = '/()$=\',~'
 
 
