@@ -188,7 +188,7 @@ def validate_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
