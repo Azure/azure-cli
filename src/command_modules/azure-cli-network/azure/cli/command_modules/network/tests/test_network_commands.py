@@ -1890,6 +1890,10 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[JMESPathCheckV2('weight', 25), JMESPathCheckV2('target', 'www.contoso.com')])
         self.cmd('network traffic-manager endpoint show -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
         self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 1))
+
+        # ensure that a profile with endpoints can be updated
+        self.cmd('network traffic-manager profile update -n {} -g {}'.format(tm_name, self.resource_group))
+
         self.cmd('network traffic-manager endpoint delete -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
         self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 0))
 
