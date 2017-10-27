@@ -637,12 +637,11 @@ def get_source_file_or_blob_service_client(namespace):
             raise ValueError(usage_string)
 
     elif source_uri:
-        if source_sas or source_key or ('source_container' in ns) or ('source_share' in ns):
+        if source_sas or source_key or source_container or source_share:
             raise ValueError(usage_string)
 
         from .storage_url_helpers import StorageResourceIdentifier
         identifier = StorageResourceIdentifier(source_uri)
-
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
@@ -650,11 +649,15 @@ def get_source_file_or_blob_service_client(namespace):
                 identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
-            ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
-                                                   sas_token=identifier.sas_token)
+            ns['source_container'] = identifier.container
+            if identifier.account_name != ns.get('account_name'):
+                ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
+                                                       sas_token=identifier.sas_token)
         elif identifier.share:
-            ns['source_client'] = FileService(account_name=identifier.account_name,
-                                              sas_token=identifier.sas_token)
+            ns['source_share'] = identifier.share
+            if identifier.account_name != ns.get('account_name'):
+                ns['source_client'] = FileService(account_name=identifier.account_name,
+                                                  sas_token=identifier.sas_token)
 
 
 # endregion

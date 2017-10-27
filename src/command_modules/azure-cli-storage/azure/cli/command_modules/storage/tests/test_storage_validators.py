@@ -12,6 +12,7 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            process_blob_source_uri, get_char_options_validator)
 from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 from azure.cli.testsdk import api_version_constraint
+from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
 
 
 class TestStorageValidators(unittest.TestCase):
@@ -171,6 +172,78 @@ class TestEncryptionValidators(unittest.TestCase):
         self.assertEqual(properties.key_name, 'key_name')
         self.assertEqual(properties.key_version, 'key_version')
         self.assertEqual(properties.key_vault_uri, 'https://example.com/key_uri')
+
+
+class TestGetSourceClientValidator(unittest.TestCase):
+    def test_validate_with_container_name_blob(self):
+        # source container name given, validator does not change namespace aside from ensuring source-client none
+        ns = self._create_namespace(source_container='container2', destination_container='container1')
+        get_source_file_or_blob_service_client(ns)
+        self.assertIsNone(ns.source_client)
+
+    def test_validate_with_source_uri_blob(self):
+        # source given in form of uri, source_container parsed from uri, source and dest account are the same
+        ns = self._create_namespace(source_uri='https://storage_name.blob.core.windows.net/container2',
+                                    destination_container='container1')
+        get_source_file_or_blob_service_client(ns)
+        self.assertEqual(ns.source_container, 'container2')
+        self.assertIsNone(ns.source_client)
+
+    def test_validate_with_different_source_uri_sas_blob(self):
+        # source given in form of uri, source_container parsed from uri, source and dest account are different
+        ns = self._create_namespace(source_uri='https://other_name.blob.core.windows.net/container2?some_sas_token',
+                                    destination_container='container1')
+        get_source_file_or_blob_service_client(ns)
+        self.assertEqual(ns.source_container, 'container2')
+        self.assertIsNotNone(ns.source_client)
+        self.assertEqual(ns.source_client.account_name, 'other_name')
+
+    def test_validate_with_share_name_file(self):
+        # source share name given, validator does not change namespace aside from ensuring source-client none
+        ns = self._create_namespace(source_share='share2', destination_share='share1')
+        get_source_file_or_blob_service_client(ns)
+        self.assertIsNone(ns.source_client)
+
+    def test_validate_with_source_uri_file(self):
+        # source given in form of uri, source_share parsed from uri, source and dest account are the same
+        ns = self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
+                                    destination_share='share1')
+        get_source_file_or_blob_service_client(ns)
+        self.assertEqual(ns.source_share, 'share2')
+        self.assertIsNone(ns.source_client)
+
+    def test_validate_with_different_source_uri_sas_file(self):
+        # source given in form of uri, source_share parsed from uri, source and dest account are different
+        ns = self._create_namespace(source_uri='https://other_name.file.core.windows.net/share2?some_sas_token',
+                                    destination_share='share1')
+        get_source_file_or_blob_service_client(ns)
+        self.assertEqual(ns.source_share, 'share2')
+        self.assertIsNotNone(ns.source_client)
+        self.assertEqual(ns.source_client.account_name, 'other_name')
+
+    def test_validate_negatives(self):
+        # bad argument combinations
+        with self.assertRaises(ValueError):
+            get_source_file_or_blob_service_client(
+                Namespace(source_uri='https://storage_name.file.core.windows.net/share2',
+                          source_account_name='some_name'))
+
+        with self.assertRaises(ValueError):
+            get_source_file_or_blob_service_client(Namespace(source_uri='faulty_uri'))
+
+        with self.assertRaises(ValueError):
+            get_source_file_or_blob_service_client(Namespace(source_container='container_name',
+                                                             source_share='share_name'))
+
+    def _create_namespace(self, **kwargs):
+        ns = Namespace(account_key='my_storage_key', account_name='storage_name', connection_string=None,
+                       dryrun=False, pattern='*', sas_token=None, source_account_key=None, source_account_name=None,
+                       source_client=None, source_container=None, source_sas=None, source_share=None,
+                       source_uri=None, destination_container=None, destination_share=None)
+
+        for key in kwargs:
+            setattr(ns, key, kwargs[key])
+        return ns
 
 
 if __name__ == '__main__':
