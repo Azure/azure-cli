@@ -759,8 +759,9 @@ with ParametersContext(command='sql server vnet-rule') as c:
                'If subnet name is provided, --vnet-name must be provided.')
 
     c.argument('ignore_missing_vnet_service_endpoint',
-               options_list=('--ignore-missing-vnet-service-endpoint', '-i'),
-               help='Create firewall rule before the virtual network has vnet service endpoint enabled', **three_state_flag())
+               options_list=('--ignore-missing-endpoint', '-i'),
+               help='Create firewall rule before the virtual network has vnet service endpoint enabled',
+               **three_state_flag())
 
 register_extra_cli_argument('sql server vnet-rule create', 'vnet_name', options_list=('--vnet-name'),
                             help='The virtual network name', validator=validate_subnet)
