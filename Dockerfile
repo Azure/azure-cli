@@ -50,8 +50,7 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
 
 # Tab completion and prompt
-RUN cat /azure-cli/az.completion > ~/.bashrc && \
-    echo -e '\n\nPS1="azure-cli# "' >> ~/.bashrc
+RUN cat /azure-cli/az.completion > ~/.bashrc
 
 WORKDIR /
 
