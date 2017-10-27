@@ -8,12 +8,12 @@
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands import cli_command
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.command_modules.cosmosdb._client_factory import (cf_documentdb)
+from azure.cli.command_modules.cosmosdb._client_factory import (cf_cosmosdb)
 from ._client_factory import get_document_client_factory
 from ._command_type import cli_cosmosdb_data_plane_command
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    mgmt_path = 'azure.mgmt.documentdb.operations.database_accounts_operations#'
+    mgmt_path = 'azure.mgmt.cosmosdb.operations.database_accounts_operations#'
     custome_path = 'azure.cli.command_modules.cosmosdb.custom#'
 
     def deprecate(argv):
@@ -24,7 +24,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSING, deprecate)
 
     def db_accounts_factory(_):
-        return cf_documentdb().database_accounts
+        return cf_cosmosdb().database_accounts
 
     cli_command(__name__, 'cosmosdb show', mgmt_path + 'DatabaseAccountsOperations.get', db_accounts_factory)
     cli_command(__name__, 'cosmosdb list-keys', mgmt_path + 'DatabaseAccountsOperations.list_keys', db_accounts_factory)
