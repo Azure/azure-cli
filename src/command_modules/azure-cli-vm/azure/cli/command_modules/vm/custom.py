@@ -2151,6 +2151,11 @@ def show_vm_secret(resource_group_name, vm_name):
 
 def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
     vm = get_vm(resource_group_name, vm_name)
+
+    # support 2 kinds of filter:
+    # a. if only keyvault is supplied, we delete its whole vault group.
+    # b. if both keyvault and certificate are supplied, we only delete the specific cert entry.
+
     to_keep = vm.os_profile.secrets
     keyvault_matched = []
     if keyvault:
@@ -2167,7 +2172,7 @@ def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
         for x in temp:
             x.vault_certificates = ([v for v in x.vault_certificates
                                      if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
-        to_keep = [x for x in to_keep if x.vault_certificates]
+        to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
 
     vm.os_profile.secrets = to_keep
     vm = set_vm(vm)

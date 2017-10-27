@@ -353,7 +353,7 @@ for scope in ['disk', 'snapshot']:
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
 register_cli_argument('vm secret', 'keyvault', validator=process_vm_secret_namespace, help='Keyvault ID, name if in the same resource group')
-register_cli_argument('vm secret', 'certificate', help='keyvault certificate name or its secret full url')
+register_cli_argument('vm secret', 'certificate', help='keyvault certificate name or its full secret url')
 register_cli_argument('vm secret', 'certificate_store', help='Windows certificate store names. Default: My')
 
 register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
