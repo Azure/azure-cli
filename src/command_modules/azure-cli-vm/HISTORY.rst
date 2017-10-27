@@ -2,8 +2,11 @@
 
 Release History
 ===============
+<<<<<<< HEAD
+=======
 2.0.18
 ++++++
+* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations 
 * vm : support `vm secret add/remove/list`
 * vm : `vm format-secret` is copied to `vm secret format`. The old one will be removed in future
 * Minor fixes.

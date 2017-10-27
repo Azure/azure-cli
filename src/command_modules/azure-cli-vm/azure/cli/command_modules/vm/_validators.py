@@ -187,36 +187,14 @@ def _parse_image_argument(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
-        try:
-            compute_client = _compute_client_factory()
-            if namespace.os_version.lower() == 'latest':
-                top_one = compute_client.virtual_machine_images.list(namespace.location,
-                                                                     namespace.os_publisher,
-                                                                     namespace.os_offer,
-                                                                     namespace.os_sku,
-                                                                     top=1,
-                                                                     orderby='name desc')
-                if not top_one:
-                    raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
 
-                image_version = top_one[0].name
-            else:
-                image_version = namespace.os_version
+        if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
+            image_plan = _get_image_plan_info_if_exists(namespace)
+            if image_plan:
+                namespace.plan_name = image_plan.name
+                namespace.plan_product = image_plan.product
+                namespace.plan_publisher = image_plan.publisher
 
-            image = compute_client.virtual_machine_images.get(namespace.location,
-                                                              namespace.os_publisher,
-                                                              namespace.os_offer,
-                                                              namespace.os_sku,
-                                                              image_version)
-
-            # pylint: disable=no-member
-            if image.plan:
-                namespace.plan_name = image.plan.name
-                namespace.plan_product = image.plan.product
-                namespace.plan_publisher = image.plan.publisher
-        except CloudError as ex:
-            logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
-                           "will be skipped", namespace.image, ex.message)
         return 'urn'
 
     # 4 - check if a fully-qualified ID (assumes it is an image ID)
@@ -233,6 +211,36 @@ def _parse_image_argument(namespace):
     except CloudError:
         err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
         raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
+
+
+def _get_image_plan_info_if_exists(namespace):
+    try:
+        compute_client = _compute_client_factory()
+        if namespace.os_version.lower() == 'latest':
+            top_one = compute_client.virtual_machine_images.list(namespace.location,
+                                                                 namespace.os_publisher,
+                                                                 namespace.os_offer,
+                                                                 namespace.os_sku,
+                                                                 top=1,
+                                                                 orderby='name desc')
+            if not top_one:
+                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
+
+            image_version = top_one[0].name
+        else:
+            image_version = namespace.os_version
+
+        image = compute_client.virtual_machine_images.get(namespace.location,
+                                                          namespace.os_publisher,
+                                                          namespace.os_offer,
+                                                          namespace.os_sku,
+                                                          image_version)
+
+        # pylint: disable=no-member
+        return image.plan
+    except CloudError as ex:
+        logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
+                       "will be skipped", namespace.image, ex.message)
 
 
 def _get_storage_profile_description(profile):
