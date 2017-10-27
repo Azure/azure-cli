@@ -2886,8 +2886,7 @@ def import_zone(resource_group_name, zone_name, file_name):
     client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
     for key, rs in record_sets.items():
 
-        rs_type = key.rsplit('.', 1)[1].lower()
-        rs_name = key.rsplit('.', 1)[0].lower()
+        rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
 
         try:
