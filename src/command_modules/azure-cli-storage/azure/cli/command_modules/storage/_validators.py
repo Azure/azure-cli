@@ -673,20 +673,10 @@ def process_blob_download_batch_parameters(namespace):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
-    from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(namespace.source)
-
-    if not identifier.is_url():
-        namespace.source_container_name = namespace.source
-    elif identifier.blob:
-        raise ValueError('incorrect usage: source should be either container URL or name')
-    else:
-        namespace.source_container_name = identifier.container
-        if namespace.account_name is None:
-            namespace.account_name = identifier.account_name
+    process_blob_batch_source_parameters(namespace)
 
 
-def process_blob_delete_batch_parameters(namespace):
+def process_blob_batch_source_parameters(namespace):
     """Process the parameters for storage blob download command"""
 
     # try to extract account name and container name from source string
@@ -800,6 +790,10 @@ def process_file_download_batch_parameters(namespace):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and share name from source string
+    process_file_batch_source_parameters(namespace)
+
+
+def process_file_batch_source_parameters(namespace):
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(namespace.source)
     if identifier.is_url():

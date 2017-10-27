@@ -90,25 +90,6 @@ def storage_blob_copy_batch(client, source_client,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False):
-    """
-    Download blobs in a container recursively
-
-    :param str source:
-        The string represents the source of this download operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param str destination:
-        The string represents the destination folder of this download operation. The folder must
-        exist.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually download the file(s)
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-    """
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
@@ -131,34 +112,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
                               maxsize_condition=None, max_connections=2, lease_id=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
-    """
-    Upload files to storage container as blobs
-
-    :param str source:
-        The directory where the files to be uploaded.
-
-    :param str destination:
-        The string represents the destination of this upload operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually upload the file(s)
-
-    :param string if_match:
-        An ETag value, or the wildcard character (*). Specify this header to perform the operation
-        only if the resource's ETag matches the value specified.
-
-    :param string if_none_match:
-        An ETag value, or the wildcard character (*). Specify this header to perform the
-        operation only if the resource's ETag does not match the value specified. Specify the
-        wildcard character (*) to perform the operation only if the resource does not exist,
-        and fail the operation if it does exist.
-    """
 
     def _append_blob(file_path, blob_name, blob_content_settings):
         if not client.exists(destination_container_name, blob_name):
@@ -244,21 +197,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
 def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
-    """
-    Delete blobs in a container recursively
-
-    :param str source:
-        The string represents the source of this delete operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually delete the file(s)
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-    """
 
     def _delete_blob(blob_name):
         delete_blob_args = {
@@ -274,6 +212,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         }
         response = client.delete_blob(**delete_blob_args)
         return response
+
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:

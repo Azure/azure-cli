@@ -183,6 +183,7 @@ cli_storage_data_plane_command('storage file copy start', file_service_path + 'c
 cli_storage_data_plane_command('storage file copy cancel', file_service_path + 'abort_copy_file', factory)
 cli_storage_data_plane_command('storage file upload-batch', 'azure.cli.command_modules.storage.file#storage_file_upload_batch', factory)
 cli_storage_data_plane_command('storage file download-batch', 'azure.cli.command_modules.storage.file#storage_file_download_batch', factory)
+cli_storage_data_plane_command('storage file delete-batch', 'azure.cli.command_modules.storage.file#storage_file_delete_batch', factory)
 cli_storage_data_plane_command('storage file copy start-batch', 'azure.cli.command_modules.storage.file#storage_file_copy_batch', factory)
 
 # table commands

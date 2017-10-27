@@ -79,7 +79,7 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
         source_files_list = list(source_files)
 
         logger = get_az_logger(__name__)
-        logger.warning('upload files to file share')
+        logger.warning('download files from file share')
         logger.warning('    account %s', client.account_name)
         logger.warning('      share %s', source)
         logger.warning('destination %s', destination)
@@ -193,6 +193,40 @@ def storage_file_copy_batch(client, source_client,
     else:
         # won't happen, the validator should ensure either source_container or source_share is set
         raise ValueError('Fail to find source. Neither blob container or file share is specified.')
+
+
+def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeout=None):
+    """
+    Delete files from file share in batch
+    """
+
+    def delete_action(file_pair):
+        delete_file_args = {
+            'share_name': source,
+            'directory_name': file_pair[0],
+            'file_name': file_pair[1],
+            'timeout': timeout
+        }
+
+        return client.delete_file(**delete_file_args)
+
+    from .util import glob_files_remotely
+    source_files = glob_files_remotely(client, source, pattern)
+
+    if dryrun:
+        # source_files_list = list(source_files)
+
+        logger = get_az_logger(__name__)
+        logger.warning('delete files from %s', source)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('      share %s', source)
+        logger.warning('      total %d', len(source_files))
+        logger.warning(' operations')
+        for f in source_files:
+            logger.warning('  - %s/%s', f[0], f[1])
+        return []
+
+    return [delete_action(f) for f in source_files]
 
 
 def _create_file_and_directory_from_blob(file_service, blob_service, share, container, sas,
