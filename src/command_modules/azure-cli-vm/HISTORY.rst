@@ -4,7 +4,8 @@ Release History
 ===============
 2.0.18
 ++++++
-* vm : expose 'vm secret add/remove'
+* vm : support `vm secret add/delete/show`
+* vm : `vm format-secret` is copied to `vm secret format`. The old one will be removed in future
 
 2.0.18
 ++++++
