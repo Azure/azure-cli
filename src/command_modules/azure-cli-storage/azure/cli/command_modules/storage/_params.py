@@ -31,6 +31,7 @@ from ._validators import \
      validate_custom_domain, validate_public_access,
      process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
+     process_blob_delete_batch_parameters,
      get_content_setting_validator, validate_encryption_services, validate_accept,
      validate_key, storage_account_key_options, validate_encryption_source,
      process_file_download_namespace,
@@ -450,6 +451,14 @@ register_cli_argument('storage blob download-batch', 'source', options_list=('--
                       validator=process_blob_download_batch_parameters)
 
 register_cli_argument('storage blob download-batch', 'source_container_name', ignore_type)
+
+
+# BLOB DELETE-BATCH PARAMETERS
+register_cli_argument('storage blob delete-batch', 'source', options_list=('--source', '-s'),
+                      validator=process_blob_delete_batch_parameters)
+
+register_cli_argument('storage blob delete-batch', 'source_container_name', ignore_type)
+
 
 # BLOB UPLOAD-BATCH PARAMETERS
 register_cli_argument('storage blob upload-batch', 'destination', options_list=('--destination', '-d'))

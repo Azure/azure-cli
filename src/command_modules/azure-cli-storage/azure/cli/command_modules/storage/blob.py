@@ -241,6 +241,55 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
     return results
 
 
+def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
+                              delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                              if_none_match=None, timeout=None, dryrun=False):
+    """
+    Delete blobs in a container recursively
+
+    :param str source:
+        The string represents the source of this delete operation. The source can be the
+        container URL or the container name. When the source is the container URL, the storage
+        account name will parsed from the URL.
+
+    :param bool dryrun:
+        Show the summary of the operations to be taken instead of actually delete the file(s)
+
+    :param str pattern:
+        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
+        and '[!seq]'.
+    """
+
+    def _delete_blob(blob_name):
+        delete_blob_args = {
+            'container_name': source_container_name,
+            'blob_name': blob_name,
+            'lease_id': lease_id,
+            'delete_snapshots': delete_snapshots,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+        response = client.delete_blob(**delete_blob_args)
+        return response
+    source_blobs = list(collect_blobs(client, source_container_name, pattern))
+
+    if dryrun:
+        logger = get_az_logger(__name__)
+        logger.warning('delete action: from %s', source)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('  container %s', source_container_name)
+        logger.warning('      total %d', len(source_blobs))
+        logger.warning(' operations')
+        for blob in source_blobs or []:
+            logger.warning('  - %s', blob)
+        return []
+
+    return [_delete_blob(blob) for blob in source_blobs]
+
+
 def _download_blob(blob_service, container, destination_folder, blob_name):
     # TODO: try catch IO exception
     destination_path = os.path.join(destination_folder, blob_name)

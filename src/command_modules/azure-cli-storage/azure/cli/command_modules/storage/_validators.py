@@ -686,6 +686,23 @@ def process_blob_download_batch_parameters(namespace):
             namespace.account_name = identifier.account_name
 
 
+def process_blob_delete_batch_parameters(namespace):
+    """Process the parameters for storage blob download command"""
+
+    # try to extract account name and container name from source string
+    from .storage_url_helpers import StorageResourceIdentifier
+    identifier = StorageResourceIdentifier(namespace.source)
+
+    if not identifier.is_url():
+        namespace.source_container_name = namespace.source
+    elif identifier.blob:
+        raise ValueError('incorrect usage: source should be either container URL or name')
+    else:
+        namespace.source_container_name = identifier.container
+        if namespace.account_name is None:
+            namespace.account_name = identifier.account_name
+
+
 def process_blob_upload_batch_parameters(namespace):
     """Process the source and destination of storage blob upload command"""
 
