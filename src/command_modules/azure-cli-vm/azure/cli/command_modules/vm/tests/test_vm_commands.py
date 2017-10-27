@@ -2385,6 +2385,22 @@ class VMScaffoldingTest(ScenarioTest):
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
 
+
+class VMSecretTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_secret_e2e_test(self, resource_group):
+        # a few pre-made key vault artifacts, with the assumption that this test must under team test subscription of 'AzureSDKADGraph2'
+        keyvault = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.KeyVault/vaults/vm-secret-kv'
+        certificate = 'vm-secrt-cert'
+
+        vm = 'vm1'
+
+        self.cmd('vm create -g {} -n {} --image rhel --use-unmanaged-disk'.format(resource_group, vm))
+        self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate))
+        self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm))
+        self.cmd('vm secret delete -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate))
+
+        self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm))
 # endregion
 
 

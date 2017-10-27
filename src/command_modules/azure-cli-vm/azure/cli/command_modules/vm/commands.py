@@ -133,7 +133,8 @@ cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
 cli_command(__name__, 'vm format-secret', custom_path.format('get_vm_format_secret'), deprecate_info='az vm secret format')
 cli_command(__name__, 'vm secret format', custom_path.format('get_vm_format_secret'))
 cli_command(__name__, 'vm secret add', custom_path.format('add_vm_secret'))
-cli_command(__name__, 'vm secret remove', custom_path.format('remove_vm_secret'))
+cli_command(__name__, 'vm secret show', custom_path.format('show_vm_secret'))
+cli_command(__name__, 'vm secret delete', custom_path.format('remove_vm_secret'))
 cli_generic_update_command(__name__, 'vm update',
                            mgmt_path.format(op_var, op_class, 'get'),
                            mgmt_path.format(op_var, op_class, 'create_or_update'),
