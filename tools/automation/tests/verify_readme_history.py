@@ -68,7 +68,7 @@ def check_history_headings(mod_path):
         actual_version = subprocess.check_output('python setup.py --version'.split(), cwd=mod_path, universal_newlines=True)
         actual_version = actual_version.strip()
         if first_version_history != actual_version:
-            print("No heading for version {} in {}".format(actual_version, history_path))
+            print("The topmost version in {} does not match version {} defined in setup.py.".format(history_path, actual_version))
             return False
         return True
 
