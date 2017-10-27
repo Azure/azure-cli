@@ -18,6 +18,7 @@ from azure.cli.core.commands.validators import validate_key_value_pairs
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally, guess_content_type
 from .sdkutil import get_table_data_type
+from .url_quote_util import encode_for_url
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -300,7 +301,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
         source_account_name,
         'blob' if valid_blob_source else 'file',
         container if valid_blob_source else share,
-        blob if valid_blob_source else path,
+        encode_for_url(blob if valid_blob_source else path),
         '?' if query_params else '',
         '&'.join(query_params),
         CLOUD.suffixes.storage_endpoint)
