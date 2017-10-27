@@ -100,7 +100,6 @@ def create_resource_requirements(cpu, memory):
     if cpu or memory:
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
         return ResourceRequirements(requests=container_resource_requests)
-    return None
 
 
 def create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):
@@ -169,14 +168,11 @@ def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_pa
                            'to enable Azure File volume mount.')
         return [VolumeMount(name=AZURE_FILE_VOLUME_NAME, mount_path=azure_file_volume_mount_path)]
 
-    return None
-
 
 def create_ip_address(ip_address, ports):
     """Create IP address. """
     if ip_address and ip_address.lower() == 'public':
         return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
-    return None
 
 
 def container_logs(client, resource_group_name, name, container_name=None):
