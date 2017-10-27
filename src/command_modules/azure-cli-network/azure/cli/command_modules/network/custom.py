@@ -2584,6 +2584,12 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
     if monitor_path is not None:
         instance.monitor_config.path = monitor_path
 
+    # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
+    for endpoint in instance.endpoints:
+        endpoint._validation = {
+            'name': {'readonly': False},
+            'type': {'readonly': False},
+        }
     return instance
 
 
