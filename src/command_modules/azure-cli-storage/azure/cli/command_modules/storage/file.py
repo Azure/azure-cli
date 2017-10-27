@@ -211,11 +211,9 @@ def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeou
         return client.delete_file(**delete_file_args)
 
     from .util import glob_files_remotely
-    source_files = glob_files_remotely(client, source, pattern)
+    source_files = list(glob_files_remotely(client, source, pattern))
 
     if dryrun:
-        # source_files_list = list(source_files)
-
         logger = get_az_logger(__name__)
         logger.warning('delete files from %s', source)
         logger.warning('    pattern %s', pattern)
