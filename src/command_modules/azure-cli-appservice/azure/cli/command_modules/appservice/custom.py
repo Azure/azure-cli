@@ -1048,8 +1048,8 @@ def config_diagnostics(resource_group_name, name, level=None,
                        docker_container_logging=None, detailed_error_messages=None,
                        failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, AzureBlobStorageHttpLogsConfig,
-                                       HttpLogsConfig, FileSystemHttpLogsConfig, EnabledConfig)
+                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       EnabledConfig)
     client = web_client_factory()
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
@@ -1066,8 +1066,9 @@ def config_diagnostics(resource_group_name, name, level=None,
 
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
-    if  server_logging_option:
-        # TODO: az blob storage log config currently not in use, will be impelemented later
+    if server_logging_option:
+        # TODO: az blob storage log config currently not in use, will be impelemented later.
+        # Tracked as Issue: #4764 on Github
         filesystem_log_config = None
         turned_on = server_logging_option != 'off'
         if server_logging_option in ['filesystem', 'off']:
