@@ -6,7 +6,7 @@
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import shlex
-from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
+from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                                  ImageRegistryCredential, ResourceRequirements, ResourceRequests,
@@ -107,15 +107,12 @@ def create_image_registry_credentials(registry_login_server, registry_username, 
     image_registry_credentials = None
     if registry_login_server:
         if not registry_username:
-            try:
-                registry_username = prompt(msg='Image registry username: ')
-            except NoTTYException:
-                raise CLIError('Please specify --username in non-interactive mode.')
+            raise CLIError('Please specify --registry-username in order to use custom image registry.')
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
-                raise CLIError('Please specify --registry-password in non-interactive mode.')
+                raise CLIError('Please specify --registry-password in order to use custom image registry.')
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
@@ -124,7 +121,7 @@ def create_image_registry_credentials(registry_login_server, registry_username, 
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
-                raise CLIError('Please specify --registry-password in non-interactive mode.')
+                raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
 
         acr_server = image.split("/")[0] if image.split("/") else None
         acr_username = image.split(ACR_SERVER_SUFFIX)[0] if image.split(ACR_SERVER_SUFFIX) else None
@@ -143,15 +140,12 @@ def create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_acc
     azure_file_volume = None
     if azure_file_volume_share_name:
         if not azure_file_volume_account_name:
-            try:
-                azure_file_volume_account_name = prompt(msg='Azure File storage account name: ')
-            except NoTTYException:
-                raise CLIError('Please specify --azure-file-volume-account-name in non-interactive mode.')
+            raise CLIError('Please specify --azure-file-volume-account-name in order to use Azure File volume.')
         if not azure_file_volume_account_key:
             try:
                 azure_file_volume_account_key = prompt_pass(msg='Azure File storage account key: ')
             except NoTTYException:
-                raise CLIError('Please specify --azure-file-volume-account-key in non-interactive mode.')
+                raise CLIError('Please specify --azure-file-volume-account-key in order to use Azure File volume.')
 
         azure_file_volume = AzureFileVolume(share_name=azure_file_volume_share_name,
                                             storage_account_name=azure_file_volume_account_name,
