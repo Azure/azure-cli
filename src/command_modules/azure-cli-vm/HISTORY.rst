@@ -2,8 +2,6 @@
 
 Release History
 ===============
-<<<<<<< HEAD
-=======
 2.0.18
 ++++++
 * `vm/vmss create`: expose `plan` arguments for using custom images with billing informations 
