@@ -195,6 +195,7 @@ register_cli_argument('webapp config set', 'java_container', help="The java cont
 register_cli_argument('webapp config set', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('webapp config set', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
+register_cli_argument('webapp config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('webapp config backup', 'webapp_name', help='The name of the webapp')
 register_cli_argument('webapp config backup', 'db_name', help='Name of the database in the backup', arg_group='Database')
 register_cli_argument('webapp config backup', 'db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
