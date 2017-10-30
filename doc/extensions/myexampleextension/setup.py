@@ -37,6 +37,5 @@ setup(
     url='https://github.com/ORG/REPO',
     classifiers=CLASSIFIERS,
     packages=find_packages(),
-    package_data={'azext_hello': ['azext_metadata.json']},
     install_requires=DEPENDENCIES
 )
