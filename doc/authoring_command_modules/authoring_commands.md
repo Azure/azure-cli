@@ -148,8 +148,7 @@ Now the user may identify the target IP config by specifying either the resource
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- The supported resource-name values for `id_part` are: `name` and `child_name_{level}`; for example, `child_name_2` is the name of the child two levels under the resource correspond to `name`.
-- Values also available are `child_type_{level}`, `child_namespace_{level}`, and `child_parent_{level}`. Note that these values may not exist for the particular id being parsed.
+- The supported values for `id_part` are `name` and `child_name_X` where X is an integer indicating how far removed from the parent resource the child is.
 
 
 Generic Update Commands
@@ -197,3 +196,60 @@ if custom_function:
 instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
 return setter(instance)  # update the instance and return the result
 ```
+
+Custom Table Formats
+=============================
+
+By default, when the `-o/--output table` option is supplied, the CLI will display the top level fields of the object structure as the columns of the table. The user can always specify a `--query` to control table and TSV formats, but the CLI also allows the command author to specify a different default table format. Two options exist:
+
+**Supply a Callable**
+
+Supply a callable that accepts the result as input an returns a list of OrderedDicts:
+
+```Python
+def transform_foo(result):
+    result = OrderedDict([('name', result['name']),
+                          ('resourceGroup', result['resourceGroup']),
+                          ('location', result['location'])])
+    return result
+```
+
+**Supply a JMESPath String**
+
+A string containing Python dictionary-syntax '{Key:JMESPath path to property, ...}'
+
+Example: 
+```Python
+table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}'
+```
+
+Tab Completion
+=============================
+
+Tab completion is enabled by default (in bash or `az interactive`) for command names, argument names and argument choice lists. To enable tab completion for dynamic properties (for example, resource names) you can supply a callable which returns a list of options:
+
+**get_resource_name_completion_list(type)**
+
+Since many completers simple return a list of resource names, you can use the `get_resource_name_completion_list` method from `azure.cli.core.commands.parameters` which accepts the type of resource you wish to get completions for.
+
+Example:
+```Python
+completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines')
+```
+
+The behavior of the completer will depend on what the user has entered prior to hitting [TAB][TAB].  For example:
+`az vm show -n [TAB][TAB]`
+This will show VM names within the entire subscription.
+`az vm show -g myrg -n [TAB][TAB]`
+This will show VM names only within the provided resource group.
+
+**Custom Completer**
+
+```Python
+def get_foo_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    # TODO: Your custom logic here
+    result = ... 
+    return [r.name for r in result]
+```
+
+The method signature must be as shown and it must return a list of names. You can make additional REST calls within the completer and may examine the partially processed namespace via `parsed_args` to filter the list based on already supplied args (as in the above case with VM).
