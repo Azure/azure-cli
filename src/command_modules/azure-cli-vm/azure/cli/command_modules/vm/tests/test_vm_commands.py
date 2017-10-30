@@ -363,7 +363,7 @@ class VMCustomImageTest(ScenarioTest):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
         prepared_image_with_plan_info = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan'
         plan_name = 'linuxdsvmubuntu'
-        self.cmd('vm create -g {} -n vm1 --image {} --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
+        self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
             resource_group, prepared_image_with_plan_info, plan_name))
         self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
             JMESPathCheckV2('plan.name', plan_name)
