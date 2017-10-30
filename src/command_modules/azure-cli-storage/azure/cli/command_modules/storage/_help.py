@@ -220,7 +220,7 @@ helps['storage blob upload-batch'] = """
           type: string
           short-summary: The blob container where the files will be uploaded.
           long-summary: The destination can be the container URL or the container name. When the destination is the container URL, the storage
-            account name will parsed from the URL.
+                        account name will be parsed from the URL.
         - name: --pattern
           type: string
           short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
@@ -229,13 +229,13 @@ helps['storage blob upload-batch'] = """
           short-summary: Show the summary of the operations to be taken instead of actually uploading the file(s).
         - name: --if-match
           type: string
-          short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation \
-only if the resource's ETag matches the value specified.
+          short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation
+                         only if the resource's ETag matches the value specified.
         - name: --if-none-match
           type: string
           short-summary: An ETag value, or the wildcard character (*).
           long-summary: Specify this header to perform the operation only if the resource's ETag does not match the value specified.
-            Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
+                        Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
 """
 helps['storage blob download-batch'] = """
     type: command
@@ -245,7 +245,7 @@ helps['storage blob download-batch'] = """
           type: string
           short-summary: The blob container from where the files will be downloaded.
           long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage
-            account name will parsed from the URL.
+                        account name will parsed from the URL.
         - name: --destination -d
           type: string
           short-summary: The existing destination folder for this download operation.
@@ -264,7 +264,7 @@ helps['storage blob delete-batch'] = """
           type: string
           short-summary: The blob container from where the files will be deleted.
           long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage
-            account name will parsed from the URL.
+                        account name will parsed from the URL.
         - name: --pattern
           type: string
           short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
@@ -273,13 +273,13 @@ helps['storage blob delete-batch'] = """
           short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
         - name: --if-match
           type: string
-          short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation \
-only if the resource's ETag matches the value specified.
+          short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation
+                         only if the resource's ETag matches the value specified.
         - name: --if-none-match
           type: string
           short-summary: An ETag value, or the wildcard character (*).
           long-summary: Specify this header to perform the operation only if the resource's ETag does not match the value specified.
-            Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
+                        Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
 
 """
 helps['storage blob copy start-batch'] = """
@@ -516,7 +516,7 @@ helps['storage file delete-batch'] = """
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: List the files and blobs to be deleted. No actual data transfer will occur.
+          short-summary: List the files and blobs to be deleted. No actual data deletion will occur.
 """
 
 helps['storage file copy start-batch'] = """

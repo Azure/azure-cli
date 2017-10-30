@@ -32,7 +32,7 @@ def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=
         logger.info('upload files to file share')
         logger.info('    account %s', client.account_name)
         logger.info('      share %s', destination)
-        logger.info('      total %d', len(source_files or []))
+        logger.info('      total %d', len(source_files))
         return [{'File': client.make_file_url(destination, os.path.dirname(src), os.path.basename(dst)),
                  'Type': guess_content_type(src, content_settings, settings_class).content_type}
                 for src, dst in source_files]

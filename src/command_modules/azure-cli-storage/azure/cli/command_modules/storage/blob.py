@@ -99,7 +99,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         logger.warning('  container %s', source_container_name)
         logger.warning('      total %d', len(source_blobs))
         logger.warning(' operations')
-        for b in source_blobs or []:
+        for b in source_blobs:
             logger.warning('  - %s', b)
         return []
 
@@ -222,7 +222,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         logger.warning('  container %s', source_container_name)
         logger.warning('      total %d', len(source_blobs))
         logger.warning(' operations')
-        for blob in source_blobs or []:
+        for blob in source_blobs:
             logger.warning('  - %s', blob)
         return []
 
