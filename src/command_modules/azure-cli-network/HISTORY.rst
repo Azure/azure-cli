@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.18
+++++++
+* `dns`: Add support for CAA records.
+* `traffic-manager profile update`: Fix issue where profiles with endpoints could not be updated.
+
 2.0.17
 ++++++
 * minor fixes

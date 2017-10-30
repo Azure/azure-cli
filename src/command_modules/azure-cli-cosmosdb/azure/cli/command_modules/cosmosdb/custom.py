@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.documentdb.models import (
+from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     Location
 )
-from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
+from azure.mgmt.cosmosdb.models.cosmos_db_enums import DatabaseAccountKind
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 

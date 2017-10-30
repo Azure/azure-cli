@@ -503,7 +503,7 @@ cli_command(__name__, 'network dns zone create', custom_path + 'create_dns_zone'
 # DNS RecordSetsOperations
 dns_record_set_path = 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.'
 cli_command(__name__, 'network dns record-set list', custom_path + 'list_dns_record_set', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
-for record in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+for record in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']:
     cli_command(__name__, 'network dns record-set {} show'.format(record), dns_record_set_path + 'get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, exception_handler=empty_on_404)
     cli_command(__name__, 'network dns record-set {} delete'.format(record), dns_record_set_path + 'delete', cf_dns_mgmt_record_sets, confirmation=True)
     cli_command(__name__, 'network dns record-set {} list'.format(record), custom_path + 'list_dns_record_set', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)

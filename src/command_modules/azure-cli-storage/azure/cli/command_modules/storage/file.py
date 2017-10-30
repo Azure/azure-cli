@@ -16,6 +16,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas,
                                                     create_short_lived_share_sas, guess_content_type)
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
 def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False, validate_content=False,
@@ -31,7 +32,7 @@ def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=
         logger.info('upload files to file share')
         logger.info('    account %s', client.account_name)
         logger.info('      share %s', destination)
-        logger.info('      total %d', len(source_files or []))
+        logger.info('      total %d', len(source_files))
         return [{'File': client.make_file_url(destination, os.path.dirname(src), os.path.basename(dst)),
                  'Type': guess_content_type(src, content_settings, settings_class).content_type}
                 for src, dst in source_files]
@@ -78,7 +79,7 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
         source_files_list = list(source_files)
 
         logger = get_az_logger(__name__)
-        logger.warning('upload files to file share')
+        logger.warning('download files from file share')
         logger.warning('    account %s', client.account_name)
         logger.warning('      share %s', source)
         logger.warning('destination %s', destination)
@@ -194,6 +195,38 @@ def storage_file_copy_batch(client, source_client,
         raise ValueError('Fail to find source. Neither blob container or file share is specified.')
 
 
+def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeout=None):
+    """
+    Delete files from file share in batch
+    """
+
+    def delete_action(file_pair):
+        delete_file_args = {
+            'share_name': source,
+            'directory_name': file_pair[0],
+            'file_name': file_pair[1],
+            'timeout': timeout
+        }
+
+        return client.delete_file(**delete_file_args)
+
+    from .util import glob_files_remotely
+    source_files = list(glob_files_remotely(client, source, pattern))
+
+    if dryrun:
+        logger = get_az_logger(__name__)
+        logger.warning('delete files from %s', source)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('      share %s', source)
+        logger.warning('      total %d', len(source_files))
+        logger.warning(' operations')
+        for f in source_files:
+            logger.warning('  - %s/%s', f[0], f[1])
+        return []
+
+    return [delete_action(f) for f in source_files]
+
+
 def _create_file_and_directory_from_blob(file_service, blob_service, share, container, sas,
                                          blob_name,
                                          destination_dir=None, metadata=None, timeout=None,
@@ -201,7 +234,8 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     """
     Copy a blob to file share and create the directory if needed.
     """
-    blob_url = blob_service.make_blob_url(container, blob_name, sas_token=sas)
+    blob_name = blob_name.encode('utf-8')
+    blob_url = blob_service.make_blob_url(container, encode_for_url(blob_name), sas_token=sas)
     full_path = os.path.join(destination_dir, blob_name) if destination_dir else blob_name
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
@@ -223,8 +257,10 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     """
     Copy a file from one file share to another
     """
-    file_url = source_file_service.make_file_url(source_share, source_file_dir or None,
-                                                 source_file_name, sas_token=sas)
+    file_url, source_file_dir, source_file_name = \
+        make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
+                                         source_file_name, sas)
+
     full_path = os.path.join(destination_dir, source_file_dir, source_file_name) \
         if destination_dir else os.path.join(source_file_dir, source_file_name)
     file_name = os.path.basename(full_path)

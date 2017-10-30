@@ -5,7 +5,10 @@ Release History
 
 2.0.19
 ++++++
-* Call "agent" a "node" in AKS to match documentation.
+* call "agent" a "node" in AKS to match documentation
+* deprecate --orchestrator-release option in acs create
+* change default VM size for AKS to Standard_D1_v2
+* fix "az aks browse" on Windows
 
 2.0.18
 ++++++

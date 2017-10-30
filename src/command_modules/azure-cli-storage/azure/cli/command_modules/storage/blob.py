@@ -17,6 +17,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p, guess_content_type)
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -89,25 +90,6 @@ def storage_blob_copy_batch(client, source_client,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False):
-    """
-    Download blobs in a container recursively
-
-    :param str source:
-        The string represents the source of this download operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param str destination:
-        The string represents the destination folder of this download operation. The folder must
-        exist.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually download the file(s)
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-    """
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
@@ -117,7 +99,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         logger.warning('  container %s', source_container_name)
         logger.warning('      total %d', len(source_blobs))
         logger.warning(' operations')
-        for b in source_blobs or []:
+        for b in source_blobs:
             logger.warning('  - %s', b)
         return []
 
@@ -130,34 +112,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
                               maxsize_condition=None, max_connections=2, lease_id=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
-    """
-    Upload files to storage container as blobs
-
-    :param str source:
-        The directory where the files to be uploaded.
-
-    :param str destination:
-        The string represents the destination of this upload operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually upload the file(s)
-
-    :param string if_match:
-        An ETag value, or the wildcard character (*). Specify this header to perform the operation
-        only if the resource's ETag matches the value specified.
-
-    :param string if_none_match:
-        An ETag value, or the wildcard character (*). Specify this header to perform the
-        operation only if the resource's ETag does not match the value specified. Specify the
-        wildcard character (*) to perform the operation only if the resource does not exist,
-        and fail the operation if it does exist.
-    """
 
     def _append_blob(file_path, blob_name, blob_content_settings):
         if not client.exists(destination_container_name, blob_name):
@@ -240,6 +194,41 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
     return results
 
 
+def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
+                              delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                              if_none_match=None, timeout=None, dryrun=False):
+
+    def _delete_blob(blob_name):
+        delete_blob_args = {
+            'container_name': source_container_name,
+            'blob_name': blob_name,
+            'lease_id': lease_id,
+            'delete_snapshots': delete_snapshots,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+        response = client.delete_blob(**delete_blob_args)
+        return response
+
+    source_blobs = list(collect_blobs(client, source_container_name, pattern))
+
+    if dryrun:
+        logger = get_az_logger(__name__)
+        logger.warning('delete action: from %s', source)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('  container %s', source_container_name)
+        logger.warning('      total %d', len(source_blobs))
+        logger.warning(' operations')
+        for blob in source_blobs:
+            logger.warning('  - %s', blob)
+        return []
+
+    return [_delete_blob(blob) for blob in source_blobs]
+
+
 def _download_blob(blob_service, container, destination_folder, blob_name):
     # TODO: try catch IO exception
     destination_path = os.path.join(destination_folder, blob_name)
@@ -253,7 +242,8 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
                                  source_container, source_sas, source_blob_name):
-    source_blob_url = source_blob_service.make_blob_url(source_container, source_blob_name,
+    source_blob_name = source_blob_name.encode('utf-8')
+    source_blob_url = source_blob_service.make_blob_url(source_container, encode_for_url(source_blob_name),
                                                         sas_token=source_sas)
 
     try:
@@ -266,9 +256,9 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
                                  source_share, source_sas, source_file_dir, source_file_name):
-    source_file_dir = source_file_dir if source_file_dir else None
-    file_url = source_file_service.make_file_url(source_share, source_file_dir, source_file_name,
-                                                 sas_token=source_sas)
+    file_url, source_file_dir, source_file_name = \
+        make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
+                                         source_file_name, source_sas)
 
     blob_name = os.path.join(source_file_dir, source_file_name) \
         if source_file_dir else source_file_name
