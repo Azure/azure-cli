@@ -8,6 +8,7 @@ ls -la $share_folder/build
 
 ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 
+pip install git+https://github.com/Azure/msrestazure-for-python.git@except_fix#egg=msrestazure
 pip install -qqq -e ./tools
 pip install -qqq coverage codecov
 [ -d privates ] && pip install -qqq privates/*.whl
