@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import uuid
+import os
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
@@ -40,6 +41,15 @@ vmss_extension_info = {
     }
 }
 
+def _get_extension_info(os_type):
+    extension = vm_extension_info[os_type].copy()
+    extension_name = os.environ.get('ADE_TEST_EXTENSION_NAME');
+    extension_publisher = os.environ.get('ADE_TEST_EXTENSION_PUBLISHER');
+    if extension_name:
+        extension['name'] = extension_name
+    if extension_publisher != "":
+        extension['publisher'] = extension_publisher
+    return extension
 
 def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
                aad_client_id,
@@ -49,9 +59,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                key_encryption_key=None,
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
-               encrypt_format_all=False,
-               extension_name=None,
-               extension_publisher=None):
+               encrypt_format_all=False):
     '''
     Enable disk encryption on OS disk, Data disks, or both
     :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
@@ -62,10 +70,6 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     :param str disk_encryption_keyvault:the KeyVault where generated encryption key will be placed
     :param str key_encryption_key: KeyVault key name or URL used to encrypt the disk encryption key
     :param str key_encryption_keyvault: the KeyVault containing the key encryption key
-    :param str extension_name: The extension name. Specify this parameter only to override the
-    default values "AzureDiskEncryption" for Windows and "AzureDiskEncryptionForLinux" for Linux.
-    :param str extension_publisher: The extension publisher name. Specify this parameter only to
-    override the default value "Microsoft.Azure.Security".
     used to encrypt the disk encryption key. If missing, CLI will use --disk-encryption-keyvault
     '''
     # pylint: disable=no-member
@@ -73,9 +77,9 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
-    extension = vm_extension_info[os_type].copy()
-    extension['name'] = extension_name or extension['name']
-    extension['publisher'] = extension_publisher or extension['publisher']
+
+    extension = _get_extension_info(os_type)
+
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
     vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
 
@@ -193,15 +197,9 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
 def decrypt_vm(resource_group_name,
                vm_name,
                volume_type=None,
-               force=False,
-               extension_name=None,
-               extension_publisher=None):
+               force=False):
     '''
     Disable disk encryption on OS disk, Data disks, or both
-    :param str extension_name: The extension name. Specify this parameter only to override the
-    default values "AzureDiskEncryption" for Windows and "AzureDiskEncryptionForLinux" for Linux.
-    :param str extension_publisher: The extension publisher name. Specify this parameter only to
-    override the default value "Microsoft.Azure.Security".
     '''
     compute_client = _compute_client_factory()
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
@@ -228,10 +226,9 @@ def decrypt_vm(resource_group_name,
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
 
+    extension = _get_extension_info(os_type)
+
     # sequence_version should be incremented since encryptions occurred before
-    extension = vm_extension_info[os_type].copy()
-    extension['name'] = extension_name or extension['name']
-    extension['publisher'] = extension_publisher or extension['publisher']
     sequence_version = uuid.uuid4()
 
     # 2. update the disk encryption extension
@@ -269,13 +266,9 @@ def decrypt_vm(resource_group_name,
     set_vm(vm)
 
 
-def show_vm_encryption_status(resource_group_name, vm_name, extension_name=None, extension_publisher=None):
+def show_vm_encryption_status(resource_group_name, vm_name):
     '''
     show the encryption status
-    :param str extension_name: The extension name. Specify this parameter only to override the
-    default values "AzureDiskEncryption" for Windows and "AzureDiskEncryptionForLinux" for Linux.
-    :param str extension_publisher: The extension publisher name. Specify this parameter only to
-    override the default value "Microsoft.Azure.Security".
     '''
     encryption_status = {
         'osDisk': 'NotEncrypted',
@@ -290,9 +283,9 @@ def show_vm_encryption_status(resource_group_name, vm_name, extension_name=None,
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     encryption_status['osType'] = os_type
-    extension = vm_extension_info[os_type].copy()
-    extension['name'] = extension_name or extension['name']
-    extension['publisher'] = extension_publisher or extension['publisher']
+
+    extension = _get_extension_info(os_type)
+
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
                                                                      vm_name,
                                                                      extension['name'],
