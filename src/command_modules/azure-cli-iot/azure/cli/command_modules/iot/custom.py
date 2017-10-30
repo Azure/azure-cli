@@ -18,7 +18,7 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_descrip
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from ._factory import resource_service_factory
-from ._utils import create_self_signed_certificate
+from ._utils import create_self_signed_certificate, open_certificate
 
 
 # CUSTOM TYPE
@@ -41,6 +41,59 @@ class SimpleAccessRights(Enum):
 
 
 # CUSTOM METHODS
+def iot_hub_certificate_list(client, hub_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    return client[1].list_by_iot_hub(resource_group_name, hub_name)
+
+
+def iot_hub_certificate_get(client, hub_name, certificate_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    return client[1].get(resource_group_name, hub_name, certificate_name)
+
+
+def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_path, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    # Get list of certs
+    cert_list = client[1].list_by_iot_hub(resource_group_name, hub_name)
+    for cert in cert_list.value:
+        if cert.name == certificate_name:
+            raise CLIError('Certificate \'{0}\' already exists. Use \'iot hub certificate update\' to update an existing certificate.'.format(certificate_name))
+    certificate = open_certificate(certificate_path)
+    if not certificate:
+        raise CLIError('Error uploading certificate \'{0}\'.'.format(certificate_path))
+    return client[1].create_or_update(resource_group_name, hub_name, certificate_name, None, certificate)
+
+
+def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    cert_list = client[1].list_by_iot_hub(resource_group_name, hub_name)
+    for cert in cert_list.value:
+        if cert.name == certificate_name:
+            certificate = open_certificate(certificate_path)
+            if not certificate:
+                raise CLIError('Error uploading certificate \'{0}\'.'.format(certificate_path))
+            return client[1].create_or_update(resource_group_name, hub_name, certificate_name, etag, certificate)
+    raise CLIError('Certificate \'{0}\' does not exist. Use \'iot hub certificate create\' to create a new certificate.'.format(certificate_name))
+
+
+def iot_hub_certificate_delete(client, hub_name, certificate_name, etag, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    return client[1].delete(resource_group_name, hub_name, certificate_name, etag)
+
+
+def iot_hub_certificate_gen_code(client, hub_name, certificate_name, etag, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    return client[1].generate_verification_code(resource_group_name, hub_name, certificate_name, etag)
+
+
+def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client[0], resource_group_name, hub_name)
+    certificate = open_certificate(certificate_path)
+    if not certificate:
+        raise CLIError('Error uploading certificate \'{0}\'.'.format(certificate_path))
+    return client[1].verify(resource_group_name, hub_name, certificate_name, etag, certificate)
+
+
 def iot_hub_create(client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1):
     _check_name_availability(client, hub_name)
     location = _ensure_location(resource_group_name, location)

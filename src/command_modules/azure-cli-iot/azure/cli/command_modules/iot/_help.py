@@ -5,6 +5,9 @@
 
 from azure.cli.core.help_files import helps
 
+certificate_help = ('For a detailed explanation of CA certificates in Azure IoT Hub, '
+                    'see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started')
+
 helps['iot'] = """
     type: group
     short-summary: (PREVIEW) Manage Internet of Things (IoT) assets.
@@ -19,6 +22,89 @@ helps['iot hub'] = """
     type: group
     short-summary: (PREVIEW) Manage Azure IoT hubs.
 """
+
+helps['iot hub certificate'] = """
+    type: group
+    short-summary: Manage IoT Hub certificates.
+"""
+
+helps['iot hub certificate create'] = """
+    type: command
+    short-summary: Create/upload an Azure IoT Hub certificate.
+    long-summary: {0}
+    examples:
+        - name: Uploads a CA certificate PEM file to an IoT hub.
+          text: >
+            az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path F:\\Certificate.pem
+        - name: Uploads a CA certificate CER file to an IoT hub.
+          text: >
+            az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path F:\\Certificate.cer
+""".format(certificate_help)
+
+helps['iot hub certificate update'] = """
+    type: command
+    short-summary: Update an Azure IoT Hub certificate.
+    long-summary: 'Uploads a new certificate to replace the existing certificate with the same name. {0}'
+    examples:
+        - name: Updates a CA certificate in an IoT hub by uploading a new PEM file.
+          text: >
+            az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path F:\\NewCertificate.pem --etag AAAAAAAAAAA=
+        - name: Updates a CA certificate in an IoT hub by uploading a new CER file.
+          text: >
+            az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path F:\\NewCertificate.cer --etag AAAAAAAAAAA=
+""".format(certificate_help)
+
+helps['iot hub certificate delete'] = """
+    type: command
+    short-summary: Deletes an Azure IoT Hub certificate.
+    long-summary: {0}
+    examples:
+        - name: Deletes MyCertificate
+          text: >
+            az iot hub certificate delete --hub-name MyIotHub --name MyCertificate --etag AAAAAAAAAAA=
+""".format(certificate_help)
+
+helps['iot hub certificate show'] = """
+    type: command
+    short-summary: Shows information about a particular Azure IoT Hub certificate.
+    long-summary: {0}
+    examples:
+        - name: Show details about MyCertificate
+          text: >
+            az iot hub certificate show --hub-name MyIotHub --name MyCertificate
+""".format(certificate_help)
+
+helps['iot hub certificate list'] = """
+    type: command
+    short-summary: Lists all certificates contained within an Azure IoT Hub
+    long-summary: {0}
+    examples:
+        - name: List all certificates in MyIotHub
+          text: >
+            az iot hub certificate list --hub-name MyIotHub
+""".format(certificate_help)
+
+helps['iot hub certificate generate-verification-code'] = """
+    type: command
+    short-summary: Generates a verification code for an Azure IoT Hub certificate.
+    long-summary: 'This verification code is used to complete the proof of possession step for a certificate. Use this
+                    verification code as the CN of a new certificate signed with the root certificates private key. {0}'
+    examples:
+        - name: Generates a verification code for MyCertificate
+          text: >
+            az iot hub certificate generate-verification-code --hub-name MyIotHub --name MyCertificate --etag AAAAAAAAAAA=
+""".format(certificate_help)
+
+helps['iot hub certificate verify'] = """
+    type: command
+    short-summary: Verifies an Azure IoT Hub certificate.
+    long-summary: 'Verifies a certificate by uploading a verification certificate containing the verification code obtained
+                    by calling generate-verification-code. This is the last step in the proof of possession process. {0}'
+    examples:
+        - name: Verifies ownership of the MyCertificate private key.
+          text: >
+            az iot hub certificate verify --hub-name MyIotHub --name MyCertificate --path F:\\Verification.pem --etag AAAAAAAAAAA=
+""".format(certificate_help)
 
 helps['iot hub create'] = """
     type: command

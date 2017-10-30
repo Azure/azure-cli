@@ -5,12 +5,11 @@ Release History
 
 0.1.14
 ++++++
-* Minor fixes.
+* Adds support for X.509 certificates.
 
 0.1.13
 ++++++
 * minor fixes
-
 
 0.1.12 (2017-09-22)
 +++++++++++++++++++
