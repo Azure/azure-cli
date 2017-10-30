@@ -8,6 +8,7 @@ Release History
 * `storage account create`: defaults --sku to 'Standard_RAGRS'
 * Fixed bugs when dealing with file/blob names that include non-ascii chars.
 * `storage blob/file copy start-batch`: Fixed bug that prevented using --source-uri.
+* `storage blob/file delete-batch`: Added commands to glob and delete multiple blobs/files.
 
 2.0.18
 ++++++
