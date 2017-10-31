@@ -1653,8 +1653,7 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
     vnet = VirtualNetwork(
         location=location, tags=tags,
         dhcp_options=DhcpOptions(dns_servers),
-        address_space=AddressSpace(
-            vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
+        address_space=AddressSpace(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
     if subnet_name:
         vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
@@ -1666,12 +1665,18 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
 def update_vnet(instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
-    if vnet_prefixes:
+    if vnet_prefixes and instance.address_space:
         instance.address_space.address_prefixes = vnet_prefixes
+    elif vnet_prefixes:
+        instance.address_space = AddressSpace(vnet_prefixes)
+
     if dns_servers == ['']:
         instance.dhcp_options.dns_servers = None
-    elif dns_servers:
+    elif dns_servers and instance.dhcp_options:
         instance.dhcp_options.dns_servers = dns_servers
+    elif dns_servers:
+        instance.dhcp_options = DhcpOptions(dns_servers=dns_servers)
+
     if ddos_protection is not None:
         instance.enable_ddos_protection = ddos_protection
     if vm_protection is not None:
