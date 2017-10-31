@@ -130,7 +130,7 @@ cli_command(__name__, 'webapp deployment slot auto-swap', custom_path + 'config_
 cli_command(__name__, 'webapp deployment slot swap', custom_path + 'swap_slot', exception_handler=ex_handler_factory())
 cli_command(__name__, 'webapp deployment slot create', custom_path + 'create_webapp_slot', exception_handler=ex_handler_factory())
 
-cli_command(__name__, 'webapp deployment user set', custom_path + 'set_deployment_user')
+cli_command(__name__, 'webapp deployment user set', custom_path + 'set_deployment_user', exception_handler=ex_handler_factory())
 cli_command(__name__, 'webapp deployment list-publishing-profiles',
             custom_path + 'list_publish_profiles')
 cli_command(__name__, 'webapp deployment container config',
@@ -181,7 +181,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'functionapp deployment source show', custom_path + 'show_source_control', exception_handler=empty_on_404)
     cli_command(__name__, 'functionapp deployment source delete', custom_path + 'delete_source_control')
     cli_command(__name__, 'functionapp deployment source update-token', custom_path + 'update_git_token', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp deployment user set', custom_path + 'set_deployment_user')
+    cli_command(__name__, 'functionapp deployment user set', custom_path + 'set_deployment_user', exception_handler=ex_handler_factory())
     cli_command(__name__, 'functionapp deployment list-publishing-profiles',
                 custom_path + 'list_publish_profiles')
     cli_command(__name__, 'functionapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
