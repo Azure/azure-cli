@@ -1045,11 +1045,11 @@ def _open_page_in_browser(url):
 # TODO: expose new blob suport
 def config_diagnostics(resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
-                       detailed_error_messages=None, failed_request_tracing=None,
-                       slot=None):
+                       docker_container_logging=None, detailed_error_messages=None,
+                       failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig,
-                                       FileSystemHttpLogsConfig, EnabledConfig)
+                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       EnabledConfig)
     client = web_client_factory()
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
@@ -1065,11 +1065,16 @@ def config_diagnostics(resource_group_name, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    if web_server_logging is not None:
-        enabled = web_server_logging
-        # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
-        fs_server_log = FileSystemHttpLogsConfig(100, 3, enabled)
-        http_logs = HttpLogsConfig(fs_server_log)
+    server_logging_option = web_server_logging or docker_container_logging
+    if server_logging_option:
+        # TODO: az blob storage log config currently not in use, will be impelemented later.
+        # Tracked as Issue: #4764 on Github
+        filesystem_log_config = None
+        turned_on = server_logging_option != 'off'
+        if server_logging_option in ['filesystem', 'off']:
+            # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
+            filesystem_log_config = FileSystemHttpLogsConfig(100, 3, enabled=turned_on)
+        http_logs = HttpLogsConfig(filesystem_log_config, None)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(detailed_error_messages))
