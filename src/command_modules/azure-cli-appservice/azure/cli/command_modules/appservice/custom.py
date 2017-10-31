@@ -961,7 +961,7 @@ def set_deployment_user(user_name, password=None):
     try:
         return client.update_publishing_user(user)
     except CloudError as e:
-        logger.error(ex_handler_factory(no_throw=True)(e))
+        ex_handler_factory()(e)
 
 
 def list_publish_profiles(resource_group_name, name, slot=None):
