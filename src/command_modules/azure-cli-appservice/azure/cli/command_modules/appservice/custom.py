@@ -958,8 +958,7 @@ def set_deployment_user(user_name, password=None):
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
-    result = client.update_publishing_user(user)
-    return result
+    return client.update_publishing_user(user)
 
 
 def list_publish_profiles(resource_group_name, name, slot=None):
