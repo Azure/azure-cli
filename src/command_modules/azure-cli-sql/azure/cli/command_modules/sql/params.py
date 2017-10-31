@@ -9,7 +9,8 @@ from azure.cli.core.commands import CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type,
-    get_resource_name_completion_list)
+    get_resource_name_completion_list,
+    three_state_flag)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
@@ -113,6 +114,9 @@ def _configure_db_create_params(
     create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
     """
 
+    # This line to be removed when zone redundancy is fully supported in production.
+    cmd.ignore('zone_redundant')
+
     # DW does not support all create modes. Check that engine and create_mode are consistent.
     if engine == Engine.dw and create_mode not in [
             CreateMode.default,
@@ -140,6 +144,7 @@ def _configure_db_create_params(
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         cmd.ignore('sample_name')
+        cmd.ignore('zone_redundant')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -552,6 +557,9 @@ with ParametersContext(command='sql dw show') as c:
 
 
 with ParametersContext(command='sql elastic-pool') as c:
+    # This line to be removed when zone redundancy is fully supported in production.
+    c.ignore('zone_redundant')
+
     c.argument('elastic_pool_name',
                options_list=('--name', '-n'),
                help='The name of the elastic pool.')
@@ -749,6 +757,11 @@ with ParametersContext(command='sql server vnet-rule') as c:
                options_list=('--subnet'),
                help='Name or ID of the subnet that allows access to an Azure Sql Server. '
                'If subnet name is provided, --vnet-name must be provided.')
+
+    c.argument('ignore_missing_vnet_service_endpoint',
+               options_list=('--ignore-missing-endpoint', '-i'),
+               help='Create firewall rule before the virtual network has vnet service endpoint enabled',
+               **three_state_flag())
 
 register_extra_cli_argument('sql server vnet-rule create', 'vnet_name', options_list=('--vnet-name'),
                             help='The virtual network name', validator=validate_subnet)
