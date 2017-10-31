@@ -7,6 +7,7 @@ Release History
 ++++++
 * `dns`: Add support for CAA records.
 * `traffic-manager profile update`: Fix issue where profiles with endpoints could not be updated.
+* `vnet update`: Fix issue where `--dns-servers` didn't work depending on how the VNET was created (ARM deployment).
 
 2.0.17
 ++++++
