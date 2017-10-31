@@ -146,9 +146,33 @@ Resource Id Arguments
 ```
 Now the user may identify the target IP config by specifying either the resource group, NIC and IP config names or by simply pasting in the ID for the IP config itself.
 
+This feature is powered by the `parse_resource_id` helper method within the `msrestazure` package, which parses a resource ID into a dictionary. Specifying `id_part` maps the parsed value for a given key in that dictionary into your argument. 
+
+For example, consider the following ID of a subnet lock:
+```
+subscription/0000-0000-0000-0000/resourceGroups/myresourcegroup/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet /providers/Microsoft.Authorization/locks/mylock
+```
+
+When run through `parse_resource_id`, the following dictionary results:
+```Python
+{
+    "subscription": "0000-0000-0000-0000",
+    "resource_group": "myresourcegroup",
+    "namespace": "Microsoft.Network",
+    "resource_type": "virtualNetworks",
+    "name": "myvnet",
+    "child_type_1": "subnets",
+    "child_name_1": "mysubnet",
+    "child_namespace_2": "Microsoft.Authorization",
+    "child_type_2": "locks",
+    "child_name_2": "mylock"
+}
+```
+
+Any of these keys could be supplied as a value for `id_part`, thought typically you would only use `name`, `child_name_1`, `child_name_2`, etc.
+
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- `id_part` accepts `name` for the name of the root resource. For child resources, `child_name_X`, `child_type_X`, and `child_namespace_X` are allowed where X is an integer indicating the child position relative to the root resources (larger integers are further removed). Type and namespace are optional and, if not supplied, essentially inherit from the nearest upstream relative.
 
 
 Generic Update Commands
