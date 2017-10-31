@@ -2144,7 +2144,7 @@ def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certifica
     return vm.os_profile.secrets
 
 
-def show_vm_secret(resource_group_name, vm_name):
+def list_vm_secrets(resource_group_name, vm_name):
     vm = get_vm(resource_group_name, vm_name)
     return vm.os_profile.secrets
 

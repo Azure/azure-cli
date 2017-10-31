@@ -7,7 +7,6 @@
 import json
 import os
 import platform
-import re
 import tempfile
 import time
 import unittest
@@ -2389,26 +2388,32 @@ class VMScaffoldingTest(ScenarioTest):
 
 class VMSecretTest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_vm_secret_e2e_test(self, resource_group):
-        # a few pre-made key vault artifacts, with the assumption that this test must under team test subscription of 'AzureSDKADGraph2'
-        keyvault = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.KeyVault/vaults/vm-secret-kv'
+    def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
+        vm = 'vm1'
+        vault_name = self.create_random_name('vmsecretkv', 20)
         certificate = 'vm-secrt-cert'
 
-        # under playback, keyvault id need to adjust to use mock subscription
-        test_keyvault_id = re.sub('[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}', self.get_subscription_id(), keyvault)
+        vault_result = self.cmd('keyvault create -g {rg} -n {name} -l {loc} --enabled-for-disk-encryption true --enabled-for-deployment true'.format(
+            rg=resource_group,
+            name=vault_name,
+            loc=resource_group_location
+        )).get_output_in_json()
+        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
-        vm = 'vm1'
-        self.cmd('vm create -g {} -n {} --image rhel --use-unmanaged-disk'.format(resource_group, vm))
-        self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate), checks=[
+        self.cmd('vm create -g {} -n {} --image rhel'.format(resource_group, vm))
+        time.sleep(60)  # ensure we don't hit the DNS exception. 30 second woule be ignored under playback
+
+        self.cmd('keyvault certificate create --vault-name {} -n {} -p @"{}"'.format(vault_name, certificate, policy_path))
+        secret_result = self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate), checks=[
             JMESPathCheckV2('length([])', 1),
-            JMESPathCheckV2('[0].sourceVault.id', test_keyvault_id),
+            JMESPathCheckV2('[0].sourceVault.id', vault_result['id']),
             JMESPathCheckV2('length([0].vaultCertificates)', 1),
-            JMESPathCheckV2('[0].vaultCertificates[0].certificateUrl', 'https://vm-secret-kv.vault.azure.net/secrets/vm-secrt-cert/e489595485004fe39d89669491d1d461'),
-        ])
-        self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm))
-        self.cmd('vm secret delete -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, keyvault, certificate))
+        ]).get_output_in_json()
+        self.assertTrue('https://{}.vault.azure.net/secrets/{}/'.format(vault_name, certificate) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])
+        self.cmd('vm secret list -g {} -n {}'.format(resource_group, vm))
+        self.cmd('vm secret remove -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate))
 
-        self.cmd('vm secret show -g {} -n {}'.format(resource_group, vm), checks=[
+        self.cmd('vm secret list -g {} -n {}'.format(resource_group, vm), checks=[
             JMESPathCheckV2('length([])', 0)
         ])
 # endregion
