@@ -2401,7 +2401,7 @@ class VMSecretTest(ScenarioTest):
         policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
         self.cmd('vm create -g {} -n {} --image rhel'.format(resource_group, vm))
-        time.sleep(60)  # ensure we don't hit the DNS exception. 30 second woule be ignored under playback
+        time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
 
         self.cmd('keyvault certificate create --vault-name {} -n {} -p @"{}"'.format(vault_name, certificate, policy_path))
         secret_result = self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate), checks=[
