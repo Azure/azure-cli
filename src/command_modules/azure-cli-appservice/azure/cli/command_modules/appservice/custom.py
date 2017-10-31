@@ -958,7 +958,11 @@ def set_deployment_user(user_name, password=None):
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
-    result = client.update_publishing_user(user)
+    try:
+        result = client.update_publishing_user(user)
+    except CloudError as e:
+        logger.error(e.response.json().get("Message"))
+        raise e
     return result
 
 
