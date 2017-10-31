@@ -45,7 +45,8 @@ def modify_url(formula_content):
 def modify_sha256(formula_content):
     tmp_file = tempfile.mkstemp()[1]
     response = urlopen(UPSTREAM_URL)
-    with open(tmp_file, 'wb') as f: f.write(response.read())
+    with open(tmp_file, 'wb') as f:
+        f.write(response.read())
     sha256 = hashlib.sha256()
     with open(tmp_file, 'rb') as f:
         sha256.update(f.read())
@@ -100,7 +101,7 @@ def main():
         shutil.copyfile(formula_path, new_formula_path)
     print('The new Homebrew formula is available at {}'.format(new_formula_path))
     print('Create a PR to {} for {}'.format(HOMEBREW_REPO_URL, AZURE_CLI_FORMULA_PATH))
-    
+
 
 if __name__ == '__main__':
     main()
