@@ -148,7 +148,7 @@ Now the user may identify the target IP config by specifying either the resource
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- The supported values for `id_part` are `name` and `child_name_X` where X is an integer indicating how far removed from the parent resource the child is.
+- `id_part` accepts `name` for the name of the root resource. For child resources, `child_name_X`, `child_type_X`, and `child_namespace_X` are allowed where X is an integer indicating the child position relative to the root resources (larger integers are further removed). Type and namespace are optional and, if not supplied, essentially inherit from the nearest upstream relative.
 
 
 Generic Update Commands
@@ -204,7 +204,7 @@ By default, when the `-o/--output table` option is supplied, the CLI will displa
 
 **Supply a Callable**
 
-Supply a callable that accepts the result as input an returns a list of OrderedDicts:
+Supply a callable that accepts the result as input and returns a list of OrderedDicts:
 
 ```Python
 def transform_foo(result):
@@ -230,7 +230,7 @@ Tab completion is enabled by default (in bash or `az interactive`) for command n
 
 **get_resource_name_completion_list(type)**
 
-Since many completers simple return a list of resource names, you can use the `get_resource_name_completion_list` method from `azure.cli.core.commands.parameters` which accepts the type of resource you wish to get completions for.
+Since many completers simply return a list of resource names, you can use the `get_resource_name_completion_list` method from `azure.cli.core.commands.parameters` which accepts the type of resource you wish to get completions for.
 
 Example:
 ```Python
