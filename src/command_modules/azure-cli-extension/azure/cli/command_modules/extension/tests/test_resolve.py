@@ -31,13 +31,13 @@ class TestResolveFromIndex(unittest.TestCase):
         name = 'myext'
         with IndexPatch({}), self.assertRaises(NoExtensionCandidatesError) as err:
             resolve_from_index(name)
-        self.assertEqual(str(err.exception), "No suitable extensions found.")
+        self.assertEqual(str(err.exception), "No extension found with name '{}'".format(name))
 
     def test_ext_not_in_index(self):
         name = 'an_extension_b'
         with IndexPatch({'an_extension_a': []}), self.assertRaises(NoExtensionCandidatesError) as err:
             resolve_from_index(name)
-        self.assertEqual(str(err.exception), "No suitable extensions found.")
+        self.assertEqual(str(err.exception), "No extension found with name '{}'".format(name))
 
     def test_ext_resolved(self):
         name = 'myext'

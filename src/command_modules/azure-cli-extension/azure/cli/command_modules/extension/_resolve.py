@@ -13,12 +13,7 @@ logger = azlogging.get_az_logger(__name__)
 
 
 class NoExtensionCandidatesError(Exception):
-    def __init__(self, msg=None):
-        super(NoExtensionCandidatesError, self).__init__(msg)
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
+    pass
 
 
 def _is_not_platform_specific(item):
@@ -56,6 +51,8 @@ def _is_greater_than_cur_version(cur_version):
 
 def resolve_from_index(extension_name, cur_version=None, index_url=None):
     candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
+    if not candidates:
+        raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
 
     filters = [_is_not_platform_specific, _is_compatible_with_cli_version, _is_greater_than_cur_version(cur_version)]
     for f in filters:
