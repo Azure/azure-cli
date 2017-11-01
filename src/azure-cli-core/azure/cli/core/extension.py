@@ -13,8 +13,8 @@ from azure.cli.core._config import GLOBAL_CONFIG_DIR
 
 
 _CUSTOM_EXT_DIR = os.environ.get('AZURE_EXTENSION_DIR')
-EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR \
-                    else os.path.join(GLOBAL_CONFIG_DIR, 'cliextensions')
+EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
+                                                                                          'cliextensions')
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
 WHL_METADATA_FILENAME = 'metadata.json'

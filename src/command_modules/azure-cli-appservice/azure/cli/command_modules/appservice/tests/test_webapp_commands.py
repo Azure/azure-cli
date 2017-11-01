@@ -210,19 +210,16 @@ class AppServicePlanScenarioTest(ScenarioTest):
         plan = 'webapp-delete-plan2'
         self.cmd('appservice plan create -g {} -n {} -l westus'.format(resource_group, plan))
 
-        self.cmd('appservice plan update -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
-             JMESPathCheckV2('name', plan),
-             JMESPathCheckV2('sku.tier', 'Standard'),
-             JMESPathCheckV2('sku.name', 'S1')
-        ])
+        self.cmd('appservice plan update -g {} -n {} --sku S1'.format(resource_group, plan),
+                 checks=[JMESPathCheckV2('name', plan),
+                         JMESPathCheckV2('sku.tier', 'Standard'),
+                         JMESPathCheckV2('sku.name', 'S1')])
 
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
         # test empty service plan should be automatically deleted.
-        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
-            JMESPathCheckV2('length(@)', 0)
-        ])
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
 
 
 class WebappConfigureTest(ScenarioTest):

@@ -285,9 +285,9 @@ def _flatten(text):
 
     # tokens: sequence of non-whitespace separated by '' where a newline was
     tokens = []
-    for l in (x for x in lines if len(x) > 0):
-        l = l.replace('\t', ' ')
-        tokens += _tokenize_line(l, quote_strings=True, infer_name=False)
+    for line in (x for x in lines if len(x) > 0):
+        line = line.replace('\t', ' ')
+        tokens += _tokenize_line(line, quote_strings=True, infer_name=False)
         tokens.append(SENTINEL)
 
     # find (...) and turn it into a single line ("capture" it)
