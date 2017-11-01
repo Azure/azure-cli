@@ -6,7 +6,7 @@
 from azure.cli.core.help_files import helps
 
 certificate_help = ('For a detailed explanation of CA certificates in Azure IoT Hub, '
-                    'see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started')
+                    'see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview')
 
 helps['iot'] = """
     type: group
