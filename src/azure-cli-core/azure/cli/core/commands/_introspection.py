@@ -33,9 +33,9 @@ def _option_descriptions(operation):
     lines = lines.splitlines()
     index = 0
     while index < len(lines):
-        l = lines[index]
+        line = lines[index]
         regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
-        match = re.search(regex, l)
+        match = re.search(regex, line)
         if not match:
             index += 1
             continue

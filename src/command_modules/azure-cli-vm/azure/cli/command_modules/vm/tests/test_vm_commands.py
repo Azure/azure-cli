@@ -674,31 +674,28 @@ class VMAvailSetScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_availset(self, resource_group):
         name = 'availset-test'
-        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name), checks=[
-                JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheckV2('sku.name', 'Aligned')
-        ])
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name),
+                         JMESPathCheckV2('platformFaultDomainCount', 2),
+                         JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                         JMESPathCheckV2('sku.name', 'Aligned')])
 
         # create with explict UD count
-        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group), checks=[
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('platformUpdateDomainCount', 2),
-                JMESPathCheckV2('sku.name', 'Aligned')
-        ])
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group),
+                 checks=[JMESPathCheckV2('platformFaultDomainCount', 2),
+                         JMESPathCheckV2('platformUpdateDomainCount', 2),
+                         JMESPathCheckV2('sku.name', 'Aligned')])
         self.cmd('vm availability-set delete -g {} -n avset2'.format(resource_group))
 
         self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(resource_group, name),
                  checks=JMESPathCheckV2('tags.test', 'success'))
         self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[
             JMESPathCheckV2('length(@)', 1),
-            JMESPathCheckV2('[0].name', name),
-        ])
-        self.cmd('vm availability-set list-sizes -g {} -n {}'.format(
-            resource_group, name), checks=JMESPathCheckV2('type(@)', 'array'))
-        self.cmd('vm availability-set show -g {} -n {}'.format(
-            resource_group, name), checks=[JMESPathCheckV2('name', name)])
+            JMESPathCheckV2('[0].name', name)])
+        self.cmd('vm availability-set list-sizes -g {} -n {}'.format(resource_group, name),
+                 checks=JMESPathCheckV2('type(@)', 'array'))
+        self.cmd('vm availability-set show -g {} -n {}'.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name)])
         self.cmd('vm availability-set delete -g {} -n {}'.format(resource_group, name))
         self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
 
@@ -708,19 +705,17 @@ class VMAvailSetLiveScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_availset_convert(self, resource_group):
         name = 'availset-test'
-        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
-                JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 3),
-                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheckV2('sku.name', 'Classic')
-        ])
+        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name),
+                         JMESPathCheckV2('platformFaultDomainCount', 3),
+                         JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                         JMESPathCheckV2('sku.name', 'Classic')])
 
         # the conversion should auto adjust the FD from 3 to 2 as 'westus2' only offers 2
-        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name), checks=[
-                JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('sku.name', 'Aligned')
-        ])
+        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name),
+                         JMESPathCheckV2('platformFaultDomainCount', 2),
+                         JMESPathCheckV2('sku.name', 'Aligned')])
 
 
 class ComputeListSkusScenarioTest(LiveScenarioTest):
