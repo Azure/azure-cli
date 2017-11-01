@@ -42,16 +42,6 @@ setup(
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
-    namespace_packages=[
-    ],
-    scripts=[
-        "scripts/check_style",
-        "scripts/check_style.bat",
-        "scripts/run_tests",
-        "scripts/run_tests.bat",
-        'scripts/azdev',
-        'scripts/azdev.bat'
-    ],
     packages=[
         'automation',
         'automation.style',
@@ -59,5 +49,12 @@ setup(
         'automation.setup',
         'automation.coverage'
     ],
+    entry_points = {
+        'console_scripts': [
+            'azdev=automation.__main__:main',
+            'check_style=automation.style.run:main',
+            'run_tests=automation.tests.run:main'
+            ]
+    },
     install_requires=DEPENDENCIES
 )
