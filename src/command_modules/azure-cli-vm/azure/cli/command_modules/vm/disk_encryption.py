@@ -17,13 +17,13 @@ _STATUS_ENCRYPTED = 'Encrypted'
 
 vm_extension_info = {
     'Linux': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryptionForLinux',
+        'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
+        'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryptionForLinux',
         'version': '0.1'
     },
     'Windows': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryption',
+        'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
+        'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryption',
         'version': '1.1'
     }
 }
@@ -40,16 +40,6 @@ vmss_extension_info = {
         'version': '2.1'
     }
 }
-
-def _get_extension_info(os_type):
-    extension = vm_extension_info[os_type].copy()
-    extension_name = os.environ.get('ADE_TEST_EXTENSION_NAME');
-    extension_publisher = os.environ.get('ADE_TEST_EXTENSION_PUBLISHER');
-    if extension_name:
-        extension['name'] = extension_name
-    if extension_publisher != "":
-        extension['publisher'] = extension_publisher
-    return extension
 
 def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
                aad_client_id,
@@ -77,9 +67,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
-
-    extension = _get_extension_info(os_type)
-
+    extension = vm_extension_info[os_type]
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
     vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
 
@@ -194,10 +182,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                        "the encryption will finish shortly")
 
 
-def decrypt_vm(resource_group_name,
-               vm_name,
-               volume_type=None,
-               force=False):
+def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
     '''
     Disable disk encryption on OS disk, Data disks, or both
     '''
@@ -226,8 +211,7 @@ def decrypt_vm(resource_group_name,
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
 
-    extension = _get_extension_info(os_type)
-
+    extension = vm_extension_info[os_type]
     # sequence_version should be incremented since encryptions occurred before
     sequence_version = uuid.uuid4()
 
@@ -267,9 +251,7 @@ def decrypt_vm(resource_group_name,
 
 
 def show_vm_encryption_status(resource_group_name, vm_name):
-    '''
-    show the encryption status
-    '''
+    '''show the encryption status'''
     encryption_status = {
         'osDisk': 'NotEncrypted',
         'osDiskEncryptionSettings': None,
@@ -283,9 +265,7 @@ def show_vm_encryption_status(resource_group_name, vm_name):
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     encryption_status['osType'] = os_type
-
-    extension = _get_extension_info(os_type)
-
+    extension = vm_extension_info[os_type]
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
                                                                      vm_name,
                                                                      extension['name'],
