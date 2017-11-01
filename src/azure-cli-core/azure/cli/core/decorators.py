@@ -92,10 +92,3 @@ def suppress_all_exceptions(raise_in_diagnostics=False, fallback_return=None):
         return _wrapped_func
 
     return _decorator
-
-
-def transfer_doc(source_func):
-    def _decorator(func):
-        func.__doc__ = source_func.__doc__
-        return func
-    return _decorator

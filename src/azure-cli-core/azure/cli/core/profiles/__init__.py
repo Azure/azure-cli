@@ -4,32 +4,21 @@
 # --------------------------------------------------------------------------------------------
 
 #  pylint: disable=unused-import
-from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
-                                             ResourceType,
-                                             PROFILE_TYPE,
-                                             get_api_version as _sdk_get_api_version,
-                                             supported_api_version as _sdk_supported_api_version,
-                                             get_versioned_sdk as _sdk_get_versioned_sdk)
-
-# API Profiles currently supported in the CLI.
-API_PROFILES = {
-    'latest': AZURE_API_PROFILES['latest'],
-    '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile']
-}
+from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, PROFILE_TYPE
 
 
-def get_api_version(resource_type):
+def get_api_version(cli_ctx, resource_type):
     """ Get the current API version for a given resource_type.
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
     :returns:  str -- The API version.
     """
-    from azure.cli.core._profile import CLOUD
-    return _sdk_get_api_version(CLOUD.profile, resource_type)
+    from azure.cli.core.profiles._shared import get_api_version as _sdk_get_api_version
+    return _sdk_get_api_version(cli_ctx.cloud.profile, resource_type)
 
 
-def supported_api_version(resource_type, min_api=None, max_api=None):
+def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None):
     """ Method to check if the current API version for a given resource_type is supported.
         If resource_type is set to None, the current profile version will be used as the basis of
         the comparison.
@@ -41,17 +30,17 @@ def supported_api_version(resource_type, min_api=None, max_api=None):
     :param max_api: The maximum API that is supported (inclusive). Omit for no maximum constraint.
     "type max_api: str
     :returns:  bool -- True if the current API version of resource_type satisfies the
-                       min/max constraints. False otherwise.
+                        min/max constraints. False otherwise.
     """
-    from azure.cli.core._profile import CLOUD
-    return _sdk_supported_api_version(CLOUD.profile, resource_type, min_api, max_api)
+    from azure.cli.core.profiles._shared import supported_api_version as _sdk_supported_api_version
+    return _sdk_supported_api_version(cli_ctx.cloud.profile, resource_type, min_api, max_api)
 
 
-def get_sdk(resource_type, *attr_args, **kwargs):
+def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
     """ Get any SDK object that's versioned using the current API version for resource_type.
         Supported keyword arguments:
             checked - A boolean specifying if this method should suppress/check import exceptions
-                      or not. By default, None is returned.
+                        or not. By default, None is returned.
             mod - A string specifying the submodule that all attr_args should be prefixed with.
 
         Example usage:
@@ -59,8 +48,8 @@ def get_sdk(resource_type, *attr_args, **kwargs):
             TableService = get_sdk(resource_type, 'table#TableService')
 
             File, Directory = get_sdk(resource_type,
-                                      'file.models#File',
-                                      'file.models#Directory')
+                                        'file.models#File',
+                                        'file.models#Directory')
 
             Same as above but get multiple models where File and Directory are both part of
             'file.models' and we don't want to specify each full path.
@@ -78,5 +67,12 @@ def get_sdk(resource_type, *attr_args, **kwargs):
     :returns: object -- e.g. an SDK module, model, enum, attribute. The number of objects returned
                         depends on len(attr_args).
     """
-    from azure.cli.core._profile import CLOUD
-    return _sdk_get_versioned_sdk(CLOUD.profile, resource_type, *attr_args, **kwargs)
+    from azure.cli.core.profiles._shared import get_versioned_sdk as _sdk_get_versioned_sdk
+    return _sdk_get_versioned_sdk(cli_ctx.cloud.profile, resource_type, *attr_args, **kwargs)
+
+
+# API Profiles currently supported in the CLI.
+API_PROFILES = {
+    'latest': AZURE_API_PROFILES['latest'],
+    '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile']
+}

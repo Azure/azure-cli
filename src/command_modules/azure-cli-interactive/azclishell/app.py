@@ -22,78 +22,44 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.filters import Always
-from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.interface import CommandLineInterface, Application
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.interface import Application
 from prompt_toolkit.shortcuts import create_eventloop
 
-import azclishell.configuration
+from azclishell import __version__
 from azclishell.az_completer import AzCompleter
-
-from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
+from azclishell.az_lexer import get_az_lexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
-from azclishell.frequency_heuristic import DISPLAY_TIME
+from azclishell.configuration import Configuration, SELECT_SYMBOL
+from azclishell.frequency_heuristic import DISPLAY_TIME, frequency_heuristic
 from azclishell.gather_commands import add_new_lines, GatherCommands
-from azclishell.key_bindings import registry, get_section, sub_section
+from azclishell.key_bindings import InteractiveKeyBindings
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.progress import progress_view
-from azclishell.telemetry import SHELL_TELEMETRY as telemetry
+from azclishell.telemetry import Telemetry
 from azclishell.threads import LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.application import Configuration
-from azure.cli.core.commands import LongRunningOperation, get_op_handler
+from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
 from azure.cli.core.cloud import get_active_cloud_name
-from azure.cli.core._config import az_config, DEFAULTS_SECTION
+from azure.cli.core._config import DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 import azure.cli.core.telemetry as cli_telemetry
-from azure.cli.core.util import (show_version_info_exit, handle_exception)
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import handle_exception
 
+from knack.log import get_logger
+from knack.util import CLIError
 
-SHELL_CONFIGURATION = azclishell.configuration.CONFIGURATION
-SHELL_CONFIG_DIR = azclishell.configuration.get_config_dir
 
 NOTIFICATIONS = ""
-PROFILE = Profile()
-SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
 START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
-
-def space_examples(list_examples, rows, section_value):
-    """ makes the example text """
-    examples_with_index = []
-
-    for i, _ in list(enumerate(list_examples)):
-        if len(list_examples[i]) > 1:
-            examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
-                                       list_examples[i][1])
-
-    example = "".join(exam for exam in examples_with_index)
-    num_newline = example.count('\n')
-
-    page_number = ''
-    if num_newline > rows * PART_SCREEN_EXAMPLE and rows > PART_SCREEN_EXAMPLE * 10:
-        len_of_excerpt = math.floor(float(rows) * PART_SCREEN_EXAMPLE)
-
-        group = example.split('\n')
-        end = int(section_value * len_of_excerpt)
-        begin = int((section_value - 1) * len_of_excerpt)
-
-        if end < num_newline:
-            example = '\n'.join(group[begin:end]) + "\n"
-        else:
-            # default chops top off
-            example = '\n'.join(group[begin:]) + "\n"
-            while ((section_value - 1) * len_of_excerpt) > num_newline:
-                sub_section()
-        page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
-
-    return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
+logger = get_logger(__name__)
 
 
 def space_toolbar(settings_items, empty_space):
@@ -114,27 +80,35 @@ def space_toolbar(settings_items, empty_space):
     return settings, empty_space
 
 
-def restart_completer(shell):
-    shell.completer = AzCompleter(GatherCommands())
-    shell.refresh_cli = True
+def restart_completer(shell_ctx):
+    shell_ctx.completer = AzCompleter(shell_ctx, GatherCommands(shell_ctx.config))
+    shell_ctx.refresh_cli = True
 
 
 # pylint: disable=too-many-instance-attributes
-class Shell(object):
-    """ represents the shell """
+class AzInteractiveShell(object):
 
-    def __init__(self, completer=None, styles=None,
-                 lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdin, output_custom=None,
-                 user_feedback=False, intermediate_sleep=.25, final_sleep=4):
-        self.styles = styles
-        if styles:
-            self.lexer = lexer or AzLexer
-        else:
-            self.lexer = None
-        self.app = app
-        self.completer = completer
-        self.history = history
+    def __init__(self, cli_ctx, style=None):
+
+        from azclishell.color_styles import style_factory
+
+        self.cli_ctx = cli_ctx
+        self.config = Configuration(cli_ctx.config)
+        self.config.set_style(style)
+        self.styles = style_factory(self.config.get_style())
+        self.lexer = get_az_lexer(self.config) if self.styles else None
+        try:
+            from azclishell.gather_commands import GatherCommands
+            from azclishell.az_completer import AzCompleter
+            self.completer = AzCompleter(self, GatherCommands(self.config))
+        except IOError:  # if there is no cache
+            self.completer = None
+        self.completer = None
+        self.history = FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
+        os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
+        self.telemetry = Telemetry(self.cli_ctx)
+
+        # OH WHAT FUN TO FIGURE OUT WHAT THESE ARE!
         self._cli = None
         self.refresh_cli = False
         self.layout = None
@@ -144,16 +118,41 @@ class Shell(object):
         self._env = os.environ
         self.last = None
         self.last_exit = 0
-        self.user_feedback = user_feedback
-        self.input = input_custom
-        self.output = output_custom
+        self.user_feedback = False
+        self.input = sys.stdin
+        self.output = None
         self.config_default = ""
         self.default_command = ""
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
-        self.intermediate_sleep = intermediate_sleep
-        self.final_sleep = final_sleep
+        self.intermediate_sleep = 0.25
+        self.final_sleep = 4
+
+        # try to consolidate state information here...
+        # These came from key bindings...
+        self._section = 1
+        self.is_prompting = False
+        self.is_example_repl = False
+        self.is_showing_default = False
+        self.is_symbols = True
+
+    def __call__(self):
+
+        if self.cli_ctx.data["az_interactive_active"]:
+            logger.warning("You're in the interactive shell already.\n")
+            return
+
+        if self.config.BOOLEAN_STATES[self.config.config.get('DEFAULT', 'firsttime')]:
+            self.config.firsttime()
+
+        if not self.config.has_feedback() and frequency_heuristic(self):
+            print("\n\nAny comments or concerns? You can use the \'feedback\' command!" +
+                  " We would greatly appreciate it.\n")
+
+        self.cli_ctx.data["az_interactive_active"] = True
+        self.run()
+        self.cli_ctx.data["az_interactive_active"] = False
 
     @property
     def cli(self):
@@ -204,6 +203,37 @@ class Shell(object):
         self._update_toolbar()
         cli.request_redraw()
 
+    def _space_examples(self, list_examples, rows, section_value):
+        """ makes the example text """
+        examples_with_index = []
+
+        for i, _ in list(enumerate(list_examples)):
+            if len(list_examples[i]) > 1:
+                examples_with_index.append("[" + str(i + 1) + "] " + list_examples[i][0] +
+                                           list_examples[i][1])
+
+        example = "".join(exam for exam in examples_with_index)
+        num_newline = example.count('\n')
+
+        page_number = ''
+        if num_newline > rows * PART_SCREEN_EXAMPLE and rows > PART_SCREEN_EXAMPLE * 10:
+            len_of_excerpt = math.floor(float(rows) * PART_SCREEN_EXAMPLE)
+
+            group = example.split('\n')
+            end = int(section_value * len_of_excerpt)
+            begin = int((section_value - 1) * len_of_excerpt)
+
+            if end < num_newline:
+                example = '\n'.join(group[begin:end]) + "\n"
+            else:
+                # default chops top off
+                example = '\n'.join(group[begin:]) + "\n"
+                while ((section_value - 1) * len_of_excerpt) > num_newline:
+                    self._section -= 1
+            page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
+
+        return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
+
     def _update_toolbar(self):
         cli = self.cli
         _, cols = get_window_dim()
@@ -231,11 +261,12 @@ class Shell(object):
     def _toolbar_info(self):
         sub_name = ""
         try:
-            sub_name = PROFILE.get_subscription()[_SUBSCRIPTION_NAME]
+            profile = Profile(self.cli_ctx)
+            sub_name = profile.get_subscription()[_SUBSCRIPTION_NAME]
         except CLIError:
             pass
 
-        curr_cloud = "Cloud: {}".format(get_active_cloud_name())
+        curr_cloud = "Cloud: {}".format(self.cli_ctx.cloud)
 
         tool_val = 'Subscription: {}'.format(sub_name) if sub_name else curr_cloud
 
@@ -282,8 +313,8 @@ class Shell(object):
                     for example in self.completer.command_examples[cmdstp]:
                         for part in example:
                             string_example += part
-                    example = space_examples(
-                        self.completer.command_examples[cmdstp], rows, get_section())
+                    example = self._space_examples(
+                        self.completer.command_examples[cmdstp], rows, self._section)
 
         if not any_documentation:
             self.description_docs = u''
@@ -291,17 +322,17 @@ class Shell(object):
 
     def _update_default_info(self):
         try:
-            options = az_config.config_parser.options(DEFAULTS_SECTION)
+            options = self.cli_ctx.config.config_parser.options(DEFAULTS_SECTION)
             self.config_default = ""
             for opt in options:
-                self.config_default += opt + ": " + az_config.get(DEFAULTS_SECTION, opt) + "  "
+                self.config_default += opt + ": " + self.cli_ctx.config.get(DEFAULTS_SECTION, opt) + "  "
         except configparser.NoSectionError:
             self.config_default = ""
 
     def create_application(self, full_layout=True):
         """ makes the application object and the buffers """
         if full_layout:
-            layout = create_layout(self.lexer, ExampleLexer, ToolbarLexer)
+            layout = create_layout(self, self.lexer, ExampleLexer, ToolbarLexer)
         else:
             layout = create_tutorial_layout(self.lexer)
 
@@ -330,13 +361,14 @@ class Shell(object):
             style=self.styles,
             buffer=writing_buffer,
             on_input_timeout=self.on_input_timeout,
-            key_bindings_registry=registry,
+            key_bindings_registry=InteractiveKeyBindings(self).registry,
             layout=layout,
             buffers=buffers,
         )
 
     def create_interface(self):
-        """ instantiates the intereface """
+        """ instantiates the interface """
+        from prompt_toolkit.interface import CommandLineInterface
         return CommandLineInterface(
             application=self.create_application(),
             eventloop=create_eventloop())
@@ -397,6 +429,7 @@ class Shell(object):
 
     def example_repl(self, text, example, start_index, continue_flag):
         """ REPL for interactive tutorials """
+        from prompt_toolkit.interface import CommandLineInterface
 
         if start_index:
             start_index = start_index + 1
@@ -442,7 +475,7 @@ class Shell(object):
         args = parse_quotes(cmd)
         cmd_stripped = cmd.strip()
         if cmd_stripped and cmd.split(' ', 1)[0].lower() == 'az':
-            telemetry.track_ssg('az', cmd)
+            self.telemetry.track_ssg('az', cmd)
             cmd = ' '.join(cmd.split()[1:])
         if self.default_command:
             cmd = self.default_command + " " + cmd
@@ -454,8 +487,8 @@ class Shell(object):
             outside = True
             cmd = 'echo -n "" >' +\
                 os.path.join(
-                    SHELL_CONFIG_DIR(),
-                    SHELL_CONFIGURATION.get_history())
+                    self.config.config_dir(),
+                    self.config.get_history())
         elif cmd_stripped == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
@@ -466,22 +499,22 @@ class Shell(object):
                 if cmd.strip() and cmd.split()[0] == 'cd':
                     self.handle_cd(parse_quotes(cmd))
                     continue_flag = True
-                telemetry.track_ssg('outside', '')
+                self.telemetry.track_ssg('outside', '')
 
             elif cmd_stripped[0] == SELECT_SYMBOL['exit_code']:
                 meaning = "Success" if self.last_exit == 0 else "Failure"
 
                 print(meaning + ": " + str(self.last_exit), file=self.output)
                 continue_flag = True
-                telemetry.track_ssg('exit code', '')
+                self.telemetry.track_ssg('exit code', '')
             elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
                 continue_flag = self.handle_jmespath_query(args)
-                telemetry.track_ssg('query', '')
+                self.telemetry.track_ssg('query', '')
 
             elif args[0] == '--version' or args[0] == '-v':
                 try:
                     continue_flag = True
-                    show_version_info_exit(self.output)
+                    self.cli_ctx.show_version()
                 except SystemExit:
                     pass
             elif "|" in cmd or ">" in cmd:
@@ -491,7 +524,7 @@ class Shell(object):
 
             elif SELECT_SYMBOL['example'] in cmd:
                 cmd, continue_flag = self.handle_example(cmd, continue_flag)
-                telemetry.track_ssg('tutorial', cmd)
+                self.telemetry.track_ssg('tutorial', cmd)
             elif len(cmd_stripped) > 2 and SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
                 continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
 
@@ -567,7 +600,7 @@ class Shell(object):
                 self.set_scope(value)
                 print("defaulting: " + value, file=self.output)
                 cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
-                telemetry.track_ssg('scope command', value)
+                self.telemetry.track_ssg('scope command', value)
 
             elif SELECT_SYMBOL['unscope'] == default_split[0] and \
                     len(self.default_command.split()) > 0:
@@ -591,13 +624,12 @@ class Shell(object):
 
         try:
             args = parse_quotes(cmd)
-            azlogging.configure_logging(args)
 
             if len(args) > 0 and args[0] == 'feedback':
-                SHELL_CONFIGURATION.set_feedback('yes')
+                self.config.set_feedback('yes')
                 self.user_feedback = False
 
-            azure_folder = get_config_dir()
+            azure_folder = self.config.config_dir
             if not os.path.exists(azure_folder):
                 os.makedirs(azure_folder)
             ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
@@ -620,7 +652,7 @@ class Shell(object):
                 self.threads.append(thread)
                 result = None
             else:
-                result = self.app.execute(args)
+                result = self.cli_ctx.invoke(args)
 
             self.last_exit = 0
             if result and result.result is not None:
@@ -641,19 +673,15 @@ class Shell(object):
 
     def progress_patch(self, _=False):
         """ forces to use the Shell Progress """
-        from azure.cli.core.application import APPLICATION
-
         from azclishell.progress import ShellProgressView
-        APPLICATION.progress_controller.init_progress(ShellProgressView())
-        return APPLICATION.progress_controller
+        self.cli_ctx.progress_controller.init_progress(ShellProgressView())
+        return self.cli_ctx.progress_controller
 
     def run(self):
         """ starts the REPL """
-        telemetry.start()
-        from azure.cli.core.application import APPLICATION
-        APPLICATION.get_progress_controller = self.progress_patch
+        self.telemetry.start()
+        self.cli_ctx.get_progress_controller = self.progress_patch
 
-        # refresh the cache and completer
         self.command_table_thread = LoadCommandTableThread(restart_completer, self)
         self.command_table_thread.start()
 
@@ -672,7 +700,7 @@ class Shell(object):
                     cmd = text
                     outside = False
 
-                except AttributeError:
+                except AttributeError as ex:
                     # when the user pressed Control D
                     break
                 else:
@@ -692,12 +720,11 @@ class Shell(object):
                     else:
                         self.cli_execute(cmd)
                         # because I catch the sys exit, I have to push out
-                        cli_telemetry.conclude()
+                        self.telemetry.conclude()
 
             except (KeyboardInterrupt, ValueError):
                 # CTRL C
                 self.set_prompt()
                 continue
 
-        print('Have a lovely day!!', file=self.output)
-        telemetry.conclude()
+        self.telemetry.conclude()

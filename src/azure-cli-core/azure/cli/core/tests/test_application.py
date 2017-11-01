@@ -5,131 +5,82 @@
 
 import unittest
 
+import mock
 import os
 import tempfile
 
-from azure.cli.core.application import Application, Configuration, IterateAction
-from azure.cli.core.commands import CliCommand
-from azure.cli.core.util import CLIError
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.commands.validators import IterateAction
+
+from azure.cli.testsdk import TestCli
+
+from knack.util import CLIError
 
 
 class TestApplication(unittest.TestCase):
     def test_client_request_id_is_not_assigned_when_application_is_created(self):
-        app = Application()
-        self.assertNotIn('x-ms-client-request-id', app.session['headers'])
+        cli = TestCli()
+        self.assertNotIn('x-ms-client-request-id', cli.data['headers'])
 
     def test_client_request_id_is_refreshed_correctly(self):
-        app = Application()
-        app.refresh_request_id()
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
+        cli = TestCli()
+        cli.refresh_request_id()
+        self.assertIn('x-ms-client-request-id', cli.data['headers'])
 
-        old_id = app.session['headers']['x-ms-client-request-id']
+        old_id = cli.data['headers']['x-ms-client-request-id']
 
-        app.refresh_request_id()
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
-        self.assertNotEquals(old_id, app.session['headers']['x-ms-client-request-id'])
+        cli.refresh_request_id()
+        self.assertIn('x-ms-client-request-id', cli.data['headers'])
+        self.assertNotEquals(old_id, cli.data['headers']['x-ms-client-request-id'])
 
     def test_client_request_id_is_refreshed_after_execution(self):
         def _handler(args):
             return True
 
-        config = Configuration()
-        config.get_command_table = lambda *_: {'test': CliCommand('test', _handler)}
-        app = Application(config)
+        class TestCommandsLoader(AzCommandsLoader):
 
-        app.execute(['test'])
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
-        old_id = app.session['headers']['x-ms-client-request-id']
+            def load_command_table(self, args):
+                super(TestCommandsLoader, self).load_command_table(args)
+                self.command_table = {'test': AzCliCommand(self, 'test', _handler)}
+                return self.command_table
 
-        app.execute(['test'])
-        self.assertIn('x-ms-client-request-id', app.session['headers'])
-        self.assertNotEquals(old_id, app.session['headers']['x-ms-client-request-id'])
+        cli = TestCli(commands_loader_cls=TestCommandsLoader)
+
+        cli.invoke(['test'])
+        self.assertIn('x-ms-client-request-id', cli.data['headers'])
+        old_id = cli.data['headers']['x-ms-client-request-id']
+
+        cli.invoke(['test'])
+        self.assertIn('x-ms-client-request-id', cli.data['headers'])
+        self.assertNotEquals(old_id, cli.data['headers']['x-ms-client-request-id'])
 
     def test_application_register_and_call_handlers(self):
         handler_called = [False]
 
-        def handler(**kwargs):
+        def handler(*args, **kwargs):
             kwargs['args'][0] = True
 
-        def other_handler(**kwargs):
+        def other_handler(*args, **kwargs):
             self.assertEqual(kwargs['args'], 'secret sauce')
 
-        app = Application()
-        app.initialize(Configuration())
+        cli = TestCli()
 
-        app.raise_event('was_handler_called', args=handler_called)
-        self.assertFalse(handler_called[0],
-                         "Raising event with no handlers registered somehow failed...")
+        cli.raise_event('was_handler_called', args=handler_called)
+        self.assertFalse(handler_called[0], "Raising event with no handlers registered somehow failed...")
 
-        app.register('was_handler_called', handler)
+        cli.register_event('was_handler_called', handler)
         self.assertFalse(handler_called[0])
 
         # Registered handler won't get called if event with different name
         # is raised...
-        app.raise_event('other_handler_called', args=handler_called)
+        cli.raise_event('other_handler_called', args=handler_called)
         self.assertFalse(handler_called[0], 'Wrong handler called!')
 
-        app.raise_event('was_handler_called', args=handler_called)
+        cli.raise_event('was_handler_called', args=handler_called)
         self.assertTrue(handler_called[0], "Handler didn't get called")
 
-        app.raise_event('other_handler_called', args='secret sauce')
-
-    def test_list_value_parameter(self):
-        hellos = []
-
-        def handler(args):
-            hellos.append(args)
-
-        command = CliCommand('test command', handler)
-        command.add_argument('hello', '--hello', nargs='+', action=IterateAction)
-        command.add_argument('something', '--something')
-        cmd_table = {'test command': command}
-
-        argv = 'az test command --hello world sir --something else'.split()
-        config = Configuration()
-        config.get_command_table = lambda argv: cmd_table
-        application = Application(config)
-        application.execute(argv[1:])
-
-        self.assertEqual(2, len(hellos))
-        self.assertEqual(hellos[0]['hello'], 'world')
-        self.assertEqual(hellos[0]['something'], 'else')
-        self.assertEqual(hellos[1]['hello'], 'sir')
-        self.assertEqual(hellos[1]['something'], 'else')
-
-    def test_case_insensitive_command_path(self):
-        import argparse
-
-        def handler(args):
-            return 'PASSED'
-
-        command = CliCommand('test command', handler)
-        command.add_argument('var', '--var', '-v')
-        cmd_table = {'test command': command}
-
-        def _test(cmd_line):
-            argv = cmd_line.split()
-            config = Configuration()
-            config.get_command_table = lambda argv: cmd_table
-            application = Application(config)
-            return application.execute(argv[1:])
-
-        # case insensitive command paths
-        result = _test('az TEST command --var blah')
-        self.assertEqual(result.result, 'PASSED')
-
-        result = _test('az test COMMAND --var blah')
-        self.assertEqual(result.result, 'PASSED')
-
-        result = _test('az test command -v blah')
-        self.assertEqual(result.result, 'PASSED')
-
-        # verify that long and short options remain case sensitive
-        with self.assertRaises(SystemExit):
-            _test('az test command --vAR blah')
-
-        with self.assertRaises(SystemExit):
-            _test('az test command -V blah')
+        cli.raise_event('other_handler_called', args='secret sauce')
 
     def test_expand_file_prefixed_files(self):
         f = tempfile.NamedTemporaryFile(delete=False)
@@ -159,7 +110,8 @@ class TestApplication(unittest.TestCase):
 
         for test_case in cases:
             try:
-                args = Application._expand_file_prefixed_files(test_case[0])  # pylint: disable=protected-access
+                from azure.cli.core.commands import _expand_file_prefixed_files
+                args = _expand_file_prefixed_files(test_case[0])  # pylint: disable=protected-access
                 self.assertEqual(args, test_case[1], 'Failed for: {}'.format(test_case[0]))
             except CLIError as ex:
                 self.fail('Unexpected error for {} ({}): {}'.format(test_case[0], args, ex))

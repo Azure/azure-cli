@@ -5,9 +5,9 @@
 import os
 import sys
 
-import azure.cli.core.azlogging as azlogging
+from knack.log import get_logger
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
 HOMEBREW_CELLAR_PATH = '/usr/local/Cellar/azure-cli/'

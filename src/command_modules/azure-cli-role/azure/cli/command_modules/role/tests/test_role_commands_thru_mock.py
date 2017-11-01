@@ -9,6 +9,8 @@ import unittest
 import uuid
 import mock
 
+from azure.cli.testsdk import TestCli
+
 from azure.mgmt.authorization.models import RoleDefinition, RoleDefinitionProperties
 from azure.graphrbac.models import Application, ServicePrincipal
 from azure.cli.command_modules.role.custom import (create_role_definition,
@@ -58,7 +60,9 @@ class TestRoleMocked(unittest.TestCase):
         role_definition_file = role_definition_file.replace('\\', '\\\\')
 
         # action
-        create_role_definition(role_definition_file)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        create_role_definition(cmd, role_definition_file)
 
         # assert
         self.assertTrue(self.create_def_invoked)
@@ -86,7 +90,9 @@ class TestRoleMocked(unittest.TestCase):
         role_definition_file = role_definition_file.replace('\\', '\\\\')
 
         # action
-        update_role_definition(role_definition_file)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        update_role_definition(cmd, role_definition_file)
 
         # assert
         self.assertTrue(self.update_def_invoked)
@@ -110,7 +116,9 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
-        result = create_service_principal_for_rbac(name, test_pwd, 12, skip_assignment=True)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        result = create_service_principal_for_rbac(cmd, name, test_pwd, 12, skip_assignment=True)
 
         # assert
         self.assertEqual(result['password'], test_pwd)
@@ -149,7 +157,9 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
-        result = create_service_principal_for_rbac(name, cert=cert, years=2, skip_assignment=True)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        result = create_service_principal_for_rbac(cmd, name, cert=cert, years=2, skip_assignment=True)
 
         # assert
         self.assertEqual(result['name'], 'http://' + name)

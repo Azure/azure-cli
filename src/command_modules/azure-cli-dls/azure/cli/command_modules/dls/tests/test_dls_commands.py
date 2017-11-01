@@ -12,7 +12,7 @@ import time
 from shutil import rmtree
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 
 

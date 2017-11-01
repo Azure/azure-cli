@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=unused-import
 
 
 helps['cloud'] = """
@@ -22,19 +22,19 @@ helps['cloud show'] = """
 """
 
 helps['cloud register'] = """
-            type: command
-            short-summary: Register a cloud.
-            long-summary: When registering a cloud, specify only the resource manager endpoint for the autodetection of other endpoints.
+    type: command
+    short-summary: Register a cloud.
+    long-summary: When registering a cloud, specify only the resource manager endpoint for the autodetection of other endpoints.
 """
 
 helps['cloud unregister'] = """
-            type: command
-            short-summary: Unregister a cloud.
+    type: command
+    short-summary: Unregister a cloud.
 """
 
 helps['cloud set'] = """
-            type: command
-            short-summary: Set the active cloud.
+    type: command
+    short-summary: Set the active cloud.
 """
 
 helps['cloud update'] = """

@@ -34,7 +34,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-cdn==0.30.2',
+    'azure-mgmt-cdn==1.0.0',
     'azure-cli-core',
 ]
 

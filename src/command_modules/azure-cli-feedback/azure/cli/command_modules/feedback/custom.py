@@ -7,12 +7,14 @@ from __future__ import print_function
 import sys
 
 from azure.cli.core import __version__ as core_version
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import prompt, NoTTYException
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core.util import COMPONENT_PREFIX
 
+from knack.log import get_logger
+from knack.prompting import prompt, NoTTYException
+from knack.util import CLIError
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
+
 
 MESSAGES = {
     'intro': 'We appreciate your feedback! This survey is only two questions and should take less '
@@ -30,8 +32,6 @@ MESSAGES = {
 
 INSTRUMENTATION_KEY = '02b91c82-6729-4241-befc-e6d02ca4fbba'
 EVENT_NAME = 'FeedbackEvent'
-
-COMPONENT_PREFIX = 'azure-cli-'
 
 
 def _prompt_net_promoter_score():

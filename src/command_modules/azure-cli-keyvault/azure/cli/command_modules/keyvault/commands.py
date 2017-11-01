@@ -5,7 +5,7 @@
 
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import _cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import keyvault_client_factory, keyvault_client_vaults_factory
@@ -34,7 +34,7 @@ cli_command(__name__, 'keyvault delete-policy', custom_path.format('delete_polic
 cli_command(__name__, 'keyvault list-deleted', mgmt_path.format('VaultsOperations.list_deleted'),
             keyvault_client_vaults_factory)
 
-cli_generic_update_command(__name__,
+_cli_generic_update_command(__name__,
                            'keyvault update',
                            mgmt_path.format('VaultsOperations.get'),
                            custom_path.format('update_keyvault_setter'),

@@ -14,7 +14,6 @@ import six
 from nose import with_setup
 from six import StringIO
 
-from azure.cli.main import main as cli_main
 from azure.cli.command_modules.find.custom import _purge
 
 

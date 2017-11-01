@@ -13,7 +13,7 @@ class VstsContinuousDeliveryProvider(object):
     def __init__(self):
         self._progress_last_message = ''
 
-    def setup_continuous_delivery(self,
+    def setup_continuous_delivery(self, cli_ctx,
                                   resource_group_name, name, repo_url, branch, git_token,
                                   slot, cd_app_type_details, cd_project_url, cd_create_account, location,
                                   test, private_repo_username, private_repo_password, webapp_list):
@@ -22,7 +22,7 @@ class VstsContinuousDeliveryProvider(object):
         """
 
         # Gather information about the Azure connection
-        profile = Profile()
+        profile = Profile(cli_ctx)
         subscription = profile.get_subscription()
         user = profile.get_current_account_user()
         cred, _, _ = profile.get_login_credentials(subscription_id=None)

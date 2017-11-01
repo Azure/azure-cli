@@ -7,13 +7,12 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
-from azure.cli.core.commands import \
-    (register_cli_argument, register_extra_cli_argument, CliArgumentType)
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type,
-    tags_type, ignore_type, enum_choice_list, file_type, three_state_flag)
+    tags_type, file_type, get_three_state_flag)
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import get_json_object
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
@@ -30,6 +29,8 @@ from azure.cli.command_modules.keyvault._validators import \
      process_certificate_cancel_namespace,
      process_secret_set_namespace,
      secret_text_encoding_values, secret_binary_encoding_values)
+
+from knack.arguments import enum_choice_list, ignore_type, CLIArgumentType
 
 
 # COMPLETERS
@@ -84,10 +85,10 @@ def register_attributes_argument(scope, name, attr_class, create=False, ignore=N
     if create:
         register_extra_cli_argument(scope, 'disabled',
                                     help='Create {} in disabled state.'.format(name),
-                                    **three_state_flag())
+                                    arg_type=get_three_state_flag())
     else:
         register_extra_cli_argument(scope, 'enabled', help='Enable the {}.'.format(name),
-                                    **three_state_flag())
+                                    arg_type=get_three_state_flag())
     if 'expires' not in ignore:
         register_extra_cli_argument(scope, 'expires', default=None,
                                     help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
@@ -101,7 +102,7 @@ def register_attributes_argument(scope, name, attr_class, create=False, ignore=N
 
 # ARGUMENT DEFINITIONS
 
-vault_name_type = CliArgumentType(help='Name of the key vault.',
+vault_name_type = CLIArgumentType(help='Name of the key vault.',
                                   options_list=('--vault-name',),
                                   metavar='NAME',
                                   completer=get_resource_name_completion_list(
@@ -125,17 +126,17 @@ register_cli_argument('keyvault', 'tags', tags_type)
 register_cli_argument('keyvault', 'enabled_for_deployment',
                       help='Allow Virtual Machines to retrieve certificates stored as secrets from '
                            'the vault.',
-                      **three_state_flag())
+                      arg_type=get_three_state_flag())
 register_cli_argument('keyvault', 'enabled_for_disk_encryption',
                       help='Allow Disk Encryption to retrieve secrets from the vault and unwrap '
                            'keys.',
-                      **three_state_flag())
+                      arg_type=get_three_state_flag())
 register_cli_argument('keyvault', 'enabled_for_template_deployment',
                       help='Allow Resource Manager to retrieve secrets from the vault.',
-                      **three_state_flag())
+                      arg_type=get_three_state_flag())
 register_cli_argument('keyvault', 'enable_soft_delete',
                       help='Enable vault deletion recovery for the vault, and all contained entities',
-                      **three_state_flag())
+                      arg_type=get_three_state_flag())
 
 register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type,
                       required=True, completer=None, validator=None)
@@ -144,7 +145,7 @@ register_cli_argument('keyvault create', 'sku', **enum_choice_list(SkuName))
 register_cli_argument('keyvault create', 'no_self_perms',
                       help="Don't add permissions for the current user/service principal in the "
                            "new vault",
-                      **three_state_flag())
+                      arg_type=get_three_state_flag())
 register_cli_argument('keyvault create', 'location',
                       validator=get_default_location_from_resource_group)
 
@@ -278,7 +279,7 @@ register_cli_argument('keyvault certificate import', 'password',
                       help="If the private key in certificate is encrypted, the password used for "
                            "encryption.")
 register_extra_cli_argument('keyvault certificate import', 'disabled',
-                            help='Import the certificate in disabled state.', **three_state_flag())
+                            help='Import the certificate in disabled state.', arg_type=get_three_state_flag())
 
 register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'),
                       type=file_type, completer=FilesCompleter(),
@@ -315,9 +316,9 @@ register_cli_argument('keyvault certificate issuer admin', 'phone', options_list
 
 register_cli_argument('keyvault certificate issuer', 'issuer_name', help='Certificate issuer name.')
 register_cli_argument('keyvault certificate issuer', 'disabled',
-                      help='Set issuer to disabled state.', **three_state_flag())
+                      help='Set issuer to disabled state.', arg_type=get_three_state_flag())
 register_cli_argument('keyvault certificate issuer', 'enabled', help='Set issuer enabled state.',
-                      **three_state_flag())
+                      arg_type=get_three_state_flag())
 register_cli_argument('keyvault certificate issuer', 'account_id', arg_group='Issuer Credential')
 register_cli_argument('keyvault certificate issuer', 'password', arg_group='Issuer Credential')
 register_cli_argument('keyvault certificate issuer', 'organization_id',

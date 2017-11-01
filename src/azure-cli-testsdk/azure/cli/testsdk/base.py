@@ -9,6 +9,7 @@ import json
 import shlex
 import logging
 import inspect
+import unittest
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
                                            OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
@@ -25,11 +26,43 @@ from .utilities import find_recording_dir
 
 logger = logging.getLogger('azure.cli.testsdk')
 
+class CheckerMixin(object):
 
-class ScenarioTest(ReplayableTest):
+    def _apply_kwargs(self, val):
+        try:
+            return val.format(**self.kwargs)
+        except Exception as ex:
+            return val
+
+    def check(self, query, expected_results):
+        from azure.cli.testsdk.checkers import JMESPathCheck
+        query = self._apply_kwargs(query)
+        expected_results = self._apply_kwargs(expected_results)
+        return JMESPathCheck(query, expected_results)
+
+    def exists(self, query):
+        from azure.cli.testsdk.checkers import JMESPathCheckExists
+        query = self._apply_kwargs(query)
+        return JMESPathCheckExists(query)
+
+    def greater_than(self, query, expected_results):
+        from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
+        query = self._apply_kwargs(query)
+        expected_results = self._apply_kwargs(expected_results)
+        return JMESPathCheckGreaterThan(query, expected_results)
+
+    def is_empty(self):
+        from azure.cli.testsdk.checkers import NoneCheck
+        return NoneCheck()
+
+
+class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
                  recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.name_replacer = GeneralNameReplacer()
+        self.kwargs = {}
         super(ScenarioTest, self).__init__(
             method_name,
             config_file=config_file,
@@ -56,7 +89,7 @@ class ScenarioTest(ReplayableTest):
                 patch_retrieve_token_for_user,
                 patch_progress_controller,
             ],
-            recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
+            recording_dir=find_recording_dir(self.cli_ctx, inspect.getfile(self.__class__)),
             recording_name=recording_name
         )
 
@@ -71,9 +104,12 @@ class ScenarioTest(ReplayableTest):
 
         return moniker
 
-    @classmethod
-    def cmd(cls, command, checks=None, expect_failure=False):
-        return execute(command, expect_failure=expect_failure).assert_with_checks(checks)
+    def cmd(self, command, checks=None, expect_failure=False):
+        try:
+            command = command.format(**self.kwargs)
+        except KeyError as ex:
+            pass
+        return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
     def get_subscription_id(self):
         if self.in_recording or self.is_live:
@@ -84,21 +120,34 @@ class ScenarioTest(ReplayableTest):
 
 
 @live_only()
-class LiveScenarioTest(IntegrationTestBase):
-    @classmethod
-    def cmd(cls, command, checks=None, expect_failure=False):
-        return execute(command, expect_failure=expect_failure).assert_with_checks(checks)
+class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
+
+    def __init__(self, method_name):
+        super(LiveScenarioTest, self).__init__(method_name)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
+        self.kwargs = {}
+
+    def cmd(self, command, checks=None, expect_failure=False):
+        try:
+            command = command.format(**self.kwargs)
+        except KeyError as ex:
+            pass
+        return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+
+    def get_subscription_id(self):
+        return self.cmd('account list --query "[?isDefault].id" -o tsv').output.strip()
 
 
 class ExecutionResult(object):
-    def __init__(self, command, expect_failure=False, in_process=True):
+    def __init__(self, cli_ctx, command, expect_failure=False, in_process=True):
         self.output = ''
         self.applog = ''
 
         if in_process:
-            self._in_process_execute(command, expect_failure=expect_failure)
+            self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
         else:
-            self._out_of_process_execute(command)
+            self._out_of_process_execute(cli_ctx, command)
 
         if expect_failure and self.exit_code == 0:
             logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s. %s', command,
@@ -138,8 +187,7 @@ class ExecutionResult(object):
 
         return self.json_value
 
-    def _in_process_execute(self, command, expect_failure=False):
-        from azure.cli.main import main as cli_main
+    def _in_process_execute(self, cli_ctx, command, expect_failure=False):
         from six import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
@@ -151,7 +199,7 @@ class ExecutionResult(object):
         try:
             # issue: stderr cannot be redirect in this form, as a result some failure information
             # is lost when command fails.
-            self.exit_code = cli_main(shlex.split(command), output=stdout_buf, logging_stream=logging_buf) or 0
+            self.exit_code = cli_ctx.invoke(shlex.split(command), out_file=stdout_buf) or 0
             self.output = stdout_buf.getvalue()
             self.applog = logging_buf.getvalue()
 

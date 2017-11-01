@@ -23,9 +23,9 @@ def cf_dls_account_trusted_provider(_):
     return get_mgmt_service_client(DataLakeStoreAccountManagementClient).trusted_id_providers
 
 
-def cf_dls_filesystem(account_name):
+def cf_dls_filesystem(cli_ctx, account_name):
     from azure.datalake.store import core
-    profile = Profile()
+    profile = Profile(cli_ctx)
     subscription_id = None
     cred, subscription_id, _ = profile.get_login_credentials(
         subscription_id=subscription_id,

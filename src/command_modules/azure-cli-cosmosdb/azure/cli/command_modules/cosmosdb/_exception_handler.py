@@ -4,10 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
-
-logger = azlogging.get_az_logger(__name__)
+from knack.util import CLIError
 
 
 def duplicate_resource_exception_handler(ex):

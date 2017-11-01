@@ -5,10 +5,10 @@
 
 import os
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.log import get_logger
+from knack.util import CLIError
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 ADAL_PYTHON_SSL_NO_VERIFY = "ADAL_PYTHON_SSL_NO_VERIFY"

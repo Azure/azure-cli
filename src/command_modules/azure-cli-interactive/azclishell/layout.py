@@ -21,7 +21,6 @@ from pygments.token import Token
 from pygments.lexer import Lexer as PygLex
 
 import azclishell.configuration
-from azclishell.key_bindings import get_show_default, get_symbols
 from azclishell.progress import get_progress_message, get_done
 
 MAX_COMPLETION = 16
@@ -54,15 +53,21 @@ input_processors = [
 # pylint: disable=too-few-public-methods
 class ShowDefault(Filter):
     """ toggle on and off seeing the default """
+    def __init__(self, shell_ctx):
+        self.shell_ctx = shell_ctx
+
     def __call__(self, *a, **kw):
-        return get_show_default()
+        return self.shell_ctx.is_showing_default
 
 
 # pylint: disable=too-few-public-methods
 class ShowSymbol(Filter):
     """ toggle showing the symbols """
+    def __init__(self, shell_ctx):
+        self.shell_ctx = shell_ctx
+
     def __call__(self, *a, **kw):
-        return get_symbols()
+        return self.shell_ctx.is_symbols
 
 
 # pylint: disable=too-few-public-methods
@@ -167,9 +172,8 @@ def create_tutorial_layout(lex):
     return layout_full
 
 
-def create_layout(lex, exam_lex, toolbar_lex):
+def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
     """ creates the layout """
-    config = azclishell.configuration.CONFIGURATION
     lexer, exam_lex, toolbar_lex = get_lexers(lex, exam_lex, toolbar_lex)
 
     if not any(isinstance(processor, DefaultPrompt) for processor in input_processors):
@@ -177,14 +181,14 @@ def create_layout(lex, exam_lex, toolbar_lex):
 
     layout_lower = ConditionalContainer(
         HSplit([
-            get_anyhline(config),
-            get_descriptions(config, exam_lex, lexer),
-            get_examplehline(config),
-            get_example(config, exam_lex),
+            get_anyhline(shell_ctx.config),
+            get_descriptions(shell_ctx.config, exam_lex, lexer),
+            get_examplehline(shell_ctx.config),
+            get_example(shell_ctx.config, exam_lex),
 
             ConditionalContainer(
                 get_hline(),
-                filter=ShowDefault() | ShowSymbol()
+                filter=ShowDefault(shell_ctx) | ShowSymbol(shell_ctx)
             ),
             ConditionalContainer(
                 Window(
@@ -193,11 +197,11 @@ def create_layout(lex, exam_lex, toolbar_lex):
                         lexer=lexer
                     )
                 ),
-                filter=ShowDefault()
+                filter=ShowDefault(shell_ctx)
             ),
             ConditionalContainer(
                 get_hline(),
-                filter=ShowDefault() & ShowSymbol()
+                filter=ShowDefault(shell_ctx) & ShowSymbol(shell_ctx)
             ),
             ConditionalContainer(
                 Window(
@@ -206,7 +210,7 @@ def create_layout(lex, exam_lex, toolbar_lex):
                         lexer=exam_lex
                     )
                 ),
-                filter=ShowSymbol()
+                filter=ShowSymbol(shell_ctx)
             ),
             ConditionalContainer(
                 Window(

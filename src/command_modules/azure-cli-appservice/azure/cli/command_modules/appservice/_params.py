@@ -6,9 +6,14 @@
 from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
-                                                get_resource_name_completion_list, file_type,
-                                                CliArgumentType, ignore_type, enum_choice_list)
+from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
+                                                get_resource_name_completion_list, file_type)
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType
+
+from knack.arguments import (CLIArgumentType, ignore_type, enum_choice_list,
+                             get_resource_name_completion_list, file_type,
+                             CliArgumentType, ignore_type, enum_choice_list)
+
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
 from ._client_factory import web_client_factory
 from ._validators import validate_existing_function_app, validate_existing_web_app
@@ -76,7 +81,7 @@ register_cli_argument('functionapp', 'app_instance', ignore_type)
 register_cli_argument('functionapp', 'slot', ignore_type)
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
-register_cli_argument('appservice', 'location', arg_type=location_type)
+register_cli_argument('appservice', 'location', arg_type=get_location_type)
 
 register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
 register_cli_argument('appservice list-locations', 'sku', arg_type=sku_arg_type)
@@ -90,7 +95,7 @@ register_cli_argument('appservice plan', 'number_of_workers', help='Number of wo
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
 register_cli_argument('webapp', 'resource_group_name', arg_type=resource_group_name_type)
-register_cli_argument('webapp', 'location', arg_type=location_type)
+register_cli_argument('webapp', 'location', arg_type=get_location_type)
 
 register_cli_argument('webapp', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('webapp', 'name', configured_default='web',

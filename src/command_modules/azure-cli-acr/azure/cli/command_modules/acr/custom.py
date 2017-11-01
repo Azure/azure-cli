@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
 
 from azure.mgmt.containerregistry.v2017_10_01.models import (
     RegistryUpdateParameters,
@@ -14,8 +12,11 @@ from azure.mgmt.containerregistry.v2017_10_01.models import (
     Sku
 )
 
-from ._factory import get_acr_service_client
+from knack.prompting import prompt, prompt_pass, NoTTYException
+from knack.util import CLIError
+
 from ._constants import MANAGED_REGISTRY_SKU
+from ._factory import get_acr_service_client
 from ._utils import (
     arm_deploy_template_new_storage,
     arm_deploy_template_existing_storage,
@@ -28,9 +29,6 @@ from ._utils import (
     get_resource_id_by_storage_account_name
 )
 from ._docker_utils import get_login_credentials
-
-
-logger = azlogging.get_az_logger(__name__)
 
 
 def acr_check_name(registry_name):

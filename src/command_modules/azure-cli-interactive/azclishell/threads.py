@@ -15,11 +15,11 @@ class LoadCommandTableThread(threading.Thread):
         self.daemon = True
 
     def run(self):
-        from azclishell._dump_commands import FRESH_TABLE
+        from azclishell._dump_commands import LoadFreshTable
         from azclishell.az_completer import initialize_command_table_attributes
 
         try:
-            FRESH_TABLE.dump_command_table()
+            LoadFreshTable(self.shell).dump_command_table(self.shell)
         except KeyboardInterrupt:
             pass
         self.initialize_function(self.shell)
