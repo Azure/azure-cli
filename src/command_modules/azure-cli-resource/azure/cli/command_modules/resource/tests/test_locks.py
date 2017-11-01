@@ -15,7 +15,7 @@ class ResourceLockTests(ScenarioTest):
         self.cmd('az lock list').get_output_in_json()
 
     @record_only()
-    def test_subscription_locks(self):
+    def test_generic_subscription_locks(self):
         for lock_type in ['ReadOnly', 'CanNotDelete']:
             lock_name = self.create_random_name('cli-test-lock', 48)
             lock = self.cmd('az lock create -n {} --lock-type {}'.format(lock_name, lock_type)).get_output_in_json()
@@ -64,28 +64,35 @@ class ResourceLockTests(ScenarioTest):
         self._lock_operation_with_resource('CanNotDelete', resource_group)
 
     def _lock_operation_with_resource_group(self, lock_type, resource_group):
-        lock_name = self.create_random_name('cli-test-lock', 48)
 
-        self.cmd('az lock create -n {} -g {} --lock-type {}'.format(lock_name, resource_group, lock_type))
+        self.kwargs = {
+            'rg': resource_group,
+            'type': lock_type,
+            'lock': self.create_random_name('cli-test-lock', 48)
+        }
+
+        self.cmd('az lock create -n {lock} -g {rg} --lock-type {type}')
         self._sleep_for_lock_operation()
 
-        self.cmd('az lock show -g {} -n {}'.format(resource_group, lock_name)).assert_with_checks([
-            JMESPathCheck('name', lock_name),
-            JMESPathCheck('level', lock_type)])
+        self.cmd('az lock show -g {rg} -n {lock}', checks=[
+            self.check('name', '{lock}'),
+            self.check('level', '{type}')
+        ])
 
-        locks_list = self.cmd("az lock list -g {} --query '[].name' -ojson".format(resource_group)).get_output_in_json()
+        locks_list = self.cmd("az lock list -g {rg} --query '[].name'").get_output_in_json()
         self.assertTrue(locks_list)
-        self.assertIn(lock_name, locks_list)
+        self.assertIn(self.kwargs['lock'], locks_list)
 
-        notes = self.create_random_name('notes', 20)
-        new_lvl = 'ReadOnly' if lock_type == 'CanNotDelete' else 'CanNotDelete'
-        lock = self.cmd('az lock update -n {} -g {} --notes {} --lock-type {}'
-                        .format(lock_name, resource_group, notes, new_lvl)).get_output_in_json()
+        self.kwargs.update({
+            'notes': self.create_random_name('notes', 20),
+            'new_lvl': 'ReadOnly' if lock_type == 'CanNotDelete' else 'CanNotDelete'
+        })
+        self.cmd('az lock update -n {lock} -g {rg} --notes {notes} --lock-type {new_lvl}', checks=[
+            self.check('notes', '{notes}'),
+            self.check('level', '{new_lvl}')
+        ]).get_output_in_json()
 
-        self.assertEqual(lock.get('notes', None), notes)
-        self.assertEqual(lock.get('level', None), new_lvl)
-
-        self.cmd('az lock delete -g {} -n {}'.format(resource_group, lock_name))
+        self.cmd('az lock delete -g {rg} -n {lock}')
         self._sleep_for_lock_operation()
 
     def _lock_operation_with_resource(self, lock_type, resource_group):
@@ -121,28 +128,31 @@ class ResourceLockTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_group_lock')
     def test_group_lock_commands(self, resource_group):
-        lock_name = self.create_random_name('cli-test-lock', 48)
 
-        self.cmd('group lock create -n {} -g {} --lock-type CanNotDelete'.format(lock_name, resource_group))
+        self.kwargs = {
+            'rg': resource_group,
+            'lock': self.create_random_name('cli-test-lock', 48),
+            'notes': self.create_random_name('notes', 20)
+        }
+
+        self.cmd('group lock create -n {lock} -g {rg} --lock-type CanNotDelete')
         self._sleep_for_lock_operation()
 
-        self.cmd('group lock show -g {} -n {}'.format(resource_group, lock_name)).assert_with_checks([
-            JMESPathCheck('name', lock_name),
-            JMESPathCheck('level', 'CanNotDelete')]).get_output_in_json()
+        self.cmd('group lock show -g {rg} -n {lock}', checks=[
+            self.check('name', '{lock}'),
+            self.check('level', 'CanNotDelete')
+        ])
 
-        locks_list = self.cmd("group lock list -g {} --query [].name -ojson"
-                              .format(resource_group)).get_output_in_json()
+        locks_list = self.cmd("group lock list -g {rg} --query [].name").get_output_in_json()
         self.assertTrue(locks_list)
-        self.assertIn(lock_name, locks_list)
+        self.assertIn(self.kwargs['lock'], locks_list)
 
-        notes = self.create_random_name('notes', 20)
-        lock = self.cmd('group lock update -n {} -g {} --notes {} --lock-type ReadOnly'
-                        .format(lock_name, resource_group, notes)).get_output_in_json()
+        self.cmd('group lock update -n {lock} -g {rg} --notes {notes} --lock-type ReadOnly', checks=[
+            self.check('notes', '{notes}'),
+            self.check('level', 'ReadOnly')
+        ])
 
-        self.assertEqual(lock.get('notes', None), notes)
-        self.assertEqual(lock.get('level', None), 'ReadOnly')
-
-        self.cmd('group lock delete -g {} -n {}'.format(resource_group, lock_name))
+        self.cmd('group lock delete -g {rg} -n {lock}')
         self._sleep_for_lock_operation()
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_lock')

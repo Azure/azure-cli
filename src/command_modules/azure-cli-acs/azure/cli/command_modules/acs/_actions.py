@@ -36,5 +36,5 @@ def _handle_container_ssh_file(**kwargs):
         logger.warning('Created SSH key files: %s,%s', private_key_filepath, public_key_filepath)
     args.ssh_key_value = content
 
-
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)
+# TODO: Move this into the AcsCommandsLoader file...
+#AZ_CLI.register(AZ_CLI.COMMAND_PARSER_PARSED, _handle_container_ssh_file)

@@ -8,17 +8,16 @@ from base64 import b64encode
 import requests
 from requests.utils import to_native_string
 
-from azure.cli.core.prompting import NoTTYException, prompt_y_n
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.prompting import prompt, prompt_pass, NoTTYException, prompt_y_n
+from knack.util import CLIError
 
 from ._utils import validate_managed_registry
 from ._docker_utils import get_access_credentials
 
 
-logger = azlogging.get_az_logger(__name__)
-DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
-LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
+
+DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
+LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is not supported for registries in Basic SKU.'
 
 
 def _get_basic_auth_str(username, password):

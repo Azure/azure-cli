@@ -3,13 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from argcomplete.completers import FilesCompleter
-from azure.cli.core.commands import \
-    (register_cli_argument, CliArgumentType)
-from azure.cli.core.commands.parameters import \
-    (tags_type,
-     get_resource_name_completion_list,
-     resource_group_name_type,
-     enum_choice_list)
+from azure.cli.core.commands import register_cli_argument
+from azure.cli.core.commands.parameters import tags_type, get_resource_name_completion_list, resource_group_name_type
 
 from azure.cli.command_modules.dla._validators import (validate_resource_group_name,
                                                        datetime_format,
@@ -27,10 +22,11 @@ from azure.mgmt.datalake.analytics.job.models.data_lake_analytics_job_management
             JobState,
             JobResult)
 
+from knack.arguments import CLIArgumentType, enum_choice_list
 
 # ARGUMENT DEFINITIONS
 # pylint: disable=line-too-long
-datalake_analytics_name_type = CliArgumentType(help='Name of the Data Lake Analytics account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeAnalytics/accounts'), id_part='name')
+datalake_analytics_name_type = CLIArgumentType(help='Name of the Data Lake Analytics account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeAnalytics/accounts'), id_part='name')
 
 # PARAMETER REGISTRATIONS
 # data lake analytics common params

@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import azure.cli.command_modules.batch._help  # pylint: disable=unused-import
-import azure.cli.core.azlogging as azlogging
 
+from knack.log import get_logger
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
 def load_params(_):

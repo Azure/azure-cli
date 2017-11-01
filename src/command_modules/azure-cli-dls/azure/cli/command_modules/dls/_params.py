@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.core.commands import \
-    (register_cli_argument, CliArgumentType)
+from azure.cli.core.commands import register_cli_argument
 
-from azure.cli.core.commands.parameters import \
-    (tags_type, get_resource_name_completion_list, resource_group_name_type, enum_choice_list)
+from azure.cli.core.commands.parameters import tags_type, get_resource_name_completion_list, resource_group_name_type
 
 from azure.cli.command_modules.dls._validators import validate_resource_group_name
 from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_enums \
@@ -17,9 +15,11 @@ from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_
 
 from azure.mgmt.datalake.store.models import (EncryptionConfigType)
 
+from knack.arguments import CLIArgumentType, enum_choice_list
+
 # ARGUMENT DEFINITIONS
 # pylint: disable=line-too-long
-datalake_store_name_type = CliArgumentType(help='Name of the Data Lake Store account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part='name')
+datalake_store_name_type = CLIArgumentType(help='Name of the Data Lake Store account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part='name')
 
 # PARAMETER REGISTRATIONS
 # global params

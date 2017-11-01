@@ -6,18 +6,16 @@ import site
 import logging
 from six import StringIO
 
-from azure.cli.core.util import CLIError
-from azure.cli.core._config import az_config
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.prompting import prompt_y_n, NoTTYException
+from azure.cli.core.util import COMPONENT_PREFIX, CLI_PACKAGE_NAME
 
-logger = azlogging.get_az_logger(__name__)
+from knack.log import get_logger
+from knack.util import CLIError
 
-CLI_PACKAGE_NAME = 'azure-cli'
-COMPONENT_PREFIX = 'azure-cli-'
+logger = get_logger(__name__)
 
 
 def _deprecate_warning():
+    from knack.prompting import NoTTYException, prompt_y_n
     logger.warning("The 'component' commands will be deprecated in the future.")
     logger.warning("az component and subcommands may not work unless the CLI is installed with pip.")
     try:
@@ -122,7 +120,7 @@ def _installed_in_user():
         return False
 
 
-def _install_or_update(package_list, link, private, pre):
+def _install_or_update(cli_ctx, package_list, link, private, pre):
     import pip
     options = ['--isolated', '--disable-pip-version-check', '--upgrade']
     if pre:
@@ -131,9 +129,9 @@ def _install_or_update(package_list, link, private, pre):
         options.append('--user')
     pkg_index_options = ['--find-links', link] if link else []
     if private:
-        package_index_url = az_config.get('component', 'package_index_url', fallback=None)
-        package_index_trusted_host = az_config.get('component', 'package_index_trusted_host',
-                                                   fallback=None)
+        package_index_url = cli_ctx.config.get('component', 'package_index_url', fallback=None)
+        package_index_trusted_host = cli_ctx.config.get('component', 'package_index_trusted_host',
+                                                        fallback=None)
         if package_index_url:
             pkg_index_options += ['--extra-index-url', package_index_url]
         else:
@@ -165,11 +163,7 @@ def _verify_additional_components(components, private, allow_third_party):
                        "third party packages.".format(', '.join(third_party)))
 
 
-def update(private=False,
-           pre=False,
-           link=None,
-           additional_components=None,
-           allow_third_party=False):
+def update(cmd, private=False, pre=False, link=None, additional_components=None, allow_third_party=False):
     """ Update the CLI and all installed components """
     _deprecate_warning()
     import pip
@@ -183,4 +177,4 @@ def update(private=False,
         _verify_additional_components(additional_components, private, allow_third_party)
         for c in additional_components:
             package_list += [COMPONENT_PREFIX + c]
-    _install_or_update(package_list, link, private, pre)
+    _install_or_update(cmd.cli_ctx, package_list, link, private, pre)

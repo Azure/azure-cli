@@ -9,7 +9,6 @@ Commands for storage file share operations
 
 import os.path
 from azure.cli.core.azlogging import get_az_logger
-from azure.cli.core.util import CLIError
 from azure.common import AzureException, AzureHttpError
 from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
@@ -17,6 +16,8 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_short_lived_container_sas,
                                                     create_short_lived_share_sas, guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
+
+from knack.util import CLIError
 
 
 def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False, validate_content=False,

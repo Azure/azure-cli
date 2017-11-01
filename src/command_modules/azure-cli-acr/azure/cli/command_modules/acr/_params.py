@@ -8,7 +8,7 @@
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
-    location_type,
+    get_location_type,
     tags_type,
     deployment_name_type,
     get_resource_name_completion_list,
@@ -32,7 +32,7 @@ register_cli_argument('acr', 'sku', help='The SKU of the container registry', ch
 register_cli_argument('acr', 'password_name', help='The name of password to regenerate', choices=['password', 'password2'])
 
 register_cli_argument('acr', 'resource_group_name', resource_group_name_type)
-register_cli_argument('acr', 'location', location_type)
+register_cli_argument('acr', 'location', get_location_type)
 register_cli_argument('acr', 'tags', tags_type)
 register_cli_argument('acr create', 'admin_enabled', nargs='?', required=False, const='true', default='false', help='Indicates whether the admin user is enabled', choices=['true', 'false'])
 register_cli_argument('acr update', 'admin_enabled', help='Indicates whether the admin user is enabled', choices=['true', 'false'])
@@ -45,7 +45,7 @@ register_cli_argument('acr repository delete', 'yes', options_list=('--yes', '-y
 
 register_cli_argument('acr create', 'registry_name', completer=None, validator=validate_registry_name)
 register_cli_argument('acr create', 'deployment_name', deployment_name_type, validator=None)
-register_cli_argument('acr create', 'location', location_type, validator=get_default_location_from_resource_group)
+register_cli_argument('acr create', 'location', get_location_type, validator=get_default_location_from_resource_group)
 register_cli_argument('acr check-name', 'registry_name', completer=None)
 
 register_cli_argument('acr webhook', 'registry_name', options_list=('--registry', '-r'), help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')

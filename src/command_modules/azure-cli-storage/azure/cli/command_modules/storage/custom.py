@@ -8,22 +8,29 @@
 from __future__ import print_function
 
 from azure.cli.core.decorators import transfer_doc
-from azure.cli.core.util import CLIError
-from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
-
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.command_modules.storage.util import guess_content_type
 from .sdkutil import get_table_data_type
 
-Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \
-    get_sdk(ResourceType.DATA_STORAGE, 'Logging', 'Metrics', 'CorsRule', 'AccessPolicy', 'RetentionPolicy',
-            mod='common.models')
+from knack.util import CLIError
 
-BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, QueueService = \
-    get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService', 'blob.baseblobservice#BaseBlobService',
-            'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties',
-            'queue#QueueService')
+def _get_standard_imports(cli_ctx):
+    raise CLIError('TODO: Update these merry old imports!')
+    Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
+                                                                        'Logging',
+                                                                        'Metrics',
+                                                                        'CorsRule',
+                                                                        'AccessPolicy',
+                                                                        'RetentionPolicy',
+                                                                        mod='models')
 
-TableService = get_table_data_type('table', 'TableService')
+    BlockBlobService, BaseBlobService, FileService, FileProperties, DirectoryProperties, TableService, QueueService = \
+        get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService', 'blob.baseblobservice#BaseBlobService',
+                'file#FileService', 'file.models#FileProperties', 'file.models#DirectoryProperties', 'table#TableService',
+                'queue#QueueService')
+
+#TableService = get_table_data_type('table', 'TableService')
 
 
 # CUSTOM METHODS
@@ -32,6 +39,7 @@ def create_storage_account(resource_group_name, account_name, sku=None, location
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            bypass=None, default_action=None, assign_identity=False):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
+        cli_ctx,
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
@@ -64,8 +72,10 @@ def create_storage_account(resource_group_name, account_name, sku=None, location
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def create_storage_account_with_account_type(resource_group_name, account_name, account_type, location=None, tags=None):
+def create_storage_account_with_account_type(cli_ctx, resource_group_name, account_name, account_type,
+                                             location=None, tags=None):
     StorageAccountCreateParameters, AccountType = get_sdk(
+        cli_ctx,
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'AccountType',
@@ -75,10 +85,11 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def update_storage_account(instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
-                           encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
+def update_storage_account(cli_ctx, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None, encryption_services=None,
+                           encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = get_sdk(
+        cli_ctx,
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
         'Sku',
@@ -136,7 +147,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
     return params
 
 
-@transfer_doc(FileService.list_directories_and_files)
+#@transfer_doc(FileService.list_directories_and_files)
 def list_share_files(client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
     if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
         generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
@@ -148,7 +159,7 @@ def list_share_files(client, share_name, directory_name=None, timeout=None, excl
     return generator
 
 
-@transfer_doc(FileService.list_directories_and_files)
+#@transfer_doc(FileService.list_directories_and_files)
 def list_share_directories(client, share_name, directory_name=None, timeout=None):
     generator = client.list_directories_and_files(share_name, directory_name,
                                                   timeout=timeout)

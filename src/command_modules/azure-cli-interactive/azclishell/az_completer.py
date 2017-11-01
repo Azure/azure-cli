@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from prompt_toolkit.completion import Completer, Completion
 
-from azclishell._dump_commands import FRESH_TABLE
 import azclishell.configuration
 from azclishell.argfinder import ArgsFinder
 from azclishell.command_tree import in_tree
@@ -20,7 +19,8 @@ SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
 
 def initialize_command_table_attributes(completer):
-    completer.cmdtab = FRESH_TABLE.command_table
+    from azclishell._dump_commands import LoadFreshTable
+    completer.cmdtab = LoadFreshTable(completer.shell_ctx).command_table
     if completer.cmdtab:
         completer.parser.load_command_table(completer.cmdtab)
         completer.argsfinder = ArgsFinder(completer.parser)
@@ -93,7 +93,8 @@ def sort_completions(completions_gen):
 class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
-    def __init__(self, commands, global_params=True):
+    def __init__(self, shell_ctx, commands, global_params=True):
+        self.shell_ctx = shell_ctx
         # dictionary of command to descriptions
         self.command_description = commands.descrip
         # from a command to a list of parameters

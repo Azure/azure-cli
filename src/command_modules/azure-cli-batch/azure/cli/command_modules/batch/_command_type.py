@@ -12,16 +12,14 @@ from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
+from azure.cli.core import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import (
-    CONFIRM_PARAM_NAME,
     command_table,
     command_module_map,
-    CliCommand,
-    CliCommandArgument,
-    get_op_handler)
-from azure.cli.core.commands._introspection import (
-    extract_full_summary_from_signature,
-    extract_args_from_signature)
+    CliCommand)
+
+from knack.arguments import CLICommandArgument, IgnoreAction
+from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 
 _CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
@@ -359,7 +357,7 @@ class BatchArgumentTree(object):
         :param str name: The name of the command line argument.
         :param str path: The complex object path to the parameter.
         :param str root: The original name of the parameter.
-        :param dict options: The kwargs to be used to instantiate CliCommandArgument.
+        :param dict options: The kwargs to be used to instantiate CLICommandArgument.
         :param list dependencies: A list of complete paths to other parameters that
          are required if this parameter is set.
         """
@@ -379,7 +377,7 @@ class BatchArgumentTree(object):
         return self._arg_tree.pop(name, {})
 
     def compile_args(self):
-        """Generator to convert pending arguments into CliCommandArgument
+        """Generator to convert pending arguments into CLICommandArgument
         objects.
         """
         for name, details in self._arg_tree.items():
@@ -399,12 +397,11 @@ class BatchArgumentTree(object):
                 self._help(name, "Expected format is an ISO-8601 duration.")
             elif self._is_silent(name):
                 import argparse
-                from azure.cli.core.commands.parameters import IgnoreAction
                 details['options']['nargs'] = '?'
                 details['options']['help'] = argparse.SUPPRESS
                 details['options']['required'] = False
                 details['options']['action'] = IgnoreAction
-            yield (name, CliCommandArgument(dest=name, **details['options']))
+            yield (name, CLICommandArgument(dest=name, **details['options']))
 
     def existing(self, name):
         """Whether the argument name is already used by a pending
@@ -512,8 +509,7 @@ class AzureBatchDataPlaneCommand(object):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
-            from azure.cli.core.util import CLIError
-            from azure.cli.core._config import az_config
+            from knack.util import CLIError
             from azure.cli.core.commands import _user_confirmed
 
             if self._cancel_operation(kwargs, az_config, _user_confirmed):
@@ -690,12 +686,12 @@ class AzureBatchDataPlaneCommand(object):
                     options['help'] = f_docstring
                     options['options_list'] = [arg_name(f_param)]
                     options['validator'] = validators.validate_options
-                    yield (f_param, CliCommandArgument(f_param, **options))
+                    yield (f_param, CLICommandArgument(f_param, **options))
             else:
                 options['default'] = getattr(self._options_model, param)
                 options['help'] = find_param_help(self._options_model, param)
                 options['options_list'] = [arg_name(param)]
-                yield (param, CliCommandArgument(param, **options))
+                yield (param, CLICommandArgument(param, **options))
 
     def _resolve_conflict(self,
                           arg, param, path, options, typestr, dependencies, conflicting):
@@ -703,7 +699,7 @@ class AzureBatchDataPlaneCommand(object):
         :param str arg: Name of the command line argument.
         :param str param: Original request parameter name.
         :param str path: Request parameter namespace.
-        :param dict options: The kwargs to be used to instantiate CliCommandArgument.
+        :param dict options: The kwargs to be used to instantiate CLICommandArgument.
         :param list dependencies: A list of complete paths to other parameters that are required
          if this parameter is set.
         :param list conflicting: A list of the argument names that have already conflicted.
@@ -811,7 +807,7 @@ class AzureBatchDataPlaneCommand(object):
                     choices = docstring[values_index + 25:].split(', ')
                     choices = [c for c in choices if c != "'unmapped'"]
                     docstring = docstring[0:values_index]
-                yield (arg[0], CliCommandArgument(arg[0],
+                yield (arg[0], CLICommandArgument(arg[0],
                                                   options_list=[arg_name(arg[0])],
                                                   required=False,
                                                   default=None,
@@ -828,7 +824,7 @@ class AzureBatchDataPlaneCommand(object):
                 docstring = "A file containing the {} specification in JSON format. " \
                             "If this parameter is specified, all '{} Arguments'" \
                             " are ignored.".format(arg[0].replace('_', ' '), group_title(arg[0]))
-                yield (param, CliCommandArgument(param,
+                yield (param, CLICommandArgument(param,
                                                  options_list=[arg_name(param)],
                                                  required=False,
                                                  default=None,
@@ -841,7 +837,7 @@ class AzureBatchDataPlaneCommand(object):
         if return_type == 'Generator':
             param = 'destination'
             docstring = "The path to the destination file or directory."
-            yield (param, CliCommandArgument(param,
+            yield (param, CLICommandArgument(param,
                                              options_list=[arg_name(param)],
                                              required=True,
                                              default=None,
@@ -854,7 +850,7 @@ class AzureBatchDataPlaneCommand(object):
         if self.confirmation:
             param = CONFIRM_PARAM_NAME
             docstring = 'Do not prompt for confirmation.'
-            yield (param, CliCommandArgument(param,
+            yield (param, CLICommandArgument(param,
                                              options_list=['--yes', '-y'],
                                              required=False,
                                              action='store_true',
@@ -865,7 +861,6 @@ def validate_client_parameters(namespace):
     """Retrieves Batch connection parameters from environment variables"""
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core._config import az_config
 
     # simply try to retrieve the remaining variables from environment variables
     if not namespace.account_name:

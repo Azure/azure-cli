@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, too-many-lines
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 vm_ids_example = """        - name: {0}
           text: >
@@ -87,6 +87,7 @@ helps['vm create'] = """
           text: >
              az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a VM in an availability zone in the current resource group's region
+          min_profile: latest
           text: >
              az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """
@@ -134,6 +135,7 @@ helps['vmss create'] = """
           text: >
              az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a single zone VM scaleset in the current resource group's region
+          min_profile: latest
           text: >
              az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """

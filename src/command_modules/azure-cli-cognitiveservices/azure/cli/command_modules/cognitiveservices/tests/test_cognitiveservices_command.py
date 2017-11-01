@@ -7,7 +7,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 class CognitiveServicesTests(ScenarioTest):

@@ -5,7 +5,7 @@
 
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import _cli_generic_update_command
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._factory import iot_hub_service_factory as factory
@@ -53,7 +53,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'iot hub show-connection-string',
                 custom_path.format('iot_hub_show_connection_string'), factory)
     cli_command(__name__, 'iot hub show', custom_path.format('iot_hub_get'), factory)
-    cli_generic_update_command(__name__, 'iot hub update', custom_path.format('iot_hub_get'),
+    _cli_generic_update_command(__name__, 'iot hub update', custom_path.format('iot_hub_get'),
                                custom_path.format('iot_hub_update'), factory)
     cli_command(__name__, 'iot hub delete', custom_path.format('iot_hub_delete'), factory,
                 transform=HubDeleteResultTransform())
@@ -85,7 +85,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'iot device show-connection-string',
                 custom_path.format('iot_device_show_connection_string'), factory)
     cli_command(__name__, 'iot device show', custom_path.format('iot_device_get'), factory)
-    cli_generic_update_command(__name__, 'iot device update', custom_path.format('iot_device_get'),
+    _cli_generic_update_command(__name__, 'iot device update', custom_path.format('iot_device_get'),
                                custom_path.format('iot_device_update'), factory)
     cli_command(__name__, 'iot device delete', custom_path.format('iot_device_delete'), factory)
     cli_command(__name__, 'iot device message send', custom_path.format('iot_device_send_message'),

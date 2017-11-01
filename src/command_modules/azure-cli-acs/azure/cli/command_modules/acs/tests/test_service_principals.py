@@ -8,7 +8,7 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.acs.custom import (
     load_acs_service_principal,
     store_acs_service_principal,

@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 import argparse
 
-from azure.mgmt.cdn.models import (QueryStringCachingBehavior, SkuName)
+from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName
 
-from azure.cli.core.commands import (register_cli_argument, CliArgumentType)
-from azure.cli.core.commands.parameters import enum_choice_list, three_state_flag, tags_type
+from azure.cli.core.commands.parameters import get_three_state_flag, tags_type, get_enum_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
+
+from knack.arguments import CLIArgumentType
+
 from ._validators import validate_origin
 
 
@@ -34,74 +36,67 @@ class OriginType(argparse._AppendAction):
         return deep_created_origin
 
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
+def load_arguments(self, _):
 
-register_cli_argument('cdn', 'name', name_arg_type, id_part='name')
-register_cli_argument('cdn', 'tags', tags_type)
+    name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+    profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
 
-# Profile #
+    with self.argument_context('cdn') as c:
+        c.argument('name', name_arg_type, id_part='name')
+        c.argument('tags', tags_type)
 
-register_cli_argument('cdn profile create',
-                      'sku',
-                      **enum_choice_list([item.value for item in list(SkuName)]))
-register_cli_argument('cdn profile create', 'location',
-                      validator=get_default_location_from_resource_group)
-profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
-register_cli_argument('cdn profile', 'profile_name', name_arg_type, id_part='name',
-                      help=profile_name_help)
-register_cli_argument('cdn profile create', 'name', name_arg_type, id_part='name',
-                      help=profile_name_help)
-# Endpoint #
+    # Profile #
+    with self.argument_context('cdn profile') as c:
+        c.argument('profile_name', name_arg_type, id_part='name', help=profile_name_help)
 
-register_cli_argument('cdn endpoint', 'endpoint_name', name_arg_type, id_part='name',
-                      help='Name of the CDN endpoint.')
-register_cli_argument('cdn endpoint create', 'name', name_arg_type, id_part='name',
-                      help='Name of the CDN endpoint.')
-cdn_endpoint = 'cdn endpoint'
-register_cli_argument(cdn_endpoint, 'location',
-                      validator=get_default_location_from_resource_group)
-register_cli_argument(cdn_endpoint,
-                      'origins',
-                      options_list='--origin',
-                      nargs='+',
-                      action=OriginType,
-                      validator=validate_origin,
-                      help='Endpoint origin specified by the following space delimited 3 '
-                           'tuple: `www.example.com http_port https_port`. The HTTP and HTTPs'
-                           'ports are optional and will default to 80 and 443 respectively.')
-register_cli_argument(cdn_endpoint, 'is_http_allowed',
-                      options_list='--no-http',
-                      help='Indicates whether HTTP traffic is not allowed on the endpoint. '
-                           'Default is to allow HTTP traffic.',
-                      **three_state_flag(invert=True))
-register_cli_argument(cdn_endpoint, 'is_https_allowed',
-                      options_list='--no-https',
-                      help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
-                           'Default is to allow HTTPS traffic.',
-                      **three_state_flag(invert=True))
-register_cli_argument(cdn_endpoint, 'is_compression_enabled',
-                      options_list='--enable-compression',
-                      help='If compression is enabled, content will be served as compressed if '
-                           'user requests for a compressed version. Content won\'t be compressed '
-                           'on CDN when requested content is smaller than 1 byte or larger than 1 '
-                           'MB.',
-                      **three_state_flag())
-caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
-register_cli_argument(cdn_endpoint,
-                      'query_string_caching_behavior',
-                      options_list='--query-string-caching',
-                      **enum_choice_list(caching_behavior))
-register_cli_argument(cdn_endpoint, 'content_types_to_compress', nargs='+')
-register_cli_argument('cdn endpoint load', 'content_paths', nargs='+')
-register_cli_argument('cdn endpoint purge', 'content_paths', nargs='+')
+    with self.argument_context('cdn profile create') as c:
+        c.argument('sku', arg_type=get_enum_type([item.value for item in list(SkuName)]))
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('name', name_arg_type, id_part='name', help=profile_name_help)
 
-# Custom Domain #
+    # Endpoint #
 
-register_cli_argument('cdn custom-domain', 'custom_domain_name', name_arg_type, id_part=None,
-                      help='Name of the custom domain.')
-register_cli_argument('cdn custom-domain create', 'location',
-                      validator=get_default_location_from_resource_group)
+    with self.argument_context('cdn endpoint') as c:
+        c.argument('endpoint_name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('origins', options_list='--origin', nargs='+', action=OriginType, validator=validate_origin,
+                   help='Endpoint origin specified by the following space delimited 3 '
+                        'tuple: `www.example.com http_port https_port`. The HTTP and HTTPs'
+                        'ports are optional and will default to 80 and 443 respectively.')
+        c.argument('is_http_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-http',
+                   help='Indicates whether HTTP traffic is not allowed on the endpoint. '
+                   'Default is to allow HTTP traffic.')
+        c.argument('is_https_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-https',
+                   help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
+                   'Default is to allow HTTPS traffic.')
+        c.argument('is_compression_enabled', arg_type=get_three_state_flag(), options_list='--enable-compression',
+                   help='If compression is enabled, content will be served as compressed if '
+                        'user requests for a compressed version. Content won\'t be compressed '
+                        'on CDN when requested content is smaller than 1 byte or larger than 1 '
+                        'MB.')
 
-# Origin #
+        caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
+        c.argument('query_string_caching_behavior', options_list='--query-string-caching',
+                   arg_type=get_enum_type(caching_behavior))
+        c.argument('content_types_to_compress', nargs='+')
 
-register_cli_argument('cdn origin', 'origin_name', name_arg_type, id_part='name')
+    with self.argument_context('cdn endpoint create') as c:
+        c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
+
+    with self.argument_context('cdn endpoint load') as c:
+        c.argument('content_paths', nargs='+')
+
+    with self.argument_context('cdn endpoint purge') as c:
+        c.argument('content_paths', nargs='+')
+
+    # Custom Domain #
+
+    with self.argument_context('cdn custom-domain') as c:
+        c.argument('custom_domain_name', name_arg_type, id_part=None, help='Name of the custom domain.')
+
+    with self.argument_context('cdn custom-domain create') as c:
+        c.argument('location', validator=get_default_location_from_resource_group)
+
+    # Origin #
+    with self.argument_context('cdn origin') as c:
+        c.argument('origin_name', name_arg_type, id_part='name')

@@ -1,10 +1,10 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
@@ -20,18 +20,18 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:52 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "myfoobar1", "type": "Microsoft.Network/trafficManagerProfiles"}'
+    body: '{"type": "Microsoft.Network/trafficManagerProfiles", "name": "myfoobar1"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile check-dns]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['73']
       Content-Type: [application/json; charset=utf-8]
@@ -47,24 +47,22 @@ interactions:
       cache-control: [private]
       content-length: ['121']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:52 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:26 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-tenant-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"trafficRoutingMethod": "Priority", "monitorConfig": {"path":
-      "/", "protocol": "HTTP", "port": 80}, "dnsConfig": {"ttl": 30, "relativeName":
-      "mytrafficmanager001100a"}, "profileStatus": "Enabled"}, "location": "global"}'
+    body: '{"properties": {"dnsConfig": {"ttl": 30, "relativeName": "mytrafficmanager001100a"},
+      "profileStatus": "enabled", "trafficRoutingMethod": "Priority", "monitorConfig":
+      {"path": "/", "protocol": "HTTP", "port": 80}}, "location": "global"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile create]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['235']
       Content-Type: [application/json; charset=utf-8]
@@ -80,7 +78,7 @@ interactions:
       cache-control: [private]
       content-length: ['687']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:54 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:27 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -93,7 +91,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile show]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -108,7 +106,7 @@ interactions:
       cache-control: [private]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:55 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:28 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -123,7 +121,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile update]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -138,7 +136,7 @@ interactions:
       cache-control: [private]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:56 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:29 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -149,15 +147,15 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"trafficRoutingMethod": "Weighted", "endpoints": [], "dnsConfig":
-      {"ttl": 30, "relativeName": "mytrafficmanager001100a"}, "profileStatus": "Enabled",
-      "monitorConfig": {"path": "/", "protocol": "HTTP", "toleratedNumberOfFailures":
-      3, "intervalInSeconds": 30, "port": 80, "profileMonitorStatus": "Inactive",
-      "timeoutInSeconds": 10}}, "tags": {}, "location": "global"}'
+    body: '{"properties": {"dnsConfig": {"ttl": 30, "relativeName": "mytrafficmanager001100a"},
+      "profileStatus": "Enabled", "endpoints": [], "trafficRoutingMethod": "Weighted",
+      "monitorConfig": {"toleratedNumberOfFailures": 3, "timeoutInSeconds": 10, "port":
+      80, "intervalInSeconds": 30, "path": "/", "protocol": "HTTP", "profileMonitorStatus":
+      "Inactive"}}, "tags": {}, "location": "global"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile update]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['381']
       Content-Type: [application/json; charset=utf-8]
@@ -173,7 +171,7 @@ interactions:
       cache-control: [private]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:56 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:29 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -188,7 +186,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile list]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -203,7 +201,7 @@ interactions:
       cache-control: [private]
       content-length: ['703']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:58 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:30 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -218,7 +216,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint create]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -233,7 +231,7 @@ interactions:
       cache-control: [private]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:37:58 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:31 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -248,7 +246,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint create]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['61']
       Content-Type: [application/json; charset=utf-8]
@@ -264,12 +262,12 @@ interactions:
       cache-control: [private]
       content-length: ['506']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:01 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:32 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1186']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -277,7 +275,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint update]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -292,7 +290,7 @@ interactions:
       cache-control: [private]
       content-length: ['506']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:00 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:33 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -302,12 +300,12 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"endpointMonitorStatus": "CheckingEndpoint", "priority":
-      1, "weight": 25, "endpointStatus": "Enabled", "target": "www.contoso.com"}}'
+    body: '{"properties": {"target": "www.contoso.com", "endpointStatus": "Enabled",
+      "weight": 25, "endpointMonitorStatus": "CheckingEndpoint", "priority": 1}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint update]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['148']
       Content-Type: [application/json; charset=utf-8]
@@ -323,12 +321,12 @@ interactions:
       cache-control: [private]
       content-length: ['504']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:02 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:34 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1181']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -336,7 +334,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint show]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -351,7 +349,7 @@ interactions:
       cache-control: [private]
       content-length: ['504']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:03 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:35 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -365,7 +363,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint list]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -380,7 +378,7 @@ interactions:
       cache-control: [private]
       content-length: ['1210']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:03 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:35 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -395,7 +393,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile update]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -410,7 +408,7 @@ interactions:
       cache-control: [private]
       content-length: ['1210']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:04 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:36 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -421,19 +419,19 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"trafficRoutingMethod": "Weighted", "endpoints": [{"name":
-      "myendpoint", "properties": {"endpointMonitorStatus": "CheckingEndpoint", "priority":
-      1, "weight": 25, "endpointStatus": "Enabled", "target": "www.contoso.com"},
-      "type": "Microsoft.Network/trafficManagerProfiles/externalEndpoints", "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager000001/providers/Microsoft.Network/trafficManagerProfiles/mytmprofile/externalEndpoints/myendpoint"}],
-      "dnsConfig": {"ttl": 30, "relativeName": "mytrafficmanager001100a"}, "profileStatus":
-      "Enabled", "monitorConfig": {"path": "/", "protocol": "HTTP", "toleratedNumberOfFailures":
-      3, "intervalInSeconds": 30, "port": 80, "profileMonitorStatus": "CheckingEndpoints",
-      "timeoutInSeconds": 10}}, "tags": {}, "location": "global"}'''
+    body: 'b''{"properties": {"dnsConfig": {"ttl": 30, "relativeName": "mytrafficmanager001100a"},
+      "profileStatus": "Enabled", "endpoints": [{"type": "Microsoft.Network/trafficManagerProfiles/externalEndpoints",
+      "properties": {"target": "www.contoso.com", "endpointStatus": "Enabled", "weight":
+      25, "endpointMonitorStatus": "CheckingEndpoint", "priority": 1}, "name": "myendpoint",
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager000001/providers/Microsoft.Network/trafficManagerProfiles/mytmprofile/externalEndpoints/myendpoint"}],
+      "trafficRoutingMethod": "Weighted", "monitorConfig": {"toleratedNumberOfFailures":
+      3, "timeoutInSeconds": 10, "port": 80, "intervalInSeconds": 30, "path": "/",
+      "protocol": "HTTP", "profileMonitorStatus": "CheckingEndpoints"}}, "tags": {},
+      "location": "global"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile update]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['874']
       Content-Type: [application/json; charset=utf-8]
@@ -449,7 +447,7 @@ interactions:
       cache-control: [private]
       content-length: ['1210']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:06 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:37 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -464,7 +462,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint delete]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
@@ -479,12 +477,12 @@ interactions:
     headers:
       cache-control: [private]
       content-length: ['0']
-      date: ['Fri, 27 Oct 2017 17:38:07 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:40 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1188']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -492,7 +490,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager endpoint list]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
@@ -507,7 +505,7 @@ interactions:
       cache-control: [private]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 27 Oct 2017 17:38:07 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:40 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -522,7 +520,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [network traffic-manager profile delete]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
@@ -537,7 +535,7 @@ interactions:
     headers:
       cache-control: [private]
       content-length: ['0']
-      date: ['Fri, 27 Oct 2017 17:38:12 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:42 GMT']
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -550,7 +548,7 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
+      CommandName: [unknown]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
@@ -565,11 +563,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 27 Oct 2017 17:38:13 GMT']
+      date: ['Fri, 27 Oct 2017 23:56:42 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGVFJBRkZJQzo1Rk1BTkFHRVJSNjdESlhTQU5RSzVBRjVKUXw0MTA5MkM0QTFFMjRDNDA4LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGVFJBRkZJQzo1Rk1BTkFHRVJDMlNPUkVFTEU1SEhPSVFBSnw5Mzg4RDc2QzA3N0YwQkY2LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1188']
+      x-ms-ratelimit-remaining-subscription-writes: ['1172']
     status: {code: 202, message: Accepted}
 version: 1

@@ -94,9 +94,9 @@ class CdnScenarioMixin(object):
                              ' '.join(content_paths))
         return self.cmd(command, checks)
 
-    def endpoint_list_cmd(self, group, profile_name, checks=None):
+    def endpoint_list_cmd(self, group, profile_name, checks=None, expect_failure=False):
         command = 'cdn endpoint list -g {} --profile-name {}'.format(group, profile_name)
-        return self.cmd(command, checks)
+        return self.cmd(command, checks, expect_failure=expect_failure)
 
     def endpoint_delete_cmd(self, group, name, profile_name, checks=None):
         command = 'cdn endpoint delete -g {} -n {} --profile-name {}'.format(group,

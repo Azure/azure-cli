@@ -4,147 +4,151 @@
 # --------------------------------------------------------------------------------------------
 
 
-def _network_client_factory(**_):
+def network_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
 
-def resource_client_factory(**_):
+def resource_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
-def cf_application_gateways(_):
-    return _network_client_factory().application_gateways
+def cf_application_gateways(cli_ctx, _):
+    return network_client_factory(cli_ctx).application_gateways
 
 
-def cf_application_security_groups(_):
-    return _network_client_factory().application_security_groups
+def cf_application_security_groups(cli_ctx, _):
+    return network_client_factory(cli_ctx).application_security_groups
 
 
-def cf_express_route_circuit_authorizations(_):
-    return _network_client_factory().express_route_circuit_authorizations
+def cf_endpoint_services(cli_ctx, _):
+    return network_client_factory(cli_ctx).available_endpoint_services
 
 
-def cf_express_route_circuit_peerings(_):
-    return _network_client_factory().express_route_circuit_peerings
+def cf_express_route_circuit_authorizations(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_circuit_authorizations
 
 
-def cf_express_route_circuits(_):
-    return _network_client_factory().express_route_circuits
+def cf_express_route_circuit_peerings(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_circuit_peerings
 
 
-def cf_express_route_service_providers(_):
-    return _network_client_factory().express_route_service_providers
+def cf_express_route_circuits(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_circuits
 
 
-def cf_load_balancers(_):
-    return _network_client_factory().load_balancers
+def cf_express_route_service_providers(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_service_providers
 
 
-def cf_local_network_gateways(_):
-    return _network_client_factory().local_network_gateways
+def cf_load_balancers(cli_ctx, _):
+    return network_client_factory(cli_ctx).load_balancers
 
 
-def cf_network_interfaces(_):
-    return _network_client_factory().network_interfaces
+def cf_local_network_gateways(cli_ctx, _):
+    return network_client_factory(cli_ctx).local_network_gateways
 
 
-def cf_network_security_groups(_):
-    return _network_client_factory().network_security_groups
+def cf_network_interfaces(cli_ctx, _):
+    return network_client_factory(cli_ctx).network_interfaces
 
 
-def cf_network_watcher(_):
-    return _network_client_factory().network_watchers
+def cf_network_security_groups(cli_ctx, _):
+    return network_client_factory(cli_ctx).network_security_groups
 
 
-def cf_packet_capture(_):
-    return _network_client_factory().packet_captures
+def cf_network_watcher(cli_ctx, _):
+    return network_client_factory(cli_ctx).network_watchers
 
 
-def cf_endpoint_service(_):
-    return _network_client_factory().available_endpoint_services
+def cf_packet_capture(cli_ctx, _):
+    return network_client_factory(cli_ctx).packet_captures
 
 
-def cf_public_ip_addresses(_):
-    return _network_client_factory().public_ip_addresses
+def cf_private_access(cli_ctx, _):
+    return network_client_factory(cli_ctx).available_private_access_services
 
 
-def cf_route_tables(_):
-    return _network_client_factory().route_tables
+def cf_public_ip_addresses(cli_ctx, _):
+    return network_client_factory(cli_ctx).public_ip_addresses
 
 
-def cf_routes(_):
-    return _network_client_factory().routes
+def cf_route_tables(cli_ctx, _):
+    return network_client_factory(cli_ctx).route_tables
 
 
-def cf_security_rules(_):
-    return _network_client_factory().security_rules
+def cf_routes(cli_ctx, _):
+    return network_client_factory(cli_ctx).routes
 
 
-def cf_subnets(_):
-    return _network_client_factory().subnets
+def cf_security_rules(cli_ctx, _):
+    return network_client_factory(cli_ctx).security_rules
 
 
-def cf_usages(_):
-    return _network_client_factory().usages
+def cf_subnets(cli_ctx, _):
+    return network_client_factory(cli_ctx).subnets
 
 
-def cf_virtual_network_gateway_connections(_):
-    return _network_client_factory().virtual_network_gateway_connections
+def cf_usages(cli_ctx, _):
+    return network_client_factory(cli_ctx).usages
 
 
-def cf_virtual_network_gateways(_):
-    return _network_client_factory().virtual_network_gateways
+def cf_virtual_network_gateway_connections(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_network_gateway_connections
 
 
-def cf_virtual_networks(_):
-    return _network_client_factory().virtual_networks
+def cf_virtual_network_gateways(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_network_gateways
 
 
-def cf_virtual_network_peerings(_):
-    return _network_client_factory().virtual_network_peerings
+def cf_virtual_networks(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_networks
 
 
-def cf_traffic_manager_mgmt_profiles(_):
+def cf_virtual_network_peerings(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_network_peerings
+
+
+def cf_traffic_manager_mgmt_profiles(cli_ctx, _):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).profiles
 
 
-def cf_traffic_manager_mgmt_endpoints(_):
+def cf_traffic_manager_mgmt_endpoints(cli_ctx, _):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(TrafficManagerManagementClient).endpoints
+    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).endpoints
 
 
-def cf_tm_geographic(_):
+def cf_tm_geographic(cli_ctx, _):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(TrafficManagerManagementClient).geographic_hierarchies
+    return get_mgmt_service_client(cli_ctx, TrafficManagerManagementClient).geographic_hierarchies
 
 
-def cf_dns_mgmt_zones(_):
+def cf_dns_mgmt_zones(cli_ctx, _):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(DnsManagementClient).zones
+    return get_mgmt_service_client(cli_ctx, DnsManagementClient).zones
 
 
-def cf_dns_mgmt_record_sets(_):
+def cf_dns_mgmt_record_sets(cli_ctx, _):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(DnsManagementClient).record_sets
+    return get_mgmt_service_client(cli_ctx, DnsManagementClient).record_sets
 
 
-def cf_route_filters(_):
-    return _network_client_factory().route_filters
+def cf_route_filters(cli_ctx, _):
+    return network_client_factory(cli_ctx).route_filters
 
 
-def cf_route_filter_rules(_):
-    return _network_client_factory().route_filter_rules
+def cf_route_filter_rules(cli_ctx, _):
+    return network_client_factory(cli_ctx).route_filter_rules
 
 
-def cf_service_community(_):
-    return _network_client_factory().bgp_service_communities
+def cf_service_community(cli_ctx, _):
+    return network_client_factory(cli_ctx).bgp_service_communities

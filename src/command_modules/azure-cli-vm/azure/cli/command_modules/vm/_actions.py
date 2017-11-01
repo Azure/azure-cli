@@ -6,7 +6,7 @@
 import json
 import re
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 
@@ -71,11 +71,10 @@ def load_images_thru_services(publisher, offer, sku, location):
     return all_images
 
 
-def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
-    from azure.cli.core.cloud import get_active_cloud, CloudEndpointNotSetException
-    cloud = get_active_cloud()
+def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
+    from azure.cli.core.cloud import CloudEndpointNotSetException
     try:
-        target_url = cloud.endpoints.vm_image_alias_doc
+        target_url = cli_ctx.cloud.endpoints.vm_image_alias_doc
     except CloudEndpointNotSetException:
         raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
                        "it or use '--all' to retrieve images from server")

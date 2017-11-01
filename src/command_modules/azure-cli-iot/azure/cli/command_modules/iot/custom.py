@@ -7,7 +7,7 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription
 from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo

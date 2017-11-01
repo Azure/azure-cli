@@ -8,7 +8,8 @@ import adal
 
 from msrest.authentication import Authentication
 
-from azure.cli.core.util import CLIError, in_cloud_console
+from knack.util import CLIError
+from azure.cli.core.util import in_cloud_console
 
 
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
@@ -44,7 +45,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
     @staticmethod
     def _log_hostname():
         import socket
-        import azure.cli.core.azlogging as azlogging
-        logger = azlogging.get_az_logger(__name__)
+        from knack.log import get_logger
+        logger = get_logger(__name__)
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())

@@ -25,15 +25,13 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.cli.core.prompting import prompt_pass, NoTTYException
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
+
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import _generic_site_operation, _generic_settings_operation, AUTH_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 
-
-logger = azlogging.get_az_logger(__name__)
 
 # pylint:disable=no-member,too-many-lines,too-many-locals
 

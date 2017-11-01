@@ -25,7 +25,7 @@ from azure.cli.command_modules.storage._transformers import \
      transform_url, transform_storage_list_output, transform_container_permission_output,
      create_boolean_result_output_transformer)
 from azure.cli.core.commands import cli_command, VersionConstraint
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import _cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
 from .sdkutil import cosmosdb_table_exists
@@ -74,7 +74,7 @@ else:
     cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
 
 if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
-    cli_generic_update_command(__name__, 'storage account update',
+    _cli_generic_update_command(__name__, 'storage account update',
                                mgmt_path + 'get_properties',
                                mgmt_path + 'update', factory,
                                custom_function_op=custom_path + 'update_storage_account')

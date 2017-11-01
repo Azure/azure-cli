@@ -12,7 +12,7 @@ except ImportError:
     import mock
 
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 
 def _mock_get_uuid_str():

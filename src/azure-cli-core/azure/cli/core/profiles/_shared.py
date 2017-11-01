@@ -207,8 +207,11 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
         return import_module(sdk_path)
     results = []
     for mod_attr_path in attr_args:
-        if sub_mod_prefix and '#' not in mod_attr_path:
-            mod_attr_path = '{}#{}'.format(sub_mod_prefix, mod_attr_path)
-        loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
-        results.append(loaded_obj)
+        try:
+            if sub_mod_prefix and '#' not in mod_attr_path:
+                mod_attr_path = '{}#{}'.format(sub_mod_prefix, mod_attr_path)
+            loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
+            results.append(loaded_obj)
+        except Exception:
+            raise
     return results[0] if len(results) == 1 else results

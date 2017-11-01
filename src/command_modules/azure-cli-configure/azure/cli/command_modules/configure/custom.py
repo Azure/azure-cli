@@ -7,15 +7,6 @@ from __future__ import print_function
 import os
 from six.moves import configparser
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
-                                    set_global_config_value, DEFAULTS_SECTION, get_config_parser)
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import (prompt,
-                                      prompt_y_n,
-                                      prompt_choice_list,
-                                      prompt_pass,
-                                      NoTTYException)
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -29,12 +20,17 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_FILE_LOGGING)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 
-logger = azlogging.get_az_logger(__name__)
+from knack.log import get_logger
+from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
+from knack.util import CLIError
 
 answers = {}
 
+logger = get_logger(__name__)
+
 
 def _print_cur_configuration(file_config):
+    from azure.cli.core._config import ENV_VAR_PREFIX
     print(MSG_HEADING_CURRENT_CONFIG_INFO)
     for section in file_config.sections():
         print()
@@ -47,14 +43,14 @@ def _print_cur_configuration(file_config):
         print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
 
 
-def _config_env_public_azure(_):
+def _config_env_public_azure(cli_ctx, _):
     from adal.adal_error import AdalError
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core._profile import Profile
     # Determine if user logged in
     try:
-        list(get_mgmt_service_client(ResourceManagementClient).resources.list())
+        list(get_mgmt_service_client(cli_ctx, ResourceManagementClient).resources.list())
     except CLIError:
         # Not logged in
         login_successful = False
@@ -62,7 +58,7 @@ def _config_env_public_azure(_):
             method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
             answers['login_index'] = method_index
             answers['login_options'] = str(LOGIN_METHOD_LIST)
-            profile = Profile()
+            profile = Profile(cli_ctx)
             interactive = False
             username = None
             password = None
@@ -94,14 +90,12 @@ def _config_env_public_azure(_):
                 logger.error(err)
 
 
-def _handle_global_configuration():
+def _handle_global_configuration(config):
     # print location of global configuration
-    print(MSG_GLOBAL_SETTINGS_LOCATION.format(GLOBAL_CONFIG_PATH))
+    print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))
     # set up the config parsers
-    file_config = get_config_parser()
-    config_exists = file_config.read([GLOBAL_CONFIG_PATH])
-    global_config = get_config_parser()
-    global_config.read(GLOBAL_CONFIG_PATH)
+    file_config = config.config_parser
+    config_exists = file_config.read([config.config_path])
     should_modify_global_config = False
     if config_exists:
         # print current config and prompt to allow global config modification
@@ -111,7 +105,7 @@ def _handle_global_configuration():
     if not config_exists or should_modify_global_config:
         # no config exists yet so configure global config or user wants to modify global config
         output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
-                                          default=get_default_from_config(global_config,
+                                          default=get_default_from_config(config.config_parser,
                                                                           'core', 'output',
                                                                           OUTPUT_LIST))
         answers['output_type_prompt'] = output_index
@@ -121,32 +115,32 @@ def _handle_global_configuration():
         answers['telemetry_prompt'] = allow_telemetry
         # save the global config
         try:
-            global_config.add_section('core')
+            config.config_parser.add_section('core')
         except configparser.DuplicateSectionError:
             pass
         try:
-            global_config.add_section('logging')
+            config.config_parser.add_section('logging')
         except configparser.DuplicateSectionError:
             pass
-        global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
-        global_config.set('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
-        global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
-        set_global_config(global_config)
+        config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
+        config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
+        config.set_value('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
 
 
-def handle_configure(defaults=None):
+def handle_configure(cmd, defaults=None):
     if defaults:
+        from azure.cli.core._config import DEFAULTS_SECTION
         for default in defaults:
             parts = default.split('=', 1)
             if len(parts) == 1:
                 raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
-            set_global_config_value(DEFAULTS_SECTION, parts[0], _normalize_config_value(parts[1]))
+            cmd.cli_ctx.config.set_value(DEFAULTS_SECTION, parts[0], _normalize_config_value(parts[1]))
         return
 
     # if nothing supplied, we go interactively
     try:
         print(MSG_INTRO)
-        _handle_global_configuration()
+        _handle_global_configuration(cmd.cli_ctx.config)
         print(MSG_CLOSING)
         # TODO: log_telemetry('configure', **answers)
     except NoTTYException:

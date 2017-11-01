@@ -9,10 +9,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 
-from azure.cli.core.commands import (
-    CliArgumentType,
-    register_cli_argument,
-    register_extra_cli_argument)
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 from azure.cli.core.commands.parameters import tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands.parameters import (
@@ -25,6 +22,8 @@ from azure.cli.command_modules.acs._validators import validate_create_parameters
 from azure.cli.command_modules.acs._validators import validate_k8s_client_version
 from azure.cli.command_modules.acs._validators import validate_k8s_version
 from azure.cli.command_modules.acs._validators import validate_linux_host_name
+
+from knack.arguments import CLIArgumentType
 
 
 def _compute_client_factory(**_):

@@ -6,8 +6,6 @@
 from collections import OrderedDict
 import json
 
-from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
-
 
 class ArmTemplateBuilder(object):
     def __init__(self):
@@ -62,7 +60,7 @@ class ArmTemplateBuilder(object):
         return json.loads(json.dumps(self.template))
 
 
-def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_ip_address=None,
+def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
                               private_ip_allocation=None, zone=None):
     frontend_ip_config = {
         'name': name
@@ -83,14 +81,14 @@ def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_i
             }
         })
 
-    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    if zone and cmd.supported_api_version(min_api='2017-06-01'):
         frontend_ip_config['zones'] = zone
 
     return frontend_ip_config
 
 
 # pylint: disable=too-many-locals
-def build_application_gateway_resource(name, location, tags, sku_name, sku_tier, capacity, servers, frontend_port,
+def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_tier, capacity, servers, frontend_port,
                                        private_ip_address, private_ip_allocation, cert_data, cert_password,
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
@@ -107,7 +105,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
 
     ssl_cert = None
 
-    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id,
+    frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id,
                                                    private_ip_address, private_ip_allocation)
     backend_address_pool = {'name': backend_pool_name}
     if servers:
@@ -151,7 +149,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
             'CookieBasedAffinity': cookie_based_affinity
         }
     }
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+    if cmd.supported_api_version(min_api='2016-12-01'):
         backend_http_settings['properties']['connectionDraining'] = {
             'enabled': bool(connection_draining_timeout),
             'drainTimeoutInSec': connection_draining_timeout if connection_draining_timeout else 1
@@ -203,16 +201,16 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': cmd.get_api_version(),
         'dependsOn': [],
         'properties': ag_properties
     }
     return ag
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation, sku, frontend_ip_zone):
-    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
+def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
+                                 subnet_id, private_ip_address, private_ip_allocation, sku, frontend_ip_zone):
+    frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation, frontend_ip_zone)
 
     lb_properties = {
@@ -228,23 +226,23 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, fronte
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': cmd.get_api_version(),
         'dependsOn': [],
         'properties': lb_properties
     }
-    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+    if sku and cmd.supported_api_version(min_api='2017-08-01'):
         lb['sku'] = {'name': sku}
     return lb
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': cmd.get_api_version(),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -252,14 +250,14 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name,
         'dependsOn': [],
         'properties': public_ip_properties
     }
-    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+    if sku and cmd.supported_api_version(min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
-    if zone and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
+    if zone and cmd.supported_api_version(min_api='2017-06-01'):
         public_ip['zones'] = zone
     return public_ip
 
 
-def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None):
+def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None):
     vnet = {
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
@@ -285,8 +283,8 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None, sub
     return vnet
 
 
-def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type, authorization_key, enable_bgp,
-                                  routing_weight, shared_key, use_policy_based_traffic_selectors):
+def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2, vpn_type, authorization_key,
+                                  enable_bgp, routing_weight, shared_key, use_policy_based_traffic_selectors):
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'authorizationKey': authorization_key,
@@ -294,7 +292,7 @@ def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_
         'connectionType': vpn_type,
         'routingWeight': routing_weight
     }
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+    if cmd.supported_api_version(min_api='2017-03-01'):
         vpn_properties['usePolicyBasedTrafficSelectors'] = use_policy_based_traffic_selectors
 
     # add scenario specific properties

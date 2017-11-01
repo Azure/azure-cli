@@ -5,12 +5,8 @@
 import uuid
 import os
 from msrestazure.tools import parse_resource_id
-from azure.cli.core.commands import LongRunningOperation
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
-from .custom import set_vm, _compute_client_factory, get_vmss_instance_view
-from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
-logger = azlogging.get_az_logger(__name__)
+from knack.util import CLIError
+from .custom import set_vm, _compute_client_factory
 
 _DATA_VOLUME_TYPE = 'DATA'
 _STATUS_ENCRYPTED = 'Encrypted'
@@ -540,7 +536,7 @@ def show_vmss_encryption_status(resource_group_name, vmss_name):
     return result
 
 
-def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, force):
+def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, vmss, force):
     def _report_client_side_validation_error(msg):
         if force:
             logger.warning(msg)
@@ -549,7 +545,7 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.keyvault import KeyVaultManagementClient
-    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
     disk_vault_resource_info = parse_resource_id(disk_vault_id)
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 
