@@ -16,11 +16,11 @@ def _auth_client_factory(scope=None):
     return get_mgmt_service_client(AuthorizationManagementClient, subscription_id=subscription_id)
 
 
-def _graph_client_factory(**_):
+def _graph_client_factory(cli_ctx, **_):
     from azure.cli.core._profile import Profile, CLOUD
     from azure.cli.core.commands.client_factory import configure_common_settings
     from azure.graphrbac import GraphRbacManagementClient
-    profile = Profile()
+    profile = Profile(cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
     client = GraphRbacManagementClient(cred,

@@ -8,137 +8,304 @@ from __future__ import print_function
 import datetime
 import json
 import logging as logs
-import pkgutil
-import re
 import sys
 import time
-import timeit
-import traceback
-from collections import OrderedDict, defaultdict
 from importlib import import_module
 
+from knack.arguments import CLICommandArgument
+from knack.commands import CLICommand
+from knack.invocation import CommandInvoker
+from knack.log import get_logger
+
 import six
-from six import string_types, reraise
 
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core import AzCommandsLoader
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import prompt_y_n, NoTTYException
-from azure.cli.core._config import az_config, DEFAULTS_SECTION
-from azure.cli.core.profiles import ResourceType, supported_api_version
-from azure.cli.core.profiles._shared import get_versioned_sdk_path
-from azure.cli.core.extension import (get_extension_names, get_extension_path,
-                                      get_extension_modname, EXTENSIONS_MOD_PREFIX)
 
-from ._introspection import (extract_args_from_signature,
-                             extract_full_summary_from_signature)
+logger = get_logger(__name__)
 
-logger = azlogging.get_az_logger(__name__)
+CONFIRM_PARAM_NAME = 'yes'
 
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
-
-CONFIRM_PARAM_NAME = 'yes'
-
 BLACKLISTED_MODS = ['context', 'shell', 'documentdb']
 
 
-class VersionConstraint(object):
-    def __init__(self, resource_type, min_api=None, max_api=None):
-        self._type = resource_type
-        self._min_api = min_api
-        self._max_api = max_api
+def _explode_list_args(args):
+    '''Iterate through each attribute member of args and create a copy with
+    the IterateValues 'flattened' to only contain a single value
 
-    def __enter__(self):
-        return self
+    Ex.
+        { a1:'x', a2:IterateValue(['y', 'z']) } => [{ a1:'x', a2:'y'),{ a1:'x', a2:'z'}]
+    '''
+    from azure.cli.core.commands.validators import IterateValue
+    import argparse
+    list_args = {argname: argvalue for argname, argvalue in vars(args).items()
+                 if isinstance(argvalue, IterateValue)}
+    if not list_args:
+        yield args
+    else:
+        values = list(zip(*list_args.values()))
+        for key in list_args:
+            delattr(args, key)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        for value in values:
+            new_ns = argparse.Namespace(**vars(args))
+            for key_index, key in enumerate(list_args.keys()):
+                setattr(new_ns, key, value[key_index])
+            yield new_ns
 
-    def register_cli_argument(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
-            register_cli_argument(*args, **kwargs)
+
+def _expand_file_prefixed_files(args):
+    def _load_file(path):
+        from azure.cli.core.util import read_file_content
+        if path == '-':
+            content = sys.stdin.read()
         else:
-            from azure.cli.core.commands.parameters import ignore_type
-            kwargs = {}
-            args = tuple([args[0], args[1], ignore_type])
-            register_cli_argument(*args, **kwargs)
+            import os
+            content = read_file_content(os.path.expanduser(path), allow_binary=True)
 
-    def register_extra_cli_argument(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
-            register_extra_cli_argument(*args, **kwargs)
+        return content[0:-1] if content and content[-1] == '\n' else content
 
-    def cli_command(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
-            cli_command(*args, **kwargs)
+    def _maybe_load_file(arg):
+        ix = arg.find('@')
+        if ix == -1:  # no @ found
+            return arg
 
+        poss_file = arg[ix + 1:]
+        if not poss_file:  # if nothing after @ then it can't be a file
+            return arg
+        elif ix == 0:
+            return _load_file(poss_file)
 
-class CliArgumentType(object):  # pylint: disable=too-few-public-methods
-    REMOVE = '---REMOVE---'
+        # if @ not at the start it can't be a file
+        return arg
 
-    def __init__(self, overrides=None, **kwargs):
-        if isinstance(overrides, str):
-            raise ValueError("Overrides has to be a CliArgumentType (cannot be a string)")
-        options_list = kwargs.get('options_list', None)
-        if options_list and isinstance(options_list, str):
-            kwargs['options_list'] = [options_list]
-        self.settings = {}
-        self.update(overrides, **kwargs)
+    def _expand_file_prefix(arg):
+        arg_split = arg.split('=', 1)
+        try:
+            return '='.join([arg_split[0], _maybe_load_file(arg_split[1])])
+        except IndexError:
+            return _maybe_load_file(arg_split[0])
 
-    def update(self, other=None, **kwargs):
-        if other:
-            self.settings.update(**other.settings)
-        self.settings.update(**kwargs)
+    return list([_expand_file_prefix(arg) for arg in args])
 
 
-class CliCommandArgument(object):  # pylint: disable=too-few-public-methods
-    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
+def _pre_command_table_create(cli_ctx, args):
 
-    def __init__(self, dest=None, argtype=None, **kwargs):
-        self.type = CliArgumentType(overrides=argtype, **kwargs)
-        if dest:
-            self.type.update(dest=dest)
+    cli_ctx.refresh_request_id()
+    return _expand_file_prefixed_files(args)
 
-        # We'll do an early fault detection to find any instances where we have inconsistent
-        # set of parameters for argparse
-        if not self.options_list and 'required' in self.options:  # pylint: disable=access-member-before-definition
-            raise ValueError(message="You can't specify both required and an options_list")
-        if not self.options.get('dest', False):
-            raise ValueError('Missing dest')
-        if not self.options_list:  # pylint: disable=access-member-before-definition
-            self.options_list = ('--{}'.format(self.options['dest'].replace('_', '-')),)
 
-    def __getattr__(self, name):
-        if name in self._NAMED_ARGUMENTS:
-            return self.type.settings.get(name, None)
-        elif name == 'name':
-            return self.type.settings.get('dest', None)
-        elif name == 'options':
-            return {key: value for key, value in self.type.settings.items()
-                    if key != 'options' and key not in self._NAMED_ARGUMENTS and
-                    not value == CliArgumentType.REMOVE}
-        elif name == 'choices':
-            return self.type.settings.get(name, None)
-        else:
-            raise AttributeError(message=name)
+class AzCliCommand(CLICommand):
 
-    def __setattr__(self, name, value):
-        if name == 'type':
-            return super(CliCommandArgument, self).__setattr__(name, value)
-        self.type.settings[name] = value
+    def __init__(self, loader, name, handler, description=None, table_transformer=None,
+                 arguments_loader=None, description_loader=None,
+                 formatter_class=None, deprecate_info=None, validator=None, **kwargs):
+        super(AzCliCommand, self).__init__(loader.cli_ctx, name, handler, description=description,
+                                           table_transformer=table_transformer, arguments_loader=arguments_loader,
+                                           description_loader=description_loader, formatter_class=formatter_class,
+                                           deprecate_info=deprecate_info, validator=validator, **kwargs)
+        self.loader = loader
+        self.command_source = None
+        self.no_wait_param = kwargs.get('no_wait_param', None)
+        self.exception_handler = kwargs.get('exception_handler', None)
+        self.confirmation = kwargs.get('confirmation', False)
+        self.command_kwargs = kwargs
+
+    def _resolve_default_value_from_cfg_file(self, arg, overrides):
+        from azure.cli.core._config import DEFAULTS_SECTION
+
+        if not hasattr(arg.type, 'required_tooling'):
+            required = arg.type.settings.get('required', False)
+            setattr(arg.type, 'required_tooling', required)
+        if 'configured_default' in overrides.settings:
+            def_config = overrides.settings.pop('configured_default', None)
+            setattr(arg.type, 'default_name_tooling', def_config)
+            # same blunt mechanism like we handled id-parts, for create command, no name default
+            if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
+                return
+            setattr(arg.type, 'configured_default_applied', True)
+            config_value = self.cli_ctx.config.get(DEFAULTS_SECTION, def_config, None)
+            if config_value:
+                logger.warning("Using default '%s' for arg %s", config_value, arg.name)
+                overrides.settings['default'] = config_value
+                overrides.settings['required'] = False
+
+    def load_arguments(self):
+        if self.arguments_loader:
+            cmd_args = self.arguments_loader()
+            if self.no_wait_param:
+                cmd_args.append(
+                    (self.no_wait_param,
+                     CLICommandArgument(self.no_wait_param, options_list=['--no-wait'], action='store_true',
+                                        help='Do not wait for the long running operation to finish.')))
+            if self.confirmation:
+                cmd_args.append(
+                    (CONFIRM_PARAM_NAME,
+                     CLICommandArgument(CONFIRM_PARAM_NAME, options_list=['--yes', '-y'], action='store_true',
+                                        help='Do not prompt for confirmation.')))
+            self.arguments.update(cmd_args)
+
+    def update_argument(self, param_name, argtype):
+        arg = self.arguments[param_name]
+        self._resolve_default_value_from_cfg_file(arg, argtype)
+        arg.type.update(other=argtype)
+
+    def __call__(self, *args, **kwargs):
+
+        cmd_args = args[0]
+
+        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
+           self.command_source.overrides_command:
+            logger.warning(self.command_source.get_command_warn_msg())
+        if self.deprecate_info is not None:
+            text = 'This command is deprecating and will be removed in future releases.'
+            if self.deprecate_info:
+                text += " Use '{}' instead.".format(self.deprecate_info)
+            logger.warning(text)
+
+        confirm = CONFIRM_PARAM_NAME in cmd_args and not cmd_args.get(CONFIRM_PARAM_NAME) and \
+            not self.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)
+
+        if confirm and not AzCommandsLoader.user_confirmed(confirm, cmd_args):
+            from knack.events import EVENT_COMMAND_CANCELLED
+            from knack.util import CLIError
+
+            self.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=self.name, command_args=cmd_args)
+            raise CLIError('Operation cancelled.')
+
+        return self.handler(*args, **kwargs)
+
+    def get_api_version(self, resource_type=None):
+        resource_type = resource_type or self.command_kwargs.get('resource_type', None)
+        return self.loader.get_api_version(resource_type=resource_type)
+
+    def supported_api_version(self, resource_type=None, min_api=None, max_api=None):
+        resource_type = resource_type or self.command_kwargs.get('resource_type', None)
+        return self.loader.supported_api_version(resource_type=resource_type, min_api=min_api, max_api=max_api)
+
+    def get_models(self, *attr_args, **kwargs):
+        resource_type = kwargs.get('resource_type', self.command_kwargs.get('resource_type', None))
+        return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models')
+
+
+# pylint: disable=too-few-public-methods
+class AzCliCommandInvoker(CommandInvoker):
+
+    # pylint: disable=too-many-statements
+    def execute(self, args):
+        import knack.events as events
+        from knack.util import CommandResultItem, todict
+
+        # TODO: Can't simply be invoked as an event because args are transformed
+        args = _pre_command_table_create(self.cli_ctx, args)
+
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
+        cmd_tbl = self.commands_loader.load_command_table(args)
+        command = self._rudimentary_get_command(args)
+        try:
+            cmd_tbl = {command: self.commands_loader.command_table[command]} if command else cmd_tbl
+        except KeyError:
+            pass
+        self.commands_loader.load_arguments(command)
+        self.commands_loader._update_command_definitions()  # pylint: disable=protected-access
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=cmd_tbl)
+        self.parser.cli_ctx = self.cli_ctx
+        self.parser.load_command_table(cmd_tbl)
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=cmd_tbl, parser=self.parser)
+
+        if not args:
+            self.cli_ctx.completion.enable_autocomplete(self.parser)
+            subparser = self.parser.subparsers[tuple()]
+            self.help.show_welcome(subparser)
+
+            # TODO: No event in base with which to target
+            telemetry.set_command_details('az')
+            telemetry.set_success(summary='welcome')
+            return None
+
+        if args[0].lower() == 'help':
+            args[0] = '--help'
+
+        self.cli_ctx.completion.enable_autocomplete(self.parser)
+
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
+        parsed_args = self.parser.parse_args(args)
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
+
+        # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
+        # with an event. Would need to be customized via inheritance.
+        results = []
+        for expanded_arg in _explode_list_args(parsed_args):
+
+            cmd = expanded_arg.func
+            if hasattr(expanded_arg, 'cmd'):
+                expanded_arg.cmd = cmd
+
+            self._validation(expanded_arg)
+
+            self.data['command'] = expanded_arg.command
+
+            params = self._filter_params(expanded_arg)
+
+            command_source = cmd_tbl[command].command_source
+            telemetry.set_command_details(self.data['command'],
+                                          self.data['output'],
+                                          [p for p in args if p.startswith('-')],
+                                          extension_name=command_source.extension_name if command_source else None)
+
+            try:
+                result = cmd(params)
+                no_wait_param = cmd.no_wait_param
+                if no_wait_param and getattr(expanded_arg, no_wait_param, False):
+                    result = None
+
+                # TODO: Not sure how to make this actually work with the TRANSFORM event...
+                transform_op = cmd.command_kwargs.get('transform', None)
+                if transform_op:
+                    result = transform_op(result)
+
+                if _is_poller(result):
+                    result = LongRunningOperation(self.cli_ctx, 'Starting {}'.format(cmd.name))(result)
+                elif _is_paged(result):
+                    result = list(result)
+
+                result = todict(result)
+                event_data = {'result': result}
+                self.cli_ctx.raise_event(events.EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
+                self.cli_ctx.raise_event(events.EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
+                result = event_data['result']
+
+                if result:
+                    results.append(result)
+
+            except Exception as ex:  # pylint: disable=broad-except
+                if cmd.exception_handler:
+                    cmd.exception_handler(ex)
+                    return
+                else:
+                    six.reraise(*sys.exc_info())
+
+        if results and len(results) == 1:
+            results = results[0]
+
+        return CommandResultItem(results,
+                                 table_transformer=cmd_tbl[parsed_args.command].table_transformer,
+                                 is_query_active=self.data['query_active'])
 
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='',
+    def __init__(self, cli_ctx, start_msg='', finish_msg='',
                  poller_done_interval_ms=1000.0, progress_controller=None):
 
+        self.cli_ctx = cli_ctx
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        from azure.cli.core.application import APPLICATION
-        self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
+        self.progress_controller = progress_controller or cli_ctx.get_progress_controller()
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
 
@@ -159,7 +326,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
-            activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
+            activity_log = get_mgmt_service_client(self.cli_ctx, MonitorClient).activity_logs.list(filter=odata_filters)
 
             results = []
             max_events = 50  # default max value for events in list_activity_log
@@ -209,12 +376,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
+
         correlation_message = ''
         self.progress_controller.begin()
         correlation_id = None
 
-        az_logger = azlogging.get_az_logger()
-        is_verbose = any(handler.level <= logs.INFO for handler in az_logger.handlers)
+        is_verbose = any(handler.level <= logs.INFO for handler in logger.handlers)
 
         while not poller.done():
             self.progress_controller.add(message='Running')
@@ -271,19 +438,33 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
         return result
 
 
-class CommandTable(dict):
-    """A command table is a dictionary of name -> CliCommand
-    instances.
+def _load_command_loader(loader, args, name, prefix):
+    module = import_module(prefix + name)
+    loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
+    command_table = {}
 
-    The `name` is the space separated name - i.e. 'vm list'
-    """
+    if loader_cls:
+        command_loader = loader_cls(cli_ctx=loader.cli_ctx)
+        if command_loader.supported_api_version():
+            command_table = command_loader.load_command_table(args)
+            if command_table:
+                for cmd in list(command_table.keys()):
+                    # TODO: If desired to for extension to patch module, this can be uncommented
+                    # if loader.cmd_to_loader_map.get(cmd):
+                    #    loader.cmd_to_loader_map[cmd].append(command_loader)
+                    # else:
+                    loader.cmd_to_loader_map[cmd] = [command_loader]
+    else:
+        logger.debug("Command module '%s' is missing `COMMAND_LOADER_CLS` entry.", name)
+    return command_table
 
-    def register(self, name):
-        def wrapped(func):
-            cli_command(self, name, func)
-            return func
 
-        return wrapped
+def _load_extension_command_loader(loader, args, ext):
+    return _load_command_loader(loader, args, ext, '')
+
+
+def _load_module_command_loader(loader, args, mod):
+    return _load_command_loader(loader, args, mod, 'azure.cli.command_modules.')
 
 
 class ExtensionCommandSource(object):
@@ -305,243 +486,6 @@ class ExtensionCommandSource(object):
             if self.extension_name:
                 return "This command is from the following extension: {}".format(self.extension_name)
             return "This command is from an extension."
-
-
-class CliCommand(object):  # pylint:disable=too-many-instance-attributes
-
-    def __init__(self, name, handler, description=None, table_transformer=None,
-                 arguments_loader=None, description_loader=None,
-                 formatter_class=None, deprecate_info=None):
-        self.name = name
-        self.handler = handler
-        self.help = None
-        self.description = description_loader \
-            if description_loader and CliCommand._should_load_description() \
-            else description
-        self.arguments = {}
-        self.arguments_loader = arguments_loader
-        self.table_transformer = table_transformer
-        self.formatter_class = formatter_class
-        self.deprecate_info = deprecate_info
-        self.command_source = None
-
-    @staticmethod
-    def _should_load_description():
-        from azure.cli.core.application import APPLICATION
-        return not APPLICATION.session['completer_active']
-
-    def load_arguments(self):
-        if self.arguments_loader:
-            self.arguments.update(self.arguments_loader())
-
-    def add_argument(self, param_name, *option_strings, **kwargs):
-        dest = kwargs.pop('dest', None)
-        argument = CliCommandArgument(
-            dest or param_name, options_list=option_strings, **kwargs)
-        self.arguments[param_name] = argument
-
-    def update_argument(self, param_name, argtype):
-        arg = self.arguments[param_name]
-        self._resolve_default_value_from_cfg_file(arg, argtype)
-        arg.type.update(other=argtype)
-
-    def _resolve_default_value_from_cfg_file(self, arg, overrides):
-        if not hasattr(arg.type, 'required_tooling'):
-            required = arg.type.settings.get('required', False)
-            setattr(arg.type, 'required_tooling', required)
-        if 'configured_default' in overrides.settings:
-            def_config = overrides.settings.pop('configured_default', None)
-            setattr(arg.type, 'default_name_tooling', def_config)
-            # same blunt mechanism like we handled id-parts, for create command, no name default
-            if (self.name.split()[-1] == 'create' and
-                    overrides.settings.get('metavar', None) == 'NAME'):
-                return
-            setattr(arg.type, 'configured_default_applied', True)
-            config_value = az_config.get(DEFAULTS_SECTION, def_config, None)
-            if config_value:
-                overrides.settings['default'] = config_value
-                overrides.settings['required'] = False
-
-    def execute(self, **kwargs):
-        return self(**kwargs)
-
-    def __call__(self, *args, **kwargs):
-        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
-           self.command_source.overrides_command:
-            logger.warning(self.command_source.get_command_warn_msg())
-        if self.deprecate_info is not None:
-            text = 'This command is deprecating and will be removed in future releases.'
-            if self.deprecate_info:
-                text += " Use '{}' instead.".format(self.deprecate_info)
-            logger.warning(text)
-        return self.handler(*args, **kwargs)
-
-
-command_table = CommandTable()
-
-# Map to determine what module a command was registered in
-command_module_map = {}
-
-# Map to determine which extension a module belongs to
-mod_to_ext_map = {}
-
-
-def load_params(command):
-    try:
-        command_table[command].load_arguments()
-    except KeyError:
-        return
-    command_module = command_module_map.get(command, None)
-    if not command_module:
-        logger.debug("Unable to load commands for '%s'. No module in command module map found.",
-                     command)
-        return
-    last_dot_index = command_module.rfind('.')
-    if last_dot_index == -1:
-        module_to_load = command_module
-    else:
-        module_to_load = command_module[:last_dot_index]
-    import_module(module_to_load).load_params(command)
-    _apply_parameter_info(command, command_table[command])
-
-
-def _get_command_table_from_extensions():
-    extensions = get_extension_names()
-    if extensions:
-        logger.debug("Found {} extension(s): {}".format(len(extensions), extensions))
-        for ext_name in extensions:
-            ext_dir = get_extension_path(ext_name)
-            sys.path.append(ext_dir)
-            try:
-                ext_mod = get_extension_modname(ext_dir=ext_dir)
-                # Add to the map. This needs to happen before we load commands as registering a command
-                # from an extension requires this map to be up-to-date.
-                mod_to_ext_map[ext_mod] = ext_name
-                start_time = timeit.default_timer()
-                import_module(ext_mod).load_commands()
-                elapsed_time = timeit.default_timer() - start_time
-                logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
-            except Exception:  # pylint: disable=broad-except
-                logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
-                logger.debug(traceback.format_exc())
-
-
-def get_command_table(module_name=None):
-    '''Loads command table(s)
-    When `module_name` is specified, only commands from that module will be loaded.
-    If the module is not found, all commands are loaded.
-    '''
-    loaded = False
-    # TODO remove module_name != 'sf' once old sf module is deprecated from the repo
-    if module_name and module_name not in BLACKLISTED_MODS and module_name != 'sf':
-        try:
-            import_module('azure.cli.command_modules.' + module_name).load_commands()
-            logger.debug("Successfully loaded command table from module '%s'.", module_name)
-            loaded = True
-        except ImportError:
-            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)
-        except Exception:  # pylint: disable=broad-except
-            pass
-    if not loaded:
-        installed_command_modules = []
-        try:
-            mods_ns_pkg = import_module('azure.cli.command_modules')
-            installed_command_modules = [modname for _, modname, _ in
-                                         pkgutil.iter_modules(mods_ns_pkg.__path__)
-                                         if modname not in BLACKLISTED_MODS]
-        except ImportError:
-            pass
-        logger.debug('Installed command modules %s', installed_command_modules)
-        cumulative_elapsed_time = 0
-        for mod in installed_command_modules:
-            try:
-                start_time = timeit.default_timer()
-                import_module('azure.cli.command_modules.' + mod).load_commands()
-                elapsed_time = timeit.default_timer() - start_time
-                logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
-                cumulative_elapsed_time += elapsed_time
-            except Exception as ex:  # pylint: disable=broad-except
-                # Changing this error message requires updating CI script that checks for failed
-                # module loading.
-                logger.error("Error loading command module '%s'", mod)
-                telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
-                                        summary='Error loading module: {}'.format(mod))
-                logger.debug(traceback.format_exc())
-        logger.debug("Loaded all modules in %.3f seconds. "
-                     "(note: there's always an overhead with the first module loaded)",
-                     cumulative_elapsed_time)
-    try:
-        # We always load extensions even if the appropriate module has been loaded
-        # as an extension could override the commands already loaded.
-        _get_command_table_from_extensions()
-    except Exception:  # pylint: disable=broad-except
-        logger.warning("Unable to load extensions. Use --debug for more information.")
-        logger.debug(traceback.format_exc())
-    _update_command_definitions(command_table)
-    ordered_commands = OrderedDict(command_table)
-    return ordered_commands
-
-
-def register_cli_argument(scope, dest, arg_type=None, **kwargs):
-    '''Specify CLI specific metadata for a given argument for a given scope.
-    '''
-    _cli_argument_registry.register_cli_argument(scope, dest, arg_type, **kwargs)
-
-
-def register_extra_cli_argument(command, dest, **kwargs):
-    '''Register extra parameters for the given command. Typically used to augment auto-command built
-    commands to add more parameters than the specific SDK method introspected.
-    '''
-    _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
-
-
-def cli_command(module_name, name, operation,
-                client_factory=None, transform=None, table_transformer=None,
-                no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None, deprecate_info=None,
-                resource_type=None, max_api=None, min_api=None):
-    """ Registers a default Azure CLI command. These commands require no special parameters. """
-    if resource_type and (max_api or min_api):
-        if not supported_api_version(resource_type, min_api=min_api, max_api=max_api):
-            return
-
-    cmd = create_command(module_name, name, operation, transform, table_transformer,
-                         client_factory, no_wait_param, confirmation=confirmation,
-                         exception_handler=exception_handler,
-                         formatter_class=formatter_class,
-                         deprecate_info=deprecate_info)
-
-    # Set the command source as we have the current command table and are about to add the command
-    if module_name and module_name.startswith(EXTENSIONS_MOD_PREFIX):
-        ext_mod = module_name.split('.')[0]
-        cmd.command_source = ExtensionCommandSource(extension_name=mod_to_ext_map.get(ext_mod, None))
-        if name in command_table:
-            cmd.command_source.overrides_command = True
-
-    command_table[name] = cmd
-
-
-def get_op_handler(operation):
-    """ Import and load the operation handler """
-    # Patch the unversioned sdk path to include the appropriate API version for the
-    # resource type in question.
-    from azure.cli.core._profile import CLOUD
-    import types
-
-    for rt in ResourceType:
-        if operation.startswith(rt.import_prefix):
-            operation = operation.replace(rt.import_prefix,
-                                          get_versioned_sdk_path(CLOUD.profile, rt))
-    try:
-        mod_to_import, attr_path = operation.split('#')
-        op = import_module(mod_to_import)
-        for part in attr_path.split('.'):
-            op = getattr(op, part)
-        if isinstance(op, types.FunctionType):
-            return op
-        return six.get_method_function(op)
-    except (ValueError, AttributeError):
-        raise ValueError("The operation '{}' is invalid.".format(operation))
 
 
 def _load_client_exception_class():
@@ -579,141 +523,3 @@ def _is_poller(obj):
         from msrestazure.azure_operation import AzureOperationPoller
         return isinstance(obj, AzureOperationPoller)
     return False
-
-
-def create_command(module_name, name, operation,
-                   transform_result, table_transformer, client_factory,
-                   no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None, deprecate_info=None):
-    if not isinstance(operation, string_types):
-        raise ValueError("Operation must be a string. Got '{}'".format(operation))
-
-    def _execute_command(kwargs):
-        if confirmation \
-            and not kwargs.get(CONFIRM_PARAM_NAME) \
-            and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
-                and not _user_confirmed(confirmation, kwargs):
-            raise CLIError('Operation cancelled.')
-
-        client = client_factory(kwargs) if client_factory else None
-        try:
-            op = get_op_handler(operation)
-            try:
-                result = op(client, **kwargs) if client else op(**kwargs)
-                if no_wait_param and kwargs.get(no_wait_param, None):
-                    return None  # return None for 'no-wait'
-
-                # apply results transform if specified
-                if transform_result:
-                    return transform_result(result)
-
-                # otherwise handle based on return type of results
-                if _is_poller(result):
-                    return LongRunningOperation('Starting {}'.format(name))(result)
-                elif _is_paged(result):
-                    return list(result)
-                return result
-            except Exception as ex:  # pylint: disable=broad-except
-                if exception_handler:
-                    exception_handler(ex)
-                else:
-                    reraise(*sys.exc_info())
-        except _load_validation_error_class() as validation_error:
-            fault_type = name.replace(' ', '-') + '-validation-error'
-            telemetry.set_exception(validation_error, fault_type=fault_type,
-                                    summary='SDK validation error')
-            raise CLIError(validation_error)
-        except _load_client_exception_class() as client_exception:
-            fault_type = name.replace(' ', '-') + '-client-error'
-            telemetry.set_exception(client_exception, fault_type=fault_type,
-                                    summary='Unexpected client exception during command creation')
-            raise client_exception
-        except _load_azure_exception_class() as azure_exception:
-            fault_type = name.replace(' ', '-') + '-service-error'
-            telemetry.set_exception(azure_exception, fault_type=fault_type,
-                                    summary='Unexpected azure exception during command creation')
-            message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
-            raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
-        except ValueError as value_error:
-            fault_type = name.replace(' ', '-') + '-value-error'
-            telemetry.set_exception(value_error, fault_type=fault_type,
-                                    summary='Unexpected value exception during command creation')
-            raise CLIError(value_error)
-
-    command_module_map[name] = module_name
-    name = ' '.join(name.split())
-
-    def arguments_loader():
-        return extract_args_from_signature(get_op_handler(operation), no_wait_param=no_wait_param)
-
-    def description_loader():
-        return extract_full_summary_from_signature(get_op_handler(operation))
-
-    cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
-                     arguments_loader=arguments_loader, description_loader=description_loader,
-                     formatter_class=formatter_class, deprecate_info=deprecate_info)
-    if confirmation:
-        cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
-                         action='store_true',
-                         help='Do not prompt for confirmation')
-    return cmd
-
-
-def _user_confirmed(confirmation, command_args):
-    if callable(confirmation):
-        return confirmation(command_args)
-    try:
-        if isinstance(confirmation, string_types):
-            return prompt_y_n(confirmation)
-        return prompt_y_n('Are you sure you want to perform this operation?')
-    except NoTTYException:
-        logger.warning('Unable to prompt for confirmation as no tty available. Use --yes.')
-        return False
-
-
-def _get_cli_argument(command, argname):
-    return _cli_argument_registry.get_cli_argument(command, argname)
-
-
-def _get_cli_extra_arguments(command):
-    return _cli_extra_argument_registry[command].items()
-
-
-class _ArgumentRegistry(object):
-    def __init__(self):
-        self.arguments = defaultdict(lambda: {})
-
-    def register_cli_argument(self, scope, dest, argtype, **kwargs):
-        argument = CliArgumentType(overrides=argtype,
-                                   **kwargs)
-        self.arguments[scope][dest] = argument
-
-    def get_cli_argument(self, command, name):
-        parts = command.split()
-        result = CliArgumentType()
-        for index in range(0, len(parts) + 1):
-            probe = ' '.join(parts[0:index])
-            override = self.arguments.get(probe, {}).get(name, None)
-            if override:
-                result.update(override)
-        return result
-
-
-_cli_argument_registry = _ArgumentRegistry()
-_cli_extra_argument_registry = defaultdict(lambda: {})
-
-
-def _apply_parameter_info(command_name, command):
-    for argument_name in command.arguments:
-        overrides = _get_cli_argument(command_name, argument_name)
-        command.update_argument(argument_name, overrides)
-
-    # Add any arguments explicitly registered for this command
-    for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
-        command.arguments[argument_name] = argument_definition
-        command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
-
-
-def _update_command_definitions(command_table_to_update):
-    for command_name, command in command_table_to_update.items():
-        _apply_parameter_info(command_name, command)

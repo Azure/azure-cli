@@ -15,7 +15,7 @@ def pass_gather(_):
     pass
 
 
-GatherCommands.gather_from_files = pass_gather
+GatherCommands._gather_from_files = pass_gather
 
 
 # pylint: disable=too-few-public-methods

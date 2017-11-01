@@ -11,12 +11,10 @@ import os
 import pkgutil
 import yaml
 
-from azure.cli.core.application import APPLICATION, Configuration
-from azure.cli.core.commands import _update_command_definitions, BLACKLISTED_MODS
-from azure.cli.core.help_files import helps
+from azure.cli.core.commands import BLACKLISTED_MODS
 from azure.cli.core.commands.arm import add_id_parameters
 
-import azclishell.configuration as config
+from knack.help_files import helps
 
 
 class LoadFreshTable(object):
@@ -24,8 +22,9 @@ class LoadFreshTable(object):
     this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
-    def __init__(self):
+    def __init__(self, shell_ctx):
         self.command_table = None
+        self.shell_ctx = shell_ctx
 
     def install_modules(self):
         installed_command_modules = []
@@ -46,8 +45,9 @@ class LoadFreshTable(object):
                 mod.load_commands()
 
             except Exception:  # pylint: disable=broad-except
-                print("Error loading: {}".format(mod))
-        _update_command_definitions(self.command_table)
+                # print("Error loading: {}".format(mod))
+                pass
+        self.shell_ctx.cli_ctx.invocation.commands_loader.load_arguments(None)
 
     def load_help_files(self, data):
         """ loads all the extra information from help files """
@@ -92,11 +92,11 @@ class LoadFreshTable(object):
                     examples.append([example['name'], example['text']])
                 data[cmd]['examples'] = examples
 
-    def dump_command_table(self):
+    def dump_command_table(self, shell_ctx):
         """ dumps the command table """
 
-        self.command_table = APPLICATION.configuration.get_command_table()
-        command_file = config.CONFIGURATION.get_help_files()
+        self.command_table = shell_ctx.cli_ctx.invocation.commands_loader.command_table
+        command_file = shell_ctx.config.get_help_files()
 
         self.install_modules()
         add_id_parameters(self.command_table)
@@ -145,19 +145,16 @@ class LoadFreshTable(object):
         self.load_help_files(data)
 
         # dump into the cache file
-        with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
+        with open(os.path.join(get_cache_dir(shell_ctx), command_file), 'w') as help_file:
             json.dump(data, help_file)
 
 
-def get_cache_dir():
+def get_cache_dir(shell_ctx):
     """ gets the location of the cache """
-    azure_folder = config.get_config_dir()
+    azure_folder = shell_ctx.config.config_dir
     cache_path = os.path.join(azure_folder, 'cache')
     if not os.path.exists(azure_folder):
         os.makedirs(azure_folder)
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
     return cache_path
-
-
-FRESH_TABLE = LoadFreshTable()

@@ -12,8 +12,7 @@ except ImportError:
 from json import loads
 import requests
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 
 from ._constants import MANAGED_REGISTRY_SKU
@@ -21,10 +20,10 @@ from ._utils import get_registry_by_name
 from .credential import acr_credential_show
 
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
-def _get_aad_token(login_server, only_refresh_token, repository=None, permission='*'):
+def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, permission='*'):
     """Obtains refresh and access tokens for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -52,7 +51,7 @@ def _get_aad_token(login_server, only_refresh_token, repository=None, permission
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
     from azure.cli.core._profile import Profile
-    profile = Profile()
+    profile = Profile(cli_ctx)
     sp_id, refresh, access, tenant = profile.get_refresh_token()
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}

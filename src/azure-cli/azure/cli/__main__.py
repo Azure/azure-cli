@@ -3,24 +3,42 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
 import os
+import sys
 
-import azure.cli.main
+from azure.cli.core import MainCommandsLoader, AzCli
+from azure.cli.core.azlogging import AzCliLogging
+from azure.cli.core.commands import AzCliCommandInvoker
+from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core._help import AzCliHelp
+
 import azure.cli.core.telemetry as telemetry
+
+from knack.completion import ARGCOMPLETE_ENV_NAME
+from knack.log import get_logger
+
+logger = get_logger(__name__)
+
+def cli_main(cli, args):
+    return cli.invoke(args)
+
+az_cli = AzCli(cli_name='az',
+               config_dir=GLOBAL_CONFIG_DIR,
+               config_env_var_prefix=ENV_VAR_PREFIX,
+               commands_loader_cls=MainCommandsLoader,
+               invocation_cls=AzCliCommandInvoker,
+               parser_cls=AzCliCommandParser,
+               logging_cls=AzCliLogging,
+               help_cls=AzCliHelp)
+
+telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
 try:
     telemetry.start()
-    args = sys.argv[1:]
 
-    # Check if we are in argcomplete mode - if so, we
-    # need to pick up our args from environment variables
-    if os.environ.get('_ARGCOMPLETE'):
-        comp_line = os.environ.get('COMP_LINE')
-        if comp_line:
-            args = comp_line.split()[1:]
-
-    exit_code = azure.cli.main.main(args)
+    exit_code = cli_main(az_cli, sys.argv[1:])
+    
     if exit_code and exit_code != 0:
         telemetry.set_failure()
     else:

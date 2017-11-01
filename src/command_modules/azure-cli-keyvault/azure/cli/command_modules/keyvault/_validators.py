@@ -9,11 +9,14 @@ import binascii
 from datetime import datetime
 import re
 
+from azure.keyvault.models import JsonWebKeyOperation
+
 from azure.mgmt.keyvault import KeyVaultManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.util import CLIError
+
+from knack.util import CLIError
 
 from msrestazure.tools import parse_resource_id
 

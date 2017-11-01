@@ -3,64 +3,36 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import (
-    get_resource_name_completion_list,
-    enum_choice_list,
-    name_type)
-from azure.cli.core.util import shell_safe_json_parse
-from azure.cli.core.commands import register_cli_argument
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
-from azure.mgmt.redis.models.redis_management_client_enums import (
-    RebootType,
-    RedisKeyType,
-    SkuName)
+# pylint: disable=line-too-long
 
-from azure.mgmt.redis.models import (
-    ScheduleEntry,
-)
+from azure.cli.core.commands.parameters import get_resource_name_completion_list, name_type
+import azure.cli.command_modules.redis._help  # pylint: disable=unused-import
+from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
+
+from azure.mgmt.redis.models.redis_management_client_enums import RebootType, RedisKeyType, SkuName
+
+from azure.cli.core.commands.parameters import get_enum_type  # TODO: Move this into Knack
 
 
-class JsonString(dict):
-    def __init__(self, value):
-        super(JsonString, self).__init__()
-        if value[0] in ("'", '"') and value[-1] == value[0]:
-            # Remove leading and trailing quotes for dos/cmd.exe users
-            value = value[1:-1]
-        dictval = shell_safe_json_parse(value)
-        self.update(dictval)
+def load_arguments(self, _):
 
+    with self.argument_context('redis') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the redis cache.', completer=get_resource_name_completion_list('Microsoft.Cache/redis'))
+        c.argument('redis_configuration', type=JsonString)
+        c.argument('reboot_type', arg_type=get_enum_type(RebootType))
+        c.argument('key_type', arg_type=get_enum_type(RedisKeyType))
+        c.argument('shard_id', type=int)
+        c.argument('sku', arg_type=get_enum_type(SkuName))
+        c.argument('vm_size', help='Size of redis cache to deploy. Example : values for C family (C0, C1, C2, C3, C4, C5, C6). For P family (P1, P2, P3, P4)')
+        c.argument('enable_non_ssl_port', action='store_true')
+        c.argument('shard_count', type=int)
 
-class ScheduleEntryList(list):
-    def __init__(self, value):
-        super(ScheduleEntryList, self).__init__()
-        if value[0] in ("'", '"') and value[-1] == value[0]:
-            # Remove leading and trailing quotes for dos/cmd.exe users
-            value = value[1:-1]
-        dictval = shell_safe_json_parse(value)
-        self.extend([ScheduleEntry(row['dayOfWeek'],
-                                   int(row['startHourUtc']),
-                                   row.get('maintenanceWindow', None)) for row in dictval])
+    with self.argument_context('redis import-method') as c:
+        c.argument('files', nargs='+')
 
+    with self.argument_context('redis patch-schedule set') as c:
+        c.argument('schedule_entries', type=ScheduleEntryList)
 
-register_cli_argument('redis', 'name', arg_type=name_type, help='Name of the redis cache.',
-                      completer=get_resource_name_completion_list('Microsoft.Cache/redis'),
-                      id_part='name')
-register_cli_argument('redis', 'redis_configuration', type=JsonString)
-register_cli_argument('redis', 'reboot_type', **enum_choice_list(RebootType))
-register_cli_argument('redis', 'key_type', **enum_choice_list(RedisKeyType))
-register_cli_argument('redis', 'shard_id', type=int)
-register_cli_argument('redis', 'sku', **enum_choice_list(SkuName))
-register_cli_argument('redis', 'vm_size',
-                      help='Size of redis cache to deploy. '
-                           'Example : values for C family (C0, C1, C2, C3, C4, C5, C6). '
-                           'For P family (P1, P2, P3, P4)')
-register_cli_argument('redis', 'enable_non_ssl_port', action='store_true')
-register_cli_argument('redis', 'shard_count', type=int)
-register_cli_argument('redis', 'subnet_id')
-
-register_cli_argument('redis import-method', 'files', nargs='+')
-
-register_cli_argument('redis patch-schedule set', 'schedule_entries', type=ScheduleEntryList)
-
-register_cli_argument('redis create', 'name', arg_type=name_type, completer=None)
-register_cli_argument('redis create', 'tenant_settings', type=JsonString)
+    with self.argument_context('redis create') as c:
+        c.argument('name', arg_type=name_type, completer=None)
+        c.argument('tenant_settings', type=JsonString)

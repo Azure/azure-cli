@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 
 
 helps['eventgrid'] = """

@@ -9,7 +9,7 @@ __all__ = ['load_params', 'load_commands']
 
 
 def load_params(_):
-    import azure.cli.command_modules.rdbms.params  # pylint: disable=redefined-outer-name, unused-variable
+    import azure.cli.command_modules.rdbms._params  # pylint: disable=redefined-outer-name, unused-variable
 
 
 def load_commands():

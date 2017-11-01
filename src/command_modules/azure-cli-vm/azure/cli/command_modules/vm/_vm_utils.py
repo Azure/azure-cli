@@ -5,9 +5,11 @@
 
 import json
 import os
-from azure.cli.core.util import CLIError
-from msrestazure.tools import parse_resource_id
 
+from knack.log import get_logger
+from knack.util import CLIError
+
+logger = get_logger(__name__)
 
 def read_content_if_is_file(string_or_file):
     content = string_or_file
@@ -17,10 +19,10 @@ def read_content_if_is_file(string_or_file):
     return content
 
 
-def _resolve_api_version(provider_namespace, resource_type, parent_path):
+def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = client.providers.get(provider_namespace)
 
     # If available, we will use parent resource's api-version
@@ -40,21 +42,19 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
 
 
 def log_pprint_template(template):
-    import azure.cli.core.azlogging as azlogging
-
-    logger = azlogging.get_az_logger(__name__)
     logger.info('==== BEGIN TEMPLATE ====')
     logger.info(json.dumps(template, indent=2))
     logger.info('==== END TEMPLATE ====')
 
 
-def check_existence(value, resource_group, provider_namespace, resource_type,
+def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.azure_exceptions import CloudError
+    from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
-    resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
 
     id_parts = parse_resource_id(value)
 

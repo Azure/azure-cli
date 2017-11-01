@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, too-many-lines
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 vm_ids_example = """        - name: {0}
           text: >
@@ -87,6 +87,7 @@ helps['vm create'] = """
           text: >
              az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a VM in an availability zone in the current resource group's region
+          min_profile: latest
           text: >
              az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """
@@ -134,6 +135,7 @@ helps['vmss create'] = """
           text: >
              az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
         - name: Create a single zone VM scaleset in the current resource group's region
+          min_profile: latest
           text: >
              az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """
@@ -173,6 +175,7 @@ helps['vm availability-set convert'] = """
 helps['vm extension set'] = """
     type: command
     short-summary: Set extensions for a VM.
+    long-summary: Get extension details from `az vm extension image list`.
     examples:
         - name: Add a user account to a Linux VM.
           text: |
@@ -230,12 +233,30 @@ helps['vm update'] = """
           text: az vm update -n name -g group --remove networkProfile.networkInterfaces 3
 """
 
+helps['vmss deallocate'] = """
+    type: command
+    short-summary: Deallocate VMs within a VMSS.
+"""
+
+helps['vmss delete-instances'] = """
+    type: command
+    short-summary: Delete VMs within a VMSS.
+"""
+
 helps['vmss get-instance-view'] = """
     type: command
     short-summary: View an instance of a VMSS.
     parameters:
         - name: --ids
           short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
+        - name: --instance-id
+          short-summary: A VM instance ID or "*" to list instance view for all VMs in a scale set.
+
+"""
+
+helps['vmss list'] = """
+    type: command
+    short-summary: List VMSS.
 """
 
 helps['vmss reimage'] = """
@@ -244,6 +265,56 @@ helps['vmss reimage'] = """
     parameters:
         - name: --ids
           short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
+        - name: --instance-id
+          short-summary: VM instance ID. If missing, reimage all instances.
+"""
+
+helps['vmss restart'] = """
+    type: command
+    short-summary: Restart VMs within a VMSS.
+"""
+
+helps['vmss scale'] = """
+    type: command
+    short-summary: Change the number of VMs within a VMSS.
+    parameters:
+        - name: --new-capacity
+          short-summary: Number of VMs in the VMSS.
+"""
+
+helps['vmss show'] = """
+    type: command
+    short-summary: Get details on VMs within a VMSS.
+    parameters:
+        - name: --ids
+          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
+        - name: --instance-id
+          short-summary: VM instance ID. If missing, show the VMSS.
+"""
+
+helps['vmss start'] = """
+    type: command
+    short-summary: Start VMs within a VMSS.
+"""
+
+helps['vmss stop'] = """
+    type: command
+    short-summary: Power off (stop) VMs within a VMSS.
+"""
+
+helps['vmss update'] = """
+    type: command
+    short-summary: Update a VMSS.
+"""
+
+helps['vmss update-instances'] = """
+    type: command
+    short-summary: Upgrade VMs within a VMSS.
+"""
+
+helps['vmss wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a scale set is met.
 """
 
 helps['vmss disk'] = """
@@ -256,25 +327,7 @@ helps['vmss nic'] = """
     short-summary: Manage network interfaces of a VMSS.
 """
 
-helps['vmss show'] = """
-    type: command
-    short-summary: Get details on VMs within a VMSS.
-    parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
-"""
-
-helps['vmss update'] = """
-    type: command
-    short-summary: Update a virtual machine scale set.
-"""
-
-helps['vmss wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of a scale set is met.
-"""
-
-helps['vmss rolling-ugrade'] = """
+helps['vmss rolling-upgrade'] = """
     type: group
     short-summary: (PREVIEW) Manage rolling upgrades.
 """
@@ -319,7 +372,10 @@ helps['vm user reset-ssh'] = """
 
 helps['vm user update'] = """
     type: command
-    long-summary: Update a user account.
+    short-summary: Update a user account.
+    parameters:
+        - name: --ssh-key-value
+          short-summary: SSH public key file value or public key file path
     examples:
         - name: Update a Windows user account.
           text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
@@ -357,6 +413,9 @@ vm_boot_diagnostics_enable_cmd = "{0} --storage https://mystor.blob.core.windows
 helps[vm_boot_diagnostics_enable] = """
     type: command
     short-summary: Enable the boot diagnostics on a VM.
+    parameters:
+        - name: --storage
+          short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/)
     examples:
 {0}
 """.format(vm_ids_example.format('Enable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_enable_cmd))
@@ -657,6 +716,15 @@ helps['vm image'] = """
 helps['vm image list'] = """
     type: command
     short-summary: List the VM/VMSS images available in the Azure Marketplace.
+    parameters:
+        - name: --all
+          short-summary: Retrieve image list from live Azure service rather using an offline image list
+        - name: --offer -f
+          short-summary: Image offer name, partial name is accepted
+        - name: --publisher -p
+          short-summary: Image publisher name, partial name is accepted
+        - name: --sku -s
+          short-summary: Image sku name, partial name is accepted
     examples:
         - name: List all available images.
           text: az vm image list --all
@@ -763,6 +831,17 @@ helps['vmss diagnostics'] = """
     short-summary: Configure the Azure Virtual Machine Scale Set diagnostics extension.
 """
 
+helps['vmss diagnostics get-default-config'] = """
+    type: command
+    short-summary: Show the default config file which defines data to be collected.
+"""
+
+helps['vmss diagnostics set'] = """
+    type: command
+    short-summary: Enable diagnostics on a VMSS.
+"""
+
+
 helps['vmss list-instance-connection-info'] = """
     type: command
     short-summary: Get the IP address and port number used to connect to individual VM instances within a set.
@@ -778,10 +857,47 @@ helps['vmss extension'] = """
     short-summary: Manage extensions on a VM scale set.
 """
 
+helps['vmss extension delete'] = """
+    type: command
+    short-summary: Delete an extension from a VMSS.
+"""
+
+helps['vmss extension list'] = """
+    type: command
+    short-summary: List extensions associated with a VMSS.
+"""
+
+helps['vmss extension set'] = """
+    type: command
+    short-summary: Add an extension to a VMSS or update an existing extension.
+    long-summary: Get extension details from `az vmss extension image list`.
+"""
+
+helps['vmss extension show'] = """
+    type: command
+    short-summary: Show details on a VMSS extension.
+"""
+
 helps['vmss extension image'] = """
     type: group
     short-summary: Find the available VM extensions for a subscription and region.
 """
+
+helps['vmss extension image list'] = """
+    type: command
+    short-summary: List the information on available extensions.
+    examples:
+        - name: List the unique publishers for extensions.
+          text: az vmss extension image list --query "[].publisher" -o tsv | sort -u
+        - name: Find extensions with "Docker" in the name.
+          text: az vmss extension image list --query "[].name" -o tsv | sort -u | grep Docker
+        - name: List extension names where the publisher name starts with "Microsoft.Azure.App".
+          text: |
+            az vmss extension image list --query \\
+                "[?starts_with(publisher, 'Microsoft.Azure.App')].publisher" \\
+                -o tsv | sort -u | xargs -I{} az vmss extension image list-names --publisher {} -l westus
+"""
+
 
 deallocate_generalize_capture = """        - name: Deallocate, generalize, and capture a stopped virtual machine.
           text: |
@@ -828,6 +944,14 @@ helps['vm capture'] = """
     type: command
     short-summary: Capture information for a stopped VM.
     long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+    parameters:
+        - name: --vhd-name-prefix
+          type: string
+          short-summary: The VHD name prefix specify for the VM disks.
+        - name: --storage-container
+          short-summary: The storage account container name in which to save the disks.
+        - name: --overwrite
+          short-summary: Overwrite the existing disk file.
     examples:
 {0}
 """.format(deallocate_generalize_capture)
@@ -925,7 +1049,13 @@ helps['vm list-skus'] = """
 
 helps['vm open-port'] = """
     type: command
-    short-summary: Manage open ports on a VM.
+    short-summary: Opens a VM to inbound traffic on specified ports.
+    long-summary: >
+        Adds a security rule to the network security group (NSG) that is attached to the VM's
+        network interface (NIC) or subnet. The existing NSG will be used or a new one will be
+        created. The rule name is 'open-port-{{port}}' and will overwrite an existing rule with
+        this name. For multi-NIC VMs, or for more fine-grained control, use the appropriate
+        network commands directly (nsg rule create, etc).
     examples:
         - name: Open all ports on a VM to inbound traffic.
           text: az vm open-port -g MyResourceGroup -n MyVm --port *
@@ -946,6 +1076,12 @@ helps['vm redeploy'] = """
 helps['vm resize'] = """
     type: command
     short-summary: Update a VM's size.
+    parameters:
+        - name: --size
+          type: string
+          short-summary: The VM size.
+          populator-commands:
+          - az vm list-vm-resize-options
     examples:
         - name: Resize a VM.
           text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands.arm import _cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
@@ -31,7 +31,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'acr login', 'azure.cli.command_modules.acr.custom#acr_login')
     cli_command(__name__, 'acr show-usage', 'azure.cli.command_modules.acr.custom#acr_show_usage',
                 table_transformer=output_format)
-    cli_generic_update_command(
+    _cli_generic_update_command(
         __name__,
         'acr update',
         'azure.cli.command_modules.acr.custom#acr_update_get',
@@ -70,7 +70,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'acr webhook ping',
                 'azure.cli.command_modules.acr.webhook#acr_webhook_ping',
                 table_transformer=output_format)
-    cli_generic_update_command(
+    _cli_generic_update_command(
         __name__,
         'acr webhook update',
         'azure.cli.command_modules.acr.webhook#acr_webhook_update_get',

@@ -5,8 +5,9 @@
 
 from azure.cli.core.commands import _get_cli_argument
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.parameters import ignore_type
 from azure.cli.core.sdk.util import ParametersContext
+
+from knack.arguments import ignore_type
 
 # CLIENT FACTORIES
 

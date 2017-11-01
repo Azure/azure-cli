@@ -34,7 +34,7 @@ def patch_main_exception_handler(unit_test):
 
         raise CliExecutionError(ex)
 
-    mock_in_unit_test(unit_test, 'azure.cli.main.handle_exception', _handle_main_exception)
+    mock_in_unit_test(unit_test, 'azure.cli.core.util.handle_exception', _handle_main_exception)
 
 
 def patch_load_cached_subscriptions(unit_test):

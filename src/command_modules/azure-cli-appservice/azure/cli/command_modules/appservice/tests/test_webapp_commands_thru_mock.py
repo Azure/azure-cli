@@ -11,7 +11,7 @@ from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteCon
                                    AddressResponse, HostingEnvironmentProfile)
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,

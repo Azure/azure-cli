@@ -7,9 +7,9 @@ import os
 import traceback
 import json
 
-import azure.cli.core.azlogging as azlogging
-
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
+
+from knack.log import get_logger
 
 
 _CUSTOM_EXT_DIR = os.environ.get('AZURE_EXTENSION_DIR')
@@ -23,7 +23,7 @@ AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
 EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ExtensionNotInstalledException(Exception):

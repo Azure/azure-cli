@@ -21,6 +21,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     mkdir_p, guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
+from knack.util import CLIError
+
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
 

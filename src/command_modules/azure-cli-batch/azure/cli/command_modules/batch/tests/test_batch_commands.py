@@ -12,7 +12,7 @@ import mock
 from msrest.exceptions import ValidationError, ClientRequestError
 from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
@@ -555,7 +555,6 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertEqual(len(options), 4)
 
     def test_batch_cancel_operation(self):
-        from azure.cli.core._config import az_config as config
         from azure.cli.core.commands import _user_confirmed as user
 
         self.assertFalse(self.command_job._cancel_operation({}, config, user))

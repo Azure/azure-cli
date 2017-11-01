@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.common import AzureHttpError
-from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import get_sdk, ResourceType
+
+from knack.util import CLIError
+
 from ._factory import generic_data_service_factory
 
 Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \

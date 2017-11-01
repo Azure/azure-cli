@@ -32,6 +32,8 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
+from knack.util import CLIError
+
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 

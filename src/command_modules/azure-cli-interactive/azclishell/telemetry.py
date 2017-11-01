@@ -31,15 +31,15 @@ def set_custom_properties(prop, name, value):
 class Telemetry(TelemetryClient):
     """ base telemetry sessions """
 
-    def __init__(self, instrumentation_key, telemetry_channel=None):
-        super(Telemetry, self).__init__(instrumentation_key, telemetry_channel)
+    def __init__(self, cli_ctx):
+        super(Telemetry, self).__init__(INSTRUMENTATION_KEY, None)
         self.start_time = None
         self.end_time = None
-        enable(instrumentation_key)
+        enable(INSTRUMENTATION_KEY)
         # adding context
         self.context.application.id = 'Azure CLI Shell'
         self.context.application.ver = __version__
-        self.context.user.id = Profile().get_installation_id()
+        self.context.user.id = Profile(cli_ctx).get_installation_id()
         self.context.instrumentation_key = INSTRUMENTATION_KEY
 
     def _track_event(self, name, properties=None, measurements=None):
@@ -92,10 +92,8 @@ def scrub(text):
     return ' '.join(values)
 
 
-SHELL_TELEMETRY = Telemetry(INSTRUMENTATION_KEY)
-
-
-if __name__ == '__main__':
-    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
-    SHELL_TELEMETRY.track_event('az/interactive/run', json.loads(sys.argv[1]))
-    SHELL_TELEMETRY.flush()
+# TODO: restore this wonky telemetry thing...
+# if __name__ == '__main__':
+#    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
+#    SHELL_TELEMETRY.track_event('az/interactive/run', json.loads(sys.argv[1]))
+#    SHELL_TELEMETRY.flush()

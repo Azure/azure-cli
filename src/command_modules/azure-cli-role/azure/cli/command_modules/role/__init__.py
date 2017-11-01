@@ -3,12 +3,28 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core import AzCommandsLoader
+
 import azure.cli.command_modules.role._help  # pylint: disable=unused-import
 
 
-def load_params(_):
-    import azure.cli.command_modules.role._params  # pylint: disable=redefined-outer-name, unused-variable
+class RoleCommandsLoader(AzCommandsLoader):
 
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core.sdk.util import CliCommandType
+        role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
+        super(RoleCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=role_custom)
+        self.module_name = __name__
 
-def load_commands():
-    import azure.cli.command_modules.role.commands  # pylint: disable=redefined-outer-name, unused-variable
+    def load_command_table(self, args):
+        super(RoleCommandsLoader, self).load_command_table(args)
+        from azure.cli.command_modules.role.commands import load_command_table
+        load_command_table(self, args)
+        return self.command_table
+
+    def load_arguments(self, command):
+        super(RoleCommandsLoader, self).load_arguments(command)
+        from azure.cli.command_modules.role._params import load_arguments
+        load_arguments(self, command)
+
+COMMAND_LOADER_CLS = RoleCommandsLoader

@@ -6,7 +6,7 @@
 import argparse
 import re
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.monitor.custom import operator_map, aggregation_map
 
 

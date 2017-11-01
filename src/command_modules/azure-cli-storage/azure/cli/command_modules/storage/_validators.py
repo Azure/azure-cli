@@ -8,12 +8,13 @@ import os
 import re
 from datetime import datetime, timedelta
 
-from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import CLOUD
-from azure.cli.core._config import az_config
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
+
+from knack.util import CLIError
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally, guess_content_type
@@ -21,7 +22,6 @@ from .sdkutil import get_table_data_type
 from .url_quote_util import encode_for_url
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
-
 
 # Utilities
 

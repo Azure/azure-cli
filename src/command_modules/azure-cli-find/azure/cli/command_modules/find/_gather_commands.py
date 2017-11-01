@@ -5,8 +5,7 @@
 
 import yaml
 
-from azure.cli.core.commands import _update_command_definitions
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 def build_command_table():
@@ -14,7 +13,6 @@ def build_command_table():
     cmd_table = commands.get_command_table()
     for cmd in cmd_table:
         cmd_table[cmd].load_arguments()
-    _update_command_definitions(cmd_table)
 
     data = {}
     for cmd in cmd_table:

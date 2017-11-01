@@ -6,10 +6,9 @@ from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
 
 from azure.cli.core.extension import ext_compat_with_cli
-import azure.cli.core.azlogging as azlogging
 from ._index import get_index_extensions
 
-logger = azlogging.get_az_logger(__name__)
+from knack.log import get_logger
 
 
 class NoExtensionCandidatesError(Exception):

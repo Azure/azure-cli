@@ -4,15 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import re
 
+from knack.util import CLIError
 try:
     from urllib.parse import urlparse, urlsplit
 except ImportError:
     from urlparse import urlparse, urlsplit  # pylint: disable=import-error
-
-
-from azure.cli.core.util import CLIError
-from .custom import _parse_lock_id
 
 
 def _validate_deployment_name(namespace):
@@ -89,6 +87,26 @@ def validate_lock_parameters(namespace):
                                       getattr(namespace, 'resource_name', None))
 
 
+def _parse_lock_id(id_arg):
+    """
+    Lock ids look very different from regular resource ids, this function uses a regular expression
+    that parses a lock's id and extracts the following parameters if available:
+    -lock_name: the lock's name; always present in a lock id
+    -resource_group: the name of the resource group; present in group/resource level locks
+    -resource_provider_namespace: the resource provider; present in resource level locks
+    -resource_type: the resource type; present in resource level locks
+    -resource_name: the resource name; present in resource level locks
+    -parent_resource_path: the resource's parent path; present in child resources such as subnets
+    """
+    regex = re.compile(
+        '/subscriptions/[^/]*(/resource[gG]roups/(?P<resource_group>[^/]*)'
+        '(/providers/(?P<resource_provider_namespace>[^/]*)'
+        '(/(?P<parent_resource_path>.*))?/(?P<resource_type>[^/]*)/(?P<resource_name>[^/]*))?)?'
+        '/providers/Microsoft.Authorization/locks/(?P<lock_name>[^/]*)')
+
+    return regex.match(id_arg).groupdict()
+
+
 def validate_subscription_lock(namespace):
     if getattr(namespace, 'ids', None):
         for lock_id in getattr(namespace, 'ids'):
@@ -104,7 +122,7 @@ def validate_group_lock(namespace):
                 raise CLIError('{} is not a valid group-level lock id.'.format(lock_id))
     else:
         if not getattr(namespace, 'resource_group', None):
-            raise CLIError('Missing required resource_group parameter.')
+            raise CLIError('Missing required --resource-group/-g parameter.')
 
 
 def validate_resource_lock(namespace):

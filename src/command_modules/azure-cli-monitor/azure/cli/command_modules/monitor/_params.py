@@ -6,10 +6,8 @@
 from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
 
-from azure.cli.core.commands import \
-    (CliArgumentType, register_cli_argument, register_extra_cli_argument)
-from azure.cli.core.commands.parameters import \
-    (location_type, enum_choice_list, tags_type, three_state_flag)
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
+from azure.cli.core.commands.parameters import location_type, tags_type, get_three_state_flag
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.command_modules.monitor.actions import \
@@ -20,6 +18,8 @@ from azure.cli.command_modules.monitor.validators import \
 from azure.mgmt.monitor.models.monitor_management_client_enums import \
     (ConditionOperator, TimeAggregationOperator)
 from azure.mgmt.monitor.models import (LogProfileResource, RetentionPolicy)
+
+from knack.arguments import CLIArgumentType, enum_choice_list
 
 # pylint: disable=line-too-long
 
@@ -33,7 +33,7 @@ def register_resource_parameter(command, dest, arg_group=None, required=True):
     register_extra_cli_argument(command, 'resource_type', options_list=['--{}-type'.format(dest)], arg_group=arg_group, help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
 
 
-name_arg_type = CliArgumentType(options_list=['--name', '-n'], metavar='NAME')
+name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
 register_cli_argument('monitor', 'location', location_type, validator=get_default_location_from_resource_group)
 register_cli_argument('monitor', 'tags', tags_type)
@@ -45,8 +45,8 @@ register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name
 register_cli_argument('monitor alert create', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
 register_cli_argument('monitor alert create', 'custom_emails', nargs='+', arg_group='Action')
-register_cli_argument('monitor alert create', 'disabled', **three_state_flag())
-register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', **three_state_flag())
+register_cli_argument('monitor alert create', 'disabled', arg_type=get_three_state_flag())
+register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', arg_type=get_three_state_flag())
 register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+', arg_group='Action')
 register_cli_argument('monitor alert create', 'condition', action=ConditionAction, nargs='+')
 register_cli_argument('monitor alert create', 'metric_name', arg_group='Condition')
@@ -57,7 +57,7 @@ register_cli_argument('monitor alert create', 'window_size', arg_group='Conditio
 register_resource_parameter('monitor alert create', 'target', 'Target Resource')
 
 register_cli_argument('monitor alert update', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-register_cli_argument('monitor alert update', 'email_service_owners', arg_group='Action', **three_state_flag())
+register_cli_argument('monitor alert update', 'email_service_owners', arg_group='Action', arg_type=get_three_state_flag())
 register_cli_argument('monitor alert update', 'add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction, arg_group='Action')
 register_cli_argument('monitor alert update', 'remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction, arg_group='Action')
 register_cli_argument('monitor alert update', 'condition', action=ConditionAction, nargs='+', arg_group='Condition')
