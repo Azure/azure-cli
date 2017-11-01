@@ -2385,6 +2385,37 @@ class VMScaffoldingTest(ScenarioTest):
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
 
+
+class VMSecretTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
+        vm = 'vm1'
+        vault_name = self.create_random_name('vmsecretkv', 20)
+        certificate = 'vm-secrt-cert'
+
+        vault_result = self.cmd('keyvault create -g {rg} -n {name} -l {loc} --enabled-for-disk-encryption true --enabled-for-deployment true'.format(
+            rg=resource_group,
+            name=vault_name,
+            loc=resource_group_location
+        )).get_output_in_json()
+        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+
+        self.cmd('vm create -g {} -n {} --image rhel'.format(resource_group, vm))
+        time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
+
+        self.cmd('keyvault certificate create --vault-name {} -n {} -p @"{}"'.format(vault_name, certificate, policy_path))
+        secret_result = self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].sourceVault.id', vault_result['id']),
+            JMESPathCheckV2('length([0].vaultCertificates)', 1),
+        ]).get_output_in_json()
+        self.assertTrue('https://{}.vault.azure.net/secrets/{}/'.format(vault_name, certificate) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])
+        self.cmd('vm secret list -g {} -n {}'.format(resource_group, vm))
+        self.cmd('vm secret remove -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate))
+
+        self.cmd('vm secret list -g {} -n {}'.format(resource_group, vm), checks=[
+            JMESPathCheckV2('length([])', 0)
+        ])
 # endregion
 
 
