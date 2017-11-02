@@ -8,6 +8,8 @@ import os.path
 from collections import namedtuple
 from azure.common import AzureException
 
+from azure.cli.core.application import APPLICATION
+from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
@@ -113,56 +115,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
 
-    def _append_blob(file_path, blob_name, blob_content_settings):
-        if not client.exists(destination_container_name, blob_name):
-            client.create_blob(
-                container_name=destination_container_name,
-                blob_name=blob_name,
-                content_settings=blob_content_settings,
-                metadata=metadata,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
-
-        append_blob_args = {
-            'container_name': destination_container_name,
-            'blob_name': blob_name,
-            'file_path': file_path,
-            'progress_callback': lambda c, t: None,
-            'maxsize_condition': maxsize_condition,
-            'lease_id': lease_id,
-            'timeout': timeout
-        }
-
-        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
-            append_blob_args['validate_content'] = validate_content
-
-        return client.append_blob_from_path(**append_blob_args)
-
-    def _upload_blob(file_path, blob_name, blob_content_settings):
-        create_blob_args = {
-            'container_name': destination_container_name,
-            'blob_name': blob_name,
-            'file_path': file_path,
-            'progress_callback': lambda c, t: None,
-            'content_settings': blob_content_settings,
-            'metadata': metadata,
-            'max_connections': max_connections,
-            'lease_id': lease_id,
-            'if_modified_since': if_modified_since,
-            'if_unmodified_since': if_unmodified_since,
-            'if_match': if_match,
-            'if_none_match': if_none_match,
-            'timeout': timeout
-        }
-
-        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
-            create_blob_args['validate_content'] = validate_content
-
-        return client.create_blob_from_path(**create_blob_args)
-
     def _create_return_result(blob_name, blob_content_settings, upload_result=None):
         return {
             'Blob': client.make_blob_url(destination_container_name, blob_name),
@@ -170,7 +122,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
             'Last Modified': upload_result.last_modified if upload_result else None,
             'eTag': upload_result.etag if upload_result else None}
 
-    upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
     logger = get_az_logger(__name__)
     settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
 
@@ -188,10 +139,100 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
         for src, dst in source_files or []:
             logger.warning('uploading {}'.format(src))
             guessed_content_settings = guess_content_type(src, content_settings, settings_class)
-            results.append(
-                _create_return_result(dst, guessed_content_settings, upload_action(src, dst, guessed_content_settings)))
-
+            result = upload_blob(client, destination_container_name, dst, src,
+                                 blob_type=blob_type, content_settings=guessed_content_settings, metadata=metadata,
+                                 validate_content=validate_content, maxsize_condition=maxsize_condition,
+                                 max_connections=max_connections, lease_id=lease_id,
+                                 if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since,
+                                 if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+            results.append(_create_return_result(dst, guessed_content_settings, result))
     return results
+
+
+@transfer_doc(get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService').create_blob_from_path)
+def upload_blob(client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
+                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
+                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+    """Upload a blob to a container."""
+
+    settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
+    content_settings = guess_content_type(file_path, content_settings, settings_class)
+
+    def upload_append_blob():
+        if not client.exists(container_name, blob_name):
+            client.create_blob(
+                container_name=container_name,
+                blob_name=blob_name,
+                content_settings=content_settings,
+                metadata=metadata,
+                lease_id=lease_id,
+                if_modified_since=if_modified_since,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                timeout=timeout)
+
+        append_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'maxsize_condition': maxsize_condition,
+            'lease_id': lease_id,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            append_blob_args['validate_content'] = validate_content
+
+        return client.append_blob_from_path(**append_blob_args)
+
+    def upload_block_blob():
+        import os
+
+        # increase the block size to 100MB when the file is larger than 200GB
+        if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
+            client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
+            client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
+
+        create_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'max_connections': max_connections,
+            'lease_id': lease_id,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17') and tier:
+            create_blob_args['premium_page_blob_tier'] = tier
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            create_blob_args['validate_content'] = validate_content
+
+        return client.create_blob_from_path(**create_blob_args)
+
+    type_func = {
+        'append': upload_append_blob,
+        'block': upload_block_blob,
+        'page': upload_block_blob  # same implementation
+    }
+    return type_func[blob_type]()
+
+
+def _update_progress(current, total):
+    HOOK = APPLICATION.get_progress_controller(True)
+
+    if total:
+        HOOK.add(message='Alive', value=current, total_val=total)
+        if total == current:
+            HOOK.end()
 
 
 def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,

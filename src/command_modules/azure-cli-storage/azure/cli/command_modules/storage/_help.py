@@ -30,7 +30,7 @@ helps['storage entity insert'] = """
 helps['storage blob upload'] = """
     type: command
     short-summary: Upload a file to a storage blob.
-    long-summary: Creates a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
+    long-summary: Createss a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
     examples:
         - name: Upload to a blob.
           text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
