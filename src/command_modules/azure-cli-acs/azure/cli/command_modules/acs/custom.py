@@ -1270,36 +1270,7 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
         access_profile = access_profiles.get('cluster_admin' if admin else 'cluster_user')
         encoded_kubeconfig = access_profile.get('kube_config')
         kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
-
-        # Special case for printing to stdout
-        if path == "-":
-            print(kubeconfig)
-            return
-
-        # ensure that at least an empty ~/.kube/config exists
-        directory = os.path.dirname(path)
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except OSError as ex:
-                if ex.errno != errno.EEXIST:
-                    raise
-        if not os.path.exists(path):
-            with open(path, 'w+t'):
-                pass
-
-        # merge the new kubeconfig into the existing one
-        fd, temp_path = tempfile.mkstemp()
-        additional_file = os.fdopen(fd, 'w+t')
-        try:
-            additional_file.write(kubeconfig)
-            additional_file.flush()
-            merge_kubernetes_configurations(path, temp_path)
-        except yaml.YAMLError as ex:
-            logger.warning('Failed to merge credentials to kube config file: %s', ex)
-        finally:
-            additional_file.close()
-            os.remove(temp_path)
+        _print_or_merge_credentials(path, kubeconfig)
 
 
 def aks_list(client, resource_group_name=None):
@@ -1389,6 +1360,41 @@ def _ensure_service_principal(service_principal=None,
             raise CLIError('--client-secret is required if --service-principal is specified')
     store_acs_service_principal(subscription_id, client_secret, service_principal)
     return load_acs_service_principal(subscription_id)
+
+
+def _print_or_merge_credentials(path, kubeconfig):
+    """Merge an unencrypted kubeconfig into the file at the specified path, or print it to
+    stdout if the path is "-".
+    """
+    # Special case for printing to stdout
+    if path == "-":
+        print(kubeconfig)
+        return
+
+    # ensure that at least an empty ~/.kube/config exists
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory)
+        except OSError as ex:
+            if ex.errno != errno.EEXIST:
+                raise
+    if not os.path.exists(path):
+        with open(path, 'w+t'):
+            pass
+
+    # merge the new kubeconfig into the existing one
+    fd, temp_path = tempfile.mkstemp()
+    additional_file = os.fdopen(fd, 'w+t')
+    try:
+        additional_file.write(kubeconfig)
+        additional_file.flush()
+        merge_kubernetes_configurations(path, temp_path)
+    except yaml.YAMLError as ex:
+        logger.warning('Failed to merge credentials to kube config file: %s', ex)
+    finally:
+        additional_file.close()
+        os.remove(temp_path)
 
 
 def _remove_nulls(managed_clusters):
