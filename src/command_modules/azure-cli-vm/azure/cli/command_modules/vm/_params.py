@@ -236,9 +236,10 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM', arg_group='Storage')
     register_cli_argument(scope, 'data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create', arg_group='Storage')
     register_cli_argument(scope, 'image_data_disks', ignore_type)
-    register_cli_argument(scope, 'plan_name', ignore_type)
-    register_cli_argument(scope, 'plan_product', ignore_type)
-    register_cli_argument(scope, 'plan_publisher', ignore_type)
+    register_cli_argument(scope, 'plan_name', arg_group='Marketplace Image Plan', help='plan name')
+    register_cli_argument(scope, 'plan_product', arg_group='Marketplace Image Plan', help='plan product')
+    register_cli_argument(scope, 'plan_publisher', arg_group='Marketplace Image Plan', help='plan publisher')
+    register_cli_argument(scope, 'plan_promotion_code', arg_group='Marketplace Image Plan', help='plan promotion code')
     for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer', 'app_gateway']:
         register_cli_argument(scope, '{}_type'.format(item), ignore_type)
 
