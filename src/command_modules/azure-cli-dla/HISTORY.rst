@@ -2,7 +2,7 @@
 
 Release History
 ===============
-unreleased
+0.0.15
 ++++++++++
 * Change the return type of the job list command: a list of JobInformation to a list of JobInformationBasic
 * Change the return type of the account list command: a list of DataLakeAnalyticsAccount to a list of DataLakeAnalyticsAccountBasic
