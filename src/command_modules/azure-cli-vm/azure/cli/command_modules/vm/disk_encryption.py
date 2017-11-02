@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import uuid
+import os
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
@@ -16,13 +17,13 @@ _STATUS_ENCRYPTED = 'Encrypted'
 
 vm_extension_info = {
     'Linux': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryptionForLinux',
+        'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
+        'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryptionForLinux',
         'version': '0.1'
     },
     'Windows': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryption',
+        'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
+        'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryption',
         'version': '1.1'
     }
 }
@@ -48,7 +49,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                key_encryption_keyvault=None,
                key_encryption_key=None,
                key_encryption_algorithm='RSA-OAEP',
-               volume_type=None):
+               volume_type=None,
+               encrypt_format_all=False):
     '''
     Enable disk encryption on OS disk, Data disks, or both
     :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
@@ -111,7 +113,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
         'AADClientCertThumbprint': aad_client_cert_thumbprint,
         'KeyVaultURL': disk_encryption_keyvault_url,
         'VolumeType': volume_type,
-        'EncryptionOperation': 'EnableEncryption',
+        'EncryptionOperation': 'EnableEncryption' if not encrypt_format_all else 'EnableEncryptionFormatAll',
         'KeyEncryptionKeyURL': key_encryption_key,
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
@@ -210,8 +212,8 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
 
-    # sequence_version should be incremented since encryptions occurred before
     extension = vm_extension_info[os_type]
+    # sequence_version should be incremented since encryptions occurred before
     sequence_version = uuid.uuid4()
 
     # 2. update the disk encryption extension

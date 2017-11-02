@@ -11,6 +11,7 @@ Release History
 
 2.0.17
 ++++++
+* `vm encryption enable`: expose '--encrypt-format'
 * `vmss create`: expose '--accelerated-networking'
 
 2.0.16 (2017-10-09)
