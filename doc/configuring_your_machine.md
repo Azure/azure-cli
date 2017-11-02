@@ -98,30 +98,33 @@ The repo has a launch.json file that will launch the version of Python that is f
 
 ## Running Tests:
 #### Command line
-  Provided your PYTHONPATH was set correctly, you can run the tests from your `<root clone>` directory.
+
+  The test and style check scripts were installed into the `bin` directory under `env` when you created
+  your python virtual environment. They should be available in your search PATH and can be run from your
+  `<root clone>` directory:
 
 ##### Windows:
 
   To run the CLI tests:
   ```BatchFile
-  <clone root>\tools\scripts\run_tests.bat [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
+  <clone root>\env\bin\run_tests.bat [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
   To check the CLI and command modules for style errors:
   ```BatchFile
-  <clone root>\tools\scripts\check_style.bat [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
+  <clone root>\env\bin\check_style.bat [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
 
 ##### OSX/Ubuntu (bash):
 
   To run the CLI tests:
   ```Shell
-   <clone root>/tools/scripts/run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
+   <clone root>/env/bin/run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
   To check the CLI and command modules for style errors:
   ```Shell
-   <clone root>/tools/scripts/check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
+   <clone root>/env/bin/check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
 
 #### VS Code
