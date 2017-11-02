@@ -14,8 +14,9 @@ from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccou
 
 from azure.mgmt.datalake.analytics.job.models import (JobType,
                                                       JobState,
-                                                      JobInformation,
-                                                      USqlJobProperties,
+                                                      CreateJobParameters,
+                                                      BuildJobParameters,
+                                                      CreateUSqlJobProperties,
                                                       JobRelationshipProperties)
 # pylint: disable=line-too-long
 from azure.mgmt.datalake.analytics.catalog.models import (DataLakeAnalyticsCatalogCredentialCreateParameters,
@@ -341,32 +342,36 @@ def submit_adla_job(client,
         # pylint: disable=line-too-long
         raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
 
-    job_properties = USqlJobProperties(script)
+    job_properties = CreateUSqlJobProperties(script)
     if runtime_version:
         job_properties.runtime_version = runtime_version
 
     if compile_mode:
         job_properties.compile_mode = compile_mode
 
-    submit_params = JobInformation(job_name,
-                                   JobType.usql,
-                                   job_properties,
-                                   degree_of_parallelism,
-                                   priority)
+    if compile_only:
+        build_params = BuildJobParameters(JobType.usql,
+                                          job_properties,
+                                          job_name)
+
+        return client.build(account_name, build_params)
+
+    create_params = CreateJobParameters(JobType.usql,
+                                        job_properties,
+                                        job_name,
+                                        degree_of_parallelism,
+                                        priority)
     if recurrence_id:
-        submit_params.related = JobRelationshipProperties(recurrence_id,
+        create_params.related = JobRelationshipProperties(recurrence_id,
                                                           pipeline_id,
                                                           pipeline_name,
                                                           pipeline_uri,
                                                           run_id,
                                                           recurrence_name)
 
-    if compile_only:
-        return client.build(account_name, submit_params)
-
     job_id = _get_uuid_str()
 
-    return client.create(account_name, job_id, submit_params)
+    return client.create(account_name, job_id, create_params)
 
 
 def wait_adla_job(client,
