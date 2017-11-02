@@ -5,6 +5,7 @@ Release History
 
 2.0.20
 ++++++
+* Allow creating Linux function apps
 
 2.0.19 (2017-10-09)
 +++++++++++++++++++
