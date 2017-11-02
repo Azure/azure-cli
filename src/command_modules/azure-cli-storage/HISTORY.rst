@@ -10,6 +10,7 @@ Release History
 * `storage blob/file copy start-batch`: Fixed bug that prevented using --source-uri.
 * `storage blob/file delete-batch`: Added commands to glob and delete multiple blobs/files.
 * `storage metrics update`: fixed bug with enabling metrics.
+* `storage blob upload-batch`: Increase blobk size when target file is large.
 
 2.0.18
 ++++++
