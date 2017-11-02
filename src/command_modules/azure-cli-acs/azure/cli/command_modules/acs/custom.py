@@ -1286,7 +1286,7 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     :param admin_username: User name for the Linux Virtual Machines.
     :type admin_username: str
     :param kubernetes_version: The version of Kubernetes to use for creating
-     the cluster, such as '1.7.7' or '1.8.1'.
+     the cluster, such as '1.7.9' or '1.8.2'.
     :type kubernetes_version: str
     :param node_count: the default number of nodes for the node pools.
     :type node_count: int
@@ -1427,7 +1427,7 @@ def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
 def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
     """Upgrade a managed Kubernetes cluster to a newer version.
     :param kubernetes_version: The version of Kubernetes to upgrade the cluster to,
-    such as '1.7.7' or '1.8.1'.
+    such as '1.7.9' or '1.8.2'.
     :type kubernetes_version: str
     :param no_wait: Start upgrading but return immediately instead of waiting
      until the managed cluster is upgraded.
