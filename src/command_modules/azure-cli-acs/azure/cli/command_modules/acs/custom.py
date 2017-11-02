@@ -1384,8 +1384,7 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
         resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
 
     if not access_profile:
-        msg = "No Kubernetes access profiles found. Cluster provisioning state is \"{}\"."
-        raise CLIError(msg.format(mc.provisioning_state))
+        raise CLIError("No Kubernetes access profile found.")
     else:
         encoded_kubeconfig = access_profile.kube_config
         kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')

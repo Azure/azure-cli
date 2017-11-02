@@ -58,7 +58,7 @@ def aks_get_versions_table_format(result):
 
     # put results in an ordered dict so the headers are predictable
     table_row = OrderedDict()
-    for k in  ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']:
+    for k in ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']:
         table_row[k] = result.get(k)
     return [table_row]
 
