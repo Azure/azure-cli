@@ -1573,7 +1573,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
-              license_type=None, assign_identity=False, identity_scope=None,
+              plan_promotion_code=None, license_type=None, assign_identity=False, identity_scope=None,
               identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None,
               zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1697,7 +1697,8 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         vm_resource['plan'] = {
             'name': plan_name,
             'publisher': plan_publisher,
-            'product': plan_product
+            'product': plan_product,
+            'promotionCode': plan_promotion_code
         }
 
     if assign_identity:
@@ -1774,7 +1775,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
                 public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None,
-                plan_name=None, plan_product=None, plan_publisher=None, license_type=None,
+                plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=False, identity_scope=None, identity_role=DefaultStr('Contributor'),
                 identity_role_id=None, zones=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1976,7 +1977,8 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_resource['plan'] = {
             'name': plan_name,
             'publisher': plan_publisher,
-            'product': plan_product
+            'product': plan_product,
+            'promotionCode': plan_promotion_code
         }
 
     if assign_identity:
