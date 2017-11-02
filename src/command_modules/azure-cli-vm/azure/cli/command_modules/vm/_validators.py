@@ -992,7 +992,7 @@ def process_image_create_namespace(namespace):
         res_id = _get_resource_id(namespace.source, namespace.resource_group_name,
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
-        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name']) if resource['type'] == 'virtualMachine' else None
         # pylint: disable=no-member
         namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
         namespace.source_virtual_machine = res_id
