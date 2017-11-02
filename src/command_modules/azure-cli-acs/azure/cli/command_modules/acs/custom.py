@@ -1380,15 +1380,14 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
     :param admin: Get the "clusterAdmin" kubectl config instead of the default "clusterUser"
     :type admin: bool
     """
-    mc = aks_show(client, resource_group_name, name)
-    access_profiles = mc.access_profiles
-    if not access_profiles:
+    access_profile = client.get_access_profiles(
+        resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
+
+    if not access_profile:
         msg = "No Kubernetes access profiles found. Cluster provisioning state is \"{}\"."
         raise CLIError(msg.format(mc.provisioning_state))
     else:
-        access_profiles = access_profiles.as_dict()
-        access_profile = access_profiles.get('cluster_admin' if admin else 'cluster_user')
-        encoded_kubeconfig = access_profile.get('kube_config')
+        encoded_kubeconfig = access_profile.kube_config
         kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
         _print_or_merge_credentials(path, kubeconfig)
 
