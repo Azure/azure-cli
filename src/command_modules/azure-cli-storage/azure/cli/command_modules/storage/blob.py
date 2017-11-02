@@ -187,8 +187,6 @@ def upload_blob(client, container_name, blob_name, file_path, blob_type=None, co
         return client.append_blob_from_path(**append_blob_args)
 
     def upload_block_blob():
-        import os
-
         # increase the block size to 100MB when the file is larger than 200GB
         if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
             client.MAX_BLOCK_SIZE = 100 * 1024 * 1024

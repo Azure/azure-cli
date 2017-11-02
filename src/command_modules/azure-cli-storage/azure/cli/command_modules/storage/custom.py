@@ -12,7 +12,6 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 from azure.cli.command_modules.storage._factory import storage_client_factory
-from azure.cli.command_modules.storage.util import guess_content_type
 from .sdkutil import get_table_data_type
 
 Logging, Metrics, CorsRule, AccessPolicy, RetentionPolicy = \
