@@ -699,3 +699,31 @@ helps['resource lock update'] = """
           text: >
             az resource lock update --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
     """
+helps['subscriptiondefinition'] = """
+    type: group
+    short-summary: Manage Azure Subscription Definitions.
+"""
+helps['subscriptiondefinition list'] = """
+    type: command
+    short-summary: List subscription definitions.
+    examples:
+        - name: List all subscription definitions.
+          text: >
+            az subscriptiondefinition list
+    """
+helps['subscriptiondefinition show'] = """
+    type: command
+    short-summary: Show the details of a subscription definition.
+    examples:
+        - name: Show a subscription definition
+          text: >
+            az subscriptiondefinition show -n mySubDef
+    """
+helps['subscriptiondefinition create'] = """
+    type: command
+    short-summary: Creates a subscription definition.
+    examples:
+        - name: Create a subscription definition
+          text: >
+            az subscriptiondefinition create -n mySubDef -ot MS-AZR-0017P
+    """

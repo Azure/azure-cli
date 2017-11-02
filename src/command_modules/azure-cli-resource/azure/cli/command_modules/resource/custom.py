@@ -43,7 +43,8 @@ from ._client_factory import (_resource_client_factory,
                               _resource_lock_client_factory,
                               _resource_links_client_factory,
                               _authorization_management_client,
-                              _resource_managedapps_client_factory)
+                              _resource_managedapps_client_factory,
+                              _subscriptiondefinition_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -1661,3 +1662,22 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             resource_type = parts['type']
 
         return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type)
+
+
+def list_subscription_definitions():
+    """List all available subscription definitions."""
+    cf = _subscriptiondefinition_client_factory()
+
+    groups = cf.subscription_definition.list()
+    return list(groups)
+
+def create_subscription_definition(name, offer_type, subscription_display_name=None):
+    """Create a subscription definition."""
+    sub_defs = _subscriptiondefinition_client_factory().subscription_definition
+    sub_defs.config.subscription_definition_name = name
+
+    new_def = SubscriptionDefinitionModel(
+        subscription_display_name=subscription_display_name if subscription_display_name else name,
+        offer_type=offer_type)
+
+    return sub_defs.create(name, new_def)
