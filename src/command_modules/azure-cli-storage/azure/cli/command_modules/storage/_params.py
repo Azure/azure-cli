@@ -15,7 +15,7 @@ from azure.cli.core.commands.parameters import (tags_type, file_type, get_locati
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format, validate_key,
+                          validate_table_payload_format, validate_key, add_progress_callback,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass)
 
@@ -457,7 +457,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Path of the file to write to. The source filename will be used if not specified.',
                    validator=process_file_download_namespace, completer=FilesCompleter())
         c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
-        c.ignore('progress_callback')
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()
@@ -507,7 +506,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument(default_file_param='local_file_path')
         c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter())
-        c.ignore('progress_callback')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument()
@@ -546,6 +544,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
+
+    for item in ['file', 'blob']:
+        for command in ['download', 'download-batch', 'upload', 'upload-batch']:
+            with self.argument_context('storage {} {}'.format(item, command)) as c:
+                c.argument('progress_callback', ignore_type, validator=add_progress_callback)
 
     with self.argument_context('storage cors list') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft',
