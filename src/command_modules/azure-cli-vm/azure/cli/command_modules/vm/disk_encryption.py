@@ -41,6 +41,7 @@ vmss_extension_info = {
     }
 }
 
+
 def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
                aad_client_id,
                disk_encryption_keyvault,
