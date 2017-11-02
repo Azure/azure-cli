@@ -816,9 +816,9 @@ def process_file_download_namespace(namespace):
 
 
 def process_metric_update_namespace(namespace):
-    namespace.hour = namespace.hour == 'enable'
-    namespace.minute = namespace.minute == 'enable'
-    namespace.api = namespace.api == 'enable' if namespace.api else None
+    namespace.hour = namespace.hour == 'true'
+    namespace.minute = namespace.minute == 'true'
+    namespace.api = namespace.api == 'true' if namespace.api else None
     if namespace.hour is None and namespace.minute is None:
         raise argparse.ArgumentError(
             None, 'incorrect usage: must specify --hour and/or --minute')
