@@ -188,3 +188,4 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'functionapp deployment list-publishing-profiles',
                 custom_path + 'list_publish_profiles')
     cli_command(__name__, 'functionapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
+    cli_command(__name__, 'functionapp assign-identity', custom_path + 'assign_identity')
