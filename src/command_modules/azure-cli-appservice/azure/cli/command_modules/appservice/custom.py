@@ -1458,6 +1458,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
                                                               deployment_container_image_name))
                 site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
+                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'false'))
             else:
                 site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
                 site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
