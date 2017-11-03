@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.15
+++++++
+* Add creating webhooks in replication regions.
+
 2.0.14
 ++++++
 * All resource management now points to 2017-10-01 api-version.
