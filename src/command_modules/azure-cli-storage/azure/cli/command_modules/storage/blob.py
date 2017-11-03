@@ -225,12 +225,12 @@ def upload_blob(client, container_name, blob_name, file_path, blob_type=None, co
 
 
 def _update_progress(current, total):
-    HOOK = APPLICATION.get_progress_controller(True)
+    hook = APPLICATION.get_progress_controller(determinant=True)
 
     if total:
-        HOOK.add(message='Alive', value=current, total_val=total)
+        hook.add(message='Alive', value=current, total_val=total)
         if total == current:
-            HOOK.end()
+            hook.end()
 
 
 def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
