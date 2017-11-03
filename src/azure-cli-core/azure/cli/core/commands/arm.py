@@ -801,6 +801,7 @@ def resolve_role_id(role, scope):
             role_id = role_defs[0].id
     return role_id
 
+
 def _gen_guid():
     import uuid
     return uuid.uuid4()
