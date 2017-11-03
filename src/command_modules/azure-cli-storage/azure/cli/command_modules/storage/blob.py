@@ -225,7 +225,7 @@ def upload_blob(client, container_name, blob_name, file_path, blob_type=None, co
 
 
 def _update_progress(current, total):
-    hook = APPLICATION.get_progress_controller(determinant=True)
+    hook = APPLICATION.get_progress_controller(det=True)
 
     if total:
         hook.add(message='Alive', value=current, total_val=total)
