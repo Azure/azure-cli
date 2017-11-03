@@ -115,7 +115,7 @@ cli_storage_data_plane_command('storage blob show', block_blob_path + 'get_blob_
 cli_storage_data_plane_command('storage blob update', block_blob_path + 'set_blob_properties', factory)
 cli_storage_data_plane_command('storage blob exists', base_blob_path + 'exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage blob download', base_blob_path + 'get_blob_to_path', factory)
-cli_storage_data_plane_command('storage blob upload', custom_path + 'upload_blob', factory)
+cli_storage_data_plane_command('storage blob upload', 'azure.cli.command_modules.storage.blob#upload_blob', factory)
 cli_storage_data_plane_command('storage blob metadata show', block_blob_path + 'get_blob_metadata', factory, exception_handler=_dont_fail_not_exist)
 cli_storage_data_plane_command('storage blob metadata update', block_blob_path + 'set_blob_metadata', factory)
 cli_storage_data_plane_command('storage blob service-properties show', base_blob_path + 'get_blob_service_properties', factory, exception_handler=_dont_fail_not_exist)
