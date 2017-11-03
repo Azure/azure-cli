@@ -1453,7 +1453,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
             functionapp_def.kind = 'functionapp,linux'
             site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
             site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
-                                                          str(binascii.hexlify(os.urandom(32)), 'ascii').upper()))
+                                                          str(binascii.hexlify(os.urandom(32)).decode()).upper()))
             if deployment_container_image_name:
                 site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
                                                               deployment_container_image_name))
