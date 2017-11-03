@@ -766,7 +766,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 
 class FunctionAppOnLinux(ScenarioTest):
-    @ResourceGroupPreparer(location='japanwest')
+    @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_functionapp_on_linux_asp(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
