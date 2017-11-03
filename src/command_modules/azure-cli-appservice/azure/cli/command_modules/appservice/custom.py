@@ -9,8 +9,9 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
+import binascii
+import os
 import OpenSSL.crypto
-import os, binascii
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.storage import StorageManagementClient
@@ -116,7 +117,7 @@ def list_webapp(resource_group_name=None):
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app(['functionapp'], resource_group_name)
+    return _list_app(['functionapp', 'functionapp,linux'], resource_group_name)
 
 
 def _list_app(app_types, resource_group_name=None):
@@ -1451,13 +1452,15 @@ def create_function(resource_group_name, name, storage_account, plan=None,
         if is_linux:
             functionapp_def.kind = 'functionapp,linux'
             site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
-            site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey', str(binascii.hexlify(os.urandom(32)), 'ascii').upper()))
+            site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
+                                                          str(binascii.hexlify(os.urandom(32)), 'ascii').upper()))
             if deployment_container_image_name:
-                site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME', deployment_container_image_name))
+                site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
+                                                              deployment_container_image_name))
                 site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
             else:
                 site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
-                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime';
+                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
         else:
             functionapp_def.kind = 'functionapp'
             site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))

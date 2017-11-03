@@ -764,30 +764,27 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
-class FunctionAppOnLinux(ResourceGroupVCRTestBase):
 
-    def __init__(self, test_method):
-        super(FunctionAppOnLinux, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
-
-    def test_functionapp_linux_asp_e2e(self):
-        self.execute()
-
-    def body(self):
-        functionapp_name = 'functionapp-linux-e2e'
-        plan = 'functionapp-linux-e2e-plan'
-        storage = 'functionappplanstorage'
-        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(self.resource_group, plan))
-        self.cmd('appservice plan list -g {}'.format(self.resource_group))
-
-        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, self.resource_group))
-
-        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, functionapp_name, plan, storage), checks=[
-            JMESPathCheck('state', 'Running'),
-            JMESPathCheck('name', functionapp_name),
-            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+class FunctionAppOnLinux(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_asp(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
+            JMESPathCheckV2('sku.name', 'S1'),
         ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp, plan, storage_account), checks=[
+            JMESPathCheckV2('name', functionapp)
+        ])
+        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].name', functionapp),
+            JMESPathCheckV2('[0].kind', 'functionapp,linux')
+        ])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
-        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
 
 class WebappAuthenticationTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_authentication')
