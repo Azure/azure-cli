@@ -164,16 +164,16 @@ helps['role definition create'] = """
                     "Name": "Contoso On-call", \\
                     "Description": "Perform VM actions and read storange and network information." \\
                     "Actions": [ \\
-                        "Microsoft.Compute/*/read", \\
+                        "Microsoft.Compute/\*/read", \\
                         "Microsoft.Compute/virtualMachines/start/action", \\
                         "Microsoft.Compute/virtualMachines/restart/action", \\
-                        "Microsoft.Network/*/read", \\
-                        "Microsoft.Storage/*/read", \\
-                        "Microsoft.Authorization/*/read", \\
+                        "Microsoft.Network/\*/read", \\
+                        "Microsoft.Storage/\*/read", \\
+                        "Microsoft.Authorization/\*/read", \\
                         "Microsoft.Resources/subscriptions/resourceGroups/read", \\
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
-                        "Microsoft.Insights/alertRules/*", \\
-                        "Microsoft.Support/*" \\
+                        "Microsoft.Insights/alertRules/\*", \\
+                        "Microsoft.Support/\*" \\
                     ], \\
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
                 }
