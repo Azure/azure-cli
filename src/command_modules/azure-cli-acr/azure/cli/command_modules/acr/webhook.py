@@ -61,7 +61,7 @@ def acr_webhook_create(webhook_name,
         registry_name,
         webhook_name,
         WebhookCreateParameters(
-            location=location if location else registry.location,
+            location=location or registry.location,
             service_uri=uri,
             actions=actions,
             custom_headers=headers,
