@@ -199,8 +199,9 @@ class Profile(object):
                 'isMRRT': True,
                 'accessToken': tokens[decoded_tokens.index(t)],
                 'tokenType': 'Bearer',
-                'oid': t.get('oid', '')
             })
+            if 'oid' in t:
+                final_tokens[-1]['oid'] = t['oid']
 
         # merging with existing cached ones
         for t in final_tokens:
