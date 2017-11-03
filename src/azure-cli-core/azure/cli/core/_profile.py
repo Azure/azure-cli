@@ -189,7 +189,7 @@ class Profile(object):
         # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter
         # as shell should update us with new ones every 10~15 minutes
         for t in decoded_tokens:
-            final_tokens.append({
+            entry = {
                 '_clientId': _CLIENT_ID,
                 'expiresIn': '2700',
                 'expiresOn': str(datetime.now() + timedelta(seconds=2700)),
@@ -199,9 +199,10 @@ class Profile(object):
                 'isMRRT': True,
                 'accessToken': tokens[decoded_tokens.index(t)],
                 'tokenType': 'Bearer',
-            })
+            }
             if 'oid' in t:
-                final_tokens[-1]['oid'] = t['oid']
+                entry['oid'] = t['oid']
+            final_tokens.append(entry)
 
         # merging with existing cached ones
         for t in final_tokens:
