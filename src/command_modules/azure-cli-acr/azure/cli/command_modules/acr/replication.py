@@ -52,7 +52,7 @@ def acr_replication_create(location,
     return client.create(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
-        replication_name=replication_name if replication_name else normalized_location,
+        replication_name=replication_name or normalized_location,
         location=location,
         tags=tags
     )
