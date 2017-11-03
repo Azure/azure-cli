@@ -143,6 +143,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' create', 'deployment_zip', options_list=('--deployment-zip', '-z'), help='perform deployment using zip file')
     register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
     register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
+    register_cli_argument(scope + ' assign-identity', 'disable_msi', action='store_true', help='disable the identity')
 
 register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')

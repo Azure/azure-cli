@@ -131,21 +131,21 @@ def _list_app(app_types, resource_group_name=None):
     return result
 
 
-def assign_identity(resource_group_name, name, role='Contributor', scope=None):
+def assign_identity(resource_group_name, name, role='Contributor', scope=None, disable_msi=False):
     client = web_client_factory()
+
     def getter():
         return _generic_site_operation(resource_group_name, name, 'get')
+
     def setter(webapp):
         webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
         poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
         return LongRunningOperation()(poller)
 
     from azure.cli.core.commands.arm import assign_implict_identity
-    assign_implict_identity(getter, setter, role, scope)
-    update_app_settings(resource_group_name, name, ['WEBSITE_DISABLE_MSI=false'])
-    logger.warning("Implict identity has been configured. if needed, you can de-activate it using "
-                   "'az webapp config appsettings set -g '{}' -n '{}' --settings "
-                   "WEBSITE_DISABLE_MSI=true".format(resource_group_name, name))
+    webapp = assign_implict_identity(getter, setter, role, scope)
+    update_app_settings(resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
+    return webapp.identity
 
 
 def get_auth_settings(resource_group_name, name, slot=None):
