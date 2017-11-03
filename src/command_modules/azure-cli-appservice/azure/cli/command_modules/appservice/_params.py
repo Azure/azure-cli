@@ -140,6 +140,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', **enum_choice_list(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
     register_cli_argument(scope + ' deployment source', 'git_token', help='Git access token required for auto sync')
     register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
+    register_cli_argument(scope + ' create', 'deployment_zip', options_list=('--deployment-zip', '-z'), help='perform deployment using zip file')
     register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
     register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 

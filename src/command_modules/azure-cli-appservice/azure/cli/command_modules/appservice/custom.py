@@ -1537,3 +1537,29 @@ def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+
+
+def enable_zip_deploy(resource_group_name, name, src, slot=None):
+    client = web_client_factory()
+    user_name, password = _get_site_credential(client, resource_group_name, name)
+    scm_url = _get_scm_url(resource_group_name, name, slot)
+    zip_url = scm_url + '/api/zipdeploy'
+
+    import urllib3
+    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers = authorization
+    headers['content-type'] = 'application/octet-stream'
+
+    import requests
+    import os
+    # Read file content
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        r = requests.post(zip_url, data=zip_content, headers=headers)
+        if r.status_code != 200:
+            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
+                zip_url, r.status_code, r.text))
+
+    # on successful deployment navigate to the app, display the latest deployment json response
+    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
+    return response.json()

@@ -112,6 +112,7 @@ cli_command(__name__, 'webapp config backup update', custom_path + 'update_backu
 cli_command(__name__, 'webapp config backup restore', custom_path + 'restore_backup', exception_handler=ex_handler_factory())
 
 cli_command(__name__, 'webapp deployment source config-local-git', custom_path + 'enable_local_git')
+cli_command(__name__, 'webapp deployment source config-zip', custom_path + 'enable_zip_deploy')
 cli_command(__name__, 'webapp deployment source config', custom_path + 'config_source_control', exception_handler=ex_handler_factory())
 cli_command(__name__, 'webapp deployment source sync', custom_path + 'sync_site_repo', exception_handler=ex_handler_factory())
 cli_command(__name__, 'webapp deployment source show', custom_path + 'show_source_control', exception_handler=empty_on_404)
@@ -176,6 +177,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     cli_command(__name__, 'functionapp config ssl unbind', custom_path + 'unbind_ssl_cert')
     cli_command(__name__, 'functionapp config ssl delete', custom_path + 'delete_ssl_cert')
     cli_command(__name__, 'functionapp deployment source config-local-git', custom_path + 'enable_local_git')
+    cli_command(__name__, 'functionapp deployment source config-zip', custom_path + 'enable_zip_deploy')
     cli_command(__name__, 'functionapp deployment source config', custom_path + 'config_source_control', exception_handler=ex_handler_factory())
     cli_command(__name__, 'functionapp deployment source sync', custom_path + 'sync_site_repo')
     cli_command(__name__, 'functionapp deployment source show', custom_path + 'show_source_control', exception_handler=empty_on_404)
