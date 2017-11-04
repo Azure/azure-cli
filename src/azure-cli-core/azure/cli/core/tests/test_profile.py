@@ -582,6 +582,7 @@ class Test_Profile(unittest.TestCase):
         self.assertEqual([expected_subscription], result_accounts)
         # sanity check that the expiration time is about 45 minutes away
         self.assertTrue(parser.parse(actual[0]['expiresOn']) < datetime.now() + timedelta(minutes=45))
+        self.assertTrue('oid' not in actual[0])
 
         # verify the token file
         # expected_arm_token_entry = {
