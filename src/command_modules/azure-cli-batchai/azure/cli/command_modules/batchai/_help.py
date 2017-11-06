@@ -25,7 +25,7 @@ helps['batchai cluster resize'] = """
     short-summary: Resize a cluster.
 """
 
-helps['batchai cluster set-auto-scale-parameters'] = """
+helps['batchai cluster auto-scale'] = """
     type: command
     short-summary: Set auto-scale parameters for a cluster.
 """
