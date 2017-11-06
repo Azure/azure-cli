@@ -172,7 +172,7 @@ with ParametersContext(command='batchai file-server create') as c:
                help='Location. You can configure the default location using `az configure --defaults '
                     'location=<location>` or specify it in the file server configuration file.')
     c.register_alias('file_server_name', options_list=('--name', '-n'), help='Name of the file server.')
-    c.argument('vm_size', help='VM size.', completer=get_vm_size_completion_list)
+    c.argument('vm_size', options_list=('--vm-size', '-s'), help='VM size.', completer=get_vm_size_completion_list)
     c.argument('disk_count', help='Number of disks.', type=int, arg_group='Storage')
     c.argument('disk_size', help='Disk size in Gb.', type=int, arg_group='Storage')
     c.argument('storage_sku', help='The sku of storage account to persist VM.',
