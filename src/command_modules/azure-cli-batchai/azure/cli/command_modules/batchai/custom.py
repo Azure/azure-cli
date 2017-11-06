@@ -291,7 +291,8 @@ def update_nodes_information(params, image, vm_size, min_nodes, max_nodes):
                        'parameters.')
 
 
-def create_cluster(client, resource_group, cluster_name, json_file=None, location=None, user_name=None,
+def create_cluster(client,  # pylint: disable=too-many-arguments
+                   resource_group, cluster_name, json_file=None, location=None, user_name=None,
                    ssh_key=None, password=None, image='UbuntuLTS', vm_size=None, min_nodes=0, max_nodes=None,
                    nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
                    afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
