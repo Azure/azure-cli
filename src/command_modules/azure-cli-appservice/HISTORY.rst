@@ -9,6 +9,7 @@ Release History
 * webapp: add --docker-container-logging
 * webapp: removing the 'storage' option from --web-server-logging since this is not working
 * `deployment user set`: logged more informative error messages.
+* functionapp: add support for creating Linux function apps
 
 0.1.19
 ++++++
