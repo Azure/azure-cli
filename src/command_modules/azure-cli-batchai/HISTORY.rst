@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.4
++++++
+
+* Added short option for providing VM size in file-server create command
+* Added storage account name and key arguments into cluster create parameters
+
 0.1.3
 +++++
 
