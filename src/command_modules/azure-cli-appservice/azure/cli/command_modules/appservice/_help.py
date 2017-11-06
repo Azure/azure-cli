@@ -44,6 +44,20 @@ helps['webapp auth update'] = """
           --facebook-oauth-scopes public_profile email
 """
 
+helps['webapp assign-identity'] = """
+    type: command
+    short-summary: (PREVIEW)assign managed service identity to the webapp
+    examples:
+        - name: assign local identity and assign a reader role to the current resource group.
+          text: >
+            az webapp assign-identity -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        - name: disable the identity when there is need.
+          text: >
+            az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_DISABLE_MSI=true
+"""
+
+helps['functionapp assign-identity'] = helps['webapp assign-identity'].replace('webapp', 'functionapp')
+
 helps['webapp config'] = """
 type: group
 short-summary: Configure a web app.
