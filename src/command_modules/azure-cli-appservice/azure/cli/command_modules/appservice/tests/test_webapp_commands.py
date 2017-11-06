@@ -762,6 +762,27 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionAppOnLinux(ScenarioTest):
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_asp(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheckV2('reserved', True),  # this weird field means it is a linux
+            JMESPathCheckV2('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp, plan, storage_account), checks=[
+            JMESPathCheckV2('name', functionapp)
+        ])
+        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].name', functionapp),
+            JMESPathCheckV2('[0].kind', 'functionapp,linux')
+        ])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
+
+
 class WebappAuthenticationTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_authentication')
     def test_webapp_authentication(self, resource_group):
