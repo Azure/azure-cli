@@ -364,13 +364,6 @@ helps['iot hub create'] = """
     type: command
     short-summary: Create an Azure IoT hub.
     long-summary: For an introduction to Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/
-    examples:
-        - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
-          text: >
-            az iot hub create --resource-group MyResourceGroup --name MyIotHub
-        - name: Create an IoT Hub with the standard pricing tier S1, in the 'westus' region.
-          text: >
-            az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1 --location westus
 """
 
 helps['iot hub show'] = """
@@ -390,31 +383,15 @@ helps['iot hub update'] = """
 helps['iot hub list'] = """
     type: command
     short-summary: List IoT hubs.
-    examples:
-        - name: List all IoT hubs in a subscription.
-          text: >
-            az iot hub list
-        - name: List all IoT hubs in the resource group 'MyGroup'
-          text: >
-            az iot hub list --resource-group MyGroup
 """
 
 helps['iot hub show-connection-string'] = """
     type: command
     short-summary: Show the connection strings for an IoT hub.
     examples:
-        - name: Show the connection string of an IoT hub using default policy and primary key.
-          text: >
-            az iot hub show-connection-string --name MyIotHub
         - name: Show the connection string of an IoT Hub using policy 'service' and secondary key.
           text: >
             az iot hub show-connection-string --name MyIotHub --policy-name service --key secondary
-        - name: Show the connection strings for all IoT hubs in a resource group.
-          text: >
-            az iot hub show-connection-string --resource-group MyResourceGroup
-        - name: Show the connection strings for all IoT hubs in a subscription.
-          text: >
-            az iot hub show-connection-string
 """
 
 helps['iot hub delete'] = """
@@ -430,13 +407,6 @@ helps['iot hub consumer-group'] = """
 helps['iot hub consumer-group create'] = """
     type: command
     short-summary: Create an event hub consumer group.
-    examples:
-        - name: Create a consumer group 'cg1' in the default event hub endpoint.
-          text: >
-            az iot hub consumer-group create --hub-name MyIotHub --name cg1
-        - name: Create a consumer group `cg1` in the operation monitoring event hub endpoint `operationsMonitoringEvents`.
-          text: >
-            az iot hub consumer-group create --hub-name MyIotHub --event-hub-name operationsMonitoringEvents --name cg1
 """
 
 helps['iot hub consumer-group list'] = """

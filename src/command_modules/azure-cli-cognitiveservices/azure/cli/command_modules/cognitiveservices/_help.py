@@ -14,9 +14,6 @@ helps['cognitiveservices'] = """
 helps['cognitiveservices list'] = """
     type: command
     short-summary: List available Azure Cognitive Services accounts.
-    examples:
-        - name: List all the Cognitive Services accounts in a resource group.
-          text: az cognitiveservices list -g MyResourceGroup
 """
 
 helps['cognitiveservices account'] = """
