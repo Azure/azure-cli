@@ -2,6 +2,13 @@
 
 Release History
 ===============
+0.1.20
+++++++
+* webapp: add deployment source config-zip support for webapps and functions apps
+* webapp: use azure-mgmt-web 0.34.1
+* webapp: add --docker-container-logging
+* webapp: removing the 'storage' option from --web-server-logging since this is not working
+* `deployment user set`: logged more informative error messages.
 
 0.1.19
 ++++++

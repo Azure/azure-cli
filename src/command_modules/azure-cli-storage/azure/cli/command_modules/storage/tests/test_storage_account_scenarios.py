@@ -109,6 +109,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account check-name --name {}'.format(name),
                  checks=JMESPathCheck('nameAvailable', True))
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-01-01')
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_storage_create_default_sku(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('sku.name', 'Standard_RAGRS')])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -141,9 +148,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage metrics update --services f --hour false --retention 1 ', storage_account_info)
 
-        self.storage_cmd('storage metrics show', storage_account_info) \
-            .assert_with_checks(JMESPathCheck('file.hour.enabled', False),
-                                JMESPathCheck('file.minute.enabled', False))
+        self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
+            JMESPathCheck('file.hour.enabled', False),
+            JMESPathCheck('file.minute.enabled', False))
+
+        self.storage_cmd('storage metrics update --services f --api true --hour true --minute true --retention 1 ',
+                         storage_account_info)
+
+        self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
+            JMESPathCheck('file.hour.enabled', True),
+            JMESPathCheck('file.minute.enabled', True))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account_1')

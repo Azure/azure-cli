@@ -31,6 +31,7 @@ from ._validators import \
      validate_custom_domain, validate_public_access,
      process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
+     process_blob_batch_source_parameters, process_file_batch_source_parameters,
      get_content_setting_validator, validate_encryption_services, validate_accept,
      validate_key, storage_account_key_options, validate_encryption_source,
      process_file_download_namespace,
@@ -332,6 +333,8 @@ with CommandContext('storage account create') as c:
               **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
     c.reg_arg('tags', tags_type)
     c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
+    c.reg_arg('sku', help='The storage account SKU.', default=enum_default(ResourceType.MGMT_STORAGE, 'SkuName', 'standard_ragrs'),
+              **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
 
 with CommandContext('storage account update') as c:
     register_common_storage_account_options(c)
@@ -449,6 +452,15 @@ register_cli_argument('storage blob download-batch', 'source', options_list=('--
 
 register_cli_argument('storage blob download-batch', 'source_container_name', ignore_type)
 
+
+# BLOB DELETE-BATCH PARAMETERS
+register_cli_argument('storage blob delete-batch', 'source', options_list=('--source', '-s'),
+                      validator=process_blob_batch_source_parameters)
+
+register_cli_argument('storage blob delete-batch', 'source_container_name', ignore_type)
+register_cli_argument('storage blob delete-batch', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
+
+
 # BLOB UPLOAD-BATCH PARAMETERS
 register_cli_argument('storage blob upload-batch', 'destination', options_list=('--destination', '-d'))
 register_cli_argument('storage blob upload-batch', 'source', options_list=('--source', '-s'),
@@ -516,6 +528,10 @@ with CommandContext('storage file download-batch') as c:
 
         with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as vc:
             vc.register_cli_argument('storage file download-batch', 'validate_content')
+
+# FILE DELETE-BATCH PARAMETERS
+with CommandContext('storage file delete-batch') as c:
+    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
 
 # FILE COPY-BATCH PARAMETERS
 with CommandContext('storage file copy start-batch') as c:

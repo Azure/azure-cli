@@ -8,6 +8,8 @@ import os.path
 from collections import namedtuple
 from azure.common import AzureException
 
+from azure.cli.core.application import APPLICATION
+from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
@@ -17,6 +19,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p, guess_content_type)
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
@@ -89,25 +92,6 @@ def storage_blob_copy_batch(client, source_client,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False):
-    """
-    Download blobs in a container recursively
-
-    :param str source:
-        The string represents the source of this download operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param str destination:
-        The string represents the destination folder of this download operation. The folder must
-        exist.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually download the file(s)
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-    """
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
@@ -117,7 +101,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         logger.warning('  container %s', source_container_name)
         logger.warning('      total %d', len(source_blobs))
         logger.warning(' operations')
-        for b in source_blobs or []:
+        for b in source_blobs:
             logger.warning('  - %s', b)
         return []
 
@@ -130,84 +114,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
                               maxsize_condition=None, max_connections=2, lease_id=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
-    """
-    Upload files to storage container as blobs
-
-    :param str source:
-        The directory where the files to be uploaded.
-
-    :param str destination:
-        The string represents the destination of this upload operation. The source can be the
-        container URL or the container name. When the source is the container URL, the storage
-        account name will parsed from the URL.
-
-    :param str pattern:
-        The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
-        and '[!seq]'.
-
-    :param bool dryrun:
-        Show the summary of the operations to be taken instead of actually upload the file(s)
-
-    :param string if_match:
-        An ETag value, or the wildcard character (*). Specify this header to perform the operation
-        only if the resource's ETag matches the value specified.
-
-    :param string if_none_match:
-        An ETag value, or the wildcard character (*). Specify this header to perform the
-        operation only if the resource's ETag does not match the value specified. Specify the
-        wildcard character (*) to perform the operation only if the resource does not exist,
-        and fail the operation if it does exist.
-    """
-
-    def _append_blob(file_path, blob_name, blob_content_settings):
-        if not client.exists(destination_container_name, blob_name):
-            client.create_blob(
-                container_name=destination_container_name,
-                blob_name=blob_name,
-                content_settings=blob_content_settings,
-                metadata=metadata,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
-
-        append_blob_args = {
-            'container_name': destination_container_name,
-            'blob_name': blob_name,
-            'file_path': file_path,
-            'progress_callback': lambda c, t: None,
-            'maxsize_condition': maxsize_condition,
-            'lease_id': lease_id,
-            'timeout': timeout
-        }
-
-        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
-            append_blob_args['validate_content'] = validate_content
-
-        return client.append_blob_from_path(**append_blob_args)
-
-    def _upload_blob(file_path, blob_name, blob_content_settings):
-        create_blob_args = {
-            'container_name': destination_container_name,
-            'blob_name': blob_name,
-            'file_path': file_path,
-            'progress_callback': lambda c, t: None,
-            'content_settings': blob_content_settings,
-            'metadata': metadata,
-            'max_connections': max_connections,
-            'lease_id': lease_id,
-            'if_modified_since': if_modified_since,
-            'if_unmodified_since': if_unmodified_since,
-            'if_match': if_match,
-            'if_none_match': if_none_match,
-            'timeout': timeout
-        }
-
-        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
-            create_blob_args['validate_content'] = validate_content
-
-        return client.create_blob_from_path(**create_blob_args)
 
     def _create_return_result(blob_name, blob_content_settings, upload_result=None):
         return {
@@ -216,7 +122,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
             'Last Modified': upload_result.last_modified if upload_result else None,
             'eTag': upload_result.etag if upload_result else None}
 
-    upload_action = _upload_blob if blob_type == 'block' or blob_type == 'page' else _append_blob
     logger = get_az_logger(__name__)
     settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
 
@@ -234,10 +139,133 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
         for src, dst in source_files or []:
             logger.warning('uploading {}'.format(src))
             guessed_content_settings = guess_content_type(src, content_settings, settings_class)
-            results.append(
-                _create_return_result(dst, guessed_content_settings, upload_action(src, dst, guessed_content_settings)))
-
+            result = upload_blob(client, destination_container_name, dst, src,
+                                 blob_type=blob_type, content_settings=guessed_content_settings, metadata=metadata,
+                                 validate_content=validate_content, maxsize_condition=maxsize_condition,
+                                 max_connections=max_connections, lease_id=lease_id,
+                                 if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since,
+                                 if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+            results.append(_create_return_result(dst, guessed_content_settings, result))
     return results
+
+
+@transfer_doc(get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService').create_blob_from_path)
+def upload_blob(client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
+                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
+                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+    """Upload a blob to a container."""
+
+    settings_class = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContentSettings')
+    content_settings = guess_content_type(file_path, content_settings, settings_class)
+
+    def upload_append_blob():
+        if not client.exists(container_name, blob_name):
+            client.create_blob(
+                container_name=container_name,
+                blob_name=blob_name,
+                content_settings=content_settings,
+                metadata=metadata,
+                lease_id=lease_id,
+                if_modified_since=if_modified_since,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                timeout=timeout)
+
+        append_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'maxsize_condition': maxsize_condition,
+            'lease_id': lease_id,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            append_blob_args['validate_content'] = validate_content
+
+        return client.append_blob_from_path(**append_blob_args)
+
+    def upload_block_blob():
+        # increase the block size to 100MB when the file is larger than 200GB
+        if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
+            client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
+            client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
+
+        create_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'file_path': file_path,
+            'progress_callback': _update_progress,
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'max_connections': max_connections,
+            'lease_id': lease_id,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17') and tier:
+            create_blob_args['premium_page_blob_tier'] = tier
+
+        if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+            create_blob_args['validate_content'] = validate_content
+
+        return client.create_blob_from_path(**create_blob_args)
+
+    type_func = {
+        'append': upload_append_blob,
+        'block': upload_block_blob,
+        'page': upload_block_blob  # same implementation
+    }
+    return type_func[blob_type]()
+
+
+def _update_progress(current, total):
+    hook = APPLICATION.get_progress_controller(det=True)
+
+    if total:
+        hook.add(message='Alive', value=current, total_val=total)
+        if total == current:
+            hook.end()
+
+
+def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
+                              delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                              if_none_match=None, timeout=None, dryrun=False):
+
+    def _delete_blob(blob_name):
+        delete_blob_args = {
+            'container_name': source_container_name,
+            'blob_name': blob_name,
+            'lease_id': lease_id,
+            'delete_snapshots': delete_snapshots,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+        response = client.delete_blob(**delete_blob_args)
+        return response
+
+    source_blobs = list(collect_blobs(client, source_container_name, pattern))
+
+    if dryrun:
+        logger = get_az_logger(__name__)
+        logger.warning('delete action: from %s', source)
+        logger.warning('    pattern %s', pattern)
+        logger.warning('  container %s', source_container_name)
+        logger.warning('      total %d', len(source_blobs))
+        logger.warning(' operations')
+        for blob in source_blobs:
+            logger.warning('  - %s', blob)
+        return []
+
+    return [_delete_blob(blob) for blob in source_blobs]
 
 
 def _download_blob(blob_service, container, destination_folder, blob_name):
@@ -253,7 +281,8 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
                                  source_container, source_sas, source_blob_name):
-    source_blob_url = source_blob_service.make_blob_url(source_container, source_blob_name,
+    source_blob_name = source_blob_name.encode('utf-8')
+    source_blob_url = source_blob_service.make_blob_url(source_container, encode_for_url(source_blob_name),
                                                         sas_token=source_sas)
 
     try:
@@ -266,9 +295,9 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
                                  source_share, source_sas, source_file_dir, source_file_name):
-    source_file_dir = source_file_dir if source_file_dir else None
-    file_url = source_file_service.make_file_url(source_share, source_file_dir, source_file_name,
-                                                 sas_token=source_sas)
+    file_url, source_file_dir, source_file_name = \
+        make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
+                                         source_file_name, source_sas)
 
     blob_name = os.path.join(source_file_dir, source_file_name) \
         if source_file_dir else source_file_name

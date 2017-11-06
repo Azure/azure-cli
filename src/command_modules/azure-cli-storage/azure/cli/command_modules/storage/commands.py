@@ -115,7 +115,7 @@ cli_storage_data_plane_command('storage blob show', block_blob_path + 'get_blob_
 cli_storage_data_plane_command('storage blob update', block_blob_path + 'set_blob_properties', factory)
 cli_storage_data_plane_command('storage blob exists', base_blob_path + 'exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage blob download', base_blob_path + 'get_blob_to_path', factory)
-cli_storage_data_plane_command('storage blob upload', custom_path + 'upload_blob', factory)
+cli_storage_data_plane_command('storage blob upload', 'azure.cli.command_modules.storage.blob#upload_blob', factory)
 cli_storage_data_plane_command('storage blob metadata show', block_blob_path + 'get_blob_metadata', factory, exception_handler=_dont_fail_not_exist)
 cli_storage_data_plane_command('storage blob metadata update', block_blob_path + 'set_blob_metadata', factory)
 cli_storage_data_plane_command('storage blob service-properties show', base_blob_path + 'get_blob_service_properties', factory, exception_handler=_dont_fail_not_exist)
@@ -129,6 +129,7 @@ cli_storage_data_plane_command('storage blob copy start-batch', 'azure.cli.comma
 cli_storage_data_plane_command('storage blob copy cancel', block_blob_path + 'abort_copy_blob', factory)
 cli_storage_data_plane_command('storage blob upload-batch', 'azure.cli.command_modules.storage.blob#storage_blob_upload_batch', factory)
 cli_storage_data_plane_command('storage blob download-batch', 'azure.cli.command_modules.storage.blob#storage_blob_download_batch', factory)
+cli_storage_data_plane_command('storage blob delete-batch', 'azure.cli.command_modules.storage.blob#storage_blob_delete_batch', factory)
 cli_storage_data_plane_command('storage blob set-tier', custom_path + 'set_blob_tier', factory)
 
 # page blob commands
@@ -182,6 +183,7 @@ cli_storage_data_plane_command('storage file copy start', file_service_path + 'c
 cli_storage_data_plane_command('storage file copy cancel', file_service_path + 'abort_copy_file', factory)
 cli_storage_data_plane_command('storage file upload-batch', 'azure.cli.command_modules.storage.file#storage_file_upload_batch', factory)
 cli_storage_data_plane_command('storage file download-batch', 'azure.cli.command_modules.storage.file#storage_file_download_batch', factory)
+cli_storage_data_plane_command('storage file delete-batch', 'azure.cli.command_modules.storage.file#storage_file_delete_batch', factory)
 cli_storage_data_plane_command('storage file copy start-batch', 'azure.cli.command_modules.storage.file#storage_file_copy_batch', factory)
 
 # table commands

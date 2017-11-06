@@ -299,6 +299,23 @@ helps['webapp deployment source config-local-git'] = """
                 https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
 """
 
+helps['webapp deployment source config-zip'] = """
+    type: command
+    short-summary: Perform deployment using the kudu zip push deployment for a webapp.
+    long-summary: >
+        By default Kudu assumes that zip deployments do not require any build-related actions like
+        npm install or dotnet publish. This can be overridden by including an .ini file on your
+        zip file with the setting SCM_DO_BUILD_DURING_DEPLOYMENT = true to enable Kudu detection
+        logic and build script generation process. Alternatley the setting can be enabled using the
+        az webapp config appsettings set command.
+    examples:
+         - name: Perform deployment by using zip file content.
+           text: >
+             az webapp deployment source config-zip \\
+                 -g <myRG> -n <myAppName> \\
+                 --src <zip file path location>
+"""
+
 helps['webapp deployment source delete'] = """
     type: command
     short-summary: Delete a source control deployment configuration.
@@ -673,6 +690,7 @@ helps['functionapp deployment source sync'] = """
     type: command
     short-summary: Synchronize from the repository. Only needed under manual integration mode.
 """
+
 helps['functionapp deployment user'] = """
     type: group
     short-summary: Manage user credentials for deployment.
@@ -688,4 +706,21 @@ helps['functionapp deployment user set'] = """
           text: >
             az functionapp deployment user set
             --user-name MyUserName
+"""
+
+helps['functionapp deployment source config-zip'] = """
+    type: command
+    short-summary: Perform deployment using the kudu zip push deployment for a function app.
+    long-summary: >
+        By default Kudu assumes that zip deployments do not require any build-related actions like
+        npm install or dotnet publish. This can be overridden by including an .ini file on your
+        zip file with the setting SCM_DO_BUILD_DURING_DEPLOYMENT = true to enable Kudu detection
+        logic and build script generation process. Alternatley the setting can be enabled using the
+        az functionapp config appsettings set command.
+    examples:
+         - name: Perform deployment by using zip file content.
+           text: >
+             az functionapp deployment source config-zip \\
+                 -g <myRG> -n <myAppName> \\
+                 --src <zip file path location>
 """

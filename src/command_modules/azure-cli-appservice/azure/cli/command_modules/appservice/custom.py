@@ -13,6 +13,7 @@ from binascii import hexlify
 from os import urandom
 import OpenSSL.crypto
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
@@ -22,7 +23,6 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    RampUpRule, UnauthenticatedClientAction)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
@@ -959,8 +959,7 @@ def set_deployment_user(user_name, password=None):
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
-    result = client.update_publishing_user(user)
-    return result
+    return client.update_publishing_user(user)
 
 
 def list_publish_profiles(resource_group_name, name, slot=None):
@@ -1046,11 +1045,11 @@ def _open_page_in_browser(url):
 # TODO: expose new blob suport
 def config_diagnostics(resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
-                       detailed_error_messages=None, failed_request_tracing=None,
-                       slot=None):
+                       docker_container_logging=None, detailed_error_messages=None,
+                       failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig,
-                                       FileSystemHttpLogsConfig, EnabledConfig)
+                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       EnabledConfig)
     client = web_client_factory()
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
@@ -1066,11 +1065,16 @@ def config_diagnostics(resource_group_name, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    if web_server_logging is not None:
-        enabled = web_server_logging
-        # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
-        fs_server_log = FileSystemHttpLogsConfig(100, 3, enabled)
-        http_logs = HttpLogsConfig(fs_server_log)
+    server_logging_option = web_server_logging or docker_container_logging
+    if server_logging_option:
+        # TODO: az blob storage log config currently not in use, will be impelemented later.
+        # Tracked as Issue: #4764 on Github
+        filesystem_log_config = None
+        turned_on = server_logging_option != 'off'
+        if server_logging_option in ['filesystem', 'off']:
+            # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
+            filesystem_log_config = FileSystemHttpLogsConfig(100, 3, enabled=turned_on)
+        http_logs = HttpLogsConfig(filesystem_log_config, None)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(detailed_error_messages))
@@ -1553,3 +1557,29 @@ def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+
+
+def enable_zip_deploy(resource_group_name, name, src, slot=None):
+    client = web_client_factory()
+    user_name, password = _get_site_credential(client, resource_group_name, name)
+    scm_url = _get_scm_url(resource_group_name, name, slot)
+    zip_url = scm_url + '/api/zipdeploy'
+
+    import urllib3
+    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers = authorization
+    headers['content-type'] = 'application/octet-stream'
+
+    import requests
+    import os
+    # Read file content
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        r = requests.post(zip_url, data=zip_content, headers=headers)
+        if r.status_code != 200:
+            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
+                zip_url, r.status_code, r.text))
+
+    # on successful deployment navigate to the app, display the latest deployment json response
+    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
+    return response.json()

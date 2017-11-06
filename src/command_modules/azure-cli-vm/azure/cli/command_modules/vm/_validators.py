@@ -9,10 +9,10 @@ import os
 import re
 
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import resource_id, parse_resource_id, is_valid_resource_id
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.validators import \
     (get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set)
 from azure.cli.core.util import CLIError, hash_string
@@ -56,6 +56,11 @@ def validate_nsg_name(namespace):
                         subscription=get_subscription_id())
     namespace.network_security_group_name = namespace.network_security_group_name \
         or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
+
+
+def process_vm_secret_namespace(namespace):
+    namespace.keyvault = _get_resource_id(namespace.keyvault, namespace.resource_group_name,
+                                          'vaults', 'Microsoft.KeyVault')
 
 
 def _get_resource_group_from_vault_name(vault_name):
@@ -182,36 +187,14 @@ def _parse_image_argument(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
-        try:
-            compute_client = _compute_client_factory()
-            if namespace.os_version.lower() == 'latest':
-                top_one = compute_client.virtual_machine_images.list(namespace.location,
-                                                                     namespace.os_publisher,
-                                                                     namespace.os_offer,
-                                                                     namespace.os_sku,
-                                                                     top=1,
-                                                                     orderby='name desc')
-                if not top_one:
-                    raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
 
-                image_version = top_one[0].name
-            else:
-                image_version = namespace.os_version
+        if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
+            image_plan = _get_image_plan_info_if_exists(namespace)
+            if image_plan:
+                namespace.plan_name = image_plan.name
+                namespace.plan_product = image_plan.product
+                namespace.plan_publisher = image_plan.publisher
 
-            image = compute_client.virtual_machine_images.get(namespace.location,
-                                                              namespace.os_publisher,
-                                                              namespace.os_offer,
-                                                              namespace.os_sku,
-                                                              image_version)
-
-            # pylint: disable=no-member
-            if image.plan:
-                namespace.plan_name = image.plan.name
-                namespace.plan_product = image.plan.product
-                namespace.plan_publisher = image.plan.publisher
-        except CloudError as ex:
-            logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
-                           "will be skipped", namespace.image, ex.message)
         return 'urn'
 
     # 4 - check if a fully-qualified ID (assumes it is an image ID)
@@ -228,6 +211,36 @@ def _parse_image_argument(namespace):
     except CloudError:
         err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
         raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
+
+
+def _get_image_plan_info_if_exists(namespace):
+    try:
+        compute_client = _compute_client_factory()
+        if namespace.os_version.lower() == 'latest':
+            top_one = compute_client.virtual_machine_images.list(namespace.location,
+                                                                 namespace.os_publisher,
+                                                                 namespace.os_offer,
+                                                                 namespace.os_sku,
+                                                                 top=1,
+                                                                 orderby='name desc')
+            if not top_one:
+                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
+
+            image_version = top_one[0].name
+        else:
+            image_version = namespace.os_version
+
+        image = compute_client.virtual_machine_images.get(namespace.location,
+                                                          namespace.os_publisher,
+                                                          namespace.os_offer,
+                                                          namespace.os_sku,
+                                                          image_version)
+
+        # pylint: disable=no-member
+        return image.plan
+    except CloudError as ex:
+        logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
+                       "will be skipped", namespace.image, ex.message)
 
 
 def _get_storage_profile_description(profile):

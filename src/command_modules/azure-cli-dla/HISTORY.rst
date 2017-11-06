@@ -2,6 +2,15 @@
 
 Release History
 ===============
+0.0.15
+++++++
+* Change the return type of the job list command: a list of JobInformation to a list of JobInformationBasic
+* Change the return type of the account list command: a list of DataLakeAnalyticsAccount to a list of DataLakeAnalyticsAccountBasic
+* The properties of a Basic type is a strict subset of the properties of a regular type
+
+0.0.14
+++++++
+* Minor fixes.
 
 0.0.13
 ++++++

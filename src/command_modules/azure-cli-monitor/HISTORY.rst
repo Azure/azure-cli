@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.0.12
+++++++
+* Add activity-log alert commands
+* Minor fixes.
+
 0.0.11
 ++++++
 * Add action-group commands

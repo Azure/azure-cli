@@ -61,8 +61,8 @@ class BatchScenarioMixin(object):
             'accountEndpoint']
         return 'https://' + endpoint
 
-    def batch_cmd(self, cmd, account_info, *args):
+    def batch_cmd(self, cmd, account_info, *args, **kwargs):
         cmd = cmd.format(*args)
         cmd = '{} --account-name {} --account-key "{}" --account-endpoint {}'.format(cmd,
                                                                                      *account_info)
-        return self.cmd(cmd)
+        return self.cmd(cmd, **kwargs)

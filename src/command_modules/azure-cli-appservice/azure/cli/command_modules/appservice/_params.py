@@ -119,7 +119,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
     register_cli_argument(scope + ' config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
     register_cli_argument(scope + ' config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
-    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
     register_cli_argument(scope + ' deployment user', 'user_name', help='user name')
     register_cli_argument(scope + ' deployment user', 'password', help='password, will prompt if not specified')
     register_cli_argument(scope + ' deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
@@ -139,6 +139,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', **enum_choice_list(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
     register_cli_argument(scope + ' deployment source', 'git_token', help='Git access token required for auto sync')
     register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
+    register_cli_argument(scope + ' create', 'deployment_zip', options_list=('--deployment-zip', '-z'), help='perform deployment using zip file')
     register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
     register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 
@@ -161,7 +162,7 @@ register_cli_argument('webapp log config', 'application_logging', help='configur
 register_cli_argument('webapp log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
-register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(['off', 'storage', 'filesystem']))
+register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(['off', 'filesystem']))
 register_cli_argument('webapp log config', 'docker_container_logging', help='configure gathering STDOUT and STDERR output from container', **enum_choice_list(['off', 'filesystem']))
 
 register_cli_argument('webapp log tail', 'provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")

@@ -33,10 +33,10 @@ from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_cho
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
-from azure.cli.core.commands.arm import resource_id as resource_dict_to_id
-
 from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
+
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from msrestazure.tools import resource_id as resource_dict_to_id
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
@@ -890,9 +890,9 @@ def list_policy_assignment(disable_scope_strict_match=None, resource_group_name=
     elif scope:
         # pylint: disable=redefined-builtin
         id = parse_resource_id(scope)
-        parent_resource_path = '' if not id.get('child_name') else (id['type'] + '/' + id['name'])
-        resource_type = id.get('child_type') or id['type']
-        resource_name = id.get('child_name') or id['name']
+        parent_resource_path = '' if not id.get('child_name_1') else (id['type'] + '/' + id['name'])
+        resource_type = id.get('child_type_1') or id['type']
+        resource_name = id.get('child_name_1') or id['name']
         result = policy_client.policy_assignments.list_for_resource(
             id['resource_group'], id['namespace'],
             parent_resource_path, resource_type, resource_name)
@@ -1135,12 +1135,12 @@ def _validate_lock_params_match_lock(
         if resource_provider_namespace != _resource_namespace:
             raise CLIError(
                 'Unexpected --namespace for lock {}, expected {}'.format(name, _resource_namespace))
-        if resource.get('grandchild_type', None) is None:
+        if resource.get('child_type_2', None) is None:
             _resource_type = resource.get('type', None)
             _resource_name = resource.get('name', None)
         else:
-            _resource_type = resource.get('child_type', None)
-            _resource_name = resource.get('child_name', None)
+            _resource_type = resource.get('child_type_1', None)
+            _resource_name = resource.get('child_name_1', None)
             parent = (resource['type'] + '/' + resource['name'])
             if parent != parent_resource_path:
                 raise CLIError(
@@ -1643,19 +1643,19 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):
         parts = parse_resource_id(resource_id)
-        namespace = parts.get('child_namespace', parts['namespace'])
-        if parts.get('grandchild_type'):
+        namespace = parts.get('child_namespace_1', parts['namespace'])
+        if parts.get('child_type_2'):
             parent = (parts['type'] + '/' + parts['name'] + '/' +
-                      parts['child_type'] + '/' + parts['child_name'])
-            resource_type = parts['grandchild_type']
-        elif parts.get('child_type'):
+                      parts['child_type_1'] + '/' + parts['child_name_1'])
+            resource_type = parts['child_type_2']
+        elif parts.get('child_type_1'):
             # if the child resource has a provider namespace it is independent of the
             # parent, so set the parent to empty
-            if parts.get('child_namespace') is not None:
+            if parts.get('child_namespace_1') is not None:
                 parent = ''
             else:
                 parent = parts['type'] + '/' + parts['name']
-            resource_type = parts['child_type']
+            resource_type = parts['child_type_1']
         else:
             parent = None
             resource_type = parts['type']

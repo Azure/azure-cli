@@ -121,7 +121,7 @@ with ParametersContext(command='batchai job create') as c:
     c.argument('json_file', options_list=('--config', '-c'),
                help='A path to a json file containing job create parameters '
                     '(json representation of azure.mgmt.batchai.models.JobCreateParameters).')
-    c.argument('cluster_name', options_list=('--cluster-name',),
+    c.argument('cluster_name', options_list=('--cluster-name', '-r'),
                help='If specified, the job will run on the given cluster instead of the '
                     'one configured in the json file.')
     c.argument('cluster_resource_group', options_list=('--cluster-resource-group',),
