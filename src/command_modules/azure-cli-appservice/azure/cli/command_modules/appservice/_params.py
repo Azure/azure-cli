@@ -167,6 +167,7 @@ register_cli_argument('webapp log config', 'web_server_logging', help='configure
 register_cli_argument('webapp log config', 'docker_container_logging', help='configure gathering STDOUT and STDERR output from container', **enum_choice_list(['off', 'filesystem']))
 
 register_cli_argument('webapp log tail', 'provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
+register_cli_argument('webapp log tail', 'number_of_lines', options_list=('--number-of-lines', '-l'), help="Number of lines to be displayed, currently only works for linux")
 register_cli_argument('webapp log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 for scope in ['appsettings', 'connection-string']:

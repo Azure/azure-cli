@@ -1170,21 +1170,27 @@ def clear_traffic_routing(resource_group_name, name):
     set_traffic_routing(resource_group_name, name, [])
 
 
-def get_streaming_log(resource_group_name, name, provider=None, slot=None):
+def get_streaming_log(resource_group_name, name, provider=None, number_of_lines=None, slot=None):
     scm_url = _get_scm_url(resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
-
     client = web_client_factory()
     user, password = _get_site_credential(client, resource_group_name, name)
-    t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
-    t.daemon = True
-    t.start()
+    if number_of_lines:
+        webapp = client.web_apps.get(resource_group_name, name)
+        if webapp.reserved is not True:
+            raise CLIError('--number-of-lines is only supported for App Service on Linux apps')
+        url = scm_url + '/api/logs/docker'
+        _get_log(url, user, password, number_of_lines=number_of_lines)
+    else:
+        t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
+        t.daemon = True
+        t.start()
 
-    while True:
-        time.sleep(100)  # so that ctrl+c can stop the command
+        while True:
+            time.sleep(100)  # so that ctrl+c can stop the command
 
 
 def download_historical_logs(resource_group_name, name, log_file=None, slot=None):
@@ -1202,7 +1208,7 @@ def _get_site_credential(client, resource_group_name, name):
     return (creds.publishing_user_name, creds.publishing_password)
 
 
-def _get_log(url, user_name, password, log_file=None):
+def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
     import sys
     import certifi
     import urllib3
@@ -1215,6 +1221,7 @@ def _get_log(url, user_name, password, log_file=None):
     std_encoding = sys.stdout.encoding
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers['CommandName'] = 'appservice list-locations'
     r = http.request(
         'GET',
         url,
@@ -1231,6 +1238,37 @@ def _get_log(url, user_name, password, log_file=None):
                 if not data:
                     break
                 f.write(data)
+    elif number_of_lines:  # print last 'n' number of lines
+        api_str = r.read().decode(encoding='utf-8')
+
+        href_count = api_str.count('https')
+
+        if href_count > 1:
+            logger.info('Will show last %s lines of logs per instance', number_of_lines)
+
+        for x in range(0, href_count):  # pylint: disable=unused-variable
+            index_of_path = api_str.index('\",\"path')
+            href_str = api_str[api_str.index("https"):index_of_path]
+            size = api_str[api_str.index('\"size\":') + len('\"size\":'):api_str.index(',\"href\"')]
+            logger.info('\nUsing endpoint: %s', href_str)
+            url = href_str
+            if int(size) > 512000:
+                logger.warning('Size of logs:%s bytes, will fetch only last 512000 bytes', size)
+                headers.update({'Range': 'bytes=-512000'})  # only get the last 512k
+
+            r = http.request(
+                'GET',
+                url,
+                headers=headers,
+                preload_content=False
+            )
+            lines = (r.data.decode(encoding='utf-8', errors='replace')
+                     .encode(std_encoding, errors='replace')
+                     .decode(std_encoding, errors='replace')
+                     .replace('\\n', '\r\n'))
+            lines_split = lines.splitlines()
+            print('\r\n'.join(lines_split[-(int(number_of_lines))::]))
+            api_str = api_str[(index_of_path + len('\",\"path')):]
     else:  # streaming
         for chunk in r.stream():
             if chunk:
