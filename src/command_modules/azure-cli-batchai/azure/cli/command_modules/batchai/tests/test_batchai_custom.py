@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import uuid
 
 import os
 import unittest
@@ -162,8 +163,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
         self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
-        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key,
-                          'key')
+        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key, 'key')
 
         # Test a case when no patching required.
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'another_account'
@@ -174,8 +174,20 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
         self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
-        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key,
-                          'key')
+        self.assertEquals(params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key, 'key')
+
+        # Storage account and key provided as command line args.
+        params.node_setup.mount_volumes.azure_file_shares[0].account_name = '<AZURE_BATCHAI_STORAGE_ACCOUNT>'
+        params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key = '<AZURE_BATCHAI_STORAGE_KEY>'
+        update_cluster_create_parameters_with_env_variables(params, 'account_from_cmd', 'key_from_cmd')
+        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account_from_cmd')
+        self.assertEquals(params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key_from_cmd')
+
+        # Non existing storage account provided as command line arg.
+        params.node_setup.mount_volumes.azure_file_shares[0].account_name = '<AZURE_BATCHAI_STORAGE_ACCOUNT>'
+        params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key = '<AZURE_BATCHAI_STORAGE_KEY>'
+        with self.assertRaises(CLIError):
+            update_cluster_create_parameters_with_env_variables(params, str(uuid.uuid4()), None)
 
     def test_batchai_add_nfs_to_cluster_create_parameters(self):
         """Test adding of nfs into cluster create parameters."""
