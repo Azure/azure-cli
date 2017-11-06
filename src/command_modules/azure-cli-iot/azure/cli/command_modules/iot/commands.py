@@ -9,7 +9,6 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from ._factory import iot_hub_service_factory as factory
-from ._factory import iot_hub_certificate_factory as certificate_factory
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
     custom_path = 'azure.cli.command_modules.iot.custom#{0}'
@@ -34,19 +33,19 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
 
     # iot hub certificate commands
     cli_command(__name__, 'iot hub certificate list', custom_path.format('iot_hub_certificate_list'),
-                certificate_factory)
+                factory)
     cli_command(__name__, 'iot hub certificate show', custom_path.format('iot_hub_certificate_get'),
-                certificate_factory)
+                factory)
     cli_command(__name__, 'iot hub certificate create', custom_path.format('iot_hub_certificate_create'),
-                certificate_factory)
+                factory)
     cli_command(__name__, 'iot hub certificate delete', custom_path.format('iot_hub_certificate_delete'),
-                certificate_factory)
+                factory)
     cli_command(__name__, 'iot hub certificate generate-verification-code',
-                custom_path.format('iot_hub_certificate_gen_code'), certificate_factory)
+                custom_path.format('iot_hub_certificate_gen_code'), factory)
     cli_command(__name__, 'iot hub certificate verify', custom_path.format('iot_hub_certificate_verify'),
-                certificate_factory)
+                factory)
     cli_command(__name__, 'iot hub certificate update', custom_path.format('iot_hub_certificate_update'),
-                certificate_factory)
+                factory)
 
     # iot hub commands
     cli_command(__name__, 'iot hub create', custom_path.format('iot_hub_create'), factory)

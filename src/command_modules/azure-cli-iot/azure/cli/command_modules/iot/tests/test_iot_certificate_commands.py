@@ -8,7 +8,7 @@ from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, JMESPathCheck
 
 from OpenSSL import crypto, SSL
 from os.path import exists, join
-from .._utils import _create_test_cert, _delete_test_cert, _create_verification_cert
+from ._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
 import random
 
 VERIFICATION_FILE = "verify.cer"

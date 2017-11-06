@@ -3,12 +3,9 @@
 Release History
 ===============
 
-0.1.15
-++++++
-* Adds support for certificate authorities (CA) and certificate chains.
-
 0.1.14
 ++++++
+* Adds support for certificate authorities (CA) and certificate chains.
 * Minor fixes.
 
 0.1.13

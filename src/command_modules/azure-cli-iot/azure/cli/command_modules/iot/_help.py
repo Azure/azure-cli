@@ -48,10 +48,12 @@ helps['iot hub certificate update'] = """
     examples:
         - name: Updates a CA certificate in an IoT hub by uploading a new PEM file.
           text: >
-            az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path F:\\NewCertificate.pem --etag AAAAAAAAAAA=
+            az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path F:\\NewCertificate.pem --etag
+            AAAAAAAAAAA=
         - name: Updates a CA certificate in an IoT hub by uploading a new CER file.
           text: >
-            az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path F:\\NewCertificate.cer --etag AAAAAAAAAAA=
+            az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path F:\\NewCertificate.cer --etag
+            AAAAAAAAAAA=
 """.format(certificate_help)
 
 helps['iot hub certificate delete'] = """
@@ -92,7 +94,8 @@ helps['iot hub certificate generate-verification-code'] = """
     examples:
         - name: Generates a verification code for MyCertificate
           text: >
-            az iot hub certificate generate-verification-code --hub-name MyIotHub --name MyCertificate --etag AAAAAAAAAAA=
+            az iot hub certificate generate-verification-code --hub-name MyIotHub --name MyCertificate --etag
+            AAAAAAAAAAA=
 """.format(certificate_help)
 
 helps['iot hub certificate verify'] = """
@@ -103,7 +106,8 @@ helps['iot hub certificate verify'] = """
     examples:
         - name: Verifies ownership of the MyCertificate private key.
           text: >
-            az iot hub certificate verify --hub-name MyIotHub --name MyCertificate --path F:\\Verification.pem --etag AAAAAAAAAAA=
+            az iot hub certificate verify --hub-name MyIotHub --name MyCertificate --path F:\\Verification.pem --etag
+            AAAAAAAAAAA=
 """.format(certificate_help)
 
 helps['iot hub create'] = """
