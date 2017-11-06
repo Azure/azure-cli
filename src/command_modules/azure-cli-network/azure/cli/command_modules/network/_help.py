@@ -708,10 +708,6 @@ helps['network dns zone create'] = """
     parameters:
         - name: --if-none-match
           short-summary: Only create a DNS zone if one doesn't exist that matches the given name.
-    examples:
-        - name: Create a DNS zone using a fully qualified domain name.
-          text: >
-            az network dns zone create -g MyResourceGroup -n www.mysite.com
 """
 
 helps['network dns zone delete'] = """
@@ -727,10 +723,6 @@ helps['network dns zone export'] = """
 helps['network dns zone import'] = """
     type: command
     short-summary: Create a DNS zone using a DNS zone file.
-    examples:
-        - name: Import a local zone file into a DNS zone resource.
-          text: >
-            az network dns zone import -g MyResourceGroup -n MyZone -f /path/to/zone/file
 """
 
 helps['network dns zone list'] = """
@@ -904,16 +896,10 @@ helps['network lb create'] = """
     type: command
     short-summary: Create a load balancer.
     examples:
-        - name: Create a basic load balancer.
-          text: >
-            az network lb create -g MyResourceGroup -n MyLb
-        - name: Create a load balancer on a specific virtual network and subnet.
-          text: >
-            az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
-        - name: create a zone flavored public facing load balancer through provisioning a zonal public ip
+        - name: Create a zone flavored public facing load balancer through provisioning a zonal public ip
           text: >
             az network lb create -g MyResourceGroup -n myLB --public-ip-zone 2
-        - name: create a zone flavored internal facing load balancer through provisioning a zonal frontend ip configuration
+        - name: Create a zone flavored internal facing load balancer through provisioning a zonal frontend ip configuration
           text: >
             az network lb create -g MyResourceGroup -n myLB --frontend-ip-zone 1 -vnet-name MyVnet --subnet MySubnet
 """
@@ -1201,9 +1187,6 @@ helps['network nic create'] = """
     type: command
     short-summary: Create a network interface.
     examples:
-        - name: Create a network interface for a specified subnet on a specified virtual network.
-          text: >
-            az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic
         - name: Create a network interface for a specified subnet on a virtual network which allows
                 IP forwarding subject to a network security group.
           text: >
@@ -1359,10 +1342,6 @@ helps['network nsg list'] = """
 helps['network nsg show'] = """
     type: command
     short-summary: Get information about a network security group.
-    examples:
-        - name: Get basic information about an NSG.
-          text: >
-            az network nsg show -g MyResourceGroup -n MyNsg
         - name: Get basic information about all default NSG rules with "Allow" access.
           text: >
             az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[?access=='Allow']"
@@ -1420,9 +1399,6 @@ helps['network public-ip create'] = """
     type: command
     short-summary: Create a public IP address.
     examples:
-        - name: Create a basic public IP resource.
-          text: >
-            az network public-ip create -g MyResourceGroup -n MyIp
         - name: Create a static public IP resource for a DNS name label.
           text: >
             az network public-ip create -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
@@ -1440,9 +1416,6 @@ helps['network public-ip list'] = """
     type: command
     short-summary: List public IP addresses.
     examples:
-        - name: List all public IPs in a resource group.
-          text: >
-            az network public-ip list -g MyResourceGroup
         - name: List all public IPs for a domain name label.
           text: >
             az network public-ip list -g MyResourceGroup --query "[?dnsSettings.domainNameLabel=='MyLabel']"
@@ -1452,9 +1425,6 @@ helps['network public-ip show'] = """
     type: command
     short-summary: Get the details of a public IP address.
     examples:
-        - name: Get information about a public IP resource.
-          text: >
-            az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get the FQDN and IP address for a public IP resource.
           text: >
             az network public-ip show -g MyResourceGroup -n MyIp --query "{ fqdn:dnsSettings.fqdn, address: ipAddress }"
@@ -1698,9 +1668,6 @@ helps['network vnet create'] = """
     short-summary: Create a virtual network.
     long-summary: You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
     examples:
-        - name: Create a basic virtual network.
-          text: >
-            az network vnet create -g MyResourceGroup -n MyVnet
         - name: Create a virtual network with a specific address prefix and one subnet.
           text: >
             az network vnet create -g MyResourceGroup -n MyVnet --address-prefix 10.0.0.0/16 --subnet-name MySubnet --subnet-prefix 10.0.0.0/24
@@ -1791,49 +1758,37 @@ helps['network vnet peering create'] = """
     short-summary: Create a peering.
     examples:
         - name: Create a virtual network peering between virtual networks in the same region
-          text: >
+          text: |
             az network vnet create --name myVnet1 --resource-group myResourceGroup --location eastus --address-prefix 10.0.0.0/16
-            \\n\\n az network vnet create --name myVnet2 --resource-group myResourceGroup --location eastus --address-prefix 10.1.0.0/16
-            \\n\\n vnet1Id=$(az network vnet show --resource-group myResourceGroup--name myVnet1 --query id --out tsv)
-            \\n\\n vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
-            \\n\\n az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
-            \\n\\n az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
+            az network vnet create --name myVnet2 --resource-group myResourceGroup --location eastus --address-prefix 10.1.0.0/16
+            vnet1Id=$(az network vnet show --resource-group myResourceGroup--name myVnet1 --query id --out tsv)
+            vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
+            az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
+             az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
 
         - name: Create a virtual network peering between virtual networks in different regions
-          text: >
+          text: |
             az network vnet create --name myVnet1 --resource-group myResourceGroup --location westcentralus --address-prefix 10.0.0.0/16
-            \\n\\n az network vnet create --name myVnet2 --resource-group myResourceGroup --location canadacentral --address-prefix 10.2.0.0/16
-            \\n\\n vnet1Id=$(az network vnet show --resource-group myResourceGroup--name myVnet1 --query id --out tsv)
-            \\n\\n vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
-            \\n\\n az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
-            \\n\\n az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
+            az network vnet create --name myVnet2 --resource-group myResourceGroup --location canadacentral --address-prefix 10.2.0.0/16
+            vnet1Id=$(az network vnet show --resource-group myResourceGroup--name myVnet1 --query id --out tsv)
+            vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
+            az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
+            az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
     type: command
     short-summary: Delete a peering.
-    examples:
-        - name: Delete a virtual network peering
-          text: >
-            az network vnet peering delete --name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1
 """
 
 helps['network vnet peering list'] = """
     type: command
     short-summary: List peerings.
-    examples:
-        - name: List all peerings of a specified virtual network
-          text: >
-            az network vnet peering list --resource-group myResourceGroup --vnet-name myVnet1
 """
 
 helps['network vnet peering show'] = """
     type: command
     short-summary: Show details of a peering.
-    examples:
-        - name: Show all details of the specified virtual network peering.
-          text: >
-             az network vnet peering show --name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1
   """
 
 helps['network vnet peering update'] = """
@@ -1948,10 +1903,6 @@ helps['network vnet-gateway'] = """
 helps['network vnet-gateway create'] = """
     type: command
     short-summary: Create a virtual network gateway.
-    examples:
-        - name: Create a basic virtual network gateway and associate with a public IP address.
-          text: >
-            az network vnet-gateway create -g MyResourceGroup --vnet MyVnet -n MyVnetGateway --public-ip-address MyIp
 """
 
 helps['network vnet-gateway delete'] = """

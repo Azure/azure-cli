@@ -165,8 +165,6 @@ helps['vm availability-set update'] = """
     type: command
     short-summary: Update an Azure Availability Set.
     examples:
-        - name: Update an availability set.
-          text: az vm availability-set update -n MyAvSet -g MyResourceGroup
         - name: Update an availability set tag.
           text: az vm availability-set update -n MyAvSet -g MyResourceGroup --set tags.foo=value
         - name: Remove an availability set tag.
@@ -199,33 +197,21 @@ helps['vm extension set'] = """
 helps['vm availability-set delete'] = """
     type: command'
     short-summary: Delete an availability set.
-    examples:
-        - name: Delete an availability set.
-          text: az vm availability-set delete -n MyAvSet -g MyResourceGroup
 """
 
 helps['vm availability-set list'] = """
     type: command
     short-summary: List availability sets.
-    examples:
-        - name: List availability sets.
-          text: az vm availability-set list -g MyResourceGroup
 """
 
 helps['vm availability-set list-sizes'] = """
     type: command
     short-summary: List VM sizes for an availability set.
-    examples:
-        - name: List VM sizes for an availability set.
-          text: az vm availability-set list-sizes -n MyAvSet -g MyResourceGroup
 """
 
 helps['vm availability-set show'] = """
     type: command
     short-summary: Get information for an availability set.
-    examples:
-        - name: Get information about an availability set.
-          text: az vm availability-set show -n MyAvSet -g MyResourceGroup
 """
 
 helps['vm update'] = """
@@ -348,8 +334,6 @@ helps['vm convert'] = """
     type: command
     short-summary: Convert a VM with unmanaged disks to use managed disks.
     examples:
-        - name: Convert a VM with unmanaged disks to use managed disks.
-          text: az vm convert -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Convert all VMs with unmanaged disks in a resource group to use managed disks.', 'vm convert'))
 
@@ -366,8 +350,6 @@ helps['vm user delete'] = """
     type: command
     short-summary: Delete a user account from a VM.
     examples:
-        - name: Delete a user account.
-          text: az vm user delete -u username -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Delete a user on all VMs in a resource group.', 'az vm user delete -u username'))
 
@@ -377,8 +359,6 @@ helps['vm user reset-ssh'] = """
     long-summary: >
         The extension will restart the SSH service, open the SSH port on your VM, and reset the SSH configuration to default values. The user account (name, password, and SSH keys) are not changed.
     examples:
-        - name: Reset the SSH configuration.
-          text: az vm user reset-ssh -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format("Reset the SSH server on all VMs in a resource group.", 'vm user reset-ssh'))
 
@@ -572,18 +552,12 @@ helps['vm unmanaged-disk attach'] = """
 helps['vm unmanaged-disk detach'] = """
     type: command
     short-summary: Detatch an unmanaged disk from a VM.
-    examples:
-        - name: Detach a data disk from a VM.
-          text: >
-            az vm unmanaged-disk detach -g MyResourceGroup --vm-name MyVm -n disk_name
 """
 
 helps['vm unmanaged-disk list'] = """
     type: command
     short-summary: List unamanaged disks of a VM.
     examples:
-        - name: List the unmanaged disks attached to a VM.
-          text: az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm
         - name: List unamanaged disks with IDs containing the string "data_disk".
           text: >
             az vm unmanaged-disk list --ids \\
@@ -593,10 +567,6 @@ helps['vm unmanaged-disk list'] = """
 helps['vm disk detach'] = """
     type: command
     short-summary: Detatch a managed disk from a VM.
-    examples:
-        - name: Detach a data disk from a VM.
-          text: >
-            az vm disk detach -g MyResourceGroup --vm-name MyVm -n disk_name
 """
 
 helps['vm disk attach'] = """
@@ -647,9 +617,6 @@ helps['vm extension'] = """
 helps['vm extension list'] = """
     type: command
     short-summary:  List the extensions attached to a VM.
-    examples:
-        - name: List attached extensions to a named VM.
-          text: az vm extension list -g MyResourceGroup --vm-name MyVm
         - name: List attached extensions with IDs containing the string "MyExtension".
           text: >
             az vm extension list --ids \\
@@ -660,8 +627,6 @@ helps['vm extension delete'] = """
     type: command
     short-summary: Remove an extension attached to a VM.
     examples:
-        - name: Use a VM name and extension to delete an extension from a VM.
-          text: az vm extension delete -g MyResourceGroup --vm-name MyVm -n extension_name
         - name: Delete extensions with IDs containing the string "MyExtension" from a VM.
           text: >
             az vm extension delete --ids \\
@@ -671,9 +636,6 @@ helps['vm extension delete'] = """
 helps['vm extension show'] = """
     type: command
     short-summary: Display information about extensions attached to a VM.
-    examples:
-        - name: Use VM name and extension name to show the extensions attached to a VM.
-          text: az vm extension show -g MyResourceGroup --vm-name MyVm -n extension_name
 """
 
 helps['vm extension image'] = """
@@ -771,19 +733,12 @@ helps['vm image list'] = """
 helps['vm image list-offers'] = """
     type: command
     short-summary: List the VM image offers available in the Azure Marketplace.
-    examples:
-        - name: List all offers from Microsoft in the West US region.
-          text: az vm image list-offers -l westus -p Microsoft
-        - name: List all offers from OpenLocic in the West US region.
-          text: az vm image list-offers -l westus -p OpenLogic
 """
 
 helps['vm image list-publishers'] = """
     type: command
     short-summary: List the VM image publishers available in the Azure Marketplace.
     examples:
-        - name: List all publishers in the West US region.
-          text: az vm image list-publishers -l westus
         - name: List all publishers with names starting with "Open" in westus.
           text: az vm image list-publishers -l westus --query "[?starts_with(name, 'Open')]"
 """
@@ -818,33 +773,21 @@ helps['vm nic'] = """
 helps['vm nic list'] = """
     type: command
     short-summary: List the NICs available on a VM.
-    examples:
-        - name: List all of the NICs on a VM.
-          text: az vm nic list -g MyResourceGroup --vm-name MyVm
 """
 
 helps['vm nic add'] = """
     type: command
     short-summary: Add existing NICs to a VM.
-    examples:
-        - name: Add two NICs to a VM.
-          text: az vm nic add -g MyResourceGroup --vm-name MyVm --nics nic_name1 nic_name2
 """
 
 helps['vm nic remove'] = """
     type: command
     short-summary: Remove NICs from a VM.
-    examples:
-        - name: Remove two NICs from a VM.
-          text: az vm nic remove -g MyResourceGroup --vm-name MyVm --nics nic_name1 nic_name2
 """
 
 helps['vm nic show'] = """
     type: command
     short-summary: Display information for a NIC attached to a VM.
-    examples:
-        - name: Show details of a NIC on a VM.
-          text: az vm nic show -g MyResourceGroup --vm-name MyVm --nic nic_name1
 """
 
 helps['vm nic set'] = """
@@ -955,7 +898,7 @@ helps['vmss encryption enable'] = """
     type: command
     short-summary: Encrypt a VMSS with managed disks.
     examples:
-        - name: encrypt a VM scale set using a key vault in the same resource group
+        - name: Encrypt a VM scale set using a key vault in the same resource group.
           text: >
             az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
 """
@@ -963,10 +906,6 @@ helps['vmss encryption enable'] = """
 helps['vmss encryption disable'] = """
     type: command
     short-summary: Disable the encryption on a VMSS with managed disks.
-    examples:
-        - name: disable encryption a VMSS
-          text: >
-            az vmss encryption disable -g MyResourceGroup -n MyVm
 """
 
 helps['vmss encryption show'] = """
@@ -1020,8 +959,6 @@ helps['vm get-instance-view'] = """
     type: command
     short-summary: Get instance information about a VM.
     examples:
-        - name: Use a resource group and name to get instance view information of a VM.
-          text: az vm get-instance-view -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Get instance views for all VMs in a resource group.', 'vm get-instance-view'))
 
@@ -1029,46 +966,29 @@ helps['vm list'] = """
     type: command
     short-summary: List details of Virtual Machines.
     long-summary: 'For more information on querying information about Virtual Machines, see https://docs.microsoft.com/en-us/cli/azure/query-az-cli2'
-    examples:
-        - name: List all VMs.
-          text: az vm list
-        - name: List all VMs by resource group.
-          text: az vm list -g MyResourceGroup
-        - name: List all VMs by resource group with details.
-          text: az vm list -g MyResourceGroup -d
 """
 
 helps['vm list-ip-addresses'] = """
     type: command
     short-summary: List IP addresses associated with a VM.
     examples:
-        - name: Get the IP addresses for a VM.
-          text: az vm list-ip-addresses -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Get IP addresses for all VMs in a resource group.', 'vm list-ip-addresses'))
 
 helps['vm list-sizes'] = """
     type: command
     short-summary: List available sizes for VMs.
-    examples:
-        - name: List the available VM sizes in the West US region.
-          text: az vm list-sizes -l westus
 """
 
 helps['vm list-usage'] = """
     type: command
     short-summary: List available usage resources for VMs.
-    examples:
-        - name: Get the compute resource usage for the West US region.
-          text: az vm list-usage -l westus
 """
 
 helps['vm list-vm-resize-options'] = """
     type: command
     short-summary: List available resizing options for VMs.
     examples:
-        - name: List all available VM sizes for resizing.
-          text: az vm list-vm-resize-options -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('List available sizes for all VMs in a resource group.', 'vm list-vm-resize-options'))
 
@@ -1076,9 +996,6 @@ helps['vm list-skus'] = """
     type: command
     short-summary: Get details for compute-related resource SKUs.
     long-summary: This command incorporates subscription level restriction, offering the most accurate information.
-    examples:
-        - name: List all SKUs in the West US region.
-          text: az vm list-skus -l westus
 """
 
 helps['vm open-port'] = """
@@ -1102,8 +1019,6 @@ helps['vm redeploy'] = """
     type: command
     short-summary: Redeploy an existing VM.
     examples:
-        - name: Redeploy a VM.
-          text: az vm redeploy -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Redeploy all VMs in a resource group.', 'vm redeploy'))
 
@@ -1117,8 +1032,6 @@ helps['vm resize'] = """
           populator-commands:
           - az vm list-vm-resize-options
     examples:
-        - name: Resize a VM.
-          text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2
 {0}
 """.format(vm_ids_example.format('Resize all VMs in a resource group.', 'vm resize --size Standard_DS3_v2'))
 
@@ -1126,8 +1039,6 @@ helps['vm restart'] = """
     type: command
     short-summary: Restart VMs.
     examples:
-        - name: Restart a VM.
-          text: az vm restart -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Restart all VMs in a resource group.', 'vm restart'))
 
@@ -1135,8 +1046,6 @@ helps['vm show'] = """
     type: command
     short-summary: Get the details of a VM.
     examples:
-        - name: Show information about a VM.
-          text: az vm show -g MyResourceGroup -n MyVm -d
 {0}
 """.format(vm_ids_example.format('Get the details for all VMs in a resource group.', 'vm show -d'))
 
@@ -1144,8 +1053,6 @@ helps['vm start'] = """
     type: command
     short-summary: Start a stopped VM.
     examples:
-        - name: Start a stopped VM.
-          text: az vm start -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Start all VMs in a resource group.', 'vm start'))
 
@@ -1153,8 +1060,6 @@ helps['vm stop'] = """
     type: command
     short-summary: Stop a running VM.
     examples:
-        - name: Stop a running VM.
-          text: az vm stop -g MyResourceGroup -n MyVm
 {0}
 """.format(vm_ids_example.format('Stop all VMs in a resource group.', 'vm stop'))
 
@@ -1191,11 +1096,11 @@ helps['vm run-command'] = """
 
 helps['vm run-command invoke'] = """
     type: command
-    short-summary: run command on a vm
+    short-summary: Run command on a VM
     examples:
-        - name: install nginx on a vm
+        - name: Install nginx on a VM running Ubuntu.
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
-        - name: invoke command with parameters
+        - name: Invoke a command with parameters.
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
 """
 

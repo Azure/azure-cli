@@ -42,26 +42,17 @@ helps['storage blob upload'] = """
         - name: --tier
           short-summary: A page blob tier value to set the blob to. The tier correlates to the size of the blob and
                          number of allowed IOPS. This is only applicable to page blobs on premium storage accounts.
-    examples:
-        - name: Upload to a blob.
-          text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
 """
 
 helps['storage file upload'] = """
     type: command
     short-summary: Upload a file to a share that uses the SMB 3.0 protocol.
     long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
-    examples:
-        - name: Upload to a local file to a share.
-          text: az storage file upload -s MyShare -source /path/to/file
 """
 
 helps['storage blob show'] = """
     type: command
     short-summary: Get the details of a blob.
-    examples:
-        - name: Show all properties of a blob.
-          text: az storage blob show -c MyContainer -n MyBlob
 """
 
 helps['storage blob delete'] = """
@@ -70,9 +61,6 @@ helps['storage blob delete'] = """
     long-summary: >
         The blob is marked for later deletion during garbage collection.  In order to delete a blob, all of its snapshots must also be deleted.
         Both can be removed at the same time.
-    examples:
-        - name: Delete a blob.
-          text: az storage blob delete -c MyContainer -n MyBlob
 """
 
 helps['storage account create'] = """
@@ -93,8 +81,6 @@ helps['storage container create'] = """
     type: command
     short-summary: Create a container in a storage account.
     examples:
-        - name: Create a storage container in a storage account.
-          text: az storage container create -n MyStorageContainer
         - name: Create a storage container in a storage account and return an error if the container already exists.
           text: az storage container create -n MyStorageContainer --fail-on-exist
 """
@@ -102,11 +88,6 @@ helps['storage container create'] = """
 helps['storage account list'] = """
     type: command
     short-summary: List storage accounts.
-    examples:
-        - name: List all storage accounts in a subscription.
-          text: az storage account list
-        - name: List all storage accounts in a resource group.
-          text: az storage account list -g MyResourceGroup
 """
 
 helps['storage account show'] = """
@@ -127,9 +108,6 @@ helps['storage account show-usage'] = """
 helps['storage blob list'] = """
     type: command
     short-summary: List storage blobs in a container.
-    examples:
-        - name: List all storage blobs in a container.
-          text: az storage blob list -c MyContainer
 """
 
 helps['storage account delete'] = """
@@ -138,16 +116,11 @@ helps['storage account delete'] = """
     examples:
         - name: Delete a storage account using a resource ID.
           text: az storage account delete --ids /subscriptions/{SubID}/resourceGroups/{MyResourceGroup}/providers/Microsoft.Storage/storageAccounts/{MyStorageAccount}
-        - name: Delete a storage account using an account name and resource group.
-          text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account show-connection-string'] = """
     type: command
     short-summary: Get the connection string for a storage account.
-    examples:
-        - name: Get a connection string for a storage account.
-          text: az storage account show-connection-string -g MyResourceGroup -n MyStorageAccount
 """
 
 helps['storage'] = """
@@ -173,9 +146,6 @@ helps['storage account keys'] = """
 helps['storage account keys list'] = """
     type: command
     short-summary: List the primary and secondary keys for a storage account.
-    examples:
-        - name: List the primary and secondary keys for a storage account.
-          text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
 """
 
 helps['storage blob'] = """

@@ -153,21 +153,12 @@ helps["sf cluster setting remove"] = """
 helps["sf cluster reliability update"] = """
     type: command
     short-summary: Update the reliability tier for the primary node in a cluster.
-    examples:
-        - name: Change the cluster reliability level to 'Silver'.
-          text: >
-            az sf cluster reliability update -g group-name -n cluster1 --reliability-level Silver
 
 """
 
 helps["sf cluster durability update"] = """
     type: command
     short-summary: Update the durability tier or VM SKU of a node type in the cluster.
-    examples:
-        - name: Change the cluster durability level to 'Silver'.
-          text: >
-            az sf cluster durability update -g group-name -n cluster1 --durability-level Silver
-
 """
 
 helps["sf cluster node-type add"] = """

@@ -35,12 +35,6 @@ helps['ad sp create-for-rbac'] = """
         - name: --role
           short-summary: Role of the service principal.
     examples:
-        - name: Create with a default role assignment.
-          text: >
-            az ad sp create-for-rbac
-        - name: Create using a custom name, and with a default assignment.
-          text: >
-            az ad sp create-for-rbac -n "MyApp"
         - name: Create without a default assignment.
           text: >
             az ad sp create-for-rbac --skip-assignment
@@ -132,9 +126,6 @@ helps['role assignment'] = """
 helps['role assignment create'] = """
     type: command
     short-summary: Create a new role assignment for a user, group, or service principal.
-    examples:
-        - name: Create role assignment for an assignee.
-          text: az role assignment create --assignee sp_name --role a_role
 """
 helps['role assignment delete'] = """
     type: command
