@@ -9,8 +9,8 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
-import binascii
-import os
+from binascii import hexlify
+from os import urandom
 import OpenSSL.crypto
 from msrestazure.azure_exceptions import CloudError
 
@@ -761,7 +761,7 @@ def show_backup_configuration(resource_group_name, webapp_name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, webapp_name,
                                        'get_backup_configuration', slot)
-    except:
+    except Exception:  # pylint: disable=broad-except
         raise CLIError('Backup configuration not found')
 
 
@@ -1453,7 +1453,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
             functionapp_def.kind = 'functionapp,linux'
             site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
             site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
-                                                          str(binascii.hexlify(os.urandom(32)).decode()).upper()))
+                                                          str(hexlify(urandom(32)).decode()).upper()))
             if deployment_container_image_name:
                 site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
                                                               deployment_container_image_name))
