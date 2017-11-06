@@ -5,7 +5,6 @@
 
 # pylint: disable=line-too-long
 from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.sdk.util import ParametersContext
 
 register_cli_argument('reservations reservation update', 'applied_scope_type', options_list=('--applied-scope-type', '-t'), required=True)
 register_cli_argument('reservations reservation update', 'applied_scopes', options_list=('--applied-scopes', '-s'))
