@@ -52,16 +52,49 @@ def _get_deserializer():
     return Deserializer(client_models)
 
 
-def update_cluster_create_parameters_with_env_variables(params):
+def get_storage_account_key(account_name, account_key):
+    """Returns account key for the given storage account.
+
+    :param str account_name: storage account name.
+    :param str or None account_key: account key provide as command line argument.
+    """
+    if account_key:
+        return account_key
+    from azure.mgmt.storage import StorageManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    storage_client = get_mgmt_service_client(StorageManagementClient)
+    account = [a.id for a in list(storage_client.storage_accounts.list()) if a.name == account_name]
+    if not account:
+        raise CLIError('Cannot find "{0}" storage account.'.format(account_name))
+    resource_group = account[0].split('/')[4]
+    keys_list_result = storage_client.storage_accounts.list_keys(resource_group, account_name)
+    if not keys_list_result or not keys_list_result.keys:
+        raise CLIError('Cannot find a key for "{0}" storage account.'.format(account_name))
+    return keys_list_result.keys[0].value
+
+
+def get_effective_storage_account_name_and_key(account_name, account_key):
+    """Returns storage account name and key to be used.
+
+    :param str or None account_name: storage account name provided as command line argument.
+    :param str or None account_key: storage account key provided as command line argument.
+    """
+    if account_name:
+        return account_name, get_storage_account_key(account_name, account_key)
+    return (az_config.get('batchai', 'storage_account', fallback=AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER),
+            az_config.get('batchai', 'storage_key', fallback=AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER))
+
+
+def update_cluster_create_parameters_with_env_variables(params, account_name=None, account_key=None):
     """Replaces placeholders with information from the environment variables.
 
     Currently we support replacing of storage account name and key in mount volumes.
 
     :param models.ClusterCreateParameters params: cluster creation parameters to patch.
+    :param str or None account_name: name of the storage account provided as command line argument.
+    :param str or None account_key: storage account key provided as command line argument.
     """
-    storage_account_name = az_config.get('batchai', 'storage_account',
-                                         fallback=AZURE_BATCHAI_STORAGE_ACCOUNT_PLACEHOLDER)
-    storage_account_key = az_config.get('batchai', 'storage_key', fallback=AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER)
+    storage_account_name, storage_account_key = get_effective_storage_account_name_and_key(account_name, account_key)
     # Patch parameters of azure file share.
     if params.node_setup and \
             params.node_setup.mount_volumes and \
@@ -261,14 +294,15 @@ def update_nodes_information(params, image, vm_size, min_nodes, max_nodes):
 def create_cluster(client, resource_group, cluster_name, json_file=None, location=None, user_name=None,
                    ssh_key=None, password=None, image='UbuntuLTS', vm_size=None, min_nodes=0, max_nodes=None,
                    nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
-                   afs_mount_path='afs', container_name=None, container_mount_path='bfs', raw=False):
+                   afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
+                   account_key=None, raw=False):
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             params = _get_deserializer()('ClusterCreateParameters', json_obj)
     else:
         params = models.ClusterCreateParameters(None, None, None)
-    update_cluster_create_parameters_with_env_variables(params)
+    update_cluster_create_parameters_with_env_variables(params, account_name, account_key)
     update_user_account_settings(params, user_name, ssh_key, password)
     if location:
         params.location = location
