@@ -28,33 +28,33 @@ class AzureReservationsTests(ScenarioTest):
     def test_get_applied_reservation_order_ids(self):
         result = self.cmd('az reservations reservation-order-id list --subscription-id 00000000-0000-0000-0000-000000000000').get_output_in_json()
         for order_id in result['reservationOrderIds']['value']:
-            self.assertTrue('/providers/Microsoft.Capacity/reservationorders/' in order_id)
+            self.assertIn('/providers/Microsoft.Capacity/reservationorders/', order_id)
 
     def test_list_reservation_order(self):
         reservation_order_list = self.cmd('reservations reservation-order list').get_output_in_json()
         self.assertIsNotNone(reservation_order_list)
         for order in reservation_order_list:
             self._validate_reservation_order(order)
-            self.assertTrue('/providers/microsoft.capacity/reservationOrders/' in order['id'])
-            self.assertTrue(order['etag'] > 0)
-            self.assertTrue(len(order['reservationsProperty']) > 0)
+            self.assertIn('/providers/microsoft.capacity/reservationOrders/', order['id'])
+            self.assertGreater(order['etag'], 0)
+            self.assertGreater(len(order['reservationsProperty']), 0)
 
     def test_get_reservation_order(self):
         reservation_order_id = "86d9870a-bf1e-4635-94c8-b0f08932bc3a"
         command = 'reservations reservation-order show --reservation-order-id {}'.format(reservation_order_id)
         reservation_order = self.cmd(command).get_output_in_json()
         self._validate_reservation_order(reservation_order)
-        self.assertTrue('/providers/microsoft.capacity/reservationOrders/' in reservation_order['id'])
-        self.assertTrue(reservation_order['etag'] > 0)
-        self.assertTrue(len(reservation_order['reservationsProperty']) > 0)
+        self.assertIn('/providers/microsoft.capacity/reservationOrders/', reservation_order['id'])
+        self.assertGreater(reservation_order['etag'], 0)
+        self.assertGreater(len(reservation_order['reservationsProperty']), 0)
 
     def test_list_reservation(self):
         reservation_order_id = "86d9870a-bf1e-4635-94c8-b0f08932bc3a"
         reservation_list = self.cmd('reservations reservation list --reservation-order-id {}'.format(reservation_order_id)).get_output_in_json()
         self.assertIsNotNone(reservation_list)
         for reservation in reservation_list:
-            self.assertTrue(reservation_order_id in reservation['name'])
-            self.assertTrue(reservation['etag'] > 0)
+            self.assertIn(reservation_order_id, reservation['name'])
+            self.assertGreater(reservation['etag'], 0)
             self.assertEqual('Microsoft.Capacity/reservationOrders/reservations', reservation['type'])
 
     def test_get_reservation(self):
@@ -62,9 +62,9 @@ class AzureReservationsTests(ScenarioTest):
         reservation_id = "0532ae1c-3c80-48a9-ae18-19cc2b6f4791"
         get_command = 'reservations reservation show  --reservation-order-id {} --reservation-id {}'.format(reservation_order_id, reservation_id)
         reservation = self.cmd(get_command).get_output_in_json()
-        self.assertTrue(reservation_order_id in reservation['name'])
-        self.assertTrue(reservation['etag'] > 0)
-        self.assertTrue(reservation['properties']['quantity'] > 0)
+        self.assertIn(reservation_order_id, reservation['name'])
+        self.assertGreater(reservation['etag'], 0)
+        self.assertGreater(reservation['properties']['quantity'], 0)
         self.assertEqual('Microsoft.Capacity/reservationOrders/reservations', reservation['type'])
 
     def test_list_reservation_history(self):
@@ -72,18 +72,18 @@ class AzureReservationsTests(ScenarioTest):
         reservation_id = "0532ae1c-3c80-48a9-ae18-19cc2b6f4791"
         command = 'reservations reservation list-history --reservation-order-id {} --reservation-id {}'.format(reservation_order_id, reservation_id)
         history = self.cmd(command).get_output_in_json()
-        self.assertTrue(len(history) > 0)
+        self.assertGreater(len(history), 0)
         for entry in history:
-            self.assertTrue(entry['etag'] > 0)
+            self.assertGreater(entry['etag'], 0)
             name_format = '{}/{}'.format(reservation_order_id, reservation_id)
-            self.assertTrue(name_format in entry['name'])
+            self.assertIn(name_format, entry['name'])
 
     def test_get_catalog(self):
         catalog = self.cmd('az reservations catalog show --subscription-id 00000000-0000-0000-0000-000000000000').get_output_in_json()
-        self.assertTrue(len(catalog) > 0)
+        self.assertGreater(len(catalog), 0)
         for entry in catalog:
-            self.assertTrue(len(entry['terms']) > 0)
-            self.assertTrue(len(entry['locations']) > 0)
+            self.assertGreater(len(entry['terms']), 0)
+            self.assertGreater(len(entry['locations']), 0)
             self.assertIsNotNone(entry['resourceType'])
             self.assertIsNotNone(entry['name'])
             self.assertIsNotNone(entry['size'])

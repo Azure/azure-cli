@@ -24,8 +24,7 @@ def create_resource_id(reservation_order_id, reservation_id):
 
 def cli_reservation_split_reservation(client, reservation_order_id, reservation_id, quantity_1, quantity_2):
     split = SplitRequest([quantity_1, quantity_2], create_resource_id(reservation_order_id, reservation_id))
-    x = client.split(reservation_order_id, split)
-    return x
+    return client.split(reservation_order_id, split)
 
 
 def cli_reservation_merge_reservation(client, reservation_order_id, reservation_id_1, reservation_id_2):
