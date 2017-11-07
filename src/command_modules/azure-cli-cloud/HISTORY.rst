@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.10
+++++++
+* `az cloud register` & `az cloud update`: Prevent users from registering clouds that have missing required endpoints
+
 2.0.9
 +++++
 * minor fixes
