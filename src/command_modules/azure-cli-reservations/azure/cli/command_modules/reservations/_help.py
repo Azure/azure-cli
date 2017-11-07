@@ -11,6 +11,26 @@ helps['reservations'] = """
     short-summary: Manage Azure Reservations.
 """
 
+helps['reservations catalog'] = """
+    type: group
+    short-summary: See catalog of available reservations
+"""
+
+helps['reservations reservation'] = """
+    type: group
+    short-summary: Manage reservation entities
+"""
+
+helps['reservations reservation-order'] = """
+    type: group
+    short-summary: Manage reservation order, which is container for reservations
+"""
+
+helps['reservations reservation-order-id'] = """
+    type: group
+    short-summary: See reservation order ids that are applied to subscription
+"""
+
 helps['reservations reservation-order list'] = """
     type: command
     short-summary: Get all reservation orders

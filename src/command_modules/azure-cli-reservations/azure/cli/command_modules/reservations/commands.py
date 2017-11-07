@@ -14,6 +14,7 @@ reservation_order_path = 'azure.mgmt.reservations.operations.reservation_order_o
 custom_path = 'azure.cli.command_modules.reservations.custom#'
 reservation_client_path = 'azure.mgmt.reservations.azure_reservation_api#'
 
+
 def reservation_command(*args, **kwargs):
     cli_command(*args, exception_handler=reservations_exception_handler, **kwargs)
 

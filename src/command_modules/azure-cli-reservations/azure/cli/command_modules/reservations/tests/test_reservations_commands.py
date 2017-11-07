@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest
 
+
 class AzureReservationsTests(ScenarioTest):
 
     def _validate_reservation_order(self, reservation_order):

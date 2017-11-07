@@ -9,8 +9,10 @@ def cf_reservations(**_):
     from azure.mgmt.reservations.azure_reservation_api import AzureReservationAPI
     return get_mgmt_service_client(AzureReservationAPI, subscription_bound=False)
 
+
 def reservation_mgmt_client_factory(kwargs):
     return cf_reservations(**kwargs).reservation
+
 
 def reservation_order_mgmt_client_factory(kwargs):
     return cf_reservations(**kwargs).reservation_order
