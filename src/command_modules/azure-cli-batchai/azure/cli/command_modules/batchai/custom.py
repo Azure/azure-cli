@@ -442,7 +442,7 @@ def create_file_server(client, resource_group, file_server_name, json_file=None,
     else:
         parameters = models.FileServerCreateParameters(None, None, None, None)
 
-    update_user_account_settings(parameters, user_name, ssh_key, password)
+    parameters = update_user_account_settings(parameters, user_name, ssh_key, password)
     if location:
         parameters.location = location
     if not parameters.location:
