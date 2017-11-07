@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from os.path import exists, join
+import base64
 from OpenSSL import crypto
 
 
@@ -37,3 +38,15 @@ def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
         'privateKey': key_dump,
         'thumbprint': thumbprint
     }
+
+
+def open_certificate(certificate_path):
+    certificate = ""
+    if certificate_path.endswith('.pem') or certificate_path.endswith('.cer'):
+        with open(certificate_path, "rb") as cert_file:
+            certificate = cert_file.read()
+            try:
+                certificate = certificate.decode("utf-8")
+            except UnicodeError:
+                certificate = base64.b64encode(certificate).decode("utf-8")
+    return certificate

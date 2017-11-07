@@ -31,6 +31,22 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                     raise e
             return None
 
+    # iot hub certificate commands
+    cli_command(__name__, 'iot hub certificate list', custom_path.format('iot_hub_certificate_list'),
+                factory)
+    cli_command(__name__, 'iot hub certificate show', custom_path.format('iot_hub_certificate_get'),
+                factory)
+    cli_command(__name__, 'iot hub certificate create', custom_path.format('iot_hub_certificate_create'),
+                factory)
+    cli_command(__name__, 'iot hub certificate delete', custom_path.format('iot_hub_certificate_delete'),
+                factory)
+    cli_command(__name__, 'iot hub certificate generate-verification-code',
+                custom_path.format('iot_hub_certificate_gen_code'), factory)
+    cli_command(__name__, 'iot hub certificate verify', custom_path.format('iot_hub_certificate_verify'),
+                factory)
+    cli_command(__name__, 'iot hub certificate update', custom_path.format('iot_hub_certificate_update'),
+                factory)
+
     # iot hub commands
     cli_command(__name__, 'iot hub create', custom_path.format('iot_hub_create'), factory)
     cli_command(__name__, 'iot hub list', custom_path.format('iot_hub_list'), factory)

@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import (location_type, enum_choice_list,
+from argcomplete.completers import FilesCompleter
+from azure.cli.core.commands.parameters import (location_type, enum_choice_list, file_type,
                                                 get_resource_name_completion_list, CliArgumentType)
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
@@ -23,15 +24,29 @@ hub_name_type = CliArgumentType(
     completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
     help='IoT Hub name.')
 
-register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'),
-                      id_part='name')
-for subgroup in ['consumer-group', 'policy', 'job']:
+etag_type = CliArgumentType(
+    None, help='Entity Tag (etag) of the object.')
+
+
+register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'), id_part='name')
+
+register_cli_argument('iot hub', 'etag', etag_type, options_list=('--etag', '-e'))
+
+for subgroup in ['consumer-group', 'policy', 'job', 'certificate']:
     register_cli_argument('iot hub {}'.format(subgroup), 'hub_name', options_list=('--hub-name',))
 
 register_cli_argument('iot device', 'hub_name', hub_name_type)
 
 register_cli_argument('iot', 'device_id', options_list=('--device-id', '-d'), help='Device Id.',
                       completer=get_device_id_completion_list)
+
+# Arguments for 'iot hub certificate' group
+register_cli_argument('iot hub certificate', 'certificate_path', options_list=('--path', '-p'), type=file_type,
+                      completer=FilesCompleter([".cer", ".pem"]),
+                      help='The path to the file containing the certificate.')
+
+register_cli_argument('iot hub certificate', 'certificate_name', options_list=('--name', '-n'),
+                      help='A friendly name for the certificate.')
 
 # Arguments for 'iot hub consumer-group' group
 register_cli_argument('iot hub consumer-group', 'consumer_group_name',
