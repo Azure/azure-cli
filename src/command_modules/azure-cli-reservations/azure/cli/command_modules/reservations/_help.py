@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.help_files import helps
-# pylint: disable=line-too-long
 
 helps['reservations'] = """
     type: group
@@ -45,6 +44,7 @@ helps['reservations reservation-order show'] = """
     parameters:
         - name: --reservation-order-id
           type: string
+          short-summary: Id of reservation order to look up
 """
 
 helps['reservations reservation-order-id list'] = """
@@ -55,6 +55,7 @@ helps['reservations reservation-order-id list'] = """
     parameters:
         - name: --subscription-id
           type: string
+          short-summary: Id of the subscription to look up applied reservations
 """
 
 helps['reservations catalog show'] = """
@@ -65,6 +66,7 @@ helps['reservations catalog show'] = """
     parameters:
         - name: --subscription-id
           type: string
+          short-summary: Id of the subscription to get the catalog for
 """
 
 helps['reservations reservation list'] = """
@@ -75,6 +77,7 @@ helps['reservations reservation list'] = """
     parameters:
         - name: --reservation-order-id
           type: string
+          short-summary: Id of container reservation order
 """
 
 helps['reservations reservation show'] = """
@@ -83,8 +86,10 @@ helps['reservations reservation show'] = """
     parameters:
         - name: --reservation-order-id
           type: string
+          short-summary: Order id of reservation to look up
         - name: --reservation-id
           type: string
+          short-summary: Reservation id of reservation to look up
 """
 
 helps['reservations reservation update'] = """
@@ -93,8 +98,10 @@ helps['reservations reservation update'] = """
     parameters:
         - name: --reservation-order-id
           type: string
+          short-summary: Order id of reservation to update
         - name: --reservation-id
           type: string
+          short-summary: Reservation id of reservation to update
         - name: --applied-scope-type -t
           type: string
           short-summary: 'Type is either Single or Shared'
@@ -109,12 +116,16 @@ helps['reservations reservation split'] = """
     parameters:
         - name: --reservation-order-id
           type: string
+          short-summary: Order id of original reservation
         - name: --reservation-id
           type: string
+          short-summary: Reservation id of original reservation
         - name: --quantity-1 -1
           type: int
+          short-summary: Quantity of the first reservation that will be created from split operation
         - name: --quantity-2 -2
           type: int
+          short-summary: Quantity of the second reservation that will be created from split operation
 """
 
 helps['reservations reservation merge'] = """
@@ -123,10 +134,13 @@ helps['reservations reservation merge'] = """
     parameters:
         - name: --reservation-order-id
           type: string
+          short-summary: Order id of original reservation
         - name: --reservation-id-1 -1
           type: string
+          short-summary: Id of the first reservation to merge
         - name: --reservation-id-2 -2
           type: string
+          short-summary: Id of the second reservation to merge
 """
 
 helps['reservations reservation list-history'] = """
@@ -135,8 +149,8 @@ helps['reservations reservation list-history'] = """
     parameters:
         - name: --reservation-order-id
           type: string
-        - name: --reservation-id-1 -1
+          short-summary: Order id of the reservation
+        - name: --reservation-id
           type: string
-        - name: --reservation-id-2 -2
-          type: string
+          short-summary: Reservation id of the reservation
 """

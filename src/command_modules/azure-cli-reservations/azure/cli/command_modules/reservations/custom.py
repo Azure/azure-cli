@@ -10,7 +10,7 @@ from azure.mgmt.reservations.models.merge_request import MergeRequest
 
 def cli_reservation_update_reservation(client, reservation_order_id, reservation_id,
                                        applied_scope_type, applied_scopes=None):
-    if applied_scopes is not None:
+    if applied_scopes:
         patch = Patch(applied_scope_type, [applied_scopes])
     else:
         patch = Patch(applied_scope_type)
