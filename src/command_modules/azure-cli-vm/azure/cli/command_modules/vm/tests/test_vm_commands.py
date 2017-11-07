@@ -1532,14 +1532,14 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
     @ResourceGroupPreparer()
     def test_vmss_create_none_options(self, resource_group):
         vmss_name = 'vmss1'
-
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
-                 ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
+                 ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3} --vm-sku Basic_A1'
                  .format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
         self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), [
-            JMESPathCheckV2('availabilitySet', None),
             JMESPathCheckV2('tags', {}),
-            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None),
+            JMESPathCheckV2('sku.name', 'Basic_A1'),
+            JMESPathCheckV2('sku.tier', 'Basic')
         ])
         self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(resource_group, vmss_name),
                  checks=JMESPathCheckV2('tags.test', 'success'))
