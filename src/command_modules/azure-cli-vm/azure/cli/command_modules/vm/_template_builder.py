@@ -848,7 +848,6 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
-            'tier': 'Standard',
             'capacity': instance_count
         },
         'properties': vmss_properties

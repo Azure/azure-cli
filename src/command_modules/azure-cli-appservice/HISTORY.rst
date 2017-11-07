@@ -10,6 +10,7 @@ Release History
 * webapp: removing the 'storage' option from --web-server-logging since this is not working
 * `deployment user set`: logged more informative error messages.
 * functionapp: add support for creating Linux function apps
+* appservice: fix list-locations
 * webapp: add --number-of-lines to 'az webapp log tail' currently only supported for linux
 
 0.1.19

@@ -1532,14 +1532,14 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
     @ResourceGroupPreparer()
     def test_vmss_create_none_options(self, resource_group):
         vmss_name = 'vmss1'
-
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
-                 ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
+                 ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3} --vm-sku Basic_A1'
                  .format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
         self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), [
-            JMESPathCheckV2('availabilitySet', None),
             JMESPathCheckV2('tags', {}),
-            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None),
+            JMESPathCheckV2('sku.name', 'Basic_A1'),
+            JMESPathCheckV2('sku.tier', 'Basic')
         ])
         self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(resource_group, vmss_name),
                  checks=JMESPathCheckV2('tags.test', 'success'))
@@ -2007,11 +2007,9 @@ class MSIScenarioTest(ScenarioTest):
 
         # Fixing the role assignment guids so test can run under playback. The assignments will
         # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C1A0'),
-                 uuid.UUID('C1E7FC22-CB48-407E-BE6A-19F0F1ED9C81'),
-                 uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
+        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
                  uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
-        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
             # create a linux vm with default configuration
             self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vm1, default_scope), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),

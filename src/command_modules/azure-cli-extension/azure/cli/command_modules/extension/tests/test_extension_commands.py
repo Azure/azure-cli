@@ -12,7 +12,7 @@ import mock
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.extension.custom import (list_extensions, add_extension, show_extension,
                                                         remove_extension, update_extension,
-                                                        list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION)
+                                                        list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION, OUT_KEY_METADATA)
 from azure.cli.command_modules.extension._resolve import NoExtensionCandidatesError
 
 
@@ -30,6 +30,8 @@ def _compute_file_hash(filename):
 MY_EXT_NAME = 'myfirstcliextension'
 MY_EXT_SOURCE = _get_test_data_file('myfirstcliextension-0.0.3+dev-py2.py3-none-any.whl')
 MY_BAD_EXT_SOURCE = _get_test_data_file('notanextension.txt')
+MY_SECOND_EXT_NAME_DASHES = 'my-second-cli-extension'
+MY_SECOND_EXT_SOURCE_DASHES = _get_test_data_file('my_second_cli_extension-0.0.1+dev-py2.py3-none-any.whl')
 
 
 class TestExtensionCommands(unittest.TestCase):
@@ -59,6 +61,18 @@ class TestExtensionCommands(unittest.TestCase):
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_NAME], MY_EXT_NAME)
         remove_extension(MY_EXT_NAME)
+        num_exts = len(list_extensions())
+        self.assertEqual(num_exts, 0)
+
+    def test_add_list_show_remove_extension_with_dashes(self):
+        add_extension(MY_SECOND_EXT_SOURCE_DASHES)
+        actual = list_extensions()
+        self.assertEqual(len(actual), 1)
+        ext = show_extension(MY_SECOND_EXT_NAME_DASHES)
+        self.assertEqual(ext[OUT_KEY_NAME], MY_SECOND_EXT_NAME_DASHES)
+        self.assertIn(OUT_KEY_NAME, ext[OUT_KEY_METADATA], "Unable to get full metadata")
+        self.assertEqual(ext[OUT_KEY_METADATA][OUT_KEY_NAME], MY_SECOND_EXT_NAME_DASHES)
+        remove_extension(MY_SECOND_EXT_NAME_DASHES)
         num_exts = len(list_extensions())
         self.assertEqual(num_exts, 0)
 

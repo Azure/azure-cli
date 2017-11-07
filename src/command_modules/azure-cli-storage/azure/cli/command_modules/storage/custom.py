@@ -40,7 +40,7 @@ def create_storage_account(resource_group_name, account_name, sku=None, location
         'AccessTier',
         'Identity',
         'Encryption',
-        'VirtualNetworkRules',
+        'NetworkRuleSet',
         mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(sku=Sku(sku), kind=Kind(kind), location=location, tags=tags)
@@ -86,7 +86,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
         'AccessTier',
         'Identity',
         'Encryption',
-        'VirtualNetworkRules',
+        'NetworkRuleSet',
         mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -119,7 +119,7 @@ def update_storage_account(instance, sku=None, tags=None, custom_domain=None, us
     if assign_identity:
         params.identity = Identity()
 
-    if NetworkRuleSet and (bypass or default_action):
+    if NetworkRuleSet:
         acl = instance.network_rule_set
         if not acl:
             if bypass and not default_action:

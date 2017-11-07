@@ -92,7 +92,8 @@ def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statement
     logger.debug('Extension source is url? %s', is_url)
     whl_filename = os.path.basename(url_parse_result.path) if is_url else os.path.basename(source)
     parsed_filename = WHEEL_INFO_RE(whl_filename)
-    extension_name = parsed_filename.groupdict().get('name') if parsed_filename else None
+    # Extension names can have - but .whl format changes it to _ (PEP 0427). Undo this.
+    extension_name = parsed_filename.groupdict().get('name').replace('_', '-') if parsed_filename else None
     if not extension_name:
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name):

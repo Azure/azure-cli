@@ -20,7 +20,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -130,6 +130,23 @@ def _list_app(app_types, resource_group_name=None):
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
+
+
+def assign_identity(resource_group_name, name, role='Contributor', scope=None, disable_msi=False):
+    client = web_client_factory()
+
+    def getter():
+        return _generic_site_operation(resource_group_name, name, 'get')
+
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
+        return LongRunningOperation()(poller)
+
+    from azure.cli.core.commands.arm import assign_implict_identity
+    webapp = assign_implict_identity(getter, setter, role, scope)
+    update_app_settings(resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
+    return webapp.identity
 
 
 def get_auth_settings(resource_group_name, name, slot=None):
@@ -908,8 +925,10 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
+    elif tier in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
+    elif tier in ['P1V2', 'P2V2', 'P3V2']:
+        return 'PREMIUMV2'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -1603,7 +1622,13 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
 def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
-    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
+def list_locations(sku, linux_workers_enabled=None):
+    client = web_client_factory()
+    full_sku = _get_sku_name(sku)
+    return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
 def enable_zip_deploy(resource_group_name, name, src, slot=None):

@@ -15,11 +15,11 @@ helps['extension add'] = """
     short-summary: Add an extension.
     examples:
     - name: Add extension by name
-      text: az extension add --name an_extension
+      text: az extension add --name anextension
     - name: Add extension from URL
-      text: az extension add --source https://contoso.com/an_extension-0.0.1-py2.py3-none-any.whl
+      text: az extension add --source https://contoso.com/anextension-0.0.1-py2.py3-none-any.whl
     - name: Add extension from local disk
-      text: az extension add --source ~/an_extension-0.0.1-py2.py3-none-any.whl
+      text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl
 """
 
 helps['extension list'] = """
@@ -34,7 +34,7 @@ helps['extension list-available'] = """
     - name: List all publicly available extensions
       text: az extension list-available
     - name: List details on a particular extension
-      text: az extension list-available --query an_extension
+      text: az extension list-available --query anextension
 """
 
 helps['extension show'] = """

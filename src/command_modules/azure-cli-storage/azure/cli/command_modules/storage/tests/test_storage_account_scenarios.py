@@ -12,7 +12,7 @@ from .storage_test_util import StorageScenarioMixin
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_service_endpoints')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
     @StorageAccountPreparer()
     def test_storage_account_service_endpoints(self, resource_group, storage_account):
 
@@ -22,6 +22,18 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
+        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny'.format(**kwargs), checks=[
+            JMESPathCheck('networkRuleSet.bypass', 'Metrics'),
+            JMESPathCheck('networkRuleSet.defaultAction', 'Deny')
+        ])
+        self.cmd('storage account update -g {rg} -n {acc} --bypass Logging --default-action Allow'.format(**kwargs), checks=[
+            JMESPathCheck('networkRuleSet.bypass', 'Logging'),
+            JMESPathCheck('networkRuleSet.defaultAction', 'Allow')
+        ])
+        self.cmd('storage account update -g {rg} -n {acc} --set networkRuleSet.default_action=deny'.format(**kwargs), checks=[
+            JMESPathCheck('networkRuleSet.bypass', 'Logging'),
+            JMESPathCheck('networkRuleSet.defaultAction', 'Deny')
+        ])
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'.format(**kwargs))
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(**kwargs))
@@ -58,8 +70,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         create_cmd = 'az storage account create -n {} -g {} --sku Standard_LRS'.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('identity', None)])
 
-        updaet_cmd = 'az storage account update -n {} -g {} --assign-identity'.format(name, resource_group)
-        result = self.cmd(updaet_cmd).get_output_in_json()
+        update_cmd = 'az storage account update -n {} -g {} --assign-identity'.format(name, resource_group)
+        result = self.cmd(update_cmd).get_output_in_json()
 
         self.assertIn('identity', result)
         self.assertTrue(result['identity']['principalId'])

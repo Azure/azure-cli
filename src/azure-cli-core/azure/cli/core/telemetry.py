@@ -48,6 +48,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     payload_properties = None
     exceptions = []
     module_correlation = None
+    extension_name = 'None'
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         details = {
@@ -154,6 +155,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'Parameters', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
         self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
+        self.set_custom_properties(result, 'ExtensionName', self.extension_name)
 
         return result
 
@@ -255,10 +257,11 @@ def set_application(application, arg_complete_env_name):
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def set_command_details(command, output_type=None, parameters=None):
+def set_command_details(command, output_type=None, parameters=None, extension_name=None):
     _session.command = command
     _session.output_type = output_type
     _session.parameters = parameters
+    _session.extension_name = extension_name or 'None'
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
