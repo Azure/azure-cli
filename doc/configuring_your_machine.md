@@ -89,7 +89,8 @@ The repo has a launch.json file that will launch the version of Python that is f
 
 ## Running Tests:
 #### Command line
-  The test and style check scripts 
+  Running the `dev_setup.py` file installed the test and style check scripts into the `tools` directory under your
+  `<root clone>` directory and added them into the current virtualenv.
 
 ##### Windows/OSX/Ubuntu:
 
