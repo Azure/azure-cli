@@ -34,32 +34,24 @@ class IotHubCertificateTest(ScenarioTest):
 
         # Create certificate
         self.cmd('iot hub certificate create --hub-name {0} -g {1} -n {2} -p {3}'.format(hub, resource_group, cert_name, CERT_FILE),
-                 checks=[
-                         JMESPathCheck('name', cert_name),
-                         JMESPathCheck('properties.isVerified', False)
-                 ])
+                 checks=[JMESPathCheck('name', cert_name),
+                         JMESPathCheck('properties.isVerified', False)])
 
         # List certificates
         output = self.cmd('iot hub certificate list --hub-name {0} -g {1}'.format(hub, resource_group),
-                          checks=[
-                              JMESPathCheck('length(@)', 1),
-                              JMESPathCheck('value[0].name', cert_name),
-                              JMESPathCheck('value[0].properties.isVerified', False)
-                          ]).get_output_in_json()
+                          checks=[JMESPathCheck('length(@)', 1),
+                                  JMESPathCheck('value[0].name', cert_name),
+                                  JMESPathCheck('value[0].properties.isVerified', False)]).get_output_in_json()
         assert len(output) == 1
 
         # Get certificate
         etag = self.cmd('iot hub certificate show --hub-name {0} -g {1} -n {2}'.format(hub, resource_group, cert_name),
-                        checks=[
-                                JMESPathCheck('name', cert_name),
-                                JMESPathCheck('properties.isVerified', False)
-                        ]).get_output_in_json()['etag']
+                        checks=[JMESPathCheck('name', cert_name),
+                                JMESPathCheck('properties.isVerified', False)]).get_output_in_json()['etag']
 
         # Generate verification code
         output = self.cmd('iot hub certificate generate-verification-code --hub-name {0} -g {1} -n {2} --etag {3}'.format(hub, resource_group, cert_name, etag),
-                          checks=[
-                                  JMESPathCheck('name', cert_name)
-                          ]).get_output_in_json()
+                          checks=[JMESPathCheck('name', cert_name)]).get_output_in_json()
 
         assert 'verificationCode' in output['properties']
 
@@ -70,10 +62,8 @@ class IotHubCertificateTest(ScenarioTest):
 
         # Verify certificate
         etag = self.cmd('iot hub certificate verify --hub-name {0} -g {1} -n {2} -p {3} --etag {4}'.format(hub, resource_group, cert_name, VERIFICATION_FILE, etag),
-                        checks=[
-                            JMESPathCheck('name', cert_name),
-                            JMESPathCheck('properties.isVerified', True)
-                        ]).get_output_in_json()['etag']
+                        checks=[JMESPathCheck('name', cert_name),
+                                JMESPathCheck('properties.isVerified', True)]).get_output_in_json()['etag']
 
         # Delete certificate
         self.cmd('iot hub certificate delete --hub-name {0} -g {1} -n {2} --etag {3}'.format(hub, resource_group, cert_name, etag))
@@ -82,10 +72,8 @@ class IotHubCertificateTest(ScenarioTest):
         hub = self.create_random_name(prefix='iot-hub-for-cert-test', length=48)
 
         self.cmd('iot hub create -n {0} -g {1} --sku S1'.format(hub, resource_group),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', hub),
-                     JMESPathCheck('sku.name', 'S1')
-                 ])
+                 checks=[JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('name', hub),
+                         JMESPathCheck('sku.name', 'S1')])
 
         return hub
