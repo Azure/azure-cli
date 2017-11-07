@@ -223,7 +223,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
         view_in_browser('myRG', 'myweb', logs=True)
         # assert
         webbrowser_mock.assert_called_with('https://haha.com')
-        log_mock.assert_called_with('myRG', 'myweb', None, None)
+        log_mock.assert_called_with('myRG', 'myweb', provider=None, slot=None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._rename_server_farm_props', autospec=True)
