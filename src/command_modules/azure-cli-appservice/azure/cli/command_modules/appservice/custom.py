@@ -1564,10 +1564,7 @@ def list_consumption_locations():
 def list_locations(sku, linux_workers_enabled=None):
     client = web_client_factory()
     full_sku = _get_sku_name(sku)
-    regions = client.list_geo_regions(full_sku, linux_workers_enabled)
-    for x in regions:
-        x.name = x.name.lower().replace(' ', '')
-    return regions.current_page
+    return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
 def enable_zip_deploy(resource_group_name, name, src, slot=None):
