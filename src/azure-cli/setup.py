@@ -81,6 +81,7 @@ DEPENDENCIES = [
     'azure-cli-profile',
     'azure-cli-rdbms',
     'azure-cli-redis',
+    'azure-cli-reservations',
     'azure-cli-resource',
     'azure-cli-role',
     'azure-cli-sql',
