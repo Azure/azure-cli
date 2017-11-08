@@ -9,6 +9,7 @@ Release History
 * deprecate --orchestrator-release option in acs create
 * change default VM size for AKS to Standard_D1_v2
 * fix "az aks browse" on Windows
+* fix "az aks get-credentials" on Windows
 
 2.0.18
 ++++++
