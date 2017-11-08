@@ -925,8 +925,10 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
+    elif tier in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
+    elif tier in ['P1V2', 'P2V2', 'P3V2']:
+        return 'PREMIUMV2'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -1573,7 +1575,13 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
 def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
-    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
+def list_locations(sku, linux_workers_enabled=None):
+    client = web_client_factory()
+    full_sku = _get_sku_name(sku)
+    return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
 def enable_zip_deploy(resource_group_name, name, src, slot=None):
