@@ -46,7 +46,7 @@ helps['webapp auth update'] = """
 
 helps['webapp assign-identity'] = """
     type: command
-    short-summary: (PREVIEW)assign managed service identity to the webapp
+    short-summary: (PREVIEW) assign managed service identity to the webapp
     examples:
         - name: assign local identity and assign a reader role to the current resource group.
           text: >

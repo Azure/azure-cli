@@ -780,7 +780,7 @@ def resolve_role_id(role, scope):
     client = get_mgmt_service_client(AuthorizationManagementClient).role_definitions
 
     role_id = None
-    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
+    if re.match(r'/subscriptions/[^/]+/providers/Microsoft.Authorization/roleDefinitions/',
                 role, re.I):
         role_id = role
     else:
