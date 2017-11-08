@@ -1558,14 +1558,16 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
 def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
-    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(sku, linux_workers_enabled=None):
     client = web_client_factory()
     full_sku = _get_sku_name(sku)
     regions = client.list_geo_regions(full_sku, linux_workers_enabled)
-    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+    for x in regions:
+        x.name = x.name.lower().replace(' ', '')
+    return regions.current_page
 
 
 def enable_zip_deploy(resource_group_name, name, src, slot=None):
