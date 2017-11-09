@@ -33,3 +33,4 @@ with ParametersContext('extension') as c:
 with ParametersContext('extension add') as c:
     c.argument('extension_name', completer=extension_name_from_index_completion_list, validator=validate_extension_add)
     c.register('source', ('--source', '-s'), help='Filepath or URL to an extension', completer=FilesCompleter())
+    c.register('yes', ('--yes', '-y'), action='store_true', help='Do not prompt for confirmation.')
