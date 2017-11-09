@@ -329,8 +329,9 @@ with CommandContext('storage account create') as c:
               **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
     c.reg_arg('account_name', account_name_type, options_list=('--name', '-n'), completer=None)
     c.reg_arg('kind', help='Indicates the type of storage account.',
+              validator=validate_access_tier_for_blob_account,
               default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'),
-              **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'), validator=validate_access_tier_for_blob_account)
+              **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
     c.reg_arg('tags', tags_type)
     c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
     c.reg_arg('sku', help='The storage account SKU.', default=enum_default(ResourceType.MGMT_STORAGE, 'SkuName', 'standard_ragrs'),
