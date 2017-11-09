@@ -206,7 +206,7 @@ def _get_displayable_name(graph_object):
 
 
 def _backfill_assignments_for_co_admins(authz_client, assignee=None):
-    co_admins = authz_client.classic_administrators.list('2015-06-01')  # TODO: call out the api-version weirdness
+    co_admins = authz_client.classic_administrators.list('2015-06-01')  # known swagger bug on api-version handling
     co_admins = [x for x in co_admins if x.properties.email_address]
     graph_client = _graph_client_factory()
     if assignee:  # apply assignee filter if applicable
