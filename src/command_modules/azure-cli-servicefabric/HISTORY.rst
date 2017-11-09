@@ -14,6 +14,7 @@ Release History
 0.0.6
 +++++
 * Minor fixes.
+* Added detailed errors to validation response when creating cluster.
 
 0.0.5
 +++++
