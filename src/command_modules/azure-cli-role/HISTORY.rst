@@ -5,6 +5,7 @@ Release History
 2.0.15
 ++++++
 * 'ad sp reset-credentials': support to add credentials instead of overwriting
+emit out an actionable error if provisioning application failed for lack of permissions
 
 2.0.14
 ++++++
