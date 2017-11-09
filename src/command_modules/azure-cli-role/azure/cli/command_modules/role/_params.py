@@ -65,6 +65,7 @@ register_cli_argument('role assignment', 'role_assignment_name', options_list=('
 register_cli_argument('role assignment', 'role', help='role name or id', completer=get_role_definition_name_completion_list)
 register_cli_argument('role assignment', 'show_all', options_list=('--all',), action='store_true', help='show all assignments under the current subscription')
 register_cli_argument('role assignment', 'include_inherited', action='store_true', help='include assignments applied on parent scopes')
+register_cli_argument('role assignment', 'include_classic_administrators', action='store_true', help='list default role assignments for subscription classic administrators, aka co-admins')
 register_cli_argument('role assignment', 'assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
 register_cli_argument('role assignment', 'ids', nargs='+', help='space separated role assignment ids')
 register_cli_argument('role definition', 'role_definition_id', options_list=('--name', '-n'), help='the role definition name')

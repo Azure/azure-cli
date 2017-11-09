@@ -10,7 +10,7 @@ import tempfile
 import time
 import unittest
 
-from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer,
+from azure.cli.testsdk import (LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer,
                                JMESPathCheck as JMESPathCheckV2)
 import azure.cli.core.azlogging as azlogging
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck,
@@ -249,6 +249,22 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('role assignment list --assignee {}'.format(self.user),
                  checks=[JMESPathCheck("length([])", 1)])
         self.cmd('role assignment delete --assignee {} --role reader'.format(self.user), None)
+
+
+class RoleAssignmentListScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_assignments_for_co_admins(self, resource_group):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 1024
+        result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
+        self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
+        self.cmd('role assignment list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2("length([])", 0)
+        ])
+        result = self.cmd('role assignment list -g {} --include-classic-administrator'.format(resource_group)).get_output_in_json()
+        self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
 
 
 if __name__ == '__main__':
