@@ -16,6 +16,7 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+from operator import le
 
 import six
 from six import string_types, reraise
@@ -27,9 +28,8 @@ from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.profiles._shared import get_versioned_sdk_path
-from azure.cli.core.extension import (get_extension_names, get_extension_path,
+from azure.cli.core.extension import (get_extensions, get_extension_path,
                                       get_extension_modname, EXTENSIONS_MOD_PREFIX)
-
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
 
@@ -42,6 +42,12 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 CONFIRM_PARAM_NAME = 'yes'
 
 BLACKLISTED_MODS = ['context', 'shell', 'documentdb']
+
+# Can use operators such as lt, le, eq, ne, ge, gt from
+# https://docs.python.org/3/library/operator.html#mapping-operators-to-functions
+BLACKLISTED_EXTENSIONS = {
+    'image-copy-extension': (le, '0.0.4'),
+}
 
 
 class VersionConstraint(object):
@@ -405,24 +411,43 @@ def load_params(command):
     _apply_parameter_info(command, command_table[command])
 
 
+def _extension_blacklisted(ext):
+    from pkg_resources import parse_version
+    try:
+        if ext.name in BLACKLISTED_EXTENSIONS:
+            comparison_op, b_ver = BLACKLISTED_EXTENSIONS[ext.name]
+            blacklisted_ver = parse_version(b_ver)
+            ext_ver = parse_version(ext.version)
+            is_blacklisted = comparison_op(blacklisted_ver, ext_ver)
+            logger.debug("Possible blacklisted extension: is_blacklisted=%s blacklisted_ver=%s comparison_op=%s "
+                         "ext_ver=%s", is_blacklisted, blacklisted_ver, comparison_op, ext_ver)
+            return is_blacklisted
+    except Exception:  # pylint: disable=broad-except
+        return False
+
+
 def _get_command_table_from_extensions():
-    extensions = get_extension_names()
+    extensions = get_extensions()
+
     if extensions:
-        logger.debug("Found {} extension(s): {}".format(len(extensions), extensions))
-        for ext_name in extensions:
-            ext_dir = get_extension_path(ext_name)
+        logger.debug("Found {} extension(s): {}".format(len(extensions), [ext.name for ext in extensions]))
+        for ext in extensions:
+            if _extension_blacklisted(ext):
+                logger.debug("Skipped extension '%s' as it's blacklisted. Consider removing this extension.", ext.name)
+                continue
+            ext_dir = get_extension_path(ext.name)
             sys.path.append(ext_dir)
             try:
                 ext_mod = get_extension_modname(ext_dir=ext_dir)
                 # Add to the map. This needs to happen before we load commands as registering a command
                 # from an extension requires this map to be up-to-date.
-                mod_to_ext_map[ext_mod] = ext_name
+                mod_to_ext_map[ext_mod] = ext.name
                 start_time = timeit.default_timer()
                 import_module(ext_mod).load_commands()
                 elapsed_time = timeit.default_timer() - start_time
-                logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
+                logger.debug("Loaded extension '%s' in %.3f seconds.", ext.name, elapsed_time)
             except Exception:  # pylint: disable=broad-except
-                logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
+                logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext.name)
                 logger.debug(traceback.format_exc())
 
 
