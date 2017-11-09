@@ -1222,7 +1222,6 @@ def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
     std_encoding = sys.stdout.encoding
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers['CommandName'] = 'appservice list-locations'
     r = http.request(
         'GET',
         url,
@@ -1247,14 +1246,16 @@ def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
         if href_count > 1:
             logger.info('Will show last %s lines of logs per instance', number_of_lines)
 
-        for x in range(0, href_count):  # pylint: disable=unused-variable
+        for x in range(0, href_count):
             index_of_path = api_str.index('\",\"path')
             href_str = api_str[api_str.index("https"):index_of_path]
             size = api_str[api_str.index('\"size\":') + len('\"size\":'):api_str.index(',\"href\"')]
+            logger.warning('\nSite Instance #%i', x + 1)
             logger.info('\nUsing endpoint: %s', href_str)
             url = href_str
-            if int(size) > 512000:
-                logger.warning('Size of logs:%s bytes, will fetch only last 512000 bytes', size)
+            byte_limit = 512000
+            byte_limit_exceeded = (int(size) > byte_limit)
+            if byte_limit_exceeded is True:
                 headers.update({'Range': 'bytes=-512000'})  # only get the last 512k
 
             r = http.request(
@@ -1266,9 +1267,17 @@ def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
             lines = (r.data.decode(encoding='utf-8', errors='replace')
                      .encode(std_encoding, errors='replace')
                      .decode(std_encoding, errors='replace')
-                     .replace('\\n', '\r\n'))
+                     .replace('\\n', '\n'))
             lines_split = lines.splitlines()
-            print('\r\n'.join(lines_split[-(int(number_of_lines))::]))
+            
+            if byte_limit_exceeded is True:
+                if len(lines_split) < int(number_of_lines):
+                    logger.warning("Hit internal limit of %s bytes." 
+                                   "Please download to see full logs", byte_limit)
+            if int(number_of_lines) > len(lines_split):
+                number_of_lines = len(lines_split)
+            last_n_lines = ('\n'.join(lines_split[-int(number_of_lines)::])).lstrip('\n')
+            print(last_n_lines)
             api_str = api_str[(index_of_path + len('\",\"path')):]
     else:  # streaming
         for chunk in r.stream():

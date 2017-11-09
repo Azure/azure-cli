@@ -12,6 +12,7 @@ from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPrepa
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
                                              JMESPathCheck, NoneCheck)
+import sys
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -120,7 +121,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = self.create_random_name(prefix='plan-quick-linux', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i lukems/ruby-hello'.format(resource_group, webapp_name, plan))
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
         self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
@@ -151,6 +152,44 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheckV2('name', 'webInOtherRG')
         ])
 
+    @ResourceGroupPreparer(location='japaneast')
+    def test_linux_webapp_log_tail(self, resource_group):
+        from azure.cli.testsdk.utilities import force_progress_logging
+        webapp_name = self.create_random_name(prefix='webapp-quick-linux', length=24)
+        plan = self.create_random_name(prefix='plan-quick-linux', length=24)
+
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i lukems/logs'.format(resource_group, webapp_name, plan))
+        
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+        # verify the web page
+        self.assertTrue('This is a sample index page' in str(r.content))
+
+        self.cmd('webapp log config -g {} -n {} --docker-container-logging filesystem'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('httpLogs.fileSystem.enabled', 'true')
+        ]))
+        
+        time.sleep(15)  # 15 seconds should be enough to ensure logs propagated
+
+        import sys
+        original_stdout = sys.stdout
+        temp_file = 'tmp.txt'
+        sys.stdout = open(temp_file, 'r+')
+        result = self.cmd('webapp log tail --number-of-lines 15 -g {} -n {}'.format(resource_group, webapp_name))
+
+        output = ''
+        try:
+            byte = sys.stdout.read(1)
+            while byte:
+                output = output + byte
+                byte = sys.stdout.read(1)
+        finally:
+            sys.stdout.close()
+            sys.stdout = original_stdout
+            os.remove(temp_file)
+
+        self.assertTrue("az-cli test" in output)
+
 
 # Test Framework is not able to handle binary file format, hence, only run live
 class AppServiceLogTest(LiveScenarioTest):
@@ -179,7 +218,7 @@ class AppServiceLogTest(LiveScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -i lukems/ruby-hello'.format(resource_group, webapp_name, plan))
         # load the site to produce a few traces
         requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
 
