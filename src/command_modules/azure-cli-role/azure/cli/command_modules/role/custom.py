@@ -369,6 +369,7 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
+    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -379,8 +380,16 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
                                                    password_credentials=password_creds)
-    return client.create(app_create_param)
 
+    try:
+        return client.create(app_create_param)
+    except GraphErrorException as ex:
+        if 'insufficient privileges' in str(ex).lower():
+            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            raise CLIError("Directory permission is needed for the current user to register the appliaction. "
+                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
+        else:
+            raise
 
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
