@@ -31,26 +31,6 @@ if $TRAVIS; then
 fi
 
 ##############################################
-# List tests to the test file - To be replaced by other mechanism in the fucture
-# content=`nosetests azure.cli -v --collect-only 2>&1`
-
-# echo $content > $app_dir/raw.txt
-# manifest="$app_dir/all_tests.txt"
-# if [ -e $manifest ]; then rm $manifest; fi
-
-# while IFS='' read -r line || [[ -n "$line" ]]; do
-#     if [ -n "$line" ] && [ "OK" != "$line" ] && [ "${line:0:3}" != "Ran" ] && [ "${line:0:3}" != "---" ]; then
-#         parts=($line)
-#         test_method=${parts[0]}
-#         test_class=${parts[1]}
-#         test_class=${test_class##(}
-#         test_class=${test_class%%)}
-
-#         echo "$test_class $test_method" >> $manifest
-#     fi
-# done <<< "$content"
-
-##############################################
 # build product packages
 echo 'Build Azure CLI and its command modules'
 for setup_file in $(find src -name 'setup.py'); do
@@ -90,7 +70,7 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0+dev$TRAVIS_BUILD_NUMBER"
+VERSION = "1.0.0.dev$TRAVIS_BUILD_NUMBER"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
