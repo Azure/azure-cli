@@ -127,6 +127,15 @@ def validate_client_parameters(namespace):
         n.account_key = _query_account_key(n.account_name)
 
 
+def validate_access_tier_for_blob_account(namespace):
+    """
+    Validate that access tier is specified when creating a StandardBlob account.
+    """
+    Kind = get_sdk(ResourceType.MGMT_STORAGE, 'Kind', mod='models')
+    if Kind(namespace.kind) == Kind.blob_storage and namespace.access_tier is None:
+        raise CLIError('Access-tier must be provided when creating a Blob Storage account.')
+
+
 def process_blob_source_uri(namespace):
     """
     Validate the parameters referenced to a blob source and create the source URI from them.

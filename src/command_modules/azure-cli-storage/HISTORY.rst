@@ -12,6 +12,7 @@ Release History
 * `storage metrics update`: fixed bug with enabling metrics.
 * `storage blob upload-batch`: Increase block size when target file is over 200GB.
 * `storage account create/update`: Fix issue where --bypass and --default-action arguments were ignored.
+* `storage account create`: Validates access-tier is provided when creating BlobStorage account.
 
 2.0.18
 ++++++

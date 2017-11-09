@@ -34,7 +34,7 @@ from ._validators import \
      process_blob_batch_source_parameters, process_file_batch_source_parameters,
      get_content_setting_validator, validate_encryption_services, validate_accept,
      validate_key, storage_account_key_options, validate_encryption_source,
-     process_file_download_namespace,
+     process_file_download_namespace, validate_access_tier_for_blob_account,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri,
      get_char_options_validator, validate_bypass, validate_subnet, page_blob_tier_validator, blob_tier_validator)
@@ -330,7 +330,7 @@ with CommandContext('storage account create') as c:
     c.reg_arg('account_name', account_name_type, options_list=('--name', '-n'), completer=None)
     c.reg_arg('kind', help='Indicates the type of storage account.',
               default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'),
-              **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
+              **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'), validator=validate_access_tier_for_blob_account)
     c.reg_arg('tags', tags_type)
     c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
     c.reg_arg('sku', help='The storage account SKU.', default=enum_default(ResourceType.MGMT_STORAGE, 'SkuName', 'standard_ragrs'),
