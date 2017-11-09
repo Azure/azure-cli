@@ -391,6 +391,7 @@ def create_application(client, display_name, homepage, identifier_uris,
         else:
             raise
 
+
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None):

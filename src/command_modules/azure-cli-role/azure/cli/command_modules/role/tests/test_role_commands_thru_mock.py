@@ -275,18 +275,17 @@ class TestRoleMocked(unittest.TestCase):
         def _test_deserializer(resp_type, response):
             err = FakedError('something bad for you')
             return err
-        
+
         faked_role_client = mock.MagicMock()
         faked_role_client.config.subscription_id = self.subscription_id
         auth_client_mock.return_value = faked_role_client
         faked_graph_client = mock.MagicMock()
         graph_client_mock.return_value = faked_graph_client
- 
+
         faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
 
         # action
-        with self.assertRaises(GraphErrorException) as context:
-            create_service_principal_for_rbac('will-fail', skip_assignment=True)
+        self.assertRaises(GraphErrorException, create_service_principal_for_rbac, 'will-fail')
 
 
 class FakedError(object):  # pylint: disable=too-few-public-methods
