@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.0.19
+++++++
+* `storage account create`: defaults --sku to 'Standard_RAGRS'
+* Fixed bugs when dealing with file/blob names that include non-ascii chars.
+* `storage blob/file copy start-batch`: Fixed bug that prevented using --source-uri.
+* `storage blob/file delete-batch`: Added commands to glob and delete multiple blobs/files.
+* `storage metrics update`: fixed bug with enabling metrics.
+* `storage blob upload-batch`: Increase block size when target file is over 200GB.
+* `storage account create/update`: Fix issue where --bypass and --default-action arguments were ignored.
+
 2.0.18
 ++++++
 * Minor fixes

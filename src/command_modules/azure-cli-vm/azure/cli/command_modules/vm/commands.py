@@ -54,7 +54,7 @@ def transform_vm(vm):
 
 
 def transform_vm_create_output(result):
-    from azure.cli.core.commands.arm import parse_resource_id
+    from msrestazure.tools import parse_resource_id
     try:
         output = OrderedDict([('id', result.id),
                               ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
@@ -130,7 +130,11 @@ cli_command(__name__, 'vm list', custom_path.format('list_vm'), table_transforme
 cli_command(__name__, 'vm resize', custom_path.format('resize_vm'), no_wait_param='no_wait')
 cli_command(__name__, 'vm capture', custom_path.format('capture_vm'))
 cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
-cli_command(__name__, 'vm format-secret', custom_path.format('get_vm_format_secret'))
+cli_command(__name__, 'vm format-secret', custom_path.format('get_vm_format_secret'), deprecate_info='az vm secret format')
+cli_command(__name__, 'vm secret format', custom_path.format('get_vm_format_secret'))
+cli_command(__name__, 'vm secret add', custom_path.format('add_vm_secret'))
+cli_command(__name__, 'vm secret list', custom_path.format('list_vm_secrets'))
+cli_command(__name__, 'vm secret remove', custom_path.format('remove_vm_secret'))
 cli_generic_update_command(__name__, 'vm update',
                            mgmt_path.format(op_var, op_class, 'get'),
                            mgmt_path.format(op_var, op_class, 'create_or_update'),

@@ -74,7 +74,7 @@ with ParametersContext(command='lab vm list') as c:
 
 with ParametersContext(command='lab vm claim') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_claim_vm)
-    c.register_alias('name', ('--name', '-n'), id_part='child_name')
+    c.register_alias('name', ('--name', '-n'), id_part='child_name_1')
     c.argument('lab_name', id_part='name')
 
 

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.15
+++++++
+* Added --ignore-missing-vnet-service-endpoint param to az sql server vnet-rule create and update commands
+* Minor fixes.
+
 2.0.14
 ++++++
 * Minor fixes

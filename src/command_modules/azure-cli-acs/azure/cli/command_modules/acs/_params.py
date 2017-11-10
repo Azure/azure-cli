@@ -112,7 +112,7 @@ register_cli_argument('acs create', 'agent_storage_profile', help=_get_feature_i
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, set the default osType of agent pools to be Windows.')
 register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
 
-register_cli_argument('acs create', 'orchestrator_release', options_list=('--orchestrator-release',), help=_get_feature_in_preview_message() + 'Use Orchestrator Release to specify the major.minor part of the semantic version for your choice of orchestrator. For example, you can specify 1.7, which will resolve to 1.7.x based on ACS latest well tested batch version')
+register_cli_argument('acs create', 'orchestrator_version', options_list=('--orchestrator-version',), help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)
@@ -163,15 +163,17 @@ register_extra_cli_argument('aks create', 'generate_ssh_keys', action='store_tru
 register_cli_argument('aks create', 'kubernetes_version', arg_type=k8s_version_arg_type,
                       validator=validate_k8s_version)
 register_cli_argument('aks create', 'admin_username', options_list=('--admin-username', '-u'))
-register_cli_argument('aks create', 'agent_vm_size', options_list=('--agent-vm-size', '-s'),
+register_cli_argument('aks create', 'node_vm_size', options_list=('--node-vm-size', '-s'),
                       completer=get_vm_size_completion_list)
-register_cli_argument('aks create', 'agent_count', type=int, options_list=('--agent-count', '-c'))
+register_cli_argument('aks create', 'node_count', type=int, options_list=('--node-count', '-c'))
 register_cli_argument('aks create', 'dns_name_prefix', options_list=('--dns-name-prefix', '-p'))
+register_cli_argument('aks delete', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
 register_cli_argument('aks get-credentials', 'path', options_list=('--file', '-f',),
                       default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                       type=file_type, completer=FilesCompleter())
 register_cli_argument('aks get-credentials', 'admin', options_list=('--admin', '-a'), default=False)
-register_cli_argument('aks scale', 'agent_count', type=int, options_list=('--agent-count', '-c'))
+register_cli_argument('aks get-versions', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
+register_cli_argument('aks scale', 'node_count', type=int, options_list=('--node-count', '-c'))
 register_cli_argument('aks upgrade', 'kubernetes_version', arg_type=k8s_version_arg_type,
                       validator=validate_k8s_version)
 register_cli_argument('aks upgrade', 'name', arg_type=name_arg_type, validator=validate_linux_host_name)

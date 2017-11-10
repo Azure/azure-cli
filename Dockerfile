@@ -3,13 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-FROM python:3.5.2-alpine
+FROM python:3.6.3-alpine
 
 ARG CLI_VERSION
 
 # Metadata as defined at http://label-schema.org
 ARG BUILD_DATE
-LABEL org.label-schema.schema-version="1.0" \
+LABEL maintainer="Microsoft" \
+      org.label-schema.schema-version="1.0" \
       org.label-schema.vendor="Microsoft" \
       org.label-schema.name="Azure CLI 2.0" \
       org.label-schema.version=$CLI_VERSION \
@@ -19,7 +20,7 @@ LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.usage="https://docs.microsoft.com/en-us/cli/azure/install-az-cli2#docker" \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
-      org.label-schema.docker.cmd="docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>"
+      org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it azuresdk/azure-cli-python:$CLI_VERSION"
 
 WORKDIR azure-cli
 COPY . /azure-cli

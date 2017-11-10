@@ -82,46 +82,26 @@ The repo has a launch.json file that will launch the version of Python that is f
 
 2.  Invoke the CLI using:
 
-  #### OSX/Ubuntu (bash):
-  ```Shell
+  #### Windows/OSX/Ubuntu:
+  ```
   az
-  ```
-
-  #### Windows:
-  ```BatchFile
-  <clone root>\az.bat [commands]
-  ```
-  which is equivalent to the following:
-  ```BatchFile
-  <clone root>\src\python -m azure.cli [commands]
   ```
 
 ## Running Tests:
 #### Command line
-  Provided your PYTHONPATH was set correctly, you can run the tests from your `<root clone>` directory.
+  Running the `dev_setup.py` file installed the test and style check scripts into the `tools` directory under your
+  `<clone root>` directory and added them into the current virtualenv.
 
-##### Windows:
+##### Windows/OSX/Ubuntu:
 
   To run the CLI tests:
-  ```BatchFile
-  <clone root>\tools\scripts\run_tests.bat [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
+  ```
+  run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
   ```
 
   To check the CLI and command modules for style errors:
-  ```BatchFile
-  <clone root>\tools\scripts\check_style.bat [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
-
-##### OSX/Ubuntu (bash):
-
-  To run the CLI tests:
-  ```Shell
-   <clone root>/tools/scripts/run_tests [-h] [--module MODULES [MODULES ...]] [--parallel] [--live] [--test TESTS]
-  ```
-
-  To check the CLI and command modules for style errors:
-  ```Shell
-   <clone root>/tools/scripts/check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
+  check_style [-h] [--ci] [--pep8] [--pylint] [--module MODULES]
   ```
 
 #### VS Code

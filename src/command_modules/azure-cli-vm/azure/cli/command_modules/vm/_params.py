@@ -23,7 +23,8 @@ from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
      process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
-     process_disk_encryption_namespace, process_assign_identity_namespace)
+     process_disk_encryption_namespace, process_assign_identity_namespace,
+     process_vm_secret_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -122,7 +123,7 @@ register_cli_argument('vm capture', 'overwrite', action='store_true')
 register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
-register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name')
+register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1')
 register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
@@ -141,7 +142,7 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss show', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
     register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-register_cli_argument('vmss', 'instance_id', id_part='child_name')
+register_cli_argument('vmss', 'instance_id', id_part='child_name_1')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
 register_cli_argument('vmss', 'tags', tags_type)
 register_cli_argument('vmss', 'caching', help='Disk caching policy', **enum_choice_list(CachingTypes))
@@ -195,8 +196,8 @@ register_cli_argument('vm nic', 'nics', nargs='+', help='Names or IDs of NICs.',
 register_cli_argument('vm nic show', 'nic', help='NIC name or ID.', validator=validate_vm_nic)
 
 register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name')
-register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='grandchild_name')
+register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name_1')
+register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
 
 register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
@@ -235,9 +236,10 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM', arg_group='Storage')
     register_cli_argument(scope, 'data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create', arg_group='Storage')
     register_cli_argument(scope, 'image_data_disks', ignore_type)
-    register_cli_argument(scope, 'plan_name', ignore_type)
-    register_cli_argument(scope, 'plan_product', ignore_type)
-    register_cli_argument(scope, 'plan_publisher', ignore_type)
+    register_cli_argument(scope, 'plan_name', arg_group='Marketplace Image Plan', help='plan name')
+    register_cli_argument(scope, 'plan_product', arg_group='Marketplace Image Plan', help='plan product')
+    register_cli_argument(scope, 'plan_publisher', arg_group='Marketplace Image Plan', help='plan publisher')
+    register_cli_argument(scope, 'plan_promotion_code', arg_group='Marketplace Image Plan', help='plan promotion code')
     for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer', 'app_gateway']:
         register_cli_argument(scope, '{}_type'.format(item), ignore_type)
 
@@ -311,6 +313,7 @@ for scope in ['vm encryption', 'vmss encryption']:
     register_cli_argument(scope, 'force', action='store_true', help='continue by ignoring client side validation errors')
     register_cli_argument(scope, 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
 register_cli_argument('vmss encryption', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+register_cli_argument('vm encryption enable', 'encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
@@ -351,6 +354,9 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 
 register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+register_cli_argument('vm secret', 'keyvault', validator=process_vm_secret_namespace, help='Keyvault ID, name if in the same resource group')
+register_cli_argument('vm secret', 'certificate', help='keyvault certificate name or its full secret url')
+register_cli_argument('vm secret', 'certificate_store', help='Windows certificate store names. Default: My')
 
 register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
 register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")

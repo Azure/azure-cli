@@ -19,7 +19,17 @@ Verification
 Run the image.
 
 ```
-$ sudo docker run -it azuresdk/azure-cli-python:${CLI_VERSION}
+$ docker run -it azuresdk/azure-cli-python:${CLI_VERSION}
 $ az
 $ az --version
+```
+
+Save the image
+```
+docker save -o docker-azuresdk-azure-cli-python-VERSION.tar azuresdk/azure-cli-python:${CLI_VERSION}
+```
+
+Load the saved image
+```
+docker load -i docker-azuresdk-azure-cli-python-VERSION.tar
 ```

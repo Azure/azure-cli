@@ -261,7 +261,6 @@ def validate_pool_settings(ns, parser):
         if ns.node_agent_sku_id and not ns.image:
             raise ValueError("Missing required argument: --image")
         if ns.image:
-            ns.version = 'latest'
             try:
                 ns.publisher, ns.offer, ns.sku = ns.image.split(':', 2)
                 try:

@@ -97,8 +97,6 @@ register_cli_argument('webapp', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
-                      help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:tag')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
 register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
@@ -114,13 +112,14 @@ register_cli_argument('webapp delete', 'keep_metrics', action='store_true', help
 register_cli_argument('webapp delete', 'keep_dns_registration', action='store_true', help='keep DNS registration')
 
 for scope in ['webapp', 'functionapp']:
+    register_cli_argument(scope + ' create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'), help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:tag')
     register_cli_argument(scope + ' config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
     register_cli_argument(scope + ' config ssl upload', 'certificate_password', help='The ssl cert password')
     register_cli_argument(scope + ' config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
     register_cli_argument(scope + ' config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
     register_cli_argument(scope + ' config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
     register_cli_argument(scope + ' config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
-    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+    register_cli_argument(scope + ' config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
     register_cli_argument(scope + ' deployment user', 'user_name', help='user name')
     register_cli_argument(scope + ' deployment user', 'password', help='password, will prompt if not specified')
     register_cli_argument(scope + ' deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
@@ -140,8 +139,12 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', **enum_choice_list(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
     register_cli_argument(scope + ' deployment source', 'git_token', help='Git access token required for auto sync')
     register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
+    register_cli_argument(scope + ' create', 'deployment_zip', options_list=('--deployment-zip', '-z'), help='perform deployment using zip file')
     register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
     register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
+    register_cli_argument(scope + ' assign-identity', 'disable_msi', action='store_true', help='disable the identity')
+    register_cli_argument(scope + ' assign-identity', 'scope', help="The scope the managed identity has access to")
+    register_cli_argument(scope + ' assign-identity', 'role', help="Role name or id the managed identity will be assigned")
 
 register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
@@ -162,7 +165,7 @@ register_cli_argument('webapp log config', 'application_logging', help='configur
 register_cli_argument('webapp log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp log config', 'level', help='logging level', **enum_choice_list(['error', 'warning', 'information', 'verbose']))
-register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(['off', 'storage', 'filesystem']))
+register_cli_argument('webapp log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(['off', 'filesystem']))
 register_cli_argument('webapp log config', 'docker_container_logging', help='configure gathering STDOUT and STDERR output from container', **enum_choice_list(['off', 'filesystem']))
 
 register_cli_argument('webapp log tail', 'provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
