@@ -161,7 +161,7 @@ class TestRoleMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_reset_credentials_password(self, graph_client_mock):
-        patch_invoked = [False]
+        patch_invoked = [False]  # to be used in a nested function below, array type is needed to get scoping work
         test_object_id = 'app_object_id'
         test_pwd = 'verySecret'
         name = 'http://mysp'
@@ -181,7 +181,7 @@ class TestRoleMocked(unittest.TestCase):
         graph_client_mock.return_value = faked_graph_client
         faked_graph_client.service_principals.list.return_value = [sp_object]
         faked_graph_client.applications.list.return_value = [app_object]
-        faked_graph_client.applications.get.side_effect = [app_object, app_object]
+        faked_graph_client.applications.get.side_effect = [app_object]
         faked_graph_client.applications.patch = test_patch
         faked_graph_client.applications.list_password_credentials.side_effect = [ValueError('should not invoke')]
 
@@ -193,7 +193,7 @@ class TestRoleMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_reset_credentials_certificate_append_option(self, graph_client_mock):
-        patch_invoked = [False]
+        patch_invoked = [False]  # to be used in a nested function below, array type is needed to get scoping work
         test_object_id = 'app_object_id'
         test_cert = _try_x509_pem('\n'.join(['-----BEGIN CERTIFICATE-----',
                                              'MIICoTCCAYkCAgPoMA0GCSqGSIb3DQEBBQUAMBQxEjAQBgNVBAMMCUNMSS1Mb2dp',
@@ -235,7 +235,7 @@ class TestRoleMocked(unittest.TestCase):
         graph_client_mock.return_value = faked_graph_client
         faked_graph_client.service_principals.list.return_value = [sp_object]
         faked_graph_client.applications.list.return_value = [app_object]
-        faked_graph_client.applications.get.side_effect = [app_object, app_object]
+        faked_graph_client.applications.get.side_effect = [app_object]
         faked_graph_client.applications.patch = test_patch
         faked_graph_client.applications.list_key_credentials.return_value = [key_cred]
 
