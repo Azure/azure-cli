@@ -203,17 +203,48 @@ class AzCliCommandInvoker(CommandInvoker):
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
-        cmd_tbl = self.commands_loader.load_command_table(args)
+        self.commands_loader.load_command_table(args)
         command = self._rudimentary_get_command(args)
+
         try:
-            cmd_tbl = {command: self.commands_loader.command_table[command]} if command else cmd_tbl
+            cmd_tbl = {command: self.commands_loader.command_table[command]}
         except KeyError:
-            pass
+            # Trim down the command table to reduce the number of subparsers required to optimize the performance.
+            #
+            # When given a command table like this:
+            #
+            # network application-gateway create
+            # network application-gateway delete
+            # network list-usages
+            # storage account create
+            # storage account list
+            #
+            # input:  az
+            # output: network application-gateway create
+            #         storage account create
+            #
+            # input:  az network
+            # output: network application-gateway create
+            #         network list-usages
+
+            cmd_tbl = {}
+            group_names = set()
+            for cmd_name, cmd in self.commands_loader.command_table.items():
+                if command and not cmd_name.startswith(command):
+                    continue
+
+                cmd_stub = cmd_name[len(command):].strip()
+                group_name = cmd_stub.split(' ', 1)[0]
+                if group_name not in group_names:
+                    cmd_tbl[cmd_name] = cmd
+                    group_names.add(group_name)
+
         self.commands_loader.load_arguments(command)
         self.commands_loader._update_command_definitions()  # pylint: disable=protected-access
         self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=cmd_tbl)
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(cmd_tbl)
+
         self.cli_ctx.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=cmd_tbl, parser=self.parser)
 
         if not args:
