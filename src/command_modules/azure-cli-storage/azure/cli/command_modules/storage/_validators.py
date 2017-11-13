@@ -8,18 +8,16 @@ import os
 import re
 from datetime import datetime, timedelta
 
-from azure.cli.core.profiles import get_sdk, ResourceType
-from azure.cli.core._profile import CLOUD
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
+from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client
+from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
+from azure.cli.command_modules.storage.sdkutil import get_table_data_type
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url
+
 from knack.util import CLIError
 
-from ._factory import get_storage_data_service_client
-from .util import glob_files_locally, guess_content_type
-from .sdkutil import get_table_data_type
-from .url_quote_util import encode_for_url
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -78,8 +76,8 @@ def _create_short_lived_file_sas(account_name, account_key, share, directory_nam
 
 # region PARAMETER VALIDATORS
 
-def validate_accept(namespace):
-    TablePayloadFormat = get_table_data_type('table', 'TablePayloadFormat')
+def validate_accept(cmd, namespace):
+    TablePayloadFormat = get_table_data_type(cmd.cli_ctx, 'table', 'TablePayloadFormat')
     if namespace.accept:
         formats = {
             'none': TablePayloadFormat.JSON_NO_METADATA,
@@ -528,9 +526,9 @@ def get_permission_validator(permission_class):
     return validator
 
 
-def table_permission_validator(namespace):
+def table_permission_validator(cmd, namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    TablePermissions = get_table_data_type('table', 'TablePermissions')
+    TablePermissions = get_table_data_type(cmd.cli_ctx, 'table', 'TablePermissions')
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'

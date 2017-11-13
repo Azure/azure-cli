@@ -69,7 +69,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 
         if not self.dev_setting_name:
             template = 'az storage account create -n {} -g {} -l {} --sku {}'
-            execute(template.format(name, group, self.location, self.sku))
+            execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
         else:
             name = self.dev_setting_name
 

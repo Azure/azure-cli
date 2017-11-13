@@ -79,12 +79,16 @@ def get_resources_in_subscription(cli_ctx, resource_type=None):
     return list(rcf.resources.list(filter=filter_str))
 
 
-def get_resource_name_completion_list(cli_ctx, resource_type=None):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        if getattr(parsed_args, 'resource_group_name', None):
-            rg = parsed_args.resource_group_name
-            return [r.name for r in get_resources_in_resource_group(cli_ctx, rg, resource_type=resource_type)]
-        return [r.name for r in get_resources_in_subscription(cli_ctx, resource_type)]
+def get_resource_name_completion_list(resource_type=None):
+    from azure.cli.core.decorators import Completer
+
+    @Completer
+    def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+        rg = getattr(namespace, 'resource_group_name', None)
+        if rg:
+            return [r.name for r in get_resources_in_resource_group(cmd.cli_ctx, rg, resource_type=resource_type)]
+        return [r.name for r in get_resources_in_subscription(cmd.cli_ctx, resource_type)]
+
     return completer
 
 
@@ -144,11 +148,12 @@ def get_enum_type(data, default=None):
 
     default_value = None
     if default:
+        from azure.cli.core.commands.validators import DefaultStr
         default_value = next((x for x in choices if x.lower() == default.lower()), None)
         if not default_value:
             raise CLIError("Command authoring exception: urecognized default '{}' from choices '{}'"
                            .format(default, choices))
-        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), type=_type, default=default_value)
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), type=_type, default=DefaultStr(default_value))
     else:
         arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), type=_type)
     return arg_type

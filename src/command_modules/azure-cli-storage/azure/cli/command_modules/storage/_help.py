@@ -108,6 +108,11 @@ helps['storage account show'] = """
           text: az storage account show -g MyResourceGroup -n MyStorageAccount
 """
 
+helps['storage account show-usage'] = """
+    type: command
+    short-summary: Show the current count and limit of the storage accounts under the subscription.
+"""
+
 helps['storage blob list'] = """
     type: command
     short-summary: List storage blobs in a container.

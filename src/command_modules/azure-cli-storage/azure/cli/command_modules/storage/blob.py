@@ -8,10 +8,7 @@ import os.path
 from collections import namedtuple
 from azure.common import AzureException
 
-from azure.cli.core.application import APPLICATION
-from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
-from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.profiles import supported_api_version, ResourceType, get_sdk
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
@@ -151,7 +148,7 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
     return results
 
 
-@transfer_doc(get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService').create_blob_from_path)
+#@transfer_doc(get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService').create_blob_from_path)
 def upload_blob(client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):

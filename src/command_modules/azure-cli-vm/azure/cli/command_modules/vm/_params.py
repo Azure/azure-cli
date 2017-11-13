@@ -13,16 +13,15 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
-    get_location_type, get_one_of_subscription_locations, get_resource_name_completion_list, tags_type,
+    get_location_type, get_resource_name_completion_list, tags_type,
     file_type, get_enum_type, zone_type, zones_type)
-from azure.cli.command_modules.vm._actions import (
-    load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
+from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_asg_names_or_ids)
 
-from knack.arguments import ignore_type, CLIArgumentType
+from knack.arguments import CLIArgumentType
 
 
 # REUSABLE ARGUMENT DEFINITIONS
@@ -45,7 +44,7 @@ disk_sku = CLIArgumentType(help='Underlying storage SKU.', arg_type=get_enum_typ
 
 
 # pylint: disable=too-many-statements
-def load_arguments(self, command):
+def load_arguments(self, _):
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
@@ -125,7 +124,7 @@ def load_arguments(self, command):
         c.argument('overwrite', action='store_true')
 
     with self.argument_context('vm create') as c:
-        c.argument('name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
+        c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
         c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -143,7 +142,7 @@ def load_arguments(self, command):
         c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
     for scope in ['vm show', 'vm list']:
-        with self.argument_context(scope) as c:    
+        with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
 
     with self.argument_context('vm diagnostics') as c:
@@ -204,7 +203,7 @@ def load_arguments(self, command):
         c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
     with self.argument_context('vm unmanaged-disk') as c:
-        c.argument( 'vm_name', arg_type=existing_vm_name)
+        c.argument('vm_name', arg_type=existing_vm_name)
         c.argument('disk_size', help='Size of disk (GiB)', default=1023, type=int)
         c.argument('new', action='store_true', help='Create a new disk.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
@@ -339,7 +338,7 @@ def load_arguments(self, command):
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
             c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create')
             c.ignore('image_data_disks', 'storage_account_type', 'public_ip_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
-            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk.', arg_type=get_enum_type([CachingTypes.read_only.value, CachingTypes.read_write.value], default=CachingTypes.read_write.value))
+            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk.', arg_type=get_enum_type([CachingTypes.read_only.value, CachingTypes.read_write.value], default='ReadWrite'))
             c.argument('data_caching', options_list=['--data-disk-caching'], help='Storage caching type for the VM data disk(s).', arg_type=get_enum_type(CachingTypes))
 
         with self.argument_context(scope, arg_group='Network') as c:
@@ -376,6 +375,9 @@ def load_arguments(self, command):
         with self.argument_context(scope) as c:
             c.argument('volume_type', help='Type of volume that the encryption operation is performed on', arg_type=get_enum_type(['DATA', 'OS', 'ALL']))
             c.argument('force', action='store_true', help='continue by ignoring client side validation errors')
+            c.argument('disk_encryption_keyvault', help='The key vault where the generated encryption key will be placed.')
+            c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
+            c.argument('key_encryption_keyvault', help='The key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
 
     for scope in ['vm extension', 'vmss extension']:
         with self.argument_context(scope) as c:
