@@ -11,6 +11,7 @@ except ImportError:
 
 from json import loads
 import requests
+from msrest.http_logger import log_request, log_response
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
@@ -209,3 +210,11 @@ def get_access_credentials(registry_name,
                             only_refresh_token=False,
                             repository=repository,
                             permission=permission)
+
+
+def log_registry_response(response):
+    """Log the HTTP request and response of a registry API call.
+    :param Response response: The response object
+    """
+    log_request(None, response.request)
+    log_response(None, response.request, response, result=response)
