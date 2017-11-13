@@ -5,9 +5,14 @@
 
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
+import json
 import shlex
+import subprocess
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
+from azure.cli.core._profile import Profile
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                                  ImageRegistryCredential, ResourceRequirements, ResourceRequests,
                                                  ContainerGroupNetworkProtocol, OperatingSystemTypes)
@@ -111,10 +116,36 @@ def create_container(client,
 
     return client.container_groups.create_or_update(resource_group_name, name, cgroup)
 
-
 def container_logs(client, resource_group_name, name, container_name=None):
     """Tail a container instance log. """
     if container_name is None:
         container_name = name
     log = client.container_logs.list(resource_group_name, container_name, name)
     return log.content
+
+
+def _get_subscription_id():
+    _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
+    return sub_id
+
+def _resource_client_factory():
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+
+
+def container_connect_kubernetes(client, resource_group_name):
+    """Install the ACI Kubernetes connector."""
+
+    subscription_id = _get_subscription_id()
+    groups = _resource_client_factory().resource_groups
+    rg = groups.get(resource_group_name)
+
+    app_info = json.loads(
+        subprocess.check_output(
+            "az ad sp create-for-rbac --role=Contributor --scopes /subscriptions/" + subscription_id + "/",
+            shell=True
+        ).decode("utf-8")
+    )
+
+    command = "helm install --name my-release --set env.azureClientId=" + app_info['appId'] + ",env.azureClientKey=" + app_info['password'] + ",env.azureTenantId=" + app_info['tenant'] + ",env.azureSubscriptionId=" + subscription_id + ",env.aciResourceGroup=" + rg.name+ ",env.aciRegion=" + rg.location + " https://github.com/neilpeterson/aci-connector-tar/raw/master/aci-connector-chart.tgz"
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
