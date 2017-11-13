@@ -6,28 +6,36 @@
 from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
 
-from azure.cli.core.commands import \
-    (CliArgumentType, register_cli_argument, register_extra_cli_argument)
-from azure.cli.core.commands.parameters import \
-    (location_type, enum_choice_list, tags_type, three_state_flag)
+from azure.cli.core.commands import CliArgumentType, register_cli_argument, register_extra_cli_argument
+from azure.cli.core.commands.parameters import location_type, enum_choice_list, tags_type, three_state_flag
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-from azure.cli.command_modules.monitor.actions import \
-    (AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
-from azure.cli.command_modules.monitor.custom import operator_map, aggregation_map
-from azure.cli.command_modules.monitor.validators import \
-    (validate_diagnostic_settings, get_target_resource_validator)
-from azure.mgmt.monitor.models.monitor_management_client_enums import \
-    (ConditionOperator, TimeAggregationOperator)
-from azure.mgmt.monitor.models import (LogProfileResource, RetentionPolicy)
+from azure.cli.command_modules.monitor.operations.actions import (AlertAddAction, AlertRemoveAction, ConditionAction,
+                                                                  period_type)
+from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
+from azure.cli.command_modules.monitor.validators import validate_diagnostic_settings, get_target_resource_validator
+from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
+from azure.mgmt.monitor.models import LogProfileResource, RetentionPolicy
 
 # pylint: disable=line-too-long
 
 
+def register_resource_parameter_context(context, dest, arg_group=None, required=True):
+    context.register(dest, options_list='--resource', arg_group=arg_group, required=required,
+                     validator=get_target_resource_validator(dest, required), help="Name or ID of the target resource.")
+    context.extra('namespace', options_list='--resource-namespace', arg_group=arg_group,
+                  help="Target resource provider namespace.")
+    context.extra('parent', options_list='--resource-parent', arg_group=arg_group,
+                  help="Target resource parent path, if applicable.")
+    context.extra('resource_type', options_list='--resource-type', arg_group=arg_group,
+                  help="Target resource type. Can also accept namespace/type format "
+                       "(Ex: 'Microsoft.Compute/virtualMachines)')")
+    context.extra('resource_group_name', options_list=('--resource-group', '-g'), arg_group='Target Resource')
+
+
 def register_resource_parameter(command, dest, arg_group=None, required=True):
-    """ Helper method to add the extra parameters needed to support specifying name or ID
-        for target resources. """
-    register_cli_argument(command, dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=required, validator=get_target_resource_validator(dest, required), help="Name or ID of the target resource.")
+    """ Helper method to add the extra parameters needed to support specifying name or ID for target resources. """
+    register_cli_argument(command, dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=required, validator=get_target_resource_validator(dest, required, preserve_resource_group_parameter=True), help="Name or ID of the target resource.")
     register_extra_cli_argument(command, 'namespace', options_list=['--{}-namespace'.format(dest)], arg_group=arg_group, help="Target resource provider namespace.")
     register_extra_cli_argument(command, 'parent', options_list=['--{}-parent'.format(dest)], arg_group=arg_group, help="Target resource parent path, if applicable.")
     register_extra_cli_argument(command, 'resource_type', options_list=['--{}-type'.format(dest)], arg_group=arg_group, help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
@@ -62,9 +70,9 @@ register_cli_argument('monitor alert update', 'add_actions', options_list=['--ad
 register_cli_argument('monitor alert update', 'remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction, arg_group='Action')
 register_cli_argument('monitor alert update', 'condition', action=ConditionAction, nargs='+', arg_group='Condition')
 register_cli_argument('monitor alert update', 'metric', arg_group='Condition')
-register_cli_argument('monitor alert update', 'operator', arg_group='Condition', **enum_choice_list(operator_map.keys()))
+register_cli_argument('monitor alert update', 'operator', arg_group='Condition', **enum_choice_list(get_operator_map().keys()))
 register_cli_argument('monitor alert update', 'threshold', arg_group='Condition')
-register_cli_argument('monitor alert update', 'aggregation', arg_group='Condition', **enum_choice_list(aggregation_map.keys()))
+register_cli_argument('monitor alert update', 'aggregation', arg_group='Condition', **enum_choice_list(get_aggregation_map().keys()))
 register_cli_argument('monitor alert update', 'period', type=period_type, arg_group='Condition')
 register_resource_parameter('monitor alert update', 'target', 'Target Resource', required=False)
 
@@ -76,13 +84,26 @@ register_cli_argument('monitor alert list-incidents', 'rule_name', options_list=
 
 # endregion
 
-# region Metrics
+with ParametersContext(command='monitor metrics list-definitions') as c:
+    register_resource_parameter_context(c, dest='resource_uri', arg_group='Target Resource')
 
-for item in ['list', 'list-definitions']:
-    register_resource_parameter('monitor metrics {}'.format(item), 'resource', 'Target Resource')
-    register_cli_argument('monitor metrics {}'.format(item), 'resource_group_name', arg_group='Target Resource')
+with ParametersContext(command='monitor metrics list') as c:
+    from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
+                             process_metric_dimension)
+    from azure.mgmt.monitor.models.monitor_management_client_enums import AggregationType
+    register_resource_parameter_context(c, dest='resource_uri', arg_group='Target Resource')
+    c.extra('start_time', options_list='--start-time', validator=process_metric_timespan, arg_group='Time')
+    c.extra('end_time', options_list='--end-time', arg_group='Time')
+    c.extra('metadata', options_list='--metadata', action='store_true', validator=process_metric_result_type)
+    c.extra('dimension', options_list='--dimension', nargs='*', validator=process_metric_dimension)
+    c.argument('interval', arg_group='Time')
+    c.argument('aggregation', nargs='*', validator=process_metric_aggregation,
+               **enum_choice_list(t for t in AggregationType if t.name != 'none'))
+    c.ignore('timespan')
+    c.ignore('result_type')
+    c.ignore('top')
+    c.ignore('orderby')
 
-# endregion
 with ParametersContext(command='monitor autoscale-settings') as c:
     c.register_alias('name', ('--azure-resource-name',))
     c.register_alias('autoscale_setting_name', ('--name', '-n'))
@@ -108,8 +129,7 @@ with ParametersContext(command='monitor diagnostic-settings') as c:
 
 with ParametersContext(command='monitor diagnostic-settings create') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'))
-    c.register_alias('target_resource_id', ('--resource-id',),
-                     validator=validate_diagnostic_settings)
+    c.register_alias('target_resource_id', ('--resource-id',), validator=validate_diagnostic_settings)
     c.register('logs', ('--logs',), type=get_json_object)
     c.register('metrics', ('--metrics',), type=get_json_object)
     c.argument('tags', nargs='*')
@@ -135,12 +155,6 @@ with ParametersContext(command='monitor log-profiles create') as c:
                help="Space separated list of regions for which Activity Log events "
                     "should be stored.")
 
-with ParametersContext(command='monitor metric-definitions list') as c:
-    c.argument('metric_names', nargs='+')
-
-with ParametersContext(command='monitor metrics list') as c:
-    c.argument('metric_names', nargs='+', required=True)
-
 with ParametersContext(command='monitor activity-log list') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'))
     c.argument('select', None, nargs='+')
@@ -159,7 +173,7 @@ register_cli_argument('monitor action-group', 'action_group_name', options_list=
 
 with ParametersContext(command='monitor action-group create') as c:
     from .validators import process_action_group_detail_for_creation
-    from .actions import ActionGroupReceiverParameterAction
+    from .operations.actions import ActionGroupReceiverParameterAction
 
     c.extra('receivers', options_list=('--action', '-a'), nargs='+', arg_group='Actions',
             action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
@@ -181,7 +195,7 @@ register_cli_argument('monitor activity-log alert', 'activity_log_alert_name', o
                       id_part='name')
 
 with ParametersContext(command='monitor activity-log alert create') as c:
-    from .activity_log_alerts import webhook_prop_type, process_condition_parameter
+    from .operations.activity_log_alerts import webhook_prop_type, process_condition_parameter
     c.register('disable', options_list='--disable', action='store_true')
     c.register('scopes', options_list=('--scope', '-s'), nargs='+')
     c.register('condition', options_list=('--condition', '-c'), nargs='+', validator=process_condition_parameter)
@@ -194,12 +208,12 @@ with ParametersContext(command='monitor activity-log alert update-condition') as
     c.register('remove_conditions', options_list=('--remove-condition', '-r'), nargs='+')
 
 with ParametersContext(command='monitor activity-log alert update') as c:
-    from .activity_log_alerts import process_condition_parameter
+    from .operations.activity_log_alerts import process_condition_parameter
     c.register('condition', options_list=('--condition', '-c'), nargs='+', validator=process_condition_parameter)
     c.register('enabled', options_list='--enabled', **three_state_flag())
 
 with ParametersContext(command='monitor activity-log alert action-group add') as c:
-    from .activity_log_alerts import webhook_prop_type
+    from .operations.activity_log_alerts import webhook_prop_type
     c.register('reset', options_list='--reset', action='store_true')
     c.register('action_group_ids', options_list=('--action-group', '-a'), nargs='+')
     c.register('webhook_properties', options_list=('--webhook-properties', '-w'), arg_type=webhook_prop_type)
