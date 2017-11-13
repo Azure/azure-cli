@@ -40,6 +40,10 @@ def _get_manifest_v2_header():
     return {'Accept': 'application/vnd.docker.distribution.manifest.v2+json'}
 
 
+def _get_metadata_header():
+    return {'Acr-Api-Version': 'v1-beta'}
+
+
 def _get_authorization_header(username, password):
     if username is None:
         auth = _get_bearer_auth_str(password)
@@ -117,7 +121,8 @@ def _obtain_data_from_registry(login_server,
                                result_index,
                                retry_times=3,
                                retry_interval=5,
-                               pagination=20):
+                               pagination=20,
+                               include_metadata_header=False):
     resultList = []
     executeNextHttpCall = True
 
@@ -126,6 +131,9 @@ def _obtain_data_from_registry(login_server,
         for i in range(0, retry_times):
             errorMessage = None
             try:
+                headers = _get_authorization_header(username, password)
+                if include_metadata_header:
+                    headers.update(_get_metadata_header())
                 response = requests.get(
                     'https://{}{}'.format(login_server, path),
                     headers=_get_authorization_header(username, password),
@@ -187,6 +195,7 @@ def acr_repository_show_tags(cmd,
                              registry_name,
                              repository,
                              resource_group_name=None,
+                             detail=False,
                              username=None,
                              password=None):
     login_server, username, password = get_access_credentials(
@@ -203,13 +212,15 @@ def acr_repository_show_tags(cmd,
         path='/v2/{}/tags/list'.format(repository),
         username=username,
         password=password,
-        result_index='tags')
+        result_index='tags',
+        include_metadata_header=detail)
 
 
 def acr_repository_show_manifests(cmd,
                                   registry_name,
                                   repository,
                                   resource_group_name=None,
+                                  detail=False,
                                   username=None,
                                   password=None):
     login_server, username, password = get_access_credentials(
@@ -226,7 +237,8 @@ def acr_repository_show_manifests(cmd,
         path='/v2/_acr/{}/manifests/list'.format(repository),
         username=username,
         password=password,
-        result_index='manifests')
+        result_index='manifests',
+        include_metadata_header=detail)
 
 
 def acr_repository_untag(cmd,
@@ -453,7 +465,7 @@ def _delete_manifest_confirmation(login_server,
         username=username,
         password=password,
         result_index='manifests',
-        pagination=20
+        include_metadata_header=True
     )
     filter_by_manifest = [x for x in manifests if manifest == x['digest']]
 
