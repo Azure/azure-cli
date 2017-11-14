@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.16
 ++++++++++
 * Added az sql db list-usages and az sql db show-usage commands.
 
