@@ -5,9 +5,12 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long
+helps['advisor'] = """
+    type: group
+    short-summary: Manage Azure Advisor.
+"""
 
-helps['example'] = """
-            type: group
-            short-summary: Example group description.
-            """
+helps['advisor recommendation list'] = """
+    type: group
+    short-summary: List Azure Advisor recommendations for a subscription.
+"""
