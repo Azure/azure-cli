@@ -3,6 +3,10 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+* Added az sql db list-usages and az sql db show-usage commands.
+
 2.0.15
 ++++++
 * Added --ignore-missing-vnet-service-endpoint param to az sql server vnet-rule create and update commands
