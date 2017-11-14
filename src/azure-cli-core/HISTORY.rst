@@ -4,8 +4,7 @@ Release History
 ===============
 2.0.22
 ++++++
-* Modified the AZURE_US_GOV_CLOUD's AAD authority endpoint from login.microsoftonline.com
-to login.microsoftonline.us.
+* Modified the AZURE_US_GOV_CLOUD's AAD authority endpoint from login.microsoftonline.com to login.microsoftonline.us.
 
 2.0.21
 ++++++
