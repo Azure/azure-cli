@@ -9,14 +9,14 @@ def cf_advisor(**_):
     from azure.mgmt.advisor import AdvisorManagementClient
     return get_mgmt_service_client(AdvisorManagementClient)
 
+def advisor_mgmt_client_factory(kwargs):
+    return cf_advisor(**kwargs)
 
 def recommendations_mgmt_client_factory(kwargs):
     return cf_advisor(**kwargs).recommendations
 
-
 def suppressions_mgmt_client_factory(kwargs):
     return cf_advisor(**kwargs).suppressions
-
 
 def configurations_mgmt_client_factory(kwargs):
     return cf_advisor(**kwargs).configurations
