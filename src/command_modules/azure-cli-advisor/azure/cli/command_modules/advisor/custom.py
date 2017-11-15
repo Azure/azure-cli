@@ -5,7 +5,6 @@
 
 import re
 import time
-import uuid
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.advisor.models import Category, ConfigData, ConfigDataProperties
@@ -64,7 +63,7 @@ def cli_advisor_list_recommendations(client, ids=None, rg_name=None, category=No
     return list(client.list(filter))
 
 def cli_advisor_disable_recommendations(client, ids=None, name=None, duration=None):
-    suppressionName = str(uuid.uuid4())
+    suppressionName = 'Azure_CLI_Suppression'
     if len(ids) > 1:
         raise CLIError('Only one recommendation can be disabled at a time.')
     id_arg = ids[0]
@@ -77,18 +76,19 @@ def cli_advisor_disable_recommendations(client, ids=None, name=None, duration=No
     return suppressionName
 
 def cli_advisor_enable_recommendations(client, ids=None, name=None, duration=None):
-    if len(ids) > 1:
+    if len(ids) != 1:
         raise CLIError('Only one recommendation can be enabled at a time.')
-    id_arg = ids[0]
-    recs = cli_advisor_list_recommendations(client=client.recommendations, ids=id_arg)
-    for rec in recs:
-        if rec.suppression_ids:
-            for id in rec.suppression_ids:
-                client.suppressions.delete(
-                    resource_uri = id_arg,
-                    recommendation_id = name,
-                    name = id
-                )
+    recs = cli_advisor_list_recommendations(client=client.recommendations, ids=ids)
+    rec = next(x for x in recs if x.name == name)
+    existingSups = rec.suppression_ids
+    allSups = list(client.suppressions.list())
+    matches = [x for x in allSups if x.suppression_id in existingSups]
+    for match in matches:
+        client.suppressions.delete(
+            resource_uri = ids[0],
+            recommendation_id = name,
+            name = match.name
+        )
 
 def cli_advisor_get_configurations(client, rg_name=None):
     if rg_name:
