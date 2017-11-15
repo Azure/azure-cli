@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.15
 ++++++
+* `role assignment list`: show default assignments for classic administrators
 * `ad sp reset-credentials`: support to add credentials instead of overwriting
 * `create-for-rbac`: emit out an actionable error if provisioning application failed for lack of permissions
 
