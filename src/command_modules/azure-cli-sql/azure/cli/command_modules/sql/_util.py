@@ -84,6 +84,10 @@ def get_sql_server_azure_ad_administrators_operations(kwargs):
     return get_sql_management_client(kwargs).server_azure_ad_administrators
 
 
+def get_sql_server_connection_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).server_connection_policies
+
+
 def get_sql_server_keys_operations(kwargs):
     return get_sql_management_client(kwargs).server_keys
 
