@@ -12,12 +12,14 @@ import mock
 from azure.cli.testsdk import TestCli
 
 from azure.mgmt.authorization.models import RoleDefinition, RoleDefinitionProperties
-from azure.graphrbac.models import Application, ServicePrincipal
+from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException
 from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_role_definition,
                                                    create_service_principal_for_rbac,
                                                    reset_service_principal_credential,
                                                    _try_x509_pem)
+
+from knack.util import CLIError
 
 # pylint: disable=line-too-long
 
@@ -243,6 +245,8 @@ class TestRoleMocked(unittest.TestCase):
         app_object.object_id = test_object_id
         key_cred = mock.MagicMock()
         key_cred.key_id = key_id_of_existing_cert
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
 
         graph_client_mock.return_value = faked_graph_client
         faked_graph_client.service_principals.list.return_value = [sp_object]
@@ -252,15 +256,57 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.list_key_credentials.return_value = [key_cred]
 
         # action
-        reset_service_principal_credential(name, cert=test_cert, append=True)
+        reset_service_principal_credential(cmd, name, cert=test_cert, append=True)
 
         # assert
         self.assertTrue(patch_invoked[0])
 
+    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    def test_create_for_rbac_failed_with_polished_error_if_due_to_permission(self, graph_client_mock, auth_client_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
+                                                               'Insufficient privileges to complete the operation',
+                                                               self.subscription_id)
 
-class FakedResponse(object):  # pylint: disable=too-few-public-methods
-    def __init__(self, status_code):
-        self.status_code = status_code
+        # action
+        with self.assertRaises(CLIError) as context:
+            create_service_principal_for_rbac(cmd, 'will-fail', skip_assignment=True)
+
+        # assert we handled such error
+        self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    def test_create_for_rbac_failed_with_regular_error(self, graph_client_mock, auth_client_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
+                                                               'something bad for you',
+                                                               self.subscription_id)
+        # action
+        with self.assertRaises(GraphErrorException) as context:
+            create_service_principal_for_rbac(cmd, 'will-fail')
+
+    @staticmethod
+    def _common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock, error_msg, subscription_id):
+        def _test_deserializer(resp_type, response):
+            err = FakedError(error_msg)
+            return err
+
+        faked_role_client = mock.MagicMock()
+        faked_role_client.config.subscription_id = subscription_id
+        auth_client_mock.return_value = faked_role_client
+        faked_graph_client = mock.MagicMock()
+        graph_client_mock.return_value = faked_graph_client
+
+        faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
+
+
+class FakedError(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, message):
+        self.message = message
 
 
 if __name__ == '__main__':
