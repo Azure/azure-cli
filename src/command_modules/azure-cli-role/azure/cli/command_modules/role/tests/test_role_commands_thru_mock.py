@@ -248,18 +248,9 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_create_for_rbac_failed_with_polished_error_if_due_to_permission(self, graph_client_mock, auth_client_mock):
-
-        def _test_deserializer(resp_type, response):
-            err = FakedError('Insufficient privileges to complete the operation')
-            return err
-
-        faked_role_client = mock.MagicMock()
-        faked_role_client.config.subscription_id = self.subscription_id
-        auth_client_mock.return_value = faked_role_client
-        faked_graph_client = mock.MagicMock()
-        graph_client_mock.return_value = faked_graph_client
-
-        faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
+        TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
+                                                               'Insufficient privileges to complete the operation',
+                                                               self.subscription_id)
 
         # action
         with self.assertRaises(CLIError) as context:
@@ -271,21 +262,25 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_create_for_rbac_failed_with_regular_error(self, graph_client_mock, auth_client_mock):
+        TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
+                                                               'something bad for you',
+                                                               self.subscription_id)
+        # action
+        self.assertRaises(GraphErrorException, create_service_principal_for_rbac, 'will-fail')
 
+    @staticmethod
+    def _common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock, error_msg, subscription_id):
         def _test_deserializer(resp_type, response):
-            err = FakedError('something bad for you')
+            err = FakedError(error_msg)
             return err
 
         faked_role_client = mock.MagicMock()
-        faked_role_client.config.subscription_id = self.subscription_id
+        faked_role_client.config.subscription_id = subscription_id
         auth_client_mock.return_value = faked_role_client
         faked_graph_client = mock.MagicMock()
         graph_client_mock.return_value = faked_graph_client
 
         faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
-
-        # action
-        self.assertRaises(GraphErrorException, create_service_principal_for_rbac, 'will-fail')
 
 
 class FakedError(object):  # pylint: disable=too-few-public-methods
