@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.command_modules.advisor._client_factory import \
     (advisor_mgmt_client_factory,
      recommendations_mgmt_client_factory,

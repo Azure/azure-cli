@@ -6,8 +6,8 @@
 import re
 import time
 
-from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.advisor.models import Category, ConfigData, ConfigDataProperties
+from azure.cli.core.util import CLIError
+from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
 
 def cli_advisor_generate_recommendations(client, timeout=30):
     """
@@ -27,7 +27,7 @@ def cli_advisor_generate_recommendations(client, timeout=30):
     while elapsedTime < maxTime:
         response = client.get_generate_status(
             raw=True,
-            operation_id = operation_id[0]
+            operation_id=operation_id[0]
         )
         status_code = response.response.status_code
         if status_code == 204:
@@ -44,23 +44,23 @@ def cli_advisor_list_recommendations(client, ids=None, rg_name=None, category=No
     :type category: str or :class:`Category
      <azure.mgmt.advisor.models.Category>`
     """
-    filter = None
+    scope = None
     if ids:
         for id_arg in ids:
-            subFilter = 'ResourceId eq \'{}\''.format(id_arg)
-            if filter:
-                filter += 'and {}'.format(subFilter)
+            subScope = 'ResourceId eq \'{}\''.format(id_arg)
+            if scope:
+                scope += 'and {}'.format(subScope)
             else:
-                filter = subFilter
+                scope = subScope
     elif rg_name:
-        filter = 'ResourceGroup eq \'{}\''.format(rg_name)
+        scope = 'ResourceGroup eq \'{}\''.format(rg_name)
     if category:
-        subFilter = 'Category eq \'{}\''.format(category)
-        if filter:
-            filter += 'and {}'.format(subFilter)
+        subScope = 'Category eq \'{}\''.format(category)
+        if scope:
+            scope += 'and {}'.format(subScope)
         else:
-            filter = subFilter
-    return list(client.list(filter))
+            scope = subScope
+    return list(client.list(scope))
 
 def cli_advisor_disable_recommendations(client, ids=None, name=None, duration=None):
     suppressionName = 'Azure_CLI_Suppression'
@@ -68,14 +68,14 @@ def cli_advisor_disable_recommendations(client, ids=None, name=None, duration=No
         raise CLIError('Only one recommendation can be disabled at a time.')
     id_arg = ids[0]
     client.create(
-        resource_uri = id_arg,
-        recommendation_id = name,
-        name = suppressionName,
-        ttl = duration
+        resource_uri=id_arg,
+        recommendation_id=name,
+        name=suppressionName,
+        ttl=duration
     )
     return suppressionName
 
-def cli_advisor_enable_recommendations(client, ids=None, name=None, duration=None):
+def cli_advisor_enable_recommendations(client, ids=None, name=None):
     if len(ids) != 1:
         raise CLIError('Only one recommendation can be enabled at a time.')
     recs = cli_advisor_list_recommendations(client=client.recommendations, ids=ids)
@@ -85,33 +85,32 @@ def cli_advisor_enable_recommendations(client, ids=None, name=None, duration=Non
     matches = [x for x in allSups if x.suppression_id in existingSups]
     for match in matches:
         client.suppressions.delete(
-            resource_uri = ids[0],
-            recommendation_id = name,
-            name = match.name
+            resource_uri=ids[0],
+            recommendation_id=name,
+            name=match.name
         )
 
 def cli_advisor_get_configurations(client, rg_name=None):
     if rg_name:
         return list(client.list_by_resource_group(rg_name).value)
-    else:
-        return list(client.list_by_subscription().value)
+    return list(client.list_by_subscription().value)
 
 def cli_advisor_set_configurations(client, rg_name=None, low_cpu_threshold=None, exclude=None):
-    input = ConfigData()
-    input.properties = ConfigDataProperties()
+    cfg = ConfigData()
+    cfg.properties = ConfigDataProperties()
 
     if low_cpu_threshold:
-        input.properties.low_cpu_threshold = low_cpu_threshold
+        cfg.properties.low_cpu_threshold = low_cpu_threshold
 
     if exclude:
         if exclude == 'True':
-            input.properties.exclude = True
+            cfg.properties.exclude = True
         elif exclude == 'False':
-            input.properties.exclude = False
+            cfg.properties.exclude = False
 
     if rg_name:
         return client.create_in_resource_group(
-            config_contract = input,
-            resource_group = rg_name)
-    else:
-        return client.create_in_subscription(input)
+            config_contract=cfg,
+            resource_group=rg_name)
+
+    return client.create_in_subscription(cfg)
