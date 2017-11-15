@@ -369,6 +369,7 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
+    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -379,7 +380,15 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
                                                    password_credentials=password_creds)
-    return client.create(app_create_param)
+
+    try:
+        return client.create(app_create_param)
+    except GraphErrorException as ex:
+        if 'insufficient privileges' in str(ex).lower():
+            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            raise CLIError("Directory permission is needed for the current user to register the application. "
+                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
+        raise
 
 
 def update_application(client, identifier, display_name=None, homepage=None,
@@ -846,7 +855,7 @@ def _get_public(x509):
 
 
 def reset_service_principal_credential(name, password=None, create_cert=False,
-                                       cert=None, years=None, keyvault=None):
+                                       cert=None, years=None, keyvault=None, append=False):
     import pytz
     client = _graph_client_factory()
 
@@ -883,26 +892,28 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     cert_creds = None
 
     if password:
-        app_creds = [
-            PasswordCredential(
-                start_date=app_start_date,
-                end_date=app_end_date,
-                key_id=str(uuid.uuid4()),
-                value=password
-            )
-        ]
+        app_creds = []
+        if append:
+            app_creds = list(client.applications.list_password_credentials(app.object_id))
+        app_creds.append(PasswordCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            key_id=str(uuid.uuid4()),
+            value=password
+        ))
 
     if public_cert_string:
-        cert_creds = [
-            KeyCredential(
-                start_date=app_start_date,
-                end_date=app_end_date,
-                value=public_cert_string,
-                key_id=str(uuid.uuid4()),
-                usage='Verify',
-                type='AsymmetricX509Cert'
-            )
-        ]
+        cert_creds = []
+        if append:
+            cert_creds = list(client.applications.list_key_credentials(app.object_id))
+        cert_creds.append(KeyCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            value=public_cert_string,
+            key_id=str(uuid.uuid4()),
+            usage='Verify',
+            type='AsymmetricX509Cert'
+        ))
 
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
 
