@@ -397,7 +397,12 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         ])
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheckV2('length([])', 1),
-            JMESPathCheckV2('[0].name', webapp)
+            JMESPathCheckV2('[0].name', webapp),
+            JMESPathCheckV2('[0].kind', 'app,linux')
+        ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheckV2('name', webapp),
+            JMESPathCheckV2('kind', 'app,linux')
         ])
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
             JMESPathCheckV2('appCommandLine', 'process.json')
@@ -761,6 +766,14 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
                      JMESPathCheckV2('name', functionapp_name),
                      JMESPathCheckV2('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('[0].kind', 'functionapp'),
+            JMESPathCheckV2('[0].name', functionapp_name)
+        ])
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheckV2('kind', 'functionapp'),
+            JMESPathCheckV2('name', functionapp_name)
+        ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
