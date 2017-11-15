@@ -5,6 +5,7 @@
 from datetime import datetime
 from azure.cli.testsdk import ScenarioTest
 
+
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
     def _validate_usage(self, usage, includeMeterDetails=False):
         self.assertIsNotNone(usage)
