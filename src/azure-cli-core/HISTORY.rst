@@ -6,6 +6,7 @@ Release History
 ++++++
 * Minor fixes
 * Modified the AZURE_US_GOV_CLOUD's AAD authority endpoint from login.microsoftonline.com to login.microsoftonline.us.
+
 2.0.21
 ++++++
 * Minor fixes
