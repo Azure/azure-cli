@@ -100,6 +100,7 @@ def load_arguments(self, _):
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
         c.argument('ids', nargs='+', help='space separated role assignment ids')
+        c.argument('include_classic_administrators', arg_type=get_three_state_flag(), help='list default role assignments for subscription classic administrators, aka co-admins')
 
     with self.argument_context('role definition') as c:
         c.argument('role_definition_id', options_list=['--name', '-n'], help='the role definition name')
