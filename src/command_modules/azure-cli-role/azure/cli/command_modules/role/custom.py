@@ -842,7 +842,7 @@ def _get_public(x509):
 
 
 def reset_service_principal_credential(cmd, name, password=None, create_cert=False,
-                                       cert=None, years=None, keyvault=None):
+                                       cert=None, years=None, keyvault=None, append=False):
     import pytz
     client = _graph_client_factory(cmd.cli_ctx)
 
@@ -879,26 +879,28 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     cert_creds = None
 
     if password:
-        app_creds = [
-            PasswordCredential(
-                start_date=app_start_date,
-                end_date=app_end_date,
-                key_id=str(uuid.uuid4()),
-                value=password
-            )
-        ]
+        app_creds = []
+        if append:
+            app_creds = list(client.applications.list_password_credentials(app.object_id))
+        app_creds.append(PasswordCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            key_id=str(uuid.uuid4()),
+            value=password
+        ))
 
     if public_cert_string:
-        cert_creds = [
-            KeyCredential(
-                start_date=app_start_date,
-                end_date=app_end_date,
-                value=public_cert_string,
-                key_id=str(uuid.uuid4()),
-                usage='Verify',
-                type='AsymmetricX509Cert'
-            )
-        ]
+        cert_creds = []
+        if append:
+            cert_creds = list(client.applications.list_key_credentials(app.object_id))
+        cert_creds.append(KeyCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            value=public_cert_string,
+            key_id=str(uuid.uuid4()),
+            usage='Verify',
+            type='AsymmetricX509Cert'
+        ))
 
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
 

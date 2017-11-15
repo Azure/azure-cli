@@ -53,6 +53,7 @@ def load_arguments(self, _):
             c.argument('years', type=int, default=None, arg_group='Credential')
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
+            c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
 
     with self.argument_context('ad') as c:
         c.argument('display_name', help='object\'s display name or its prefix')
