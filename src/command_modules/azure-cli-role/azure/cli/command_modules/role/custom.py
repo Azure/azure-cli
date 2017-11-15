@@ -224,7 +224,7 @@ def _backfill_assignments_for_co_admins(authz_client, assignee=None):
         return []
 
     result, users = [], []
-    for i in range(0, len(co_admins), 10):
+    for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
         upn_queries = ["userPrincipalName eq '{}'".format(x.properties.email_address) for x in co_admins[i:i + 10]]
         temp = list(list_users(graph_client.users, query_filter=' or '.join(upn_queries)))
         users += temp
