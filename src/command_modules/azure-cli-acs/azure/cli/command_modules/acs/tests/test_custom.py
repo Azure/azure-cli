@@ -12,11 +12,12 @@ import unittest
 import yaml
 
 from msrestazure.azure_exceptions import CloudError
-
+from azure.graphrbac.models import GraphErrorException
 from azure.cli.command_modules.acs._params import (regionsInPreview,
                                                    regionsInProd)
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
-                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix)
+                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
+                                                  create_application)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -291,3 +292,23 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(len(merged['users']), 2)
         self.assertEqual(merged['users'], ['user1', 'user2'])
         self.assertEqual(merged['current-context'], obj2['current-context'])
+
+    def test_acs_sp_create_failed_with_polished_error_if_due_to_permission(self):
+
+        class FakedError(object):
+            def __init__(self, message):
+                self.message = message
+
+        def _test_deserializer(resp_type, response):
+            err = FakedError('Insufficient privileges to complete the operation')
+            return err
+
+        client = mock.MagicMock()
+        client.create.side_effect = GraphErrorException(_test_deserializer, None)
+
+        # action
+        with self.assertRaises(CLIError) as context:
+            create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
+
+        # assert we handled such error
+        self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
