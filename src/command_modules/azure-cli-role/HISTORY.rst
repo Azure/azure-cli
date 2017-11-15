@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.15
+++++++
+* 'ad sp reset-credentials': support to add credentials instead of overwriting
 
 2.0.14
 ++++++

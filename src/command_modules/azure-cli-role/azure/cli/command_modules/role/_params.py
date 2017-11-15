@@ -33,6 +33,7 @@ register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
 register_cli_argument('ad sp create-for-rbac', 'show_auth_for_sdk', options_list='--sdk-auth', action='store_true', help='output result in compatible with Azure SDK auth file')
+register_cli_argument('ad sp reset-credentials', 'append', action='store_true', help='append the new credential instead of overwriting')
 
 for item in ['create-for-rbac', 'reset-credentials']:
     register_cli_argument('ad sp {}'.format(item), 'name', name_arg_type)
