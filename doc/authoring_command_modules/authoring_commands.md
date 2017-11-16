@@ -80,7 +80,7 @@ register_cli_argument('mypackage command2', 'my_param', ...)  # command2 inherit
 
 The follow keyword arguments are supported:
 - `options_list` - By default, your argument will be exposed as an option in hyphenated form (ex: `my_param` becomes `--my-param`). If you would like to change the option string without changing the parameter name, and/or add a short option, specify the `options_list` kwarg. This is a tuple of two string values, one for an standard option string, and the other for an optional short string. (Ex: `options_list=('--myparam', '-m')`)
-- `validator` - The name of a callable that takes the function namespace as a parameter. Allows you to perform any custom logic or validation on the entire namespace prior to command execution. Validators are executed after argument parsing, and thus after `type` and `action` have been applied. However, because the order in which validators are exectued is random, you should not have multiple validators modifying the same parameter within the namespace.
+- `validator` - The name of a callable that takes the function namespace as a parameter. Allows you to perform any custom logic or validation on the entire namespace prior to command execution. Validators are executed after argument parsing, and thus after `type` and `action` have been applied. However, because the order in which validators are executed is random, you should not have multiple validators modifying the same parameter within the namespace.
 - `completer` - The name of a callable that takes the following parameters `(prefix, action, parsed_args, **kwargs)` and return a list of completion values.
 
 Additionally, the following `kwargs`, supported by argparse, are supported as well:
