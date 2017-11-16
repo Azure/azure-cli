@@ -31,8 +31,6 @@ def cli_consumption_list_usage(client, billing_period_name=None, top=None, inclu
         filter_from = "properties/usageEnd ge \'{}\'".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_to = "properties/usageEnd le \'{}\'".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_expression = "{} and {}".format(filter_from, filter_to)
-    if (start_date and not end_date) or (end_date and not start_date):
-        raise ValueError("Usage : [--start-date <startDate> & --end-date <endDate>].")
     if top:
         pages = client.list(scope, expand=expand, filter=filter_expression, top=top)
         return list(pages.advance_page())

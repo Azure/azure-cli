@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from datetime import datetime
+from azure.cli.core.util import CLIError
 
 
 def get_datetime_type():
@@ -21,3 +22,9 @@ def get_datetime_type():
                 continue
         raise ValueError("Input '{}' not valid. Valid example: 2017-02-11T23:59:59Z".format(string))
     return datetime_type
+
+
+def validate_both_start_end_dates(namespace):
+    """Validates the existence of both start and end dates in the parameter or neither"""
+    if (namespace.start_date and not namespace.end_date) or (namespace.end_date and not namespace.start_date):
+        raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")
