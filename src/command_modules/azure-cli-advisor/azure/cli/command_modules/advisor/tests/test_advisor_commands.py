@@ -5,14 +5,10 @@
 
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer
 
 
-class AzureAdvisorServiceScenarioTest(ScenarioTest):
-
-    def test_generate_recommendations(self):
-        output = self.cmd('advisor recommendation generate').get_output_in_json()
-        self.assertEqual(output['Status'], 204)
+class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 
     def test_list_disable_enable_recommendations(self):
         output = self.cmd('advisor recommendation list').get_output_in_json()
@@ -27,6 +23,13 @@ class AzureAdvisorServiceScenarioTest(ScenarioTest):
         output = self.cmd('advisor recommendation list --category cost').get_output_in_json()
         self.assertTrue(len(output) > 0)
         self.assertEqual(output[0]['suppressionIds'], None)
+
+
+class AzureAdvisorScenarioTest(ScenarioTest):
+
+    def test_generate_recommendations(self):
+        output = self.cmd('advisor recommendation generate').get_output_in_json()
+        self.assertEqual(output['Status'], 204)
 
     def test_get_set_configurations_subscription(self):
         output = self.cmd('advisor configuration get').get_output_in_json()

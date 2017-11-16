@@ -3,22 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import re
 import time
 import uuid
-import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
-
-logger = azlogging.get_az_logger(__name__)
 
 
 def cli_advisor_generate_recommendations(client, timeout=30):
     response = client.generate(raw=True)
     location = response.headers['Location']
 
-    # extract the operation ID from the Location header
-    operation_id = re.findall("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", location)
+    operation_id = _parse_operation_id(location)
 
     elapsedTime = 0
     maxTime = int(timeout)
@@ -27,7 +22,7 @@ def cli_advisor_generate_recommendations(client, timeout=30):
     while elapsedTime < maxTime:
         response = client.get_generate_status(
             raw=True,
-            operation_id=operation_id[0]
+            operation_id=operation_id
         )
         status_code = response.response.status_code
         if status_code == 204:
@@ -137,3 +132,12 @@ def _parse_recommendation_uri(recommendationUri):
     resourceUri = recommendationUri[:recommendationUri.find("/providers/Microsoft.Advisor/recommendations")]
     recommendationId = recommendationUri[recommendationUri.find("/recommendations/") + len('/recommendations/'):]
     return {'resourceUri': resourceUri, 'recommendationId': recommendationId}
+
+
+def _parse_operation_id(location):
+    # extract the operation ID from the Location header
+    # it is a GUID (i.e. a string of length 36) immediately preceding the api-version query parameter
+    end = location.find('?api-version')
+    start = end - 36
+    operation_id = location[start:end]
+    return operation_id
