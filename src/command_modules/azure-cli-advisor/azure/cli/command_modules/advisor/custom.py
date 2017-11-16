@@ -5,15 +5,15 @@
 
 import re
 import time
+import uuid
+import azure.cli.core.azlogging as azlogging
 
 from azure.cli.core.util import CLIError
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
 
+logger = azlogging.get_az_logger(__name__)
+
 def cli_advisor_generate_recommendations(client, timeout=30):
-    """
-    :param timeout: The timeout in seconds.
-    :type timeout: str
-    """
     response = client.generate(raw=True)
     location = response.headers['Location']
 
@@ -31,19 +31,12 @@ def cli_advisor_generate_recommendations(client, timeout=30):
         )
         status_code = response.response.status_code
         if status_code == 204:
-            break
+            return {'Status': 204, 'Message': 'Recommendation generation has been completed.'}
         time.sleep(1)
         elapsedTime += 1
-    if status_code != 204:
-        raise CLIError('Recommendation generation timed out.')
-    return 'Recommendations successfully generated.'
+    return {'Status': 202, 'Message': 'Recommendation generation is in progress.'}
 
 def cli_advisor_list_recommendations(client, ids=None, rg_name=None, category=None):
-    """
-    :param category: The category of the recommendation.
-    :type category: str or :class:`Category
-     <azure.mgmt.advisor.models.Category>`
-    """
     scope = None
     if ids:
         for id_arg in ids:
@@ -62,33 +55,53 @@ def cli_advisor_list_recommendations(client, ids=None, rg_name=None, category=No
             scope = subScope
     return list(client.list(scope))
 
-def cli_advisor_disable_recommendations(client, ids=None, name=None, duration=None):
-    suppressionName = 'Azure_CLI_Suppression'
-    if len(ids) > 1:
-        raise CLIError('Only one recommendation can be disabled at a time.')
-    id_arg = ids[0]
-    client.create(
-        resource_uri=id_arg,
-        recommendation_id=name,
-        name=suppressionName,
-        ttl=duration
-    )
-    return suppressionName
-
-def cli_advisor_enable_recommendations(client, ids=None, name=None):
-    if len(ids) != 1:
-        raise CLIError('Only one recommendation can be enabled at a time.')
-    recs = cli_advisor_list_recommendations(client=client.recommendations, ids=ids)
-    rec = next(x for x in recs if x.name == name)
-    existingSups = rec.suppression_ids
-    allSups = list(client.suppressions.list())
-    matches = [x for x in allSups if x.suppression_id in existingSups]
-    for match in matches:
-        client.suppressions.delete(
-            resource_uri=ids[0],
-            recommendation_id=name,
-            name=match.name
+def cli_advisor_disable_recommendations(client, ids, days=None):
+    suppressions = []
+    suppressionName = str(uuid.uuid4())
+    for id_arg in ids:
+        result = _parse_recommendation_uri(id_arg)
+        resourceUri = result['resourceUri']
+        recommendationId = result['recommendationId']
+        if days:
+            ttl = '{}:00:00:00'.format(days)
+        else:
+            ttl = ''
+        client.create(
+            resource_uri=resourceUri,
+            recommendation_id=recommendationId,
+            name=suppressionName,
+            ttl=ttl
         )
+        suppressions.append(client.get(
+            resource_uri=resourceUri,
+            recommendation_id=recommendationId,
+            name=suppressionName
+        ))
+    return suppressions
+
+def cli_advisor_enable_recommendations(client, ids):
+    enabledRecs = []
+    allSups = list(client.suppressions.list())
+    for id_arg in ids:
+        result = _parse_recommendation_uri(id_arg)
+        resourceUri = result['resourceUri']
+        recommendationId = result['recommendationId']
+        recs = cli_advisor_list_recommendations(
+            client=client.recommendations,
+            ids=[resourceUri]
+        )
+        rec = next(x for x in recs if x.name == recommendationId)
+        matches = [x for x in allSups if x.suppression_id in rec.suppression_ids]
+        for match in matches:
+            logger.debug('Attempting to delete suppression with resourceUri = \'{}\', recommendationId = \'{}\', name = \'{}\''.format(resourceUri, recommendationId, match.name))
+            client.suppressions.delete(
+                resource_uri=resourceUri,
+                recommendation_id=recommendationId,
+                name=match.name
+            )
+        rec.suppression_ids = None
+        enabledRecs.append(rec)
+    return enabledRecs
 
 def cli_advisor_get_configurations(client, rg_name=None):
     if rg_name:
@@ -114,3 +127,8 @@ def cli_advisor_set_configurations(client, rg_name=None, low_cpu_threshold=None,
             resource_group=rg_name)
 
     return client.create_in_subscription(cfg)
+
+def _parse_recommendation_uri(recommendationUri):
+    resourceUri = recommendationUri[:recommendationUri.find("/providers/Microsoft.Advisor/recommendations")]
+    recommendationId = recommendationUri[recommendationUri.find("/recommendations/")+len('/recommendations/'):]
+    return {'resourceUri': resourceUri, 'recommendationId': recommendationId}

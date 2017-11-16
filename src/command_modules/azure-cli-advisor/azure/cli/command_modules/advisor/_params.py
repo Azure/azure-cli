@@ -13,11 +13,9 @@ register_cli_argument('advisor recommendation list', 'rg_name', options_list=('-
 register_cli_argument('advisor recommendation list', 'category', options_list=('--category', '-c'), required=False, help='Name of category.')
 
 register_cli_argument('advisor recommendation disable', 'ids', nargs='+', options_list=('--ids'), required=True, help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
-register_cli_argument('advisor recommendation disable', 'name', options_list=('--name', '-n'), required=True, help='Name of the recommendation to disable.')
-register_cli_argument('advisor recommendation disable', 'duration', options_list=('--duration', '-d'), required=False, help='Duration to disable.')
+register_cli_argument('advisor recommendation disable', 'days', options_list=('--days', '-d'), required=False, help='Number of days to disable. If not specified, the recommendation is disabled forever.')
 
 register_cli_argument('advisor recommendation enable', 'ids', nargs='+', options_list=('--ids'), required=True, help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
-register_cli_argument('advisor recommendation enable', 'name', options_list=('--name', '-n'), required=True, help='Name of the recommendation to enable.')
 
 register_cli_argument('advisor configuration get', 'rg_name', options_list=('--resource-group', '-g'), required=False, help='Name of resource group.')
 
