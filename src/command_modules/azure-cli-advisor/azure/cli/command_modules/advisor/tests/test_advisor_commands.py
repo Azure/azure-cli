@@ -7,6 +7,7 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
+
 class AzureAdvisorServiceScenarioTest(ScenarioTest):
 
     def test_generate_recommendations(self):
@@ -53,6 +54,7 @@ class AzureAdvisorServiceScenarioTest(ScenarioTest):
         output = self.cmd('advisor configuration get --resource-group {}'.format(resource_group)).get_output_in_json()
         self.assertTrue(len(output) > 0)
         self.assertTrue(not output[0]['properties']['exclude'])
+
 
 if __name__ == '__main__':
     unittest.main()
