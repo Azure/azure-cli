@@ -8,10 +8,10 @@ import time
 import uuid
 import azure.cli.core.azlogging as azlogging
 
-from azure.cli.core.util import CLIError
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
 
 logger = azlogging.get_az_logger(__name__)
+
 
 def cli_advisor_generate_recommendations(client, timeout=30):
     response = client.generate(raw=True)
@@ -36,6 +36,7 @@ def cli_advisor_generate_recommendations(client, timeout=30):
         elapsedTime += 1
     return {'Status': 202, 'Message': 'Recommendation generation is in progress.'}
 
+
 def cli_advisor_list_recommendations(client, ids=None, rg_name=None, category=None):
     scope = None
     if ids:
@@ -54,6 +55,7 @@ def cli_advisor_list_recommendations(client, ids=None, rg_name=None, category=No
         else:
             scope = subScope
     return list(client.list(scope))
+
 
 def cli_advisor_disable_recommendations(client, ids, days=None):
     suppressions = []
@@ -79,6 +81,7 @@ def cli_advisor_disable_recommendations(client, ids, days=None):
         ))
     return suppressions
 
+
 def cli_advisor_enable_recommendations(client, ids):
     enabledRecs = []
     allSups = list(client.suppressions.list())
@@ -93,7 +96,6 @@ def cli_advisor_enable_recommendations(client, ids):
         rec = next(x for x in recs if x.name == recommendationId)
         matches = [x for x in allSups if x.suppression_id in rec.suppression_ids]
         for match in matches:
-            logger.debug('Attempting to delete suppression with resourceUri = \'{}\', recommendationId = \'{}\', name = \'{}\''.format(resourceUri, recommendationId, match.name))
             client.suppressions.delete(
                 resource_uri=resourceUri,
                 recommendation_id=recommendationId,
@@ -103,10 +105,12 @@ def cli_advisor_enable_recommendations(client, ids):
         enabledRecs.append(rec)
     return enabledRecs
 
+
 def cli_advisor_get_configurations(client, rg_name=None):
     if rg_name:
         return list(client.list_by_resource_group(rg_name).value)
     return list(client.list_by_subscription().value)
+
 
 def cli_advisor_set_configurations(client, rg_name=None, low_cpu_threshold=None, exclude=None):
     cfg = ConfigData()
@@ -128,7 +132,8 @@ def cli_advisor_set_configurations(client, rg_name=None, low_cpu_threshold=None,
 
     return client.create_in_subscription(cfg)
 
+
 def _parse_recommendation_uri(recommendationUri):
     resourceUri = recommendationUri[:recommendationUri.find("/providers/Microsoft.Advisor/recommendations")]
-    recommendationId = recommendationUri[recommendationUri.find("/recommendations/")+len('/recommendations/'):]
+    recommendationId = recommendationUri[recommendationUri.find("/recommendations/") + len('/recommendations/'):]
     return {'resourceUri': resourceUri, 'recommendationId': recommendationId}
