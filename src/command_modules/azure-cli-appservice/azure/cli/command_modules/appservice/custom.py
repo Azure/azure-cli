@@ -113,11 +113,13 @@ def update_webapp(instance, client_affinity_enabled=None):
 
 
 def list_webapp(resource_group_name=None):
-    return _list_app(['app', 'app,linux'], resource_group_name)
+    from ._validators import WEB_APP_TYPES
+    return _list_app(WEB_APP_TYPES, resource_group_name)
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app(['functionapp', 'functionapp,linux'], resource_group_name)
+    from ._validators import FUNCTION_APP_TYPES
+    return _list_app(FUNCTION_APP_TYPES, resource_group_name)
 
 
 def _list_app(app_types, resource_group_name=None):
