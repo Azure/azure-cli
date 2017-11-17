@@ -68,7 +68,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
-    elif runtime:  # windows webapp
+    elif runtime:  # windows webapp with runtime specified
         if startup_file or deployment_container_image_name:
             raise CLIError("usage error: --startup-file or --deployment-container-image-name is "
                            "only appliable on linux webapp")
@@ -80,6 +80,9 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
             site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+
+    else:  # windows webapp without runtime specified
+        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
