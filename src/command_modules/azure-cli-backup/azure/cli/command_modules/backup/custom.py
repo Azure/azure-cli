@@ -86,7 +86,7 @@ def delete_policy(client, resource_group_name, vault_name, name):
 
 
 def show_container(client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
-    return _get_one_or_many(_get_containers(client, container_type, status, resource_group_name, vault_name, name))
+    return _get_none_one_or_many(_get_containers(client, container_type, status, resource_group_name, vault_name, name))
 
 
 def list_containers(client, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
@@ -144,7 +144,7 @@ def show_item(client, resource_group_name, vault_name, container_name, name, con
               item_type="VM"):
     items = list_items(client, resource_group_name, vault_name, container_name, container_type, item_type)
 
-    return _get_one_or_many([item for item in items if item.properties.friendly_name == name])
+    return _get_none_one_or_many([item for item in items if item.properties.friendly_name == name])
 
 
 def list_items(client, resource_group_name, vault_name, container_name, container_type="AzureIaasVM", item_type="VM"):
@@ -156,6 +156,8 @@ def list_items(client, resource_group_name, vault_name, container_name, containe
     paged_items = _get_list_from_paged_response(items)
     container = show_container(backup_protection_containers_cf(None), container_name, resource_group_name, vault_name,
                                container_type)
+    _validate_container(container)
+
     return [item for item in paged_items if item.properties.container_name.lower() in container.name.lower()]
 
 
@@ -167,7 +169,10 @@ def update_policy_for_item(client, resource_group_name, vault_name, container_na
     # Get objects from JSON files
     item = show_item(backup_protected_items_client, resource_group_name, vault_name, container_name, item_name,
                      container_type, item_type)
+    _validate_item(item)
+
     policy = show_policy(protection_policies_cf(None), resource_group_name, vault_name, policy_name)
+    _validate_policy(policy)
 
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
@@ -196,6 +201,7 @@ def backup_now(client, resource_group_name, vault_name, container_name, item_nam
                container_type="AzureIaasVM", item_type="VM"):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      container_type, item_type)
+    _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -212,6 +218,7 @@ def show_recovery_point(client, resource_group_name, vault_name, container_name,
                         container_type="AzureIaasVM", item_type="VM"):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      container_type, item_type)
+    _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -225,6 +232,7 @@ def list_recovery_points(client, resource_group_name, vault_name, container_name
                          container_type="AzureIaasVM", item_type="VM", start_date=None, end_date=None):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      container_type, item_type)
+    _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -247,6 +255,8 @@ def list_recovery_points(client, resource_group_name, vault_name, container_name
 def restore_disks(client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      "AzureIaasVM", "VM")
+    _validate_item(item)
+
     vault = vaults_cf(None).get(resource_group_name, vault_name, custom_headers=_get_custom_headers())
     vault_location = vault.location
 
@@ -275,6 +285,7 @@ def restore_disks(client, resource_group_name, vault_name, container_name, item_
 def restore_files_mount_rp(client, resource_group_name, vault_name, container_name, item_name, rp_name):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      "AzureIaasVM", "VM")
+    _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -306,6 +317,7 @@ def restore_files_mount_rp(client, resource_group_name, vault_name, container_na
 def restore_files_unmount_rp(client, resource_group_name, vault_name, container_name, item_name, rp_name):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      "AzureIaasVM", "VM")
+    _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -324,6 +336,7 @@ def disable_protection(client, resource_group_name, vault_name, container_name, 
                        container_type="AzureIaasVM", item_type="VM", delete_backup_data=False, **kwargs):
     item = show_item(backup_protected_items_cf(None), resource_group_name, vault_name, container_name, item_name,
                      container_type, item_type)
+    _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
@@ -568,6 +581,23 @@ def _get_resource_name_and_rg(resource_group_name, name_or_id):
         resource_group = resource_group_name
     return name, resource_group
 
+
+def _validate_container(container):
+    _validate_object(container, "Container not found. Please provide a valid container_name.")
+
+
+def _validate_item(item):
+    _validate_object(item, "Item not found. Please provide a valid item_name.")
+
+
+def _validate_policy(policy):
+    _validate_object(policy, "Policy not found. Please provide a valid policy_name.")
+
+
+def _validate_object(obj, error_message):
+    if obj is None:
+        raise ValueError(error_message)
+
 # Tracking Utilities
 
 
@@ -627,8 +657,12 @@ def _get_list_from_paged_response(obj_list):
     return list(obj_list) if isinstance(obj_list, Paged) else obj_list
 
 
-def _get_one_or_many(obj_list):
-    return obj_list[0] if len(obj_list) == 1 else obj_list
+def _get_none_one_or_many(obj_list):
+    if len(obj_list) == 0:
+        return None
+    elif len(obj_list) == 1:
+        return obj_list[0]
+    return obj_list
 
 
 def _get_filter_string(filter_dict):
