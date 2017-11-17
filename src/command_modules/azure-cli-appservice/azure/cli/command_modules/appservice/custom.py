@@ -52,7 +52,6 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     is_linux = plan_info.reserved
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     if is_linux:
         if runtime and deployment_container_image_name:
@@ -78,12 +77,16 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](match, site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
+        logger.info('1')
         if not match['displayName'].startswith('node'):
+            logger.info('2')
             site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
+
+    webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation()(poller)
@@ -1200,7 +1203,7 @@ def get_streaming_log(resource_group_name, name, provider=None, number_of_lines=
     user, password = _get_site_credential(client, resource_group_name, name)
     if number_of_lines:
         webapp = client.web_apps.get(resource_group_name, name)
-        if webapp.reserved is not True:
+        if not webapp.reserved:
             raise CLIError('--number-of-lines is only supported for App Service on Linux apps')
         url = scm_url + '/api/logs/docker'
         _get_log(url, user, password, number_of_lines=number_of_lines)
@@ -1272,7 +1275,9 @@ def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
 
 def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
     import sys
+    import json
     href_count = api_string.count('https')
+    json.loads(api_string)
 
     std_encoding = sys.stdout.encoding
     if href_count > 1:
@@ -1283,11 +1288,11 @@ def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
         href_str = api_string[api_string.index("https"):index_of_path]
         size = api_string[api_string.index('\"size\":') +
                           len('\"size\":'):api_string.index(',\"href\"')]
-        logger.warning('\nSite Instance #%i', x + 1)
+        logger.info('\nSite Instance #%i', x + 1)
         logger.info('\nUsing endpoint: %s', href_str)
         url = href_str
         byte_limit_exceeded = (int(size) > byte_limit)
-        if byte_limit_exceeded is True:
+        if byte_limit_exceeded:
             headers.update({'Range': 'bytes=-512000'})  # only get the last 512k
 
         r = http.request(
@@ -1302,12 +1307,11 @@ def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
                  .replace('\\n', '\n'))
         lines_split = lines.splitlines()
         lines_split_length = len(lines_split)
-        if byte_limit_exceeded is True:
+        if byte_limit_exceeded:
             if lines_split_length < int(number_of_lines):
                 logger.warning("Hit internal limit of %s bytes."
                                "Please download to see full logs", byte_limit)
-        if int(number_of_lines) > lines_split_length:
-            number_of_lines = lines_split_length
+        number_of_lines = min(int(number_of_lines), lines_split_length)
         last_n_lines = ('\n'.join(lines_split[-int(number_of_lines)::])).lstrip('\n')
         print(last_n_lines)
         api_string = api_string[(index_of_path + len('\",\"path')):]
