@@ -93,18 +93,27 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type)
         c.argument('vm', help='Name or ID of the Virtual Machine to be protected.')
         c.argument('policy_name', policy_name_type)
-        c.argument('container_name', container_name_type)
-        c.argument('item_name', item_name_type)
-        c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
-        c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
 
+    for command in ['backup-now', 'disable']:
+        with self.argument_context('backup protection ' + command) as c:
+            c.argument('container_name', container_name_type)
+            c.argument('item_name', item_name_type)
+
+    with self.argument_context('backup protection backup-now') as c:
+        c.argument('retain_until', type=datetime_type, help='The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y).')
+
+    with self.argument_context('backup protection disable') as c:
+        c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
     # Restore
     with self.argument_context('backup restore') as c:
         c.argument('vault_name', vault_name_type)
         c.argument('container_name', container_name_type)
         c.argument('item_name', item_name_type)
         c.argument('rp_name', rp_name_type)
+
+    with self.argument_context('backup restore restore-disks') as c:
         c.argument('storage_account', help='Name or ID of the storge account to which disks are restored.')
+        c.argument('restore_disks_to_this_storage_account', arg_type=get_three_state_flag(), help='Use this flag when you want disks to be restored to the given storage account. When not specified, disks will be restored to their original storage accounts. Default: false.')
 
     # Job
     with self.argument_context('backup job') as c:
