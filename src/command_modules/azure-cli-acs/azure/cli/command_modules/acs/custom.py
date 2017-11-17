@@ -960,6 +960,7 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
+    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -970,7 +971,14 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
                                                    password_credentials=password_creds)
-    return client.create(app_create_param)
+    try:
+        return client.create(app_create_param)
+    except GraphErrorException as ex:
+        if 'insufficient privileges' in str(ex).lower():
+            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            raise CLIError("Directory permission is needed for the current user to register the application. "
+                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
+        raise
 
 
 def _build_application_creds(password=None, key_value=None, key_type=None,
@@ -1270,32 +1278,7 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
         access_profile = access_profiles.get('cluster_admin' if admin else 'cluster_user')
         encoded_kubeconfig = access_profile.get('kube_config')
         kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
-
-        # Special case for printing to stdout
-        if path == "-":
-            print(kubeconfig)
-            return
-
-        # ensure that at least an empty ~/.kube/config exists
-        directory = os.path.dirname(path)
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except OSError as ex:
-                if ex.errno != errno.EEXIST:
-                    raise
-        if not os.path.exists(path):
-            with open(path, 'w+t'):
-                pass
-
-        # merge the new kubeconfig into the existing one
-        with tempfile.NamedTemporaryFile(mode='w+t') as additional_file:
-            additional_file.write(kubeconfig)
-            additional_file.flush()
-            try:
-                merge_kubernetes_configurations(path, additional_file.name)
-            except yaml.YAMLError as ex:
-                logger.warning('Failed to merge credentials to kube config file: %s', ex)
+        _print_or_merge_credentials(path, kubeconfig)
 
 
 def aks_list(client, resource_group_name=None):
@@ -1385,6 +1368,41 @@ def _ensure_service_principal(service_principal=None,
             raise CLIError('--client-secret is required if --service-principal is specified')
     store_acs_service_principal(subscription_id, client_secret, service_principal)
     return load_acs_service_principal(subscription_id)
+
+
+def _print_or_merge_credentials(path, kubeconfig):
+    """Merge an unencrypted kubeconfig into the file at the specified path, or print it to
+    stdout if the path is "-".
+    """
+    # Special case for printing to stdout
+    if path == "-":
+        print(kubeconfig)
+        return
+
+    # ensure that at least an empty ~/.kube/config exists
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory)
+        except OSError as ex:
+            if ex.errno != errno.EEXIST:
+                raise
+    if not os.path.exists(path):
+        with open(path, 'w+t'):
+            pass
+
+    # merge the new kubeconfig into the existing one
+    fd, temp_path = tempfile.mkstemp()
+    additional_file = os.fdopen(fd, 'w+t')
+    try:
+        additional_file.write(kubeconfig)
+        additional_file.flush()
+        merge_kubernetes_configurations(path, temp_path)
+    except yaml.YAMLError as ex:
+        logger.warning('Failed to merge credentials to kube config file: %s', ex)
+    finally:
+        additional_file.close()
+        os.remove(temp_path)
 
 
 def _remove_nulls(managed_clusters):

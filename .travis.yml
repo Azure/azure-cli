@@ -11,8 +11,13 @@ install: echo 'skip'
 cache: pip
 jobs:
   include:
-    - stage: build
-      script: ./scripts/ci/build.sh
+    - stage: precheck
+      env: PURPOSE='PEP8'
+      script: ./scripts/ci/precheck_pep8.sh
+      python: 3.6
+    - stage: precheck
+      env: PURPOSE='Headers'
+      script: ./scripts/ci/precheck_header.sh
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'

@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.20
+++++++
+* `acs create`: emit out an actionable error if provisioning application failed for lack of permissions
+
 
 2.0.19
 ++++++
@@ -9,6 +13,7 @@ Release History
 * deprecate --orchestrator-release option in acs create
 * change default VM size for AKS to Standard_D1_v2
 * fix "az aks browse" on Windows
+* fix "az aks get-credentials" on Windows
 
 2.0.18
 ++++++

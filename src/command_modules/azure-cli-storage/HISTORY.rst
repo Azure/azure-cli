@@ -11,6 +11,7 @@ Release History
 * `storage blob/file delete-batch`: Added commands to glob and delete multiple blobs/files.
 * `storage metrics update`: fixed bug with enabling metrics.
 * `storage blob upload-batch`: Increase block size when target file is over 200GB.
+* `storage account create/update`: Fix issue where --bypass and --default-action arguments were ignored.
 
 2.0.18
 ++++++

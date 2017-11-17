@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import mock
+import uuid
 import os
 import time
 import tempfile
@@ -395,7 +397,12 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         ])
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheckV2('length([])', 1),
-            JMESPathCheckV2('[0].name', webapp)
+            JMESPathCheckV2('[0].name', webapp),
+            JMESPathCheckV2('[0].kind', 'app,linux')
+        ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheckV2('name', webapp),
+            JMESPathCheckV2('kind', 'app,linux')
         ])
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
             JMESPathCheckV2('appCommandLine', 'process.json')
@@ -759,6 +766,14 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
                      JMESPathCheckV2('name', functionapp_name),
                      JMESPathCheckV2('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('[0].kind', 'functionapp'),
+            JMESPathCheckV2('[0].name', functionapp_name)
+        ])
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheckV2('kind', 'functionapp'),
+            JMESPathCheckV2('name', functionapp_name)
+        ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -863,6 +878,24 @@ class WebappZipDeployScenarioTest(LiveScenarioTest):
             JMESPathCheckV2('deployer', 'Zip-Push'),
             JMESPathCheckV2('message', 'Created via zip push deployment'),
             JMESPathCheckV2('complete', True)])
+
+
+class WebappImplictIdentityTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_assign_identity(self, resource_group):
+        scope = '/subscriptions/{}/resourcegroups/{}'.format(self.get_subscription_id(), resource_group)
+        role = 'Reader'
+        plan_name = self.create_random_name('web-msi-plan', 20)
+        webapp_name = self.create_random_name('web-msi', 20)
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46667')]
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
+            result = self.cmd('webapp assign-identity -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+        self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].properties.roleDefinitionName', role)
+        ])
 
 
 if __name__ == '__main__':

@@ -158,7 +158,9 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def format_help(self):
         is_group = self.is_group()
 
-        telemetry.set_command_details(command=self.prog[3:])
+        telemetry.set_command_details(
+            command=self.prog[3:],
+            extension_name=self.command_source.extension_name if self.command_source else None)
         telemetry.set_success(summary='show help')
 
         _help.show_help(self.prog.split()[1:],

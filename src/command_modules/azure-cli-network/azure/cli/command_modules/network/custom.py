@@ -2874,9 +2874,6 @@ def import_zone(resource_group_name, zone_name, file_name):
                             'imported at this time. Skipping...', relative_record_set_name)
                         continue
 
-                    if record_set_type != 'soa' and relative_record_set_name != origin:
-                        relative_record_set_name = record_set_name[:-(len(origin) + 2)]
-
                     record_set = RecordSet(ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
@@ -2898,7 +2895,7 @@ def import_zone(resource_group_name, zone_name, file_name):
     for key, rs in record_sets.items():
 
         rs_name, rs_type = key.lower().rsplit('.', 1)
-        rs_name = '@' if rs_name == origin else rs_name
+        rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
 
         try:
             record_count = len(getattr(rs, _type_to_property_name(rs_type)))

@@ -20,7 +20,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -113,11 +113,13 @@ def update_webapp(instance, client_affinity_enabled=None):
 
 
 def list_webapp(resource_group_name=None):
-    return _list_app(['app', 'app,linux'], resource_group_name)
+    from ._validators import WEB_APP_TYPES
+    return _list_app(WEB_APP_TYPES, resource_group_name)
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app(['functionapp', 'functionapp,linux'], resource_group_name)
+    from ._validators import FUNCTION_APP_TYPES
+    return _list_app(FUNCTION_APP_TYPES, resource_group_name)
 
 
 def _list_app(app_types, resource_group_name=None):
@@ -130,6 +132,23 @@ def _list_app(app_types, resource_group_name=None):
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
+
+
+def assign_identity(resource_group_name, name, role='Contributor', scope=None, disable_msi=False):
+    client = web_client_factory()
+
+    def getter():
+        return _generic_site_operation(resource_group_name, name, 'get')
+
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
+        return LongRunningOperation()(poller)
+
+    from azure.cli.core.commands.arm import assign_implict_identity
+    webapp = assign_implict_identity(getter, setter, role, scope)
+    update_app_settings(resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
+    return webapp.identity
 
 
 def get_auth_settings(resource_group_name, name, slot=None):

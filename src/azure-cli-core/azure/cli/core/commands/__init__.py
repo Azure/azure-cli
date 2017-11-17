@@ -41,7 +41,7 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context', 'shell', 'documentdb']
+BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 
 
 class VersionConstraint(object):

@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.21
+++++++
+* `webapp/functionapp`: ensure list/show display correct set of apps
+
 0.1.20
 ++++++
 * webapp: add deployment source config-zip support for webapps and functions apps

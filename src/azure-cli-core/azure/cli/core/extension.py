@@ -98,7 +98,7 @@ class WheelExtension(Extension):
             metadata.update(azext_metadata)
         for dist_info_dirname in dist_info_dirs:
             parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
-            if parsed_dist_info_dir and parsed_dist_info_dir.groupdict().get('name') == self.name:
+            if parsed_dist_info_dir and parsed_dist_info_dir.groupdict().get('name') == self.name.replace('-', '_'):
                 whl_metadata_filepath = os.path.join(ext_dir, dist_info_dirname, WHL_METADATA_FILENAME)
                 if os.path.isfile(whl_metadata_filepath):
                     with open(whl_metadata_filepath) as f:
