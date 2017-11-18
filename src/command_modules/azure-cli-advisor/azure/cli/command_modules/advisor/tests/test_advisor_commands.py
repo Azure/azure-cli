@@ -60,8 +60,7 @@ class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 class AzureAdvisorScenarioTest(ScenarioTest):
 
     def test_generate_recommendations(self):
-        output = self.cmd('advisor recommendation generate').get_output_in_json()
-        self.assertEqual(output['Status'], 204)
+        self.cmd('advisor recommendation generate')
 
     def test_get_set_configurations_subscription(self):
         output = self.cmd('advisor configuration get').get_output_in_json()

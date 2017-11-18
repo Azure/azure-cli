@@ -3,30 +3,24 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
 import uuid
 
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
+from msrestazure.azure_exceptions import CloudError
 
 
-def cli_advisor_generate_recommendations(client, timeout=30):
+def cli_advisor_generate_recommendations(client):
     response = client.generate(raw=True)
     location = response.headers['Location']
     operation_id = parse_operation_id(location)
 
-    elapsedTime = 0
-    maxTime = timeout if timeout > 1 else 1
-    while elapsedTime < maxTime:
-        response = client.get_generate_status(
-            raw=True,
-            operation_id=operation_id
-        )
-        status_code = response.response.status_code
-        if status_code == 204:
-            return {'Status': 204, 'Message': 'Recommendation generation has been completed.'}
-        time.sleep(1)
-        elapsedTime += 1
-    return {'Status': 202, 'Message': 'Recommendation generation is in progress.'}
+    try:
+        client.get_generate_status(operation_id=operation_id)
+    except CloudError as ex:
+        # Advisor API returns 204 which is not aligned with ARM guidelines
+        # so the SDK will throw an exception that we will have to ignore
+        if ex.status_code != 204:
+            raise ex
 
 
 def cli_advisor_list_recommendations(client, ids=None, resource_group_name=None, category=None):

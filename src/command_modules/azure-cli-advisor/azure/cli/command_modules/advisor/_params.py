@@ -13,14 +13,6 @@ def validate_include_or_exclude(namespace):
 
 
 register_cli_argument(
-    'advisor recommendation generate',
-    'timeout',
-    options_list=('--timeout', '-t'),
-    type=int,
-    help='Time to wait in seconds.'
-)
-
-register_cli_argument(
     'advisor recommendation list',
     'ids',
     nargs='+',
