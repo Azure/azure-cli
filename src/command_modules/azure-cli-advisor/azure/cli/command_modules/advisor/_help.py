@@ -10,32 +10,42 @@ helps['advisor'] = """
     short-summary: (PREVIEW) Manage Azure Advisor.
 """
 
-helps['advisor configuration get'] = """
+helps['advisor configuration'] = """
     type: group
+    short-summary: Manage Azure Advisor configuration.
+"""
+
+helps['advisor recommendation'] = """
+    type: group
+    short-summary: Review Azure Advisor recommendations.
+"""
+
+helps['advisor configuration get'] = """
+    type: command
     short-summary: Get Azure Advisor configuration.
 """
 
 helps['advisor configuration set'] = """
-    type: group
+    type: command
     short-summary: Set Azure Advisor configuration.
 """
 
 helps['advisor recommendation generate'] = """
-    type: group
+    type: command
     short-summary: Generate Azure Advisor recommendations.
 """
 
 helps['advisor recommendation list'] = """
-    type: group
+    type: command
     short-summary: List Azure Advisor recommendations.
 """
 
 helps['advisor recommendation disable'] = """
-    type: group
+    type: command
     short-summary: Disable Azure Advisor recommendations.
 """
 
 helps['advisor recommendation enable'] = """
-    type: group
+    type: command
     short-summary: Enable Azure Advisor recommendations.
 """
