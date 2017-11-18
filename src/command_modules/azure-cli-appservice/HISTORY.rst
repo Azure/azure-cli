@@ -4,6 +4,7 @@ Release History
 ===============
 0.1.21
 ++++++
+* `webapp config ssl upload`: fix a bug in the cert name generation
 * `webapp/functionapp`: ensure list/show display correct set of apps
 
 0.1.20
