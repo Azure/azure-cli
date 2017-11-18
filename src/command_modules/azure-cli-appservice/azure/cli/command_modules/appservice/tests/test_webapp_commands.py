@@ -591,7 +591,7 @@ class WebappSSLCertTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_ssl(self, resource_group):
         plan = self.create_random_name(prefix='webapp-ssl-test-plan', length=24)
-        webapp_name = 'webapp-ssl-test123' # do not randomlize it as the test cert is bound to the hostname 
+        webapp_name = 'webapp-ssl-test123'  # do not randomlize it as the test cert is bound to the hostname
         # Cert Generated using
         # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
