@@ -7,9 +7,14 @@ from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.util import CLIError
 
+
 def validate_include_or_exclude(namespace):
     if namespace.include and namespace.exclude:
         raise CLIError('usage error: --include | --exclude')
+
+def validate_ids_or_resource_group(namespace):
+    if namespace.ids and namespace.resource_group_name:
+        raise CLIError('usage error: --ids | --resource-group')
 
 
 register_cli_argument(
@@ -23,7 +28,8 @@ register_cli_argument(
 register_cli_argument(
     'advisor recommendation list',
     'resource_group_name',
-    resource_group_name_type
+    resource_group_name_type,
+    validator=validate_ids_or_resource_group
 )
 
 register_cli_argument(

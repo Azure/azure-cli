@@ -11,6 +11,7 @@ from azure.cli.command_modules.advisor.custom import build_filter_string, parse_
 
 # pylint: disable=line-too-long
 
+
 class AzureAdvisorUnitTest(unittest.TestCase):
 
     def test_build_filter(self):

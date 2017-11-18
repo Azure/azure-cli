@@ -37,7 +37,7 @@ cli_command(
     __name__,
     'advisor recommendation enable',
     custom_path + 'cli_advisor_enable_recommendations',
-    advisor_mgmt_client_factory # using advisor client here because this spans recommendations and suppressions
+    advisor_mgmt_client_factory  # using advisor client here because this spans recommendations and suppressions
 )
 
 cli_command(
