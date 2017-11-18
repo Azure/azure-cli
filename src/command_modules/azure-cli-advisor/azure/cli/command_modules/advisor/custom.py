@@ -88,7 +88,8 @@ def cli_advisor_set_configurations(client, resource_group_name=None,
 
     cfg.properties.low_cpu_threshold = low_cpu_threshold
     cfg.properties.exclude = exclude
-    cfg.properties.exclude = not include
+    if include:
+        cfg.properties.exclude = False
 
     if resource_group_name:
         return client.create_in_resource_group(
