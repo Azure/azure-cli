@@ -3,26 +3,33 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.parameters import get_one_of_subscription_locations
+from azure.cli.core.decorators import Completer
 
-def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    images = load_images_from_aliases_doc()
+from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc, get_vm_sizes
+
+
+@Completer
+def get_urn_aliases_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
+    images = load_images_from_aliases_doc(cmd.cli_ctx)
     return [i['urnAlias'] for i in images]
 
 
-def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    try:
-        location = parsed_args.location
-    except AttributeError:
-        location = get_one_of_subscription_locations()
-    result = get_vm_sizes(location)
+@Completer
+def get_vm_size_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
+    location = namespace.location
+    if not location:
+        location = get_one_of_subscription_locations(cmd.cli_ctx)
+    result = get_vm_sizes(cmd.cli_ctx, location)
     return [r.name for r in result]
 
 
-def get_vm_run_command_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+@Completer
+def get_vm_run_command_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
     from ._client_factory import _compute_client_factory
     try:
-        location = parsed_args.location
+        location = namespace.location
     except AttributeError:
-        location = get_one_of_subscription_locations()
-    result = _compute_client_factory().virtual_machine_run_commands.list(location)
+        location = get_one_of_subscription_locations(cmd.cli_ctx)
+    result = _compute_client_factory(cmd.cli_ctx).virtual_machine_run_commands.list(location)
     return [r.id for r in result]

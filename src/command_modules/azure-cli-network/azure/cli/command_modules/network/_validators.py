@@ -493,8 +493,8 @@ def process_ag_url_path_map_rule_create_namespace(namespace):  # pylint: disable
             namespace, 'redirectConfigurations', namespace.redirect_config)
 
 
-def process_ag_create_namespace(namespace):
-    get_default_location_from_resource_group(namespace)
+def process_ag_create_namespace(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
 
     get_servers_validator(camel_case=True)(namespace)
 
@@ -517,8 +517,8 @@ def process_auth_create_namespace(namespace):
     namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
 
 
-def process_lb_create_namespace(namespace):
-    get_default_location_from_resource_group(namespace)
+def process_lb_create_namespace(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
 
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
@@ -558,17 +558,17 @@ def process_lb_frontend_ip_namespace(namespace):
         get_public_ip_validator()(namespace)
 
 
-def process_local_gateway_create_namespace(namespace):
+def process_local_gateway_create_namespace(cmd, namespace):
     ns = namespace
-    get_default_location_from_resource_group(ns)
+    get_default_location_from_resource_group(cmd, ns)
     use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
     if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
             'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
 
 
-def process_nic_create_namespace(namespace):
-    get_default_location_from_resource_group(namespace)
+def process_nic_create_namespace(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
 
     validate_address_pool_id_list(namespace)
     validate_inbound_nat_rule_id_list(namespace)
@@ -580,13 +580,13 @@ def process_nic_create_namespace(namespace):
     get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
 
 
-def process_public_ip_create_namespace(namespace):
-    get_default_location_from_resource_group(namespace)
+def process_public_ip_create_namespace(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
 
 
-def process_route_table_create_namespace(namespace):
+def process_route_table_create_namespace(cmd, namespace):
     RouteTable = namespace.cmd.get_models('RouteTable')
-    get_default_location_from_resource_group(namespace)
+    get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
     namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
@@ -648,8 +648,8 @@ def process_tm_endpoint_create_namespace(namespace):
         raise CLIError(error_message)
 
 
-def process_vnet_create_namespace(namespace):
-    get_default_location_from_resource_group(namespace)
+def process_vnet_create_namespace(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
@@ -665,9 +665,9 @@ def process_vnet_create_namespace(namespace):
         namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
 
 
-def process_vnet_gateway_create_namespace(namespace):
+def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
-    get_default_location_from_resource_group(ns)
+    get_default_location_from_resource_group(cmd, ns)
     get_virtual_network_validator()(ns)
 
     get_public_ip_validator()(ns)
@@ -692,9 +692,9 @@ def process_vnet_gateway_update_namespace(namespace):
                        'public IPs to create an active-active gateway.')
 
 
-def process_vpn_connection_create_namespace(namespace):
+def process_vpn_connection_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
-    get_default_location_from_resource_group(namespace)
+    get_default_location_from_resource_group(cmd, namespace)
 
     args = [a for a in [namespace.express_route_circuit2,
                         namespace.local_gateway2,

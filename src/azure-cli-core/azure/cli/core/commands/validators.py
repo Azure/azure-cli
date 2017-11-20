@@ -66,10 +66,10 @@ def generate_deployment_name(namespace):
             'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
 
 
-def get_default_location_from_resource_group(namespace):
+def get_default_location_from_resource_group(cmd, namespace):
     if not namespace.location:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        resource_client = get_mgmt_service_client(namespace.cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
         logger.debug("using location '%s' from resource group '%s'", namespace.location, rg.name)

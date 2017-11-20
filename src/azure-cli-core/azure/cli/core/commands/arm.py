@@ -203,13 +203,14 @@ def _get_child(parent, collection_name, item_name, collection_key):
 
 
 def _get_operations_tmpl(cmd):
-    operations_tmpl = cmd.command_kwargs.get('operations_tmpl', cmd.command_kwargs.get('command_type').settings['operations_tmpl'])
+    operations_tmpl = cmd.command_kwargs.get('operations_tmpl',
+                                             cmd.command_kwargs.get('command_type').settings['operations_tmpl'])
     if not operations_tmpl:
         raise CLIError("command authoring error: cmd '{}' does not have an operations_tmpl.".format(cmd.name))
     return operations_tmpl
 
 
-def _get_client_factory(name, kwargs):
+def _get_client_factory(_, kwargs):
     factory = kwargs.get('client_factory', kwargs.get('command_type').settings.get('client_factory', None))
     return factory
 
@@ -239,7 +240,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             return {}
 
         custom_op = context.get_op_handler(custom_function_op)
-        context._apply_doc_string(custom_op, kwargs)
+        context._apply_doc_string(custom_op, kwargs)  # pylint: disable=protected-access
         return dict(extract_args_from_signature(custom_op))
 
     def generic_update_arguments_loader():
@@ -445,7 +446,8 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, None) if factory else None
-        args[client_arg_name] = client
+        if client:
+            args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
 
@@ -749,7 +751,7 @@ def _find_property(instance, path):
     return instance
 
 
-def assign_implict_identity(getter, setter, identity_role=None, identity_scope=None):
+def assign_implict_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.mgmt.authorization.models import RoleAssignmentProperties
@@ -766,8 +768,8 @@ def assign_implict_identity(getter, setter, identity_role=None, identity_scope=N
     if identity_scope:
         principal_id = resource.identity.principal_id
 
-        identity_role_id = resolve_role_id(identity_role, identity_scope)
-        assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
+        identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
+        assignments_client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
         properties = RoleAssignmentProperties(identity_role_id, principal_id)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
@@ -791,10 +793,10 @@ def assign_implict_identity(getter, setter, identity_role=None, identity_scope=N
     return resource
 
 
-def resolve_role_id(role, scope):
+def resolve_role_id(cli_ctx, role, scope):
     import uuid
     from azure.mgmt.authorization import AuthorizationManagementClient
-    client = get_mgmt_service_client(AuthorizationManagementClient).role_definitions
+    client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_definitions
 
     role_id = None
     if re.match(r'/subscriptions/[^/]+/providers/Microsoft.Authorization/roleDefinitions/',

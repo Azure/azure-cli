@@ -179,6 +179,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if command_loaders:
             for loader in command_loaders:
+                loader.command_name = command
                 loader.load_arguments(command)
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
@@ -188,19 +189,24 @@ class MainCommandsLoader(CLICommandsLoader):
                 c.argument('location', get_location_type(self.cli_ctx))
                 c.argument('deployment_name', deployment_name_type)
                 c.argument('cmd', ignore_type)
-
-            super(MainCommandsLoader, self).load_arguments(command)
+        super(MainCommandsLoader, self).load_arguments(command)
 
 
 class AzCommandsLoader(CLICommandsLoader):
 
-    def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest', **kwargs):
+    def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
+                 command_group_cls=None, argument_context_cls=None,
+                 **kwargs):
         from azure.cli.core.commands import AzCliCommand
+        from azure.cli.core.sdk.util import _CommandGroup, _ParametersContext
+
         super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx, command_cls=AzCliCommand)
         self.module_name = __name__
         self.min_profile = min_profile
         self.max_profile = max_profile
         self.module_kwargs = kwargs
+        self._command_group_cls = command_group_cls or _CommandGroup
+        self._argument_context_cls = argument_context_cls or _ParametersContext
 
     def _update_command_definitions(self):
         for command_name, command in self.command_table.items():
@@ -241,7 +247,6 @@ class AzCommandsLoader(CLICommandsLoader):
             raise CLIError("command authoring error: source '{}' not found.".format(doc_string_source))
         dest.__doc__ = model.__doc__
 
-
     def get_api_version(self, resource_type=None):
         from azure.cli.core.profiles import get_api_version
         resource_type = resource_type or self.module_kwargs.get('resource_type', None)
@@ -266,18 +271,16 @@ class AzCommandsLoader(CLICommandsLoader):
         return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models')
 
     def command_group(self, group_name, command_type=None, **kwargs):
-        from azure.cli.core.sdk.util import _CommandGroup
         merged_kwargs = self.module_kwargs.copy()
         if command_type:
             merged_kwargs['command_type'] = command_type
         merged_kwargs.update(kwargs)
-        return _CommandGroup(self.module_name, self, group_name, **merged_kwargs)
+        return self._command_group_cls(self.module_name, self, group_name, **merged_kwargs)
 
     def argument_context(self, scope, **kwargs):
-        from azure.cli.core.sdk.util import _ParametersContext
         merged_kwargs = self.module_kwargs.copy()
         merged_kwargs.update(kwargs)
-        return _ParametersContext(self, scope, **merged_kwargs)
+        return self._argument_context_cls(self, scope, **merged_kwargs)
 
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 

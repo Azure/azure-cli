@@ -252,6 +252,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
         # be caught through the base class
         return None
 
+
 # region Disks (Managed)
 def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                         size_gb=None, sku='Premium_LRS',
@@ -403,7 +404,7 @@ def update_snapshot(cmd, instance, sku=None):
 
 
 # region VirtualMachines
-def assign_vm_identity(cmd, resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
+def assign_vm_identity(cmd, resource_group_name, vm_name, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineIdentity = cmd.get_models('VirtualMachineIdentity')
     from azure.cli.core.commands.arm import assign_implict_identity
@@ -430,7 +431,6 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, identity_role=DefaultS
     return _construct_identity_info(identity_scope, identity_role, port)
 
 
-
 def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
     VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
@@ -444,11 +444,11 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None,
-              admin_username=DefaultStr(getpass.getuser()), ssh_dest_key_path=None, ssh_key_value=None,
+              admin_username=getpass.getuser(), ssh_dest_key_path=None, ssh_key_value=None,
               generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None,
-              os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
+              os_caching=DefaultStr('ReadWrite'), data_caching=None, storage_container_name=None, storage_sku=None,
               use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None,
               attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
@@ -456,7 +456,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=False, identity_scope=None,
-              identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None,
+              identity_role='Contributor', identity_role_id=None, application_security_groups=None,
               zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -679,7 +679,7 @@ def list_vm(cmd, resource_group_name=None, show_details=False):
     vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
         if resource_group_name else ccf.virtual_machines.list_all()
     if show_details:
-        return [get_vm_details(cmd.cli_ctx, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
+        return [get_vm_details(cmd, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
 
     return list(vm_list)
 
@@ -754,9 +754,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
         nsg = nic.network_security_group
     else:
         subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
-        subnet = network.subnets.get(resource_group_name,
-                                     subnet_id['name'],
-                                     subnet_id['child_name'])
+        subnet = network.subnets.get(resource_group_name, subnet_id['name'], subnet_id['child_name_1'])
         nsg = subnet.network_security_group
 
     if not nsg:
@@ -793,7 +791,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
         LongRunningOperation(cmd.cli_ctx, 'Updating subnet')(network.subnets.create_or_update(
             resource_group_name=resource_group_name,
             virtual_network_name=subnet_id['name'],
-            subnet_name=subnet_id['child_name'],
+            subnet_name=subnet_id['child_name_1'],
             subnet_parameters=subnet
         ))
 
@@ -841,7 +839,7 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
         av_set.sku.name = 'Aligned'
 
         # let us double check whether the existing FD number is supported
-        skus = list_skus(av_set.location)
+        skus = list_skus(cmd, av_set.location)
         av_sku = next((s for s in skus if s.resource_type == 'availabilitySets' and s.name == 'Aligned'), None)
         if av_sku and av_sku.capabilities:
             max_fd = int(next((c.value for c in av_sku.capabilities if c.name == 'MaximumPlatformFaultDomainCount'),
@@ -907,7 +905,7 @@ def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
     vm.resources = None
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
-    set_vm(vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'disabling boot diagnostics', 'done'))
+    set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'disabling boot diagnostics', 'done'))
 
 
 def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
@@ -940,7 +938,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
 
     # Issue: https://github.com/Azure/autorest/issues/934
     vm.resources = None
-    set_vm(vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
+    set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
 def get_boot_log(cmd, resource_group_name, vm_name):
@@ -1186,7 +1184,6 @@ def set_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
     return _update_vm_nics(cmd, vm, nics, primary_nic)
 
 
-
 def _build_nic_list(cmd, nic_ids):
     NetworkInterfaceReference = cmd.get_models('NetworkInterfaceReference')
     nic_list = []
@@ -1313,9 +1310,9 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     vm = get_vm(cmd, resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
-        keyvault_client = create_keyvault_data_plane_client()
-        cert_info = keyvault_client.get_certificate(get_key_vault_base_url(parse_resource_id(keyvault)['name']),
-                                                    certificate, '')
+        keyvault_client = create_keyvault_data_plane_client(cmd.cli_ctx)
+        cert_info = keyvault_client.get_certificate(
+            get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']), certificate, '')
         certificate = cert_info.sid
 
     if not _is_linux_vm(vm):
@@ -1524,7 +1521,7 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 
 
 # region VirtualMachineScaleSets
-def assign_vmss_identity(cmd, resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
+def assign_vmss_identity(cmd, resource_group_name, vmss_name, identity_role='Contributor',
                          identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineScaleSetIdentity, UpgradeMode = cmd.get_models('VirtualMachineScaleSetIdentity', 'UpgradeMode')
     from azure.cli.core.commands.arm import assign_implict_identity
@@ -1560,18 +1557,18 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, identity_role=Defa
 def create_vmss(cmd, vmss_name, resource_group_name, image,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
-                admin_username=DefaultStr(getpass.getuser()), admin_password=None, authentication_type=None,
+                admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
                 load_balancer=None, load_balancer_sku=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
-                app_gateway_sku=DefaultStr('Standard_Large'), app_gateway_capacity=DefaultInt(10),
+                app_gateway_sku='Standard_Large', app_gateway_capacity=10,
                 backend_pool_name=None, nat_pool_name=None, backend_port=None, health_probe=None,
                 public_ip_address=None, public_ip_address_allocation=None,
                 public_ip_address_dns_name=None, accelerated_networking=False,
                 public_ip_per_vm=False, vm_domain_name=None, dns_servers=None, nsg=None,
                 os_caching=None, data_caching=None,
-                storage_container_name=DefaultStr('vhds'), storage_sku=None,
+                storage_container_name='vhds', storage_sku=None,
                 os_type=None, os_disk_name=None,
                 use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1581,7 +1578,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
-                assign_identity=False, identity_scope=None, identity_role=DefaultStr('Contributor'),
+                assign_identity=False, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1624,7 +1621,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         subnet = subnet or '{}Subnet'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
         vnet = build_vnet_resource(
-            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+            cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
         if app_gateway_type:
             vnet['properties']['subnets'].append({
                 'name': 'appGwSubnet',
@@ -1696,7 +1693,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             ag_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
             master_template.add_resource(build_public_ip_resource(
-                public_ip_address, location, tags,
+                cmd, public_ip_address, location, tags,
                 _get_public_ip_address_allocation(public_ip_address_allocation, None), public_ip_address_dns_name,
                 None, zones))
             public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
@@ -1759,7 +1756,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
+    vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
                                         ip_config_name, nic_name, subnet_id, public_ip_per_vm,
@@ -1789,7 +1786,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(cmd, vmss_name, vmss_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope, False))
         # pylint: disable=line-too-long
         msi_extention_type = 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux')
@@ -1909,7 +1906,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
         # loop around inboundnatrule
         instance_addresses = {}
         for rule in lb.inbound_nat_rules:
-            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
+            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name_1']
             instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
                                                                            rule.frontend_port)
 

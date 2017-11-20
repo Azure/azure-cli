@@ -3,20 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.validators import \
-    (get_default_location_from_resource_group, validate_tags)
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group, validate_tags)
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
 
 def get_combined_validator(validators):
-    def _final_valiator_impl(namespace):
+    def _final_valiator_impl(cmd, namespace):
         # do additional creation validation
         if namespace.subcommand == 'create':
             storage_validator(namespace)
             password_validator(namespace)
-            get_default_location_from_resource_group(namespace)
+            get_default_location_from_resource_group(cmd, namespace)
 
         validate_tags(namespace)
 
@@ -47,6 +47,5 @@ def password_validator(ns):
 
 
 def storage_validator(ns):
-    if ns.storage_mb:
-        if ns.storage_mb > 1023 * 1024:
-            raise ValueError('The size of storage cannot exceed 1023GB.')
+    if ns.storage_mb and ns.storage_mb > 1023 * 1024:
+        raise ValueError('The size of storage cannot exceed 1023GB.')

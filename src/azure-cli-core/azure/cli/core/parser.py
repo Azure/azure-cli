@@ -87,6 +87,7 @@ class AzCliCommandParser(CLICommandParser):
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
+                _cmd=metadata,
                 _command_validator=command_validator,
                 _argument_validators=argument_validators,
                 _parser=command_parser)

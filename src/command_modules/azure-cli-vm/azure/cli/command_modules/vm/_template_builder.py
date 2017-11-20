@@ -10,7 +10,7 @@ import json
 from enum import Enum
 
 from azure.cli.core.util import b64encode
-from azure.cli.core.profiles import get_api_version, supported_api_version, ResourceType
+from azure.cli.core.profiles import ResourceType
 
 
 class ArmTemplateBuilder(object):
@@ -804,7 +804,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    if cmd.supported_api_version(min_api='2017-03-30'):
         if dns_servers:
             nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
 

@@ -134,7 +134,6 @@ def load_arguments(self, _):
         c.argument('network_security_group_name', nsg_name_type, id_part='name')
         c.argument('private_ip_address', private_ip_address_type)
         c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
-
     # endregion
 
     # region ApplicationGateways

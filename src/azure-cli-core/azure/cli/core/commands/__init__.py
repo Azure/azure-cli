@@ -19,7 +19,6 @@ from knack.log import get_logger
 
 import six
 
-from azure.cli.core import AzCommandsLoader
 import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
@@ -134,6 +133,7 @@ class AzCliCommand(CLICommand):
                 overrides.settings['required'] = False
 
     def load_arguments(self):
+        from azure.cli.core.commands.validators import DefaultStr, DefaultInt
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
             if self.no_wait_param:
@@ -146,6 +146,14 @@ class AzCliCommand(CLICommand):
                     (CONFIRM_PARAM_NAME,
                      CLICommandArgument(CONFIRM_PARAM_NAME, options_list=['--yes', '-y'], action='store_true',
                                         help='Do not prompt for confirmation.')))
+            for (arg_name, arg) in cmd_args:
+                arg_def = arg.type.settings.get('default', None)
+                if isinstance(arg_def, str):
+                    arg_def = DefaultStr(arg_def)
+                elif isinstance(arg_def, int):
+                    arg_def = DefaultInt(arg_def)
+                if arg_def:
+                    arg.type.settings['default'] = arg_def
             self.arguments.update(cmd_args)
 
     def update_argument(self, param_name, argtype):
@@ -155,6 +163,7 @@ class AzCliCommand(CLICommand):
 
     def __call__(self, *args, **kwargs):
 
+        from azure.cli.core import AzCommandsLoader
         cmd_args = args[0]
 
         if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
@@ -325,6 +334,34 @@ class AzCliCommandInvoker(CommandInvoker):
         return CommandResultItem(results,
                                  table_transformer=cmd_tbl[parsed_args.command].table_transformer,
                                  is_query_active=self.data['query_active'])
+
+    def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
+        import inspect
+        arg_spec = inspect.getargspec(func).args  # pylint: disable=deprecated-method
+        kwargs = {}
+        if 'cmd' in arg_spec:
+            kwargs['cmd'] = ns._cmd  # pylint: disable=protected-access
+        if 'namespace' in arg_spec:
+            kwargs['namespace'] = ns
+        if 'ns' in arg_spec:
+            kwargs['ns'] = ns
+        return kwargs
+
+    def _validate_cmd_level(self, ns, cmd_validator):  # pylint: disable=no-self-use
+        if cmd_validator:
+            cmd_validator(**self._build_kwargs(cmd_validator, ns))
+        try:
+            delattr(ns, '_command_validator')
+        except AttributeError:
+            pass
+
+    def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
+        for validator in getattr(ns, '_argument_validators', []):
+            validator(**self._build_kwargs(validator, ns))
+        try:
+            delattr(ns, '_argument_validators')
+        except AttributeError:
+            pass
 
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
