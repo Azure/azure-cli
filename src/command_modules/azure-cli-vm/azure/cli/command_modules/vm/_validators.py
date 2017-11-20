@@ -804,7 +804,7 @@ def _resolve_role_id(cli_ctx, role, scope):
 
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
-    get_default_location_from_resource_group(namespace)
+    get_default_location_from_resource_group(cmd, namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
@@ -971,7 +971,7 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 def process_vmss_create_namespace(cmd, namespace):
     validate_tags(namespace)
-    get_default_location_from_resource_group(namespace)
+    get_default_location_from_resource_group(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)

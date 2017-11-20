@@ -5,110 +5,89 @@
 from azure.mgmt.rdbms import mysql
 from azure.mgmt.rdbms import postgresql
 
-from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.commands.parameters import get_resource_name_completion_list, tags_type, location_type
+from azure.cli.core.commands.parameters import (
+    get_resource_name_completion_list, tags_type, get_location_type, get_enum_type)
 
-from knack.arguments import enum_choice_list
-
-from ._util import PolyParametersContext
-from .validators import configuration_value_validator
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator
 
 # pylint: disable=line-too-long
 
-#        load parameters from models        #
 
+def load_arguments(self, _):
 
-def load_params(command_group, engine):
-    with PolyParametersContext(command='{} server create'.format(command_group)) as c:
-        c.expand('sku', engine.models.Sku)
-        c.ignore('name')
-        c.ignore('family')
-        c.ignore('size')
+    server_completers = {
+        'mysql': get_resource_name_completion_list('Microsoft.DBForMySQL/servers'),
+        'postgres': get_resource_name_completion_list('Microsoft.DBForPostgreSQL/servers')
+    }
 
-        c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
-        c.argument('administrator_login', arg_group='Authentication')
-        c.argument('administrator_login_password', arg_group='Authentication')
+    def _complex_params(command_group, engine):
 
-        c.expand('parameters', engine.models.ServerForCreate)
+        with self.argument_context('{} server create'.format(command_group)) as c:
+            c.expand('sku', engine.models.Sku)
+            c.ignore('name', 'family', 'size')
 
-        c.argument('location', location_type, required=False)
+            c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
+            c.argument('administrator_login', arg_group='Authentication')
+            c.argument('administrator_login_password', arg_group='Authentication')
 
-    with PolyParametersContext(command='{} server restore'.format(command_group)) as c:
-        c.expand('sku', engine.models.Sku)
-        c.ignore('name')
-        c.ignore('family')
-        c.ignore('size')
-        c.ignore('tier')
-        c.ignore('capacity')
+            c.expand('parameters', engine.models.ServerForCreate)
 
-        c.expand('properties', engine.models.ServerPropertiesForRestore)
-        c.ignore('version')
-        c.ignore('ssl_enforcement')
-        c.ignore('storage_mb')
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
 
-        c.expand('parameters', engine.models.ServerForCreate)
-        c.ignore('tags')
-        c.ignore('location')
+        with self.argument_context('{} server restore'. format(command_group)) as c:
+            c.expand('sku', engine.models.Sku)
+            c.ignore('name', 'family', 'size', 'tier', 'capacity')
 
-        c.argument('source_server_id', options_list=('--source-server', '-s'),
-                   help='The name or ID of the source server to restore from.')
-        c.argument('restore_point_in_time',
-                   help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.expand('properties', engine.models.ServerPropertiesForRestore)
+            c.ignore('version', 'ssl_enforcement', 'storage_mb')
 
-    with PolyParametersContext(command='{} server configuration set'.format(command_group)) as c:
-        c.ignore('source')
-        c.argument('value',
-                   help='Value of the configuration. If not provided, configuration value will be set to default.',
-                   validator=configuration_value_validator)
+            c.expand('parameters', engine.models.ServerForCreate)
+            c.ignore('tags', 'location')
 
+            c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
+            c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
-load_params('mysql', mysql)
-load_params('postgres', postgresql)
+        with self.argument_context('{} server configuration set'.format(command_group)) as c:
+            c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
+            c.ignore('source')
 
-#####
-#           register cli arguments
-#####
+    _complex_params('mysql', mysql)
+    _complex_params('postgres', postgresql)
 
-server_completers = {'mysql': get_resource_name_completion_list('Microsoft.DBForMySQL/servers'),
-                     'postgres': get_resource_name_completion_list('Microsoft.DBForPostgreSQL/servers')}
+    for scope in ['mysql', 'postgres']:
+        with self.argument_context(scope) as c:
+            c.argument('name', options_list=['--sku-name'])
+            c.argument('server_name', completer=server_completers[scope], options_list=['--server-name', '-s'])
 
+    for scope in ['mysql server', 'postgres server']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--name', '-n'], id_part='name', help='Name of the server.')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'])
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], required=False, help='The password of the administrator login.')
+            c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable ssl enforcement or not when connect to server.')
+            c.argument('tier', arg_type=get_enum_type(['Basic', 'Standard']), options_list=['--performance-tier'], help='The performance tier of the server.')
+            c.argument('capacity', options_list=['--compute-units'], type=int, help='Number of compute units.')
+            c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server, unit is MB.')
+            c.argument('tags', tags_type)
 
-for command_group_name in ['mysql', 'postgres']:
-    register_cli_argument('{0}'.format(command_group_name), 'name', options_list=('--sku-name',))
-    register_cli_argument('{0}'.format(command_group_name), 'server_name', completer=server_completers[command_group_name], options_list=('--server-name', '-s'))
+    for scope in ['mysql server-logs', 'postgres server-logs']:
+        with self.argument_context(scope) as c:
+            c.argument('file_name', options_list=['--name', '-n'], nargs='+')
+            c.argument('max_file_size', type=int)
+            c.argument('file_last_written', type=int)
 
-    register_cli_argument('{0} server'.format(command_group_name), 'server_name', options_list=('--name', '-n'), id_part='name',
-                          help='Name of the server.')
-    register_cli_argument('{0} server'.format(command_group_name), 'administrator_login', options_list=('--admin-user', '-u'))
-    register_cli_argument('{0} server'.format(command_group_name), 'administrator_login_password', options_list=('--admin-password', '-p'), required=False,
-                          help='The password of the administrator login.')
-    register_cli_argument('{0} server'.format(command_group_name), 'ssl_enforcement', options_list=('--ssl-enforcement',),
-                          help='Enable ssl enforcement or not when connect to server.',
-                          **enum_choice_list(['Enabled', 'Disabled']))
-    register_cli_argument('{0} server'.format(command_group_name), 'tier', options_list=('--performance-tier',),
-                          help='The performance tier of the server.',
-                          **enum_choice_list(['Basic', 'Standard']))
-    register_cli_argument('{0} server'.format(command_group_name), 'capacity', options_list=('--compute-units',), type=int,
-                          help='Number of compute units.')
-    register_cli_argument('{0} server'.format(command_group_name), 'storage_mb', options_list=('--storage-size',), type=int,
-                          help='The max storage size of the server, unit is MB.')
-    register_cli_argument('{0} server'.format(command_group_name), 'tags', tags_type)
+    for scope in ['mysql db', 'postgres db']:
+        with self.argument_context(scope) as c:
+            c.argument('database_name', options_list=['--name', '-n'])
 
-    register_cli_argument('{0} server-logs'.format(command_group_name), 'file_name', options_list=('--name', '-n'), nargs='+')
-    register_cli_argument('{0} server-logs'.format(command_group_name), 'max_file_size', type=int)
-    register_cli_argument('{0} server-logs'.format(command_group_name), 'file_last_written', type=int)
+    for scope in ['mysql server firewall-rule', 'postgres server firewall-rule']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'])
+            c.argument('firewall_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the firewall rule.')
+            c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+            c.argument('end_ip_address', options_list=['--end-ip-address'], help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
-    register_cli_argument('{0} db'.format(command_group_name), 'database_name', options_list=('--name', '-n'))
-
-    register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'server_name', options_list=('--server-name', '-s'))
-    register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'firewall_rule_name', options_list=('--name', '-n'), id_part='child_name_1',
-                          help='The name of the firewall rule.')
-    register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'start_ip_address', options_list=('--start-ip-address',),
-                          help='The start IP address of the firewall rule. Must be IPv4 format. Use value'
-                          ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
-    register_cli_argument('{0} server firewall-rule'.format(command_group_name), 'end_ip_address', options_list=('--end-ip-address',),
-                          help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
-                          ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
-
-    register_cli_argument('{0} server configuration'.format(command_group_name), 'server_name', options_list=('--server-name', '-s'))
-    register_cli_argument('{0} server configuration'.format(command_group_name), 'configuration_name', id_part='child_name_1', options_list=('--name', '-n'))
+    for scope in ['mysql server configuration', 'postgres server configuration']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'])
+            c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
