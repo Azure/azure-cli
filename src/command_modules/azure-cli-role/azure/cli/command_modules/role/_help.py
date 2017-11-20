@@ -35,12 +35,15 @@ helps['ad sp create-for-rbac'] = """
         - name: --role
           short-summary: Role of the service principal.
     examples:
+        - name: Create a service principal with an assigned name and password and default role.
+          text: >
+            az ad sp create-for-rbac -n MyRole -p YourPasswordHere
         - name: Create without a default assignment.
           text: >
             az ad sp create-for-rbac --skip-assignment
         - name: Create with customized contributor assignments.
           text: |
-            az ad sp create-for-rbac -n "MyApp" --role contributor \\
+            az ad sp create-for-rbac -n "MyApp" --role Contributor \\
                 --scopes /subscriptions/{SubID}/resourceGroups/{MyRG1} \\
                 /subscriptions/{SubID}/resourceGroups/{MyRG2}
         - name: Create using a self-signed certificte.

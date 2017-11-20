@@ -730,17 +730,23 @@ helps['vm image list'] = """
           text: az vm image list -f CentOS --all
 """
 
-helps['vm image list-offers'] = """
-    type: command
-    short-summary: List the VM image offers available in the Azure Marketplace.
-"""
-
 helps['vm image list-publishers'] = """
     type: command
     short-summary: List the VM image publishers available in the Azure Marketplace.
     examples:
-        - name: List all publishers with names starting with "Open" in westus.
-          text: az vm image list-publishers -l westus --query "[?starts_with(name, 'Open')]"
+        - name: List all publishers with names starting with "open" in westus.
+          text: az vm image list-publishers -l westus --query "[?starts_with(name, 'open')]"
+"""
+
+helps['vm image list-offers'] = """
+    type: command
+    short-summary: List the VM image offers available in the Azure Marketplace.
+    long-summary: Use the results of `vm image list-publishers` to get the available publishers to query for a region.
+    examples:
+      - name: Find publishers in westus with names starting with 'open', and list all of their offerings.
+        text: |
+            az vm list-offers -l westus "[?starts_with(name, 'open')].name" -o tsv | \
+              xargs -n 1 az vm image list-offers -l westus --publisher {}
 """
 
 helps['vm image list-skus'] = """
