@@ -3,6 +3,11 @@
 Release History
 ===============
 
+1.0.5
++++++
+* Bugfix: Supplying non-existent name or natively formatted name for container causes stack trace.
+* Enhancement: Now 'Health Status' of an item is visible in its table view.
+
 1.0.4
 +++++
 * Minor fixes.
