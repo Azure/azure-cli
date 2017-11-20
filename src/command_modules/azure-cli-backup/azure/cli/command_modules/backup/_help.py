@@ -108,7 +108,7 @@ helps['backup policy show'] = """
 helps['backup policy delete'] = """
             type: command
             short-summary: Delete a backup policy.
-            long-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To  associate another policy with a Backup item, use the backup item set-policy command.
+            long-summary: Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To associate another policy with a Backup item, use the backup item set-policy command.
             """
 
 helps['backup policy set'] = """

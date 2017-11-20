@@ -91,7 +91,7 @@ helps['acr credential show'] = """
     examples:
         - name: Get the username and password used to log into a container registry.
           text: >
-            az acr credential show -n MyRegistry --query {user:username, password:passwords[0].value} --output table 
+            az acr credential show -n MyRegistry --query {user:username, password:passwords[0].value}
 """
 
 helps['acr credential renew'] = """

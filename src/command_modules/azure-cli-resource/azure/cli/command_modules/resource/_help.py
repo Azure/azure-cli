@@ -387,7 +387,7 @@ helps['group create'] = """
 helps['group delete'] = """
     type: command
     short-summary: Delete a resource group.
-    long-summary: This also deletes all reosurces which are part of the resource group.
+    long-summary: This also deletes all resources which are part of the resource group.
 """
 
 helps['group list'] = """
