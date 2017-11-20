@@ -131,7 +131,7 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name):
     vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm)
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
-    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name, custom_headers=_get_custom_headers())
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
     if vm.location != vault.location:
