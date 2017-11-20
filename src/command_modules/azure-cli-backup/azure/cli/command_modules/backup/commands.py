@@ -27,7 +27,8 @@ def transform_item(result):
                         ('Type', result['properties']['workloadType']),
                         ('Last Backup Status', result['properties']['lastBackupStatus']),
                         ('Last Recovery Point', result['properties']['lastRecoveryPoint']),
-                        ('Protection Status', result['properties']['protectionStatus'])])
+                        ('Protection Status', result['properties']['protectionStatus']),
+                        ('Health Status', result['properties']['healthStatus'])])
 
 
 def transform_job(result):
