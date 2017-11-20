@@ -20,13 +20,13 @@ from azure.cli.command_modules.vm._validators import (
     process_vm_secret_namespace)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.arm import handle_long_running_operation_exception, deployment_validate_table_format
+from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.sdk.util import CliCommandType
 
-# pylint: disable=line-too-long
-def load_command_table(self, args):
+
+# pylint: disable=line-too-long, too-many-statements
+def load_command_table(self, _):
 
     compute_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.vm.custom#{}')
 
@@ -97,6 +97,11 @@ def load_command_table(self, args):
         client_factory=cf_rolling_upgrade_commands
     )
 
+    compute_vmss_vm_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.{}',
+        client_factory=cf_vmss_vm
+    )
+
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations{}',
         client_factory=cf_ni
@@ -113,7 +118,7 @@ def load_command_table(self, args):
         g.generic_wait_command('wait')
 
     with self.command_group('image', compute_image_sdk) as g:
-        g.custom_command('create', 'create_image')
+        g.custom_command('create', 'create_image', validator=process_image_create_namespace)
         g.custom_command('list', 'list_images')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('delete', 'delete')
@@ -152,7 +157,7 @@ def load_command_table(self, args):
         g.command('start', 'start', no_wait_param='raw')
         g.command('stop', 'power_off', no_wait_param='raw')
         g.generic_update_command('update', no_wait_param='raw')
-        g.generic_wait_command('wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
+        g.generic_wait_command('wait', 'get_instance_view', command_type=compute_custom, client_factory=None)
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -236,7 +241,7 @@ def load_command_table(self, args):
         g.custom_command('delete-instances', 'delete_vmss_instances', no_wait_param='no_wait')
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list', 'list_vmss', table_transformer=get_vmss_table_output_transformer(self))
-        g.command('list-instances', 'list')
+        g.command('list-instances', 'list', command_type=compute_vmss_vm_sdk)
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')

@@ -601,6 +601,28 @@ helps['vm encryption'] = """
     short-summary: Manage encryption of VM disks.
 """
 
+helps['vm encryption enable'] = """
+    type: command
+    short-summary: Enable disk encryption on the OS disk and/or data disks.
+    parameters:
+        - name: --aad-client-id
+          short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
+        - name: --aad-client-secret
+          short-summary: Client secret of the AAD app with permissions to write secrets to the key vault.
+        - name: --aad-client-cert-thumbprint
+          short-summary: Thumbprint of the AAD app certificate with permissions to write secrets to the key vault.
+"""
+
+helps['vm encryption disable'] = """
+    type: command
+    short-summary: Disable disk encryption on the OS disk and/or data disks.
+"""
+
+helps['vm encryption show'] = """
+    type: command
+    short-summary: Show encryption status.
+"""
+
 helps['vm extension'] = """
     type: group
     short-summary: Manage extensions on VMs.
@@ -914,30 +936,30 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
 
 helps['vmss encryption'] = """
     type: group
-    short-summary: (PREVIEW) Manage encryption of VM scale sets.
+    short-summary: (PREVIEW) Manage encryption of VMSS.
 """
 
 helps['vmss encryption enable'] = """
     type: command
-    short-summary: Encrypt a VM scale set with managed disks.
+    short-summary: Encrypt a VMSS with managed disks.
     examples:
-        - name: encrypte a VM scale set using a key vault in the same resource group
+        - name: encrypt a VM scale set using a key vault in the same resource group
           text: >
             az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
 """
 
 helps['vmss encryption disable'] = """
     type: command
-    short-summary: disable the encryption on a VM scale set with managed disks.
+    short-summary: Disable the encryption on a VMSS with managed disks.
     examples:
-        - name: disable encryption a VM scale set
+        - name: disable encryption a VMSS
           text: >
             az vmss encryption disable -g MyResourceGroup -n MyVm
 """
 
 helps['vmss encryption show'] = """
     type: command
-    short-summary: show the encryption status
+    short-summary: Show encryption status.
 """
 
 helps['vm capture'] = """

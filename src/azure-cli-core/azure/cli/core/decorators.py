@@ -23,6 +23,19 @@ from functools import wraps
 is_diagnostics_mode = False
 
 
+# pylint: disable=too-few-public-methods
+class Completer(object):
+
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, **kwargs):
+        namespace = kwargs['parsed_args']
+        prefix = kwargs['prefix']
+        cmd = namespace._cmd  # pylint: disable=protected-access
+        return self.func(cmd, prefix, namespace)
+
+
 # internal functions
 
 def _should_raise(raise_in_diagnostics):

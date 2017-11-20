@@ -11,6 +11,7 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
+
 def read_content_if_is_file(string_or_file):
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -69,7 +70,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         parent_path = ''
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
-    api_version = _resolve_api_version(provider_namespace, resource_type, parent_path)
+    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -78,17 +79,16 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         return False
 
 
-def create_keyvault_data_plane_client():
+def create_keyvault_data_plane_client(cli_ctx):
     from azure.cli.core._profile import Profile
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
     return KeyVaultClient(KeyVaultAuthentication(get_token))
 
 
-def get_key_vault_base_url(vault_name):
-    from azure.cli.core._profile import CLOUD
-    suffix = CLOUD.suffixes.keyvault_dns
+def get_key_vault_base_url(cli_ctx, vault_name):
+    suffix = cli_ctx.cloud.suffixes.keyvault_dns
     return 'https://{}{}'.format(vault_name, suffix)

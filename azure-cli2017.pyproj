@@ -14,8 +14,7 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>MSBuild|{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>mysql server-logs download -h</CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -423,6 +422,9 @@
     <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\custom.py" />
     <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\tests\test_rdbms_commands.py" />
     <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\validators.py" />
+    <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\_client_factory.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\_help.py" />
     <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\_params.py" />
     <Compile Include="command_modules\azure-cli-rdbms\azure\cli\command_modules\rdbms\_util.py" />
