@@ -50,6 +50,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
+    node_default_version = "6.9.1"
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
@@ -79,10 +80,12 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         match['setter'](match, site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
-            site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+            site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION",
+                                                          node_default_version))
 
     else:  # windows webapp without runtime specified
-        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION",
+                                                      node_default_version))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:

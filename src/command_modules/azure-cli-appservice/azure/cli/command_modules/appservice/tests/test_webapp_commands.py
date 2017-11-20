@@ -95,8 +95,20 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create(self, resource_group):
-        webapp_name = 'webapp-quick'
-        plan = 'plan-quick'
+        webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
+        plan = self.create_random_name(prefix='plan-quick', length=24)
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
+            JMESPathCheckV2('[0].value', '6.9.1'),
+        ]))
+
+    @ResourceGroupPreparer()
+    def test_win_webapp_quick_create_runtime(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
+        plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
