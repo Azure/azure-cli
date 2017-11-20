@@ -164,35 +164,37 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
 
 
-class ResourceCreateScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(ResourceCreateScenarioTest, self).__init__(__file__, test_method,
-                                                         resource_group='cli_test_resource_create')
+class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
-    def test_resource_create(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer()
+    def test_resource_create_and_show(self, resource_group, resource_group_location):
         appservice_plan = 'cli_res_create_plan'
         webapp = 'clirescreateweb'
 
         self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms '
                  '--is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":'
-                 '\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(self.resource_group,
+                 '\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(resource_group,
                                                                appservice_plan,
-                                                               self.location),
-                 checks=[JMESPathCheck('name', appservice_plan)])
+                                                               resource_group_location),
+                 checks=[JCheck('name', appservice_plan)])
 
         result = self.cmd(
             'resource create -g {} -n {} --resource-type Microsoft.web/sites --properties '
-            '"{{\\"serverFarmId\\":\\"{}\\"}}"'.format(self.resource_group,
+            '"{{\\"serverFarmId\\":\\"{}\\"}}"'.format(resource_group,
                                                        webapp,
                                                        appservice_plan),
-            checks=[JMESPathCheck('name', webapp)])
+            checks=[JCheck('name', webapp)]).get_output_in_json()
 
         app_settings_id = result['id'] + '/config/appsettings'
         self.cmd('resource create --id {} --properties "{{\\"key2\\":\\"value12\\"}}"'.format(
-            app_settings_id), checks=[JMESPathCheck('properties.key2', 'value12')])
+            app_settings_id), checks=[JCheck('properties.key2', 'value12')])
+
+        self.cmd('resource show --id {}'.format(result['id'] + '/config/web'), checks=[
+            JCheck('properties.publishingUsername', '$' + webapp)  # spot check
+        ])
+        self.cmd('resource show --id {} --include-response-body'.format(result['id'] + '/config/web'), checks=[
+            JCheck('responseBody.properties.publishingUsername', '$' + webapp)  # spot check
+        ])
 
 
 class TagScenarioTest(VCRTestBase):
