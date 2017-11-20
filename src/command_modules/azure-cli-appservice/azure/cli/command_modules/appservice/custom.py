@@ -1275,9 +1275,8 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
-    hosting_environment_profile_param = webapp.hosting_environment_profile
-    if hosting_environment_profile_param is None:
-        hosting_environment_profile_param = ""
+    hosting_environment_profile_param = (webapp.hosting_environment_profile.name
+                                         if webapp.hosting_environment_profile else '')
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
