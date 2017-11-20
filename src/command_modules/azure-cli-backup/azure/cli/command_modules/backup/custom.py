@@ -658,7 +658,7 @@ def _get_list_from_paged_response(obj_list):
 
 
 def _get_none_one_or_many(obj_list):
-    if len(obj_list) == 0:
+    if not obj_list:
         return None
     elif len(obj_list) == 1:
         return obj_list[0]
