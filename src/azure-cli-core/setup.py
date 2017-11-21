@@ -56,7 +56,7 @@ DEPENDENCIES = [
     'colorama',
     'humanfriendly',
     'jmespath',
-    'knack',
+    'knack==0.2.0',
     'msrest>=0.4.4',
     'msrestazure>=0.4.7',
     'paramiko',
