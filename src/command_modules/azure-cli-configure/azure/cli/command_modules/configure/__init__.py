@@ -13,7 +13,6 @@ class ConfigureCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         super(ConfigureCommandsLoader, self).__init__(cli_ctx=cli_ctx)
-        self.module_name = __name__
 
     def load_command_table(self, args):
 

@@ -17,7 +17,6 @@ class ComputeCommandsLoader(AzCommandsLoader):
         super(ComputeCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_COMPUTE,
                                                     custom_command_type=compute_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         from azure.cli.command_modules.vm.commands import load_command_table

@@ -22,6 +22,8 @@ import six
 
 logger = get_logger(__name__)
 
+EXCLUDED_PARAMS = ['self', 'raw', 'custom_headers', 'operation_config', 'content_version', 'kwargs', 'client']
+
 
 class AzCli(CLI):
 
@@ -205,8 +207,9 @@ class AzCommandsLoader(CLICommandsLoader):
         from azure.cli.core.commands import AzCliCommand
         from azure.cli.core.sdk.util import _CommandGroup, _ParametersContext
 
-        super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx, command_cls=AzCliCommand)
-        self.module_name = __name__
+        super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                               command_cls=AzCliCommand,
+                                               excluded_command_handler_args=EXCLUDED_PARAMS)
         self.min_profile = min_profile
         self.max_profile = max_profile
         self.module_kwargs = kwargs
@@ -289,7 +292,7 @@ class AzCommandsLoader(CLICommandsLoader):
         if command_type:
             merged_kwargs['command_type'] = command_type
         merged_kwargs.update(kwargs)
-        return self._command_group_cls(self.module_name, self, group_name, **merged_kwargs)
+        return self._command_group_cls(self, group_name, **merged_kwargs)
 
     def argument_context(self, scope, **kwargs):
         merged_kwargs = self.module_kwargs.copy()
@@ -319,7 +322,7 @@ class AzCommandsLoader(CLICommandsLoader):
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
             if client:
                 client_arg_name = 'client' if operation.startswith('azure.cli') else 'self'
-                if client_arg_name in  op_args:
+                if client_arg_name in op_args:
                     command_args[client_arg_name] = client
             result = op(**command_args)
             return result
@@ -327,7 +330,7 @@ class AzCommandsLoader(CLICommandsLoader):
         def default_arguments_loader():
             op = handler or self.get_op_handler(operation)
             self._apply_doc_string(op, kwargs)
-            cmd_args = list(extract_args_from_signature(op))
+            cmd_args = list(extract_args_from_signature(op, excluded_params=self.excluded_command_handler_args))
             return cmd_args
 
         def default_description_loader():

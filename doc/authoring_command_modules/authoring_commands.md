@@ -30,7 +30,6 @@ class MyCommandsLoader(AzCommandsLoader):
         super(MyCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                min_profile='2017-03-10-profile',
                                                custom_command_type=mymod_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         super(MyCommandsLoader, self).load_command_table(args)
