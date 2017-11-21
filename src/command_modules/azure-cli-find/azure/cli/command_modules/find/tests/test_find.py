@@ -4,16 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import contextlib
-import json
-import shlex
 import unittest
 import mock
 import sys
 import six
-from nose import with_setup
 from six import StringIO
 
-from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.command_modules.find.custom import _purge, find
 from azure.cli.testsdk import TestCli
 
