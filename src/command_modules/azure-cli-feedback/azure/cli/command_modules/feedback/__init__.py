@@ -16,7 +16,6 @@ class FeedbackCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(FeedbackCommandsLoader, self).load_command_table(args)
 
         custom_feedback = CliCommandType(operations_tmpl='azure.cli.command_modules.feedback.custom#{}')
 

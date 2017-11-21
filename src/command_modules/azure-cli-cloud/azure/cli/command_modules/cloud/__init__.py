@@ -19,7 +19,6 @@ class CloudCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(CloudCommandsLoader, self).load_command_table(args)
 
         cloud_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.cloud.custom#{}')
 
@@ -36,7 +35,6 @@ class CloudCommandsLoader(AzCommandsLoader):
 
     def load_arguments(self, command):
 
-        super(CloudCommandsLoader, self).load_arguments(command)
         active_cloud_name = self.cli_ctx.cloud.name
 
         # pylint: disable=line-too-long

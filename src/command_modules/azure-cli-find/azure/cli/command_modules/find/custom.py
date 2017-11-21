@@ -82,8 +82,6 @@ def _print_hit(hit):
 
 
 def find(cmd, criteria, reindex=False):
-    print(cmd)
-    print(criteria)
     from whoosh.qparser import MultifieldParser
     if reindex:
         _create_index(cmd.cli_ctx)
