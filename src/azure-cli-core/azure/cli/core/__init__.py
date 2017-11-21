@@ -247,26 +247,33 @@ class AzCommandsLoader(CLICommandsLoader):
             raise CLIError("command authoring error: source '{}' not found.".format(doc_string_source))
         dest.__doc__ = model.__doc__
 
+    def _get_resource_type(self):
+        resource_type = self.module_kwargs.get('resource_type', None)
+        if not resource_type:
+            command_type = self.module_kwargs.get('command_type', None)
+            resource_type = command_type.settings.get('resource_type', None) if command_type else None
+        return resource_type
+
     def get_api_version(self, resource_type=None):
         from azure.cli.core.profiles import get_api_version
-        resource_type = resource_type or self.module_kwargs.get('resource_type', None)
+        resource_type = resource_type or self._get_resource_type()
         return get_api_version(self.cli_ctx, resource_type)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None):
         from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
         return supported_api_version(
             cli_ctx=self.cli_ctx,
-            resource_type=resource_type or PROFILE_TYPE,
+            resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
             min_api=min_api or self.min_profile,
             max_api=max_api or self.max_profile)
 
     def get_sdk(self, *attr_args, **kwargs):
         from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.cli_ctx, kwargs.pop('resource_type', self.module_kwargs['resource_type']),
+        return get_sdk(self.cli_ctx, kwargs.pop('resource_type', self._get_resource_type()),
                        *attr_args, **kwargs)
 
     def get_models(self, *attr_args, **kwargs):
-        resource_type = kwargs.get('resource_type', self.module_kwargs.get('resource_type', None))
+        resource_type = kwargs.get('resource_type', self._get_resource_type())
         from azure.cli.core.profiles import get_sdk
         return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models')
 
@@ -293,15 +300,20 @@ class AzCommandsLoader(CLICommandsLoader):
 
         name = ' '.join(name.split())
 
-        client_factory = kwargs.get('client_factory', None)
+        command_type = kwargs.get('command_type', None)
+        client_factory = command_type.settings.get('client_factory', None) if command_type \
+            else kwargs.get('client_factory', None)
 
         def default_command_handler(command_args):
+            from azure.cli.core.util import get_arg_list
             op = handler or self.get_op_handler(operation)
+            op_args = get_arg_list(op)
 
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
             if client:
                 client_arg_name = 'client' if operation.startswith('azure.cli') else 'self'
-                command_args[client_arg_name] = client
+                if client_arg_name in  op_args:
+                    command_args[client_arg_name] = client
             result = op(**command_args)
             return result
 

@@ -50,12 +50,14 @@ def load_command_table(self, _):
 
     resource_group_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.{}',
-        client_factory=cf_resource_groups
+        client_factory=cf_resource_groups,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_provider_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.{}',
-        client_factory=cf_providers
+        client_factory=cf_providers,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_feature_sdk = CliCommandType(
@@ -66,17 +68,20 @@ def load_command_table(self, _):
 
     resource_tag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.{}',
-        client_factory=cf_tags
+        client_factory=cf_tags,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_deployment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.{}',
-        client_factory=cf_deployments
+        client_factory=cf_deployments,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_deployment_operation_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.{}',
-        client_factory=cf_deployment_operations
+        client_factory=cf_deployment_operations,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_policy_definitions_sdk = CliCommandType(
@@ -103,12 +108,14 @@ def load_command_table(self, _):
     )
     resource_managedapp_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.{}',
-        client_factory=cf_resource_managedapplications
+        client_factory=cf_resource_managedapplications,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_managedapp_def_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.{}',
-        client_factory=cf_resource_managedappdefinitions
+        client_factory=cf_resource_managedappdefinitions,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     with self.command_group('account lock', resource_lock_sdk) as g:
