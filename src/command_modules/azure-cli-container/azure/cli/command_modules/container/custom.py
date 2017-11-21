@@ -56,7 +56,7 @@ def create_container(client,
                      azure_file_volume_mount_path=None):
     """Create a container group. """
 
-    ports = ports or []
+    ports = ports or [80]
 
     container_resource_requirements = create_resource_requirements(cpu=cpu, memory=memory)
 
@@ -74,15 +74,15 @@ def create_container(client,
     azure_file_volume_mount = create_azure_file_volume_mount(azure_file_volume=azure_file_volume,
                                                              azure_file_volume_mount_path=azure_file_volume_mount_path)
 
+    cgroup_ip_address = create_ip_address(ip_address, ports)
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
                           command=command,
-                          ports=[ContainerPort(port=p) for p in ports],
+                          ports=[ContainerPort(port=p) for p in ports] if cgroup_ip_address else None,
                           environment_variables=environment_variables,
                           volume_mounts=azure_file_volume_mount)
-
-    cgroup_ip_address = create_ip_address(ip_address, ports)
 
     cgroup = ContainerGroup(location=location,
                             containers=[container],
