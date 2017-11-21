@@ -20,7 +20,6 @@ class StorageCommandsLoader(AzCommandsLoader):
                                                     resource_type=ResourceType.DATA_STORAGE,
                                                     custom_command_type=storage_custom,
                                                     command_group_cls=_StorageCommandGroup)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         super(StorageCommandsLoader, self).load_command_table(args)

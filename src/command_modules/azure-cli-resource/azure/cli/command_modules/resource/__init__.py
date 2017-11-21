@@ -16,7 +16,6 @@ class ResourceCommandsLoader(AzCommandsLoader):
         resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
         super(ResourceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                      custom_command_type=resource_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         from azure.cli.command_modules.resource.commands import load_command_table

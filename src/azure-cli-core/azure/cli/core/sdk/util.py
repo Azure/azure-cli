@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
 
 from knack.arguments import ignore_type, ArgumentsContext
@@ -38,9 +39,9 @@ class CliCommandType(object):
 
 class _CommandGroup(KnackCommandGroup):
 
-    def __init__(self, module_name, command_loader, group_name, **kwargs):
+    def __init__(self, command_loader, group_name, **kwargs):
         operations_tmpl = kwargs.pop('operations_tmpl', None)
-        super(_CommandGroup, self).__init__(module_name, command_loader, group_name,
+        super(_CommandGroup, self).__init__(command_loader, group_name,
                                             operations_tmpl, **kwargs)
         if operations_tmpl:
             self.group_kwargs['operations_tmpl'] = operations_tmpl
@@ -243,19 +244,6 @@ class _ParametersContext(ArgumentsContext):
         else:
             self.ignore(dest)
 
-    # pylint: disable=arguments-differ
-    def alias(self, dest, options_list, **kwargs):
-        self._check_stale()
-        if not self._applicable():
-            return
-
-        merged_kwargs = self.group_kwargs.copy()
-        arg_type = kwargs.get('arg_type', None)
-        if arg_type:
-            merged_kwargs.update(arg_type.settings)
-        merged_kwargs.update(kwargs)
-        super(_ParametersContext, self).register_alias(dest, options_list, **kwargs)
-
     def expand(self, dest, model_type, group_name=None, patches=None):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
@@ -275,7 +263,7 @@ class _ParametersContext(ArgumentsContext):
         parameter_docs = option_descriptions(model_type)
 
         expanded_arguments = []
-        for name, arg in extract_args_from_signature(model_type.__init__):
+        for name, arg in extract_args_from_signature(model_type.__init__, excluded_params=EXCLUDED_PARAMS):
             if name in parameter_docs:
                 arg.type.settings['help'] = parameter_docs[name]
 

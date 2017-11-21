@@ -14,7 +14,6 @@ class RoleCommandsLoader(AzCommandsLoader):
         from azure.cli.core.sdk.util import CliCommandType
         role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
         super(RoleCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=role_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         from azure.cli.command_modules.role.commands import load_command_table

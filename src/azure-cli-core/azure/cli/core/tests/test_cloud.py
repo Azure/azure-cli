@@ -20,7 +20,7 @@ from azure.cli.core.cloud import (Cloud,
                                   update_cloud,
                                   AZURE_PUBLIC_CLOUD,
                                   KNOWN_CLOUDS,
-                                  init_known_clouds,
+                                  update_cloud,
                                   CloudEndpointNotSetException,
                                   CannotUnregisterCloudException)
 
@@ -157,37 +157,6 @@ class TestCloud(unittest.TestCase):
         actual = get_active_cloud_name(cli)
         self.assertEqual(expected, actual)
 
-    def test_known_cloud_missing_endpoint(self):
-        cli = TestCli()
-        # New endpoints in cloud config should be saved in config for the known clouds
-        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
-                config_file:
-            # Save the clouds to config to get started
-            init_known_clouds()
-            cloud = get_cloud(cli, AZURE_PUBLIC_CLOUD.name)
-            self.assertEqual(cloud.endpoints.batch_resource_id,
-                             AZURE_PUBLIC_CLOUD.endpoints.batch_resource_id)
-            # Remove an endpoint from the cloud config (leaving other config values as is)
-            config = cli.config.config_parser
-            config.read(config_file)
-            config.remove_option(AZURE_PUBLIC_CLOUD.name, 'endpoint_batch_resource_id')
-            with open(config_file, 'w') as cf:
-                config.write(cf)
-            # Verify that it was removed
-            config.read(config_file)
-            self.assertFalse(config.has_option(AZURE_PUBLIC_CLOUD.name,
-                                               'endpoint_batch_resource_id'))
-            # Init the known clouds again (this should add the missing endpoint)
-            init_known_clouds(force=True)
-            config.read(config_file)
-            # The missing endpoint should have been added by init_known_clouds as 'force' was used.
-            self.assertTrue(config.has_option(AZURE_PUBLIC_CLOUD.name,
-                                              'endpoint_batch_resource_id'),
-                            'Expected the missing endpoint to be added but it was not.')
-            actual_val = config.get(AZURE_PUBLIC_CLOUD.name, 'endpoint_batch_resource_id')
-            expected_val = AZURE_PUBLIC_CLOUD.endpoints.batch_resource_id
-            self.assertEqual(actual_val, expected_val)
-
     def test_get_known_clouds(self):
         cli = TestCli()
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
@@ -197,12 +166,6 @@ class TestCloud(unittest.TestCase):
 
     def test_modify_known_cloud(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
-            pool_size = 100
-            p = multiprocessing.Pool(pool_size)
-            p.map(init_known_clouds, [True] * pool_size)
-            p.close()
-            p.join()
-            # Check we can read the file with no exceptions
             cli = TestCli()
             config = cli.config.config_parser
             cloud_name = AZURE_PUBLIC_CLOUD.name
@@ -214,9 +177,8 @@ class TestCloud(unittest.TestCase):
             cloud = get_cloud(cli, cloud_name)
             self.assertEqual(cloud.endpoints.gallery, 'https://mynewcustomgallery.azure.com')
             # Check that the config file only has what we changed, not the full cloud info.
-            config = cli.config
-            config.config_parser.read(config_file)
-            items = config.config_parser.items(cloud_name)
+            config.read(config_file)
+            items = config.items(cloud_name)
             self.assertEqual(len(items), 1)
             self.assertEqual(items[0], ('endpoint_gallery', 'https://mynewcustomgallery.azure.com'))
 

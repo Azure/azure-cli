@@ -133,6 +133,8 @@ class AzCliCommand(CLICommand):
                 overrides.settings['required'] = False
 
     def load_arguments(self):
+        from azure.cli.core.commands.validators import DefaultStr, DefaultInt
+        super(AzCliCommand, self).load_arguments()
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
             if self.no_wait_param:
@@ -140,11 +142,6 @@ class AzCliCommand(CLICommand):
                     (self.no_wait_param,
                      CLICommandArgument(self.no_wait_param, options_list=['--no-wait'], action='store_true',
                                         help='Do not wait for the long running operation to finish.')))
-            if self.confirmation:
-                cmd_args.append(
-                    (CONFIRM_PARAM_NAME,
-                     CLICommandArgument(CONFIRM_PARAM_NAME, options_list=['--yes', '-y'], action='store_true',
-                                        help='Do not prompt for confirmation.')))
             self.arguments.update(cmd_args)
 
     def update_argument(self, param_name, argtype):
@@ -161,30 +158,10 @@ class AzCliCommand(CLICommand):
             arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
-
-        from azure.cli.core import AzCommandsLoader
-        cmd_args = args[0]
-
         if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
            self.command_source.overrides_command:
             logger.warning(self.command_source.get_command_warn_msg())
-        if self.deprecate_info is not None:
-            text = 'This command is deprecating and will be removed in future releases.'
-            if self.deprecate_info:
-                text += " Use '{}' instead.".format(self.deprecate_info)
-            logger.warning(text)
-
-        confirm = CONFIRM_PARAM_NAME in cmd_args and not cmd_args.get(CONFIRM_PARAM_NAME) and \
-            not self.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)
-
-        if confirm and not AzCommandsLoader.user_confirmed(confirm, cmd_args):
-            from knack.events import EVENT_COMMAND_CANCELLED
-            from knack.util import CLIError
-
-            self.cli_ctx.raise_event(EVENT_COMMAND_CANCELLED, command=self.name, command_args=cmd_args)
-            raise CLIError('Operation cancelled.')
-
-        return self.handler(*args, **kwargs)
+        return super(AzCliCommand, self).__call__(*args, **kwargs)
 
     def _get_resource_type(self):
         resource_type = self.command_kwargs.get('resource_type', None)
