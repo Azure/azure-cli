@@ -187,16 +187,23 @@ class AzCliCommand(CLICommand):
 
         return self.handler(*args, **kwargs)
 
+    def _get_resource_type(self):
+        resource_type = self.command_kwargs.get('resource_type', None)
+        if not resource_type:
+            command_type = self.command_kwargs.get('command_type', None)
+            resource_type = command_type.settings.get('resource_type', None) if command_type else None
+        return resource_type
+
     def get_api_version(self, resource_type=None):
-        resource_type = resource_type or self.command_kwargs.get('resource_type', None)
+        resource_type = resource_type or self._get_resource_type()
         return self.loader.get_api_version(resource_type=resource_type)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None):
-        resource_type = resource_type or self.command_kwargs.get('resource_type', None)
+        resource_type = resource_type or self._get_resource_type()
         return self.loader.supported_api_version(resource_type=resource_type, min_api=min_api, max_api=max_api)
 
     def get_models(self, *attr_args, **kwargs):
-        resource_type = kwargs.get('resource_type', self.command_kwargs.get('resource_type', None))
+        resource_type = kwargs.get('resource_type', self._get_resource_type())
         return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models')
 
 
@@ -336,14 +343,14 @@ class AzCliCommandInvoker(CommandInvoker):
                                  is_query_active=self.data['query_active'])
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
-        import inspect
-        arg_spec = inspect.getargspec(func).args  # pylint: disable=deprecated-method
+        from azure.cli.core.util import get_arg_list
+        arg_list = get_arg_list(func)
         kwargs = {}
-        if 'cmd' in arg_spec:
+        if 'cmd' in arg_list:
             kwargs['cmd'] = ns._cmd  # pylint: disable=protected-access
-        if 'namespace' in arg_spec:
+        if 'namespace' in arg_list:
             kwargs['namespace'] = ns
-        if 'ns' in arg_spec:
+        if 'ns' in arg_list:
             kwargs['ns'] = ns
         return kwargs
 
