@@ -190,7 +190,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         sql_management='https://management.core.usgovcloudapi.net:8443/',
         batch_resource_id='https://batch.core.usgovcloudapi.net/',
         gallery='https://gallery.usgovcloudapi.net/',
-        active_directory='https://login.microsoftonline.com',
+        active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
@@ -239,19 +239,6 @@ def _get_cloud(cli_ctx, cloud_name):
 def get_custom_clouds(cli_ctx):
     known_cloud_names = [c.name for c in KNOWN_CLOUDS]
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
-
-
-def init_known_clouds(force=False):
-    config = get_config_parser()
-    config.read(CLOUD_CONFIG_FILE)
-    stored_cloud_names = config.sections()
-    for c in KNOWN_CLOUDS:
-        if force or c.name not in stored_cloud_names:
-            _config_add_cloud(config, c, overwrite=force)
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
-        config.write(configfile)
 
 
 def get_clouds(cli_ctx):

@@ -16,7 +16,6 @@ class CdnCommandsLoader(AzCommandsLoader):
         super(CdnCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                 min_profile='2017-03-10-profile',
                                                 custom_command_type=cdn_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         super(CdnCommandsLoader, self).load_command_table(args)

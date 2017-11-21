@@ -15,7 +15,7 @@ from enum import Enum
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -73,8 +73,6 @@ def _authentication_context_factory(cli_ctx, tenant, cache):
 
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
-
-init_known_clouds(force=True)
 
 
 def _load_tokens_from_file(file_path):

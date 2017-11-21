@@ -33,9 +33,9 @@ def enable_autocomplete(parser):
 class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
 
-    def __init__(self, cli_ctx=None, **kwargs):
+    def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
-        super(AzCliCommandParser, self).__init__(cli_ctx, **kwargs)
+        super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     # TODO: If not for _command_source this would not need to be overridden with 99% same implementation
     def load_command_table(self, cmd_tbl):
@@ -63,6 +63,7 @@ class AzCliCommandParser(CLICommandParser):
                                                   conflict_handler='error',
                                                   help_file=metadata.help,
                                                   formatter_class=fc,
+                                                  cli_help=self.cli_help,
                                                   _command_source=metadata.command_source)
             command_parser.cli_ctx = self.cli_ctx
             command_validator = metadata.validator
@@ -104,19 +105,11 @@ class AzCliCommandParser(CLICommandParser):
         self.exit(2)
 
     def format_help(self):
-        from azure.cli.core._help import show_help
-        is_group = self.is_group()
-
         telemetry.set_command_details(
             command=self.prog[3:],
             extension_name=self.command_source.extension_name if self.command_source else None)
         telemetry.set_success(summary='show help')
-
-        show_help(self.prog.split()[0],
-                  self.prog.split()[1:],
-                  self._actions[-1] if is_group else self,
-                  is_group)
-        self.exit()
+        super(AzCliCommandParser, self).format_help()
 
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices

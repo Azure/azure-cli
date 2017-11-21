@@ -17,7 +17,6 @@ class NetworkCommandsLoader(AzCommandsLoader):
         super(NetworkCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_NETWORK,
                                                     custom_command_type=network_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         from azure.cli.command_modules.network.commands import load_command_table

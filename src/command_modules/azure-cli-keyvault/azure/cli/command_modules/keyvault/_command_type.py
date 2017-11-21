@@ -6,6 +6,7 @@
 import base64
 from six import string_types
 
+from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import (command_table,
                                      command_module_map,
                                      CliCommand,
@@ -99,7 +100,7 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
     name = ' '.join(name.split())
 
     def arguments_loader():
-        return extract_args_from_signature(get_op_handler(operation))
+        return extract_args_from_signature(get_op_handler(operation), excluded_params=EXCLUDED_PARAMS)
 
     def description_loader():
         return extract_full_summary_from_signature(get_op_handler(operation))

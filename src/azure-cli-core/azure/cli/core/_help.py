@@ -7,8 +7,12 @@ from __future__ import print_function
 
 from azure.cli.core.commands import ExtensionCommandSource
 
-from knack.help import (
-    HelpExample, HelpFile as KnackHelpFile, CLIHelp, HelpParameter, ArgumentGroupRegistry as KnackArgumentGroupRegistry)
+from knack.help import (HelpExample,
+                        HelpFile as KnackHelpFile,
+                        CLIHelp,
+                        HelpParameter,
+                        ArgumentGroupRegistry as KnackArgumentGroupRegistry)
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -41,43 +45,33 @@ Here are the base commands:
 """
 
 
-def print_detailed_help(cli_name, help_file):
-    from knack.help import _print_header, _print_indent, print_arguments, _print_groups, _print_examples
-    _print_extensions_msg(help_file)
-    _print_header(cli_name, help_file)
-
-    if help_file.type == 'command':
-        _print_indent('Arguments')
-        print_arguments(help_file)
-    elif help_file.type == 'group':
-        _print_groups(help_file)
-    if help_file.examples:
-        _print_examples(help_file)
-
-
-def _print_extensions_msg(help_file):
-    if help_file.type != 'command':
-        return
-    if help_file.command_source and isinstance(help_file.command_source, ExtensionCommandSource):
-        logger.warning(help_file.command_source.get_command_warn_msg())
-
-
-def show_help(cli_name, nouns, parser, is_group):
-    from knack.help import GroupHelpFile
-
-    delimiters = ' '.join(nouns)
-    help_file = CliCommandHelpFile(delimiters, parser) if not is_group else GroupHelpFile(delimiters, parser)
-    help_file.load(parser)
-    if not nouns:
-        help_file.command = ''
-    print_detailed_help(cli_name, help_file)
-
-
 class AzCliHelp(CLIHelp):
 
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         super(AzCliHelp, self).__init__(cli_ctx, PRIVACY_STATEMENT, WELCOME_MESSAGE)
+
+    @staticmethod
+    def _print_extensions_msg(help_file):
+        if help_file.type != 'command':
+            return
+        if help_file.command_source and isinstance(help_file.command_source, ExtensionCommandSource):
+            logger.warning(help_file.command_source.get_command_warn_msg())
+
+    @classmethod
+    def print_detailed_help(cls, cli_name, help_file):
+        cls._print_extensions_msg(help_file)
+        cls._print_detailed_help(cli_name, help_file)
+
+    @classmethod
+    def show_help(cls, cli_name, nouns, parser, is_group):
+        from knack.help import GroupHelpFile
+        delimiters = ' '.join(nouns)
+        help_file = CliCommandHelpFile(delimiters, parser) if not is_group else GroupHelpFile(delimiters, parser)
+        help_file.load(parser)
+        if not nouns:
+            help_file.command = ''
+        cls.print_detailed_help(cli_name, help_file)
 
 
 class CliHelpFile(KnackHelpFile):

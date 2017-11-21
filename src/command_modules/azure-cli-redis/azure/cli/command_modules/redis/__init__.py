@@ -19,7 +19,6 @@ class RedisCommandsLoader(AzCommandsLoader):
         super(RedisCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   min_profile='2017-03-10-profile',
                                                   custom_command_type=redis_custom)
-        self.module_name = __name__
 
     def load_command_table(self, args):
         from azure.cli.command_modules.redis.commands import load_command_table

@@ -7,7 +7,7 @@ import argparse
 import re
 from six import string_types
 
-from azure.cli.core import AzCommandsLoader
+from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
@@ -230,10 +230,10 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             custom_function_op))
 
     def get_arguments_loader():
-        return dict(extract_args_from_signature(context.get_op_handler(getter_op)))
+        return dict(extract_args_from_signature(context.get_op_handler(getter_op), excluded_params=EXCLUDED_PARAMS))
 
     def set_arguments_loader():
-        return dict(extract_args_from_signature(context.get_op_handler(setter_op)))
+        return dict(extract_args_from_signature(context.get_op_handler(setter_op), excluded_params=EXCLUDED_PARAMS))
 
     def function_arguments_loader():
         if not custom_function_op:
@@ -241,7 +241,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         custom_op = context.get_op_handler(custom_function_op)
         context._apply_doc_string(custom_op, kwargs)  # pylint: disable=protected-access
-        return dict(extract_args_from_signature(custom_op))
+        return dict(extract_args_from_signature(custom_op), excluded_params=EXCLUDED_PARAMS)
 
     def generic_update_arguments_loader():
 
@@ -388,7 +388,8 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
 
     def generic_wait_arguments_loader():
 
-        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op)))
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
         cmd_args = getter_args.copy()
 
         group_name = 'Wait Condition'

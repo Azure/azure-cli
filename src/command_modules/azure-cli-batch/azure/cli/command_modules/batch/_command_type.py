@@ -12,7 +12,7 @@ from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
-from azure.cli.core import CONFIRM_PARAM_NAME
+from azure.cli.core import CONFIRM_PARAM_NAME, EXCLUDED_PARAMS
 from azure.cli.core.commands import (
     command_table,
     command_module_map,
@@ -794,7 +794,7 @@ class AzureBatchDataPlaneCommand(object):
 
         self.parser = BatchArgumentTree(self.validator, self.silent)
         self._load_options_model(handler)
-        for arg in extract_args_from_signature(handler):
+        for arg in extract_args_from_signature(handler, excluded_params=EXCLUDED_PARAMS):
             arg_type = find_param_type(handler, arg[0])
             if arg[0] == self._options_param:
                 for option_arg in self._process_options():

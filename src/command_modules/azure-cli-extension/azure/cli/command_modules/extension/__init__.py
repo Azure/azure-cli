@@ -16,7 +16,6 @@ class ExtensionCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         super(ExtensionCommandsLoader, self).__init__(cli_ctx=cli_ctx)
-        self.module_name = __name__
 
     def load_command_table(self, args):
 
@@ -57,7 +56,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         with self.argument_context('extension') as c:
             c.argument('extension_name', options_list=['--name', '-n'], help='Name of extension', completer=extension_name_completion_list)
             # This is a hidden parameter for now
-            c.register('index_url', ('--index',), help=argparse.SUPPRESS)
+            c.argument('index_url', options_list=['--index'], help=argparse.SUPPRESS)
 
         with self.argument_context('extension add') as c:
             c.argument('extension_name', completer=extension_name_from_index_completion_list)
