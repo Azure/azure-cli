@@ -15,7 +15,6 @@ class ResourceCommandsLoader(AzCommandsLoader):
         from azure.cli.core.sdk.util import CliCommandType
         resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
         super(ResourceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                     resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
                                                      custom_command_type=resource_custom)
         self.module_name = __name__
 

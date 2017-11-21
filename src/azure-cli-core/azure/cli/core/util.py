@@ -202,3 +202,15 @@ def hash_string(value, length=16, force_lower=False):
 def in_cloud_console():
     import os
     return os.environ.get('ACC_CLOUD', None)
+
+
+def get_arg_list(op):
+    import inspect
+
+    try:
+        # only supported in python3 - falling back to argspec if not available
+        sig = inspect.signature(op)
+        return sig.parameters
+    except AttributeError:
+        sig = inspect.getargspec(operation)  # pylint: disable=deprecated-method
+        return sig.args
