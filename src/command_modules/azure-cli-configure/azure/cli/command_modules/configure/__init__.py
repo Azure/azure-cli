@@ -16,7 +16,6 @@ class ConfigureCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(ConfigureCommandsLoader, self).load_command_table(args)
 
         configure_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.configure.custom#{}')
 
@@ -26,8 +25,6 @@ class ConfigureCommandsLoader(AzCommandsLoader):
         return self.command_table
 
     def load_arguments(self, command):
-
-        super(ConfigureCommandsLoader, self).load_arguments(command)
 
         with self.argument_context('configure') as c:
             c.argument('defaults', nargs='+', options_list=('--defaults', '-d'))

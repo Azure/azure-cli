@@ -14,7 +14,6 @@ from azure.mgmt.trafficmanager.models import MonitorProtocol
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
-from azure.cli.core.commands.validators import DefaultStr, DefaultInt
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -138,8 +137,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                sku=None,
                                private_ip_address='', public_ip_address=None,
                                public_ip_address_allocation=None,
-                               subnet='default', subnet_address_prefix=DefaultStr('10.0.0.0/24'),
-                               virtual_network_name=None, vnet_address_prefix=DefaultStr('10.0.0.0/16'),
+                               subnet='default', subnet_address_prefix='10.0.0.0/24',
+                               virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0):
     from azure.cli.core.util import random_string
@@ -2114,8 +2113,8 @@ def _handle_asg_property(kwargs, key, asgs):
 
 def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
                                priority, description=None, protocol=None, access=None, direction=None,
-                               source_port_ranges=DefaultStr('*'), source_address_prefixes=DefaultStr('*'),
-                               destination_port_ranges=DefaultInt(80), destination_address_prefixes=DefaultStr('*'),
+                               source_port_ranges='*', source_address_prefixes='*',
+                               destination_port_ranges=80, destination_address_prefixes='*',
                                source_asgs=None, destination_asgs=None):
     kwargs = {
         'protocol': protocol,
