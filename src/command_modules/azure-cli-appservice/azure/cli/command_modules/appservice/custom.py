@@ -9,19 +9,20 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
+from binascii import hexlify
+from os import urandom
 import OpenSSL.crypto
-
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
@@ -116,7 +117,7 @@ def list_webapp(resource_group_name=None):
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app(['functionapp'], resource_group_name)
+    return _list_app(['functionapp', 'functionapp,linux'], resource_group_name)
 
 
 def _list_app(app_types, resource_group_name=None):
@@ -129,6 +130,23 @@ def _list_app(app_types, resource_group_name=None):
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
+
+
+def assign_identity(resource_group_name, name, role='Contributor', scope=None, disable_msi=False):
+    client = web_client_factory()
+
+    def getter():
+        return _generic_site_operation(resource_group_name, name, 'get')
+
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
+        return LongRunningOperation()(poller)
+
+    from azure.cli.core.commands.arm import assign_implict_identity
+    webapp = assign_implict_identity(getter, setter, role, scope)
+    update_app_settings(resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
+    return webapp.identity
 
 
 def get_auth_settings(resource_group_name, name, slot=None):
@@ -760,7 +778,7 @@ def show_backup_configuration(resource_group_name, webapp_name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, webapp_name,
                                        'get_backup_configuration', slot)
-    except:
+    except Exception:  # pylint: disable=broad-except
         raise CLIError('Backup configuration not found')
 
 
@@ -907,8 +925,10 @@ def _get_sku_name(tier):
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']:
+    elif tier in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
+    elif tier in ['P1V2', 'P2V2', 'P3V2']:
+        return 'PREMIUMV2'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -958,8 +978,7 @@ def set_deployment_user(user_name, password=None):
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
-    result = client.update_publishing_user(user)
-    return result
+    return client.update_publishing_user(user)
 
 
 def list_publish_profiles(resource_group_name, name, slot=None):
@@ -1045,11 +1064,11 @@ def _open_page_in_browser(url):
 # TODO: expose new blob suport
 def config_diagnostics(resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
-                       detailed_error_messages=None, failed_request_tracing=None,
-                       slot=None):
+                       docker_container_logging=None, detailed_error_messages=None,
+                       failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig,
-                                       FileSystemHttpLogsConfig, EnabledConfig)
+                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       EnabledConfig)
     client = web_client_factory()
     # TODO: ensure we call get_site only once
     site = client.web_apps.get(resource_group_name, name)
@@ -1065,11 +1084,16 @@ def config_diagnostics(resource_group_name, name, level=None,
         application_logs = ApplicationLogsConfig(fs_log)
 
     http_logs = None
-    if web_server_logging is not None:
-        enabled = web_server_logging
-        # 100 mb max log size, retenting last 3 days. Yes we hard code it, portal does too
-        fs_server_log = FileSystemHttpLogsConfig(100, 3, enabled)
-        http_logs = HttpLogsConfig(fs_server_log)
+    server_logging_option = web_server_logging or docker_container_logging
+    if server_logging_option:
+        # TODO: az blob storage log config currently not in use, will be impelemented later.
+        # Tracked as Issue: #4764 on Github
+        filesystem_log_config = None
+        turned_on = server_logging_option != 'off'
+        if server_logging_option in ['filesystem', 'off']:
+            # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
+            filesystem_log_config = FileSystemHttpLogsConfig(100, 3, enabled=turned_on)
+        http_logs = HttpLogsConfig(filesystem_log_config, None)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(detailed_error_messages))
@@ -1424,7 +1448,8 @@ class _StackRuntimeHelper(object):
 
 def create_function(resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None, deployment_source_url=None,
-                    deployment_source_branch='master', deployment_local_git=None):
+                    deployment_source_branch='master', deployment_local_git=None,
+                    deployment_container_image_name=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -1433,28 +1458,46 @@ def create_function(resource_group_name, name, storage_account, plan=None,
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config)
     client = web_client_factory()
+
     if consumption_plan_location:
         locations = list_consumption_locations()
         location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
+        functionapp_def.kind = 'functionapp'
     else:
         if is_valid_resource_id(plan):
             plan = parse_resource_id(plan)['name']
         plan_info = client.app_service_plans.get(resource_group_name, plan)
         location = plan_info.location
+        is_linux = plan_info.reserved
+        if is_linux:
+            functionapp_def.kind = 'functionapp,linux'
+            site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
+            site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
+                                                          str(hexlify(urandom(32)).decode()).upper()))
+            if deployment_container_image_name:
+                site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
+                                                              deployment_container_image_name))
+                site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
+                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'false'))
+            else:
+                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
+                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
+        else:
+            functionapp_def.kind = 'functionapp'
+            site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))
+
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
     con_string = _validate_and_get_connection_string(resource_group_name, storage_account)
-    functionapp_def.kind = 'functionapp'
 
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair('AzureWebJobsStorage', con_string))
     site_config.app_settings.append(NameValuePair('AzureWebJobsDashboard', con_string))
     site_config.app_settings.append(NameValuePair('WEBSITE_NODE_DEFAULT_VERSION', '6.5.0'))
-    site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))
 
     if consumption_plan_location is None:
         site_config.always_on = True
@@ -1532,4 +1575,36 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
 def list_consumption_locations():
     client = web_client_factory()
     regions = client.list_geo_regions(sku='Dynamic')
-    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
+def list_locations(sku, linux_workers_enabled=None):
+    client = web_client_factory()
+    full_sku = _get_sku_name(sku)
+    return client.list_geo_regions(full_sku, linux_workers_enabled)
+
+
+def enable_zip_deploy(resource_group_name, name, src, slot=None):
+    client = web_client_factory()
+    user_name, password = _get_site_credential(client, resource_group_name, name)
+    scm_url = _get_scm_url(resource_group_name, name, slot)
+    zip_url = scm_url + '/api/zipdeploy'
+
+    import urllib3
+    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers = authorization
+    headers['content-type'] = 'application/octet-stream'
+
+    import requests
+    import os
+    # Read file content
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        r = requests.post(zip_url, data=zip_content, headers=headers)
+        if r.status_code != 200:
+            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
+                zip_url, r.status_code, r.text))
+
+    # on successful deployment navigate to the app, display the latest deployment json response
+    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
+    return response.json()

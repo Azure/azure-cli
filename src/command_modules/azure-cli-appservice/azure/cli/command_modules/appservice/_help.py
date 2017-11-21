@@ -44,6 +44,20 @@ helps['webapp auth update'] = """
           --facebook-oauth-scopes public_profile email
 """
 
+helps['webapp assign-identity'] = """
+    type: command
+    short-summary: (PREVIEW) assign managed service identity to the webapp
+    examples:
+        - name: assign local identity and assign a reader role to the current resource group.
+          text: >
+            az webapp assign-identity -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        - name: disable the identity when there is need.
+          text: >
+            az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_DISABLE_MSI=true
+"""
+
+helps['functionapp assign-identity'] = helps['webapp assign-identity'].replace('webapp', 'functionapp')
+
 helps['webapp config'] = """
 type: group
 short-summary: Configure a web app.
@@ -297,6 +311,23 @@ helps['webapp deployment source config-local-git'] = """
 
             git remote add azure \\
                 https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
+"""
+
+helps['webapp deployment source config-zip'] = """
+    type: command
+    short-summary: Perform deployment using the kudu zip push deployment for a webapp.
+    long-summary: >
+        By default Kudu assumes that zip deployments do not require any build-related actions like
+        npm install or dotnet publish. This can be overridden by including an .ini file on your
+        zip file with the setting SCM_DO_BUILD_DURING_DEPLOYMENT = true to enable Kudu detection
+        logic and build script generation process. Alternatley the setting can be enabled using the
+        az webapp config appsettings set command.
+    examples:
+         - name: Perform deployment by using zip file content.
+           text: >
+             az webapp deployment source config-zip \\
+                 -g <myRG> -n <myAppName> \\
+                 --src <zip file path location>
 """
 
 helps['webapp deployment source delete'] = """
@@ -673,6 +704,7 @@ helps['functionapp deployment source sync'] = """
     type: command
     short-summary: Synchronize from the repository. Only needed under manual integration mode.
 """
+
 helps['functionapp deployment user'] = """
     type: group
     short-summary: Manage user credentials for deployment.
@@ -688,4 +720,21 @@ helps['functionapp deployment user set'] = """
           text: >
             az functionapp deployment user set
             --user-name MyUserName
+"""
+
+helps['functionapp deployment source config-zip'] = """
+    type: command
+    short-summary: Perform deployment using the kudu zip push deployment for a function app.
+    long-summary: >
+        By default Kudu assumes that zip deployments do not require any build-related actions like
+        npm install or dotnet publish. This can be overridden by including an .ini file on your
+        zip file with the setting SCM_DO_BUILD_DURING_DEPLOYMENT = true to enable Kudu detection
+        logic and build script generation process. Alternatley the setting can be enabled using the
+        az functionapp config appsettings set command.
+    examples:
+         - name: Perform deployment by using zip file content.
+           text: >
+             az functionapp deployment source config-zip \\
+                 -g <myRG> -n <myAppName> \\
+                 --src <zip file path location>
 """

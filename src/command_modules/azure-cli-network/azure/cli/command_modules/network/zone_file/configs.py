@@ -26,6 +26,6 @@
 # pylint: skip-file
 
 SUPPORTED_RECORDS = [
-    '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'PTR', 'TXT',
+    '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CAA', 'CNAME', 'MX', 'PTR', 'TXT',
     'SRV', 'SPF', 'URI'
 ]

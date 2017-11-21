@@ -21,11 +21,12 @@ from azure.cli.core.commands.validators import validate_file_or_dict, DefaultStr
 from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+
+from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
 
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
@@ -1240,7 +1241,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
         subnet = network.subnets.get(resource_group_name,
                                      subnet_id['name'],
-                                     subnet_id['child_name'])
+                                     subnet_id['child_name_1'])
         nsg = subnet.network_security_group
 
     if not nsg:
@@ -1277,7 +1278,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         LongRunningOperation('Updating subnet')(network.subnets.create_or_update(
             resource_group_name=resource_group_name,
             virtual_network_name=subnet_id['name'],
-            subnet_name=subnet_id['child_name'],
+            subnet_name=subnet_id['child_name_1'],
             subnet_parameters=subnet
         ))
 
@@ -1502,7 +1503,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
         # loop around inboundnatrule
         instance_addresses = {}
         for rule in lb.inbound_nat_rules:
-            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name']
+            instance_id = parse_resource_id(rule.backend_ip_configuration.id)['child_name_1']
             instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address,
                                                                            rule.frontend_port)
 
@@ -1572,7 +1573,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
-              license_type=None, assign_identity=False, identity_scope=None,
+              plan_promotion_code=None, license_type=None, assign_identity=False, identity_scope=None,
               identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None,
               zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1696,7 +1697,8 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         vm_resource['plan'] = {
             'name': plan_name,
             'publisher': plan_publisher,
-            'product': plan_product
+            'product': plan_product,
+            'promotionCode': plan_promotion_code
         }
 
     if assign_identity:
@@ -1773,7 +1775,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
                 public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None,
-                plan_name=None, plan_product=None, plan_publisher=None, license_type=None,
+                plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=False, identity_scope=None, identity_role=DefaultStr('Contributor'),
                 identity_role_id=None, zones=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1975,7 +1977,8 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_resource['plan'] = {
             'name': plan_name,
             'publisher': plan_publisher,
-            'product': plan_product
+            'product': plan_product,
+            'promotionCode': plan_promotion_code
         }
 
     if assign_identity:
@@ -2115,19 +2118,83 @@ def get_vm_format_secret(secrets, certificate_store=None):
     return formatted
 
 
+def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
+    from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
+    VaultSecretGroup, SourceVault, VaultCertificate = get_sdk(ResourceType.MGMT_COMPUTE, 'VaultSecretGroup',
+                                                              'SourceVault', 'VaultCertificate', mod='models')
+    vm = get_vm(resource_group_name, vm_name)
+
+    if '://' not in certificate:  # has a cert name rather a full url?
+        keyvault_client = create_keyvault_data_plane_client()
+        cert_info = keyvault_client.get_certificate(get_key_vault_base_url(parse_resource_id(keyvault)['name']),
+                                                    certificate, '')
+        certificate = cert_info.sid
+
+    if not _is_linux_vm(vm):
+        certificate_store = certificate_store or 'My'
+    elif certificate_store:
+        raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
+    vault_cert = VaultCertificate(certificate_url=certificate, certificate_store=certificate_store)
+    vault_secret_group = next((x for x in vm.os_profile.secrets
+                               if x.source_vault and x.source_vault.id.lower() == keyvault.lower()), None)
+    if vault_secret_group:
+        vault_secret_group.vault_certificates.append(vault_cert)
+    else:
+        vault_secret_group = VaultSecretGroup(source_vault=SourceVault(keyvault), vault_certificates=[vault_cert])
+        vm.os_profile.secrets.append(vault_secret_group)
+    vm = set_vm(vm)
+    return vm.os_profile.secrets
+
+
+def list_vm_secrets(resource_group_name, vm_name):
+    vm = get_vm(resource_group_name, vm_name)
+    return vm.os_profile.secrets
+
+
+def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
+    vm = get_vm(resource_group_name, vm_name)
+
+    # support 2 kinds of filter:
+    # a. if only keyvault is supplied, we delete its whole vault group.
+    # b. if both keyvault and certificate are supplied, we only delete the specific cert entry.
+
+    to_keep = vm.os_profile.secrets
+    keyvault_matched = []
+    if keyvault:
+        keyvault = keyvault.lower()
+        keyvault_matched = [x for x in to_keep if x.source_vault and x.source_vault.id.lower() == keyvault]
+
+    if keyvault and not certificate:
+        to_keep = [x for x in to_keep if x not in keyvault_matched]
+    elif certificate:
+        temp = keyvault_matched if keyvault else to_keep
+        cert_url_pattern = certificate.lower()
+        if '://' not in cert_url_pattern:  # just a cert name?
+            cert_url_pattern = '/' + cert_url_pattern + '/'
+        for x in temp:
+            x.vault_certificates = ([v for v in x.vault_certificates
+                                     if not(v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
+        to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
+
+    vm.os_profile.secrets = to_keep
+    vm = set_vm(vm)
+    return vm.os_profile.secrets
+
+
 def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
                        identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models')
-    vm = get_vm(resource_group_name, vm_name)
-    if not vm.identity:
-        logger.info('Enabling managed identity...')
-        vm.identity = VirtualMachineIdentity(type='systemAssigned')
-        vm = set_vm(vm)
-    else:
-        logger.info('Managed identity is already enabled')
+    from azure.cli.core.commands.arm import assign_implict_identity
+    client = _compute_client_factory()
 
-    if identity_scope:
-        _create_role_assignment_with_retries(identity_scope, identity_role_id, vm.identity.principal_id)
+    def getter():
+        return client.virtual_machines.get(resource_group_name, vm_name)
+
+    def setter(vm):
+        vm.identity = VirtualMachineIdentity(type='SystemAssigned')
+        return set_vm(vm)
+
+    vm = assign_implict_identity(getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
@@ -2143,22 +2210,20 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
 
 def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
                          identity_role_id=None, identity_scope=None, port=None):
-    VirtualMachineIdentity, UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity',
-                                                  'UpgradeMode', mod='models')
+    VirtualMachineScaleSetIdentity, UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity',
+                                                          'UpgradeMode', mod='models')
+    from azure.cli.core.commands.arm import assign_implict_identity
     client = _compute_client_factory()
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    if not vmss.identity:
-        logger.info('Enabling managed identity...')
-        vmss.identity = VirtualMachineIdentity(type='systemAssigned')
-        client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
-        # the 'create_or_update' doesn't deserialize the result right, hence we dig it out ourselves
-        # (TODO open auto-rest bug before merge)
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    else:
-        logger.info('Managed identity is already enabled')
 
-    if identity_scope:
-        _create_role_assignment_with_retries(identity_scope, identity_role_id, vmss.identity.principal_id)
+    def getter():
+        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+
+    def setter(vmss):
+        vmss.identity = VirtualMachineScaleSetIdentity(type='SystemAssigned')
+        poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        return LongRunningOperation()(poller)
+
+    vmss = assign_implict_identity(getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration
@@ -2182,35 +2247,6 @@ def _construct_identity_info(identity_scope, identity_role, port):
         'role': str(identity_role),  # could be DefaultStr, so convert to string
         'port': port
     }
-
-
-# to workaround a known AAD server replicate issue
-def _create_role_assignment_with_retries(identity_scope, identity_role_id, principal_id):
-    import time
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
-    from msrestazure.azure_exceptions import CloudError
-    assignments_client = get_mgmt_service_client(AuthorizationManagementClient).role_assignments
-    properties = RoleAssignmentProperties(identity_role_id, principal_id)
-
-    logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
-    retry_times = 36
-    assignment_id = _gen_guid()
-    for l in range(0, retry_times):
-        try:
-            assignments_client.create(identity_scope, assignment_id, properties)
-            break
-        except CloudError as ex:
-            if 'role assignment already exists' in ex.message:
-                logger.info('Role assignment already exists')
-                break
-            elif l < retry_times and ' does not exist in the directory ' in ex.message:
-                time.sleep(5)
-                logger.warning('Retrying role assignment creation: %s/%s', l + 1,
-                               retry_times)
-                continue
-            else:
-                raise
 
 
 # for injecting test seams to produce predicatable role assignment id for playback

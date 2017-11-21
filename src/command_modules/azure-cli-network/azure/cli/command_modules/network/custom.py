@@ -8,10 +8,10 @@ from collections import Counter, OrderedDict
 import mock
 
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import DefaultStr, DefaultInt
 
@@ -21,7 +21,7 @@ from azure.cli.command_modules.network._util import _get_property, _set_param
 
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
-from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
+from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord,
                                    NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord, Zone)
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
@@ -1653,8 +1653,7 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
     vnet = VirtualNetwork(
         location=location, tags=tags,
         dhcp_options=DhcpOptions(dns_servers),
-        address_space=AddressSpace(
-            vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
+        address_space=AddressSpace(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
     if subnet_name:
         vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-09-01'):
@@ -1666,12 +1665,18 @@ def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
 def update_vnet(instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
-    if vnet_prefixes:
+    if vnet_prefixes and instance.address_space:
         instance.address_space.address_prefixes = vnet_prefixes
+    elif vnet_prefixes:
+        instance.address_space = AddressSpace(vnet_prefixes)
+
     if dns_servers == ['']:
         instance.dhcp_options.dns_servers = None
-    elif dns_servers:
+    elif dns_servers and instance.dhcp_options:
         instance.dhcp_options.dns_servers = dns_servers
+    elif dns_servers:
+        instance.dhcp_options = DhcpOptions(dns_servers=dns_servers)
+
     if ddos_protection is not None:
         instance.enable_ddos_protection = ddos_protection
     if vm_protection is not None:
@@ -2584,6 +2589,12 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
     if monitor_path is not None:
         instance.monitor_config.path = monitor_path
 
+    # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
+    for endpoint in instance.endpoints:
+        endpoint._validation = {
+            'name': {'readonly': False},
+            'type': {'readonly': False},
+        }
     return instance
 
 
@@ -2688,7 +2699,7 @@ def list_dns_zones(resource_group_name=None):
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=ttl, metadata=metadata)
+    record_set = RecordSet(ttl=ttl, metadata=metadata)
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
                                 record_set_type, record_set, if_match=if_match,
                                 if_none_match='*' if if_none_match else None)
@@ -2714,6 +2725,7 @@ def _type_to_property_name(key):
     type_dict = {
         'a': 'arecords',
         'aaaa': 'aaaa_records',
+        'caa': 'caa_records',
         'cname': 'cname_record',
         'mx': 'mx_records',
         'ns': 'ns_records',
@@ -2765,6 +2777,8 @@ def export_zone(resource_group_name, zone_name):
                 record_obj.update({'ip': record.ipv6_address})
             elif record_type == 'a':
                 record_obj.update({'ip': record.ipv4_address})
+            elif record_type == 'caa':
+                record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname})
             elif record_type == 'mx':
@@ -2801,6 +2815,8 @@ def _build_record(data):
             return AaaaRecord(data['ip'])
         elif record_type == 'a':
             return ARecord(data['ip'])
+        elif record_type == 'caa':
+            return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
         elif record_type == 'cname':
             return CnameRecord(data['alias'])
         elif record_type == 'mx':
@@ -2858,19 +2874,16 @@ def import_zone(resource_group_name, zone_name, file_name):
                             'imported at this time. Skipping...', relative_record_set_name)
                         continue
 
-                    if record_set_type != 'soa' and relative_record_set_name != origin:
-                        relative_record_set_name = record_set_name[:-(len(origin) + 2)]
-
-                    record_set = RecordSet(
-                        name=relative_record_set_name, type=record_set_type, ttl=record_set_ttl)
+                    record_set = RecordSet(ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
-    for rs in record_sets.values():
+    for key, rs in record_sets.items():
+        rs_type = key.rsplit('.', 1)[1].lower()
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs.type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
         except TypeError:
             record_count = 1
         total_records += record_count
@@ -2879,31 +2892,30 @@ def import_zone(resource_group_name, zone_name, file_name):
     client = get_mgmt_service_client(DnsManagementClient)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
     client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
-    for rs in record_sets.values():
+    for key, rs in record_sets.items():
 
-        rs.type = rs.type.lower()
-        rs.name = '@' if rs.name == origin else rs.name
+        rs_name, rs_type = key.lower().rsplit('.', 1)
+        rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
 
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs.type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
         except TypeError:
             record_count = 1
-        if rs.name == '@' and rs.type == 'soa':
+        if rs_name == '@' and rs_type == 'soa':
             root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
             rs.soa_record.host = root_soa.soa_record.host
-            rs.name = '@'
-        elif rs.name == '@' and rs.type == 'ns':
+            rs_name = '@'
+        elif rs_name == '@' and rs_type == 'ns':
             root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
             root_ns.ttl = rs.ttl
             rs = root_ns
-            rs.type = rs.type.rsplit('/', 1)[1]
+            rs_type = rs.type.rsplit('/', 1)[1]
         try:
             client.record_sets.create_or_update(
-                resource_group_name, zone_name, rs.name, rs.type, rs)
+                resource_group_name, zone_name, rs_name, rs_type, rs)
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
-                  .format(cum_records, total_records, record_count, rs.type, rs.name),
-                  file=sys.stderr)
+                  .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
         except CloudError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
@@ -2921,6 +2933,12 @@ def add_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_addre
     record_type = 'a'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                             'arecords')
+
+
+def add_dns_caa_record(resource_group_name, zone_name, record_set_name, value, flags, tag):
+    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record_type = 'caa'
+    return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 
 def add_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
@@ -3010,6 +3028,14 @@ def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_ad
                           keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_caa_record(resource_group_name, zone_name, record_set_name, value,
+                          flags, tag, keep_empty_record_set=False):
+    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record_type = 'caa'
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname,
                             keep_empty_record_set=False):
     record = CnameRecord(cname=cname)
@@ -3077,7 +3103,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)
+        record_set = RecordSet(ttl=3600)
 
     _add_record(record_set, record, record_type, is_list)
 

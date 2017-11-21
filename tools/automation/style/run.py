@@ -51,7 +51,7 @@ def run_pep8(modules):
     return return_code
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser('Code style tools')
     parser.add_argument('--ci', action='store_true', help='Run in CI mode')
     parser.add_argument('--pep8', dest='suites', action='append_const', const='pep8',
@@ -91,3 +91,6 @@ if __name__ == '__main__':
             return_code_sum += run_pylint(selected_modules)
 
     sys.exit(return_code_sum)
+
+if __name__ == '__main__':
+    main()

@@ -58,22 +58,31 @@ with ParametersContext(command='batchai cluster create') as c:
                help='Relative mount path for nfs. The nfs will be available at '
                     '$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.',
                arg_group='File Server Mount')
+    c.argument('account_name', options_list=('--storage-account-name',),
+               help='Storage account name for Azure File Shares and/or Azure Storage Containers mounting. Related '
+                    'environment variable: AZURE_BATCHAI_STORAGE_ACCOUNT. Must be used in conjunction with '
+                    '--storage-account-key. If the key is not provided, the command will try to query the storage '
+                    'account key using the authenticated Azure account.',
+               arg_group='Storage Account')
+    c.argument('account_key', options_list=('--storage-account-key',),
+               help='Storage account key. Must be used in conjunction with --storage-account-name. Environment '
+                    'variable: AZURE_BATCHAI_STORAGE_KEY.',
+               arg_group='Storage Account')
     c.argument('azure_file_share', options_list=('--afs-name',),
-               help='Name of the azure file share to mount. Please provide AZURE_BATCHAI_STORAGE_ACCOUNT and '
-                    'AZURE_BATCHAI_STORAGE_KEY environment variables or add batchai/storage_key and '
-                    'batchai/storage_account values to az configuration file containing storage account name and key.',
+               help='Name of the azure file share to mount. Must be used in conjunction with --storage-account-name '
+                    'and --storage-account-key arguments or AZURE_BATCHAI_STORAGE_ACCOUNT and '
+                    'AZURE_BATCHAI_STORAGE_KEY environment variables.  If you need to mount more than one Azure File '
+                    'share, configure them in a configuration file and use --config option.',
                arg_group='Azure File Share Mount')
     c.argument('afs_mount_path', options_list=('--afs-mount-path',),
                help='Relative mount path for Azure File share. The file share will be available at '
-                    '$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder. If you need to mount more than one Azure '
-                    'Storage container, configure them in a configuration file and use --config option.',
+                    '$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.',
                arg_group='Azure File Share Mount')
     c.argument('container_name', options_list=('--container-name',),
-               help='Name of Azure Storage container to mount. Please provide AZURE_BATCHAI_STORAGE_ACCOUNT and '
-                    'AZURE_BATCHAI_STORAGE_KEY environment variables or add batchai/storage_key and '
-                    'batchai/storage_account values to az configuration file containing storage account name and key. '
-                    'If you need to mount more than one Azure Storage container, configure them in a configuration '
-                    'file and use --config option.',
+               help='Name of Azure Storage container to mount. Must be used in conjunction with --storage-account-name '
+                    'and --storage-account-key arguments or AZURE_BATCHAI_STORAGE_ACCOUNT and '
+                    'AZURE_BATCHAI_STORAGE_KEY environment variables. If you need to mount more than one Azure Storage '
+                    'container, configure them in a configuration file and use --config option.',
                arg_group='Azure Storage Container Mount')
     c.argument('container_mount_path', options_list=('--container-mount-path',),
                help='Relative mount path for Azure Storage container. The container will be available at '
@@ -121,7 +130,7 @@ with ParametersContext(command='batchai job create') as c:
     c.argument('json_file', options_list=('--config', '-c'),
                help='A path to a json file containing job create parameters '
                     '(json representation of azure.mgmt.batchai.models.JobCreateParameters).')
-    c.argument('cluster_name', options_list=('--cluster-name',),
+    c.argument('cluster_name', options_list=('--cluster-name', '-r'),
                help='If specified, the job will run on the given cluster instead of the '
                     'one configured in the json file.')
     c.argument('cluster_resource_group', options_list=('--cluster-resource-group',),
@@ -172,7 +181,7 @@ with ParametersContext(command='batchai file-server create') as c:
                help='Location. You can configure the default location using `az configure --defaults '
                     'location=<location>` or specify it in the file server configuration file.')
     c.register_alias('file_server_name', options_list=('--name', '-n'), help='Name of the file server.')
-    c.argument('vm_size', help='VM size.', completer=get_vm_size_completion_list)
+    c.argument('vm_size', options_list=('--vm-size', '-s'), help='VM size.', completer=get_vm_size_completion_list)
     c.argument('disk_count', help='Number of disks.', type=int, arg_group='Storage')
     c.argument('disk_size', help='Disk size in Gb.', type=int, arg_group='Storage')
     c.argument('storage_sku', help='The sku of storage account to persist VM.',

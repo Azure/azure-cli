@@ -259,7 +259,7 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
 
 def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
-    from azure.cli.core.commands.arm import parse_resource_id
+    from msrestazure.tools import parse_resource_id
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     result = parse_resource_id(identity_scope)
@@ -483,7 +483,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
 
     if attach_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
-        from azure.cli.core.commands.arm import is_valid_resource_id
+        from msrestazure.tools import is_valid_resource_id
         for d in attach_data_disks:
             disk_entry = {
                 'lun': lun,
@@ -848,7 +848,6 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
-            'tier': 'Standard',
             'capacity': instance_count
         },
         'properties': vmss_properties

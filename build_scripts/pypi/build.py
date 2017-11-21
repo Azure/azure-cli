@@ -40,6 +40,7 @@ def _exec_command(command_list, cwd=None, stdout=None):
 
 def _build_package(path_to_package, dist_dir):
     cmd_success = _exec_command(['python', 'setup.py', 'bdist_wheel', '-d', dist_dir], cwd=path_to_package)
+    cmd_success = _exec_command(['python', 'setup.py', 'sdist', '-d', dist_dir], cwd=path_to_package)
     if not cmd_success:
         _error_exit('Error building {}.'.format(path_to_package))
 
