@@ -26,6 +26,7 @@ from ._util import (
     get_sql_server_keys_operations,
     get_sql_servers_operations,
     get_sql_server_usages_operations,
+    get_sql_subscription_usages_operations,
     get_sql_virtual_network_rules_operations
 )
 
@@ -46,6 +47,20 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
 
         with s.group('sql elastic-pool') as c:
             c.custom_command('list-editions', 'elastic_pool_list_capabilities')
+
+    ###############################################
+    #                sql list-usages              #
+    ###############################################
+
+    subscription_usages_operations = create_service_adapter(
+        'azure.mgmt.sql.operations.subscription_usages_operations',
+        'SubscriptionUsagesOperations')
+
+    with ServiceGroup(__name__, get_sql_subscription_usages_operations,
+                      subscription_usages_operations, custom_path) as s:
+        with s.group('sql') as c:
+            c.command('list-usages', 'list_by_location')
+            c.command('show-usage', 'get')
 
     ###############################################
     #                sql db                       #

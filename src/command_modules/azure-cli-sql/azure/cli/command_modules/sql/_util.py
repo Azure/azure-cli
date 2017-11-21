@@ -96,5 +96,9 @@ def get_sql_server_usages_operations(kwargs):
     return get_sql_management_client(kwargs).server_usages
 
 
+def get_sql_subscription_usages_operations(kwargs):
+    return get_sql_management_client(kwargs).subscription_usages
+
+
 def get_sql_virtual_network_rules_operations(kwargs):
     return get_sql_management_client(kwargs).virtual_network_rules
