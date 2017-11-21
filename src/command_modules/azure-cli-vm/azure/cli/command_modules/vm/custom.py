@@ -17,7 +17,7 @@ except ImportError:
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
-from azure.cli.core.commands.validators import validate_file_or_dict, DefaultStr, DefaultInt
+from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
@@ -448,7 +448,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None,
-              os_caching=DefaultStr('ReadWrite'), data_caching=None, storage_container_name=None, storage_sku=None,
+              os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
               use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None,
               attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',

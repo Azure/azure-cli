@@ -18,7 +18,6 @@ class ProfileCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(ProfileCommandsLoader, self).load_command_table(args)
 
         profile_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.profile.custom#{}'
@@ -40,7 +39,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
     # pylint: disable=line-too-long
     def load_arguments(self, command):
-        super(ProfileCommandsLoader, self).load_arguments(command)
+
         with self.argument_context('login') as c:
             c.argument('password', options_list=('--password', '-p'), help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
             c.argument('service_principal', action='store_true', help='The credential representing a service principal.')

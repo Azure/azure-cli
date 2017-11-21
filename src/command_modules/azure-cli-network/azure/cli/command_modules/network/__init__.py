@@ -20,13 +20,11 @@ class NetworkCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(NetworkCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.network.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(NetworkCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.network._params import load_arguments
         load_arguments(self, command)
 

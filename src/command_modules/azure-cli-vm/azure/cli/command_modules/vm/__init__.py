@@ -20,13 +20,11 @@ class ComputeCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(ComputeCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.vm.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(ComputeCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.vm._params import load_arguments
         load_arguments(self, command)
 

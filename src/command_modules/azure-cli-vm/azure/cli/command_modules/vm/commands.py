@@ -103,7 +103,7 @@ def load_command_table(self, _):
     )
 
     network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations{}',
+        operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.{}',
         client_factory=cf_ni
     )
 
@@ -260,8 +260,8 @@ def load_command_table(self, _):
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
     with self.command_group('vmss disk', compute_vmss_sdk, min_api='2017-03-30') as g:
-        g.command('attach', 'attach_managed_data_disk_to_vmss')
-        g.command('detach', 'detach_disk_from_vmss')
+        g.custom_command('attach', 'attach_managed_data_disk_to_vmss')
+        g.custom_command('detach', 'detach_disk_from_vmss')
 
     with self.command_group('vmss encryption', custom_command_type=compute_disk_encryption_custom, min_api='2017-03-30') as g:
         g.custom_command('enable', 'encrypt_vmss', validator=process_disk_encryption_namespace)

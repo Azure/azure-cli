@@ -8,7 +8,6 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.core.commands.validators import DefaultStr
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _figure_out_storage_source,
@@ -86,11 +85,11 @@ class TestActions(unittest.TestCase):
         # action (should throw)
         kwargs = {'namespace': np}
         with self.assertRaises(CLIError):
-            process_disk_or_snapshot_create_namespace(**kwargs)
+            process_disk_or_snapshot_create_namespace(cmd, **kwargs)
 
         # with blob uri, should be fine
         np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
-        process_disk_or_snapshot_create_namespace(**kwargs)
+        process_disk_or_snapshot_create_namespace(cmd, **kwargs)
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long

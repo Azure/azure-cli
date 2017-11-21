@@ -143,19 +143,25 @@ def get_enum_type(data, default=None):
     except AttributeError:
         choices = data
 
+    class DefaultAction(argparse.Action):
+
+        def __call__(self, parser, args, values, option_string=None):
+            if values:
+                values = next((x for x in self.choices if x.lower() == values.lower()), values)
+            setattr(args, self.dest, values)
+
     def _type(value):
         return next((x for x in choices if x.lower() == value.lower()), value) if value else value
 
     default_value = None
     if default:
-        from azure.cli.core.commands.validators import DefaultStr
         default_value = next((x for x in choices if x.lower() == default.lower()), None)
         if not default_value:
             raise CLIError("Command authoring exception: urecognized default '{}' from choices '{}'"
                            .format(default, choices))
-        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), type=_type, default=DefaultStr(default_value))
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction, default=default_value)
     else:
-        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), type=_type)
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction)
     return arg_type
 
 

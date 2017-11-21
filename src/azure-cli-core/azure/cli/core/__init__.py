@@ -83,7 +83,11 @@ class MainCommandsLoader(CLICommandsLoader):
         self.loaders = []
 
     def _update_command_definitions(self):
-        pass
+        for cmd_name in self.command_table:
+            loaders = self.cmd_to_loader_map[cmd_name]
+            for loader in loaders:
+                loader.command_table = self.command_table
+                loader._update_command_definitions()
 
     def load_command_table(self, args):
         from importlib import import_module
@@ -178,18 +182,19 @@ class MainCommandsLoader(CLICommandsLoader):
         command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            for loader in command_loaders:
-                loader.command_name = command
-                loader.load_arguments(command)
-                self.argument_registry.arguments.update(loader.argument_registry.arguments)
-                self.extra_argument_registry.update(loader.extra_argument_registry)
-
             with ArgumentsContext(self, '') as c:
                 c.argument('resource_group_name', resource_group_name_type)
                 c.argument('location', get_location_type(self.cli_ctx))
                 c.argument('deployment_name', deployment_name_type)
                 c.argument('cmd', ignore_type)
-        super(MainCommandsLoader, self).load_arguments(command)
+
+            for loader in command_loaders:
+                loader.command_name = command
+                self.command_table[command].load_arguments()  # this loads the arguments via reflection
+                loader.load_arguments(command)  # this adds entries to the argument registries
+                self.argument_registry.arguments.update(loader.argument_registry.arguments)
+                self.extra_argument_registry.update(loader.extra_argument_registry)
+                loader._update_command_definitions()
 
 
 class AzCommandsLoader(CLICommandsLoader):
@@ -209,16 +214,18 @@ class AzCommandsLoader(CLICommandsLoader):
         self._argument_context_cls = argument_context_cls or _ParametersContext
 
     def _update_command_definitions(self):
+        master_arg_registry = self.cli_ctx.invocation.commands_loader.argument_registry
+        master_extra_arg_registry = self.cli_ctx.invocation.commands_loader.extra_argument_registry
         for command_name, command in self.command_table.items():
             for argument_name in command.arguments:
-                overrides = self.argument_registry.get_cli_argument(command_name, argument_name)
+                overrides = master_arg_registry.get_cli_argument(command_name, argument_name)
                 command.update_argument(argument_name, overrides)
 
             # Add any arguments explicitly registered for this command
-            for argument_name, argument_definition in self.extra_argument_registry[command_name].items():
+            for argument_name, argument_definition in master_extra_arg_registry[command_name].items():
                 command.arguments[argument_name] = argument_definition
                 command.update_argument(argument_name,
-                                        self.argument_registry.get_cli_argument(command_name, argument_name))
+                                        master_arg_registry.get_cli_argument(command_name, argument_name))
 
     def _apply_doc_string(self, dest, command_kwargs):
         doc_string_source = command_kwargs.get('doc_string_source', None)

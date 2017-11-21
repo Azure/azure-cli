@@ -19,7 +19,6 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(ExtensionCommandsLoader, self).load_command_table(args)
 
         def ext_add_has_confirmed(command_args):
             return bool(not command_args.get('source') or prompt_y_n('Are you sure you want to install this extension?'))
@@ -45,7 +44,6 @@ class ExtensionCommandsLoader(AzCommandsLoader):
 
     # pylint: disable=line-too-long
     def load_arguments(self, command):
-        super(ExtensionCommandsLoader, self).load_arguments(command)
 
         from argcomplete.completers import FilesCompleter
         from azure.cli.core.extension import get_extension_names

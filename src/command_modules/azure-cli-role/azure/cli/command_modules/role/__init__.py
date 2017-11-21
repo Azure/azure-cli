@@ -17,13 +17,11 @@ class RoleCommandsLoader(AzCommandsLoader):
         self.module_name = __name__
 
     def load_command_table(self, args):
-        super(RoleCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.role.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(RoleCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.role._params import load_arguments
         load_arguments(self, command)
 
