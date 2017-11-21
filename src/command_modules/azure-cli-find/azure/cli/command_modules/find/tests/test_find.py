@@ -35,7 +35,7 @@ class SearchIndexTest(unittest.TestCase):
 
     def execute(self, args, reindex=False):
         with capture() as out:
-            find(self.loader, args, True)
+            find(self.loader, args, reindex)
 
         return out[0]
 
