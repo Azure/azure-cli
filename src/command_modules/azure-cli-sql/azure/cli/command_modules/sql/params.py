@@ -10,6 +10,7 @@ from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type,
     get_resource_name_completion_list,
+    location_type,
     three_state_flag)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
@@ -45,6 +46,7 @@ server_param_type = CliArgumentType(
     options_list=('--server', '-s'),
     help='Name of the Azure SQL server.')
 
+
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
@@ -77,6 +79,11 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
         return 'Size (in {}) - valid units are {}.'.format(
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
+
+
+with ParametersContext(command='sql') as c:
+    c.argument('location_name', arg_type=location_type)
+    c.argument('usage_name', options_list=('--usage', '-u'))
 
 
 ###############################################

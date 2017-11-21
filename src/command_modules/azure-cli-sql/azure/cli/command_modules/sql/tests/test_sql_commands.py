@@ -1723,3 +1723,14 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         # test sql server vnet-rule delete rule 2
         self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'.format(vnet_rule_2, rg, server),
                  checks=NoneCheck())
+
+
+class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
+    def test_sql_subscription_usages(self):
+        self.cmd('sql list-usages -l westus',
+                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+
+        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+                 checks=[
+                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheckGreaterThan('limit', 0)])
