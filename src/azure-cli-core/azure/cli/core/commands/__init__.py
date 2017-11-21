@@ -133,7 +133,6 @@ class AzCliCommand(CLICommand):
                 overrides.settings['required'] = False
 
     def load_arguments(self):
-        from azure.cli.core.commands.validators import DefaultStr, DefaultInt
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
             if self.no_wait_param:
@@ -146,20 +145,20 @@ class AzCliCommand(CLICommand):
                     (CONFIRM_PARAM_NAME,
                      CLICommandArgument(CONFIRM_PARAM_NAME, options_list=['--yes', '-y'], action='store_true',
                                         help='Do not prompt for confirmation.')))
-            for (arg_name, arg) in cmd_args:
-                arg_def = arg.type.settings.get('default', None)
-                if isinstance(arg_def, str):
-                    arg_def = DefaultStr(arg_def)
-                elif isinstance(arg_def, int):
-                    arg_def = DefaultInt(arg_def)
-                if arg_def:
-                    arg.type.settings['default'] = arg_def
             self.arguments.update(cmd_args)
 
     def update_argument(self, param_name, argtype):
+        from azure.cli.core.commands.validators import DefaultStr, DefaultInt
         arg = self.arguments[param_name]
         self._resolve_default_value_from_cfg_file(arg, argtype)
         arg.type.update(other=argtype)
+        arg_default = arg.type.settings.get('default', None)
+        if isinstance(arg_default, str):
+            arg_default = DefaultStr(arg_default)
+        elif isinstance(arg_default, int):
+            arg_default = DefaultInt(arg_default)
+        if arg_default:
+            arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
 
@@ -223,7 +222,7 @@ class AzCliCommandInvoker(CommandInvoker):
         command = self._rudimentary_get_command(args)
 
         try:
-            cmd_tbl = {command: self.commands_loader.command_table[command]}
+            self.commands_loader.command_table = {command: self.commands_loader.command_table[command]}
         except KeyError:
             # Trim down the command table to reduce the number of subparsers required to optimize the performance.
             #
@@ -243,7 +242,7 @@ class AzCliCommandInvoker(CommandInvoker):
             # output: network application-gateway create
             #         network list-usages
 
-            cmd_tbl = {}
+            cmd_table = {}
             group_names = set()
             for cmd_name, cmd in self.commands_loader.command_table.items():
                 if command and not cmd_name.startswith(command):
@@ -252,16 +251,18 @@ class AzCliCommandInvoker(CommandInvoker):
                 cmd_stub = cmd_name[len(command):].strip()
                 group_name = cmd_stub.split(' ', 1)[0]
                 if group_name not in group_names:
-                    cmd_tbl[cmd_name] = cmd
+                    cmd_table[cmd_name] = cmd
                     group_names.add(group_name)
+                self.commands_loader.command_table = cmd_table
 
+        self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
         self.commands_loader.load_arguments(command)
-        self.commands_loader._update_command_definitions()  # pylint: disable=protected-access
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=cmd_tbl)
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=self.commands_loader.command_table)
         self.parser.cli_ctx = self.cli_ctx
-        self.parser.load_command_table(cmd_tbl)
+        self.parser.load_command_table(self.commands_loader.command_table)
 
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=cmd_tbl, parser=self.parser)
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
+                                 parser=self.parser)
 
         if not args:
             self.cli_ctx.completion.enable_autocomplete(self.parser)
@@ -297,7 +298,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
             params = self._filter_params(expanded_arg)
 
-            command_source = cmd_tbl[command].command_source
+            command_source = self.commands_loader.command_table[command].command_source
             telemetry.set_command_details(self.data['command'],
                                           self.data['output'],
                                           [p for p in args if p.startswith('-')],
@@ -339,7 +340,7 @@ class AzCliCommandInvoker(CommandInvoker):
             results = results[0]
 
         return CommandResultItem(results,
-                                 table_transformer=cmd_tbl[parsed_args.command].table_transformer,
+                                 table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
                                  is_query_active=self.data['query_active'])
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use

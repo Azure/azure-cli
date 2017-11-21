@@ -214,6 +214,11 @@ class _ParametersContext(ArgumentsContext):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.is_stale = True
 
+    def _applicable(self):
+        command_name = self.command_loader.command_name
+        scope = self.scope
+        return command_name.startswith(scope)
+
     def _check_stale(self):
         if self.is_stale:
             message = "command authoring error: argument context '{}' is stale! " \
@@ -224,6 +229,9 @@ class _ParametersContext(ArgumentsContext):
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
         self._check_stale()
+        if not self._applicable():
+            return
+
         merged_kwargs = self.group_kwargs.copy()
         if arg_type:
             merged_kwargs.update(arg_type.settings)
@@ -238,6 +246,9 @@ class _ParametersContext(ArgumentsContext):
     # pylint: disable=arguments-differ
     def alias(self, dest, options_list, **kwargs):
         self._check_stale()
+        if not self._applicable():
+            return
+
         merged_kwargs = self.group_kwargs.copy()
         arg_type = kwargs.get('arg_type', None)
         if arg_type:
@@ -252,6 +263,9 @@ class _ParametersContext(ArgumentsContext):
         from azure.cli.core.sdk.validators import get_complex_argument_processor
         from knack.introspection import extract_args_from_signature, option_descriptions
         self._check_stale()
+        if not self._applicable():
+            return
+
         if not patches:
             patches = dict()
 
@@ -280,11 +294,17 @@ class _ParametersContext(ArgumentsContext):
 
     def ignore(self, *args):
         self._check_stale()
+        if not self._applicable():
+            return
+
         for arg in args:
             super(_ParametersContext, self).ignore(arg)
 
     def extra(self, dest, **kwargs):
         self._check_stale()
+        if not self._applicable():
+            return
+
         merged_kwargs = self.group_kwargs.copy()
         merged_kwargs.update(kwargs)
         if self.command_loader.supported_api_version(resource_type=merged_kwargs.get('resource_type'),

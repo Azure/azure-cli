@@ -375,7 +375,6 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
                  checks=self.check('powerState', 'VM running'))
 
 
-# TODO: FAIL command failed
 class VMAttachDisksOnCreate(ScenarioTest):
 
     @ResourceGroupPreparer()
@@ -396,7 +395,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
             'data_disk': 'dDisk'
         })
         self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk}')
-        self.cmd('disk create -g {rg} -n {od_disk} --source {os_snapshot}')
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot}')
         self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk}')
         self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
 
@@ -488,14 +487,15 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
 
         # create another snapshot by importing from the disk1
-        data_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk1} --sku Premium_LRS')
+        data_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk1} --sku Premium_LRS').get_output_in_json()
         self.kwargs.update({
-            'snapshot1_id': data_snapshot['id'],
+            'snapshot1_id': os_snapshot['id'],
+            'snapshot2_id': data_snapshot['id'],
             'disk2_id': data_disk2['id']
         })
 
         # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
-        self.cmd('image create -g {rg} -n {image} --source {snapshot1} --data-disk-sources {disk1} {snapshot1_id} {disk2_id} --os-type Linux --tags tag1=i1', checks=[
+        self.cmd('image create -g {rg} -n {image} --source {snapshot1} --data-disk-sources {disk1} {snapshot2_id} {disk2_id} --os-type Linux --tags tag1=i1', checks=[
             self.check('storageProfile.osDisk.osType', 'Linux'),
             self.check('storageProfile.osDisk.snapshot.id', '{snapshot1_id}'),
             self.check('length(storageProfile.dataDisks)', 3),
@@ -1276,7 +1276,6 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss list --resource-group {rg}', checks=self.is_empty())
 
 
-# TODO: FAIL KeyError line 1300 'upgrade'
 class VMSSCreateOptions(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
@@ -1298,7 +1297,7 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('sku.capacity', '{count}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
-            self.check('upgradePolicy.mode', self.kwargs['upgrade'].title()),
+            self.check('upgradePolicy.mode', self.kwargs['update'].title()),
             self.check('singlePlacementGroup', True),
         ])
         self.kwargs['id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
@@ -1651,7 +1650,6 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
 
 
-# TODO: FAIL the command failed
 class VMSSCustomDataScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_custom_data')
@@ -1662,14 +1660,13 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\ --custom-data \'#cloud-config\nhostname: myVMhostname\' ')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}" --custom-data "#cloud-config\nhostname: myVMhostname"')
 
         # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('provisioningState', 'Succeeded'))
 
 
-# TODO: FAIL list_virtual_machine_scale_set_network_interfaces is invalid
 class VMSSNicScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_nics')
