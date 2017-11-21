@@ -17,6 +17,7 @@ from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.command_modules.find.custom import _purge, find
 from azure.cli.testsdk import TestCli
 
+
 @contextlib.contextmanager
 def capture():
     oldout, olderr = sys.stdout, sys.stderr
