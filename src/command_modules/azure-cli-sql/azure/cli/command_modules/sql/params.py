@@ -26,6 +26,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CreateMode,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
+    ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
     TransparentDataEncryptionStatus)
@@ -684,6 +685,16 @@ with ParametersContext(command='sql server ad-admin') as c:
 with ParametersContext(command='sql server ad-admin create') as c:
     c.expand('properties', ServerAzureADAdministrator, patches={
         'tenant_id': patch_arg_make_optional})
+
+
+#####
+#           sql server conn-policy
+#####
+
+
+with ParametersContext(command='sql server conn-policy') as c:
+    c.argument('server_name', arg_type=server_param_type)
+    c.argument('connection_type', options_list=('--connection-type', '-t'), **enum_choice_list(ServerConnectionType))
 
 
 #####
