@@ -428,13 +428,13 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.cli_ctx.get_progress_controller.begin()
+        self.cli_ctx.get_progress_controller().begin()
         correlation_id = None
 
         is_verbose = any(handler.level <= logs.INFO for handler in logger.handlers)
 
         while not poller.done():
-            self.cli_ctx.get_progress_controller.add(message='Running')
+            self.cli_ctx.get_progress_controller().add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -454,7 +454,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 self._delay()
             except KeyboardInterrupt:
-                self.cli_ctx.get_progress_controller.stop()
+                self.cli_ctx.get_progress_controller().stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -462,10 +462,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.cli_ctx.get_progress_controller.stop()
+            self.cli_ctx.get_progress_controller().stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.cli_ctx.get_progress_controller.end()
+        self.cli_ctx.get_progress_controller().end()
         return result
 
 
