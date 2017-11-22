@@ -350,15 +350,12 @@ class AzCliCommandInvoker(CommandInvoker):
 
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
-
-    def __init__(self, cli_ctx, start_msg='', finish_msg='',
-                 poller_done_interval_ms=1000.0, progress_controller=None):
+    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
 
         self.cli_ctx = cli_ctx
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        self.progress_controller = progress_controller or cli_ctx.get_progress_controller()
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
 
@@ -431,13 +428,13 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.progress_controller.begin()
+        self.cli_ctx.get_progress_controller.begin()
         correlation_id = None
 
         is_verbose = any(handler.level <= logs.INFO for handler in logger.handlers)
 
         while not poller.done():
-            self.progress_controller.add(message='Running')
+            self.cli_ctx.get_progress_controller.add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -457,7 +454,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 self._delay()
             except KeyboardInterrupt:
-                self.progress_controller.stop()
+                self.cli_ctx.get_progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -465,10 +462,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             result = poller.result()
         except ClientException as client_exception:
             from azure.cli.core.commands.arm import handle_long_running_operation_exception
-            self.progress_controller.stop()
+            self.cli_ctx.get_progress_controller.stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.progress_controller.end()
+        self.cli_ctx.get_progress_controller.end()
         return result
 
 

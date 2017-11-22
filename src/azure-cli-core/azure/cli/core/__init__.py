@@ -32,7 +32,6 @@ class AzCli(CLI):
 
         from azure.cli.core.commands.arm import add_id_parameters
         from azure.cli.core.cloud import get_active_cloud
-        import azure.cli.core.commands.progress as progress
         from azure.cli.core.extensions import register_extensions
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 
@@ -51,12 +50,12 @@ class AzCli(CLI):
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
 
-        self.progress_controller = progress.ProgressHook()
-
         register_extensions(self)
         self.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
         # TODO: Doesn't work because args get copied
         # self.register_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, _pre_command_table_create)
+
+        self.progress_controller = None
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -69,6 +68,9 @@ class AzCli(CLI):
 
     def get_progress_controller(self, det=False):
         import azure.cli.core.commands.progress as progress
+        if not self.progress_controller:
+            self.progress_controller = progress.ProgressHook()
+
         self.progress_controller.init_progress(progress.get_progress_view(det))
         return self.progress_controller
 
