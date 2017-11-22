@@ -1800,7 +1800,7 @@ class MSIScenarioTest(ScenarioTest):
                 self.check('port', 50343)
             ])
 
-            self.cmd('vm extension list -g {rg} --vm-name {vm3}'.format(resource_group, vm3), checks=[
+            self.cmd('vm extension list -g {rg} --vm-name {vm3}', checks=[
                 self.check('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
                 self.check('[0].publisher', 'Microsoft.ManagedIdentity'),
                 self.check('[0].settings.port', 50343)
