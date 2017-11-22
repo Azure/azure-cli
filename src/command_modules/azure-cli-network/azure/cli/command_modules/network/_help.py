@@ -1251,7 +1251,7 @@ helps['network nic delete'] = """
 
 helps['network nic list'] = """
     type: command
-    short-summary: List network interfaces.   
+    short-summary: List network interfaces.
     long-summary: |
         Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.  To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
@@ -2223,7 +2223,7 @@ helps['network watcher test-ip-flow'] = """
 
 helps['network watcher test-connectivity'] = """
     type: command
-    short-summary: (Preview) Test if a connection can be established between a Virtual Machine and a given endpoint.  
+    short-summary: (Preview) Test if a connection can be established between a Virtual Machine and a given endpoint.
     long-summary:  |
                 To register for this feature refer to instructions at https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
                 For additional examples, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
