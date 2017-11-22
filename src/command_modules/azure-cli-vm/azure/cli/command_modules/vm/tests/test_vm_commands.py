@@ -318,12 +318,13 @@ class VMCustomImageTest(ScenarioTest):
             'plan': 'linuxdsvmubuntu'
         })
 
-        self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
+        with self.assertRaises(CLIError) as err:
+            self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu', expect_failure=True)
+        self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
         self.cmd('vm show -g {rg} -n vm1',
                  checks=self.check('plan.name', '{plan}'))
 
 
-# TODO: FAIL command failed
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_from_unmanaged_disk')
@@ -353,7 +354,6 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
                  checks=self.check('powerState', 'VM running'))
 
 
-# TODO: FAIL command failed
 class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
@@ -683,7 +683,7 @@ class ComputeListSkusScenarioTest(LiveScenarioTest):
         result = self.cmd('vm list-skus -l westus -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Size', 'Tier'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Tier', 'Size', 'Capabilities'])
         # spot check the first 3 entries
         self.assertEqual(lines[3].split(), ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3'])
         self.assertEqual(lines[4].split(), ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3'])
@@ -1593,7 +1593,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
         assert is_valid_resource_id(self.kwargs['subnet_id'])
         assert is_valid_resource_id(self.kwargs['lb_id'])
 
-        self.cmd('vmss create --image CentOS --os-disk-name {od_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk')
+        self.cmd('vmss create --image CentOS --os-disk-name {os_disk} --admin-username ubuntu --subnet {subnet_id} -l "West US" --vm-sku {sku} --storage-container-name {container} -g {rg} --name {vmss} --load-balancer {lb_id} --ssh-key-value \'{ssh_key}\' --backend-pool-name {bepool} --use-unmanaged-disk')
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('sku.name', '{sku}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
@@ -1800,7 +1800,7 @@ class MSIScenarioTest(ScenarioTest):
                 self.check('port', 50343)
             ])
 
-            self.cmd('vm extension list -g {rg} --vm-name {vm3}'.format(resource_group, vm3), checks=[
+            self.cmd('vm extension list -g {rg} --vm-name {vm3}', checks=[
                 self.check('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
                 self.check('[0].publisher', 'Microsoft.ManagedIdentity'),
                 self.check('[0].settings.port', 50343)
