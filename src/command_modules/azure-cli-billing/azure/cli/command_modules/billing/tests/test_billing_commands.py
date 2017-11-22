@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, record_only
+from azure.cli.testsdk import ScenarioTest, record_only
 
 
 class AzureBillingServiceScenarioTest(ScenarioTest):
@@ -49,4 +49,4 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         self.assertTrue(periods_list)
         # get
         period_name = periods_list[0]['name']
-        self.cmd('billing period show -n {}'.format(period_name), checks=JMESPathCheck('name', period_name))
+        self.cmd('billing period show -n {}'.format(period_name), checks=self.check('name', period_name))
