@@ -342,6 +342,22 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
+        # Show
+        self.cmd('sql server conn-policy show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('connectionType', 'Default')])
+
+        # Update
+        for type in ('Proxy', 'Default', 'Redirect'):
+            self.cmd('sql server conn-policy update -g {} -s {} -t {}'
+                     .format(resource_group, server, type),
+                     checks=[JMESPathCheck('connectionType', type)])
+
+
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
