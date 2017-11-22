@@ -241,7 +241,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         custom_op = context.get_op_handler(custom_function_op)
         context._apply_doc_string(custom_op, kwargs)  # pylint: disable=protected-access
-        return dict(extract_args_from_signature(custom_op), excluded_params=EXCLUDED_PARAMS)
+        return dict(extract_args_from_signature(custom_op, excluded_params=EXCLUDED_PARAMS))
 
     def generic_update_arguments_loader():
 

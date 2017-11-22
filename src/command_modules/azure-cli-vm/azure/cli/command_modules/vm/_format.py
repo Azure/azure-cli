@@ -77,8 +77,8 @@ def transform_sku_for_table_output(skus):
         order_dict['resourceType'] = k['resourceType']
         order_dict['locations'] = str(k['locations']) if len(k['locations']) > 1 else k['locations'][0]
         order_dict['name'] = k['name']
-        order_dict['size'] = k['size']
         order_dict['tier'] = k['tier']
+        order_dict['size'] = k['size']
         if k['capabilities']:
             temp = ['{}={}'.format(pair['name'], pair['value']) for pair in k['capabilities']]
             order_dict['capabilities'] = str(temp) if len(temp) > 1 else temp[0]
