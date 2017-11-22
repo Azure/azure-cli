@@ -12,6 +12,11 @@ helps['network'] = """
     short-summary: Manage Azure Network resources.
 """
 
+helps['network list-usages'] = """
+    type: command
+    short-summary: List the number of network resources you are using against your subscription quota within a region.
+"""
+
 helps['network dns'] = """
     type: group
     short-summary: Manage DNS domains in Azure.
@@ -667,11 +672,26 @@ helps['network dns record-set list'] = """
 helps['network asg'] = """
     type: group
     short-summary: Manage application security groups.
+    long-summary: You can configure network security as a natural extension of an application’s structure, ASG allows
+     you to group virtual machines and define network security policies based on those groups. You can specify an
+      application security group as the source and destination in a NSG security rule. For more information
+       visit https://docs.microsoft.com/en-us/azure/virtual-network/create-network-security-group-preview
 """
 
 helps['network asg create'] = """
     type: command
     short-summary: Create an application security group.
+    long-summary: You can configure network security as a natural extension of an application’s structure, ASG
+     allows you to group virtual machines and define network security policies based on those groups. You can
+      specify an application security group as the source and destination in a NSG security rule. For more
+       information visit https://docs.microsoft.com/en-us/azure/virtual-network/create-network-security-group-preview
+    parameters:
+        - name: --name -n
+          short-summary: Name of the new application security group resource.
+    examples:
+        - name: Create a typical ASG
+          text: >
+            az network asg create -g MyGroup -n MyAppSecGroup
 """
 
 helps['network asg delete'] = """
@@ -889,7 +909,6 @@ helps['network express-route peering update'] = """
         - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
           text: az network express-route peering update -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
           min_profile: latest
-
 """
 # endregion
 
@@ -1185,21 +1204,33 @@ helps['network local-gateway update'] = """
 helps['network nic'] = """
     type: group
     short-summary: Manage network interfaces.
+    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
 """
 
 helps['network nic show-effective-route-table'] = """
     type: command
     short-summary: Show all route tables applied to a network interface.
+    long-summary: To learn more about how to troubleshoot using effective route tables visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
+    examples:
+        - name: Show effective routes applied to a network interface
+          text: >
+            az network nic show-effective-route-table -n MyNic -g MyResourceGroup
 """
 
 helps['network nic list-effective-nsg'] = """
     type: command
-    short-summary: List all network security groups applied to a network interface.
+    short-summary: List all effective network security groups applied to a network interface.
+    long-summary: To learn more about how to troubleshoot using effective security rules visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
+    examples:
+        - name: List the effective network security groups associated with a nic
+          text: >
+            az network nic list-effective-nsg -n MyNic -g MyResourceGroup
 """
 
 helps['network nic create'] = """
     type: command
     short-summary: Create a network interface.
+    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: Create a network interface for a specified subnet on a specified virtual network.
           text: >
@@ -1209,6 +1240,8 @@ helps['network nic create'] = """
           text: >
             az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic \\
                 --ip-forwarding --network-security-group MyNsg
+        - name: Create a network interface for a specified subnet on a virtual network with network security group and application security groups.
+          text: az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic --network-security-group MyNsg --network-security-group MyNsg --application-security-groups Web, App
 """
 
 helps['network nic delete'] = """
@@ -1220,7 +1253,7 @@ helps['network nic list'] = """
     type: command
     short-summary: List network interfaces.
     long-summary: |
-        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
+        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.  To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: List all NICs by internal DNS suffix.
           text: >
@@ -1230,19 +1263,19 @@ helps['network nic list'] = """
 helps['network nic show'] = """
     type: command
     short-summary: Get the details of a network interface.
+    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: Get the internal domain name suffix for a NIC.
-          text: >
-            az network nic show -g MyResourceGroup -n MyNic --query "dnsSettings.internalDomainNameSuffix"
+          text: az network nic show -g MyResourceGroup -n MyNic --query "dnsSettings.internalDomainNameSuffix"
 """
 
 helps['network nic update'] = """
     type: command
     short-summary: Update a network interface.
+    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: Update a network interface to use a different network security group.
-          text: >
-            az network nic update -g MyResourceGroup -n MyNic --network-security-group MyNsg
+          text: az network nic update -g MyResourceGroup -n MyNic --network-security-group MyNsg
 """
 # endregion
 
@@ -1331,6 +1364,10 @@ helps['network nic ip-config inbound-nat-rule remove'] = """
 helps['network nsg'] = """
     type: group
     short-summary: Manage Azure Network Security Groups (NSGs).
+    long-summary: You can control network traffic to resources in a virtual network using a network security
+     group. A network security group contains a list of security rules that allow or deny inbound or outbound
+      network traffic based on source or destination IP addresses, Application Security Groups, ports, and
+       protocols. For more information visit docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-nsg
 """
 
 helps['network nsg rule'] = """
@@ -1381,6 +1418,12 @@ helps['network nsg rule create'] = """
                     --source-address-prefixes 208.130.28/24 --source-port-ranges 80
                     --destination-address-prefixes * --destination-port-ranges 80 8080 --access Deny
                     --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
+        - name: Create a security rule using service tags. aka.ms/servicetags
+          text: >
+            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
+        - name: Create a security rule using application security groups. aka.ms/applicationsecuritygroups
+          text: >
+            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080  --destination-asgs Web --access Allow --protocol Tcp --description "Allow Internet to Web ASG on ports 80,8080."
 """
 
 helps['network nsg rule delete'] = """
@@ -1419,6 +1462,7 @@ helps['network public-ip'] = """
 helps['network public-ip create'] = """
     type: command
     short-summary: Create a public IP address.
+    long-summary: To learn more about how to create a public IP address, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#create-a-public-ip-address
     examples:
         - name: Create a basic public IP resource.
           text: >
@@ -1434,11 +1478,17 @@ helps['network public-ip create'] = """
 helps['network public-ip delete'] = """
     type: command
     short-summary: Delete a public IP address.
+    long-summary: To learn more about how to delete a public IP address visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#view-change-settings-for-or-delete-a-public-ip-address
+    examples:
+        - name: Delete a network interface
+          text: >
+            az network public-ip delete -n MyNic -g MyResourceGroup
 """
 
 helps['network public-ip list'] = """
     type: command
     short-summary: List public IP addresses.
+    long-summary: To learn more about how to manage public IP addresses, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address
     examples:
         - name: List all public IPs in a resource group.
           text: >
@@ -1451,6 +1501,7 @@ helps['network public-ip list'] = """
 helps['network public-ip show'] = """
     type: command
     short-summary: Get the details of a public IP address.
+    long-summary: To learn more information about  public IP addressed in Azure, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#view-change-settings-for-or-delete-a-public-ip-address
     examples:
         - name: Get information about a public IP resource.
           text: >
@@ -1463,6 +1514,7 @@ helps['network public-ip show'] = """
 helps['network public-ip update'] = """
     type: command
     short-summary: Update a public IP address.
+    long-summary: To learn more information about public IP addresses in Azure, visit: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#view-change-settings-for-or-delete-a-public-ip-address
     examples:
         - name: Update a public IP resource with a DNS name label and static allocation.
           text: >
@@ -1690,15 +1742,19 @@ helps['network vnet'] = """
 
 helps['network vnet check-ip-address'] = """
     type: command
-    short-summary: Check if a private IP address is available for use.
+    short-summary: Check if a private IP address is available for use within a virtual network.
+    examples:
+        - name: Typical usage
+          text: >
+            az network vnet check-ip-address -n myVnet -g MyResourceGroup --ip-address 10.0.0.4
 """
 
 helps['network vnet create'] = """
     type: command
     short-summary: Create a virtual network.
-    long-summary: You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
+    long-summary: You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix. To learn about how to create a virtual network visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#create-vnet
     examples:
-        - name: Create a basic virtual network.
+        - name: Create a virtual network.
           text: >
             az network vnet create -g MyResourceGroup -n MyVnet
         - name: Create a virtual network with a specific address prefix and one subnet.
@@ -1709,11 +1765,17 @@ helps['network vnet create'] = """
 helps['network vnet delete'] = """
     type: command
     short-summary: Delete a virtual network.
+    long-summary: To learn more about deleting a virtual network, visit: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#delete-vnet
+    examples:
+        - name: Delete a virtual network
+          text: >
+            az network vnet delete -n myVNet -g MyResourceGroup
 """
 
 helps['network vnet list'] = """
     type: command
     short-summary: List virtual networks.
+    long-summary: To learn more about virtual networks, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#a-name--view-vnetaview-virtual-networks-and-settings
     examples:
         - name: List virtual networks which specify a certain address prefix.
           text: >
@@ -1723,11 +1785,21 @@ helps['network vnet list'] = """
 helps['network vnet show'] = """
     type: command
     short-summary: Get the details of a virtual network.
+    long-summary: To learn more about virtual networks and settings, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#a-name--view-vnetaview-virtual-networks-and-settings
+    examples:
+        - name: Typical usage
+          text: >
+            az network vnet show -n myVNet -g MyResourceGroup
 """
 
 helps['network vnet update'] = """
     type: command
     short-summary: Update a virtual network.
+    long-summary: To learn more about managing virtual networks, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network
+    examples:
+        - name: Update a specific virtual network’s DNS server
+          text: >
+            az network vnet update -n myVNet -g myResourceGroup -–dns-servers 10.2.0.8
 """
 # endregion
 
@@ -1741,6 +1813,7 @@ helps['network vnet subnet'] = """
 helps['network vnet subnet create'] = """
     type: command
     short-summary: Create a subnet and associate an existing NSG and route table.
+    long-summary: To learn more about subnets, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
     parameters:
         - name: --service-endpoints
           short-summary: Space separated list of services allowed private access to this subnet.
@@ -1756,26 +1829,51 @@ helps['network vnet subnet create'] = """
 helps['network vnet subnet delete'] = """
     type: command
     short-summary: Delete a subnet.
+    long-summary: To learn more about deleting a virtual network visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet#delete-subnet
+    examples:
+        - name: Delete a subnet
+          text: az network vnet subnet delete -n mySubnet -g MyResourceGroup
 """
 
 helps['network vnet subnet list'] = """
     type: command
     short-summary: List subnets.
+    long-summary: To learn more about subnets in Azure, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
+    examples:
+        - name: Typical usage
+          text: az network vnet subnet list -n myVNet -g myResourceGroup
 """
 
 helps['network vnet subnet show'] = """
     type: command
     short-summary: Show details of a subnet.
+    long-summary: To learn more about subnets, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
+    examples:
+        - name: Show subnets associated to a specific virtual network
+          text: az network vnet subnet show -n mySubnet– vnet-name myVNet -g myResourceGroup
 """
 
 helps['network vnet subnet update'] = """
     type: command
     short-summary: Update a subnet.
+    long-summary: To learn more about subnets, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
     parameters:
         - name: --service-endpoints
           short-summary: Space separated list of services allowed private access to this subnet.
           populator-commands:
             - az network vnet list-endpoint-services
+    examples:
+        - name: Associate a network security group to a subnet
+          text: az network vnet subnet update -n mySubnet –vnet-name myVNet -g myResourceGroup –network-security-group myNSG
+"""
+
+helps['network vnet list-endpoint-services'] = """
+    type: command
+    long-summary: To learn more about service endpoints, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-configure
+    examples:
+        - name: List the endpoint services available for use in the West US
+          text: >
+            az network vnet list-endpoint-services -l westus
 """
 # endregion
 
@@ -1789,6 +1887,7 @@ helps['network vnet peering'] = """
 helps['network vnet peering create'] = """
     type: command
     short-summary: Create a peering.
+    long-summary: To learn more about VNet Peering about how to create a peering, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#before-you-begin
     examples:
         - name: Create a virtual network peering between virtual networks in the same region
           text: >
@@ -1812,6 +1911,7 @@ helps['network vnet peering create'] = """
 helps['network vnet peering delete'] = """
     type: command
     short-summary: Delete a peering.
+    long-summary: To learn more about how to delete a virtual network peering visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#delete-a-peering
     examples:
         - name: Delete a virtual network peering
           text: >
@@ -1821,6 +1921,7 @@ helps['network vnet peering delete'] = """
 helps['network vnet peering list'] = """
     type: command
     short-summary: List peerings.
+    long-summary: To learn more about virtual network peerings, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#view-or-change-peering-settings
     examples:
         - name: List all peerings of a specified virtual network
           text: >
@@ -1830,15 +1931,17 @@ helps['network vnet peering list'] = """
 helps['network vnet peering show'] = """
     type: command
     short-summary: Show details of a peering.
+    long-summary: To learn more about virtual network peering details and settings, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#view-or-change-peering-settings
     examples:
         - name: Show all details of the specified virtual network peering.
           text: >
              az network vnet peering show --name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1
-  """
+"""
 
 helps['network vnet peering update'] = """
     type: command
     short-summary: Update a peering.
+    long-summary: To learn more about updating virtual network peerings, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering
     examples:
         - name: Change forwarded traffic configuration of a virtual network peering
           text: >
@@ -2038,12 +2141,16 @@ helps['network vnet-gateway root-cert delete'] = """
 # region Network Watcher
 helps['network watcher'] = """
     type: group
-    short-summary: (PREVIEW) Manage the Azure Network Watcher.
+    short-summary: Manage the Azure Network Watcher.
+    long-summary: Network Watcher enables you to monitor and diagnose conditions at a network scenario level. To learn more, visit https://docs.microsoft.com/en-us/azure/network-watcher/
 """
 
 helps['network watcher list'] = """
     type: command
     short-summary: List Network Watchers.
+    examples:
+        - name: List all Network Watchers in a subscription.
+          text: az network watcher list
 """
 
 helps['network watcher configure'] = """
@@ -2058,16 +2165,21 @@ helps['network watcher configure'] = """
           short-summary: Name of resource group. Required when enabling new regions.
           long-summary: When a previously disabled region is enabled to use Network Watcher, a
             Network Watcher resource will be created in this resource group.
+    examples:
+        - name: Configure Network Watcher in a region
+          text: az network watcher configure --resource-group NetworkWatcherRG  --locations westus --enabled true
 """
 
 helps['network watcher troubleshooting'] = """
     type: group
-    short-summary: (PREVIEW) Manage Network Watcher troubleshooting sessions.
+    short-summary: Manage Network Watcher troubleshooting sessions.
+    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
 """
 
 helps['network watcher troubleshooting start'] = """
     type: command
     short-summary: Troubleshoot issues with VPN connections or gateway connectivity.
+    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
     parameters:
         - name: --resource-type -t
           short-summary: The type of target resource to troubleshoot, if resource ID is not specified.
@@ -2075,17 +2187,24 @@ helps['network watcher troubleshooting start'] = """
           short-summary: Name or ID of the storage account in which to store the troubleshooting results.
         - name: --storage-path
           short-summary: Fully qualified URI to the storage blob container in which to store the troubleshooting results.
+    examples:
+        - name: Start a troubleshooting operation
+          text: az network watcher troubleshooting start --resource-group resourceGroupName --resource resourceName --resource-type {vnetGateway/vpnConnection} --storage-account storageAccountName  --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
 """
 
 helps['network watcher troubleshooting show'] = """
     type: command
     short-summary: Get the results of the last troubleshooting operation.
+    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
+    examples:
+        - name: Show the results or status of a troubleshooting operation
+          text: az network watcher troubleshooting show  --resource resourcename –-resource-group resourcegroupname –resource-type vnetGateway
 """
 
 helps['network watcher test-ip-flow'] = """
     type: command
     short-summary: Test IP flow to/from a VM given the currently configured network security group rules.
-    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.  For more information about test-ip-flow, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-ip-flow-verify-cli
     parameters:
         - name: --local
           short-summary: The private IPv4 address for the VM's NIC and the port of the packet in
@@ -2097,11 +2216,17 @@ helps['network watcher test-ip-flow'] = """
           short-summary: Direction of the packet relative to the VM.
         - name: --protocol
           short-summary: Protocol to test.
+    examples:
+        - name: Run test-ip-flow verify to test logical connectivity from a VM to the specified destination IPv4 address and port.
+          text: az network watcher test-ip-flow --resource-group resourceGroupName --direction Outbound  --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm vmName
 """
 
 helps['network watcher test-connectivity'] = """
     type: command
-    short-summary: Test if a direct TCP connection can be established between a Virtual Machine and a given endpoint.
+    short-summary: (Preview) Test if a connection can be established between a Virtual Machine and a given endpoint.
+    long-summary:  |
+                To register for this feature refer to instructions at https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
+                For additional examples, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
     parameters:
         - name: --source-resource
           short-summary: Name or ID of the resource from which to originate traffic.
@@ -2115,22 +2240,33 @@ helps['network watcher test-connectivity'] = """
           short-summary: Port number on which to receive traffic.
         - name: --dest-address
           short-summary: The IP address or URI at which to receive traffic.
+    examples:
+        - name: This example checks connectivity to a destination virtual machine over port 80.
+          text: az network watcher test-connectivity -g ContosoRG --source-resource MultiTierApp0 --dest-resource Database0 --dest-port 80
 """
 
 helps['network watcher show-next-hop'] = """
     type: command
     short-summary: Get information on the 'next hop' for a VM.
-    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.  For more information about show-next-hop, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-next-hop-cli
+    examples:
+        - name: Use show-next-hop to get the next hop from a VM to a given destination IP address
+          text: az network watcher show-next-hop -g resourcegroupName --vm vmNameorID --source-ip 10.0.0.4 --dest-ip 10.1.0.4
 """
 
 helps['network watcher show-security-group-view'] = """
     type: command
     short-summary: Get detailed security information on a VM for the currently configured network security group.
+    long-summary: For more information about using show-security-group view, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-security-group-view-cli
+    examples:
+        - name: Use show-security-group-view to get the network security group information for the specified VM.
+          text: az network watcher show-security-group-view -g resourcgroupname --vm vmname
 """
 
 helps['network watcher show-topology'] = """
     type: command
     short-summary: Get the network topology of a resource group.
+    long-summary: For more information about show-topology, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-topology-cli
     parameters:
         - name: --resource-group -g
           short-summary: The name of the target resource group to perform topology on.
@@ -2138,19 +2274,22 @@ helps['network watcher show-topology'] = """
           short-summary: Location. Defaults to the location of the target resource group.
           long-summary: Topology information is only shown for resources within the target
             resource group that are within the specified region.
+    examples:
+        - name: Use show-topology to get the topology of resources within a resource group.
+          text: az network watcher show-topology -g resourcegroupname
 """
 
 helps['network watcher packet-capture'] = """
     type: group
-    short-summary: (PREVIEW) Manage packet capture sessions on VMs.
+    short-summary: Manage packet capture sessions on VMs.
     long-summary: |
-        These commands require that both Azure Network Watcher is enabled for the
-        VM's region and that AzureNetworkWatcherExtension is enabled on the VM.
+        These commands require that both Azure Network Watcher is enabled for the VM's region and that AzureNetworkWatcherExtension is enabled on the VM.  For more information about configuring packet capture, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
 """
 
 helps['network watcher packet-capture create'] = """
     type: command
     short-summary: Create and start a packet capture session.
+    long-summary: For more information about configuring packet capture, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     parameters:
         - name: --capture-limit
           short-summary: The maximum size in bytes of the capture output.
@@ -2172,16 +2311,64 @@ helps['network watcher packet-capture create'] = """
           short-summary: Name or ID of the VM to target.
         - name: --filters
           short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
+    examples:
+        - name: Create a packet capture session on a VM
+          text: az network watcher packet-capture create -g {resoureceurceGroupName} -n packetCaptureName --vm {vmName} --storage-account gwteststorage123abc
+        - name: Create a packet capture session on a VM with optional filters
+          text: az network watcher packet-capture create -g {resoureceurceGroupName} -n packetCaptureName --vm {vmName} --storage-account gwteststorage123abc --filters "[{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"20\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"80\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"443\"},{\"protocol\":\"UDP\"}]"
 """
+
+helps['network watcher packet-capture delete'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Delete a packet capture session. Note that this only deletes the session and not the capture file.
+          text: az network watcher packet-capture delete -n packetCaptureName --location westcentralus
+"""
+
+helps['network watcher packet-capture list'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: List all packet capture sessions within a resource group.
+          text: az network watcher packet-capture list --locationshow- myresourcegroup
+"""
+
+helps['network watcher packet-capture show'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Show a packet capture session.
+          text: az network watcher packet-capture show --location myresourcegroup –n mypacketcapture
+"""
+
+helps['network watcher packet-capture show-status'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Show the status of a packet capture session.
+          text: az network watcher packet-capture show-status --location myresourcegroup –n mypacketcapture
+"""
+
+helps['network watcher packet-capture stop'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Stop a running packet capture session.
+          text: az network watcher packet-capture stop --location myresourcegroup –n mypacketcapture
+"""
+
 
 helps['network watcher flow-log'] = """
     type: group
-    short-summary: (PREVIEW) Manage network security group flow logging.
+    short-summary: Manage network security group flow logging.
+    long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
 """
 
 helps['network watcher flow-log configure'] = """
     type: command
     short-summary: Configure flow logging on a network security group.
+    long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
     parameters:
         - name: --nsg
           short-summary: Name or ID of the Network Security Group to target.
@@ -2191,11 +2378,20 @@ helps['network watcher flow-log configure'] = """
           short-summary: Number of days to retain logs.
         - name: --storage-account
           short-summary: Name or ID of the storage account in which to save the flow logs.
+    examples:
+        - name: Enable NSG flow logs
+          text: az network watcher flow-log configure -g myGroup --enabled true --nsg nsgName --storage-account storageAccountName
+        - name: Disable NSG flow logs
+          text: az network watcher flow-log configure -g myGroup --enabled false --nsg nsgName
 """
 
 helps['network watcher flow-log show'] = """
     type: command
     short-summary: Get the flow log configuration for a network security group.
+    long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
+    examples:
+        - name: Show NSG flow logs
+          text: az network watcher flow-log show -g myGroup --nsg nsgName
 """
 
 # endregion
