@@ -51,6 +51,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-acr',
     'azure-cli-acs',
+    'azure-cli-advisor',
     'azure-cli-appservice',
     'azure-cli-batch',
     'azure-cli-batchai',
