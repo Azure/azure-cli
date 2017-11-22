@@ -6,6 +6,7 @@
 from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.batch._help  # pylint: disable=unused-import
+from azure.cli.command_modules.batch._command_type import BatchCommandGroup
 
 
 class BatchCommandsLoader(AzCommandsLoader):
@@ -16,7 +17,8 @@ class BatchCommandsLoader(AzCommandsLoader):
         batch_mgmt_resource = ('azure.mgmt.batch', 'BatchManagementClient')
         super(BatchCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   resource_type=batch_mgmt_resource,
-                                                  custom_command_type=batch_custom)
+                                                  custom_command_type=batch_custom,
+                                                  command_group_cls=BatchCommandGroup)
         self.module_name = __name__
 
     def load_command_table(self, args):
