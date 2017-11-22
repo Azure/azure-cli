@@ -909,7 +909,6 @@ helps['network express-route peering update'] = """
         - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
           text: az network express-route peering update -g myrg --circuit-name circuit1 --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
           min_profile: latest
-
 """
 # endregion
 
@@ -1940,7 +1939,7 @@ helps['network vnet peering show'] = """
         - name: Show all details of the specified virtual network peering.
           text: >
              az network vnet peering show --name myVnet1toMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1
-  """
+"""
 
 helps['network vnet peering update'] = """
     type: command
@@ -2145,12 +2144,16 @@ helps['network vnet-gateway root-cert delete'] = """
 # region Network Watcher
 helps['network watcher'] = """
     type: group
-    short-summary: (PREVIEW) Manage the Azure Network Watcher.
+    short-summary: Manage the Azure Network Watcher.
+    long-summary: Network Watcher enables you to monitor and diagnose conditions at a network scenario level. To learn more, visit https://docs.microsoft.com/en-us/azure/network-watcher/
 """
 
 helps['network watcher list'] = """
     type: command
     short-summary: List Network Watchers.
+    examples:
+        - name: List all Network Watchers in a subscription.
+          text: az network watcher list
 """
 
 helps['network watcher configure'] = """
@@ -2165,16 +2168,21 @@ helps['network watcher configure'] = """
           short-summary: Name of resource group. Required when enabling new regions.
           long-summary: When a previously disabled region is enabled to use Network Watcher, a
             Network Watcher resource will be created in this resource group.
+    examples: 
+        - name: Configure Network Watcher in a region
+          text: az network watcher configure --resource-group NetworkWatcherRG  --locations westus --enabled true
 """
 
 helps['network watcher troubleshooting'] = """
     type: group
-    short-summary: (PREVIEW) Manage Network Watcher troubleshooting sessions.
+    short-summary: Manage Network Watcher troubleshooting sessions.
+    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
 """
 
 helps['network watcher troubleshooting start'] = """
     type: command
     short-summary: Troubleshoot issues with VPN connections or gateway connectivity.
+    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
     parameters:
         - name: --resource-type -t
           short-summary: The type of target resource to troubleshoot, if resource ID is not specified.
@@ -2182,17 +2190,24 @@ helps['network watcher troubleshooting start'] = """
           short-summary: Name or ID of the storage account in which to store the troubleshooting results.
         - name: --storage-path
           short-summary: Fully qualified URI to the storage blob container in which to store the troubleshooting results.
+    examples:
+        - name: Start a troubleshooting operation
+          text: az network watcher troubleshooting start --resource-group resourceGroupName --resource resourceName --resource-type {vnetGateway/vpnConnection} --storage-account storageAccountName  --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
 """
 
 helps['network watcher troubleshooting show'] = """
     type: command
     short-summary: Get the results of the last troubleshooting operation.
+    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
+    examples:
+        - name: Show the results or status of a troubleshooting operation
+          text: az network watcher troubleshooting show  --resource resourcename –-resource-group resourcegroupname –resource-type vnetGateway
 """
 
 helps['network watcher test-ip-flow'] = """
     type: command
     short-summary: Test IP flow to/from a VM given the currently configured network security group rules.
-    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.  For more information about test-ip-flow, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-ip-flow-verify-cli 
     parameters:
         - name: --local
           short-summary: The private IPv4 address for the VM's NIC and the port of the packet in
@@ -2204,11 +2219,17 @@ helps['network watcher test-ip-flow'] = """
           short-summary: Direction of the packet relative to the VM.
         - name: --protocol
           short-summary: Protocol to test.
+    examples: 
+        - name: Run test-ip-flow verify to test logical connectivity from a VM to the specified destination IPv4 address and port. 
+          text: az network watcher test-ip-flow --resource-group resourceGroupName --direction Outbound  --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm vmName
 """
 
 helps['network watcher test-connectivity'] = """
     type: command
-    short-summary: Test if a direct TCP connection can be established between a Virtual Machine and a given endpoint.
+    short-summary: (Preview) Test if a connection can be established between a Virtual Machine and a given endpoint.  
+    long-summary:  |
+                To register for this feature refer to instructions at https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli 
+                For additional examples, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
     parameters:
         - name: --source-resource
           short-summary: Name or ID of the resource from which to originate traffic.
@@ -2222,22 +2243,33 @@ helps['network watcher test-connectivity'] = """
           short-summary: Port number on which to receive traffic.
         - name: --dest-address
           short-summary: The IP address or URI at which to receive traffic.
+    examples:
+        - name: This example checks connectivity to a destination virtual machine over port 80.
+          text: az network watcher test-connectivity -g ContosoRG --source-resource MultiTierApp0 --dest-resource Database0 --dest-port 80
 """
 
 helps['network watcher show-next-hop'] = """
     type: command
     short-summary: Get information on the 'next hop' for a VM.
-    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.  For more information about show-next-hop, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-next-hop-cli 
+    examples: 
+        - name: Use show-next-hop to get the next hop from a VM to a given destination IP address
+          text: az network watcher show-next-hop -g resourcegroupName --vm vmNameorID --source-ip 10.0.0.4 --dest-ip 10.1.0.4
 """
 
 helps['network watcher show-security-group-view'] = """
     type: command
     short-summary: Get detailed security information on a VM for the currently configured network security group.
+    long-summary: For more information about using show-security-group view, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-security-group-view-cli 
+    examples: 
+        - name: Use show-security-group-view to get the network security group information for the specified VM.
+          text: az network watcher show-security-group-view -g resourcgroupname --vm vmname
 """
 
 helps['network watcher show-topology'] = """
     type: command
     short-summary: Get the network topology of a resource group.
+    long-summary: For more information about show-topology, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-topology-cli 
     parameters:
         - name: --resource-group -g
           short-summary: The name of the target resource group to perform topology on.
@@ -2245,19 +2277,22 @@ helps['network watcher show-topology'] = """
           short-summary: Location. Defaults to the location of the target resource group.
           long-summary: Topology information is only shown for resources within the target
             resource group that are within the specified region.
+    examples:
+        - name: Use show-topology to get the topology of resources within a resource group.
+          text: az network watcher show-topology -g resourcegroupname
 """
 
 helps['network watcher packet-capture'] = """
     type: group
-    short-summary: (PREVIEW) Manage packet capture sessions on VMs.
+    short-summary: Manage packet capture sessions on VMs.
     long-summary: |
-        These commands require that both Azure Network Watcher is enabled for the
-        VM's region and that AzureNetworkWatcherExtension is enabled on the VM.
+        These commands require that both Azure Network Watcher is enabled for the VM's region and that AzureNetworkWatcherExtension is enabled on the VM.  For more information about configuring packet capture, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
 """
 
 helps['network watcher packet-capture create'] = """
     type: command
     short-summary: Create and start a packet capture session.
+    long-summary: For more information about configuring packet capture, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     parameters:
         - name: --capture-limit
           short-summary: The maximum size in bytes of the capture output.
@@ -2279,16 +2314,64 @@ helps['network watcher packet-capture create'] = """
           short-summary: Name or ID of the VM to target.
         - name: --filters
           short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
+    examples:
+        - name: Create a packet capture session on a VM
+          text: az network watcher packet-capture create -g {resoureceurceGroupName} -n packetCaptureName --vm {vmName} --storage-account gwteststorage123abc
+        - name: Create a packet capture session on a VM with optional filters
+          text: az network watcher packet-capture create -g {resoureceurceGroupName} -n packetCaptureName --vm {vmName} --storage-account gwteststorage123abc --filters "[{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"20\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"80\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"443\"},{\"protocol\":\"UDP\"}]"
 """
+
+helps['network watcher packet-capture delete'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples: 
+        - name: Delete a packet capture session. Note that this only deletes the session and not the capture file.
+          text: az network watcher packet-capture delete -n packetCaptureName --location westcentralus
+"""
+
+helps['network watcher packet-capture list'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples: 
+        - name: List all packet capture sessions within a resource group.
+          text: az network watcher packet-capture list --locationshow- myresourcegroup
+"""
+
+helps['network watcher packet-capture show'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples: 
+        - name: Show a packet capture session.
+          text: az network watcher packet-capture show --location myresourcegroup –n mypacketcapture
+"""
+
+helps['network watcher packet-capture show-status'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples: 
+        - name: Show the status of a packet capture session.
+          text: az network watcher packet-capture show-status --location myresourcegroup –n mypacketcapture
+"""
+
+helps['network watcher packet-capture stop'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples: 
+        - name: Stop a running packet capture session.
+          text: az network watcher packet-capture stop --location myresourcegroup –n mypacketcapture
+"""
+
 
 helps['network watcher flow-log'] = """
     type: group
-    short-summary: (PREVIEW) Manage network security group flow logging.
+    short-summary: Manage network security group flow logging.
+    long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
 """
 
 helps['network watcher flow-log configure'] = """
     type: command
     short-summary: Configure flow logging on a network security group.
+    long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
     parameters:
         - name: --nsg
           short-summary: Name or ID of the Network Security Group to target.
@@ -2298,11 +2381,20 @@ helps['network watcher flow-log configure'] = """
           short-summary: Number of days to retain logs.
         - name: --storage-account
           short-summary: Name or ID of the storage account in which to save the flow logs.
+    examples:
+        - name: Enable NSG flow logs
+          text: az network watcher flow-log configure -g myGroup --enabled true --nsg nsgName --storage-account storageAccountName
+        - name: Disable NSG flow logs
+          text: az network watcher flow-log configure -g myGroup --enabled false --nsg nsgName
 """
 
 helps['network watcher flow-log show'] = """
     type: command
     short-summary: Get the flow log configuration for a network security group.
+    long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
+    examples:
+        - name: Show NSG flow logs
+          text: az network watcher flow-log show -g myGroup --nsg nsgName
 """
 
 # endregion
