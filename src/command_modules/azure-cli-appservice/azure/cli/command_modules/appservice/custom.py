@@ -50,6 +50,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
+    node_default_version = "6.9.1"
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
@@ -68,7 +69,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         else:  # must specify runtime
             raise CLIError('usage error: must specify --runtime | --deployment-container-image-name')  # pylint: disable=line-too-long
 
-    elif runtime:  # windows webapp
+    elif runtime:  # windows webapp with runtime specified
         if startup_file or deployment_container_image_name:
             raise CLIError("usage error: --startup-file or --deployment-container-image-name is "
                            "only appliable on linux webapp")
@@ -79,7 +80,12 @@ def create_webapp(resource_group_name, name, plan, runtime=None, startup_file=No
         match['setter'](match, site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
-            site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION", "6.9.1"))
+            site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION",
+                                                          node_default_version))
+
+    else:  # windows webapp without runtime specified
+        site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION",
+                                                      node_default_version))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
@@ -113,11 +119,13 @@ def update_webapp(instance, client_affinity_enabled=None):
 
 
 def list_webapp(resource_group_name=None):
-    return _list_app(['app', 'app,linux'], resource_group_name)
+    from ._validators import WEB_APP_TYPES
+    return _list_app(WEB_APP_TYPES, resource_group_name)
 
 
 def list_function_app(resource_group_name=None):
-    return _list_app(['functionapp', 'functionapp,linux'], resource_group_name)
+    from ._validators import FUNCTION_APP_TYPES
+    return _list_app(FUNCTION_APP_TYPES, resource_group_name)
 
 
 def _list_app(app_types, resource_group_name=None):
@@ -1267,9 +1275,8 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
-    hosting_environment_profile_param = webapp.hosting_environment_profile
-    if hosting_environment_profile_param is None:
-        hosting_environment_profile_param = ""
+    hosting_environment_profile_param = (webapp.hosting_environment_profile.name
+                                         if webapp.hosting_environment_profile else '')
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,

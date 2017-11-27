@@ -44,6 +44,7 @@ register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
 register_cli_argument('resource invoke-action', 'action', help='The action that will be invoked on the specified resource')
 register_cli_argument('resource invoke-action', 'request_body', help='JSON encoded parameter arguments for the action that will be passed along in the post request body. Use @{file} to load from a file.')
+register_cli_argument('resource show', 'include_response_body', action='store_true', help=r"Use it if the default command output doesn't capture all on the wire")
 
 register_cli_argument('resource create', 'resource_id', options_list=['--id'], help='Resource ID.', action=None)
 register_cli_argument('resource create', 'properties', options_list=('--properties', '-p'),

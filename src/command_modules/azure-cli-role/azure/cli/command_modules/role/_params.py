@@ -33,6 +33,7 @@ register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
 register_cli_argument('ad sp create-for-rbac', 'show_auth_for_sdk', options_list='--sdk-auth', action='store_true', help='output result in compatible with Azure SDK auth file')
+register_cli_argument('ad sp reset-credentials', 'append', action='store_true', help='append the new credential instead of overwriting')
 
 for item in ['create-for-rbac', 'reset-credentials']:
     register_cli_argument('ad sp {}'.format(item), 'name', name_arg_type)
@@ -64,6 +65,7 @@ register_cli_argument('role assignment', 'role_assignment_name', options_list=('
 register_cli_argument('role assignment', 'role', help='role name or id', completer=get_role_definition_name_completion_list)
 register_cli_argument('role assignment', 'show_all', options_list=('--all',), action='store_true', help='show all assignments under the current subscription')
 register_cli_argument('role assignment', 'include_inherited', action='store_true', help='include assignments applied on parent scopes')
+register_cli_argument('role assignment', 'include_classic_administrators', action='store_true', help='list default role assignments for subscription classic administrators, aka co-admins')
 register_cli_argument('role assignment', 'assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
 register_cli_argument('role assignment', 'ids', nargs='+', help='space separated role assignment ids')
 register_cli_argument('role definition', 'role_definition_id', options_list=('--name', '-n'), help='the role definition name')
