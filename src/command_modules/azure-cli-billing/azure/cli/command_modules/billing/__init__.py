@@ -14,7 +14,7 @@ class BillingCommandsLoader(AzCommandsLoader):
         from azure.cli.core.sdk.util import CliCommandType
         billing_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.billing.custom#{}')
         super(BillingCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=billing_custom,
-                                                    min_profile="latest")
+                                                    min_profile="2017-03-10-profile")
 
     def load_command_table(self, args):
         from azure.cli.command_modules.billing.commands import load_command_table
