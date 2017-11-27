@@ -6,7 +6,7 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.sdk.util import CliCommandType
 
-from azure.cli.command_modules.profile.custom import get_subscription_id_list
+from azure.cli.command_modules.profile._completers import get_subscription_id_list
 from azure.cli.command_modules.profile._format import transform_account_list
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
 
@@ -60,5 +60,6 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account show') as c:
             c.argument('show_auth_for_sdk', options_list=('--sdk-auth',), action='store_true', help='output result in compatible with Azure SDK auth file')
+
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader

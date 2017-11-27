@@ -116,7 +116,7 @@ def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statement
         if not os.path.isfile(ext_file):
             raise CLIError("File {} not found.".format(source))
     # Validate the extension
-    logger.debug('Validating the extension {}'.format(ext_file))
+    logger.debug('Validating the extension %s', ext_file)
     if ext_sha256:
         valid_checksum, computed_checksum = is_valid_sha256sum(ext_file, ext_sha256)
         if valid_checksum:

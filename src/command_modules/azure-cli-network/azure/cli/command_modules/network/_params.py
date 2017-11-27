@@ -12,7 +12,6 @@ from azure.cli.core.commands.parameters import (get_location_type, get_resource_
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._validators import \
     (dns_zone_name_type,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
@@ -25,71 +24,12 @@ from azure.cli.command_modules.network._validators import \
      get_asg_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
-from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
+from azure.cli.command_modules.network._completers import (
+    subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list)
 from azure.cli.core.util import get_json_object
 
 from knack.arguments import CLIArgumentType, ignore_type
-
-
-# region Completers
-def get_subnet_completion_list(cli_ctx):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = network_client_factory(cli_ctx)
-        if parsed_args.resource_group_name and parsed_args.virtual_network_name:
-            rg = parsed_args.resource_group_name
-            vnet = parsed_args.virtual_network_name
-            return [r.name for r in client.subnets.list(resource_group_name=rg, virtual_network_name=vnet)]
-    return completer
-
-
-def get_lb_subresource_completion_list(cli_ctx, prop):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = network_client_factory(cli_ctx)
-        try:
-            lb_name = parsed_args.load_balancer_name
-        except AttributeError:
-            lb_name = parsed_args.resource_name
-        if parsed_args.resource_group_name and lb_name:
-            lb = client.load_balancers.get(parsed_args.resource_group_name, lb_name)
-            return [r.name for r in getattr(lb, prop)]
-    return completer
-
-
-def get_ag_subresource_completion_list(cli_ctx, prop):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = network_client_factory(cli_ctx)
-        try:
-            ag_name = parsed_args.application_gateway_name
-        except AttributeError:
-            ag_name = parsed_args.resource_name
-        if parsed_args.resource_group_name and ag_name:
-            ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
-            return [r.name for r in getattr(ag, prop)]
-    return completer
-
-
-def get_ag_url_map_rule_completion_list(cli_ctx):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = network_client_factory(cli_ctx)
-        try:
-            ag_name = parsed_args.application_gateway_name
-        except AttributeError:
-            ag_name = parsed_args.resource_name
-        if parsed_args.resource_group_name and ag_name:
-            ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
-            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None)  # pylint: disable=no-member
-            return [r.name for r in url_map.path_rules]
-    return completer
-
-
-def get_tm_endpoint_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        return list_traffic_manager_endpoints(parsed_args['cmd'], parsed_args.resource_group_name, parsed_args.profile_name) \
-            if parsed_args.resource_group_name and parsed_args.profile_name \
-            else []
-    return completer
-
-# endregion
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -166,7 +106,7 @@ def load_arguments(self, _):
         c.ignore('public_ip_address_type')
 
         subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True)
-        c.argument('subnet', help=subnet_help, completer=get_subnet_completion_list(self.cli_ctx), arg_group='Network')
+        c.argument('subnet', help=subnet_help, completer=subnet_completion_list, arg_group='Network')
         c.ignore('subnet_type')
 
     with self.argument_context('network application-gateway update') as c:
@@ -188,7 +128,7 @@ def load_arguments(self, _):
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(self.cli_ctx, item['ref']), id_part='child_name_1')
+            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name_1')
             c.argument('resource_name', options_list=('--gateway-name',), help='The name of the application gateway.')
             c.argument('application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
             c.argument('private_ip_address', arg_group=None)
@@ -224,9 +164,9 @@ def load_arguments(self, _):
             c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
 
     with self.argument_context('network application-gateway http-listener') as c:
-        c.argument('frontend_ip', help='The name or ID of the frontend IP configuration.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'frontend_ip_configurations'))
-        c.argument('frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'frontend_ports'))
-        c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'ssl_certificates'))
+        c.argument('frontend_ip', help='The name or ID of the frontend IP configuration.', completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
+        c.argument('frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
+        c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
         c.ignore('protocol')
         c.argument('host_name', help='Host name to use for multisite gateways.')
 
@@ -248,7 +188,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway http-settings') as c:
         c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
         c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'probes'))
+        c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
@@ -258,11 +198,11 @@ def load_arguments(self, _):
         c.argument('timeout', help='The probe timeout in seconds.')
 
     with self.argument_context('network application-gateway rule') as c:
-        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_address_pools'))
-        c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'http_listeners'))
-        c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_http_settings_collection'))
+        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
+        c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
-        c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'url_path_maps'))
+        c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_cert)
@@ -275,22 +215,22 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway url-path-map') as c:
         c.argument('rule_name', help='The name of the url-path-map rule.', arg_group='First Rule')
         c.argument('paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
-        c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_address_pools'), arg_group='First Rule')
-        c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_http_settings_collection'), arg_group='First Rule')
+        c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
+        c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
 
     with self.argument_context('network application-gateway url-path-map create') as c:
-        c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_address_pools'))
-        c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_http_settings_collection'))
+        c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
     with self.argument_context('network application-gateway url-path-map update') as c:
-        c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_address_pools'))
-        c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_http_settings_collection'))
+        c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
     with self.argument_context('network application-gateway url-path-map rule') as c:
-        c.argument('item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list(self.cli_ctx), id_part='child_name_2')
-        c.argument('url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'url_path_maps'), id_part='child_name_1')
-        c.argument('address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_address_pools'))
-        c.argument('http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list(self.cli_ctx, 'backend_http_settings_collection'))
+        c.argument('item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=ag_url_map_rule_completion_list, id_part='child_name_2')
+        c.argument('url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name_1')
+        c.argument('address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
         for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
             c.argument(item, arg_group=None)
 
@@ -502,7 +442,7 @@ def load_arguments(self, _):
     ]
     for item in lb_subresources:
         with self.argument_context('network lb {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(self.cli_ctx, item['ref']), id_part='child_name_1')
+            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
             c.argument('resource_name', options_list=('--lb-name',), help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
             c.argument('load_balancer_name', load_balancer_name_type)
 
@@ -512,13 +452,13 @@ def load_arguments(self, _):
         c.argument('frontend_port_range_start', help='Port number')
         c.argument('frontend_port_range_end', help='Port number')
         c.argument('backend_port', help='Port number')
-        c.argument('frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list(self.cli_ctx, 'frontend_ip_configurations'))
+        c.argument('frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
         c.argument('floating_ip', help='Enable floating IP.', arg_type=get_enum_type(['true', 'false']))
         c.argument('idle_timeout', help='Idle timeout in minutes.')
         c.argument('protocol', help='', arg_type=get_enum_type(TransportProtocol))
         c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
         for item in ['backend_pool_name', 'backend_address_pool_name']:
-            c.argument(item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list(self.cli_ctx, 'backend_address_pools'))
+            c.argument(item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
     with self.argument_context('network lb create') as c:
         c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=('--frontend-ip-zone'), help='used to create internal facing Load balancer')
@@ -532,7 +472,7 @@ def load_arguments(self, _):
         c.ignore('public_ip_type')
 
         subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True, allow_none=True, default_none=True)
-        c.argument('subnet', help=subnet_help, completer=get_subnet_completion_list(self.cli_ctx))
+        c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
         c.argument('subnet_address_prefix', help='The CIDR address prefix to use when creating a new subnet.')
         c.argument('vnet_name', virtual_network_name_type)
         c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
@@ -597,7 +537,7 @@ def load_arguments(self, _):
         c.argument('network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 
         subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
-        c.argument('subnet', help=subnet_help, completer=get_subnet_completion_list(self.cli_ctx))
+        c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
 
     with self.argument_context('network nic update') as c:
         c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
@@ -606,8 +546,8 @@ def load_arguments(self, _):
     for item in ['create', 'ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
             c.extra('load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list(self.cli_ctx, 'backendAddresPools'))
-            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list(self.cli_ctx, 'inboundNatRules'))
+            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
+            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
             c.argument('application_security_groups', min_api='2017-09-01', help='Space separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
 
     with self.argument_context('network nic ip-config') as c:
@@ -830,7 +770,7 @@ def load_arguments(self, _):
 
     endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
     with self.argument_context('network traffic-manager endpoint') as c:
-        c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
+        c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Endpoint name.', completer=tm_endpoint_completion_list)
         c.argument('endpoint_type', options_list=['--type', '-t'], help='Endpoint type.', id_part='child_name_1', arg_type=get_enum_type(endpoint_types))
         c.argument('profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
         c.argument('endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")

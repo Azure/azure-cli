@@ -41,4 +41,5 @@ class InteractiveCommandsLoader(AzCommandsLoader):
             c.argument('style', options_list=['--style', '-s'], help='The colors of the shell.',
                        choices=style_options())
 
+
 COMMAND_LOADER_CLS = InteractiveCommandsLoader

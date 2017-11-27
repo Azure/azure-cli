@@ -42,40 +42,6 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_
 logger = get_logger(__name__)
 
 
-def get_policy_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    policy_client = _resource_policy_client_factory(cli_ctx)
-    result = policy_client.policy_definitions.list()
-    return [i.name for i in result]
-
-
-def get_policy_set_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    policy_client = _resource_policy_client_factory(cli_ctx)
-    result = policy_client.policy_set_definitions.list()
-    return [i.name for i in result]
-
-
-def get_policy_assignment_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    policy_client = _resource_policy_client_factory(cli_ctx)
-    result = policy_client.policy_assignments.list()
-    return [i.name for i in result]
-
-
-def get_providers_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    rcf = _resource_client_factory(cli_ctx)
-    result = rcf.providers.list()
-    return [r.namespace for r in result]
-
-
-def get_resource_types_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    rcf = _resource_client_factory(cli_ctx)
-    result = rcf.providers.list()
-    types = []
-    for p in list(result):
-        for r in p.resource_types:
-            types.append(p.namespace + '/' + r.resource_type)
-    return types
-
-
 def _process_parameters(template_param_defs, parameter_lists):
 
     def _try_parse_json_object(value):

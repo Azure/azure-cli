@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 
-from azure.cli.command_modules.redis._help import helps
+from azure.cli.command_modules.redis._help import helps  # pylint: disable=unused-import
 
 
 class RedisCommandsLoader(AzCommandsLoader):
@@ -28,5 +28,6 @@ class RedisCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         from azure.cli.command_modules.redis._params import load_arguments
         load_arguments(self, command)
+
 
 COMMAND_LOADER_CLS = RedisCommandsLoader
