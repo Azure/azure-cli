@@ -24,4 +24,5 @@ class RoleCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.role._params import load_arguments
         load_arguments(self, command)
 
+
 COMMAND_LOADER_CLS = RoleCommandsLoader

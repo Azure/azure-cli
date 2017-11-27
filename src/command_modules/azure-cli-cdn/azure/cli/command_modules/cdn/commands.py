@@ -75,9 +75,11 @@ def load_command_table(self, _):
         g.command('load', 'load_content')
         g.command('purge', 'purge_content')
         g.command('validate-custom-domain', 'validate_custom_domain')
-        g.custom_command('create', 'create_endpoint', client_factory=cf_cdn, doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('create', 'create_endpoint', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
         g.generic_update_command('update', setter_name='update', setter_arg_name='endpoint_update_properties',
-                                 custom_func_name='update_endpoint', doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters')
+                                 custom_func_name='update_endpoint',
+                                 doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters')
 
     with self.command_group('cdn profile', cdn_profiles_sdk) as g:
         g.command('show', 'get')
@@ -85,7 +87,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('list', 'list_profiles', client_factory=cf_cdn)
         g.custom_command('create', 'create_profile', client_factory=cf_cdn)
-        g.generic_update_command('update', setter_name='update', custom_func_name='update_profile', doc_string_source='azure.mgmt.cdn.models#ProfileUpdateParameters')
+        g.generic_update_command('update', setter_name='update', custom_func_name='update_profile',
+                                 doc_string_source='azure.mgmt.cdn.models#ProfileUpdateParameters')
 
     with self.command_group('cdn custom-domain', cdn_domain_sdk) as g:
         g.command('show', 'get')

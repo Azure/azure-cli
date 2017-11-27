@@ -14,7 +14,6 @@ from azure.cli.core.cloud import (Cloud,
                                   switch_active_cloud,
                                   update_cloud,
                                   get_active_cloud_name,
-                                  get_custom_clouds,
                                   CloudAlreadyRegisteredException,
                                   CloudNotRegisteredException,
                                   CannotUnregisterCloudException)
@@ -22,14 +21,6 @@ from azure.cli.core.cloud import (Cloud,
 
 # The exact API version doesn't matter too much right now. It just has to be YYYY-MM-DD format.
 METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2015-01-01'
-
-
-def get_cloud_name_completion_list(cli_ctx, prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    return [c.name for c in get_clouds(cli_ctx)]
-
-
-def get_custom_cloud_name_completion_list(cli_ctx, prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    return [c.name for c in get_custom_clouds(cli_ctx)]
 
 
 def list_clouds(cmd):
