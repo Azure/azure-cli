@@ -145,10 +145,10 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
 
-class ResourceCreateScenarioTest(ScenarioTest):
+class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_create')
-    def test_resource_create(self, resource_group, resource_group_location):
+    def test_resource_create_and_show(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'plan': 'cli_res_create_plan',
@@ -163,8 +163,14 @@ class ResourceCreateScenarioTest(ScenarioTest):
                           checks=self.check('name', '{app}')).get_output_in_json()
 
         self.kwargs['app_settings_id'] = result['id'] + '/config/appsettings'
-        self.cmd('resource create --id {app_settings_id} --properties "{{\\"key1\\":\\"value12\\"}}"',
+        self.kwargs['app_config_id'] = result['id'] + '/config/web'
+        self.cmd('resource create --id {app_settings_id} --properties "{{\\"key2\\":\\"value12\\"}}"',
                  checks=[self.check('properties.key2', 'value12')])
+
+        self.cmd('resource show --id {app_config_id}',
+                 checks=self.check('properties.publishingUsername', '${app}'))
+        self.cmd('resource show --id {app_config_id} --include-response-body',
+                 checks=self.check('responseBody.properties.publishingUsername', '${app}'))
 
 
 class TagScenarioTest(ScenarioTest):

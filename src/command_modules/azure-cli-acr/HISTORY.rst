@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.16
+++++++
+* Documentation fixes.
+
 2.0.15
 ++++++
 * Add creating webhooks in replication regions.

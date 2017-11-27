@@ -342,6 +342,22 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
+        # Show
+        self.cmd('sql server conn-policy show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('connectionType', 'Default')])
+
+        # Update
+        for type in ('Proxy', 'Default', 'Redirect'):
+            self.cmd('sql server conn-policy update -g {} -s {} -t {}'
+                     .format(resource_group, server, type),
+                     checks=[JMESPathCheck('connectionType', type)])
+
+
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -1723,3 +1739,14 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         # test sql server vnet-rule delete rule 2
         self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'.format(vnet_rule_2, rg, server),
                  checks=NoneCheck())
+
+
+class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
+    def test_sql_subscription_usages(self):
+        self.cmd('sql list-usages -l westus',
+                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+
+        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+                 checks=[
+                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheckGreaterThan('limit', 0)])

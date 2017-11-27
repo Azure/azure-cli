@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.14
+++++++
+* Fixed default ports regression
+
 0.1.13
 ++++++
 * minor fixes

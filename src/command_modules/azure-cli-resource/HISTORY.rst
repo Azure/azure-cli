@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.19
+++++++
+* `resource show`: expose `--include-response-body` to show the response body in the output
 
 2.0.18
 ++++++

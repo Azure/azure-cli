@@ -28,7 +28,7 @@ CONFIRM_PARAM_NAME = 'yes'
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
-BLACKLISTED_MODS = ['context', 'shell', 'documentdb']
+BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 
 
 def _explode_list_args(args):
