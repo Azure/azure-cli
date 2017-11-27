@@ -327,7 +327,7 @@ cli_generic_update_command(__name__, 'network public-ip update', public_ip_path 
 
 # RouteTablesOperations
 rt_path = 'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.'
-cli_command(__name__, 'network route-table create', rt_path + 'create_or_update', cf_route_tables)
+cli_command(__name__, 'network route-table create', custom_path + 'create_route_table')
 cli_command(__name__, 'network route-table delete', rt_path + 'delete', cf_route_tables)
 cli_command(__name__, 'network route-table show', rt_path + 'get', cf_route_tables, exception_handler=empty_on_404)
 cli_command(__name__, 'network route-table list', custom_path + 'list_route_tables')

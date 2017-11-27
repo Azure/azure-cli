@@ -2445,11 +2445,23 @@ update_express_route_peering.__doc__ = create_express_route_peering.__doc__
 
 # region Route Table commands
 
-def update_route_table(instance, tags=None):
+def create_route_table(resource_group_name, route_table_name, location=None, tags=None,
+                       disable_bgp_route_propagation=None):
+    RouteTable = get_sdk(ResourceType.MGMT_NETWORK, 'RouteTable', mod='models')
+    ncf = _network_client_factory()
+    route_table = RouteTable(location=location, tags=tags)
+    if supported_api_version(ResourceType.MGMT_NETWORK, '2017-10-01'):
+        route_table.disable_bgp_route_propagation = disable_bgp_route_propagation
+    return ncf.route_tables.create_or_update(resource_group_name, route_table_name, route_table)
+
+
+def update_route_table(instance, tags=None, disable_bgp_route_propagation=None):
     if tags == '':
         instance.tags = None
     elif tags is not None:
         instance.tags = tags
+    if disable_bgp_route_propagation is not None:
+        instance.disable_bgp_route_propagation = disable_bgp_route_propagation
     return instance
 
 
