@@ -13,13 +13,11 @@ from ._exception_handler import billing_exception_handler
 
 def load_command_table(self, _):
     billing_invoice_util = CliCommandType(
-        min_api='latest',
         client_factory=invoices_mgmt_client_factory,
         exception_handler=billing_exception_handler
     )
 
     billing_period_util = CliCommandType(
-        min_api='latest',
         client_factory=billing_periods_mgmt_client_factory,
         exception_handler=billing_exception_handler
     )
