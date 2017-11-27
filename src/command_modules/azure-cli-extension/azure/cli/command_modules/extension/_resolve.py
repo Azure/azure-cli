@@ -6,9 +6,13 @@ from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
 
 from azure.cli.core.extension import ext_compat_with_cli
-from ._index import get_index_extensions
+
+from azure.cli.command_modules.extension._index import get_index_extensions
 
 from knack.log import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class NoExtensionCandidatesError(Exception):

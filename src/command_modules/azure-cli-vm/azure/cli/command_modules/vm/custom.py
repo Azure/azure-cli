@@ -417,7 +417,8 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, identity_role='Contrib
         vm.identity = VirtualMachineIdentity(type='SystemAssigned')
         return set_vm(cmd, vm)
 
-    vm = assign_implict_identity(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
+    vm = assign_implict_identity(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
+                                 identity_scope=identity_scope)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')

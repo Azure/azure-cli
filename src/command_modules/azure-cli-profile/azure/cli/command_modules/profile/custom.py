@@ -28,15 +28,6 @@ def _load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     return subscriptions
 
 
-def get_subscription_id_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    subscriptions = _load_subscriptions(cli_ctx)
-    result = []
-    for subscription in subscriptions:
-        result.append(subscription['id'])
-        result.append(subscription['name'])
-    return result
-
-
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     subscriptions = _load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)

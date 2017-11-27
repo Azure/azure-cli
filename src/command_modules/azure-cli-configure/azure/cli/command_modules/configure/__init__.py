@@ -28,4 +28,5 @@ class ConfigureCommandsLoader(AzCommandsLoader):
         with self.argument_context('configure') as c:
             c.argument('defaults', nargs='+', options_list=('--defaults', '-d'))
 
+
 COMMAND_LOADER_CLS = ConfigureCommandsLoader

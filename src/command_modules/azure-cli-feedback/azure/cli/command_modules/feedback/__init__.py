@@ -23,4 +23,5 @@ class FeedbackCommandsLoader(AzCommandsLoader):
 
         return self.command_table
 
+
 COMMAND_LOADER_CLS = FeedbackCommandsLoader

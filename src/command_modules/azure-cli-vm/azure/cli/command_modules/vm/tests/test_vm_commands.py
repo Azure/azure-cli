@@ -318,7 +318,7 @@ class VMCustomImageTest(ScenarioTest):
             'plan': 'linuxdsvmubuntu'
         })
 
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(CLIError):
             self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu', expect_failure=True)
         self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
         self.cmd('vm show -g {rg} -n vm1',
@@ -510,12 +510,12 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
     def _check_vm_power_state(self, expected_power_state):
 
         self.cmd('vm get-instance-view --resource-group {rg} --name {vm}', checks=[
-                self.check('type(@)', 'object'),
-                self.check('name', '{vm}'),
-                self.check('resourceGroup', '{rg}'),
-                self.check('length(instanceView.statuses)', 2),
-                self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
-                self.check('instanceView.statuses[1].code', expected_power_state),
+            self.check('type(@)', 'object'),
+            self.check('name', '{vm}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('length(instanceView.statuses)', 2),
+            self.check('instanceView.statuses[0].code', 'ProvisioningState/succeeded'),
+            self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
@@ -546,9 +546,9 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
         # Verify tags were set
         self.cmd('vm show --resource-group {rg} --name {vm}', checks=[
-                self.check('tags.firsttag', '1'),
-                self.check('tags.secondtag', '2'),
-                self.check('tags.thirdtag', ''),
+            self.check('tags.firsttag', '1'),
+            self.check('tags.secondtag', '2'),
+            self.check('tags.thirdtag', ''),
         ])
         self._check_vm_power_state('PowerState/running')
 
@@ -556,24 +556,24 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self.cmd('vm user delete -g {rg} -n {vm} -u foouser1')
 
         self.cmd('network nsg show --resource-group {rg} --name {nsg}', checks=[
-                self.check('tags.firsttag', '1'),
-                self.check('tags.secondtag', '2'),
-                self.check('tags.thirdtag', ''),
+            self.check('tags.firsttag', '1'),
+            self.check('tags.secondtag', '2'),
+            self.check('tags.thirdtag', ''),
         ])
         self.cmd('network public-ip show --resource-group {rg} --name {ip}', checks=[
-                self.check('tags.firsttag', '1'),
-                self.check('tags.secondtag', '2'),
-                self.check('tags.thirdtag', ''),
+            self.check('tags.firsttag', '1'),
+            self.check('tags.secondtag', '2'),
+            self.check('tags.thirdtag', ''),
         ])
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
-                self.check('tags.firsttag', '1'),
-                self.check('tags.secondtag', '2'),
-                self.check('tags.thirdtag', ''),
+            self.check('tags.firsttag', '1'),
+            self.check('tags.secondtag', '2'),
+            self.check('tags.thirdtag', ''),
         ])
         self.cmd('storage account show --resource-group {rg} --name {sa}', checks=[
-                self.check('tags.firsttag', '1'),
-                self.check('tags.secondtag', '2'),
-                self.check('tags.thirdtag', ''),
+            self.check('tags.firsttag', '1'),
+            self.check('tags.secondtag', '2'),
+            self.check('tags.thirdtag', ''),
         ])
 
         self.cmd('vm stop --resource-group {rg} --name {vm}')

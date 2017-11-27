@@ -286,7 +286,7 @@ class TestRoleMocked(unittest.TestCase):
                                                                'something bad for you',
                                                                self.subscription_id)
         # action
-        with self.assertRaises(GraphErrorException) as context:
+        with self.assertRaises(GraphErrorException):
             create_service_principal_for_rbac(cmd, 'will-fail')
 
     @staticmethod

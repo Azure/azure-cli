@@ -19,7 +19,7 @@ def load_arguments(self, _):
 
     from knack.arguments import ignore_type, CLIArgumentType
 
-    from azure.cli.command_modules.resource.custom import (
+    from azure.cli.command_modules.resource._completers import (
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (

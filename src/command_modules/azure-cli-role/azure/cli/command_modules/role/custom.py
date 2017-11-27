@@ -43,11 +43,6 @@ def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
     return _search_role_definitions(definitions_client, name, scope, custom_role_only)
 
 
-def get_role_definition_name_completion_list(cmd, prefix, **kwargs):  # pylint: disable=unused-argument
-    definitions = list_role_definitions(cmd)
-    return [x.properties.role_name for x in list(definitions)]
-
-
 def create_role_definition(cmd, role_definition):
     return _create_update_role_definition(cmd.cli_ctx, role_definition, for_update=False)
 

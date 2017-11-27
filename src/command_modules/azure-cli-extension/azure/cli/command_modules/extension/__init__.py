@@ -11,7 +11,11 @@ from azure.cli.core.sdk.util import CliCommandType
 
 import azure.cli.command_modules.extension._help  # pylint: disable=unused-import
 
+from knack.prompting import prompt_y_n
+from knack.util import CLIError
 
+
+# pylint: disable=line-too-long
 class ExtensionCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -41,17 +45,11 @@ class ExtensionCommandsLoader(AzCommandsLoader):
 
         return self.command_table
 
-    # pylint: disable=line-too-long
     def load_arguments(self, command):
 
         from argcomplete.completers import FilesCompleter
-        from azure.cli.core.extension import get_extension_names
-
-        def extension_name_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-            return get_extension_names()
-
-        def extension_name_from_index_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-            return get_index_extensions().keys()
+        from azure.cli.command_modules.extension._completers import (
+            extension_name_completion_list, extension_name_from_index_completion_list)
 
         with self.argument_context('extension') as c:
             c.argument('extension_name', options_list=['--name', '-n'], help='Name of extension', completer=extension_name_completion_list)

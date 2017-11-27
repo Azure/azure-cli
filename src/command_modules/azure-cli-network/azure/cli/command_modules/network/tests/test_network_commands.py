@@ -1170,12 +1170,12 @@ class NetworkNicScenarioTest(ScenarioTest):
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet_id} --ip-forwarding --private-ip-address {pri_ip} --public-ip-address {pub_ip} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {address_pool_ids} --lb-inbound-nat-rules {rule_ids}', checks=[
-                self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-                self.check('NewNIC.ipConfigurations[0].privateIpAddress', '{pri_ip}'),
-                self.check('NewNIC.enableIpForwarding', True),
-                self.check('NewNIC.provisioningState', 'Succeeded'),
-                self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
-                self.check('length(NewNIC.dnsSettings.dnsServers)', 1)
+            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+            self.check('NewNIC.ipConfigurations[0].privateIpAddress', '{pri_ip}'),
+            self.check('NewNIC.enableIpForwarding', True),
+            self.check('NewNIC.provisioningState', 'Succeeded'),
+            self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+            self.check('length(NewNIC.dnsSettings.dnsServers)', 1)
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
@@ -1207,10 +1207,10 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('name', '{nic}')
         ])
         self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {nsg2}', checks=[
-                self.check('enableIpForwarding', True),
-                self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
-                self.check('length(dnsSettings.dnsServers)', 0),
-                self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
+            self.check('enableIpForwarding', True),
+            self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
+            self.check('length(dnsSettings.dnsServers)', 0),
+            self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
         ])
 
         # test generic update

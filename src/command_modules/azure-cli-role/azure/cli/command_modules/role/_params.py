@@ -6,10 +6,10 @@
 # pylint: disable=line-too-long
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 
-from knack.arguments import CLIArgumentType
+from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
+from azure.cli.command_modules.role._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
 
-from .custom import get_role_definition_name_completion_list
-from ._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
+from knack.arguments import CLIArgumentType
 
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
