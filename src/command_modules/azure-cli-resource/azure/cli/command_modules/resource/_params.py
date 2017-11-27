@@ -14,7 +14,7 @@ def load_arguments(self, _):
 
     from azure.cli.core.commands.parameters import (
         resource_group_name_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
-        get_enum_type)
+        get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
 
     from knack.arguments import ignore_type, CLIArgumentType
@@ -47,6 +47,7 @@ def load_arguments(self, _):
         c.argument('tag', tag_type)
         c.argument('tags', tags_type)
         c.argument('resource_ids', nargs='+', options_list=['--ids'], help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.', arg_group='Resource Id')
+        c.argument('include_response_body', arg_type=get_three_state_flag(), help='Use if the default command output doesn\'t capture all of the property data.')
 
     with self.argument_context('resource list') as c:
         c.argument('name', resource_name_type)

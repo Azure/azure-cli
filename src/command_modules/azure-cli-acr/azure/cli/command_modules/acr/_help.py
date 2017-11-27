@@ -122,10 +122,10 @@ helps['acr credential show'] = """
         - name: Get the login credentials for a container registry.
           text: >
             az acr credential show -n MyRegistry
-        - name: Get the username used to log into a container registry.
+        - name: Get the username used to log in to a container registry.
           text: >
             az acr credential show -n MyRegistry --query username
-        - name: Get a password used to log into a container registry.
+        - name: Get a password used to log in to a container registry.
           text: >
             az acr credential show -n MyRegistry --query passwords[0].value
 """
@@ -179,7 +179,7 @@ helps['acr repository delete'] = """
         - name: Delete the manifest referenced by a tag. This also deletes any associated layer data and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
-        - name: Delete a manfiest from a repository. This also deletes any associated layer data and all tags referencing the manifest.
+        - name: Delete a manifest from a repository. This also deletes any associated layer data and all tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --manifest MyManifest
 """

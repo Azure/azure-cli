@@ -147,7 +147,7 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
-                          show_all=False, include_groups=False):
+                          show_all=False, include_groups=False, include_classic_administrators=False):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively). Supported only for a user principal.
@@ -169,32 +169,76 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                                            scope, assignee, role,
                                            include_inherited, include_groups)
 
-    if not assignments:
+    results = todict(assignments) if assignments else []
+    if include_classic_administrators:
+        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, factory, assignee)
+
+    if not results:
         return []
 
-    # fill in logic names to get things understandable.
-    # it's possible that associated roles and principals were deleted, and we just do nothing.
-
-    results = todict(assignments)
-
-    # fill in role names
+    # 1. fill in logic names to get things understandable.
+    # (it's possible that associated roles and principals were deleted, and we just do nothing.)
+    # 2. fill in role names
     role_defs = list(definitions_client.list(
         scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
     role_dics = {i.id: i.properties.role_name for i in role_defs}
     for i in results:
-        i['properties']['roleDefinitionName'] = role_dics.get(i['properties']['roleDefinitionId'],
-                                                              None)
+        if role_dics.get(i['properties']['roleDefinitionId']):
+            i['properties']['roleDefinitionName'] = role_dics[i['properties']['roleDefinitionId']]
 
     # fill in principal names
-    principal_ids = set(i['properties']['principalId'] for i in results)
+    principal_ids = set(i['properties']['principalId'] for i in results if i['properties']['principalId'])
     if principal_ids:
         principals = _get_object_stubs(graph_client, principal_ids)
         principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
-        for i in results:
-            i['properties']['principalName'] = principal_dics.get(i['properties']['principalId'],
-                                                                  None)
+
+        for i in [r for r in results if not r['properties'].get('principalName')]:
+            i['properties']['principalName'] = ''
+            if principal_dics.get(i['properties']['principalId']):
+                i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
 
     return results
+
+
+def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
+    co_admins = auth_client.classic_administrators.list('2015-06-01')  # known swagger bug on api-version handling
+    co_admins = [x for x in co_admins if x.properties.email_address]
+    graph_client = _graph_client_factory(cli_ctx)
+    if assignee:  # apply assignee filter if applicable
+        try:
+            uuid.UUID(assignee)
+            result = _get_object_stubs(graph_client, [assignee])
+            if not result:
+                return []
+            assignee = _get_displayable_name(result[0]).lower()
+        except ValueError:
+            pass
+        co_admins = [x for x in co_admins if assignee == x.properties.email_address.lower()]
+
+    if not co_admins:
+        return []
+
+    result, users = [], []
+    for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
+        upn_queries = ["userPrincipalName eq '{}'".format(x.properties.email_address) for x in co_admins[i:i + 10]]
+        temp = list(list_users(graph_client.users, query_filter=' or '.join(upn_queries)))
+        users += temp
+    upns = {u.user_principal_name: u.object_id for u in users}
+    for admin in co_admins:
+        na_text = 'NA(classic admins)'
+        email = admin.properties.email_address
+        result.append({
+            'id': na_text,
+            'name': na_text,
+            'properties': {
+                'principalId': upns.get(email),
+                'principalName': email,
+                'roleDefinitionName': admin.properties.role,
+                'roleDefinitionId': 'NA(classic admin role)',
+                'scope': '/subscriptions/' + auth_client.config.subscription_id
+            }
+        })
+    return result
 
 
 def _get_displayable_name(graph_object):
@@ -368,6 +412,7 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
+    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -378,7 +423,15 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
                                                    password_credentials=password_creds)
-    return client.create(app_create_param)
+
+    try:
+        return client.create(app_create_param)
+    except GraphErrorException as ex:
+        if 'insufficient privileges' in str(ex).lower():
+            link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            raise CLIError("Directory permission is needed for the current user to register the application. "
+                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
+        raise
 
 
 def update_application(client, identifier, display_name=None, homepage=None,
@@ -842,7 +895,7 @@ def _get_public(x509):
 
 
 def reset_service_principal_credential(cmd, name, password=None, create_cert=False,
-                                       cert=None, years=None, keyvault=None):
+                                       cert=None, years=None, keyvault=None, append=False):
     import pytz
     client = _graph_client_factory(cmd.cli_ctx)
 
@@ -879,26 +932,28 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     cert_creds = None
 
     if password:
-        app_creds = [
-            PasswordCredential(
-                start_date=app_start_date,
-                end_date=app_end_date,
-                key_id=str(uuid.uuid4()),
-                value=password
-            )
-        ]
+        app_creds = []
+        if append:
+            app_creds = list(client.applications.list_password_credentials(app.object_id))
+        app_creds.append(PasswordCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            key_id=str(uuid.uuid4()),
+            value=password
+        ))
 
     if public_cert_string:
-        cert_creds = [
-            KeyCredential(
-                start_date=app_start_date,
-                end_date=app_end_date,
-                value=public_cert_string,
-                key_id=str(uuid.uuid4()),
-                usage='Verify',
-                type='AsymmetricX509Cert'
-            )
-        ]
+        cert_creds = []
+        if append:
+            cert_creds = list(client.applications.list_key_credentials(app.object_id))
+        cert_creds.append(KeyCredential(
+            start_date=app_start_date,
+            end_date=app_end_date,
+            value=public_cert_string,
+            key_id=str(uuid.uuid4()),
+            usage='Verify',
+            type='AsymmetricX509Cert'
+        ))
 
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
 

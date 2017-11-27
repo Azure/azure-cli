@@ -95,8 +95,20 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_win_webapp_quick_create(self, resource_group):
-        webapp_name = 'webapp-quick'
-        plan = 'plan-quick'
+        webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
+        plan = self.create_random_name(prefix='plan-quick', length=24)
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
+            JMESPathCheckV2('[0].value', '6.9.1'),
+        ]))
+
+    @ResourceGroupPreparer()
+    def test_win_webapp_quick_create_runtime(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
+        plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
@@ -397,7 +409,12 @@ class LinuxWebappSceanrioTest(ScenarioTest):
         ])
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheckV2('length([])', 1),
-            JMESPathCheckV2('[0].name', webapp)
+            JMESPathCheckV2('[0].name', webapp),
+            JMESPathCheckV2('[0].kind', 'app,linux')
+        ])
+        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp), checks=[
+            JMESPathCheckV2('name', webapp),
+            JMESPathCheckV2('kind', 'app,linux')
         ])
         self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(resource_group, webapp, 'process.json'), checks=[
             JMESPathCheckV2('appCommandLine', 'process.json')
@@ -582,35 +599,29 @@ class WebappSlotSwapScenarioTest(ScenarioTest):
         ])
 
 
-class WebappSSLCertTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(WebappSSLCertTest, self).__init__(__file__, test_method, resource_group='test_cli_webapp_ssl')
-        self.webapp_name = 'webapp-ssl-test123'
-
-    def test_webapp_ssl(self):
-        self.execute()
-
-    def body(self):
-        plan = 'webapp-ssl-test-plan'
+class WebappSSLCertTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_ssl(self, resource_group):
+        plan = self.create_random_name(prefix='webapp-ssl-test-plan', length=24)
+        webapp_name = 'webapp-ssl-test123'  # do not randomlize it as the test cert is bound to the hostname
         # Cert Generated using
         # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
-        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan, self.location))
-        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(self.resource_group, self.webapp_name, pfx_file, cert_password), checks=[
-            JMESPathCheck('thumbprint', cert_thumbprint)
+        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
+            JMESPathCheckV2('thumbprint', cert_thumbprint)
         ])
-        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(self.resource_group, self.webapp_name, cert_thumbprint, 'SNI'), checks=[
-            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(self.webapp_name), 'SniEnabled'),
-            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(self.webapp_name), cert_thumbprint)
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheckV2("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'SniEnabled'),
+            JMESPathCheckV2("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(webapp_name), cert_thumbprint)
         ])
-        self.cmd('webapp config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[
-            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(self.webapp_name), 'Disabled'),
+        self.cmd('webapp config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(resource_group, webapp_name, cert_thumbprint), checks=[
+            JMESPathCheckV2("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(webapp_name), 'Disabled'),
         ])
-        self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(self.resource_group, cert_thumbprint))
-        self.cmd('webapp delete -g {} -n {}'.format(self.resource_group, self.webapp_name))
+        self.cmd('webapp config ssl delete -g {} --certificate-thumbprint {}'.format(resource_group, cert_thumbprint))
 
 
 class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
@@ -761,6 +772,14 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
                      JMESPathCheckV2('name', functionapp_name),
                      JMESPathCheckV2('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheckV2('[0].kind', 'functionapp'),
+            JMESPathCheckV2('[0].name', functionapp_name)
+        ])
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheckV2('kind', 'functionapp'),
+            JMESPathCheckV2('name', functionapp_name)
+        ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 

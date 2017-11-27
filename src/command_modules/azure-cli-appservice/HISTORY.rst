@@ -2,6 +2,12 @@
 
 Release History
 ===============
+0.1.21
+++++++
+* `webapp config ssl upload`: fix a bug in the cert name generation
+* `webapp/functionapp`: ensure list/show display correct set of apps
+* webapp: set WEBSITE_NODE_DEFAULT_VERSION in case where runtime is not set
+
 0.1.20
 ++++++
 * webapp: add deployment source config-zip support for webapps and functions apps
