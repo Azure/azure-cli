@@ -889,7 +889,7 @@ class AzArgumentContext(ArgumentsContext):
         for arg in args:
             super(AzArgumentContext, self).ignore(arg)
 
-    def extra(self, dest, **kwargs):
+    def extra(self, dest, arg_type=None, **kwargs):
         self._check_stale()
         if not self._applicable():
             return
@@ -899,6 +899,8 @@ class AzArgumentContext(ArgumentsContext):
                              "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
 
         merged_kwargs = self.group_kwargs.copy()
+        if arg_type:
+            merged_kwargs.update(arg_type.settings)
         merged_kwargs.update(kwargs)
         if self.command_loader.supported_api_version(resource_type=merged_kwargs.get('resource_type'),
                                                      min_api=merged_kwargs.get('min_api'),
