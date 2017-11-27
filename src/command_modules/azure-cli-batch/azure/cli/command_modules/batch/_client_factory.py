@@ -4,19 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 
-def account_mgmt_client_factory(cli_ctx, _):
+def mgmt_batch_account_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).batch_account
 
 
-def application_mgmt_client_factory(cli_ctx, _):
+def mgmt_application_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).application
 
 
-def application_package_client_factory(cli_ctx, _):
+def mgmt_application_package_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).application_package
 
 
-def location_client_factory(cli_ctx, _):
+def mgmt_location_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).location
 
 
