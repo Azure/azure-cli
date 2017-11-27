@@ -31,3 +31,6 @@ class BatchCommandsLoader(AzCommandsLoader):
         super(BatchCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.batch._params import load_arguments
         load_arguments(self, command)
+
+
+COMMAND_LOADER_CLS = BatchCommandsLoader

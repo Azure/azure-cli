@@ -12,8 +12,10 @@ from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
+
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
+from azure.cli.core.sdk.util import _CommandGroup
 
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
@@ -487,7 +489,7 @@ class AzureBatchDataPlaneCommand(object):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
         self._flatten = kwargs.pop('flatten', FLATTEN)  # Number of object levels to flatten
-        self._silent = kwargs.pop('silent', []
+        self._silent = kwargs.pop('silent', [])
         self._ignore = list(IGNORE_PARAMETERS)  # Parameters to ignore
         self._ignore.extend(kwargs.pop('ignore', []))
         self._head_cmd = False
@@ -599,12 +601,12 @@ class AzureBatchDataPlaneCommand(object):
     def get_kwargs(self):
         args = {
             'handler': self.handler,
-            'arguments_loader' = self.arguments_loader,
-            'description_loader' = self.description_loader,
-            'table_transformer' = self.table_transformer,
-            'confirmation' = self.confirmation,
-            'validator' = self.validator,
-            'client_factory' = self.client_factory
+            'arguments_loader': self.arguments_loader,
+            'description_loader': self.description_loader,
+            'table_transformer': self.table_transformer,
+            'confirmation': self.confirmation,
+            'validator': self.validator,
+            'client_factory': self.client_factory
         }
         args.update(self.merged_kwargs)
         return args
