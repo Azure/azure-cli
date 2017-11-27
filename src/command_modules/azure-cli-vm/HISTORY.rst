@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.19
+++++++
+* Update the storage multiapi package reference
+
 2.0.18
 ++++++
 * `vmss create`: fix a bug that blocks using Basic tier of VM sizes
