@@ -119,6 +119,23 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account check-name --name {}'.format(name),
                  checks=JMESPathCheck('nameAvailable', True))
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location='southcentralus')
+    def test_create_storage_account_v2(self, resource_group, location):
+
+        self.kwargs.update({
+            'name': self.create_random_name(prefix='cli', length=24),
+            'loc': location
+        })
+
+        self.cmd('storage account create -n {name} -g {rg} -l {loc} --kind StorageV2',
+                 checks=[JMESPathCheck('kind', 'StorageV2')])
+
+        self.cmd('storage account check-name --name {name}', checks=[
+            JMESPathCheck('nameAvailable', False),
+            JMESPathCheck('reason', 'AlreadyExists')
+        ])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-01-01')
     @ResourceGroupPreparer(location='southcentralus')
     def test_storage_create_default_sku(self, resource_group):

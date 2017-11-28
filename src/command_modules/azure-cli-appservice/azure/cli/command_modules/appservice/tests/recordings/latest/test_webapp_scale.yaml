@@ -1,16 +1,16 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group create]
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,23 +20,23 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Nov 2017 08:00:05 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1177']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -46,37 +46,37 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Nov 2017 08:00:06 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"perSiteScaling": false, "name": "scale-plan000002"},
-      "location": "westus", "sku": {"tier": "SHARED", "name": "D1", "capacity": 1}}'''
+    body: 'b''{"sku": {"name": "D1", "tier": "SHARED", "capacity": 1}, "location":
+      "westus", "properties": {"name": "scale-plan000002", "perSiteScaling": false}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Length: ['155']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1379']
+      content-length: ['1380']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:00:11 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -84,7 +84,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -92,24 +92,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"D1","tier":"Shared","size":"D1","family":"D","capacity":0}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1379']
+      content-length: ['1380']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:00:12 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:51 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -120,20 +120,20 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"targetWorkerCount": 0, "isSpot": false, "perSiteScaling":
-      false, "reserved": false, "targetWorkerSizeId": 0, "name": "scale-plan000002"},
-      "location": "West US", "sku": {"family": "D", "size": "D1", "tier": "STANDARD",
-      "name": "S2", "capacity": 1}, "kind": "app"}'''
+    body: 'b''{"kind": "app", "sku": {"name": "S2", "tier": "STANDARD", "family":
+      "D", "capacity": 1, "size": "D1"}, "location": "West US", "properties": {"reserved":
+      false, "perSiteScaling": false, "targetWorkerSizeId": 0, "isSpot": false, "name":
+      "scale-plan000002", "targetWorkerCount": 0}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Length: ['287']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
@@ -142,14 +142,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 22 Nov 2017 08:00:13 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:52 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/6a3a8d22-d736-4c12-9ef6-754577d827a8?api-version=2016-09-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/ebab0210-9467-4b6d-b5e1-733b6db15e59?api-version=2016-09-01']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1186']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
 - request:
@@ -157,24 +157,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/6a3a8d22-d736-4c12-9ef6-754577d827a8?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/ebab0210-9467-4b6d-b5e1-733b6db15e59?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Medium","workerSizeId":1,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Medium","currentWorkerSizeId":1,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1380']
+      content-length: ['1381']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:00:29 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -189,24 +189,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Medium","workerSizeId":1,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Medium","currentWorkerSizeId":1,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S2","tier":"Standard","size":"S2","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1380']
+      content-length: ['1381']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:00:30 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -217,20 +217,20 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"targetWorkerCount": 0, "isSpot": false, "perSiteScaling":
-      false, "reserved": false, "targetWorkerSizeId": 0, "name": "scale-plan000002"},
-      "location": "West US", "sku": {"family": "S", "size": "S2", "tier": "BASIC",
-      "name": "B1", "capacity": 1}, "kind": "app"}'''
+    body: 'b''{"kind": "app", "sku": {"name": "B1", "tier": "BASIC", "family": "S",
+      "capacity": 1, "size": "S2"}, "location": "West US", "properties": {"reserved":
+      false, "perSiteScaling": false, "targetWorkerSizeId": 0, "isSpot": false, "name":
+      "scale-plan000002", "targetWorkerCount": 0}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Length: ['284']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
@@ -239,14 +239,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 22 Nov 2017 08:00:32 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:10 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/1eee20eb-9f23-4c67-8d1b-2df1e5ac8a7c?api-version=2016-09-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/54204277-ca37-48cc-947e-6dc94f47f509?api-version=2016-09-01']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1180']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
 - request:
@@ -254,24 +254,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/1eee20eb-9f23-4c67-8d1b-2df1e5ac8a7c?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/54204277-ca37-48cc-947e-6dc94f47f509?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1378']
+      content-length: ['1379']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:00:48 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -286,24 +286,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1378']
+      content-length: ['1379']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:00:49 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -314,20 +314,20 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"targetWorkerCount": 0, "isSpot": false, "perSiteScaling":
-      false, "reserved": false, "targetWorkerSizeId": 0, "name": "scale-plan000002"},
-      "location": "West US", "sku": {"family": "B", "size": "B1", "tier": "Basic",
-      "name": "B1", "capacity": 2}, "kind": "app"}'''
+    body: 'b''{"kind": "app", "sku": {"name": "B1", "tier": "Basic", "family": "B",
+      "capacity": 2, "size": "B1"}, "location": "West US", "properties": {"reserved":
+      false, "perSiteScaling": false, "targetWorkerSizeId": 0, "isSpot": false, "name":
+      "scale-plan000002", "targetWorkerCount": 0}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Length: ['284']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002?api-version=2016-09-01
@@ -336,14 +336,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 22 Nov 2017 08:00:52 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:29 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/63c69297-a62d-4109-baca-7696402fca53?api-version=2016-09-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/cfaba04f-2623-429d-bf50-8c077e9a0f0e?api-version=2016-09-01']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
       x-powered-by: [ASP.NET]
     status: {code: 202, message: Accepted}
 - request:
@@ -351,24 +351,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [appservice plan update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/63c69297-a62d-4109-baca-7696402fca53?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverFarms/scale-plan000002/operationresults/cfaba04f-2623-429d-bf50-8c077e9a0f0e?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/scale-plan000002","name":"scale-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"scale-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":2,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":2,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-087_2759","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":2}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-075_12359","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":2}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1378']
+      content-length: ['1379']
       content-type: [application/json]
-      date: ['Wed, 22 Nov 2017 08:01:08 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -383,13 +383,13 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group delete]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.16 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.21]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -398,11 +398,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 22 Nov 2017 08:01:10 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:48 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc2S0lETkxYN0NOQkxKWE9HTENFRkRUWVNPWDdLRzVCQUdIM3xCMzNERkM0MzIxMzQyRjczLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdOQ0ZBNUo1N0VJVlUzTUxDQ0VBSFEzRlZENDNJV0IyN0pNWnxCMENFMkYwNENDOTM4RUQxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1186']
     status: {code: 202, message: Accepted}
 version: 1

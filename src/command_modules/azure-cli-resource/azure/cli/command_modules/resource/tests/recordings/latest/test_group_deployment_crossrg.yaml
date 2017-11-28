@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_alt000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:45:17 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
     status: {code: 201, message: Created}
 - request:
     body: '{"location": "westus", "tags": {"use": "az-test"}}'
@@ -35,9 +35,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002?api-version=2017-05-10
@@ -47,29 +47,31 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:45:18 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1188']
     status: {code: 201, message: Created}
 - request:
-    body: 'b''{"properties": {"parameters": {"CrossRg": {"value": "cli_test_cross_rg_alt000001"},
-      "StorageAccountName1": {"value": "crossrgyvfw7sqrpixgzhto4"}, "StorageAccountName2":
-      {"value": "crossrgu75mspz7sjgh7veiz"}}, "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: 'b''{"properties": {"mode": "Incremental", "parameters": {"StorageAccountName1":
+      {"value": "crossrghtroxp2bkglzcojex"}, "CrossRg": {"value": "cli_test_cross_rg_alt000001"},
+      "StorageAccountName2": {"value": "crossrgv2udxhsfm33kgenjl"}}, "template": {"$schema":
+      "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "parameters": {"StorageAccountName1": {"type": "string", "defaultValue": "test1ddosdatest72"},
-      "StorageAccountName2": {"type": "string", "defaultValue": "test1ddfosatdest73"},
-      "CrossRg": {"type": "string", "defaultValue": "crossrg5"}}, "resources": [{"properties":
-      {"template": {"parameters": {}, "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "contentVersion": "1.0.0.0", "variables": {}, "resources": [{"properties": {"accountType":
-      "Standard_LRS"}, "apiVersion": "2015-06-15", "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters(\''StorageAccountName2\'')]", "location": "West US"}],
-      "outputs": {"result": {"type": "string", "value": "Hello World"}}}, "parameters":
-      {}, "mode": "Incremental"}, "apiVersion": "2017-05-10", "resourceGroup": "[parameters(\''CrossRg\'')]",
-      "type": "Microsoft.Resources/deployments", "name": "nestedTemplate"}, {"properties":
-      {"accountType": "Standard_LRS"}, "apiVersion": "2015-06-15", "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters(\''StorageAccountName1\'')]", "location": "West US"}],
-      "contentVersion": "1.0.0.0", "variables": {}}, "mode": "Incremental"}}'''
+      "CrossRg": {"type": "string", "defaultValue": "crossrg5"}, "StorageAccountName2":
+      {"type": "string", "defaultValue": "test1ddfosatdest73"}}, "variables": {},
+      "resources": [{"type": "Microsoft.Resources/deployments", "apiVersion": "2017-05-10",
+      "name": "nestedTemplate", "resourceGroup": "[parameters(\''CrossRg\'')]", "properties":
+      {"mode": "Incremental", "parameters": {}, "template": {"outputs": {"result":
+      {"type": "string", "value": "Hello World"}}, "resources": [{"type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15", "name": "[parameters(\''StorageAccountName2\'')]",
+      "location": "West US", "properties": {"accountType": "Standard_LRS"}}], "contentVersion":
+      "1.0.0.0", "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {}, "variables": {}}}}, {"type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15", "name": "[parameters(\''StorageAccountName1\'')]",
+      "location": "West US", "properties": {"accountType": "Standard_LRS"}}], "contentVersion":
+      "1.0.0.0"}}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -77,44 +79,47 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['1523']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/deployment_dry_run","name":"deployment_dry_run","properties":{"templateHash":"10269404789201613404","parameters":{"storageAccountName1":{"type":"String","value":"crossrgyvfw7sqrpixgzhto4"},"storageAccountName2":{"type":"String","value":"crossrgu75mspz7sjgh7veiz"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-19T18:45:18.9391575Z","duration":"PT0S","correlationId":"b9fac8ae-74de-4edc-a932-193a92a44d47","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"apiVersion":"2015-06-15","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/crossrgu75mspz7sjgh7veiz","name":"crossrgu75mspz7sjgh7veiz","type":"Microsoft.Storage/storageAccounts","location":"West
-        US","properties":{"accountType":"Standard_LRS"}},{"apiVersion":"2015-06-15","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/crossrgyvfw7sqrpixgzhto4","name":"crossrgyvfw7sqrpixgzhto4","type":"Microsoft.Storage/storageAccounts","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/deployment_dry_run","name":"deployment_dry_run","properties":{"templateHash":"7996577249640928902","parameters":{"storageAccountName1":{"type":"String","value":"crossrghtroxp2bkglzcojex"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"},"storageAccountName2":{"type":"String","value":"crossrgv2udxhsfm33kgenjl"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:05.3378846Z","duration":"PT0S","correlationId":"7ceea5b1-ce70-4970-875c-37cacead5756","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"apiVersion":"2017-05-10","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Resources/deployments/nestedTemplate","name":"nestedTemplate","type":"Microsoft.Resources/deployments","properties":{"mode":"Incremental","parameters":{},"template":{"outputs":{"result":{"type":"string","value":"Hello
+        World"}},"resources":[{"type":"Microsoft.Storage/storageAccounts","apiVersion":"2015-06-15","name":"crossrgv2udxhsfm33kgenjl","location":"West
+        US","properties":{"accountType":"Standard_LRS"}}],"contentVersion":"1.0.0.0","$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","parameters":{},"variables":{}}}},{"apiVersion":"2015-06-15","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/crossrghtroxp2bkglzcojex","name":"crossrghtroxp2bkglzcojex","type":"Microsoft.Storage/storageAccounts","location":"West
+        US","properties":{"accountType":"Standard_LRS"}},{"apiVersion":"2015-06-15","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/crossrgv2udxhsfm33kgenjl","name":"crossrgv2udxhsfm33kgenjl","type":"Microsoft.Storage/storageAccounts","location":"West
         US","properties":{"accountType":"Standard_LRS"}}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1788']
+      content-length: ['2547']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:45:19 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"parameters": {"CrossRg": {"value": "cli_test_cross_rg_alt000001"}},
-      "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: 'b''{"properties": {"mode": "Incremental", "parameters": {"CrossRg": {"value":
+      "cli_test_cross_rg_alt000001"}}, "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "parameters": {"StorageAccountName1": {"type": "string", "defaultValue": "test1ddosdatest72"},
-      "StorageAccountName2": {"type": "string", "defaultValue": "test1ddfosatdest73"},
-      "CrossRg": {"type": "string", "defaultValue": "crossrg5"}}, "resources": [{"properties":
-      {"template": {"parameters": {}, "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "contentVersion": "1.0.0.0", "variables": {}, "resources": [{"properties": {"accountType":
-      "Standard_LRS"}, "apiVersion": "2015-06-15", "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters(\''StorageAccountName2\'')]", "location": "West US"}],
-      "outputs": {"result": {"type": "string", "value": "Hello World"}}}, "parameters":
-      {}, "mode": "Incremental"}, "apiVersion": "2017-05-10", "resourceGroup": "[parameters(\''CrossRg\'')]",
-      "type": "Microsoft.Resources/deployments", "name": "nestedTemplate"}, {"properties":
-      {"accountType": "Standard_LRS"}, "apiVersion": "2015-06-15", "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters(\''StorageAccountName1\'')]", "location": "West US"}],
-      "contentVersion": "1.0.0.0", "variables": {}}, "mode": "Incremental"}}'''
+      "CrossRg": {"type": "string", "defaultValue": "crossrg5"}, "StorageAccountName2":
+      {"type": "string", "defaultValue": "test1ddfosatdest73"}}, "variables": {},
+      "resources": [{"type": "Microsoft.Resources/deployments", "apiVersion": "2017-05-10",
+      "name": "nestedTemplate", "resourceGroup": "[parameters(\''CrossRg\'')]", "properties":
+      {"mode": "Incremental", "parameters": {}, "template": {"outputs": {"result":
+      {"type": "string", "value": "Hello World"}}, "resources": [{"type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15", "name": "[parameters(\''StorageAccountName2\'')]",
+      "location": "West US", "properties": {"accountType": "Standard_LRS"}}], "contentVersion":
+      "1.0.0.0", "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {}, "variables": {}}}}, {"type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15", "name": "[parameters(\''StorageAccountName1\'')]",
+      "location": "West US", "properties": {"accountType": "Standard_LRS"}}], "contentVersion":
+      "1.0.0.0"}}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -122,24 +127,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['1399']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"10269404789201613404","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-09-19T18:45:21.0052943Z","duration":"PT0.1699723S","correlationId":"85f22aed-cf35-48f7-ab55-11a1ee0cc8ac","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"7996577249640928902","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-19T04:36:07.9534142Z","duration":"PT0.4148056S","correlationId":"b61cc532-f339-4642-b760-97ca2a1ea31e","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operationStatuses/08586957601646422974?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operationStatuses/08586879487179390195?api-version=2017-05-10']
       cache-control: [no-cache]
-      content-length: ['1025']
+      content-length: ['1024']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:45:20 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -149,19 +154,19 @@ interactions:
       CommandName: [group deployment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586957601646422974?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586879487179390195?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['20']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:45:51 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -175,19 +180,19 @@ interactions:
       CommandName: [group deployment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586957601646422974?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586879487179390195?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:46:21 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -201,19 +206,19 @@ interactions:
       CommandName: [group deployment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"10269404789201613404","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-19T18:46:12.589094Z","duration":"PT51.753772S","correlationId":"85f22aed-cf35-48f7-ab55-11a1ee0cc8ac","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/test1ddfosatdest73"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"7996577249640928902","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:47.0315132Z","duration":"PT39.4929046S","correlationId":"b61cc532-f339-4642-b760-97ca2a1ea31e","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/test1ddfosatdest73"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72"}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1474']
+      content-length: ['1475']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:46:21 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -227,19 +232,19 @@ interactions:
       CommandName: [group deployment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/?api-version=2017-05-10
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"10269404789201613404","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-19T18:46:12.589094Z","duration":"PT51.753772S","correlationId":"85f22aed-cf35-48f7-ab55-11a1ee0cc8ac","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/test1ddfosatdest73"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72"}]}}]}'}
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"7996577249640928902","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:47.0315132Z","duration":"PT39.4929046S","correlationId":"b61cc532-f339-4642-b760-97ca2a1ea31e","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/test1ddfosatdest73"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72"}]}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1486']
+      content-length: ['1487']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:46:21 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -253,19 +258,19 @@ interactions:
       CommandName: [group deployment show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"10269404789201613404","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-19T18:46:12.589094Z","duration":"PT51.753772S","correlationId":"85f22aed-cf35-48f7-ab55-11a1ee0cc8ac","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/test1ddfosatdest73"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003","name":"azure-cli-crossrgdeployment000003","properties":{"templateHash":"7996577249640928902","parameters":{"storageAccountName1":{"type":"String","value":"test1ddosdatest72"},"crossRg":{"type":"String","value":"cli_test_cross_rg_alt000001"},"storageAccountName2":{"type":"String","value":"test1ddfosatdest73"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:47.0315132Z","duration":"PT39.4929046S","correlationId":"b61cc532-f339-4642-b760-97ca2a1ea31e","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Storage/storageAccounts/test1ddfosatdest73"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72"}]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1474']
+      content-length: ['1475']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:46:21 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -279,19 +284,19 @@ interactions:
       CommandName: [group deployment operation list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002/deployments/mock-deployment/operations?api-version=2017-05-10
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operations/A65A8AED21645F4C","operationId":"A65A8AED21645F4C","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2017-09-19T18:46:12.382338Z","duration":"PT50.9240457S","trackingId":"503d7c0f-c02d-48f0-9ca8-85cd7271c565","serviceRequestId":"7a7fd439-8676-429c-bb51-b1cd44f552b6","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Resources/deployments/nestedTemplate","resourceType":"Microsoft.Resources/deployments","resourceName":"nestedTemplate"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operations/54371FEFC03C2391","operationId":"54371FEFC03C2391","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2017-09-19T18:46:00.7917637Z","duration":"PT39.3616844S","trackingId":"50a94269-a8e5-4b43-89ea-47696ad8f2ad","serviceRequestId":"85f22aed-cf35-48f7-ab55-11a1ee0cc8ac","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"test1ddosdatest72"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operations/08586957601646422974","operationId":"08586957601646422974","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2017-09-19T18:46:12.5566161Z","duration":"PT0.1164068S","trackingId":"de32400f-5dfa-4547-8e9b-e35866b50c3a","statusCode":"OK","statusMessage":null}}]}'}
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operations/0BF2EBE27074F799","operationId":"0BF2EBE27074F799","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:35.7021608Z","duration":"PT26.7633848S","trackingId":"5e82737f-2959-4465-91ea-6e72edbe9209","serviceRequestId":"88be9bbe-d739-402a-a551-d9546bad14a9","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_alt000001/providers/Microsoft.Resources/deployments/nestedTemplate","resourceType":"Microsoft.Resources/deployments","resourceName":"nestedTemplate"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operations/77B0A0A6ADE9C0EF","operationId":"77B0A0A6ADE9C0EF","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:46.6633188Z","duration":"PT37.7246869S","trackingId":"321ef40b-c029-42c5-b760-82824460cb70","serviceRequestId":"b61cc532-f339-4642-b760-97ca2a1ea31e","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Storage/storageAccounts/test1ddosdatest72","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"test1ddosdatest72"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cross_rg_deploy000002/providers/Microsoft.Resources/deployments/azure-cli-crossrgdeployment000003/operations/08586879487179390195","operationId":"08586879487179390195","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:46.995494Z","duration":"PT0.2423549S","trackingId":"5eae0206-40e1-4549-83a2-3fc5d2d2702b","statusCode":"OK","statusMessage":null}}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['2344']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Sep 2017 18:46:22 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -306,9 +311,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_deploy000002?api-version=2017-05-10
@@ -317,12 +322,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Sep 2017 18:46:22 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:11 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQ1JPU1M6NUZSRzo1RkRFUExPWVBTTUg3NVhWV0o3TzZRN3w1MUZCQkI1QjY3RDhGMEE3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQ1JPU1M6NUZSRzo1RkRFUExPWUpFN0Y2R09QTUpOR1FDMnwyREYzODYyNDlBREMyNUVBLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -333,9 +338,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cross_rg_alt000001?api-version=2017-05-10
@@ -344,11 +349,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Sep 2017 18:46:23 GMT']
+      date: ['Tue, 19 Dec 2017 04:37:12 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQ1JPU1M6NUZSRzo1RkFMVDJISkNRS0hUSkYyTTJXWlM0QnwwRkM3MzQ5MDVBNjkyRENCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQ1JPU1M6NUZSRzo1RkFMVDc2R1RRQ040QUNNTzZVTFBDRnw2MjAwNUEyRDI5QTI5MDRELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1180']
     status: {code: 202, message: Accepted}
 version: 1

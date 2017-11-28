@@ -188,6 +188,16 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
 
+    def test_list_skus_contains_zone_info(self):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 2048
+        # we pick eastus2 as it is one of 3 regions so far with zone support
+        self.kwargs['loc'] = 'eastus2'
+        result = self.cmd('vm list-skus -otable -l {loc} -otable')
+        self.assertTrue(next(l for l in result.output.splitlines() if '1,2,3' in l).split()[-1] == '1,2,3')
+
 
 class VMImageShowScenarioTest(ScenarioTest):
 
@@ -318,8 +328,8 @@ class VMCustomImageTest(ScenarioTest):
             'plan': 'linuxdsvmubuntu'
         })
 
-        with self.assertRaises(CLIError):
-            self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu', expect_failure=True)
+        with self.assertRaises(AssertionError):
+            self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
         self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
         self.cmd('vm show -g {rg} -n vm1',
                  checks=self.check('plan.name', '{plan}'))
@@ -1357,11 +1367,26 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
 
     @ResourceGroupPreparer()
     def test_vmss_create_default_app_gateway(self, resource_group):
-        vmss_name = 'vmss1'
-        res = self.cmd("vmss create -g {} --name {} --image UbuntuLTS --disable-overprovision --instance-count 101 "
-                       "--single-placement-group false --validate".format(resource_group, vmss_name)).get_output_in_json()
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        res = self.cmd("vmss create -g {rg} --name {vmss} --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false --validate").get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
+    def test_vmss_existing_lb(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'lb': 'lb1'
+        })
+        self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
+        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$')
+
+
+# TODO: change back to ScenarioTest and re-record when issue #5111 is fixed
+class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ips')
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
@@ -1384,15 +1409,6 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith('.clitestnewnetwork'))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
-    def test_vmss_existing_lb(self, resource_group):
-        self.kwargs.update({
-            'vmss': 'vmss1',
-            'lb': 'lb1'
-        })
-        self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
-        self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$')
 
 
 class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
@@ -1725,8 +1741,8 @@ class VMSSILBTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""')
         # list connection information should fail
-        with self.assertRaises(CLIError) as err:
-            self.cmd('vmss list-instance-connection-info -g {rg} -n {vmss}')
+        with self.assertRaises(AssertionError) as err:
+            self.cmd('vmss list-instance-connection-info -g {rg} -n {vmss}', expect_failure=True)
         self.assertTrue('internal load balancer' in str(err.exception))
 
 
@@ -1828,10 +1844,10 @@ class MSIScenarioTest(ScenarioTest):
         })
         # Fixing the role assignment guids so test can run under playback. The assignments will
         # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C121'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C122'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C123'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C124')]
+        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C138'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C137'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C136'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C135')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create linux vm with default configuration
             self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}', checks=[
@@ -1933,6 +1949,97 @@ class MSIScenarioTest(ScenarioTest):
                 self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
                 self.check('[0].settings.port', 50342)
             ])
+
+    @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
+    def test_vm_explicit_msi(self, resource_group):
+
+        self.kwargs.update({
+            'emsi': 'id1',
+            'emsi2': 'id2',
+            'vm': 'vm1',
+            'sub': self.get_subscription_id(),
+            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
+        })
+
+        # create a managed identity
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi}',
+                               checks=self.check('name', '{emsi}')).get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
+
+        # create a vm with system + user assigned identities
+        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys').get_output_in_json()
+        self.assertEqual(result['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
+        result = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(identity.identityIds)', 1),
+            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi_result['id'].lower())
+        # assign a new managed identity
+        self.cmd('vm assign-identity -g {rg} -n {vm} --identities {emsi2}')
+        self.cmd('vm show -g {rg} -n {vm}',
+                 checks=self.check('length(identity.identityIds)', 2))
+        # remove the 1st user assigned identity
+        self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi}')
+        result = self.cmd('vm show -g {rg} -n {vm}',
+                          checks=self.check('length(identity.identityIds)', 1)).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
+
+        # remove the 2nd
+        self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi2}')
+        # verify the VM still has the system assigned identity
+        result = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # blocked by https://github.com/Azure/azure-cli/issues/5103
+            # self.check('length(identity.identityIds)', 0)
+            self.check('identity.type', 'SystemAssigned'),
+        ])
+
+    @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
+    def test_vmss_explicit_msi(self, resource_group):
+
+        self.kwargs.update({
+            'emsi': 'id1',
+            'emsi2': 'id2',
+            'vmss': 'vmss1',
+            'sub': self.get_subscription_id(),
+            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
+        })
+
+        # create a managed identity
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
+
+        # create a vmss with system + user assigned identities
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys').get_output_in_json()
+        self.assertEqual(result['vmss']['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
+
+        result = self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('length(identity.identityIds)', 1),
+            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi_result['id'].lower())
+
+        # assign a new managed identity
+        self.cmd('vmss assign-identity -g {rg} -n {vmss} --identities {emsi2}')
+        self.cmd('vmss show -g {rg} -n {vmss}',
+                 checks=self.check('length(identity.identityIds)', 2))
+
+        # update instances
+        self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids *')
+
+        # remove the 1st user assigned identity
+        self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi}')
+        result = self.cmd('vmss show -g {rg} -n {vmss}',
+                          checks=self.check('length(identity.identityIds)', 1)).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
+
+        # remove the 2nd
+        self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi2}')
+        # verify the vmss still has the system assigned identity
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            # blocked by https://github.com/Azure/azure-cli/issues/5103
+            # self.check('length(identity.identityIds)', 0)
+            self.check('identity.type', 'SystemAssigned'),
+        ])
 
 
 # TODO: FAIL (master failing) force_progress_logging needs updates for Knack...
@@ -2212,7 +2319,7 @@ class VMSecretTest(ScenarioTest):
             self.check('[0].sourceVault.id', vault_result['id']),
             self.check('length([0].vaultCertificates)', 1),
         ]).get_output_in_json()
-        self.assertTrue('https://{vault}.vault.azure.net/secrets/{cert}/'.format(**self.kargs) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])
+        self.assertTrue('https://{vault}.vault.azure.net/secrets/{cert}/'.format(**self.kwargs) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])
         self.cmd('vm secret list -g {rg} -n {vm}')
         self.cmd('vm secret remove -g {rg} -n {vm} --keyvault {vault} --certificate {cert}')
 

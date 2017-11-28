@@ -118,14 +118,14 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
-    with self.command_group('account lock', resource_lock_sdk) as g:
+    with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
         g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
         g.custom_command('update', 'update_lock')
 
-    with self.command_group('group', resource_group_sdk) as g:
+    with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('exists', 'check_existence')
@@ -135,14 +135,14 @@ def load_command_table(self, _):
         g.generic_update_command('update')
         g.generic_wait_command('wait')
 
-    with self.command_group('group lock') as g:
+    with self.command_group('group lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
         g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
         g.custom_command('update', 'update_lock')
 
-    with self.command_group('resource', resource_custom) as g:
+    with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_resource')
         g.custom_command('delete', 'delete_resource')
         g.custom_command('show', 'show_resource', exception_handler=empty_on_404)
@@ -153,7 +153,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
 
-    with self.command_group('resource lock') as g:
+    with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
@@ -161,7 +161,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_lock')
 
     # Resource provider commands
-    with self.command_group('provider', resource_provider_sdk) as g:
+    with self.command_group('provider', resource_provider_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.command('list', 'list')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.custom_command('register', 'register_provider')
@@ -170,12 +170,11 @@ def load_command_table(self, _):
         g.custom_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    if self.supported_api_version(min_api='2017-05-10'):
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, min_api='2017-05-10') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
-        with self.command_group('feature', resource_feature_sdk, client_factory=cf_features) as g:
-            g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
-            g.command('show', 'get', exception_handler=empty_on_404, table_transformer=feature_table_transform)
-            g.custom_command('register', 'register_feature')
+        g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
+        g.command('show', 'get', exception_handler=empty_on_404, table_transformer=feature_table_transform)
+        g.custom_command('register', 'register_feature')
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk) as g:
@@ -205,28 +204,28 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_policy_assignment')
         g.custom_command('show', 'show_policy_assignment', exception_handler=empty_on_404)
 
-    with self.command_group('policy definition', resource_policy_definitions_sdk) as g:
+    with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.custom_command('show', 'get_policy_definition', exception_handler=empty_on_404)
         g.custom_command('update', 'update_policy_definition')
 
-    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, min_api='2017-06-01-preview') as g:
+    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.custom_command('show', 'get_policy_setdefinition', exception_handler=empty_on_404)
         g.custom_command('update', 'update_policy_setdefinition')
 
-    with self.command_group('lock') as g:
+    with self.command_group('lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
         g.custom_command('list', 'list_locks')
         g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
         g.custom_command('update', 'update_lock')
 
-    with self.command_group('resource link', resource_link_sdk) as g:
+    with self.command_group('resource link', resource_link_sdk, resource_type=ResourceType.MGMT_RESOURCE_LINKS) as g:
         g.custom_command('create', 'create_resource_link')
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404)
