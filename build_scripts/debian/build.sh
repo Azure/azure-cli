@@ -64,9 +64,6 @@ done;
 all_modules=`find $tmp_pkg_dir -name "*.whl"`
 $source_dir/python_env/bin/pip3 install $all_modules
 $source_dir/python_env/bin/pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
-# WORKAROUND: Newer versions of cryptography do not work on Bash on Windows / WSL - see https://github.com/Azure/azure-cli/issues/4154
-# If you *have* to use a newer version of cryptography in the future, verify that it works on WSL also.
-$source_dir/python_env/bin/pip3 install cryptography==2.0
 # Add the debian files
 mkdir $source_dir/debian
 # Create temp dir for the debian/ directory used for CLI build.

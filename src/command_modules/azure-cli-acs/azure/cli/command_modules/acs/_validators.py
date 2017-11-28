@@ -15,6 +15,20 @@ import azure.cli.core.keys as keys
 logger = get_logger(__name__)
 
 
+def validate_connector_name(namespace):
+    """Validates a string as a legal connector name.
+
+    This validation will also occur server-side in the kubernetes, but that may take
+    for a while. So it's more user-friendly to validate in the CLI pre-flight.
+    """
+    # https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md
+    regex = re.compile(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$')
+    found = regex.findall(namespace.connector_name)
+    if not found:
+        raise CLIError('--connector-name must consist of lower case alphanumeric characters or dashes (-), '
+                       'and must start and end with an alphanumeric character.')
+
+
 def validate_ssh_key(namespace):
     string_or_file = (namespace.ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))

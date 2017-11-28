@@ -1614,6 +1614,8 @@ def create_lb_inbound_nat_pool(
     InboundNatPool = cmd.get_models('InboundNatPool')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) \
         if frontend_ip_name else None
     new_pool = InboundNatPool(
@@ -2413,7 +2415,7 @@ def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, r
 # region PublicIPAddresses
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None):
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None):
     IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings = cmd.get_models(
         'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings')
     client = network_client_factory(cmd.cli_ctx).public_ip_addresses
@@ -2432,6 +2434,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['public_ip_address_version'] = version
     if cmd.supported_api_version(min_api='2017-06-01'):
         public_ip_args['zones'] = zone
+    if cmd.supported_api_version(min_api='2017-11-01'):
+        public_ip_args['ip_tags'] = ip_tags
     if sku:
         public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
@@ -2444,7 +2448,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 
 
 def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None):
+                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None):
     if dns_name is not None or reverse_fqdn is not None:
         if instance.dns_settings:
             if dns_name is not None:
@@ -2464,6 +2468,8 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
         instance.tags = tags
     if sku is not None:
         instance.sku.name = sku
+    if ip_tags:
+        instance.ip_tags = ip_tags
     return instance
 
 
@@ -2495,11 +2501,23 @@ def create_route_filter_rule(cmd, client, resource_group_name, route_filter_name
 
 
 # region RouteTables
-def update_route_table(instance, tags=None):
+def create_route_table(cmd, resource_group_name, route_table_name, location=None, tags=None,
+                       disable_bgp_route_propagation=None):
+    RouteTable = cmd.get_models('RouteTable')
+    ncf = network_client_factory(cmd.cli_ctx)
+    route_table = RouteTable(location=location, tags=tags)
+    if cmd.supported_api_version(min_api='2017-10-01'):
+        route_table.disable_bgp_route_propagation = disable_bgp_route_propagation
+    return ncf.route_tables.create_or_update(resource_group_name, route_table_name, route_table)
+
+
+def update_route_table(instance, tags=None, disable_bgp_route_propagation=None):
     if tags == '':
         instance.tags = None
     elif tags is not None:
         instance.tags = tags
+    if disable_bgp_route_propagation is not None:
+        instance.disable_bgp_route_propagation = disable_bgp_route_propagation
     return instance
 
 
