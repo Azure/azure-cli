@@ -26,8 +26,8 @@ def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_v
         client_type = get_client_class(client_or_resource_type)
         api_version = api_version or get_api_version(client_or_resource_type)
         if isinstance(api_version, SDKProfile):
-            api_version = api_version.default_api_version
             sdk_profile = sdk_profile or api_version.profile
+            api_version = api_version.default_api_version
     else:
         # Get the non-versioned client
         client_type = client_or_resource_type
