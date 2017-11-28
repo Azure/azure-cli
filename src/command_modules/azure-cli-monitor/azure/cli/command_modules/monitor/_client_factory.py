@@ -24,7 +24,7 @@ def cf_autoscale(kwargs):
 
 
 def cf_diagnostics(kwargs):
-    return cf_monitor(kwargs).service_diagnostic_settings
+    return cf_monitor(kwargs).diagnostic_settings
 
 
 def cf_log_profiles(kwargs):
@@ -39,24 +39,17 @@ def cf_activity_log_alerts(kwargs):
     return cf_monitor(kwargs).activity_log_alerts
 
 
-# DATA CLIENT FACTORIES
-def cf_monitor_data(_):
-    from azure.monitor import MonitorClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(MonitorClient)
-
-
 def cf_metrics(kwargs):
-    return cf_monitor_data(kwargs).metrics
+    return cf_monitor(kwargs).metrics
 
 
 def cf_metric_def(kwargs):
-    return cf_monitor_data(kwargs).metric_definitions
+    return cf_monitor(kwargs).metric_definitions
 
 
 def cf_activity_log(kwargs):
-    return cf_monitor_data(kwargs).activity_logs
+    return cf_monitor(kwargs).activity_logs
 
 
 def cf_event_categories(kwargs):
-    return cf_monitor_data(kwargs).event_categories
+    return cf_monitor(kwargs).event_categories
