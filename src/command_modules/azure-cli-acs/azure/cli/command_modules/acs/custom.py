@@ -1380,7 +1380,7 @@ def _print_or_merge_credentials(path, kubeconfig):
 
     # ensure that at least an empty ~/.kube/config exists
     directory = os.path.dirname(path)
-    if not os.path.exists(directory):
+    if directory and not os.path.exists(directory):
         try:
             os.makedirs(directory)
         except OSError as ex:
