@@ -365,7 +365,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
     def _generate_template_progress(self, correlation_id):  # pylint: disable=no-self-use
         """ gets the progress for template deployments """
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.monitor import MonitorClient
+        from azure.mgmt.monitor import MonitorManagementClient
 
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
             formatter = "eventTimestamp ge {}"
@@ -376,7 +376,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
-            activity_log = get_mgmt_service_client(self.cli_ctx, MonitorClient).activity_logs.list(filter=odata_filters)
+            activity_log = get_mgmt_service_client(MonitorManagementClient).activity_logs.list(filter=odata_filters)
 
             results = []
             max_events = 50  # default max value for events in list_activity_log
