@@ -34,12 +34,8 @@ def _data_file(filename):
 
 
 class TestBatchAICustom(unittest.TestCase):
-    def __init__(self, method):
-        super(TestBatchAICustom, self).__init__(method)
-        pass
 
     def test_batchai_update_cluster_create_parameters_with_user_account_settings(self):
-        """Test updating of user account settings."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -77,7 +73,6 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_update_file_server_create_parameters_with_user_account_settings(self):
-        """Test updating of user account settings."""
         params = FileServerCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                             ssh_configuration=SshConfiguration(
                                                 user_account_settings=UserAccountSettings(
@@ -128,7 +123,6 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_cluster_parameter_update_with_environment_variables(self):
-        """Test patching of cluster create parameters with environment variables."""
         params = ClusterCreateParameters(
             location='eastus', vm_size='STANDARD_D1',
             user_account_settings=UserAccountSettings(admin_user_name='name',
@@ -198,7 +192,6 @@ class TestBatchAICustom(unittest.TestCase):
             _update_cluster_create_parameters_with_env_variables(params, str(uuid.uuid4()), None)
 
     def test_batchai_add_nfs_to_cluster_create_parameters(self):
-        """Test adding of nfs into cluster create parameters."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -214,7 +207,6 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.node_setup.mount_volumes.file_servers[0].mount_options, 'rw')
 
     def test_batchai_add_azure_file_share_to_cluster_create_parameters(self):
-        """Test adding of azure file share into cluster create parameters."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -252,7 +244,6 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
 
     def test_batchai_add_azure_container_to_cluster_create_parameters(self):
-        """Test adding of azure file share into cluster create parameters."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -294,7 +285,6 @@ class TestBatchAICustom(unittest.TestCase):
                           'key')
 
     def test_batchai_update_nodes_information(self):
-        """Test updating of nodes information."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))

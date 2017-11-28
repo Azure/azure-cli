@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.1.22
+++++++
+* Minor fixes.
+
 0.1.21
 ++++++
 * `webapp config ssl upload`: fix a bug in the cert name generation

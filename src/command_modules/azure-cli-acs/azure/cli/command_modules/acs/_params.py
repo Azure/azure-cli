@@ -16,12 +16,12 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 from ._completers import get_vm_size_completion_list
 from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key)
+    validate_list_of_integers, validate_ssh_key, validate_connector_name)
 
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
-aci_connector_chart_url = 'https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz'
+aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-0.1.0.tgz'
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -166,12 +166,19 @@ def load_arguments(self, _):
         c.argument('install_location', default=_get_default_install_location('kubectl'))
 
     with self.argument_context('aks install-connector') as c:
-        c.argument('chart_url', default=aci_connector_chart_url)
-        c.argument('os_type', get_enum_type(aci_connector_os_type))
+        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
+        c.argument('client_secret',
+                   help='Client secret to use with the service principal for making calls to Azure APIs')
+        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
+        c.argument('service_principal',
+                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
 
     with self.argument_context('aks remove-connector') as c:
-        c.argument('graceful', action='store_true')
-        c.argument('os_type', get_enum_type(aci_connector_os_type))
+        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('graceful', action='store_true',
+                   help='Mention if you want to drain/uncordon your aci-connector to move your applications')
+        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
 
 
 def _get_default_install_location(exe_name):

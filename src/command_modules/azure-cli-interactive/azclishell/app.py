@@ -700,7 +700,7 @@ class AzInteractiveShell(object):
                     cmd = text
                     outside = False
 
-                except AttributeError as ex:
+                except AttributeError:
                     # when the user pressed Control D
                     break
                 else:

@@ -756,7 +756,7 @@ def _find_property(instance, path):
     return instance
 
 
-def assign_implict_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
+def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.mgmt.authorization.models import RoleAssignmentProperties
@@ -764,10 +764,7 @@ def assign_implict_identity(cli_ctx, getter, setter, identity_role=None, identit
 
     # get
     resource = getter()
-    if resource.identity:
-        logger.warning('Implict identity is already configured')
-    else:
-        resource = setter(resource)
+    resource = setter(resource)
 
     # create role assignment:
     if identity_scope:

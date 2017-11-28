@@ -27,7 +27,7 @@ logger = get_logger(__name__)
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler', 'min_api', 'max_api',
                       'client_factory', 'operations_tmpl', 'no_wait_param', 'validator', 'resource_type',
-                      'client_arg_name']
+                      'client_arg_name', 'operation_group']
 
 CONFIRM_PARAM_NAME = 'yes'
 
@@ -168,28 +168,23 @@ class AzCliCommand(CLICommand):
             logger.warning(self.command_source.get_command_warn_msg())
         return super(AzCliCommand, self).__call__(*args, **kwargs)
 
-    def _get_resource_type(self):
-        resource_type = self.command_kwargs.get('resource_type', None)
-        if not resource_type:
-            command_type = self.command_kwargs.get('command_type', None)
-            resource_type = command_type.settings.get('resource_type', None) if command_type else None
-        return resource_type
-
     def _merge_kwargs(self, kwargs, base_kwargs=None):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'command_kwargs')
         return _merge_kwargs(kwargs, base)
 
     def get_api_version(self, resource_type=None):
-        resource_type = resource_type or self._get_resource_type()
+        resource_type = resource_type or self.command_kwargs.get('resource_type', None)
         return self.loader.get_api_version(resource_type=resource_type)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None):
-        resource_type = resource_type or self._get_resource_type()
+        resource_type = resource_type or self.command_kwargs.get('resource_type', None)
         return self.loader.supported_api_version(resource_type=resource_type, min_api=min_api, max_api=max_api)
 
     def get_models(self, *attr_args, **kwargs):
-        resource_type = kwargs.get('resource_type', self._get_resource_type())
-        return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models')
+        resource_type = kwargs.get('resource_type', self.command_kwargs.get('resource_type', None))
+        operation_group = kwargs.get('operation_group', self.command_kwargs.get('operation_group', None))
+        return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models',
+                                   operation_group=operation_group)
 
 
 # pylint: disable=too-few-public-methods

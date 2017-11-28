@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._validators import \
      validate_private_ip_address,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location,
-     get_asg_validator)
+     get_asg_validator, validate_ip_tags)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network._completers import (
@@ -182,8 +182,9 @@ def load_arguments(self, _):
         c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
         c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
-    with self.argument_context('network lb inbound-nat-rule create') as c:
-        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+    for item in ['rule', 'pool']:
+        with self.argument_context('network lb inbound-nat-{} create'.format(item)) as c:
+            c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
     with self.argument_context('network application-gateway http-settings') as c:
         c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
@@ -700,6 +701,7 @@ def load_arguments(self, _):
         c.argument('dns_name', help='Globally unique DNS entry.')
         c.argument('idle_timeout', help='Idle timeout in minutes.')
         c.argument('zone', zone_type, min_api='2017-06-01')
+        c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
@@ -735,6 +737,7 @@ def load_arguments(self, _):
     # region RouteTables
     with self.argument_context('network route-table') as c:
         c.argument('route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
+        c.argument('disable_bgp_propagation', arg_type=get_three_state_flag(), min_api='2017-10-01', help='Disable routes learned by BGP.')
 
     with self.argument_context('network route-table create') as c:
         c.extra('tags')

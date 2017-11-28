@@ -762,12 +762,24 @@ def validate_ssh_key(namespace):
 
 
 def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
-    if from_set_command or namespace.assign_identity:
+    if from_set_command or namespace.assign_identity is not None:
+        identities = namespace.assign_identity or []
+        from ._vm_utils import MSI_LOCAL_ID
+        for i, _ in enumerate(identities):
+            if identities[i] != MSI_LOCAL_ID:
+                identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
+                                                 'userAssignedIdentities', 'Microsoft.ManagedIdentity')
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
             raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
                 namespace.identity_role))
-        # keep 'identity_role' for output as logical name is more readable
+        user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
+        if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
+            raise CLIError('usage error: user assigned identity is only available under profile '
+                           'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
+            if identities and MSI_LOCAL_ID not in identities:
+                raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
+            # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
@@ -1087,4 +1099,15 @@ def process_disk_encryption_namespace(cmd, namespace):
 
 def process_assign_identity_namespace(cmd, namespace):
     _validate_vm_vmss_msi(cmd, namespace, from_set_command=True)
+
+
+def process_remove_identity_namespace(cmd, namespace):
+    namespace.identities = [_get_resource_id(cmd.cli_ctx, x, namespace.resource_group_name,
+                                             'userAssignedIdentities',
+                                             'Microsoft.ManagedIdentity') for x in namespace.identities]
+
+
+# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
+def process_msi_namespace(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
 # endregion
