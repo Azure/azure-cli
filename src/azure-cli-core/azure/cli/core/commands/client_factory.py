@@ -21,6 +21,7 @@ ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_version=None,
                             **kwargs):
+    sdk_profile = None
     if isinstance(client_or_resource_type, ResourceType):
         # Get the versioned client
         client_type = get_client_class(client_or_resource_type)
