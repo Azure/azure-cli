@@ -53,6 +53,7 @@ def get_sdk(resource_type, *attr_args, **kwargs):
             checked - A boolean specifying if this method should suppress/check import exceptions
                       or not. By default, None is returned.
             mod - A string specifying the submodule that all attr_args should be prefixed with.
+            rt - A string specifying the operation group name we want models.
 
         Example usage:
             Get a single SDK model.
@@ -68,6 +69,11 @@ def get_sdk(resource_type, *attr_args, **kwargs):
                                       'File',
                                       'Directory',
                                       mod='file.models')
+
+            VirtualMachine = get_sdk(resource_type,
+                                     'VirtualMachine,
+                                     mod='models',
+                                     rt='virtual_machines')
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.

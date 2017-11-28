@@ -50,11 +50,24 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
         self.client_name = client_name
 
 
+class SDKProfile(object):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, default_api_version, profile):
+        """Constructor.
+
+        :param str default_api_version: Default API version if not overriden by a profile. Nullable.
+        :param profile: A dict operation group name to API version.
+        :type profile: dict[str, str]
+        """
+        self.default_api_version = default_api_version
+        self.profile = profile
+
+
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-06-01',
         ResourceType.MGMT_NETWORK: '2017-09-01',
-        ResourceType.MGMT_COMPUTE: '2017-03-30',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2017-03-30', {'resource_skus': '2017-09-01'}),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
@@ -186,22 +199,26 @@ def get_client_class(resource_type):
     return _get_attr(resource_type.import_prefix, '#' + resource_type.client_name)
 
 
-def get_versioned_sdk_path(api_profile, resource_type):
+def get_versioned_sdk_path(api_profile, resource_type, operation_group):
     """ Patch the unversioned sdk path to include the appropriate API version for the
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
+    api_version = get_api_version(api_profile, resource_type)
+    if isinstance(api_version, SDKProfile):
+        api_version = api_version.profile.get(operation_group, api_version.default_api_version)
     return '{}.v{}'.format(
         resource_type.import_prefix,
-        get_api_version(api_profile, resource_type).replace('-', '_')
+        api_version.replace('-', '_')
     )
 
 
 def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     checked = kwargs.get('checked', True)
     sub_mod_prefix = kwargs.get('mod', None)
-    sdk_path = get_versioned_sdk_path(api_profile, resource_type)
+    operation_group = kwargs.get('rt', None)
+    sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
     if not attr_args:
         # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
