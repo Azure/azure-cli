@@ -12,5 +12,5 @@ helps['consumption'] = """
 
 helps['consumption usage list'] = """
     type: command
-    short-summary: Shows the usage details of Azure resource consumption, either with current biling period or within a specific billing period.
+    short-summary: Shows the usage details of Azure resource consumption, either with a biling period or by a specific date range.
 """
