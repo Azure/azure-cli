@@ -92,18 +92,24 @@ AZURE_API_PROFILES = {
 }
 
 
-def get_api_version(api_profile, resource_type):
+def get_api_version(api_profile, resource_type, operation_group=None, as_sdk_profile=False):
     """Get the API version of a resource type given an API profile.
 
     :param api_profile: The name of the API profile.
     :type api_profile: str.
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
+    :param operation_group:
     :returns:  str -- the API version.
     :raises: APIVersionException
     """
     try:
-        return AZURE_API_PROFILES[api_profile][resource_type]
+        api_version = AZURE_API_PROFILES[api_profile][resource_type]
+        if as_sdk_profile:
+            return api_version # Could be SDKProfile or string
+        if isinstance(api_version, SDKProfile):
+            api_version = api_version.profile.get(operation_group, api_version.default_api_version)
+        return api_version
     except KeyError:
         raise APIVersionException(resource_type, api_profile)
 
@@ -168,10 +174,8 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
         raise TypeError()
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
-    api_version_str = get_api_version(api_profile, resource_type) \
+    api_version_str = get_api_version(api_profile, resource_type, operation_group) \
         if isinstance(resource_type, ResourceType) else api_profile
-    if isinstance(api_version_str, SDKProfile):
-        api_version_str = api_version_str.profile.get(operation_group, api_version_str.default_api_version)
     api_version = _DateAPIFormat(api_version_str)
     if min_api and api_version < _DateAPIFormat(min_api):
         return False
@@ -207,9 +211,7 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
-    api_version = get_api_version(api_profile, resource_type)
-    if isinstance(api_version, SDKProfile):
-        api_version = api_version.profile.get(operation_group, api_version.default_api_version)
+    api_version = get_api_version(api_profile, resource_type, operation_group)
     return '{}.v{}'.format(
         resource_type.import_prefix,
         api_version.replace('-', '_')
