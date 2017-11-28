@@ -52,7 +52,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
 class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, default_api_version, profile):
+    def __init__(self, default_api_version, profile=None):
         """Constructor.
 
         :param str default_api_version: Default API version if not overriden by a profile. Nullable.
@@ -60,7 +60,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
         :type profile: dict[str, str]
         """
         self.default_api_version = default_api_version
-        self.profile = profile
+        self.profile = profile if profile is not None else {}
 
 
 AZURE_API_PROFILES = {
