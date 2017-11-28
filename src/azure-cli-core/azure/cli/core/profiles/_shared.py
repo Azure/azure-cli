@@ -106,7 +106,7 @@ def get_api_version(api_profile, resource_type, operation_group=None, as_sdk_pro
     try:
         api_version = AZURE_API_PROFILES[api_profile][resource_type]
         if as_sdk_profile:
-            return api_version # Could be SDKProfile or string
+            return api_version  # Could be SDKProfile or string
         if isinstance(api_version, SDKProfile):
             api_version = api_version.profile.get(operation_group, api_version.default_api_version)
         return api_version
