@@ -71,7 +71,7 @@ def get_sdk(resource_type, *attr_args, **kwargs):
                                       mod='file.models')
 
             VirtualMachine = get_sdk(resource_type,
-                                     'VirtualMachine,
+                                     'VirtualMachine',
                                      mod='models',
                                      rt='virtual_machines')
 
